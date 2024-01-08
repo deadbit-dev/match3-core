@@ -88,6 +88,22 @@ function Match3(size_x, size_y)
     local cb_on_celll_activated
     local cb_on_damaged_element
     local function init()
+        do
+            local y = 0
+            while y < size_y do
+                cells[y + 1] = {}
+                elements[y + 1] = {}
+                do
+                    local x = 0
+                    while x < size_x do
+                        cells[y + 1][x + 1] = {id = y * size_x + x, type = ____exports.CellType.Base, is_active = false}
+                        elements[y + 1][x + 1] = ____exports.NullElement
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
     end
     local function get_all_combinations()
     end

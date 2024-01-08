@@ -166,10 +166,23 @@ function Match3(size_x: number, size_y: number) {
     let cb_is_combined_elements: FncIsCombined;
     let cb_on_celll_activated: FncOnCellActivated;
     let cb_on_damaged_element: FncOnDamagedElement;
+    
     function init() {
-        // todo...
         // заполняем массив cells с размерностью size_x, size_y с порядком: cells[y][x] is_active false, типа пустое поле
         // а также массив elements с размерностью size_x, size_y и значением NullElement
+        for(let y = 0; y < size_y; y++) {
+            cells[y] = [];
+            elements[y] = [];
+            for(let x = 0; x < size_x; x++) {
+                cells[y][x] = {
+                    id: y * size_x + x,
+                    type: CellType.Base,
+                    is_active: false
+                };
+
+                elements[y][x] = NullElement;
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
