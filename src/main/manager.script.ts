@@ -8,7 +8,7 @@
 import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
 import { register_manager } from '../modules/Manager';
-import { hex2rgba } from '../utils/utils';
+
 
 
 interface props {
@@ -29,9 +29,8 @@ export function init(this: props) {
 
     Camera.set_go_prjection(-1, 1);
     
-    Scene.set_bg('#fff');
-    
-    go.set('/tmap#tMap', "tint", hex2rgba('#90bdbf'));
+    Scene.load("game", true);
+    Scene.set_bg('#321553');
 }
 
 export function update(this: props, dt: number): void {

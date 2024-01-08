@@ -3,8 +3,6 @@ local druid = require("druid.druid")
 local default_style = require("druid.styles.default.style")
 local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
-local ____utils = require("utils.utils")
-local hex2rgba = ____utils.hex2rgba
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -18,12 +16,8 @@ function ____exports.init(self)
     default_style.scroll.WHEEL_SCROLL_SPEED = 10
     druid.set_default_style(default_style)
     Camera.set_go_prjection(-1, 1)
-    Scene.set_bg("#fff")
-    go.set(
-        "/tmap#tMap",
-        "tint",
-        hex2rgba("#90bdbf")
-    )
+    Scene.load("game", true)
+    Scene.set_bg("#321553")
 end
 function ____exports.update(self, dt)
     Manager.update(dt)
