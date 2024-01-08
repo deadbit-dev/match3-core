@@ -185,18 +185,35 @@ function Match3(size_x, size_y)
         end
     end
     local function get_free_cells()
-        return {}
-    end
-    local function set_element(x, y, element)
-        elements[y + 1][x + 1] = element
-    end
-    local function remove_element(x, y, is_damagind, is_near_activation)
+        local free_cells = {}
+        do
+            local y = 0
+            while y < size_y do
+                do
+                    local x = 0
+                    while x < size_x do
+                        local cell = cells[y + 1][x + 1]
+                        if cell.is_active and elements[y + 1][x + 1] == ____exports.NullElement then
+                            free_cells[#free_cells + 1] = {x = x, y = y, id = cell.id}
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        return free_cells
     end
     local function set_cell(x, y, cell)
         cells[y + 1][x + 1] = cell
     end
     local function set_dc_element(id, element)
         dc_elements[id] = element
+    end
+    local function set_element(x, y, element)
+        elements[y + 1][x + 1] = element
+    end
+    local function remove_element(x, y, is_damagind, is_near_activation)
     end
     local function get_all_available_steps()
         return {}

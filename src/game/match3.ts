@@ -302,6 +302,18 @@ function Match3(size_x: number, size_y: number) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
+    // возвращает массив свободных клеток
+    function get_free_cells(): ItemInfo[] {
+        // возвращается инфа только если клетка is_active и на ней ничего нет
+        const free_cells: ItemInfo[] = []; 
+        for(let y = 0; y < size_y; y++) {
+            for(let x = 0; x < size_x; x++) {
+                const cell = cells[y][x];
+                if(cell.is_active && elements[y][x] == NullElement) {
+                    free_cells.push({x: x, y: y, id: cell.id});
+                }
+            }
+        }
 
     // сохранение состояния игры
     function save_state(): GameState {
