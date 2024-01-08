@@ -85,7 +85,7 @@ function Match3(size_x, size_y)
     local cb_on_combinated
     local cb_ob_near_activation
     local cb_is_combined_elements
-    local cb_on_celll_activated
+    local cb_on_cell_activated
     local cb_on_damaged_element
     local function init()
         do
@@ -147,25 +147,42 @@ function Match3(size_x, size_y)
     end
     local function try_damage_element(damaged_info)
     end
-    local function on_base_near_activation(cells)
-    end
-    local function on_near_activation(cells)
-        if cb_ob_near_activation then
-            return cb_ob_near_activation(cells)
-        else
-            on_base_near_activation(cells)
-        end
+    local function on_near_activation_base(items)
+        __TS__ArrayForEach(
+            items,
+            function(____, item)
+                local cell = cells[item.x + 1][item.y + 1]
+                if cell.type ~= ____exports.CellType.ActionLocked then
+                    return
+                end
+                if cell.cnt_acts then
+                    cell.cnt_acts = cell.cnt_acts + 1
+                end
+                if cell.cnt_acts ~= cell.cnt_acts_req then
+                    return
+                end
+                if cb_on_cell_activated ~= nil then
+                    cb_on_cell_activated(item)
+                end
+            end
+        )
     end
     local function set_callback_ob_near_activation(fnc)
         cb_ob_near_activation = fnc
     end
     local function set_callback_on_cell_activated(fnc)
-        cb_on_celll_activated = fnc
+        cb_on_cell_activated = fnc
     end
     local function save_state()
         return {}
     end
     local function load_state(state)
+    local function on_near_activation(cells)
+        if cb_ob_near_activation ~= nil then
+            return cb_ob_near_activation(cells)
+        else
+            on_near_activation_base(cells)
+        end
     end
     local function get_free_cells()
         return {}

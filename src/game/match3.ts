@@ -164,7 +164,7 @@ function Match3(size_x: number, size_y: number) {
     let cb_on_combinated: FncOnCombinated;
     let cb_ob_near_activation: FncObNearActivation;
     let cb_is_combined_elements: FncIsCombined;
-    let cb_on_celll_activated: FncOnCellActivated;
+    let cb_on_cell_activated: FncOnCellActivated;
     let cb_on_damaged_element: FncOnDamagedElement;
     
     function init() {
@@ -273,18 +273,16 @@ function Match3(size_x: number, size_y: number) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
-    function on_base_near_activation(cells: ItemInfo[]) {
+    function on_near_activation_base(items: ItemInfo[]) {
         // если клетка из массива содержит флаг ActionLocked то увеличиваем счетчик cnt_acts
-        // а когда он достигнет cnt_acts_req то вызываем событие cb_on_celll_activated
-    }
-
-
-    // список клеток возле которых произошла активация комбинации или удаление элемента
-    function on_near_activation(cells: ItemInfo[]) {
-        if (cb_ob_near_activation)
-            return cb_ob_near_activation(cells);
-        else
-            on_base_near_activation(cells);
+        // а когда он достигнет cnt_acts_req то вызываем событие cb_on_cell_activated
+        items.forEach(item => {
+            const cell = cells[item.x][item.y];
+            if (cell.type != CellType.ActionLocked) return;
+            if (cell.cnt_acts) cell.cnt_acts++;
+            if (cell.cnt_acts != cell.cnt_acts_req) return;
+            if (cb_on_cell_activated != null) cb_on_cell_activated(item);
+        });
     }
 
     // задаем колбек для обработки ячеек, возле которых была активация комбинации
@@ -294,7 +292,13 @@ function Match3(size_x: number, size_y: number) {
 
     // Задаем кастомный колбек для обработки события активации клетки
     function set_callback_on_cell_activated(fnc: FncOnCellActivated) {
-        cb_on_celll_activated = fnc;
+        cb_on_cell_activated = fnc;
+    }
+    
+    // список клеток возле которых произошла активация комбинации или удаление элемента
+    function on_near_activation(cells: ItemInfo[]) {
+        if (cb_ob_near_activation != null) return cb_ob_near_activation(cells);
+        else on_near_activation_base(cells);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
