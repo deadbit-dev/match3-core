@@ -74,6 +74,27 @@ function ____exports.is_intersect_zone(check_pos, go_pos, go_size, go_angle_deg,
         check_pos
     )
 end
+function ____exports.rotate_matrix_90(matrix)
+    local n = #matrix
+    local m = #matrix[1]
+    local rotated_matrix = {}
+    do
+        local i = 0
+        while i < m do
+            rotated_matrix[i + 1] = {}
+            do
+                local j = n - 1
+                while j >= 0 do
+                    local ____rotated_matrix_index_0 = rotated_matrix[i + 1]
+                    ____rotated_matrix_index_0[#____rotated_matrix_index_0 + 1] = matrix[j + 1][i + 1]
+                    j = j - 1
+                end
+            end
+            i = i + 1
+        end
+    end
+    return rotated_matrix
+end
 function ____exports.get_debug_intersect_points()
     return {a, b, c, d}
 end

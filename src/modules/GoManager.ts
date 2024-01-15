@@ -295,10 +295,11 @@ export function GoManager() {
     }
 
 
-    function add_game_item<T extends IGameItem>(gi: T, add_go_list = true) {
-        game_items.push(gi);
+    function add_game_item<T extends IGameItem>(gi: T, add_go_list = true): number {
+        const length = game_items.push(gi);
         if (add_go_list)
             go_list.push(gi._hash);
+        return length - 1;
     }
 
     function delete_go(_go: hash, remove_from_scene = true) {

@@ -69,6 +69,21 @@ export function is_intersect_zone(check_pos: vmath.vector3, go_pos: vmath.vector
     return is_point_in_zone(a, b, c, d, check_pos);
 }
 
+export function rotate_matrix_90(matrix: number[][]): number[][] {
+    const n = matrix.length;
+    const m = matrix[0].length;
+    const rotated_matrix: number[][] = [];
+
+    for (let i = 0; i < m; i++) {
+        rotated_matrix[i] = [];
+        for (let j = n - 1; j >= 0; j--) {
+            rotated_matrix[i].push(matrix[j][i]);
+        }
+    }
+
+    return rotated_matrix;
+}
+
 export function get_debug_intersect_points() {
     return [a, b, c, d];
 }
