@@ -1,5 +1,6 @@
 local ____lualib = require("lualib_bundle")
-local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
+local Set = ____lualib.Set
+local __TS__New = ____lualib.__TS__New
 local __TS__TypeOf = ____lualib.__TS__TypeOf
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local ____exports = {}
@@ -16,19 +17,19 @@ ____exports.MoveDirection.Right = 3
 ____exports.MoveDirection[____exports.MoveDirection.Right] = "Right"
 ____exports.MoveDirection.None = 4
 ____exports.MoveDirection[____exports.MoveDirection.None] = "None"
-local CombinationType = CombinationType or ({})
-CombinationType.Comb3 = 0
-CombinationType[CombinationType.Comb3] = "Comb3"
-CombinationType.Comb4 = 1
-CombinationType[CombinationType.Comb4] = "Comb4"
-CombinationType.Comb5 = 2
-CombinationType[CombinationType.Comb5] = "Comb5"
-CombinationType.Comb3x3 = 3
-CombinationType[CombinationType.Comb3x3] = "Comb3x3"
-CombinationType.Comb3x4 = 4
-CombinationType[CombinationType.Comb3x4] = "Comb3x4"
-CombinationType.Comb3x5 = 5
-CombinationType[CombinationType.Comb3x5] = "Comb3x5"
+____exports.CombinationType = CombinationType or ({})
+____exports.CombinationType.Comb3 = 0
+____exports.CombinationType[____exports.CombinationType.Comb3] = "Comb3"
+____exports.CombinationType.Comb4 = 1
+____exports.CombinationType[____exports.CombinationType.Comb4] = "Comb4"
+____exports.CombinationType.Comb5 = 2
+____exports.CombinationType[____exports.CombinationType.Comb5] = "Comb5"
+____exports.CombinationType.Comb3x3 = 3
+____exports.CombinationType[____exports.CombinationType.Comb3x3] = "Comb3x3"
+____exports.CombinationType.Comb3x4 = 4
+____exports.CombinationType[____exports.CombinationType.Comb3x4] = "Comb3x4"
+____exports.CombinationType.Comb3x5 = 5
+____exports.CombinationType[____exports.CombinationType.Comb3x5] = "Comb3x5"
 local CombinationMasks = {
     {{1, 1, 1}},
     {{1, 1, 1, 1}},
@@ -83,8 +84,11 @@ ____exports.ProcessMode.Combinate = 0
 ____exports.ProcessMode[____exports.ProcessMode.Combinate] = "Combinate"
 ____exports.ProcessMode.MoveElements = 1
 ____exports.ProcessMode[____exports.ProcessMode.MoveElements] = "MoveElements"
-function ____exports.Match3(size_x, size_y)
-    local is_combined_elements_base, is_combined_elements, try_damage_element, swap_elements, element_types, elements, cb_is_combined_elements, cb_on_damaged_element
+function ____exports.Field(size_x, size_y, move_direction)
+    if move_direction == nil then
+        move_direction = ____exports.MoveDirection.Up
+    end
+    local is_combined_elements_base, is_combined_elements, try_damage_element, swap_elements, element_types, elements, damaged_elements, cb_is_combined_elements, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or element_types[e1.type] and element_types[e2.type] and element_types[e1.type].index == element_types[e2.type].index
     end
@@ -96,8 +100,11 @@ function ____exports.Match3(size_x, size_y)
         end
     end
     function try_damage_element(damaged_info)
-        if cb_on_damaged_element ~= nil then
-            return cb_on_damaged_element(damaged_info)
+        if not damaged_elements:has(damaged_info.element.id) then
+            damaged_elements:add(damaged_info.element.id)
+            if cb_on_damaged_element ~= nil then
+                return cb_on_damaged_element(damaged_info)
+            end
         end
     end
     function swap_elements(from_x, from_y, to_x, to_y)
@@ -105,15 +112,17 @@ function ____exports.Match3(size_x, size_y)
         elements[from_y + 1][from_x + 1] = elements[to_y + 1][to_x + 1]
         elements[to_y + 1][to_x + 1] = elements_from
     end
-    local move_direction = ____exports.MoveDirection.Up
     local cells = {}
     element_types = {}
     elements = {}
     local last_moved_elements = {}
+    damaged_elements = __TS__New(Set)
     local cb_is_can_move
     local cb_on_combinated
     local cb_ob_near_activation
     local cb_on_cell_activated
+    local cb_on_move_element
+    local cb_on_request_element
     local function init()
         do
             local y = 0
@@ -151,7 +160,7 @@ function ____exports.Match3(size_x, size_y)
                 local is_one_row_mask = false
                 repeat
                     local ____switch14 = mask_index
-                    local ____cond14 = ____switch14 == CombinationType.Comb3 or ____switch14 == CombinationType.Comb4 or ____switch14 == CombinationType.Comb5
+                    local ____cond14 = ____switch14 == ____exports.CombinationType.Comb3 or ____switch14 == ____exports.CombinationType.Comb4 or ____switch14 == ____exports.CombinationType.Comb5
                     if ____cond14 then
                         is_one_row_mask = true
                         break
@@ -201,19 +210,6 @@ function ____exports.Match3(size_x, size_y)
                                         end
                                     end
                                     if is_combined then
-                                        local is_find = false
-                                        for ____, element in ipairs(combination.elements) do
-                                            for ____, last_moved_element in ipairs(last_moved_elements) do
-                                                if last_moved_element.id == element.id then
-                                                    combination.combined_element = element
-                                                    is_find = true
-                                                    break
-                                                end
-                                            end
-                                            if is_find then
-                                                break
-                                            end
-                                        end
                                         combination.type = mask_index
                                         combinations[#combinations + 1] = combination
                                     end
@@ -279,55 +275,62 @@ function ____exports.Match3(size_x, size_y)
     local function set_callback_is_can_move(fnc)
         cb_is_can_move = fnc
     end
-    local function on_combined_base(combined_item, items, combination_type, combination_angle)
-        __TS__ArrayForEach(
-            items,
-            function(____, item)
-                local element = elements[item.y + 1][item.x + 1]
-                if element ~= ____exports.NullElement then
-                    try_damage_element({x = item.x, y = item.y, element = element})
-                    if element.id == item.id then
-                        elements[item.y + 1][item.x + 1] = ____exports.NullElement
-                    end
-                end
+    local function on_move_element(from_x, from_y, to_x, to_y, element)
+        if cb_on_move_element ~= nil then
+            return cb_on_move_element(
+                from_x,
+                from_y,
+                to_x,
+                to_y,
+                element
+            )
+        end
+    end
+    local function set_callback_on_move_element(fnc)
+        cb_on_move_element = fnc
+    end
+    local function on_combined_base(combined_element, combination)
+        for ____, item in ipairs(combination.elements) do
+            local element = elements[item.y + 1][item.x + 1]
+            if element ~= ____exports.NullElement and element.id == item.id then
+                try_damage_element({x = item.x, y = item.y, element = element})
+                damaged_elements:delete(element.id)
+                elements[item.y + 1][item.x + 1] = ____exports.NullElement
             end
-        )
+        end
     end
     local function set_callback_on_combinated(fnc)
         cb_on_combinated = fnc
     end
-    local function on_combinated(combined_item, items, combination_type, combination_angle)
+    local function on_combinated(combined_element, combination)
         if cb_on_combinated ~= nil then
-            return cb_on_combinated(combined_item, items, combination_type, combination_angle)
+            return cb_on_combinated(combined_element, combination)
         else
-            return on_combined_base(combined_item, items, combination_type, combination_angle)
+            return on_combined_base(combined_element, combination)
         end
     end
     local function set_callback_on_damaged_element(fnc)
         cb_on_damaged_element = fnc
     end
     local function on_near_activation_base(items)
-        __TS__ArrayForEach(
-            items,
-            function(____, item)
-                local cell = cells[item.y + 1][item.x + 1]
-                if cell == ____exports.NotActiveCell then
-                    return
-                end
-                if cell.type ~= ____exports.CellType.ActionLocked then
-                    return
-                end
-                if cell.cnt_acts then
-                    cell.cnt_acts = cell.cnt_acts + 1
-                end
-                if cell.cnt_acts ~= cell.cnt_acts_req then
-                    return
-                end
-                if cb_on_cell_activated ~= nil then
-                    cb_on_cell_activated(item)
-                end
+        for ____, item in ipairs(items) do
+            local cell = cells[item.y + 1][item.x + 1]
+            if cell == ____exports.NotActiveCell then
+                return
             end
-        )
+            if cell.type ~= ____exports.CellType.ActionLocked then
+                return
+            end
+            if cell.cnt_acts then
+                cell.cnt_acts = cell.cnt_acts + 1
+            end
+            if cell.cnt_acts ~= cell.cnt_acts_req then
+                return
+            end
+            if cb_on_cell_activated ~= nil then
+                cb_on_cell_activated(item)
+            end
+        end
     end
     local function set_callback_ob_near_activation(fnc)
         cb_ob_near_activation = fnc
@@ -341,6 +344,15 @@ function ____exports.Match3(size_x, size_y)
         else
             on_near_activation_base(cells)
         end
+    end
+    local function on_request_element(x, y)
+        if cb_on_request_element ~= nil then
+            return cb_on_request_element(x, y)
+        end
+        return ____exports.NullElement
+    end
+    local function set_callback_on_request_element(fnc)
+        cb_on_request_element = fnc
     end
     local function get_free_cells()
         local free_cells = {}
@@ -392,16 +404,16 @@ function ____exports.Match3(size_x, size_y)
                             local id = -1
                             local item = array[i + 1][j + 1]
                             repeat
-                                local ____switch88 = __TS__TypeOf(array)
-                                local ____cond88 = ____switch88 == __TS__TypeOf(elements)
-                                if ____cond88 then
+                                local ____switch90 = __TS__TypeOf(array)
+                                local ____cond90 = ____switch90 == __TS__TypeOf(elements)
+                                if ____cond90 then
                                     if item ~= ____exports.NullElement then
                                         id = item.id
                                     end
                                     break
                                 end
-                                ____cond88 = ____cond88 or ____switch88 == __TS__TypeOf(cells)
-                                if ____cond88 then
+                                ____cond90 = ____cond90 or ____switch90 == __TS__TypeOf(cells)
+                                if ____cond90 then
                                     id = item.id
                                     break
                                 end
@@ -423,23 +435,24 @@ function ____exports.Match3(size_x, size_y)
         if element == ____exports.NullElement then
             return
         end
-        if is_damaging then
-            try_damage_element({x = x, y = y, element = element})
-        end
         if is_near_activation then
             on_near_activation(get_neighbors(x, y))
         end
-        elements[y + 1][x + 1] = ____exports.NullElement
+        if is_damaging then
+            try_damage_element({x = x, y = y, element = element})
+            damaged_elements:delete(element.id)
+            elements[y + 1][x + 1] = ____exports.NullElement
+        end
     end
     local function is_available_cell_type(cell)
         repeat
-            local ____switch96 = cell.type
-            local ____cond96 = ____switch96 == ____exports.CellType.NotMoved or ____switch96 == ____exports.CellType.Locked or ____switch96 == ____exports.CellType.Wall
-            if ____cond96 then
+            local ____switch98 = cell.type
+            local ____cond98 = ____switch98 == ____exports.CellType.NotMoved or ____switch98 == ____exports.CellType.Locked or ____switch98 == ____exports.CellType.Wall
+            if ____cond98 then
                 return false
             end
-            ____cond96 = ____cond96 or ____switch96 == ____exports.CellType.ActionLocked
-            if ____cond96 then
+            ____cond98 = ____cond98 or ____switch98 == ____exports.CellType.ActionLocked
+            if ____cond98 then
                 if cell.cnt_acts ~= cell.cnt_acts_req then
                     return false
                 end
@@ -486,36 +499,267 @@ function ____exports.Match3(size_x, size_y)
         end
         return true
     end
-    local function process_state(mode)
-        repeat
-            local ____switch109 = mode
-            local is_combined, combinations
-            local ____cond109 = ____switch109 == ____exports.ProcessMode.Combinate
-            if ____cond109 then
-                is_combined = false
-                combinations = get_all_combinations()
-                for ____, combination in ipairs(combinations) do
-                    on_combinated(combination.combined_element, combination.elements, combination.type, combination.angle)
-                    __TS__ArrayForEach(
-                        combination.elements,
-                        function(____, element)
-                            on_near_activation(get_neighbors(element.x, element.y, cells))
-                        end
-                    )
-                    is_combined = true
+    local function process_combinate()
+        local is_procesed = false
+        for ____, combination in ipairs(get_all_combinations()) do
+            local found = false
+            for ____, elememnt in ipairs(combination.elements) do
+                for ____, last_moved_element in ipairs(last_moved_elements) do
+                    if last_moved_element.id == elememnt.id then
+                        on_combinated(elememnt, combination)
+                        found = true
+                        break
+                    end
                 end
-                if is_combined then
-                    __TS__ArraySplice(last_moved_elements, 0, #last_moved_elements)
-                    return true
+                if found then
+                    break
+                end
+            end
+            for ____, element in ipairs(combination.elements) do
+                on_near_activation(get_neighbors(element.x, element.y, cells))
+            end
+            is_procesed = true
+        end
+        __TS__ArraySplice(last_moved_elements, 0, #last_moved_elements)
+        return is_procesed
+    end
+    local function request_element(x, y)
+        local element = on_request_element(x, y)
+        if element ~= ____exports.NullElement then
+            last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+        end
+    end
+    local function try_move_element_from_up(x, y)
+        do
+            local j = y
+            while j >= 0 do
+                local cell = cells[j + 1][x + 1]
+                if cell ~= ____exports.NotActiveCell then
+                    if not is_available_cell_type(cell) then
+                        return false
+                    end
+                    local element = elements[j + 1][x + 1]
+                    if element ~= ____exports.NullElement then
+                        elements[y + 1][x + 1] = element
+                        elements[j + 1][x + 1] = ____exports.NullElement
+                        on_move_element(
+                            x,
+                            j,
+                            x,
+                            y,
+                            element
+                        )
+                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+                        return true
+                    end
+                end
+                j = j - 1
+            end
+        end
+        return false
+    end
+    local function try_move_element_from_down(x, y)
+        do
+            local j = y
+            while j < size_y do
+                local cell = cells[j + 1][x + 1]
+                if cell ~= ____exports.NotActiveCell then
+                    if not is_available_cell_type(cell) then
+                        return false
+                    end
+                    local element = elements[j + 1][x + 1]
+                    if element ~= ____exports.NullElement then
+                        elements[y + 1][x + 1] = element
+                        elements[j + 1][x + 1] = ____exports.NullElement
+                        on_move_element(
+                            x,
+                            j,
+                            x,
+                            y,
+                            element
+                        )
+                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+                        return true
+                    end
+                end
+                j = j + 1
+            end
+        end
+        return false
+    end
+    local function try_move_element_from_left(x, y)
+        do
+            local j = x
+            while j >= 0 do
+                local cell = cells[y + 1][j + 1]
+                if cell ~= ____exports.NotActiveCell then
+                    if not is_available_cell_type(cell) then
+                        return false
+                    end
+                    local element = elements[y + 1][j + 1]
+                    if element ~= ____exports.NullElement then
+                        elements[y + 1][x + 1] = element
+                        elements[y + 1][j + 1] = ____exports.NullElement
+                        on_move_element(
+                            j,
+                            y,
+                            x,
+                            y,
+                            element
+                        )
+                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+                        return true
+                    end
+                end
+                j = j - 1
+            end
+        end
+        return false
+    end
+    local function try_move_element_from_right(x, y)
+        do
+            local j = x
+            while j < size_x do
+                local cell = cells[y + 1][j + 1]
+                if cell ~= ____exports.NotActiveCell then
+                    if not is_available_cell_type(cell) then
+                        return false
+                    end
+                    local element = elements[y + 1][j + 1]
+                    if element ~= ____exports.NullElement then
+                        elements[y + 1][x + 1] = element
+                        elements[y + 1][j + 1] = ____exports.NullElement
+                        on_move_element(
+                            j,
+                            y,
+                            x,
+                            y,
+                            element
+                        )
+                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+                        return true
+                    end
+                end
+                j = j + 1
+            end
+        end
+        return false
+    end
+    local function process_move()
+        local is_procesed = false
+        repeat
+            local ____switch144 = move_direction
+            local ____cond144 = ____switch144 == ____exports.MoveDirection.Up
+            if ____cond144 then
+                do
+                    local y = size_y - 1
+                    while y >= 0 do
+                        do
+                            local x = 0
+                            while x < size_x do
+                                local cell = cells[y + 1][x + 1]
+                                local empty = elements[y + 1][x + 1]
+                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell then
+                                    if not try_move_element_from_up(x, y) then
+                                        request_element(x, y)
+                                    end
+                                    is_procesed = true
+                                end
+                                x = x + 1
+                            end
+                        end
+                        y = y - 1
+                    end
                 end
                 break
             end
-            ____cond109 = ____cond109 or ____switch109 == ____exports.ProcessMode.MoveElements
-            if ____cond109 then
+            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Down
+            if ____cond144 then
+                do
+                    local y = 0
+                    while y < size_y do
+                        do
+                            local x = 0
+                            while x < size_x do
+                                local cell = cells[y + 1][x + 1]
+                                local empty = elements[y + 1][x + 1]
+                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell then
+                                    if not try_move_element_from_down(x, y) then
+                                        request_element(x, y)
+                                    end
+                                    is_procesed = true
+                                end
+                                x = x + 1
+                            end
+                        end
+                        y = y + 1
+                    end
+                end
+                break
+            end
+            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Left
+            if ____cond144 then
+                do
+                    local x = size_x - 1
+                    while x >= 0 do
+                        do
+                            local y = 0
+                            while y < size_y do
+                                local cell = cells[y + 1][x + 1]
+                                local empty = elements[y + 1][x + 1]
+                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell then
+                                    if not try_move_element_from_left(x, y) then
+                                        request_element(x, y)
+                                    end
+                                    is_procesed = true
+                                end
+                                y = y + 1
+                            end
+                        end
+                        x = x - 1
+                    end
+                end
+                break
+            end
+            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Right
+            if ____cond144 then
+                do
+                    local x = 0
+                    while x < size_x do
+                        do
+                            local y = 0
+                            while y < size_y do
+                                local cell = cells[y + 1][x + 1]
+                                local empty = elements[y + 1][x + 1]
+                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell then
+                                    if not try_move_element_from_right(x, y) then
+                                        request_element(x, y)
+                                    end
+                                    is_procesed = true
+                                end
+                                y = y + 1
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
                 break
             end
         until true
-        return false
+        return is_procesed
+    end
+    local function process_state(mode)
+        repeat
+            local ____switch162 = mode
+            local ____cond162 = ____switch162 == ____exports.ProcessMode.Combinate
+            if ____cond162 then
+                return process_combinate()
+            end
+            ____cond162 = ____cond162 or ____switch162 == ____exports.ProcessMode.MoveElements
+            if ____cond162 then
+                return process_move()
+            end
+        until true
     end
     local function save_state()
         return {cells = cells, elements = elements}
@@ -555,6 +799,8 @@ function ____exports.Match3(size_x, size_y)
         get_all_combinations = get_all_combinations,
         get_all_available_steps = get_all_available_steps,
         get_free_cells = get_free_cells,
+        try_damage_element = try_damage_element,
+        set_callback_on_move_element = set_callback_on_move_element,
         set_callback_is_can_move = set_callback_is_can_move,
         is_can_move_base = is_can_move_base,
         set_callback_is_combined_elements = set_callback_is_combined_elements,
@@ -562,6 +808,7 @@ function ____exports.Match3(size_x, size_y)
         set_callback_on_combinated = set_callback_on_combinated,
         on_combined_base = on_combined_base,
         set_callback_on_damaged_element = set_callback_on_damaged_element,
+        set_callback_on_request_element = set_callback_on_request_element,
         set_callback_ob_near_activation = set_callback_ob_near_activation,
         on_near_activation_base = on_near_activation_base,
         set_callback_on_cell_activated = set_callback_on_cell_activated

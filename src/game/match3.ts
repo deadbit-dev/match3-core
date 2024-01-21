@@ -13,7 +13,7 @@ export enum MoveDirection {
 }
 
 // тип комбинации
-enum CombinationType {
+export enum CombinationType {
     Comb3,
     Comb4,
     Comb5,
@@ -77,7 +77,6 @@ const CombinationMasks = [
 ];
 
 export interface CombinationInfo {
-    combined_element: ItemInfo;
     elements: ItemInfo[];
     type: CombinationType;
     angle: number;
@@ -156,16 +155,18 @@ export enum ProcessMode {
 }
 
 type FncIsCanMove = (from_x: number, from_y: number, to_x: number, to_y: number) => boolean;
-type FncOnCombinated = (combined_element: ItemInfo, elements: ItemInfo[], combination_type: CombinationType, combination_angle: number) => void;
+type FncOnCombinated = (combined_element: ItemInfo, combination: CombinationInfo) => void;
 type FncObNearActivation = (elements: ItemInfo[]) => void;
 type FncIsCombined = (e1: Element, e2: Element) => boolean;
 type FncOnCellActivated = (cell: ItemInfo) => void;
 type FncOnDamagedElement = (info: DamagedInfo) => void;
+type FncOnMoveElement = (from_x:number, from_y: number, to_x: number, to_y: number, element: Element) => void;
+type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
-export function Match3(size_x: number, size_y: number) {
+export function Field(size_x: number, size_y: number, move_direction = MoveDirection.Up) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
-    let move_direction = MoveDirection.Up;
+    
     // наши все клетки, полностью заполненная прямоугольная/квадратная структура
     const cells: (Cell | typeof NotActiveCell)[][] = [];
     // классификаторы элементов
@@ -174,6 +175,7 @@ export function Match3(size_x: number, size_y: number) {
     const elements: (Element | typeof NullElement)[][] = [];
     
     const last_moved_elements: ItemInfo[] = [];
+    const damaged_elements: Set<number> = new Set<number>();
 
     // кастомные колбеки 
     let cb_is_can_move: FncIsCanMove;
@@ -182,6 +184,8 @@ export function Match3(size_x: number, size_y: number) {
     let cb_is_combined_elements: FncIsCombined;
     let cb_on_cell_activated: FncOnCellActivated;
     let cb_on_damaged_element: FncOnDamagedElement;
+    let cb_on_move_element: FncOnMoveElement;
+    let cb_on_request_element: FncOnRequestElement;
 
     function init() {
         // заполняем массив cells с размерностью size_x, size_y с порядком: cells[y][x] is_active false, типа пустое поле
@@ -199,7 +203,7 @@ export function Match3(size_x: number, size_y: number) {
     function is_unique_element_combination(element: Element, combinations: CombinationInfo[]) {
         for(const comb of combinations) {
             for(const elem of comb.elements) {
-                if(elem.id == (element as Element).id) return false;
+                if(elem.id == element.id) return false;
             }
         }
 
@@ -275,19 +279,6 @@ export function Match3(size_x: number, size_y: number) {
                         }
 
                         if(is_combined) {
-                            // поиск элемента комбинации
-                            let is_find = false;
-                            for(const element of combination.elements) {
-                                for(const last_moved_element of last_moved_elements) {
-                                    if(last_moved_element.id == element.id) {
-                                        combination.combined_element = element;
-                                        is_find = true;
-                                        break;
-                                    }
-                                }
-                                if(is_find) break;
-                            }
-
                             combination.type = mask_index as CombinationType;
                             combinations.push(combination);
                         }
@@ -354,7 +345,7 @@ export function Match3(size_x: number, size_y: number) {
                 }
             }
             if(was) break;
-        };
+        }
 
         swap_elements(from_x, from_y, to_x, to_y);
 
@@ -373,19 +364,28 @@ export function Match3(size_x: number, size_y: number) {
         cb_is_can_move = fnc;
     }
 
+    function on_move_element(from_x: number, from_y: number, to_x: number, to_y: number, element: Element) {
+        if(cb_on_move_element != null) return cb_on_move_element(from_x, from_y, to_x, to_y, element);
+    }
+
+    function set_callback_on_move_element(fnc: FncOnMoveElement) {
+        cb_on_move_element = fnc;
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------------
     // базовая обработка при комбинации
-    function on_combined_base(combined_item: ItemInfo, items: ItemInfo[], combination_type: CombinationType, combination_angle: number) {
+    function on_combined_base(combined_element: ItemInfo, combination: CombinationInfo) {
         // сначала вызываем для каждого try_damage_element затем удаляем все элементы с массива
         // тут важно учесть что т.к. сначала вызвали try_damage_element то в этот момент при большом сборе будет образовываться новый элемент на поле,
         // соответственно нам нужно удалить все элементы не просто с массива elements, но и проверив что id у них не изменился, чтобы случайно не удалить новый созданный
-        items.forEach(item => {
+        for(const item of combination.elements) {
             const element = elements[item.y][item.x];
-            if(element != NullElement) {
+            if(element != NullElement && element.id == item.id) {
                 try_damage_element({x: item.x, y: item.y, element: element});
-                if(element.id == item.id) elements[item.y][item.x] = NullElement;
+                damaged_elements.delete(element.id);
+                elements[item.y][item.x] = NullElement;
             }
-        });
+        }
     }
 
     // Задаем кастомный колбек для обработки комбинации
@@ -396,9 +396,9 @@ export function Match3(size_x: number, size_y: number) {
     // обработка действия когда сработала комбинация 
     // элемент который сдвинулся(он нужен для того чтобы например при образовании пары из 4х элементов понять в каком месте образовался другой элемент)
     // и массив элементов которые задействованы
-    function on_combinated(combined_item: ItemInfo, items: ItemInfo[], combination_type: CombinationType, combination_angle: number) {
-        if(cb_on_combinated != null) return cb_on_combinated(combined_item, items, combination_type, combination_angle);
-        else return on_combined_base(combined_item, items, combination_type, combination_angle);
+    function on_combinated(combined_element: ItemInfo, combination: CombinationInfo) {
+        if(cb_on_combinated != null) return cb_on_combinated(combined_element, combination);
+        else return on_combined_base(combined_element, combination);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -409,22 +409,24 @@ export function Match3(size_x: number, size_y: number) {
     // попытка нанести урон элементу, смысл в том чтобы вызвать колбек активации, при этом только 1 раз за жизнь элемента
     // при успехе вызываем колбек cb_on_damaged_element 
     function try_damage_element(damaged_info: DamagedInfo) {
-        // TODO
-        if(cb_on_damaged_element != null) return cb_on_damaged_element(damaged_info);
+        if(!damaged_elements.has(damaged_info.element.id)) {
+            damaged_elements.add(damaged_info.element.id);
+            if(cb_on_damaged_element != null) return cb_on_damaged_element(damaged_info);
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
     function on_near_activation_base(items: ItemInfo[]) {
         // если клетка из массива содержит флаг ActionLocked то увеличиваем счетчик cnt_acts
         // а когда он достигнет cnt_acts_req то вызываем событие cb_on_cell_activated
-        items.forEach(item => {
+        for(const item of items) {
             const cell = cells[item.y][item.x];
             if(cell == NotActiveCell) return;
             if(cell.type != CellType.ActionLocked) return;
             if(cell.cnt_acts) cell.cnt_acts++;
             if(cell.cnt_acts != cell.cnt_acts_req) return;
             if(cb_on_cell_activated != null) cb_on_cell_activated(item);
-        });
+        }
     }
 
     // задаем колбек для обработки ячеек, возле которых была активация комбинации
@@ -444,6 +446,15 @@ export function Match3(size_x: number, size_y: number) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
+    function on_request_element(x: number, y: number) : Element | typeof NullElement {
+        if(cb_on_request_element != null) return cb_on_request_element(x, y);
+        return NullElement;                         
+    }
+
+    function set_callback_on_request_element(fnc: FncOnRequestElement) {
+        cb_on_request_element = fnc;
+    }
+    //-----------------------------------------------------------------------------------------------------------------------------------
     // возвращает массив свободных клеток
     function get_free_cells(): ItemInfo[] {
         // возвращается инфа только если клетка is_active и на ней ничего нет
@@ -459,7 +470,6 @@ export function Match3(size_x: number, size_y: number) {
 
         return free_cells;
     }
-
     
     // задает клетку
     function set_cell(x: number, y: number, cell: Cell | typeof NotActiveCell) {
@@ -496,7 +506,7 @@ export function Match3(size_x: number, size_y: number) {
         for (let i = y - 1; i <= y + 1; i++) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && !(i == y && j == x)) {
-                    let id: number = -1;
+                    let id = -1;
                     const item = array[i][j];
                     switch(typeof array) {
                         case typeof elements: if(item as number != NullElement) id = (item as Element).id; break;
@@ -519,10 +529,12 @@ export function Match3(size_x: number, size_y: number) {
         const element = elements[y][x];
         if(element as number == NullElement) return;
 
-        if(is_damaging) try_damage_element({x: x, y: y, element: element as Element});
         if(is_near_activation) on_near_activation(get_neighbors(x, y));
-
-        elements[y][x] = NullElement;
+        if(is_damaging) {
+            try_damage_element({x: x, y: y, element: element as Element});
+            damaged_elements.delete((element as Element).id);
+            elements[y][x] = NullElement;
+        }
     }
 
     function is_available_cell_type(cell: Cell): boolean {
@@ -552,10 +564,10 @@ export function Match3(size_x: number, size_y: number) {
         const is_can = is_can_move(from_x, from_y, to_x, to_y);
         if(is_can) {
             swap_elements(from_x, from_y, to_x, to_y);
-
+            
             const element_from = elements[from_y][from_x];
             if(element_from as number != NullElement) last_moved_elements.push({x: from_x, y: from_y, id: (element_from as Element).id});
-
+        
             const element_to = elements[to_y][to_x];
             if(element_to as number != NullElement) last_moved_elements.push({x: to_x, y: to_y, id: (element_to as Element).id});
         }
@@ -579,6 +591,184 @@ export function Match3(size_x: number, size_y: number) {
         return true;
     }
 
+    function process_combinate() {
+        let is_procesed = false;
+        for(const combination of get_all_combinations()) {
+            let found = false;
+            for(const elememnt of combination.elements) {
+                for(const last_moved_element of last_moved_elements) {
+                    if(last_moved_element.id == elememnt.id) {
+                        on_combinated(elememnt, combination);
+                        found = true;
+                        break;
+                    }
+                }
+                if(found) break;
+            }
+            
+            for(const element of combination.elements)
+                on_near_activation(get_neighbors(element.x, element.y, cells));
+            is_procesed = true;
+        }
+        
+        last_moved_elements.splice(0, last_moved_elements.length);
+        
+        return is_procesed;
+    }
+
+    function request_element(x: number, y: number) {
+        const element = on_request_element(x, y);
+        if(element as number != NullElement) {
+            last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+        }
+    }
+
+    function try_move_element_from_up(x: number, y:number): boolean {
+        for(let j = y; j >= 0; j--) {
+            const cell = cells[j][x];
+            if(cell as number != NotActiveCell) {
+                if(!is_available_cell_type(cell as Cell)) return false;
+                
+                const element = elements[j][x];
+                if(element as number != NullElement) {
+                    elements[y][x] = element;
+                    elements[j][x] = NullElement;
+
+                    on_move_element(x, j, x, y, element as Element);
+                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    function try_move_element_from_down(x: number, y:number): boolean {
+        for(let j = y; j < size_y; j++) {
+            const cell = cells[j][x];
+            if(cell as number != NotActiveCell) {
+                if(!is_available_cell_type(cell as Cell)) return false;
+                
+                const element = elements[j][x];
+                if(element as number != NullElement) {
+                    elements[y][x] = element;
+                    elements[j][x] = NullElement;
+
+                    on_move_element(x, j, x, y, element as Element);
+                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    function try_move_element_from_left(x: number, y:number): boolean {
+        for(let j = x; j >= 0; j--) {
+            const cell = cells[y][j];
+            if(cell as number != NotActiveCell) {
+                if(!is_available_cell_type(cell as Cell)) return false;
+                
+                const element = elements[y][j];
+                if(element as number != NullElement) {
+                    elements[y][x] = element;
+                    elements[y][j] = NullElement;
+
+                    on_move_element(j, y, x, y, element as Element);
+                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function try_move_element_from_right(x: number, y:number): boolean {
+        for(let j = x; j < size_x; j++) {
+            const cell = cells[y][j];
+            if(cell as number != NotActiveCell) {
+                if(!is_available_cell_type(cell as Cell)) return false;
+                
+                const element = elements[y][j];
+                if(element as number != NullElement) {
+                    elements[y][x] = element;
+                    elements[y][j] = NullElement;
+
+                    on_move_element(j, y, x, y, element as Element);
+                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+   
+   
+
+    function process_move() {
+        let is_procesed = false;
+        switch(move_direction) {
+            case MoveDirection.Up:
+                for(let y = size_y - 1; y >= 0; y--) {
+                    for(let x = 0; x < size_x; x++) {
+                        const cell = cells[y][x];
+                        const empty = elements[y][x];
+                        if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
+                            if(!try_move_element_from_up(x, y)) request_element(x, y);
+                            is_procesed = true;
+                        }
+                    }
+                }
+            break;
+            case MoveDirection.Down:
+                for(let y = 0; y < size_y; y++) {
+                    for(let x = 0; x < size_x; x++) {
+                        const cell = cells[y][x];
+                        const empty = elements[y][x];
+                        if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
+                            if(!try_move_element_from_down(x, y)) request_element(x, y);
+                            is_procesed = true;
+                        }
+                    }
+                }
+            break;
+            case MoveDirection.Left:
+                for(let x = size_x - 1; x >= 0; x--) {
+                    for(let y = 0; y < size_y; y++) {
+                        const cell = cells[y][x];
+                        const empty = elements[y][x];
+                        if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
+                            if(!try_move_element_from_left(x, y)) request_element(x, y);
+                            is_procesed = true;   
+                        }
+                    }
+                }
+            break;
+            case MoveDirection.Right:
+                for(let x = 0; x < size_x; x++) {
+                    for(let y = 0; y < size_y; y++) {
+                        const cell = cells[y][x];
+                        const empty = elements[y][x];
+                        if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
+                            if(!try_move_element_from_right(x, y)) request_element(x, y);
+                            is_procesed = true;
+                        }
+                    }
+                }
+            break;
+        }
+
+        return is_procesed;
+    }
+
     // вызываем шаг обработки текущего состояния игры
     // mode = Combinate: т.е. выполняет поиск всех комбинаций и вызываются методы on_combinated и on_near_activation 
     // возвращает истину если хоть одна комбинация активирована, по хорошему тут логика должна быть такая что если например   
@@ -586,31 +776,9 @@ export function Match3(size_x: number, size_y: number) {
     // возвращает истину если смещение произведено
     function process_state(mode: ProcessMode) {
         switch(mode) {
-            case ProcessMode.Combinate:
-                let is_combined = false;
-
-                const combinations = get_all_combinations();
-                for(const combination of combinations) {
-                    on_combinated(combination.combined_element, combination.elements, combination.type, combination.angle);
-                    combination.elements.forEach(element => {
-                        on_near_activation(get_neighbors(element.x, element.y, cells))
-                    });
-
-                    is_combined = true;
-                };
-                
-                if(is_combined) {
-                    last_moved_elements.splice(0, last_moved_elements.length);
-                    return true;
-                }
-            break;
-            
-            case ProcessMode.MoveElements:
-                // TODO: move elements
-            break;
+            case ProcessMode.Combinate: return process_combinate();
+            case ProcessMode.MoveElements: return process_move();
         }
-
-        return false;
     }
 
     // сохранение состояния игры
@@ -640,11 +808,12 @@ export function Match3(size_x: number, size_y: number) {
     return {
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element,
         try_move, try_click, process_state, save_state, load_state,
-        get_all_combinations, get_all_available_steps, get_free_cells,
-        set_callback_is_can_move, is_can_move_base,
+        get_all_combinations, get_all_available_steps, get_free_cells, try_damage_element,
+        set_callback_on_move_element, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,
-        set_callback_on_damaged_element, 
+        set_callback_on_damaged_element,
+        set_callback_on_request_element,
         set_callback_ob_near_activation, on_near_activation_base,
         set_callback_on_cell_activated
     };

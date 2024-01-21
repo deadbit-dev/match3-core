@@ -3,12 +3,31 @@ local druid = require("druid.druid")
 function ____exports.init(self)
     Manager.init_gui()
     self.druid = druid.new(self)
+    self.druid:new_button(
+        "restart_button",
+        function()
+            Scene.restart()
+        end
+    )
+    self.druid:new_button(
+        "buster_button",
+        function()
+            GameStorage.set(
+                "buster_active",
+                not GameStorage.get("buster_active")
+            )
+        end
+    )
 end
 function ____exports.on_input(self, action_id, action)
     return self.druid:on_input(action_id, action)
 end
 function ____exports.update(self, dt)
     self.druid:update(dt)
+    gui.set_alpha(
+        gui.get_node("buster_button"),
+        GameStorage.get("buster_active") and 0.5 or 1
+    )
 end
 function ____exports.on_message(self, message_id, message, sender)
     Manager.on_message_gui(self, message_id, message, sender)

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { CellType, NullElement, NotActiveCell } from "../game/match3";
-import { CellId, CellDatabaseValue, ElementId, ElementDatabaseValue } from "../game/game_logic";
+import { CellType, NotActiveCell, ElementType, NullElement, MoveDirection } from "../game/match3";
 
 export const IS_DEBUG_MODE = true;
 
@@ -26,12 +25,63 @@ export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
+export enum CellId {
+    Base,
+    Ice
+}
+
+export interface CellDatabaseValue {
+    type: CellType;
+    is_active: boolean;
+    view: string;
+}
+
+export enum ElementId {
+    Gold,
+    Dimonde,
+    Topaz,
+    Ruby,
+    Emerald
+}
+
+export interface ElementDatabaseValue {
+    type: ElementType;
+    view: string;
+}
+
+export enum ComboType {
+    Vertical,
+    Horizontal,
+    All
+}
+
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    game_animation_speed_cof: 1,
+
     min_swipe_distance: 32,
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
+
+    move_elements_easing: go.EASING_INOUTBACK,
+    move_elements_time: 0.75,
+    move_delay_after_combination: 1,
+    wait_time_after_move: 0.5,
+    
+    damaged_element_easing: go.EASING_INOUTBACK,
+    damaged_element_time: 0.5,
+    damaged_element_delay: 0.1,
+    damaged_element_scale: 0.5,
+
+    combined_element_easing: go.EASING_INCUBIC,
+    combined_element_time: 0.3,
+
+    spawn_element_easing: go.EASING_INCUBIC,
+    spawn_element_time: 0.5,
+    
+    buster_delay: 0.5,
+
     cell_database: new Map<CellId, CellDatabaseValue>([
         [
             CellId.Base,
@@ -61,7 +111,7 @@ export const _GAME_CONFIG = {
                     is_movable: true,
                     is_clickable: false
                 },
-                view: 'element_dimonde'
+                view: 'element_diamond'
             }
         ],
 
@@ -87,7 +137,37 @@ export const _GAME_CONFIG = {
                 },
                 view: 'element_topaz'
             }
+        ],
+        
+        [
+            ElementId.Ruby,
+            {
+                type: {
+                    index: ElementId.Ruby,
+                    is_movable: true,
+                    is_clickable: false
+                },
+                view: 'element_ruby'
+            }
+        ],
+        
+        [
+            ElementId.Emerald,
+            {
+                type: {
+                    index: ElementId.Emerald,
+                    is_movable: true,
+                    is_clickable: false
+                },
+                view: 'element_emerald'
+            }
         ]
+    ]),
+
+    combo_graphics: new Map<ComboType, string>([
+        [ ComboType.All, 'combo_all'],
+        [ ComboType.Horizontal, 'combo_horizontal'],
+        [ ComboType.Vertical, 'combo_vertical' ]
     ]),
 
     levels: [
@@ -98,25 +178,26 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
+                move_direction: MoveDirection.Up,
                 cells: [
-                    [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Base],
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, CellId.Base,CellId.Base, NotActiveCell, CellId.Base],
-                    [NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, CellId.Base,CellId.Base, NotActiveCell, CellId.Base],
+                    [CellId.Base, NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, NotActiveCell, CellId.Base],
+                    [CellId.Base, NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, NotActiveCell, CellId.Base],
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Base]
+                    [NotActiveCell, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, NotActiveCell]
                 ],
                 elements: [
-                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Topaz],
+                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, NullElement],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
-                    [NullElement, NullElement, NullElement, ElementId.Gold, ElementId.Gold, NullElement, NullElement, ElementId.Dimonde],
-                    [NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Dimonde, ElementId.Topaz, ElementId.Dimonde, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Topaz]
+                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Ruby, NullElement, NullElement, ElementId.Dimonde],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Ruby, NullElement, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
+                    [NullElement, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, NullElement]
                 ]
             }
         }
@@ -126,7 +207,8 @@ export const _GAME_CONFIG = {
 
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
-    current_level: 0
+    current_level: 0,
+    buster_active: false
 };
 
 

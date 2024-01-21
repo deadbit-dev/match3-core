@@ -25,6 +25,9 @@ export function GoManager() {
 
     let go_list: hash[] = [];
     let game_items: IGameItem[] = [];
+    
+    let index = 0;
+    let index2GameItem = new Map<number, IGameItem>();
 
     function make_go(name = 'cell', pos: vmath.vector3, is_add_list = false) {
         const item = factory.create("/prefabs#" + name, pos);
@@ -291,36 +294,40 @@ export function GoManager() {
     }
 
     function get_item_by_index(index: number) {
-        return game_items[index];
+        // game_items[index];
+        return index2GameItem.get(index); 
     }
-
 
     function add_game_item<T extends IGameItem>(gi: T, add_go_list = true): number {
-        const length = game_items.push(gi);
+        game_items.push(gi);
         if (add_go_list)
             go_list.push(gi._hash);
-        return length - 1;
+        index2GameItem.set(index, gi);
+        return index++;
     }
 
-    function delete_go(_go: hash, remove_from_scene = true) {
+    function delete_go(_go: hash, remove_from_scene = true, recursive = false) {
         for (let i = go_list.length - 1; i >= 0; i--) {
             const _go_item = go_list[i];
             if (_go == _go_item) {
                 go_list.splice(i, 1);
                 if (remove_from_scene)
-                    go.delete(_go);
+                    go.delete(_go, recursive);
                 return true;
             }
         }
         return false;
     }
 
-    function delete_item(item: IGameItem, remove_from_scene = true) {
+    function delete_item(item: IGameItem, remove_from_scene = true, recursive = false) {
+        for(const [key, value] of index2GameItem)
+            if(value._hash == item._hash) index2GameItem.delete(key);
+
         for (let i = game_items.length - 1; i >= 0; i--) {
             const it = game_items[i];
             if (it._hash == item._hash) {
                 game_items.splice(i, 1);
-                delete_go(it._hash, remove_from_scene);
+                delete_go(it._hash, remove_from_scene, recursive);
                 return true;
             }
         }
