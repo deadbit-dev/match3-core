@@ -463,7 +463,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             for(let x = 0; x < size_x; x++) {
                 const cell = cells[y][x];
                 if(cell != NotActiveCell && elements[y][x] == NullElement) {
-                    free_cells.push({x: x, y: y, id: cell.id});
+                    free_cells.push({x, y, id: cell.id});
                 }
             }
         }
@@ -531,7 +531,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
 
         if(is_near_activation) on_near_activation(get_neighbors(x, y));
         if(is_damaging) {
-            try_damage_element({x: x, y: y, element: element as Element});
+            try_damage_element({x, y, element: element as Element});
             damaged_elements.delete((element as Element).id);
             elements[y][x] = NullElement;
         }
@@ -619,7 +619,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     function request_element(x: number, y: number) {
         const element = on_request_element(x, y);
         if(element as number != NullElement) {
-            last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+            last_moved_elements.push({x, y, id: (element as Element).id});
         }
     }
 
@@ -635,7 +635,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     elements[j][x] = NullElement;
 
                     on_move_element(x, j, x, y, element as Element);
-                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    last_moved_elements.push({x, y, id: (element as Element).id});
                     
                     return true;
                 }
@@ -657,7 +657,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     elements[j][x] = NullElement;
 
                     on_move_element(x, j, x, y, element as Element);
-                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    last_moved_elements.push({x, y, id: (element as Element).id});
                     
                     return true;
                 }
@@ -679,7 +679,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     elements[y][j] = NullElement;
 
                     on_move_element(j, y, x, y, element as Element);
-                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    last_moved_elements.push({x, y, id: (element as Element).id});
                     
                     return true;
                 }
@@ -701,7 +701,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     elements[y][j] = NullElement;
 
                     on_move_element(j, y, x, y, element as Element);
-                    last_moved_elements.push({x: x, y: y, id: (element as Element).id});
+                    last_moved_elements.push({x, y, id: (element as Element).id});
                     
                     return true;
                 }
