@@ -34,7 +34,7 @@ export function update(this: props, dt: number): void {
     this.druid.update(dt);
 
     gui.set_alpha(gui.get_node('hammer_button'), this.busters.hammer_active ? 0.5 : 1);
-    gui.set_text(gui.get_node('hammer_counts'), GameStorage.get('hammer_counts').toString());
+    gui.set_text(gui.get_node('hammer_counts'), tostring(GameStorage.get('hammer_counts')));
 }
 
 export function on_message(this: props, message_id: string | hash, message: any, sender: string | hash | url): void {

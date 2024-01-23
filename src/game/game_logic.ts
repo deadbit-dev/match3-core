@@ -34,6 +34,8 @@ import {
 } from './match3';
 
 
+
+
 export function Game() {
     const game_width = 540;
     const game_height = 960;
@@ -109,17 +111,15 @@ export function Game() {
     }
 
     function setup_element_types() {
-        for(const [key, value] of GAME_CONFIG.element_database) {
-            field.set_element_type(key, value.type);
+        for(const [key, value] of Object.entries(GAME_CONFIG.element_database)) {
+            field.set_element_type(tonumber(key) as number, value.type);
         }
     }
 
-    function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell): Cell {
-        if(cell_id as number == NotActiveCell) return {} as Cell;
+    function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell): Cell | typeof NotActiveCell {
+        if(cell_id as number == NotActiveCell) return NotActiveCell;
 
-        const data = GAME_CONFIG.cell_database.get(cell_id);
-        if(data == undefined) return {} as Cell;
-
+        const data = GAME_CONFIG.cell_database[cell_id as CellId];
         const cell = {
             id: set_cell_view(x, y, cell_id),
             type: data.type,
@@ -134,9 +134,7 @@ export function Game() {
     function make_element(x: number, y: number, element_id: ElementId | typeof NullElement, spawn_anim = false, data: any = null): Element | typeof NullElement {
         if(element_id as number == NullElement) return NullElement;
         
-        const element_data = GAME_CONFIG.element_database.get(element_id);
-        if(element_data == undefined) return NullElement;
-
+        const element_data = GAME_CONFIG.element_database[element_id as ElementId];
         const element: Element = {
             id: set_element_view(x, y, element_id, spawn_anim),
             type: element_data.type.index,
@@ -151,7 +149,7 @@ export function Game() {
     function make_combo_element(x: number, y: number, element_id: ElementId, combo_type: ComboType, z_index = 1) {
         const pos = vmath.vector3(0, 0, z_index);
         const combo_view = gm.make_go('combo_view', pos);
-        sprite.play_flipbook(msg.url(undefined, combo_view, 'sprite'), GAME_CONFIG.combo_graphics.get(combo_type));
+        sprite.play_flipbook(msg.url(undefined, combo_view, 'sprite'), GAME_CONFIG.combo_graphics[combo_type]);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), combo_view);
         
         const element = make_element(x, y, element_id, true, {
@@ -174,7 +172,7 @@ export function Game() {
     function set_cell_view(x: number, y: number, cell_id: CellId, z_index = -1): number {
         const pos = get_cell_world_pos(x, y, z_index);
         const _go = gm.make_go('cell_view', pos);
-        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database.get(cell_id)?.view);
+        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         return gm.add_game_item({ _hash: _go });
     }
@@ -182,7 +180,7 @@ export function Game() {
     function set_element_view(x: number, y: number, element_id: ElementId, spawn_anim = false, z_index = 0): number {
         const pos = get_cell_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
-        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.element_database.get(element_id)?.view);
+        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.element_database[element_id].view);
         
         if(spawn_anim) {
             go.set_scale(vmath.vector3(0.01, 0.01, 1), _go);
@@ -384,10 +382,10 @@ export function Game() {
         }
     }
 
-    function get_random_element_id(): ElementId {
-        let index = math.random(GAME_CONFIG.element_database.size - 1);
-        for(const [key, value] of GAME_CONFIG.element_database) {
-            if(index-- == 0) return key;
+    function get_random_element_id(): ElementId | typeof NullElement {
+        let index = math.random(Object.keys(GAME_CONFIG.element_database).length - 1);
+        for(const [key, value] of Object.entries(GAME_CONFIG.element_database)) {
+            if(index-- == 0) return tonumber(key) as ElementId;
         }
 
         return -1;

@@ -1,5 +1,6 @@
 local ____lualib = require("lualib_bundle")
-local __TS__Iterator = ____lualib.__TS__Iterator
+local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
+local __TS__ObjectKeys = ____lualib.__TS__ObjectKeys
 local ____exports = {}
 local flow = require("ludobits.m.flow")
 local camera = require("utils.camera")
@@ -22,20 +23,20 @@ function ____exports.Game()
         cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size), 0)
     end
     function setup_element_types()
-        for ____, ____value in __TS__Iterator(GAME_CONFIG.element_database) do
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
             local value = ____value[2]
-            field.set_element_type(key, value.type)
+            field.set_element_type(
+                tonumber(key),
+                value.type
+            )
         end
     end
     function make_cell(x, y, cell_id)
         if cell_id == NotActiveCell then
-            return {}
+            return NotActiveCell
         end
-        local data = GAME_CONFIG.cell_database:get(cell_id)
-        if data == nil then
-            return {}
-        end
+        local data = GAME_CONFIG.cell_database[cell_id]
         local cell = {
             id = set_cell_view(x, y, cell_id),
             type = data.type,
@@ -54,10 +55,7 @@ function ____exports.Game()
         if element_id == NullElement then
             return NullElement
         end
-        local element_data = GAME_CONFIG.element_database:get(element_id)
-        if element_data == nil then
-            return NullElement
-        end
+        local element_data = GAME_CONFIG.element_database[element_id]
         local element = {
             id = set_element_view(x, y, element_id, spawn_anim),
             type = element_data.type.index,
@@ -74,7 +72,7 @@ function ____exports.Game()
         local combo_view = gm.make_go("combo_view", pos)
         sprite.play_flipbook(
             msg.url(nil, combo_view, "sprite"),
-            GAME_CONFIG.combo_graphics:get(combo_type)
+            GAME_CONFIG.combo_graphics[combo_type]
         )
         go.set_scale(
             vmath.vector3(scale_ratio, scale_ratio, 1),
@@ -106,10 +104,10 @@ function ____exports.Game()
         end
         local pos = get_cell_world_pos(x, y, z_index)
         local _go = gm.make_go("cell_view", pos)
-        local ____sprite_play_flipbook_3 = sprite.play_flipbook
-        local ____msg_url_result_2 = msg.url(nil, _go, "sprite")
-        local ____opt_0 = GAME_CONFIG.cell_database:get(cell_id)
-        ____sprite_play_flipbook_3(____msg_url_result_2, ____opt_0 and ____opt_0.view)
+        sprite.play_flipbook(
+            msg.url(nil, _go, "sprite"),
+            GAME_CONFIG.cell_database[cell_id].view
+        )
         go.set_scale(
             vmath.vector3(scale_ratio, scale_ratio, 1),
             _go
@@ -125,10 +123,10 @@ function ____exports.Game()
         end
         local pos = get_cell_world_pos(x, y, z_index)
         local _go = gm.make_go("element_view", pos)
-        local ____sprite_play_flipbook_7 = sprite.play_flipbook
-        local ____msg_url_result_6 = msg.url(nil, _go, "sprite")
-        local ____opt_4 = GAME_CONFIG.element_database:get(element_id)
-        ____sprite_play_flipbook_7(____msg_url_result_6, ____opt_4 and ____opt_4.view)
+        sprite.play_flipbook(
+            msg.url(nil, _go, "sprite"),
+            GAME_CONFIG.element_database[element_id].view
+        )
         if spawn_anim then
             go.set_scale(
                 vmath.vector3(0.01, 0.01, 1),
@@ -267,24 +265,24 @@ function ____exports.Game()
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch46 = move_direction
-            local ____cond46 = ____switch46 == MoveDirection.Up
-            if ____cond46 then
+            local ____switch44 = move_direction
+            local ____cond44 = ____switch44 == MoveDirection.Up
+            if ____cond44 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond46 = ____cond46 or ____switch46 == MoveDirection.Down
-            if ____cond46 then
+            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Down
+            if ____cond44 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond46 = ____cond46 or ____switch46 == MoveDirection.Left
-            if ____cond46 then
+            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Left
+            if ____cond44 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond46 = ____cond46 or ____switch46 == MoveDirection.Right
-            if ____cond46 then
+            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Right
+            if ____cond44 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -321,9 +319,9 @@ function ____exports.Game()
                 field.on_combined_base(combined_element, combination)
                 local combo_type
                 repeat
-                    local ____switch54 = combination.type
-                    local ____cond54 = ____switch54 == CombinationType.Comb4 or ____switch54 == CombinationType.Comb5
-                    if ____cond54 then
+                    local ____switch52 = combination.type
+                    local ____cond52 = ____switch52 == CombinationType.Comb4 or ____switch52 == CombinationType.Comb5
+                    if ____cond52 then
                         if combination.angle == 0 then
                             combo_type = ComboType.Horizontal
                         else
@@ -367,9 +365,9 @@ function ____exports.Game()
             return false
         end
         repeat
-            local ____switch61 = damaged_info.element.data.combo_type
-            local ____cond61 = ____switch61 == ComboType.All
-            if ____cond61 then
+            local ____switch59 = damaged_info.element.data.combo_type
+            local ____cond59 = ____switch59 == ComboType.All
+            if ____cond59 then
                 do
                     local y = 0
                     while y < field_height do
@@ -386,8 +384,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond61 = ____cond61 or ____switch61 == ComboType.Vertical
-            if ____cond61 then
+            ____cond59 = ____cond59 or ____switch59 == ComboType.Vertical
+            if ____cond59 then
                 do
                     local y = 0
                     while y < field_height do
@@ -397,8 +395,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond61 = ____cond61 or ____switch61 == ComboType.Horizontal
-            if ____cond61 then
+            ____cond59 = ____cond59 or ____switch59 == ComboType.Horizontal
+            if ____cond59 then
                 do
                     local x = 0
                     while x < field_width do
@@ -430,14 +428,14 @@ function ____exports.Game()
         end
     end
     function get_random_element_id()
-        local index = math.random(GAME_CONFIG.element_database.size - 1)
-        for ____, ____value in __TS__Iterator(GAME_CONFIG.element_database) do
+        local index = math.random(#__TS__ObjectKeys(GAME_CONFIG.element_database) - 1)
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
             local value = ____value[2]
-            local ____index_8 = index
-            index = ____index_8 - 1
-            if ____index_8 == 0 then
-                return key
+            local ____index_0 = index
+            index = ____index_0 - 1
+            if ____index_0 == 0 then
+                return tonumber(key)
             end
         end
         return -1
@@ -457,24 +455,24 @@ function ____exports.Game()
             return NullElement
         end
         repeat
-            local ____switch76 = move_direction
-            local ____cond76 = ____switch76 == MoveDirection.Up
-            if ____cond76 then
+            local ____switch74 = move_direction
+            local ____cond74 = ____switch74 == MoveDirection.Up
+            if ____cond74 then
                 gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * cell_size)
                 break
             end
-            ____cond76 = ____cond76 or ____switch76 == MoveDirection.Down
-            if ____cond76 then
+            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Down
+            if ____cond74 then
                 gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y - field_height * cell_size)
                 break
             end
-            ____cond76 = ____cond76 or ____switch76 == MoveDirection.Left
-            if ____cond76 then
+            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Left
+            if ____cond74 then
                 gm.set_position_xy(item_from, to_world_pos.x - field_width * cell_size, to_world_pos.y)
                 break
             end
-            ____cond76 = ____cond76 or ____switch76 == MoveDirection.Right
-            if ____cond76 then
+            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Right
+            if ____cond74 then
                 gm.set_position_xy(item_from, to_world_pos.x + field_width * cell_size, to_world_pos.y)
                 break
             end
@@ -508,14 +506,14 @@ function ____exports.Game()
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch81 = message_id
-                local ____cond81 = ____switch81 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond81 then
+                local ____switch79 = message_id
+                local ____cond79 = ____switch79 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond79 then
                     on_up(_message.item)
                     break
                 end
-                ____cond81 = ____cond81 or ____switch81 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond81 then
+                ____cond79 = ____cond79 or ____switch79 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond79 then
                     on_move(_message)
                     break
                 end

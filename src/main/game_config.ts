@@ -82,93 +82,72 @@ export const _GAME_CONFIG = {
     
     buster_delay: 0.5,
 
-    cell_database: new Map<CellId, CellDatabaseValue>([
-        [
-            CellId.Base,
-            {
-                type: CellType.Base,
-                is_active: true,
-                view: 'cell_base'
-            }
-        ],
+    cell_database: {
+        [CellId.Base]: {
+            type: CellType.Base,
+            is_active: true,
+            view: 'cell_base'
+        },
 
-        [
-            CellId.Ice,
-            {
-                type: CellType.ActionLocked,
-                is_active: true,
-                view: 'cell_ice'
-            }
-        ]
-    ]), 
+        [CellId.Ice]: {
+            type: CellType.ActionLocked,
+            is_active: true,
+            view: 'cell_ice'
+        }
+    },
 
-    element_database: new Map<ElementId, ElementDatabaseValue>([
-        [
-            ElementId.Dimonde,
-            {
-                type: {
-                    index: ElementId.Dimonde,
-                    is_movable: true,
-                    is_clickable: false
-                },
-                view: 'element_diamond'
-            }
-        ],
+    element_database: {
+        [ElementId.Dimonde]: {
+            type: {
+                index: ElementId.Dimonde,
+                is_movable: true,
+                is_clickable: false
+            },
+            view: 'element_diamond'
+        },
 
-        [
-            ElementId.Gold,
-            {
-                type: {
-                    index: ElementId.Gold,
-                    is_movable: true,
-                    is_clickable: false
-                },
-                view: 'element_gold'
-            }
-        ],
+        [ElementId.Gold]: {
+            type: {
+                index: ElementId.Gold,
+                is_movable: true,
+                is_clickable: false
+            },
+            view: 'element_gold'
+        },
 
-        [
-            ElementId.Topaz,
-            {
-                type: {
-                    index: ElementId.Topaz,
-                    is_movable: true,
-                    is_clickable: false
-                },
-                view: 'element_topaz'
-            }
-        ],
+        [ElementId.Topaz]: {
+            type: {
+                index: ElementId.Topaz,
+                is_movable: true,
+                is_clickable: false
+            },
+            view: 'element_topaz'
+        },
+            
+        [ElementId.Ruby]: {
+            type: {
+                index: ElementId.Ruby,
+                is_movable: true,
+                is_clickable: false
+            },
+            view: 'element_ruby'
+        },
         
-        [
-            ElementId.Ruby,
-            {
-                type: {
-                    index: ElementId.Ruby,
-                    is_movable: true,
-                    is_clickable: false
-                },
-                view: 'element_ruby'
-            }
-        ],
-        
-        [
-            ElementId.Emerald,
-            {
-                type: {
-                    index: ElementId.Emerald,
-                    is_movable: true,
-                    is_clickable: false
-                },
-                view: 'element_emerald'
-            }
-        ]
-    ]),
+        [ElementId.Emerald]: {
+            type: {
+                index: ElementId.Emerald,
+                is_movable: true,
+                is_clickable: false
+            },
+            view: 'element_emerald'
+        },
+    },
 
-    combo_graphics: new Map<ComboType, string>([
-        [ ComboType.All, 'combo_all'],
-        [ ComboType.Horizontal, 'combo_horizontal'],
-        [ ComboType.Vertical, 'combo_vertical' ]
-    ]),
+    combo_graphics: {
+        [ComboType.All]: 'combo_all',
+        [ComboType.Horizontal]: 'combo_horizontal',
+        [ComboType.Vertical]: 'combo_vertical'
+    },
 
     levels: [
         {

@@ -27,7 +27,7 @@ export function GoManager() {
     let game_items: IGameItem[] = [];
     
     let index = 0;
-    let index2GameItem = new Map<number, IGameItem>();
+    let index2GameItem: {index:number, item: IGameItem} [] = [];
 
     function make_go(name = 'cell', pos: vmath.vector3, is_add_list = false) {
         const item = factory.create("/prefabs#" + name, pos);
@@ -295,14 +295,14 @@ export function GoManager() {
 
     function get_item_by_index(index: number) {
         // game_items[index];
-        return index2GameItem.get(index); 
+        return index2GameItem.find((value) => value.index == index)?.item; 
     }
 
     function add_game_item<T extends IGameItem>(gi: T, add_go_list = true): number {
         game_items.push(gi);
         if (add_go_list)
             go_list.push(gi._hash);
-        index2GameItem.set(index, gi);
+        index2GameItem.push({index, item:gi});
         return index++;
     }
 
@@ -320,9 +320,8 @@ export function GoManager() {
     }
 
     function delete_item(item: IGameItem, remove_from_scene = true, recursive = false) {
-        for(const [key, value] of index2GameItem)
-            if(value._hash == item._hash) index2GameItem.delete(key);
-
+        index2GameItem.splice(index2GameItem.findIndex((value) => value.item._hash == item._hash), 1);
+        
         for (let i = game_items.length - 1; i >= 0; i--) {
             const it = game_items[i];
             if (it._hash == item._hash) {

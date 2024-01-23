@@ -1,8 +1,8 @@
 local ____lualib = require("lualib_bundle")
-local Set = ____lualib.Set
-local __TS__New = ____lualib.__TS__New
-local __TS__TypeOf = ____lualib.__TS__TypeOf
+local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__TypeOf = ____lualib.__TS__TypeOf
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
@@ -100,8 +100,11 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
     end
     function try_damage_element(damaged_info)
-        if not damaged_elements:has(damaged_info.element.id) then
-            damaged_elements:add(damaged_info.element.id)
+        if __TS__ArrayFind(
+            damaged_elements,
+            function(____, element) return element == damaged_info.element.id end
+        ) == nil then
+            damaged_elements[#damaged_elements + 1] = damaged_info.element.id
             if cb_on_damaged_element ~= nil then
                 return cb_on_damaged_element(damaged_info)
             end
@@ -116,7 +119,7 @@ function ____exports.Field(size_x, size_y, move_direction)
     element_types = {}
     elements = {}
     local last_moved_elements = {}
-    damaged_elements = __TS__New(Set)
+    damaged_elements = {}
     local cb_is_can_move
     local cb_on_combinated
     local cb_ob_near_activation
@@ -294,7 +297,14 @@ function ____exports.Field(size_x, size_y, move_direction)
             local element = elements[item.y + 1][item.x + 1]
             if element ~= ____exports.NullElement and element.id == item.id then
                 try_damage_element({x = item.x, y = item.y, element = element})
-                damaged_elements:delete(element.id)
+                __TS__ArraySplice(
+                    damaged_elements,
+                    __TS__ArrayFindIndex(
+                        damaged_elements,
+                        function(____, elem) return elem == element.id end
+                    ),
+                    1
+                )
                 elements[item.y + 1][item.x + 1] = ____exports.NullElement
             end
         end
@@ -404,16 +414,16 @@ function ____exports.Field(size_x, size_y, move_direction)
                             local id = -1
                             local item = array[i + 1][j + 1]
                             repeat
-                                local ____switch90 = __TS__TypeOf(array)
-                                local ____cond90 = ____switch90 == __TS__TypeOf(elements)
-                                if ____cond90 then
+                                local ____switch92 = __TS__TypeOf(array)
+                                local ____cond92 = ____switch92 == __TS__TypeOf(elements)
+                                if ____cond92 then
                                     if item ~= ____exports.NullElement then
                                         id = item.id
                                     end
                                     break
                                 end
-                                ____cond90 = ____cond90 or ____switch90 == __TS__TypeOf(cells)
-                                if ____cond90 then
+                                ____cond92 = ____cond92 or ____switch92 == __TS__TypeOf(cells)
+                                if ____cond92 then
                                     id = item.id
                                     break
                                 end
@@ -440,19 +450,26 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
         if is_damaging then
             try_damage_element({x = x, y = y, element = element})
-            damaged_elements:delete(element.id)
+            __TS__ArraySplice(
+                damaged_elements,
+                __TS__ArrayFindIndex(
+                    damaged_elements,
+                    function(____, elem) return elem == element.id end
+                ),
+                1
+            )
             elements[y + 1][x + 1] = ____exports.NullElement
         end
     end
     local function is_available_cell_type(cell)
         repeat
-            local ____switch98 = cell.type
-            local ____cond98 = ____switch98 == ____exports.CellType.NotMoved or ____switch98 == ____exports.CellType.Locked or ____switch98 == ____exports.CellType.Wall
-            if ____cond98 then
+            local ____switch101 = cell.type
+            local ____cond101 = ____switch101 == ____exports.CellType.NotMoved or ____switch101 == ____exports.CellType.Locked or ____switch101 == ____exports.CellType.Wall
+            if ____cond101 then
                 return false
             end
-            ____cond98 = ____cond98 or ____switch98 == ____exports.CellType.ActionLocked
-            if ____cond98 then
+            ____cond101 = ____cond101 or ____switch101 == ____exports.CellType.ActionLocked
+            if ____cond101 then
                 if cell.cnt_acts ~= cell.cnt_acts_req then
                     return false
                 end
@@ -648,9 +665,9 @@ function ____exports.Field(size_x, size_y, move_direction)
     local function process_move()
         local is_procesed = false
         repeat
-            local ____switch144 = move_direction
-            local ____cond144 = ____switch144 == ____exports.MoveDirection.Up
-            if ____cond144 then
+            local ____switch147 = move_direction
+            local ____cond147 = ____switch147 == ____exports.MoveDirection.Up
+            if ____cond147 then
                 do
                     local y = size_y - 1
                     while y >= 0 do
@@ -673,8 +690,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Down
-            if ____cond144 then
+            ____cond147 = ____cond147 or ____switch147 == ____exports.MoveDirection.Down
+            if ____cond147 then
                 do
                     local y = 0
                     while y < size_y do
@@ -697,8 +714,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Left
-            if ____cond144 then
+            ____cond147 = ____cond147 or ____switch147 == ____exports.MoveDirection.Left
+            if ____cond147 then
                 do
                     local x = size_x - 1
                     while x >= 0 do
@@ -721,8 +738,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond144 = ____cond144 or ____switch144 == ____exports.MoveDirection.Right
-            if ____cond144 then
+            ____cond147 = ____cond147 or ____switch147 == ____exports.MoveDirection.Right
+            if ____cond147 then
                 do
                     local x = 0
                     while x < size_x do
@@ -750,13 +767,13 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function process_state(mode)
         repeat
-            local ____switch162 = mode
-            local ____cond162 = ____switch162 == ____exports.ProcessMode.Combinate
-            if ____cond162 then
+            local ____switch165 = mode
+            local ____cond165 = ____switch165 == ____exports.ProcessMode.Combinate
+            if ____cond165 then
                 return process_combinate()
             end
-            ____cond162 = ____cond162 or ____switch162 == ____exports.ProcessMode.MoveElements
-            if ____cond162 then
+            ____cond165 = ____cond165 or ____switch165 == ____exports.ProcessMode.MoveElements
+            if ____cond165 then
                 return process_move()
             end
         until true

@@ -1,6 +1,3 @@
-local ____lualib = require("lualib_bundle")
-local Map = ____lualib.Map
-local __TS__New = ____lualib.__TS__New
 local ____exports = {}
 local ____match3 = require("game.match3")
 local CellType = ____match3.CellType
@@ -62,15 +59,15 @@ ____exports._GAME_CONFIG = {
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,
-    cell_database = __TS__New(Map, {{____exports.CellId.Base, {type = CellType.Base, is_active = true, view = "cell_base"}}, {____exports.CellId.Ice, {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}}}),
-    element_database = __TS__New(Map, {
-        {____exports.ElementId.Dimonde, {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, view = "element_diamond"}},
-        {____exports.ElementId.Gold, {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, view = "element_gold"}},
-        {____exports.ElementId.Topaz, {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, view = "element_topaz"}},
-        {____exports.ElementId.Ruby, {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, view = "element_ruby"}},
-        {____exports.ElementId.Emerald, {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, view = "element_emerald"}}
-    }),
-    combo_graphics = __TS__New(Map, {{____exports.ComboType.All, "combo_all"}, {____exports.ComboType.Horizontal, "combo_horizontal"}, {____exports.ComboType.Vertical, "combo_vertical"}}),
+    cell_database = {[____exports.CellId.Base] = {type = CellType.Base, is_active = true, view = "cell_base"}, [____exports.CellId.Ice] = {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}},
+    element_database = {
+        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, view = "element_diamond"},
+        [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, view = "element_gold"},
+        [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, view = "element_topaz"},
+        [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, view = "element_ruby"},
+        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, view = "element_emerald"}
+    },
+    combo_graphics = {[____exports.ComboType.All] = "combo_all", [____exports.ComboType.Horizontal] = "combo_horizontal", [____exports.ComboType.Vertical] = "combo_vertical"},
     levels = {{field = {
         width = 8,
         height = 8,

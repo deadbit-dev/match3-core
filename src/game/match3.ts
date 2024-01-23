@@ -175,7 +175,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     const elements: (Element | typeof NullElement)[][] = [];
     
     const last_moved_elements: ItemInfo[] = [];
-    const damaged_elements: Set<number> = new Set<number>();
+    const damaged_elements: number[] = [];
 
     // кастомные колбеки 
     let cb_is_can_move: FncIsCanMove;
@@ -382,7 +382,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             const element = elements[item.y][item.x];
             if(element != NullElement && element.id == item.id) {
                 try_damage_element({x: item.x, y: item.y, element: element});
-                damaged_elements.delete(element.id);
+                damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
                 elements[item.y][item.x] = NullElement;
             }
         }
@@ -409,8 +409,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     // попытка нанести урон элементу, смысл в том чтобы вызвать колбек активации, при этом только 1 раз за жизнь элемента
     // при успехе вызываем колбек cb_on_damaged_element 
     function try_damage_element(damaged_info: DamagedInfo) {
-        if(!damaged_elements.has(damaged_info.element.id)) {
-            damaged_elements.add(damaged_info.element.id);
+        if(damaged_elements.find((element) => element == damaged_info.element.id) == undefined) {
+            damaged_elements.push(damaged_info.element.id);
             if(cb_on_damaged_element != null) return cb_on_damaged_element(damaged_info);
         }
     }
@@ -532,7 +532,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         if(is_near_activation) on_near_activation(get_neighbors(x, y));
         if(is_damaging) {
             try_damage_element({x, y, element: element as Element});
-            damaged_elements.delete((element as Element).id);
+            damaged_elements.splice(damaged_elements.findIndex((elem) => elem == (element as Element).id), 1);
             elements[y][x] = NullElement;
         }
     }
