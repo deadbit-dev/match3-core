@@ -241,29 +241,55 @@ export function Game() {
             process_move();
         }
     }
+
+    function try_click_activation(x: number, y: number): boolean {
+        const element = field.get_element(x, y);
+        if(element as number == NullElement) return false;
+        if(!GAME_CONFIG.element_database[(element as Element).type as ElementId].type.is_clickable) return false;
+        
+        field.remove_element(x, y, true, false);
+        flow.delay(buster_delay);
+        process_game_step();
+
+        return true;
+    }
+    
+    function try_hammer_activation(x: number, y: number): boolean {
+        if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
+        
+        field.remove_element(x, y, true, false);
+        flow.delay(buster_delay);
+        process_game_step();
+
+        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
+        busters.hammer_active = false;
+
+        return true;
+    }
     
     function on_up(item: IGameItem) {
-        const element_to_world_pos = go.get_world_position(item._hash);
-        const element_to_pos = get_element_pos(element_to_world_pos);
+        const item_world_pos = go.get_world_position(item._hash);
+        const element_pos = get_element_pos(item_world_pos);
         
         if(selected_element != null) {
-            const selected_element_world_pos = go.get_world_position(selected_element._hash);
-            const selected_element_pos = get_element_pos(selected_element_world_pos);
+            const selected_item_world_pos = go.get_world_position(selected_element._hash);
+            const selected_element_pos = get_element_pos(selected_item_world_pos);
             
-            const dx = math.abs(selected_element_pos.x - element_to_pos.x);
-            const dy = math.abs(selected_element_pos.y - element_to_pos.y);
+            const dx = math.abs(selected_element_pos.x - element_pos.x);
+            const dy = math.abs(selected_element_pos.y - element_pos.y);
             if((dx != 0 && dy != 0) || (dx > 1 || dy > 1)) {
                 selected_element = item;
                 return;
             }
 
-            swap_elements(selected_element_pos, element_to_pos);
+            swap_elements(selected_element_pos, element_pos);
             
             selected_element = null;
             return;
         }
 
-        if(try_busters_activation(element_to_pos.x, element_to_pos.y)) return;
+        if(try_click_activation(element_pos.x, element_pos.y)) return;
+        if(try_hammer_activation(element_pos.x, element_pos.y)) return;
 
         selected_element = item;
     }
@@ -418,19 +444,6 @@ export function Game() {
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
 
         return element;
-    }
-
-    function try_busters_activation(x: number, y: number) {
-        if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
-        
-        field.remove_element(x, y, true, false);
-        flow.delay(buster_delay);
-        process_game_step();
-
-        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
-        busters.hammer_active = false;
-
-        return true;
     }
 
     function wait_event() {

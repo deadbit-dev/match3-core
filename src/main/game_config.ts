@@ -101,7 +101,7 @@ export const _GAME_CONFIG = {
             type: {
                 index: ElementId.Dimonde,
                 is_movable: true,
-                is_clickable: false
+                is_clickable: true
             },
             view: 'element_diamond'
         },

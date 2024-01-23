@@ -16,7 +16,7 @@ local MoveDirection = ____match3.MoveDirection
 local CombinationType = ____match3.CombinationType
 local ProcessMode = ____match3.ProcessMode
 function ____exports.Game()
-    local setup_size, setup_element_types, make_cell, make_element, make_combo_element, get_cell_world_pos, set_cell_view, set_element_view, get_element_pos, get_move_direction, swap_elements, process_move, process_game_step, on_up, on_move, on_move_element, on_combined, try_activate_combo, on_damaged_element, get_random_element_id, on_request_element, try_busters_activation, wait_event, game_width, game_height, min_swipe_distance, swap_element_easing, swap_element_time, move_delay_after_combination, move_elements_easing, move_elements_time, wait_time_after_move, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, combined_element_easing, combined_element_time, spawn_element_easing, spawn_element_time, buster_delay, origin_cell_size, field_width, field_height, offset_border, move_direction, busters, field, gm, cell_size, scale_ratio, cells_offset, selected_element
+    local setup_size, setup_element_types, make_cell, make_element, make_combo_element, get_cell_world_pos, set_cell_view, set_element_view, get_element_pos, get_move_direction, swap_elements, process_move, process_game_step, try_click_activation, try_hammer_activation, on_up, on_move, on_move_element, on_combined, try_activate_combo, on_damaged_element, get_random_element_id, on_request_element, wait_event, game_width, game_height, min_swipe_distance, swap_element_easing, swap_element_time, move_delay_after_combination, move_elements_easing, move_elements_time, wait_time_after_move, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, combined_element_easing, combined_element_time, spawn_element_easing, spawn_element_time, buster_delay, origin_cell_size, field_width, field_height, offset_border, move_direction, busters, field, gm, cell_size, scale_ratio, cells_offset, selected_element
     function setup_size()
         cell_size = math.min((game_width - offset_border * 2) / field_width, 100)
         scale_ratio = cell_size / origin_cell_size
@@ -229,23 +229,53 @@ function ____exports.Game()
             process_move()
         end
     end
+    function try_click_activation(x, y)
+        local element = field.get_element(x, y)
+        if element == NullElement then
+            return false
+        end
+        if not GAME_CONFIG.element_database[element.type].type.is_clickable then
+            return false
+        end
+        field.remove_element(x, y, true, false)
+        flow.delay(buster_delay)
+        process_game_step()
+        return true
+    end
+    function try_hammer_activation(x, y)
+        if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
+            return false
+        end
+        field.remove_element(x, y, true, false)
+        flow.delay(buster_delay)
+        process_game_step()
+        GameStorage.set(
+            "hammer_counts",
+            GameStorage.get("hammer_counts") - 1
+        )
+        busters.hammer_active = false
+        return true
+    end
     function on_up(item)
-        local element_to_world_pos = go.get_world_position(item._hash)
-        local element_to_pos = get_element_pos(element_to_world_pos)
+        local item_world_pos = go.get_world_position(item._hash)
+        local element_pos = get_element_pos(item_world_pos)
         if selected_element ~= nil then
-            local selected_element_world_pos = go.get_world_position(selected_element._hash)
-            local selected_element_pos = get_element_pos(selected_element_world_pos)
-            local dx = math.abs(selected_element_pos.x - element_to_pos.x)
-            local dy = math.abs(selected_element_pos.y - element_to_pos.y)
+            local selected_item_world_pos = go.get_world_position(selected_element._hash)
+            local selected_element_pos = get_element_pos(selected_item_world_pos)
+            local dx = math.abs(selected_element_pos.x - element_pos.x)
+            local dy = math.abs(selected_element_pos.y - element_pos.y)
             if dx ~= 0 and dy ~= 0 or (dx > 1 or dy > 1) then
                 selected_element = item
                 return
             end
-            swap_elements(selected_element_pos, element_to_pos)
+            swap_elements(selected_element_pos, element_pos)
             selected_element = nil
             return
         end
-        if try_busters_activation(element_to_pos.x, element_to_pos.y) then
+        if try_click_activation(element_pos.x, element_pos.y) then
+            return
+        end
+        if try_hammer_activation(element_pos.x, element_pos.y) then
             return
         end
         selected_element = item
@@ -265,24 +295,24 @@ function ____exports.Game()
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch44 = move_direction
-            local ____cond44 = ____switch44 == MoveDirection.Up
-            if ____cond44 then
+            local ____switch50 = move_direction
+            local ____cond50 = ____switch50 == MoveDirection.Up
+            if ____cond50 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Down
-            if ____cond44 then
+            ____cond50 = ____cond50 or ____switch50 == MoveDirection.Down
+            if ____cond50 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Left
-            if ____cond44 then
+            ____cond50 = ____cond50 or ____switch50 == MoveDirection.Left
+            if ____cond50 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond44 = ____cond44 or ____switch44 == MoveDirection.Right
-            if ____cond44 then
+            ____cond50 = ____cond50 or ____switch50 == MoveDirection.Right
+            if ____cond50 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -319,9 +349,9 @@ function ____exports.Game()
                 field.on_combined_base(combined_element, combination)
                 local combo_type
                 repeat
-                    local ____switch52 = combination.type
-                    local ____cond52 = ____switch52 == CombinationType.Comb4 or ____switch52 == CombinationType.Comb5
-                    if ____cond52 then
+                    local ____switch58 = combination.type
+                    local ____cond58 = ____switch58 == CombinationType.Comb4 or ____switch58 == CombinationType.Comb5
+                    if ____cond58 then
                         if combination.angle == 0 then
                             combo_type = ComboType.Horizontal
                         else
@@ -365,9 +395,9 @@ function ____exports.Game()
             return false
         end
         repeat
-            local ____switch59 = damaged_info.element.data.combo_type
-            local ____cond59 = ____switch59 == ComboType.All
-            if ____cond59 then
+            local ____switch65 = damaged_info.element.data.combo_type
+            local ____cond65 = ____switch65 == ComboType.All
+            if ____cond65 then
                 do
                     local y = 0
                     while y < field_height do
@@ -384,8 +414,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond59 = ____cond59 or ____switch59 == ComboType.Vertical
-            if ____cond59 then
+            ____cond65 = ____cond65 or ____switch65 == ComboType.Vertical
+            if ____cond65 then
                 do
                     local y = 0
                     while y < field_height do
@@ -395,8 +425,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond59 = ____cond59 or ____switch59 == ComboType.Horizontal
-            if ____cond59 then
+            ____cond65 = ____cond65 or ____switch65 == ComboType.Horizontal
+            if ____cond65 then
                 do
                     local x = 0
                     while x < field_width do
@@ -455,24 +485,24 @@ function ____exports.Game()
             return NullElement
         end
         repeat
-            local ____switch74 = move_direction
-            local ____cond74 = ____switch74 == MoveDirection.Up
-            if ____cond74 then
+            local ____switch80 = move_direction
+            local ____cond80 = ____switch80 == MoveDirection.Up
+            if ____cond80 then
                 gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * cell_size)
                 break
             end
-            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Down
-            if ____cond74 then
+            ____cond80 = ____cond80 or ____switch80 == MoveDirection.Down
+            if ____cond80 then
                 gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y - field_height * cell_size)
                 break
             end
-            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Left
-            if ____cond74 then
+            ____cond80 = ____cond80 or ____switch80 == MoveDirection.Left
+            if ____cond80 then
                 gm.set_position_xy(item_from, to_world_pos.x - field_width * cell_size, to_world_pos.y)
                 break
             end
-            ____cond74 = ____cond74 or ____switch74 == MoveDirection.Right
-            if ____cond74 then
+            ____cond80 = ____cond80 or ____switch80 == MoveDirection.Right
+            if ____cond80 then
                 gm.set_position_xy(item_from, to_world_pos.x + field_width * cell_size, to_world_pos.y)
                 break
             end
@@ -487,33 +517,19 @@ function ____exports.Game()
         )
         return element
     end
-    function try_busters_activation(x, y)
-        if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
-            return false
-        end
-        field.remove_element(x, y, true, false)
-        flow.delay(buster_delay)
-        process_game_step()
-        GameStorage.set(
-            "hammer_counts",
-            GameStorage.get("hammer_counts") - 1
-        )
-        busters.hammer_active = false
-        return true
-    end
     function wait_event()
         while true do
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch79 = message_id
-                local ____cond79 = ____switch79 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond79 then
+                local ____switch83 = message_id
+                local ____cond83 = ____switch83 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond83 then
                     on_up(_message.item)
                     break
                 end
-                ____cond79 = ____cond79 or ____switch79 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond79 then
+                ____cond83 = ____cond83 or ____switch83 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond83 then
                     on_move(_message)
                     break
                 end
