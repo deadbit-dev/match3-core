@@ -241,7 +241,7 @@ ____exports._GAME_CONFIG = {
                 NullElement
             }
         }
-    }}}
+    }, busters = {hammer_active = false}}}
 }
-____exports._STORAGE_CONFIG = {current_level = 0, buster_active = false}
+____exports._STORAGE_CONFIG = {current_level = 0, hammer_counts = 3}
 return ____exports

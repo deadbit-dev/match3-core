@@ -63,6 +63,8 @@ export function Game() {
     const field_height = level_config['field']['height'];
     const offset_border = level_config['field']['offset_border'];
     const move_direction = level_config['field']['move_direction'];
+
+    const busters = level_config['busters'];
     
     const field = Field(8, 8, move_direction);
     const gm = GoManager();
@@ -90,6 +92,8 @@ export function Game() {
                 make_element(x, y, level_config['field']['elements'][y][x]);
             }
         }
+
+        busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
         
         wait_event();
     }
@@ -261,7 +265,7 @@ export function Game() {
             return;
         }
 
-        if(try_buster_activation(element_to_pos.x, element_to_pos.y)) return;
+        if(try_busters_activation(element_to_pos.x, element_to_pos.y)) return;
 
         selected_element = item;
     }
@@ -418,14 +422,15 @@ export function Game() {
         return element;
     }
 
-    function try_buster_activation(x: number, y: number) {
-        if(!GameStorage.get('buster_active')) return false;
+    function try_busters_activation(x: number, y: number) {
+        if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
         field.remove_element(x, y, true, false);
         flow.delay(buster_delay);
         process_game_step();
 
-        GameStorage.set('buster_active', false);
+        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
+        busters.hammer_active = false;
 
         return true;
     }

@@ -179,6 +179,9 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 move_direction: MoveDirection.Up,
+                
+                
+                
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Base],
@@ -189,6 +192,7 @@ export const _GAME_CONFIG = {
                     [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [NotActiveCell, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, NotActiveCell]
                 ],
+
                 elements: [
                     [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, NullElement],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
@@ -199,6 +203,10 @@ export const _GAME_CONFIG = {
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
                     [NullElement, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, NullElement]
                 ]
+            },
+
+            busters: {
+                hammer_active: false
             }
         }
     ]
@@ -208,7 +216,7 @@ export const _GAME_CONFIG = {
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
     current_level: 0,
-    buster_active: false
+    hammer_counts: 3,
 };
 
 

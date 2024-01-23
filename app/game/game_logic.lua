@@ -15,7 +15,7 @@ local MoveDirection = ____match3.MoveDirection
 local CombinationType = ____match3.CombinationType
 local ProcessMode = ____match3.ProcessMode
 function ____exports.Game()
-    local setup_size, setup_element_types, make_cell, make_element, make_combo_element, get_cell_world_pos, set_cell_view, set_element_view, get_element_pos, get_move_direction, swap_elements, process_move, process_game_step, on_up, on_move, on_move_element, on_combined, try_activate_combo, on_damaged_element, get_random_element_id, on_request_element, try_buster_activation, wait_event, game_width, game_height, min_swipe_distance, swap_element_easing, swap_element_time, move_delay_after_combination, move_elements_easing, move_elements_time, wait_time_after_move, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, combined_element_easing, combined_element_time, spawn_element_easing, spawn_element_time, buster_delay, origin_cell_size, field_width, field_height, offset_border, move_direction, field, gm, cell_size, scale_ratio, cells_offset, selected_element
+    local setup_size, setup_element_types, make_cell, make_element, make_combo_element, get_cell_world_pos, set_cell_view, set_element_view, get_element_pos, get_move_direction, swap_elements, process_move, process_game_step, on_up, on_move, on_move_element, on_combined, try_activate_combo, on_damaged_element, get_random_element_id, on_request_element, try_busters_activation, wait_event, game_width, game_height, min_swipe_distance, swap_element_easing, swap_element_time, move_delay_after_combination, move_elements_easing, move_elements_time, wait_time_after_move, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, combined_element_easing, combined_element_time, spawn_element_easing, spawn_element_time, buster_delay, origin_cell_size, field_width, field_height, offset_border, move_direction, busters, field, gm, cell_size, scale_ratio, cells_offset, selected_element
     function setup_size()
         cell_size = math.min((game_width - offset_border * 2) / field_width, 100)
         scale_ratio = cell_size / origin_cell_size
@@ -247,7 +247,7 @@ function ____exports.Game()
             selected_element = nil
             return
         end
-        if try_buster_activation(element_to_pos.x, element_to_pos.y) then
+        if try_busters_activation(element_to_pos.x, element_to_pos.y) then
             return
         end
         selected_element = item
@@ -489,14 +489,18 @@ function ____exports.Game()
         )
         return element
     end
-    function try_buster_activation(x, y)
-        if not GameStorage.get("buster_active") then
+    function try_busters_activation(x, y)
+        if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
         end
         field.remove_element(x, y, true, false)
         flow.delay(buster_delay)
         process_game_step()
-        GameStorage.set("buster_active", false)
+        GameStorage.set(
+            "hammer_counts",
+            GameStorage.get("hammer_counts") - 1
+        )
+        busters.hammer_active = false
         return true
     end
     function wait_event()
@@ -543,6 +547,7 @@ function ____exports.Game()
     field_height = level_config.field.height
     offset_border = level_config.field.offset_border
     move_direction = level_config.field.move_direction
+    busters = level_config.busters
     field = Field(8, 8, move_direction)
     gm = GoManager()
     selected_element = nil
@@ -568,6 +573,7 @@ function ____exports.Game()
                 y = y + 1
             end
         end
+        busters.hammer_active = GameStorage.get("hammer_counts") <= 0
         wait_event()
     end
     init()

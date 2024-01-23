@@ -3,6 +3,7 @@ local druid = require("druid.druid")
 function ____exports.init(self)
     Manager.init_gui()
     self.druid = druid.new(self)
+    self.busters = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].busters
     self.druid:new_button(
         "restart_button",
         function()
@@ -10,12 +11,11 @@ function ____exports.init(self)
         end
     )
     self.druid:new_button(
-        "buster_button",
+        "hammer_button",
         function()
-            GameStorage.set(
-                "buster_active",
-                not GameStorage.get("buster_active")
-            )
+            if GameStorage.get("hammer_counts") > 0 then
+                self.busters.hammer_active = not self.busters.hammer_active
+            end
         end
     )
 end
@@ -25,8 +25,12 @@ end
 function ____exports.update(self, dt)
     self.druid:update(dt)
     gui.set_alpha(
-        gui.get_node("buster_button"),
-        GameStorage.get("buster_active") and 0.5 or 1
+        gui.get_node("hammer_button"),
+        self.busters.hammer_active and 0.5 or 1
+    )
+    gui.set_text(
+        gui.get_node("hammer_counts"),
+        tostring(GameStorage.get("hammer_counts"))
     )
 end
 function ____exports.on_message(self, message_id, message, sender)
