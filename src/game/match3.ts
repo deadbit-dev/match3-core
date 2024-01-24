@@ -145,8 +145,9 @@ export interface StepInfo {
 
 // описание игровых данных для импорта/экспорта
 export interface GameState {
-    cells: (Cell | typeof NotActiveCell)[][];
-    elements: (Element | typeof NullElement)[][];
+    cells: (Cell | typeof NotActiveCell)[][]; // наши все клетки, полностью заполненная прямоугольная/квадратная структура
+    element_types: {[id: number]: ElementType}; // классификаторы элементов
+    elements: (Element | typeof NullElement)[][]; // непосредственно игровые элементы
 }
 
 export enum ProcessMode {
@@ -167,12 +168,11 @@ type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElemen
 export function Field(size_x: number, size_y: number, move_direction = MoveDirection.Up) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
     
-    // наши все клетки, полностью заполненная прямоугольная/квадратная структура
-    const cells: (Cell | typeof NotActiveCell)[][] = [];
-    // классификаторы элементов
-    const element_types: { [id: number]: ElementType } = {};
-    // непосредственно игровые элементы
-    const elements: (Element | typeof NullElement)[][] = [];
+    const state: GameState = {
+        cells: [],
+        element_types: {},
+        elements: []
+    };
     
     const last_moved_elements: ItemInfo[] = [];
     const damaged_elements: number[] = [];
@@ -191,11 +191,11 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // заполняем массив cells с размерностью size_x, size_y с порядком: cells[y][x] is_active false, типа пустое поле
         // а также массив elements с размерностью size_x, size_y и значением NullElement
         for(let y = 0; y < size_y; y++) {
-            cells[y] = [];
-            elements[y] = [];
+            state.cells[y] = [];
+            state.elements[y] = [];
             for(let x = 0; x < size_x; x++) {
-                cells[y][x] = NotActiveCell;
-                elements[y][x] = NullElement;
+                state.cells[y][x] = NotActiveCell;
+                state.elements[y][x] = NullElement;
             }
         }
     }
@@ -251,7 +251,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                         for(let i = 0; i < mask.length && is_combined; i++) {
                             for(let j = 0; j < mask[0].length && is_combined; j++) {
                                 if(mask[i][j] == 1) {
-                                    const element = elements[y+i][x+j];
+                                    const element = state.elements[y+i][x+j];
                                     if(element as number == NullElement) {
                                         is_combined = false;
                                         break;
@@ -298,7 +298,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // как пример грубая проверка что классификатор элементов одинаковый
         // либо индекс внутри классификатора одинаковый, это для случая например собираем зеленые ячейки две, а третья тоже зеленая, но с горизонтальным взрывом
         // т.е. визуально и по классификатору она другая, но по индексу она одинаковая, как раз он и нужен для проверки принадлежности к одной группе
-        return e1.type == e2.type || (element_types[e1.type] && element_types[e2.type] && element_types[e1.type].index == element_types[e2.type].index);
+        return e1.type == e2.type || (state.element_types[e1.type] && state.element_types[e2.type] && state.element_types[e1.type].index == state.element_types[e2.type].index);
     }
 
     // задаем кастомный колбек для проверки могут ли участвовать в комбинации два элемента
@@ -318,15 +318,15 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // логика тут в том что мы делаем пробное перемещение элементов, а затем получаем все возможные комбинации (get_all_combinations)
         // затем смотрим присутствует ли среди них комбинация хоть с одним из элементов, который был в позиции from_x, from_y или to_x, to_y
        
-        const element_from = elements[from_y][from_x];
+        const element_from = state.elements[from_y][from_x];
         if(element_from == NullElement) return false;
 
-        const element_type_from = element_types[element_from.type];
+        const element_type_from = state.element_types[element_from.type];
         if(!element_type_from.is_movable) return false;
 
-        const element_to = elements[to_y][to_x];
+        const element_to = state.elements[to_y][to_x];
         if(element_to != NullElement) {
-            const element_type_to = element_types[element_from.type];
+            const element_type_to = state.element_types[element_from.type];
             if(!element_type_to.is_movable) return false;
         }
 
@@ -379,11 +379,11 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // тут важно учесть что т.к. сначала вызвали try_damage_element то в этот момент при большом сборе будет образовываться новый элемент на поле,
         // соответственно нам нужно удалить все элементы не просто с массива elements, но и проверив что id у них не изменился, чтобы случайно не удалить новый созданный
         for(const item of combination.elements) {
-            const element = elements[item.y][item.x];
+            const element = state.elements[item.y][item.x];
             if(element != NullElement && element.id == item.id) {
                 try_damage_element({x: item.x, y: item.y, element: element});
                 damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
-                elements[item.y][item.x] = NullElement;
+                state.elements[item.y][item.x] = NullElement;
             }
         }
     }
@@ -420,7 +420,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // если клетка из массива содержит флаг ActionLocked то увеличиваем счетчик cnt_acts
         // а когда он достигнет cnt_acts_req то вызываем событие cb_on_cell_activated
         for(const item of items) {
-            const cell = cells[item.y][item.x];
+            const cell = state.cells[item.y][item.x];
             if(cell == NotActiveCell) return;
             if(cell.type != CellType.ActionLocked) return;
             if(cell.cnt_acts) cell.cnt_acts++;
@@ -461,8 +461,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         const free_cells: ItemInfo[] = []; 
         for(let y = 0; y < size_y; y++) {
             for(let x = 0; x < size_x; x++) {
-                const cell = cells[y][x];
-                if(cell != NotActiveCell && elements[y][x] == NullElement) {
+                const cell = state.cells[y][x];
+                if(cell != NotActiveCell && state.elements[y][x] == NullElement) {
                     free_cells.push({x, y, id: cell.id});
                 }
             }
@@ -473,34 +473,34 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     
     // задает клетку
     function set_cell(x: number, y: number, cell: Cell | typeof NotActiveCell) {
-        cells[y][x] = cell;
+        state.cells[y][x] = cell;
     }
 
     function get_cell(x: number, y: number): Cell | typeof NotActiveCell {
-        return cells[y][x];
+        return state.cells[y][x];
     }
     
     function set_element_type(id: number, element_type: ElementType) {
-        element_types[id] = element_type;
+        state.element_types[id] = element_type;
     }
     
     // добавляет элемент на поле
     function set_element(x: number, y: number, element: Element | typeof NullElement) {
-        elements[y][x] = element;
+        state.elements[y][x] = element;
     }
     
     function get_element(x: number, y:number): Element | typeof NullElement {
-        return elements[y][x];
+        return state.elements[y][x];
     }
 
     function swap_elements(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const elements_from = elements[from_y][from_x]; 
-        elements[from_y][from_x] = elements[to_y][to_x];
-        elements[to_y][to_x] = elements_from;
+        const elements_from = state.elements[from_y][from_x]; 
+        state.elements[from_y][from_x] = state.elements[to_y][to_x];
+        state.elements[to_y][to_x] = elements_from;
     }
 
     // возвращает соседние елементы/клетки
-    function get_neighbors(x: number, y: number, array: (Cell | typeof NotActiveCell)[][] | (Element | typeof NullElement)[][] = elements): ItemInfo[] {
+    function get_neighbors(x: number, y: number, array: (Cell | typeof NotActiveCell)[][] | (Element | typeof NullElement)[][] = state.elements): ItemInfo[] {
         const neighbors: ItemInfo[] = [];
         
         for (let i = y - 1; i <= y + 1; i++) {
@@ -509,8 +509,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     let id = -1;
                     const item = array[i][j];
                     switch(typeof array) {
-                        case typeof elements: if(item as number != NullElement) id = (item as Element).id; break;
-                        case typeof cells: id = (item as Cell).id; break;
+                        case typeof state.elements: if(item as number != NullElement) id = (item as Element).id; break;
+                        case typeof state.cells: id = (item as Cell).id; break;
                     }
 
                     if(id == -1) neighbors.push({x: j, y: i, id: id});
@@ -526,14 +526,14 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         // удаляем элемент с массива и вызываем try_damage_element если is_damaging = true
         // и вызываем on_near_activation для соседей если свойство is_near_activation = true
 
-        const element = elements[y][x];
+        const element = state.elements[y][x];
         if(element as number == NullElement) return;
 
         if(is_near_activation) on_near_activation(get_neighbors(x, y));
         if(is_damaging) {
             try_damage_element({x, y, element: element as Element});
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == (element as Element).id), 1);
-            elements[y][x] = NullElement;
+            state.elements[y][x] = NullElement;
         }
     }
 
@@ -555,20 +555,20 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     // на основе ограничений клетки, а также на соответствущее разрешение перемещения у элемента(is_move) 
     // возвращает результат если успех, то уже применен ход (т.е. элементы перемещен и поменялся местами)
     function try_move(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const cell_from = cells[from_y][from_x];
+        const cell_from = state.cells[from_y][from_x];
         if(cell_from == NotActiveCell || !is_available_cell_type(cell_from)) return false;
         
-        const cell_to = cells[to_y][to_x];
+        const cell_to = state.cells[to_y][to_x];
         if(cell_to == NotActiveCell || !is_available_cell_type(cell_to)) return false;
 
         const is_can = is_can_move(from_x, from_y, to_x, to_y);
         if(is_can) {
             swap_elements(from_x, from_y, to_x, to_y);
             
-            const element_from = elements[from_y][from_x];
+            const element_from = state.elements[from_y][from_x];
             if(element_from as number != NullElement) last_moved_elements.push({x: from_x, y: from_y, id: (element_from as Element).id});
         
-            const element_to = elements[to_y][to_x];
+            const element_to = state.elements[to_y][to_x];
             if(element_to as number != NullElement) last_moved_elements.push({x: to_x, y: to_y, id: (element_to as Element).id});
         }
 
@@ -579,13 +579,13 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     // по идее тут проверяем на базовые правила доступности клика на основе ограничений клетки, а также на соответствущее разрешение клика у элемента(is_click) 
     // ничего больше не делаем, т.е. не удаляем и т.п.
     function try_click(x: number, y: number) {
-        const cell = cells[y][x];
+        const cell = state.cells[y][x];
         if(cell == NotActiveCell) return false;
         
-        const element = elements[y][x];
+        const element = state.elements[y][x];
         if(element == NullElement) return false;
         
-        const element_type = element_types[element.type];
+        const element_type = state.element_types[element.type];
         if(!element_type.is_clickable) return false;
 
         return true;
@@ -607,7 +607,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             }
             
             for(const element of combination.elements)
-                on_near_activation(get_neighbors(element.x, element.y, cells));
+                on_near_activation(get_neighbors(element.x, element.y, state.cells));
             is_procesed = true;
         }
         
@@ -625,14 +625,14 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
 
     function try_move_element_from_up(x: number, y:number): boolean {
         for(let j = y; j >= 0; j--) {
-            const cell = cells[j][x];
+            const cell = state.cells[j][x];
             if(cell as number != NotActiveCell) {
                 if(!is_available_cell_type(cell as Cell)) return false;
                 
-                const element = elements[j][x];
+                const element = state.elements[j][x];
                 if(element as number != NullElement) {
-                    elements[y][x] = element;
-                    elements[j][x] = NullElement;
+                    state.elements[y][x] = element;
+                    state.elements[j][x] = NullElement;
 
                     on_move_element(x, j, x, y, element as Element);
                     last_moved_elements.push({x, y, id: (element as Element).id});
@@ -647,14 +647,14 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     
     function try_move_element_from_down(x: number, y:number): boolean {
         for(let j = y; j < size_y; j++) {
-            const cell = cells[j][x];
+            const cell = state.cells[j][x];
             if(cell as number != NotActiveCell) {
                 if(!is_available_cell_type(cell as Cell)) return false;
                 
-                const element = elements[j][x];
+                const element = state.elements[j][x];
                 if(element as number != NullElement) {
-                    elements[y][x] = element;
-                    elements[j][x] = NullElement;
+                    state.elements[y][x] = element;
+                    state.elements[j][x] = NullElement;
 
                     on_move_element(x, j, x, y, element as Element);
                     last_moved_elements.push({x, y, id: (element as Element).id});
@@ -669,14 +669,14 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     
     function try_move_element_from_left(x: number, y:number): boolean {
         for(let j = x; j >= 0; j--) {
-            const cell = cells[y][j];
+            const cell = state.cells[y][j];
             if(cell as number != NotActiveCell) {
                 if(!is_available_cell_type(cell as Cell)) return false;
                 
-                const element = elements[y][j];
+                const element = state.elements[y][j];
                 if(element as number != NullElement) {
-                    elements[y][x] = element;
-                    elements[y][j] = NullElement;
+                    state.elements[y][x] = element;
+                    state.elements[y][j] = NullElement;
 
                     on_move_element(j, y, x, y, element as Element);
                     last_moved_elements.push({x, y, id: (element as Element).id});
@@ -691,14 +691,14 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
 
     function try_move_element_from_right(x: number, y:number): boolean {
         for(let j = x; j < size_x; j++) {
-            const cell = cells[y][j];
+            const cell = state.cells[y][j];
             if(cell as number != NotActiveCell) {
                 if(!is_available_cell_type(cell as Cell)) return false;
                 
-                const element = elements[y][j];
+                const element = state.elements[y][j];
                 if(element as number != NullElement) {
-                    elements[y][x] = element;
-                    elements[y][j] = NullElement;
+                    state.elements[y][x] = element;
+                    state.elements[y][j] = NullElement;
 
                     on_move_element(j, y, x, y, element as Element);
                     last_moved_elements.push({x, y, id: (element as Element).id});
@@ -719,8 +719,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             case MoveDirection.Up:
                 for(let y = size_y - 1; y >= 0; y--) {
                     for(let x = 0; x < size_x; x++) {
-                        const cell = cells[y][x];
-                        const empty = elements[y][x];
+                        const cell = state.cells[y][x];
+                        const empty = state.elements[y][x];
                         if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
                             if(!try_move_element_from_up(x, y)) request_element(x, y);
                             is_procesed = true;
@@ -731,8 +731,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             case MoveDirection.Down:
                 for(let y = 0; y < size_y; y++) {
                     for(let x = 0; x < size_x; x++) {
-                        const cell = cells[y][x];
-                        const empty = elements[y][x];
+                        const cell = state.cells[y][x];
+                        const empty = state.elements[y][x];
                         if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
                             if(!try_move_element_from_down(x, y)) request_element(x, y);
                             is_procesed = true;
@@ -743,8 +743,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             case MoveDirection.Left:
                 for(let x = size_x - 1; x >= 0; x--) {
                     for(let y = 0; y < size_y; y++) {
-                        const cell = cells[y][x];
-                        const empty = elements[y][x];
+                        const cell = state.cells[y][x];
+                        const empty = state.elements[y][x];
                         if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
                             if(!try_move_element_from_left(x, y)) request_element(x, y);
                             is_procesed = true;   
@@ -755,8 +755,8 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
             case MoveDirection.Right:
                 for(let x = 0; x < size_x; x++) {
                     for(let y = 0; y < size_y; y++) {
-                        const cell = cells[y][x];
-                        const empty = elements[y][x];
+                        const cell = state.cells[y][x];
+                        const empty = state.elements[y][x];
                         if((empty as number == NullElement) && (cell as number != NotActiveCell)) {
                             if(!try_move_element_from_right(x, y)) request_element(x, y);
                             is_procesed = true;
@@ -783,10 +783,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
 
     // сохранение состояния игры
     function save_state(): GameState {
-        return {
-            cells: cells,
-            elements: elements
-        };
+        return state;
     }
 
     // загрузить состояние игры
@@ -799,6 +796,10 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         }
     }
     
+    function revert_step(state: GameState): GameState {
+        return {} as GameState;
+    }
+
     // возвращает массив всех возможных ходов(для подсказок например)
     function get_all_available_steps(): StepInfo[] {
         // TODO
