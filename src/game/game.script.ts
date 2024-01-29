@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { Game } from './game_logic';
+import { Game } from './match3_game';
 import * as flow from 'ludobits.m.flow';
 
 interface props {

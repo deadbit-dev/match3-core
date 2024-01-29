@@ -1,9 +1,10 @@
 local ____exports = {}
-local ____match3 = require("game.match3")
-local CellType = ____match3.CellType
-local NotActiveCell = ____match3.NotActiveCell
-local NullElement = ____match3.NullElement
-local MoveDirection = ____match3.MoveDirection
+local ____match3_core = require("game.match3_core")
+local CellType = ____match3_core.CellType
+local NotActiveCell = ____match3_core.NotActiveCell
+local NullElement = ____match3_core.NullElement
+local ____math_utils = require("utils.math_utils")
+local Direction = ____math_utils.Direction
 ____exports.IS_DEBUG_MODE = true
 ____exports.ADS_CONFIG = {
     is_mediation = true,
@@ -24,25 +25,25 @@ ____exports.CellId[____exports.CellId.Base] = "Base"
 ____exports.CellId.Ice = 1
 ____exports.CellId[____exports.CellId.Ice] = "Ice"
 ____exports.ElementId = ElementId or ({})
-____exports.ElementId.Gold = 0
-____exports.ElementId[____exports.ElementId.Gold] = "Gold"
-____exports.ElementId.Dimonde = 1
+____exports.ElementId.Dimonde = 0
 ____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
+____exports.ElementId.Gold = 1
+____exports.ElementId[____exports.ElementId.Gold] = "Gold"
 ____exports.ElementId.Topaz = 2
 ____exports.ElementId[____exports.ElementId.Topaz] = "Topaz"
 ____exports.ElementId.Ruby = 3
 ____exports.ElementId[____exports.ElementId.Ruby] = "Ruby"
 ____exports.ElementId.Emerald = 4
 ____exports.ElementId[____exports.ElementId.Emerald] = "Emerald"
-____exports.ComboType = ComboType or ({})
-____exports.ComboType.Vertical = 0
-____exports.ComboType[____exports.ComboType.Vertical] = "Vertical"
-____exports.ComboType.Horizontal = 1
-____exports.ComboType[____exports.ComboType.Horizontal] = "Horizontal"
-____exports.ComboType.All = 2
-____exports.ComboType[____exports.ComboType.All] = "All"
+____exports.ElementId.Helicopter = 5
+____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
+____exports.ElementId.VerticalBuster = 6
+____exports.ElementId[____exports.ElementId.VerticalBuster] = "VerticalBuster"
+____exports.ElementId.HorizontalBuster = 7
+____exports.ElementId[____exports.ElementId.HorizontalBuster] = "HorizontalBuster"
+____exports.ElementId.AxisBuster = 8
+____exports.ElementId[____exports.ElementId.AxisBuster] = "AxisBuster"
 ____exports._GAME_CONFIG = {
-    game_animation_speed_cof = 1,
     min_swipe_distance = 32,
     swap_element_easing = go.EASING_LINEAR,
     swap_element_time = 0.25,
@@ -61,19 +62,22 @@ ____exports._GAME_CONFIG = {
     buster_delay = 0.5,
     cell_database = {[____exports.CellId.Base] = {type = CellType.Base, is_active = true, view = "cell_base"}, [____exports.CellId.Ice] = {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}},
     element_database = {
-        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = true}, view = "element_diamond"},
+        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, view = "element_diamond"},
         [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, view = "element_gold"},
         [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, view = "element_topaz"},
         [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, view = "element_ruby"},
-        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, view = "element_emerald"}
+        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, view = "element_emerald"},
+        [____exports.ElementId.Helicopter] = {type = {index = ____exports.ElementId.Helicopter, is_movable = true, is_clickable = true}, view = "helicopter"},
+        [____exports.ElementId.VerticalBuster] = {type = {index = ____exports.ElementId.VerticalBuster, is_movable = true, is_clickable = true}, view = "vertical_buster"},
+        [____exports.ElementId.HorizontalBuster] = {type = {index = ____exports.ElementId.HorizontalBuster, is_movable = true, is_clickable = true}, view = "horizontal_buster"},
+        [____exports.ElementId.AxisBuster] = {type = {index = ____exports.ElementId.AxisBuster, is_movable = true, is_clickable = true}, view = "axis_buster"}
     },
-    combo_graphics = {[____exports.ComboType.All] = "combo_all", [____exports.ComboType.Horizontal] = "combo_horizontal", [____exports.ComboType.Vertical] = "combo_vertical"},
     levels = {{field = {
         width = 8,
         height = 8,
         cell_size = 64,
         offset_border = 10,
-        move_direction = MoveDirection.Up,
+        move_direction = Direction.Up,
         cells = {
             {
                 NotActiveCell,
@@ -181,8 +185,8 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Dimonde,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz
@@ -192,7 +196,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Emerald,
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Dimonde
@@ -202,7 +206,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Emerald,
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Topaz
@@ -212,28 +216,28 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold
             },
             {
-                ____exports.ElementId.Dimonde,
+                ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Ruby
             },
             {
                 NullElement,
+                ____exports.ElementId.Ruby,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
                 NullElement
             }

@@ -6,9 +6,11 @@ function ____exports.init(self)
     self.busters = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].busters
     self.druid:new_button(
         "restart_button",
-        function()
-            Scene.restart()
-        end
+        function() return Scene.restart() end
+    )
+    self.druid:new_button(
+        "revert_step_button",
+        function() return Manager.send_game("REVERT_STEP") end
     )
     self.druid:new_button(
         "hammer_button",

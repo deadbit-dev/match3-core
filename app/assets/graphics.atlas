@@ -27,15 +27,19 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/combo_horizontal.png"
+  image: "/assets/horizontal_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/combo_vertical.png"
+  image: "/assets/vertical_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/combo_all.png"
+  image: "/assets/axis_buster.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/helicopter.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

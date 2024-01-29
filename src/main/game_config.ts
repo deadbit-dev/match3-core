@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { CellType, NotActiveCell, ElementType, NullElement, MoveDirection } from "../game/match3";
+import { CellType, NotActiveCell, ElementType, NullElement } from "../game/match3_core";
+import { VoidMessage } from "../modules/modules_const";
+import { Direction } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
 
@@ -30,36 +32,21 @@ export enum CellId {
     Ice
 }
 
-export interface CellDatabaseValue {
-    type: CellType;
-    is_active: boolean;
-    view: string;
-}
-
 export enum ElementId {
-    Gold,
     Dimonde,
+    Gold,
     Topaz,
     Ruby,
-    Emerald
-}
-
-export interface ElementDatabaseValue {
-    type: ElementType;
-    view: string;
-}
-
-export enum ComboType {
-    Vertical,
-    Horizontal,
-    All
+    Emerald,
+    Helicopter,
+    VerticalBuster,
+    HorizontalBuster,
+    AxisBuster
 }
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
-    game_animation_speed_cof: 1,
-
     min_swipe_distance: 32,
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
@@ -101,7 +88,7 @@ export const _GAME_CONFIG = {
             type: {
                 index: ElementId.Dimonde,
                 is_movable: true,
-                is_clickable: true
+                is_clickable: false
             },
             view: 'element_diamond'
         },
@@ -141,12 +128,42 @@ export const _GAME_CONFIG = {
             },
             view: 'element_emerald'
         },
-    },
 
-    combo_graphics: {
-        [ComboType.All]: 'combo_all',
-        [ComboType.Horizontal]: 'combo_horizontal',
-        [ComboType.Vertical]: 'combo_vertical'
+        [ElementId.Helicopter]: {
+            type: {
+                index: ElementId.Helicopter,
+                is_movable: true,
+                is_clickable: true
+            },
+            view: 'helicopter'
+        },
+
+        [ElementId.VerticalBuster]: {
+            type: {
+                index: ElementId.VerticalBuster,
+                is_movable: true,
+                is_clickable: true
+            },
+            view: 'vertical_buster'
+        },
+
+        [ElementId.HorizontalBuster]: {
+            type: {
+                index: ElementId.HorizontalBuster,
+                is_movable: true,
+                is_clickable: true
+            },
+            view: 'horizontal_buster'
+        },
+
+        [ElementId.AxisBuster]: {
+            type: {
+                index: ElementId.AxisBuster,
+                is_movable: true,
+                is_clickable: true
+            },
+            view: 'axis_buster'
+        }
     },
 
     levels: [
@@ -157,7 +174,7 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
-                move_direction: MoveDirection.Up,
+                move_direction: Direction.Up,
                 
                 
                 
@@ -175,12 +192,12 @@ export const _GAME_CONFIG = {
                 elements: [
                     [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, NullElement],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Ruby, NullElement, NullElement, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Ruby, NullElement, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, NullElement]
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Dimonde],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
+                    [NullElement, ElementId.Ruby, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Gold, NullElement]
                 ]
             },
 
@@ -201,5 +218,5 @@ export const _STORAGE_CONFIG = {
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
-    //
+    REVERT_STEP: VoidMessage
 };

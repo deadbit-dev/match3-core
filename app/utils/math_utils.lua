@@ -1,4 +1,15 @@
 local ____exports = {}
+____exports.Direction = Direction or ({})
+____exports.Direction.Up = 0
+____exports.Direction[____exports.Direction.Up] = "Up"
+____exports.Direction.Down = 1
+____exports.Direction[____exports.Direction.Down] = "Down"
+____exports.Direction.Left = 2
+____exports.Direction[____exports.Direction.Left] = "Left"
+____exports.Direction.Right = 3
+____exports.Direction[____exports.Direction.Right] = "Right"
+____exports.Direction.None = 4
+____exports.Direction[____exports.Direction.None] = "None"
 local function is_point_in_zone(A, B, C, D, E)
     local function side(a, b, p)
         local val = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)

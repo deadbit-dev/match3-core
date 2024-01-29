@@ -17,9 +17,8 @@ export function init(this: props): void {
     this.druid = druid.new(this);
     this.busters = GAME_CONFIG.levels[GameStorage.get('current_level')]['busters'];
     
-    this.druid.new_button('restart_button', () => {
-        Scene.restart();
-    });
+    this.druid.new_button('restart_button', () => Scene.restart());
+    this.druid.new_button('revert_step_button', () => Manager.send_game('REVERT_STEP'));
 
     this.druid.new_button('hammer_button',() => {
         if(GameStorage.get('hammer_counts') > 0) this.busters.hammer_active = !this.busters.hammer_active;

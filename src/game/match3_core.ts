@@ -1,22 +1,14 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { rotate_matrix_90 } from "../utils/math_utils";
-
-// направление движения при сложении ячеек(а также падение новых - анимации на клиенте)
-export enum MoveDirection {
-    Up,
-    Down,
-    Left,
-    Right,
-    None
-}
+import { Direction, rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
     Comb3,
     Comb4,
     Comb5,
+    Comb2x2,
     Comb3x3,
     Comb3x4,
     Comb3x5,
@@ -37,6 +29,11 @@ const CombinationMasks = [
     [
         [1, 1, 1, 1, 1]
     ],
+    // 2x2
+    [
+        [1, 1],
+        [1, 1]
+    ],
     // 3x3
     [
         [0, 1, 0],
@@ -49,13 +46,6 @@ const CombinationMasks = [
         [1, 0, 0],
         [1, 1, 1]
     ],
-    // // 3x3
-    // [
-    //     [0, 0, 1],
-    //     [0, 0, 1],
-    //     [1, 1, 1]
-    // ],
-
     // 3x4
     [
         [0, 1, 0, 0],
@@ -165,10 +155,10 @@ type FncOnMoveElement = (from_x:number, from_y: number, to_x: number, to_y: numb
 type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
-export function Field(size_x: number, size_y: number, move_direction = MoveDirection.Up) {
+export function Field(size_x: number, size_y: number, move_direction = Direction.Up) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
     
-    const state: GameState = {
+    let state: GameState = {
         cells: [],
         element_types: {},
         elements: []
@@ -411,8 +401,11 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     function try_damage_element(damaged_info: DamagedInfo) {
         if(damaged_elements.find((element) => element == damaged_info.element.id) == undefined) {
             damaged_elements.push(damaged_info.element.id);
-            if(cb_on_damaged_element != null) return cb_on_damaged_element(damaged_info);
+            if(cb_on_damaged_element != null) cb_on_damaged_element(damaged_info);
+            return true;
         }
+
+        return false;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -530,8 +523,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
         if(element as number == NullElement) return;
 
         if(is_near_activation) on_near_activation(get_neighbors(x, y));
-        if(is_damaging) {
-            try_damage_element({x, y, element: element as Element});
+        if(is_damaging && try_damage_element({x, y, element: element as Element})) {
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == (element as Element).id), 1);
             state.elements[y][x] = NullElement;
         }
@@ -716,7 +708,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
     function process_move() {
         let is_procesed = false;
         switch(move_direction) {
-            case MoveDirection.Up:
+            case Direction.Up:
                 for(let y = size_y - 1; y >= 0; y--) {
                     for(let x = 0; x < size_x; x++) {
                         const cell = state.cells[y][x];
@@ -728,7 +720,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     }
                 }
             break;
-            case MoveDirection.Down:
+            case Direction.Down:
                 for(let y = 0; y < size_y; y++) {
                     for(let x = 0; x < size_x; x++) {
                         const cell = state.cells[y][x];
@@ -740,7 +732,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     }
                 }
             break;
-            case MoveDirection.Left:
+            case Direction.Left:
                 for(let x = size_x - 1; x >= 0; x--) {
                     for(let y = 0; y < size_y; y++) {
                         const cell = state.cells[y][x];
@@ -752,7 +744,7 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
                     }
                 }
             break;
-            case MoveDirection.Right:
+            case Direction.Right:
                 for(let x = 0; x < size_x; x++) {
                     for(let y = 0; y < size_y; y++) {
                         const cell = state.cells[y][x];
@@ -783,23 +775,40 @@ export function Field(size_x: number, size_y: number, move_direction = MoveDirec
 
     // сохранение состояния игры
     function save_state(): GameState {
-        return state;
+        const st: GameState = {
+            cells: [],
+            element_types: state.element_types,
+            elements: []
+        };
+        
+        for(let y = 0; y < size_y; y++) {
+            st.cells[y] = [];
+            st.elements[y] = [];
+            
+            for(let x = 0; x < size_x; x++) {
+                st.cells[y][x] = state.cells[y][x];
+                st.elements[y][x] = state.elements[y][x];
+            }
+        }
+    
+        return st;
     }
 
     // загрузить состояние игры
-    function load_state(state: GameState) {
+    function load_state(st: GameState) {
+        state.element_types = st.element_types;
+
         for(let y = 0; y < size_y; y++) {
+            state.cells[y] = [];
+            state.elements[y] = [];
+            
             for(let x = 0; x < size_x; x++) {
-                set_cell(x, y, state.cells[y][x]);
-                set_element(x, y, state.elements[y][x]);
+                state.cells[y][x] = st.cells[y][x];
+                state.elements[y][x] = st.elements[y][x];
             }
         }
     }
     
-    function revert_step(state: GameState): GameState {
-        return {} as GameState;
-    }
-
     // возвращает массив всех возможных ходов(для подсказок например)
     function get_all_available_steps(): StepInfo[] {
         // TODO
