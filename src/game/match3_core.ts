@@ -493,7 +493,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
 
     // возвращает соседние елементы/клетки
-    function get_neighbors(x: number, y: number, array: (Cell | typeof NotActiveCell)[][] | (Element | typeof NullElement)[][] = state.elements): ItemInfo[] {
+    function get_neighbors(x: number, y: number, array: (Cell | typeof NotActiveCell)[][] | (Element | typeof NullElement)[][] = state.elements) {
         const neighbors: ItemInfo[] = [];
         
         for (let i = y - 1; i <= y + 1; i++) {
@@ -615,7 +615,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         }
     }
 
-    function try_move_element_from_up(x: number, y:number): boolean {
+    function try_move_element_from_up(x: number, y:number) {
         for(let j = y; j >= 0; j--) {
             const cell = state.cells[j][x];
             if(cell as number != NotActiveCell) {
@@ -637,7 +637,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         return false;
     }
     
-    function try_move_element_from_down(x: number, y:number): boolean {
+    function try_move_element_from_down(x: number, y:number) {
         for(let j = y; j < size_y; j++) {
             const cell = state.cells[j][x];
             if(cell as number != NotActiveCell) {
@@ -659,7 +659,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         return false;
     }
     
-    function try_move_element_from_left(x: number, y:number): boolean {
+    function try_move_element_from_left(x: number, y:number) {
         for(let j = x; j >= 0; j--) {
             const cell = state.cells[y][j];
             if(cell as number != NotActiveCell) {
@@ -681,7 +681,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         return false;
     }
 
-    function try_move_element_from_right(x: number, y:number): boolean {
+    function try_move_element_from_right(x: number, y:number) {
         for(let j = x; j < size_x; j++) {
             const cell = state.cells[y][j];
             if(cell as number != NotActiveCell) {
@@ -816,7 +816,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
 
     return {
-        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element,
+        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
         try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_all_available_steps, get_free_cells, try_damage_element,
         set_callback_on_move_element, set_callback_is_can_move, is_can_move_base,

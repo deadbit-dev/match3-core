@@ -62,15 +62,15 @@ ____exports._GAME_CONFIG = {
     buster_delay = 0.5,
     cell_database = {[____exports.CellId.Base] = {type = CellType.Base, is_active = true, view = "cell_base"}, [____exports.CellId.Ice] = {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}},
     element_database = {
-        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, view = "element_diamond"},
-        [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, view = "element_gold"},
-        [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, view = "element_topaz"},
-        [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, view = "element_ruby"},
-        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, view = "element_emerald"},
-        [____exports.ElementId.Helicopter] = {type = {index = ____exports.ElementId.Helicopter, is_movable = true, is_clickable = true}, view = "helicopter"},
-        [____exports.ElementId.VerticalBuster] = {type = {index = ____exports.ElementId.VerticalBuster, is_movable = true, is_clickable = true}, view = "vertical_buster"},
-        [____exports.ElementId.HorizontalBuster] = {type = {index = ____exports.ElementId.HorizontalBuster, is_movable = true, is_clickable = true}, view = "horizontal_buster"},
-        [____exports.ElementId.AxisBuster] = {type = {index = ____exports.ElementId.AxisBuster, is_movable = true, is_clickable = true}, view = "axis_buster"}
+        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, percentage = 19, view = "element_diamond"},
+        [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, percentage = 19, view = "element_gold"},
+        [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, percentage = 19, view = "element_topaz"},
+        [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, percentage = 19, view = "element_ruby"},
+        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, percentage = 19, view = "element_emerald"},
+        [____exports.ElementId.Helicopter] = {type = {index = ____exports.ElementId.Helicopter, is_movable = true, is_clickable = true}, percentage = 2, view = "helicopter"},
+        [____exports.ElementId.VerticalBuster] = {type = {index = ____exports.ElementId.VerticalBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "vertical_buster"},
+        [____exports.ElementId.HorizontalBuster] = {type = {index = ____exports.ElementId.HorizontalBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "horizontal_buster"},
+        [____exports.ElementId.AxisBuster] = {type = {index = ____exports.ElementId.AxisBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "axis_buster"}
     },
     levels = {{field = {
         width = 8,

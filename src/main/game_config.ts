@@ -81,7 +81,7 @@ export const _GAME_CONFIG = {
             is_active: true,
             view: 'cell_ice'
         }
-    },
+    } as {[key in CellId]: {type: CellType, is_active: boolean, view: string}},
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -90,6 +90,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
+            percentage: 19,
             view: 'element_diamond'
         },
 
@@ -99,6 +100,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
+            percentage: 19,
             view: 'element_gold'
         },
 
@@ -108,6 +110,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
+            percentage: 19,
             view: 'element_topaz'
         },
             
@@ -117,6 +120,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
+            percentage: 19,
             view: 'element_ruby'
         },
         
@@ -126,6 +130,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
+            percentage: 19,
             view: 'element_emerald'
         },
 
@@ -135,6 +140,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
+            percentage: 2,
             view: 'helicopter'
         },
 
@@ -144,6 +150,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
+            percentage: 1,
             view: 'vertical_buster'
         },
 
@@ -153,6 +160,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
+            percentage: 1,
             view: 'horizontal_buster'
         },
 
@@ -162,9 +170,10 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
+            percentage: 1,
             view: 'axis_buster'
         }
-    },
+    } as {[key in ElementId]: {type: ElementType, percentage: number, view: string}},
 
     levels: [
         {

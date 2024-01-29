@@ -35,6 +35,7 @@ import {
 } from './match3_core';
 
 import { View } from './match3_view';
+import { register } from 'ludobits.m.broadcast';
 
 
 export function Game() {
@@ -65,6 +66,7 @@ export function Game() {
         
         setup_element_types();
 
+        field.set_callback_is_can_move(is_can_move);
         field.set_callback_on_move_element(view.on_move_element_animation);
         field.set_callback_on_damaged_element(on_damaged_element);
         field.set_callback_on_combinated(on_combined);
@@ -139,13 +141,19 @@ export function Game() {
 
     //-----------------------------------------------------------------------------------------------------------------------------------
 
-    function get_move_direction(dir: vmath.vector3): Direction {
+    function get_move_direction(dir: vmath.vector3) {
         const cs45 = 0.7;
         if(dir.y > cs45) return Direction.Up;
         else if(dir.y < -cs45) return Direction.Down;
         else if(dir.x < -cs45) return Direction.Left;
         else if(dir.x > cs45) return Direction.Right;
         else return Direction.None;
+    }
+
+    function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
+        if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
+        
+        return (is_click_actiovation(from_x, from_y) || is_click_actiovation(to_x, to_y));
     }
 
     function swap_elements(from_pos_x: number, from_pos_y: number, to_pos_x: number, to_pos_y: number) {
@@ -161,15 +169,21 @@ export function Game() {
         
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
-        } else process_game_step();
+        } else if(!try_click_activation(from_pos_x, from_pos_y) && !try_click_activation(to_pos_x, to_pos_y)) process_game_step();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
 
-    function try_click_activation(x: number, y: number): boolean {
+    function is_click_actiovation(x: number, y: number) {
         const element = field.get_element(x, y);
-        if(element as number == NullElement) return false;
-        if(!GAME_CONFIG.element_database[(element as Element).type as ElementId].type.is_clickable) return false;
+        if(element == NullElement) return false;
+        if(!GAME_CONFIG.element_database[element.type as ElementId].type.is_clickable) return false;
+
+        return true;
+    }
+
+    function try_click_activation(x: number, y: number) {
+        if(!is_click_actiovation(x, y)) return false;
         
         field.remove_element(x, y, true, false);
         flow.delay(buster_delay);
@@ -178,7 +192,7 @@ export function Game() {
         return true;
     }
     
-    function try_hammer_activation(x: number, y: number): boolean {
+    function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
         field.remove_element(x, y, true, false);
@@ -261,6 +275,35 @@ export function Game() {
         }
     }
 
+    function is_valid_element_pos(x: number, y: number) {
+        if(x < 0 || x > field_width || y < 0 || y > field_height) return false;
+
+        const element = field.get_element(x, y);
+        if(element as number == NullElement) return false;
+
+        return true;
+    }
+
+    function try_activate_helicopter(damaged_info: DamagedInfo) {
+        if(is_valid_element_pos(damaged_info.x - 1, damaged_info.y)) field.remove_element(damaged_info.x - 1, damaged_info.y, true, true);
+        if(is_valid_element_pos(damaged_info.x, damaged_info.y - 1)) field.remove_element(damaged_info.x, damaged_info.y - 1, true, true);
+        if(is_valid_element_pos(damaged_info.x + 1, damaged_info.y)) field.remove_element(damaged_info.x + 1, damaged_info.y, true, true);
+        if(is_valid_element_pos(damaged_info.x, damaged_info.y + 1)) field.remove_element(damaged_info.x, damaged_info.y + 1, true, true);
+
+        const available_elements = [];
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                const element = field.get_element(x, y);
+                if(element as number != NullElement) {
+                    available_elements.push({x, y});
+                }
+            }
+        }
+
+        const target = available_elements[math.random(0, available_elements.length - 1)];
+        view.helicopter_animation(damaged_info.element, target.x, target.y, () => field.remove_element(target.x, target.y, true, true));
+    }
+
     function try_activate_buster_element(damaged_info: DamagedInfo) {
         switch(damaged_info.element.type) {
             case ElementId.AxisBuster:
@@ -282,12 +325,7 @@ export function Game() {
                 }
             break;
             case ElementId.Helicopter:
-                if(damaged_info.x - 1 > 0) field.remove_element(damaged_info.x - 1, damaged_info.y, true, true);
-                if(damaged_info.y - 1 > 0) field.remove_element(damaged_info.x, damaged_info.y - 1, true, true);
-                if(damaged_info.x + 1 < field_width) field.remove_element(damaged_info.x + 1, damaged_info.y, true, true);
-                if(damaged_info.y + 1 < field_height) field.remove_element(damaged_info.x, damaged_info.y + 1, true, true);
-
-                field.remove_element(math.random(0, field_width - 1), math.random(0, field_height - 1), true, true);
+                try_activate_helicopter(damaged_info);
             break;
             default: return false;
         }
@@ -312,12 +350,23 @@ export function Game() {
     //-----------------------------------------------------------------------------------------------------------------------------------
 
     function get_random_element_id(): ElementId | typeof NullElement {
-        let index = math.random(Object.keys(GAME_CONFIG.element_database).length - 1);
-        for(const [key, value] of Object.entries(GAME_CONFIG.element_database)) {
-            if(index-- == 0) return tonumber(key) as ElementId;
+        let bins: number[] = [];
+        for(const [_, value] of Object.entries(GAME_CONFIG.element_database)) {
+            const normalized_value = value.percentage / 100;
+            if(bins.length == 0) bins.push(normalized_value);
+            else bins.push(normalized_value + bins[bins.length - 1]);
         }
 
-        return -1;
+        const rand = math.random();
+    
+        for(let [index, value] of bins.entries()) {
+            if(value >= rand) {
+                for(const [key, _] of Object.entries(GAME_CONFIG.element_database))
+                    if(index-- == 0) return tonumber(key) as ElementId;
+            }
+        }
+
+        return NullElement;
     }
 
     function on_request_element(x: number, y: number): Element | typeof NullElement {

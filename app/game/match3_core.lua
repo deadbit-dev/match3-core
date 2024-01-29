@@ -820,6 +820,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         set_element = set_element,
         get_element = get_element,
         remove_element = remove_element,
+        swap_elements = swap_elements,
         try_move = try_move,
         try_click = try_click,
         process_state = process_state,

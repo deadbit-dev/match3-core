@@ -270,6 +270,25 @@ function ____exports.View()
         end
         return previous_state
     end
+    local function helicopter_animation(helicopter, target_x, target_y, on_complite)
+        local target_world_pos = get_cell_world_pos(target_x, target_y)
+        local helicopter_item = gm.get_item_by_index(helicopter.id)
+        if helicopter_item == nil then
+            return
+        end
+        flow.go_animate(
+            helicopter_item._hash,
+            "position",
+            go.PLAYBACK_ONCE_FORWARD,
+            target_world_pos,
+            go.EASING_INCUBIC,
+            1,
+            0.1
+        )
+        if on_complite ~= nil then
+            on_complite()
+        end
+    end
     return {
         init = init,
         set_cell_view = set_cell_view,
@@ -281,6 +300,7 @@ function ____exports.View()
         request_element_animation = request_element_animation,
         damaged_element_animation = damaged_element_animation,
         revert_step_animation = revert_step_animation,
+        helicopter_animation = helicopter_animation,
         on_move_element_animation = on_move_element_animation,
         get_item_by_index = get_item_by_index,
         delete_item = delete_item,

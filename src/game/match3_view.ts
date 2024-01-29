@@ -196,10 +196,19 @@ export function View() {
         return previous_state;
     }
 
+    function helicopter_animation(helicopter: Element, target_x: number, target_y: number, on_complite?: () => void) {
+        const target_world_pos = get_cell_world_pos(target_x, target_y);
+        const helicopter_item = gm.get_item_by_index(helicopter.id);
+        if(helicopter_item == undefined) return;
+        
+        flow.go_animate(helicopter_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, 1, 0.1);
+        if(on_complite != undefined) on_complite();
+    }
+
     return {
         init, set_cell_view, set_element_view, get_cell_world_pos, get_element_pos,
         swap_element_animation, squash_combo_animation, request_element_animation,
-        damaged_element_animation, revert_step_animation,
+        damaged_element_animation, revert_step_animation, helicopter_animation,
         on_move_element_animation, get_item_by_index, delete_item, do_message
     };
 }
