@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
+import { ElementId } from "../main/game_config";
 import { Direction, rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
@@ -9,9 +10,10 @@ export enum CombinationType {
     Comb4,
     Comb5,
     Comb2x2,
-    Comb3x3,
+    Comb3x3a,
+    Comb3x3b,
     Comb3x4,
-    Comb3x5,
+    Comb3x5
 }
 
 // маски комбинации, для проверки надо также вращать(90,180,270)
@@ -34,13 +36,13 @@ const CombinationMasks = [
         [1, 1],
         [1, 1]
     ],
-    // 3x3
+    // 3x3a
     [
         [0, 1, 0],
         [0, 1, 0],
         [1, 1, 1]
     ],
-    // 3x3
+    // 3x3b
     [
         [1, 0, 0],
         [1, 0, 0],
@@ -464,6 +466,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         return free_cells;
     }
     
+    function get_all_elements_by_type(element_type: number) {
+        const target_elements: ItemInfo[] = []; 
+        for(let y = 0; y < size_y; y++) {
+            for(let x = 0; x < size_x; x++) {
+                const element = state.elements[y][x];
+                if(element != NullElement && element.type == element_type) {
+                    target_elements.push({x, y, id: element.id});
+                }
+            }
+        }
+
+        return target_elements;
+    }
+    
     // задает клетку
     function set_cell(x: number, y: number, cell: Cell | typeof NotActiveCell) {
         state.cells[y][x] = cell;
@@ -539,6 +555,15 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
                 if(cell.cnt_acts != cell.cnt_acts_req) return false;
             break;
         }
+
+        return true;
+    }
+    
+    function is_valid_element_pos(x: number, y: number) {
+        if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;
+
+        const element = get_element(x, y);
+        if(element as number == NullElement) return false;
 
         return true;
     }
@@ -817,8 +842,8 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
 
     return {
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
-        try_move, try_click, process_state, save_state, load_state,
-        get_all_combinations, get_all_available_steps, get_free_cells, try_damage_element,
+        is_valid_element_pos, try_move, try_click, process_state, save_state, load_state,
+        get_all_combinations, get_all_available_steps, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,

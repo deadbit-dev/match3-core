@@ -35,14 +35,18 @@ ____exports.ElementId.Ruby = 3
 ____exports.ElementId[____exports.ElementId.Ruby] = "Ruby"
 ____exports.ElementId.Emerald = 4
 ____exports.ElementId[____exports.ElementId.Emerald] = "Emerald"
-____exports.ElementId.Helicopter = 5
-____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
-____exports.ElementId.VerticalBuster = 6
+____exports.ElementId.VerticalBuster = 5
 ____exports.ElementId[____exports.ElementId.VerticalBuster] = "VerticalBuster"
-____exports.ElementId.HorizontalBuster = 7
+____exports.ElementId.HorizontalBuster = 6
 ____exports.ElementId[____exports.ElementId.HorizontalBuster] = "HorizontalBuster"
-____exports.ElementId.AxisBuster = 8
+____exports.ElementId.AxisBuster = 7
 ____exports.ElementId[____exports.ElementId.AxisBuster] = "AxisBuster"
+____exports.ElementId.Helicopter = 8
+____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
+____exports.ElementId.Dynamite = 9
+____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
+____exports.ElementId.Diskosphere = 10
+____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 ____exports._GAME_CONFIG = {
     min_swipe_distance = 32,
     swap_element_easing = go.EASING_LINEAR,
@@ -62,15 +66,17 @@ ____exports._GAME_CONFIG = {
     buster_delay = 0.5,
     cell_database = {[____exports.CellId.Base] = {type = CellType.Base, is_active = true, view = "cell_base"}, [____exports.CellId.Ice] = {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}},
     element_database = {
-        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, percentage = 19, view = "element_diamond"},
-        [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, percentage = 19, view = "element_gold"},
-        [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, percentage = 19, view = "element_topaz"},
-        [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, percentage = 19, view = "element_ruby"},
-        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, percentage = 19, view = "element_emerald"},
-        [____exports.ElementId.Helicopter] = {type = {index = ____exports.ElementId.Helicopter, is_movable = true, is_clickable = true}, percentage = 2, view = "helicopter"},
-        [____exports.ElementId.VerticalBuster] = {type = {index = ____exports.ElementId.VerticalBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "vertical_buster"},
-        [____exports.ElementId.HorizontalBuster] = {type = {index = ____exports.ElementId.HorizontalBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "horizontal_buster"},
-        [____exports.ElementId.AxisBuster] = {type = {index = ____exports.ElementId.AxisBuster, is_movable = true, is_clickable = true}, percentage = 1, view = "axis_buster"}
+        [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, percentage = 10, view = "element_diamond"},
+        [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, percentage = 10, view = "element_gold"},
+        [____exports.ElementId.Topaz] = {type = {index = ____exports.ElementId.Topaz, is_movable = true, is_clickable = false}, percentage = 10, view = "element_topaz"},
+        [____exports.ElementId.Ruby] = {type = {index = ____exports.ElementId.Ruby, is_movable = true, is_clickable = false}, percentage = 10, view = "element_ruby"},
+        [____exports.ElementId.Emerald] = {type = {index = ____exports.ElementId.Emerald, is_movable = true, is_clickable = false}, percentage = 10, view = "element_emerald"},
+        [____exports.ElementId.VerticalBuster] = {type = {index = ____exports.ElementId.VerticalBuster, is_movable = true, is_clickable = true}, percentage = 0, view = "vertical_buster"},
+        [____exports.ElementId.HorizontalBuster] = {type = {index = ____exports.ElementId.HorizontalBuster, is_movable = true, is_clickable = true}, percentage = 0, view = "horizontal_buster"},
+        [____exports.ElementId.AxisBuster] = {type = {index = ____exports.ElementId.AxisBuster, is_movable = true, is_clickable = true}, percentage = 0, view = "axis_buster"},
+        [____exports.ElementId.Helicopter] = {type = {index = ____exports.ElementId.Helicopter, is_movable = true, is_clickable = true}, percentage = 0, view = "helicopter_buster"},
+        [____exports.ElementId.Dynamite] = {type = {index = ____exports.ElementId.Dynamite, is_movable = true, is_clickable = true}, percentage = 0, view = "dynamite_buster"},
+        [____exports.ElementId.Diskosphere] = {type = {index = ____exports.ElementId.Diskosphere, is_movable = true, is_clickable = true}, percentage = 0, view = "diskosphere_buster"}
     },
     levels = {{field = {
         width = 8,
@@ -173,8 +179,8 @@ ____exports._GAME_CONFIG = {
             },
             {
                 ____exports.ElementId.Dimonde,
-                ____exports.ElementId.Topaz,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.VerticalBuster,
+                ____exports.ElementId.VerticalBuster,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
@@ -196,7 +202,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Topaz,
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Dimonde
@@ -206,7 +212,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Gold,
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Topaz
@@ -216,7 +222,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold
@@ -233,10 +239,10 @@ ____exports._GAME_CONFIG = {
             },
             {
                 NullElement,
-                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Helicopter,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Gold,
+                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 NullElement

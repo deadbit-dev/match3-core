@@ -31,11 +31,11 @@ import {
     CombinationInfo,
     ProcessMode,
     ItemInfo,
-    GameState
+    GameState,
+    ElementType
 } from './match3_core';
 
 import { View } from './match3_view';
-import { register } from 'ludobits.m.broadcast';
 
 
 export function Game() {
@@ -169,7 +169,12 @@ export function Game() {
         
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
-        } else if(!try_click_activation(from_pos_x, from_pos_y) && !try_click_activation(to_pos_x, to_pos_y)) process_game_step();
+        } else {
+            const is_from = try_click_activation(from_pos_x, from_pos_y, false);
+            const is_to = try_click_activation(to_pos_x, to_pos_y, false);
+            if(is_from || is_to) flow.delay(buster_delay);
+            process_game_step();
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -182,12 +187,15 @@ export function Game() {
         return true;
     }
 
-    function try_click_activation(x: number, y: number) {
+    function try_click_activation(x: number, y: number, with_process = true) {
         if(!is_click_actiovation(x, y)) return false;
         
         field.remove_element(x, y, true, false);
-        flow.delay(buster_delay);
-        process_game_step();
+        
+        if(with_process) {
+            flow.delay(buster_delay);
+            process_game_step();
+        }
 
         return true;
     }
@@ -260,13 +268,19 @@ export function Game() {
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
         switch(combination.type) {
-            case CombinationType.Comb4: case CombinationType.Comb5:
+            case CombinationType.Comb4:
                 make_buster(combined_element, combination, (combination.angle == 0) ? ElementId.HorizontalBuster : ElementId.VerticalBuster);
+            break;
+            case CombinationType.Comb5:
+                make_buster(combined_element, combination, ElementId.Diskosphere);
             break;
             case CombinationType.Comb2x2:
                 make_buster(combined_element, combination, ElementId.Helicopter);
             break;
-            case CombinationType.Comb3x3: case CombinationType.Comb3x4: case CombinationType.Comb3x5:   
+            case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
+                make_buster(combined_element, combination, ElementId.Dynamite);
+            break;
+            case CombinationType.Comb3x4: case CombinationType.Comb3x5:   
                 make_buster(combined_element, combination, ElementId.AxisBuster);
             break;
             default:
@@ -274,21 +288,30 @@ export function Game() {
             break;
         }
     }
+    
 
-    function is_valid_element_pos(x: number, y: number) {
-        if(x < 0 || x > field_width || y < 0 || y > field_height) return false;
+    function try_activate_vertical_buster(damaged_info: DamagedInfo) {
+        for(let y = 0; y < field_height; y++) {
+            field.remove_element(damaged_info.x, y, true, true);
+        }
+    }
 
-        const element = field.get_element(x, y);
-        if(element as number == NullElement) return false;
+    function try_activate_horizontal_buster(damaged_info: DamagedInfo) {
+        for(let x = 0; x < field_width; x++) {
+            field.remove_element(x, damaged_info.y, true, true);
+        }
+    }
 
-        return true;
+    function try_activate_axis_buster(damaged_info: DamagedInfo) {
+        try_activate_vertical_buster(damaged_info);
+        try_activate_horizontal_buster(damaged_info);
     }
 
     function try_activate_helicopter(damaged_info: DamagedInfo) {
-        if(is_valid_element_pos(damaged_info.x - 1, damaged_info.y)) field.remove_element(damaged_info.x - 1, damaged_info.y, true, true);
-        if(is_valid_element_pos(damaged_info.x, damaged_info.y - 1)) field.remove_element(damaged_info.x, damaged_info.y - 1, true, true);
-        if(is_valid_element_pos(damaged_info.x + 1, damaged_info.y)) field.remove_element(damaged_info.x + 1, damaged_info.y, true, true);
-        if(is_valid_element_pos(damaged_info.x, damaged_info.y + 1)) field.remove_element(damaged_info.x, damaged_info.y + 1, true, true);
+        if(field.is_valid_element_pos(damaged_info.x - 1, damaged_info.y)) field.remove_element(damaged_info.x - 1, damaged_info.y, true, true);
+        if(field.is_valid_element_pos(damaged_info.x, damaged_info.y - 1)) field.remove_element(damaged_info.x, damaged_info.y - 1, true, true);
+        if(field.is_valid_element_pos(damaged_info.x + 1, damaged_info.y)) field.remove_element(damaged_info.x + 1, damaged_info.y, true, true);
+        if(field.is_valid_element_pos(damaged_info.x, damaged_info.y + 1)) field.remove_element(damaged_info.x, damaged_info.y + 1, true, true);
 
         const available_elements = [];
         for (let y = 0; y < field_height; y++) {
@@ -304,29 +327,32 @@ export function Game() {
         view.helicopter_animation(damaged_info.element, target.x, target.y, () => field.remove_element(target.x, target.y, true, true));
     }
 
+    function try_activate_dynamite(damaged_info: DamagedInfo) {
+        for(let y = damaged_info.y - 2; y <= damaged_info.y + 2; y++) {
+            for(let x = damaged_info.x - 2; x <= damaged_info.x + 2; x++) {
+                if(field.is_valid_element_pos(x, y)) field.remove_element(x, y, true, true);
+            }
+        }
+    }
+
+    function try_activate_diskosphere(damaged_info: DamagedInfo) {
+        const random_element_id = get_random_element_id();
+        if(random_element_id == NullElement) return;
+
+        const element_data = GAME_CONFIG.element_database[random_element_id];
+        const elements = field.get_all_elements_by_type(element_data.type.index);
+
+        for(const element of elements) field.remove_element(element.x, element.y, true, true);
+    }
+
     function try_activate_buster_element(damaged_info: DamagedInfo) {
         switch(damaged_info.element.type) {
-            case ElementId.AxisBuster:
-                for(let y = 0; y < field_height; y++) {
-                    field.remove_element(damaged_info.x, y, true, true);
-                }
-                for(let x = 0; x < field_width; x++) {
-                    field.remove_element(x, damaged_info.y, true, true);
-                }
-            break;
-            case ElementId.VerticalBuster:
-                for(let y = 0; y < field_height; y++) {
-                    field.remove_element(damaged_info.x, y, true, true);
-                }
-            break;
-            case ElementId.HorizontalBuster:
-                for(let x = 0; x < field_width; x++) {
-                    field.remove_element(x, damaged_info.y, true, true);
-                }
-            break;
-            case ElementId.Helicopter:
-                try_activate_helicopter(damaged_info);
-            break;
+            case ElementId.AxisBuster: try_activate_axis_buster(damaged_info); break;
+            case ElementId.VerticalBuster: try_activate_vertical_buster(damaged_info); break;
+            case ElementId.HorizontalBuster: try_activate_horizontal_buster(damaged_info); break;
+            case ElementId.Helicopter: try_activate_helicopter(damaged_info); break;
+            case ElementId.Dynamite: try_activate_dynamite(damaged_info); break;
+            case ElementId.Diskosphere: try_activate_diskosphere(damaged_info); break;
             default: return false;
         }
 
@@ -336,7 +362,6 @@ export function Game() {
     function on_damaged_element(damaged_info: DamagedInfo) {
         try_activate_buster_element(damaged_info);
         view.damaged_element_animation(damaged_info.element.id);
-        
     }
 
     function on_cell_activated(item_info: ItemInfo) {
@@ -350,9 +375,13 @@ export function Game() {
     //-----------------------------------------------------------------------------------------------------------------------------------
 
     function get_random_element_id(): ElementId | typeof NullElement {
+        let sum = 0;
+        for(const [_, value] of Object.entries(GAME_CONFIG.element_database))
+            sum += value.percentage;
+
         let bins: number[] = [];
         for(const [_, value] of Object.entries(GAME_CONFIG.element_database)) {
-            const normalized_value = value.percentage / 100;
+            const normalized_value = value.percentage / sum;
             if(bins.length == 0) bins.push(normalized_value);
             else bins.push(normalized_value + bins[bins.length - 1]);
         }

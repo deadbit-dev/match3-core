@@ -19,7 +19,7 @@ local ProcessMode = ____match3_core.ProcessMode
 local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.Game()
-    local setup_element_types, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_actiovation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, is_valid_element_pos, try_activate_helicopter, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, field_width, field_height, busters, field, view, previous_states, selected_element
+    local setup_element_types, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_actiovation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, try_activate_vertical_buster, try_activate_horizontal_buster, try_activate_axis_buster, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, field_width, field_height, busters, field, view, previous_states, selected_element
     function setup_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -105,7 +105,12 @@ function ____exports.Game()
         view.swap_element_animation(element_from, element_to, element_from_world_pos, element_to_world_pos)
         if not field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y) then
             view.swap_element_animation(element_from, element_to, element_to_world_pos, element_from_world_pos)
-        elseif not try_click_activation(from_pos_x, from_pos_y) and not try_click_activation(to_pos_x, to_pos_y) then
+        else
+            local is_from = try_click_activation(from_pos_x, from_pos_y, false)
+            local is_to = try_click_activation(to_pos_x, to_pos_y, false)
+            if is_from or is_to then
+                flow.delay(buster_delay)
+            end
             process_game_step()
         end
     end
@@ -119,13 +124,18 @@ function ____exports.Game()
         end
         return true
     end
-    function try_click_activation(x, y)
+    function try_click_activation(x, y, with_process)
+        if with_process == nil then
+            with_process = true
+        end
         if not is_click_actiovation(x, y) then
             return false
         end
         field.remove_element(x, y, true, false)
-        flow.delay(buster_delay)
-        process_game_step()
+        if with_process then
+            flow.delay(buster_delay)
+            process_game_step()
+        end
         return true
     end
     function try_hammer_activation(x, y)
@@ -160,24 +170,24 @@ function ____exports.Game()
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch39 = move_direction
-            local ____cond39 = ____switch39 == Direction.Up
-            if ____cond39 then
+            local ____switch41 = move_direction
+            local ____cond41 = ____switch41 == Direction.Up
+            if ____cond41 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Down
-            if ____cond39 then
+            ____cond41 = ____cond41 or ____switch41 == Direction.Down
+            if ____cond41 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Left
-            if ____cond39 then
+            ____cond41 = ____cond41 or ____switch41 == Direction.Left
+            if ____cond41 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Right
-            if ____cond39 then
+            ____cond41 = ____cond41 or ____switch41 == Direction.Right
+            if ____cond41 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -209,19 +219,29 @@ function ____exports.Game()
     end
     function on_combined(combined_element, combination)
         repeat
-            local ____switch47 = combination.type
-            local ____cond47 = ____switch47 == CombinationType.Comb4 or ____switch47 == CombinationType.Comb5
-            if ____cond47 then
+            local ____switch49 = combination.type
+            local ____cond49 = ____switch49 == CombinationType.Comb4
+            if ____cond49 then
                 make_buster(combined_element, combination, combination.angle == 0 and ElementId.HorizontalBuster or ElementId.VerticalBuster)
                 break
             end
-            ____cond47 = ____cond47 or ____switch47 == CombinationType.Comb2x2
-            if ____cond47 then
+            ____cond49 = ____cond49 or ____switch49 == CombinationType.Comb5
+            if ____cond49 then
+                make_buster(combined_element, combination, ElementId.Diskosphere)
+                break
+            end
+            ____cond49 = ____cond49 or ____switch49 == CombinationType.Comb2x2
+            if ____cond49 then
                 make_buster(combined_element, combination, ElementId.Helicopter)
                 break
             end
-            ____cond47 = ____cond47 or (____switch47 == CombinationType.Comb3x3 or ____switch47 == CombinationType.Comb3x4 or ____switch47 == CombinationType.Comb3x5)
-            if ____cond47 then
+            ____cond49 = ____cond49 or (____switch49 == CombinationType.Comb3x3a or ____switch49 == CombinationType.Comb3x3b)
+            if ____cond49 then
+                make_buster(combined_element, combination, ElementId.Dynamite)
+                break
+            end
+            ____cond49 = ____cond49 or (____switch49 == CombinationType.Comb3x4 or ____switch49 == CombinationType.Comb3x5)
+            if ____cond49 then
                 make_buster(combined_element, combination, ElementId.AxisBuster)
                 break
             end
@@ -231,27 +251,39 @@ function ____exports.Game()
             end
         until true
     end
-    function is_valid_element_pos(x, y)
-        if x < 0 or x > field_width or y < 0 or y > field_height then
-            return false
+    function try_activate_vertical_buster(damaged_info)
+        do
+            local y = 0
+            while y < field_height do
+                field.remove_element(damaged_info.x, y, true, true)
+                y = y + 1
+            end
         end
-        local element = field.get_element(x, y)
-        if element == NullElement then
-            return false
+    end
+    function try_activate_horizontal_buster(damaged_info)
+        do
+            local x = 0
+            while x < field_width do
+                field.remove_element(x, damaged_info.y, true, true)
+                x = x + 1
+            end
         end
-        return true
+    end
+    function try_activate_axis_buster(damaged_info)
+        try_activate_vertical_buster(damaged_info)
+        try_activate_horizontal_buster(damaged_info)
     end
     function try_activate_helicopter(damaged_info)
-        if is_valid_element_pos(damaged_info.x - 1, damaged_info.y) then
+        if field.is_valid_element_pos(damaged_info.x - 1, damaged_info.y) then
             field.remove_element(damaged_info.x - 1, damaged_info.y, true, true)
         end
-        if is_valid_element_pos(damaged_info.x, damaged_info.y - 1) then
+        if field.is_valid_element_pos(damaged_info.x, damaged_info.y - 1) then
             field.remove_element(damaged_info.x, damaged_info.y - 1, true, true)
         end
-        if is_valid_element_pos(damaged_info.x + 1, damaged_info.y) then
+        if field.is_valid_element_pos(damaged_info.x + 1, damaged_info.y) then
             field.remove_element(damaged_info.x + 1, damaged_info.y, true, true)
         end
-        if is_valid_element_pos(damaged_info.x, damaged_info.y + 1) then
+        if field.is_valid_element_pos(damaged_info.x, damaged_info.y + 1) then
             field.remove_element(damaged_info.x, damaged_info.y + 1, true, true)
         end
         local available_elements = {}
@@ -279,52 +311,65 @@ function ____exports.Game()
             function() return field.remove_element(target.x, target.y, true, true) end
         )
     end
+    function try_activate_dynamite(damaged_info)
+        do
+            local y = damaged_info.y - 2
+            while y <= damaged_info.y + 2 do
+                do
+                    local x = damaged_info.x - 2
+                    while x <= damaged_info.x + 2 do
+                        if field.is_valid_element_pos(x, y) then
+                            field.remove_element(x, y, true, true)
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+    end
+    function try_activate_diskosphere(damaged_info)
+        local random_element_id = get_random_element_id()
+        if random_element_id == NullElement then
+            return
+        end
+        local element_data = GAME_CONFIG.element_database[random_element_id]
+        local elements = field.get_all_elements_by_type(element_data.type.index)
+        for ____, element in ipairs(elements) do
+            field.remove_element(element.x, element.y, true, true)
+        end
+    end
     function try_activate_buster_element(damaged_info)
         repeat
-            local ____switch61 = damaged_info.element.type
-            local ____cond61 = ____switch61 == ElementId.AxisBuster
-            if ____cond61 then
-                do
-                    local y = 0
-                    while y < field_height do
-                        field.remove_element(damaged_info.x, y, true, true)
-                        y = y + 1
-                    end
-                end
-                do
-                    local x = 0
-                    while x < field_width do
-                        field.remove_element(x, damaged_info.y, true, true)
-                        x = x + 1
-                    end
-                end
+            local ____switch73 = damaged_info.element.type
+            local ____cond73 = ____switch73 == ElementId.AxisBuster
+            if ____cond73 then
+                try_activate_axis_buster(damaged_info)
                 break
             end
-            ____cond61 = ____cond61 or ____switch61 == ElementId.VerticalBuster
-            if ____cond61 then
-                do
-                    local y = 0
-                    while y < field_height do
-                        field.remove_element(damaged_info.x, y, true, true)
-                        y = y + 1
-                    end
-                end
+            ____cond73 = ____cond73 or ____switch73 == ElementId.VerticalBuster
+            if ____cond73 then
+                try_activate_vertical_buster(damaged_info)
                 break
             end
-            ____cond61 = ____cond61 or ____switch61 == ElementId.HorizontalBuster
-            if ____cond61 then
-                do
-                    local x = 0
-                    while x < field_width do
-                        field.remove_element(x, damaged_info.y, true, true)
-                        x = x + 1
-                    end
-                end
+            ____cond73 = ____cond73 or ____switch73 == ElementId.HorizontalBuster
+            if ____cond73 then
+                try_activate_horizontal_buster(damaged_info)
                 break
             end
-            ____cond61 = ____cond61 or ____switch61 == ElementId.Helicopter
-            if ____cond61 then
+            ____cond73 = ____cond73 or ____switch73 == ElementId.Helicopter
+            if ____cond73 then
                 try_activate_helicopter(damaged_info)
+                break
+            end
+            ____cond73 = ____cond73 or ____switch73 == ElementId.Dynamite
+            if ____cond73 then
+                try_activate_dynamite(damaged_info)
+                break
+            end
+            ____cond73 = ____cond73 or ____switch73 == ElementId.Diskosphere
+            if ____cond73 then
+                try_activate_diskosphere(damaged_info)
                 break
             end
             do
@@ -346,11 +391,17 @@ function ____exports.Game()
         make_cell(item_info.x, item_info.y, CellId.Base)
     end
     function get_random_element_id()
+        local sum = 0
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
+            local _ = ____value[1]
+            local value = ____value[2]
+            sum = sum + value.percentage
+        end
         local bins = {}
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local _ = ____value[1]
             local value = ____value[2]
-            local normalized_value = value.percentage / 100
+            local normalized_value = value.percentage / sum
             if #bins == 0 then
                 bins[#bins + 1] = normalized_value
             else
@@ -405,24 +456,24 @@ function ____exports.Game()
             local message_id, _message, sender = flow.until_any_message()
             view.do_message(message_id, _message, sender)
             repeat
-                local ____switch87 = message_id
-                local ____cond87 = ____switch87 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond87 then
+                local ____switch97 = message_id
+                local ____cond97 = ____switch97 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond97 then
                     on_down(_message.item)
                     break
                 end
-                ____cond87 = ____cond87 or ____switch87 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond87 then
+                ____cond97 = ____cond97 or ____switch97 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond97 then
                     on_up(_message.item)
                     break
                 end
-                ____cond87 = ____cond87 or ____switch87 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond87 then
+                ____cond97 = ____cond97 or ____switch97 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond97 then
                     on_move(_message)
                     break
                 end
-                ____cond87 = ____cond87 or ____switch87 == to_hash("REVERT_STEP")
-                if ____cond87 then
+                ____cond97 = ____cond97 or ____switch97 == to_hash("REVERT_STEP")
+                if ____cond97 then
                     revert_step()
                     break
                 end

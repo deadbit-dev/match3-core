@@ -212,4 +212,3 @@ export function View() {
         on_move_element_animation, get_item_by_index, delete_item, do_message
     };
 }
-

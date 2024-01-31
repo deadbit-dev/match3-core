@@ -38,10 +38,12 @@ export enum ElementId {
     Topaz,
     Ruby,
     Emerald,
-    Helicopter,
     VerticalBuster,
     HorizontalBuster,
-    AxisBuster
+    AxisBuster,
+    Helicopter,
+    Dynamite,
+    Diskosphere
 }
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
@@ -90,7 +92,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
-            percentage: 19,
+            percentage: 10,
             view: 'element_diamond'
         },
 
@@ -100,7 +102,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
-            percentage: 19,
+            percentage: 10,
             view: 'element_gold'
         },
 
@@ -110,7 +112,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
-            percentage: 19,
+            percentage: 10,
             view: 'element_topaz'
         },
             
@@ -120,7 +122,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
-            percentage: 19,
+            percentage: 10,
             view: 'element_ruby'
         },
         
@@ -130,18 +132,8 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: false
             },
-            percentage: 19,
+            percentage: 10,
             view: 'element_emerald'
-        },
-
-        [ElementId.Helicopter]: {
-            type: {
-                index: ElementId.Helicopter,
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 2,
-            view: 'helicopter'
         },
 
         [ElementId.VerticalBuster]: {
@@ -150,7 +142,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
-            percentage: 1,
+            percentage: 0,
             view: 'vertical_buster'
         },
 
@@ -160,7 +152,7 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
-            percentage: 1,
+            percentage: 0,
             view: 'horizontal_buster'
         },
 
@@ -170,8 +162,38 @@ export const _GAME_CONFIG = {
                 is_movable: true,
                 is_clickable: true
             },
-            percentage: 1,
+            percentage: 0,
             view: 'axis_buster'
+        },
+        
+        [ElementId.Helicopter]: {
+            type: {
+                index: ElementId.Helicopter,
+                is_movable: true,
+                is_clickable: true
+            },
+            percentage: 0,
+            view: 'helicopter_buster'
+        },
+
+        [ElementId.Dynamite]: {
+            type: {
+                index: ElementId.Dynamite,
+                is_movable: true,
+                is_clickable: true
+            },
+            percentage: 0,
+            view: 'dynamite_buster'
+        },
+
+        [ElementId.Diskosphere]: {
+            type: {
+                index: ElementId.Diskosphere,
+                is_movable: true,
+                is_clickable: true
+            },
+            percentage: 0,
+            view: 'diskosphere_buster'
         }
     } as {[key in ElementId]: {type: ElementType, percentage: number, view: string}},
 
@@ -200,13 +222,13 @@ export const _GAME_CONFIG = {
 
                 elements: [
                     [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, NullElement],
-                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, NullElement, ElementId.Dimonde],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Ruby, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Gold, NullElement]
+                    [NullElement, ElementId.Helicopter, ElementId.Emerald, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement]
                 ]
             },
 

@@ -16,11 +16,13 @@ ____exports.CombinationType.Comb5 = 2
 ____exports.CombinationType[____exports.CombinationType.Comb5] = "Comb5"
 ____exports.CombinationType.Comb2x2 = 3
 ____exports.CombinationType[____exports.CombinationType.Comb2x2] = "Comb2x2"
-____exports.CombinationType.Comb3x3 = 4
-____exports.CombinationType[____exports.CombinationType.Comb3x3] = "Comb3x3"
-____exports.CombinationType.Comb3x4 = 5
+____exports.CombinationType.Comb3x3a = 4
+____exports.CombinationType[____exports.CombinationType.Comb3x3a] = "Comb3x3a"
+____exports.CombinationType.Comb3x3b = 5
+____exports.CombinationType[____exports.CombinationType.Comb3x3b] = "Comb3x3b"
+____exports.CombinationType.Comb3x4 = 6
 ____exports.CombinationType[____exports.CombinationType.Comb3x4] = "Comb3x4"
-____exports.CombinationType.Comb3x5 = 6
+____exports.CombinationType.Comb3x5 = 7
 ____exports.CombinationType[____exports.CombinationType.Comb3x5] = "Comb3x5"
 local CombinationMasks = {
     {{1, 1, 1}},
@@ -377,6 +379,26 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
         return free_cells
     end
+    local function get_all_elements_by_type(element_type)
+        local target_elements = {}
+        do
+            local y = 0
+            while y < size_y do
+                do
+                    local x = 0
+                    while x < size_x do
+                        local element = state.elements[y + 1][x + 1]
+                        if element ~= ____exports.NullElement and element.type == element_type then
+                            target_elements[#target_elements + 1] = {x = x, y = y, id = element.id}
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        return target_elements
+    end
     local function set_cell(x, y, cell)
         state.cells[y + 1][x + 1] = cell
     end
@@ -407,16 +429,16 @@ function ____exports.Field(size_x, size_y, move_direction)
                             local id = -1
                             local item = array[i + 1][j + 1]
                             repeat
-                                local ____switch92 = __TS__TypeOf(array)
-                                local ____cond92 = ____switch92 == __TS__TypeOf(state.elements)
-                                if ____cond92 then
+                                local ____switch96 = __TS__TypeOf(array)
+                                local ____cond96 = ____switch96 == __TS__TypeOf(state.elements)
+                                if ____cond96 then
                                     if item ~= ____exports.NullElement then
                                         id = item.id
                                     end
                                     break
                                 end
-                                ____cond92 = ____cond92 or ____switch92 == __TS__TypeOf(state.cells)
-                                if ____cond92 then
+                                ____cond96 = ____cond96 or ____switch96 == __TS__TypeOf(state.cells)
+                                if ____cond96 then
                                     id = item.id
                                     break
                                 end
@@ -455,19 +477,29 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function is_available_cell_type(cell)
         repeat
-            local ____switch101 = cell.type
-            local ____cond101 = ____switch101 == ____exports.CellType.NotMoved or ____switch101 == ____exports.CellType.Locked or ____switch101 == ____exports.CellType.Wall
-            if ____cond101 then
+            local ____switch105 = cell.type
+            local ____cond105 = ____switch105 == ____exports.CellType.NotMoved or ____switch105 == ____exports.CellType.Locked or ____switch105 == ____exports.CellType.Wall
+            if ____cond105 then
                 return false
             end
-            ____cond101 = ____cond101 or ____switch101 == ____exports.CellType.ActionLocked
-            if ____cond101 then
+            ____cond105 = ____cond105 or ____switch105 == ____exports.CellType.ActionLocked
+            if ____cond105 then
                 if cell.cnt_acts ~= cell.cnt_acts_req then
                     return false
                 end
                 break
             end
         until true
+        return true
+    end
+    local function is_valid_element_pos(x, y)
+        if x < 0 or x >= size_x or y < 0 or y >= size_y then
+            return false
+        end
+        local element = get_element(x, y)
+        if element == ____exports.NullElement then
+            return false
+        end
         return true
     end
     local function try_move(from_x, from_y, to_x, to_y)
@@ -657,9 +689,9 @@ function ____exports.Field(size_x, size_y, move_direction)
     local function process_move()
         local is_procesed = false
         repeat
-            local ____switch147 = move_direction
-            local ____cond147 = ____switch147 == Direction.Up
-            if ____cond147 then
+            local ____switch154 = move_direction
+            local ____cond154 = ____switch154 == Direction.Up
+            if ____cond154 then
                 do
                     local y = size_y - 1
                     while y >= 0 do
@@ -682,8 +714,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond147 = ____cond147 or ____switch147 == Direction.Down
-            if ____cond147 then
+            ____cond154 = ____cond154 or ____switch154 == Direction.Down
+            if ____cond154 then
                 do
                     local y = 0
                     while y < size_y do
@@ -706,8 +738,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond147 = ____cond147 or ____switch147 == Direction.Left
-            if ____cond147 then
+            ____cond154 = ____cond154 or ____switch154 == Direction.Left
+            if ____cond154 then
                 do
                     local x = size_x - 1
                     while x >= 0 do
@@ -730,8 +762,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond147 = ____cond147 or ____switch147 == Direction.Right
-            if ____cond147 then
+            ____cond154 = ____cond154 or ____switch154 == Direction.Right
+            if ____cond154 then
                 do
                     local x = 0
                     while x < size_x do
@@ -759,13 +791,13 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function process_state(mode)
         repeat
-            local ____switch165 = mode
-            local ____cond165 = ____switch165 == ____exports.ProcessMode.Combinate
-            if ____cond165 then
+            local ____switch172 = mode
+            local ____cond172 = ____switch172 == ____exports.ProcessMode.Combinate
+            if ____cond172 then
                 return process_combinate()
             end
-            ____cond165 = ____cond165 or ____switch165 == ____exports.ProcessMode.MoveElements
-            if ____cond165 then
+            ____cond172 = ____cond172 or ____switch172 == ____exports.ProcessMode.MoveElements
+            if ____cond172 then
                 return process_move()
             end
         until true
@@ -821,6 +853,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         get_element = get_element,
         remove_element = remove_element,
         swap_elements = swap_elements,
+        is_valid_element_pos = is_valid_element_pos,
         try_move = try_move,
         try_click = try_click,
         process_state = process_state,
@@ -829,6 +862,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         get_all_combinations = get_all_combinations,
         get_all_available_steps = get_all_available_steps,
         get_free_cells = get_free_cells,
+        get_all_elements_by_type = get_all_elements_by_type,
         try_damage_element = try_damage_element,
         set_callback_on_move_element = set_callback_on_move_element,
         set_callback_is_can_move = set_callback_is_can_move,

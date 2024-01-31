@@ -39,7 +39,15 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/helicopter.png"
+  image: "/assets/helicopter_buster.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/dynamite_buster.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/diskosphere_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0
