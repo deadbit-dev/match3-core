@@ -63,8 +63,8 @@ export const _GAME_CONFIG = {
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.5,
 
-    combined_element_easing: go.EASING_INCUBIC,
-    combined_element_time: 0.3,
+    squash_element_easing: go.EASING_INCUBIC,
+    squash_element_time: 0.3,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -221,14 +221,14 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, NullElement],
-                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
+                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.HorizontalBuster, ElementId.HorizontalBuster, ElementId.Emerald, NullElement],
+                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Diskosphere, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, NullElement, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Dynamite, ElementId.Dynamite, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Helicopter, ElementId.Emerald, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement]
+                    [NullElement, ElementId.Helicopter, ElementId.Helicopter, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement]
                 ]
             },
 

@@ -37,6 +37,14 @@ import {
 
 import { View } from './match3_view';
 
+interface ActivationData {
+    x: number;
+    y: number;
+    other_x?: number;
+    other_y?: number;
+}
+
+type FncOnInteract = (item: ItemInfo, other_item: ItemInfo) => void;
 
 export function Game() {
     const min_swipe_distance = GAME_CONFIG.min_swipe_distance;
@@ -59,6 +67,7 @@ export function Game() {
 
     let previous_states: GameState[] = [];
     let selected_element: IGameItem | null = null;
+    let activated_elements: number[] = [];
     
     function init() {
         field.init();
@@ -170,9 +179,7 @@ export function Game() {
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
         } else {
-            const is_from = try_click_activation(from_pos_x, from_pos_y, false);
-            const is_to = try_click_activation(to_pos_x, to_pos_y, false);
-            if(is_from || is_to) flow.delay(buster_delay);
+            try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
             process_game_step();
         }
     }
@@ -187,15 +194,11 @@ export function Game() {
         return true;
     }
 
-    function try_click_activation(x: number, y: number, with_process = true) {
+    function try_click_activation(x: number, y: number) {
         if(!is_click_actiovation(x, y)) return false;
-        
-        field.remove_element(x, y, true, false);
-        
-        if(with_process) {
-            flow.delay(buster_delay);
-            process_game_step();
-        }
+        if(!try_activate_buster_element({x, y})) return false;
+
+        process_game_step();
 
         return true;
     }
@@ -263,7 +266,7 @@ export function Game() {
             make_element(combined_element.x, combined_element.y, buster, true);
         };
 
-        view.squash_combo_animation(combined_element, combination, on_complite);
+        view.squash_animation(combined_element, combination.elements, on_complite);
     }
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
@@ -288,31 +291,77 @@ export function Game() {
             break;
         }
     }
+
+    function try_iteract_with_other_buster(data: ActivationData, types_for_check: number[], on_interact: FncOnInteract) {
+        const element = field.get_element(data.x, data.y);
+        if(element == NullElement) return false;
+
+        if(data.other_x == undefined || data.other_y == undefined) return false;
+        
+        const other_element = field.get_element(data.other_x, data.other_y);
+        if(other_element == NullElement) return false;
+
+        if(!types_for_check.includes(other_element.type)) return false;
+        
+        on_interact({x: data.x, y: data.y, id: element.id}, {x: data.other_x, y: data.other_y, id: other_element.id});
+        return true;
+    }
     
+    function try_activate_vertical_buster(data: ActivationData) {
+        if(try_iteract_with_other_buster(data, [ElementId.HorizontalBuster, ElementId.VerticalBuster], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                field.remove_element(other_item.x, other_item.y, true, true);
+                try_activate_axis_buster({x: item.x, y: item.y});
+            });
+        })) return;
 
-    function try_activate_vertical_buster(damaged_info: DamagedInfo) {
+        field.remove_element(data.x, data.y, true, true);
+        
         for(let y = 0; y < field_height; y++) {
-            field.remove_element(damaged_info.x, y, true, true);
+            if(y != data.y) {
+                if(!try_activate_buster_element({x: data.x, y}))
+                    field.remove_element(data.x, y, true, true);
+            }
         }
     }
 
-    function try_activate_horizontal_buster(damaged_info: DamagedInfo) {
+    function try_activate_horizontal_buster(data: ActivationData) {
+        if(try_iteract_with_other_buster(data, [ElementId.HorizontalBuster, ElementId.VerticalBuster], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                field.remove_element(other_item.x, other_item.y, true, true);
+                try_activate_axis_buster({x: item.x, y: item.y});
+            });
+        })) return;
+
+        field.remove_element(data.x, data.y, true, true);
+        
         for(let x = 0; x < field_width; x++) {
-            field.remove_element(x, damaged_info.y, true, true);
+            if(x != data.x) {
+                if(!try_activate_buster_element({x, y: data.y}))
+                    field.remove_element(x, data.y, true, true);
+            }
         }
     }
 
-    function try_activate_axis_buster(damaged_info: DamagedInfo) {
-        try_activate_vertical_buster(damaged_info);
-        try_activate_horizontal_buster(damaged_info);
+    function try_activate_axis_buster(data: ActivationData) {
+        field.remove_element(data.x, data.y, true, true);
+
+        for(let y = 0; y < field_height; y++) {
+            if(y != data.y) {
+                if(!try_activate_buster_element({x: data.x, y}))
+                    field.remove_element(data.x, y, true, true);
+            }
+        }
+        
+        for(let x = 0; x < field_width; x++) {
+            if(x != data.x) {
+                if(!try_activate_buster_element({x, y: data.y}))
+                    field.remove_element(x, data.y, true, true);
+            }
+        }
     }
 
-    function try_activate_helicopter(damaged_info: DamagedInfo) {
-        if(field.is_valid_element_pos(damaged_info.x - 1, damaged_info.y)) field.remove_element(damaged_info.x - 1, damaged_info.y, true, true);
-        if(field.is_valid_element_pos(damaged_info.x, damaged_info.y - 1)) field.remove_element(damaged_info.x, damaged_info.y - 1, true, true);
-        if(field.is_valid_element_pos(damaged_info.x + 1, damaged_info.y)) field.remove_element(damaged_info.x + 1, damaged_info.y, true, true);
-        if(field.is_valid_element_pos(damaged_info.x, damaged_info.y + 1)) field.remove_element(damaged_info.x, damaged_info.y + 1, true, true);
-
+    function attack(x: number, y: number, element: Element) {
         const available_elements = [];
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -323,45 +372,152 @@ export function Game() {
             }
         }
 
-        const target = available_elements[math.random(0, available_elements.length - 1)];
-        view.helicopter_animation(damaged_info.element, target.x, target.y, () => field.remove_element(target.x, target.y, true, true));
-    }
-
-    function try_activate_dynamite(damaged_info: DamagedInfo) {
-        for(let y = damaged_info.y - 2; y <= damaged_info.y + 2; y++) {
-            for(let x = damaged_info.x - 2; x <= damaged_info.x + 2; x++) {
-                if(field.is_valid_element_pos(x, y)) field.remove_element(x, y, true, true);
-            }
+        if(available_elements.length == 0) {
+            field.remove_element(x, y, true, true);
+            return;
         }
+
+        const target = available_elements[math.random(0, available_elements.length - 1)];
+        view.attack_animation(element, target.x, target.y, () => {
+            if(!try_activate_buster_element({x: target.x, y: target.y}))
+                field.remove_element(target.x, target.y, true, true);
+            field.remove_element(x, y, true, true);
+        });
     }
 
-    function try_activate_diskosphere(damaged_info: DamagedInfo) {
-        const random_element_id = get_random_element_id();
-        if(random_element_id == NullElement) return;
+    function try_activate_helicopter(data: ActivationData) {
+        let helicopter = field.get_element(data.x, data.y);
+        if(helicopter == NullElement) return false;
+        
+        if(activated_elements.findIndex((element_id) => element_id == (helicopter as Element).id) != -1) return false;
+        activated_elements.push(helicopter.id);
 
-        const element_data = GAME_CONFIG.element_database[random_element_id];
-        const elements = field.get_all_elements_by_type(element_data.type.index);
+        const was_iteraction = try_iteract_with_other_buster(data, [ElementId.Helicopter], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                field.remove_element(other_item.x, other_item.y, true, true);
+            });
+        });
 
-        for(const element of elements) field.remove_element(element.x, element.y, true, true);
-    }
-
-    function try_activate_buster_element(damaged_info: DamagedInfo) {
-        switch(damaged_info.element.type) {
-            case ElementId.AxisBuster: try_activate_axis_buster(damaged_info); break;
-            case ElementId.VerticalBuster: try_activate_vertical_buster(damaged_info); break;
-            case ElementId.HorizontalBuster: try_activate_horizontal_buster(damaged_info); break;
-            case ElementId.Helicopter: try_activate_helicopter(damaged_info); break;
-            case ElementId.Dynamite: try_activate_dynamite(damaged_info); break;
-            case ElementId.Diskosphere: try_activate_diskosphere(damaged_info); break;
-            default: return false;
+        if(field.is_valid_element_pos(data.x - 1, data.y) && !try_activate_buster_element({x: data.x - 1, y: data.y}))
+            field.remove_element(data.x - 1, data.y, true, true);
+        if(field.is_valid_element_pos(data.x, data.y - 1) && !try_activate_buster_element({x: data.x, y: data.y - 1}))
+            field.remove_element(data.x, data.y - 1, true, true);
+        if(field.is_valid_element_pos(data.x + 1, data.y) && !try_activate_buster_element({x: data.x + 1, y: data.y}))
+            field.remove_element(data.x + 1, data.y, true, true);
+        if(field.is_valid_element_pos(data.x, data.y + 1) && !try_activate_buster_element({x: data.x, y: data.y + 1}))
+            field.remove_element(data.x, data.y + 1, true, true);
+    
+        attack(data.x, data.y, helicopter);
+        
+        for(let i = 0; i < 2 && was_iteraction; i++) {
+            helicopter = make_element(data.x, data.y, ElementId.Helicopter, true);
+            if(helicopter != NullElement) {
+                activated_elements.push(helicopter.id);
+                attack(data.x, data.y, helicopter);
+            }
         }
 
         return true;
     }
 
+    function try_activate_dynamite(data: ActivationData) {
+        let range = 2;
+       
+        try_iteract_with_other_buster(data, [ElementId.Dynamite], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                field.remove_element(other_item.x, other_item.y, true, true);
+                range = 3;
+            });
+        });
+
+        field.remove_element(data.x, data.y, true, true);
+
+        for(let y = data.y - range; y <= data.y + range; y++) {
+            for(let x = data.x - range; x <= data.x + range; x++) {
+                if(field.is_valid_element_pos(x, y)) {
+                    if(!try_activate_buster_element({x, y}))
+                        field.remove_element(x, y, true, true);
+                }
+            }
+        }
+    }
+
+    function try_activate_diskosphere(data: ActivationData) {
+        if(try_iteract_with_other_buster(data, [ElementId.Dynamite, ElementId.HorizontalBuster, ElementId.VerticalBuster], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                const other_element = field.get_element(other_item.x, other_item.y);
+                if(other_element == NullElement) return;
+                
+                const element_id = get_random_element_id();
+                if(element_id == NullElement) return;
+
+                const element_data = GAME_CONFIG.element_database[element_id];
+                const elements = field.get_all_elements_by_type(element_data.type.index);
+
+                for(const element of elements) {
+                    field.remove_element(element.x, element.y, true, true);
+                    make_element(element.x, element.y, other_element.type, true);
+                }
+
+                field.remove_element(item.x, item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, true);
+
+                for(const element of elements) try_activate_buster_element({x: element.x, y: element.y});
+            });
+        })) return;
+
+        if(data.other_x != undefined && data.other_y != undefined) {
+            const element = field.get_element(data.x, data.y);
+            if(element == NullElement) return;
+
+            const other_element = field.get_element(data.other_x, data.other_y);
+            if(other_element == NullElement) return;
+
+            view.squash_animation({x: data.x, y: data.y, id: element.id}, [{x: data.other_x, y: data.other_y, id: other_element.id}], () => {
+                const element_id = other_element.type as ElementId;
+                const element_data = GAME_CONFIG.element_database[element_id];
+                const elements = field.get_all_elements_by_type(element_data.type.index);
+
+                field.remove_element(data.x, data.y, true, true);
+                for(const element of elements) field.remove_element(element.x, element.y, true, true);
+            });
+            
+            return;
+        }
+        
+        const element_id = get_random_element_id();
+        if(element_id == NullElement) return;
+
+        const element_data = GAME_CONFIG.element_database[element_id];
+        const elements = field.get_all_elements_by_type(element_data.type.index);
+
+        field.remove_element(data.x, data.y, true, true);
+        for(const element of elements) field.remove_element(element.x, element.y, true, true);
+    }
+
+    function try_activate_buster_element(data: ActivationData) {
+        const element = field.get_element(data.x, data.y);
+        if(element == NullElement) return false;
+        
+        switch(element.type) {
+            case ElementId.AxisBuster: try_activate_axis_buster(data); break;
+            case ElementId.VerticalBuster: try_activate_vertical_buster(data); break;
+            case ElementId.HorizontalBuster: try_activate_horizontal_buster(data); break;
+            case ElementId.Helicopter: try_activate_helicopter(data); break;
+            case ElementId.Dynamite: try_activate_dynamite(data); break;
+            case ElementId.Diskosphere: try_activate_diskosphere(data); break;
+            default: return false;
+        }
+
+        flow.delay(buster_delay);
+
+        return true;
+    }
+
     function on_damaged_element(damaged_info: DamagedInfo) {
-        try_activate_buster_element(damaged_info);
-        view.damaged_element_animation(damaged_info.element.id);
+        view.damaged_element_animation(damaged_info.element.id, () => {
+            activated_elements.splice(activated_elements.findIndex((element_id) => element_id == damaged_info.element.id), 1);
+        });
     }
 
     function on_cell_activated(item_info: ItemInfo) {

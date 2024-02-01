@@ -23,8 +23,8 @@ function ____exports.View()
     local swap_element_time = GAME_CONFIG.swap_element_time
     local move_elements_easing = GAME_CONFIG.move_elements_easing
     local move_elements_time = GAME_CONFIG.move_elements_time
-    local combined_element_easing = GAME_CONFIG.combined_element_easing
-    local combined_element_time = GAME_CONFIG.combined_element_time
+    local squash_element_easing = GAME_CONFIG.squash_element_easing
+    local squash_element_time = GAME_CONFIG.squash_element_time
     local spawn_element_easing = GAME_CONFIG.spawn_element_easing
     local spawn_element_time = GAME_CONFIG.spawn_element_time
     local damaged_element_easing = GAME_CONFIG.damaged_element_easing
@@ -58,7 +58,7 @@ function ____exports.View()
     local function get_item_by_index(index)
         return gm.get_item_by_index(index)
     end
-    local function damaged_element_animation(element_id)
+    local function damaged_element_animation(element_id, on_complite)
         local item = get_item_by_index(element_id)
         if item ~= nil then
             go.animate(
@@ -71,6 +71,9 @@ function ____exports.View()
                 damaged_element_delay,
                 function()
                     delete_item(item, true)
+                    if on_complite ~= nil then
+                        on_complite()
+                    end
                 end
             )
         end
@@ -128,6 +131,61 @@ function ____exports.View()
         end
         return gm.add_game_item({_hash = _go, is_clickable = true})
     end
+    local function squash_animation(target_element, elements, on_complite)
+        local target_element_world_pos = get_cell_world_pos(target_element.x, target_element.y)
+        do
+            local i = 0
+            while i < #elements do
+                local element = elements[i + 1]
+                local item = gm.get_item_by_index(element.id)
+                if item ~= nil then
+                    local is_last = i == #elements - 1
+                    if not is_last then
+                        go.animate(
+                            item._hash,
+                            "position",
+                            go.PLAYBACK_ONCE_FORWARD,
+                            target_element_world_pos,
+                            squash_element_easing,
+                            squash_element_time,
+                            0
+                        )
+                    else
+                        flow.go_animate(
+                            item._hash,
+                            "position",
+                            go.PLAYBACK_ONCE_FORWARD,
+                            target_element_world_pos,
+                            squash_element_easing,
+                            squash_element_time,
+                            0
+                        )
+                        on_complite()
+                    end
+                end
+                i = i + 1
+            end
+        end
+    end
+    local function attack_animation(element, target_x, target_y, on_complite)
+        local target_world_pos = get_cell_world_pos(target_x, target_y)
+        local item = gm.get_item_by_index(element.id)
+        if item == nil then
+            return
+        end
+        flow.go_animate(
+            item._hash,
+            "position",
+            go.PLAYBACK_ONCE_FORWARD,
+            target_world_pos,
+            go.EASING_INCUBIC,
+            1,
+            0.1
+        )
+        if on_complite ~= nil then
+            on_complite()
+        end
+    end
     local function swap_element_animation(element_from, element_to, from_world_pos, to_world_pos)
         local item_from = get_item_by_index(element_from.id)
         if item_from == nil then
@@ -169,30 +227,6 @@ function ____exports.View()
             move_elements_time
         )
     end
-    local function squash_combo_animation(combined_element, combination, on_complite)
-        local combined_element_world_pos = get_cell_world_pos(combined_element.x, combined_element.y)
-        do
-            local i = 0
-            while i < #combination.elements do
-                local element = combination.elements[i + 1]
-                local item = gm.get_item_by_index(element.id)
-                if item ~= nil then
-                    local is_last = i == #combination.elements - 1
-                    go.animate(
-                        item._hash,
-                        "position",
-                        go.PLAYBACK_ONCE_FORWARD,
-                        combined_element_world_pos,
-                        combined_element_easing,
-                        combined_element_time,
-                        0,
-                        is_last and on_complite or nil
-                    )
-                end
-                i = i + 1
-            end
-        end
-    end
     local function request_element_animation(element, x, y, z)
         local item_from = gm.get_item_by_index(element.id)
         if item_from == nil then
@@ -200,24 +234,24 @@ function ____exports.View()
         end
         local world_pos = get_cell_world_pos(x, y, z)
         repeat
-            local ____switch26 = move_direction
-            local ____cond26 = ____switch26 == Direction.Up
-            if ____cond26 then
+            local ____switch32 = move_direction
+            local ____cond32 = ____switch32 == Direction.Up
+            if ____cond32 then
                 gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size)
                 break
             end
-            ____cond26 = ____cond26 or ____switch26 == Direction.Down
-            if ____cond26 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Down
+            if ____cond32 then
                 gm.set_position_xy(item_from, world_pos.x, world_pos.y - field_height * cell_size)
                 break
             end
-            ____cond26 = ____cond26 or ____switch26 == Direction.Left
-            if ____cond26 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Left
+            if ____cond32 then
                 gm.set_position_xy(item_from, world_pos.x - field_width * cell_size, world_pos.y)
                 break
             end
-            ____cond26 = ____cond26 or ____switch26 == Direction.Right
-            if ____cond26 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Right
+            if ____cond32 then
                 gm.set_position_xy(item_from, world_pos.x + field_width * cell_size, world_pos.y)
                 break
             end
@@ -270,37 +304,18 @@ function ____exports.View()
         end
         return previous_state
     end
-    local function helicopter_animation(helicopter, target_x, target_y, on_complite)
-        local target_world_pos = get_cell_world_pos(target_x, target_y)
-        local helicopter_item = gm.get_item_by_index(helicopter.id)
-        if helicopter_item == nil then
-            return
-        end
-        flow.go_animate(
-            helicopter_item._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            target_world_pos,
-            go.EASING_INCUBIC,
-            1,
-            0.1
-        )
-        if on_complite ~= nil then
-            on_complite()
-        end
-    end
     return {
         init = init,
         set_cell_view = set_cell_view,
         set_element_view = set_element_view,
         get_cell_world_pos = get_cell_world_pos,
         get_element_pos = get_element_pos,
+        squash_animation = squash_animation,
+        attack_animation = attack_animation,
         swap_element_animation = swap_element_animation,
-        squash_combo_animation = squash_combo_animation,
         request_element_animation = request_element_animation,
         damaged_element_animation = damaged_element_animation,
         revert_step_animation = revert_step_animation,
-        helicopter_animation = helicopter_animation,
         on_move_element_animation = on_move_element_animation,
         get_item_by_index = get_item_by_index,
         delete_item = delete_item,
