@@ -3,7 +3,7 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_ice.png"
+  image: "/assets/cell_grass.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -48,6 +48,10 @@ images {
 }
 images {
   image: "/assets/diskosphere_buster.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cell_box.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

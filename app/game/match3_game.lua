@@ -19,6 +19,7 @@ local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
+local CellType = ____match3_core.CellType
 local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.Game()
@@ -41,7 +42,8 @@ function ____exports.Game()
         local cell = {
             id = view.set_cell_view(x, y, cell_id),
             type = data.type,
-            is_active = data.is_active
+            cnt_acts = data.cnt_acts,
+            cnt_near_acts = data.cnt_near_acts
         }
         field.set_cell(x, y, cell)
         return cell
@@ -599,12 +601,38 @@ function ____exports.Game()
         )
     end
     function on_cell_activated(item_info)
+        local cell = field.get_cell(item_info.x, item_info.y)
+        if cell == NotActiveCell then
+            return
+        end
         local item = view.get_item_by_index(item_info.id)
         if item == nil then
             return
         end
         view.delete_item(item, true)
-        make_cell(item_info.x, item_info.y, CellId.Base)
+        repeat
+            local ____switch129 = cell.type
+            local ____cond129 = ____switch129 == CellType.ActionLocked
+            if ____cond129 then
+                if cell.cnt_acts == nil then
+                    break
+                end
+                if cell.cnt_acts > 0 then
+                    make_cell(item_info.x, item_info.y, CellId.Base)
+                end
+                break
+            end
+            ____cond129 = ____cond129 or ____switch129 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond129 then
+                if cell.cnt_near_acts == nil then
+                    break
+                end
+                if cell.cnt_near_acts > 0 then
+                    make_cell(item_info.x, item_info.y, CellId.Base)
+                end
+                break
+            end
+        until true
     end
     function get_random_element_id()
         local sum = 0
@@ -672,24 +700,24 @@ function ____exports.Game()
             local message_id, _message, sender = flow.until_any_message()
             view.do_message(message_id, _message, sender)
             repeat
-                local ____switch148 = message_id
-                local ____cond148 = ____switch148 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond148 then
+                local ____switch154 = message_id
+                local ____cond154 = ____switch154 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond154 then
                     on_down(_message.item)
                     break
                 end
-                ____cond148 = ____cond148 or ____switch148 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond148 then
+                ____cond154 = ____cond154 or ____switch154 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond154 then
                     on_up(_message.item)
                     break
                 end
-                ____cond148 = ____cond148 or ____switch148 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond148 then
+                ____cond154 = ____cond154 or ____switch154 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond154 then
                     on_move(_message)
                     break
                 end
-                ____cond148 = ____cond148 or ____switch148 == to_hash("REVERT_STEP")
-                if ____cond148 then
+                ____cond154 = ____cond154 or ____switch154 == to_hash("REVERT_STEP")
+                if ____cond154 then
                     revert_step()
                     break
                 end

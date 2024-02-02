@@ -22,8 +22,10 @@ ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.CellId = CellId or ({})
 ____exports.CellId.Base = 0
 ____exports.CellId[____exports.CellId.Base] = "Base"
-____exports.CellId.Ice = 1
-____exports.CellId[____exports.CellId.Ice] = "Ice"
+____exports.CellId.Grass = 1
+____exports.CellId[____exports.CellId.Grass] = "Grass"
+____exports.CellId.Box = 2
+____exports.CellId[____exports.CellId.Box] = "Box"
 ____exports.ElementId = ElementId or ({})
 ____exports.ElementId.Dimonde = 0
 ____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
@@ -64,7 +66,15 @@ ____exports._GAME_CONFIG = {
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,
-    cell_database = {[____exports.CellId.Base] = {type = CellType.Base, is_active = true, view = "cell_base"}, [____exports.CellId.Ice] = {type = CellType.ActionLocked, is_active = true, view = "cell_ice"}},
+    cell_database = {
+        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_base"},
+        [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
+        [____exports.CellId.Box] = {
+            type = bit.bor(CellType.ActionLockedNear, CellType.Wall),
+            cnt_near_acts = 0,
+            view = "cell_box"
+        }
+    },
     element_database = {
         [____exports.ElementId.Dimonde] = {type = {index = ____exports.ElementId.Dimonde, is_movable = true, is_clickable = false}, percentage = 10, view = "element_diamond"},
         [____exports.ElementId.Gold] = {type = {index = ____exports.ElementId.Gold, is_movable = true, is_clickable = false}, percentage = 10, view = "element_gold"},
@@ -96,47 +106,17 @@ ____exports._GAME_CONFIG = {
                 NotActiveCell
             },
             {
-                ____exports.CellId.Ice,
+                ____exports.CellId.Grass,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
                 ____exports.CellId.Base
             },
             {
-                ____exports.CellId.Ice,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base
-            },
-            {
-                ____exports.CellId.Base,
-                NotActiveCell,
-                NotActiveCell,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                NotActiveCell,
-                NotActiveCell,
-                ____exports.CellId.Base
-            },
-            {
-                ____exports.CellId.Base,
-                NotActiveCell,
-                NotActiveCell,
-                ____exports.CellId.Base,
-                ____exports.CellId.Base,
-                NotActiveCell,
-                NotActiveCell,
-                ____exports.CellId.Base
-            },
-            {
-                ____exports.CellId.Ice,
+                ____exports.CellId.Grass,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
@@ -146,7 +126,37 @@ ____exports._GAME_CONFIG = {
                 ____exports.CellId.Base
             },
             {
-                ____exports.CellId.Ice,
+                ____exports.CellId.Base,
+                ____exports.CellId.Box,
+                ____exports.CellId.Box,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Box,
+                ____exports.CellId.Box,
+                ____exports.CellId.Base
+            },
+            {
+                ____exports.CellId.Base,
+                ____exports.CellId.Box,
+                ____exports.CellId.Box,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Box,
+                ____exports.CellId.Box,
+                ____exports.CellId.Base
+            },
+            {
+                ____exports.CellId.Grass,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base,
+                ____exports.CellId.Base
+            },
+            {
+                ____exports.CellId.Grass,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
@@ -157,12 +167,12 @@ ____exports._GAME_CONFIG = {
             },
             {
                 NotActiveCell,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
-                ____exports.CellId.Ice,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
+                ____exports.CellId.Grass,
                 NotActiveCell
             }
         },

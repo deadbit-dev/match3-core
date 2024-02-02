@@ -4,6 +4,7 @@
 import { CellType, NotActiveCell, ElementType, NullElement } from "../game/match3_core";
 import { VoidMessage } from "../modules/modules_const";
 import { Direction } from "../utils/math_utils";
+// import { band } from "../utils/utils";
 
 export const IS_DEBUG_MODE = true;
 
@@ -29,7 +30,8 @@ export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
 export enum CellId {
     Base,
-    Ice
+    Grass,
+    Box
 }
 
 export enum ElementId {
@@ -74,16 +76,21 @@ export const _GAME_CONFIG = {
     cell_database: {
         [CellId.Base]: {
             type: CellType.Base,
-            is_active: true,
             view: 'cell_base'
         },
 
-        [CellId.Ice]: {
+        [CellId.Grass]: {
             type: CellType.ActionLocked,
-            is_active: true,
-            view: 'cell_ice'
+            cnt_acts: 0,
+            view: 'cell_grass'
+        },
+
+        [CellId.Box]: {
+            type: bit.bor(CellType.ActionLockedNear, CellType.Wall),
+            cnt_near_acts: 0,
+            view: 'cell_box'
         }
-    } as {[key in CellId]: {type: CellType, is_active: boolean, view: string}},
+    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -211,13 +218,13 @@ export const _GAME_CONFIG = {
                 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Ice, CellId.Base, CellId.Base, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Base],
-                    [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, NotActiveCell, CellId.Base],
-                    [CellId.Base, NotActiveCell, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, NotActiveCell, CellId.Base],
-                    [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Ice, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, CellId.Ice, NotActiveCell]
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
                 ],
 
                 elements: [

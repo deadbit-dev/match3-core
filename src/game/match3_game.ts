@@ -32,7 +32,8 @@ import {
     ProcessMode,
     ItemInfo,
     GameState,
-    ElementType
+    ElementType,
+    CellType
 } from './match3_core';
 
 import { View } from './match3_view';
@@ -108,7 +109,8 @@ export function Game() {
         const cell = {
             id: view.set_cell_view(x, y, cell_id),
             type: data.type,
-            is_active: data.is_active
+            cnt_acts: data.cnt_acts,
+            cnt_near_acts: data.cnt_near_acts,
         };
 
         field.set_cell(x, y, cell);
@@ -366,7 +368,7 @@ export function Game() {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const element = field.get_element(x, y);
-                if(element as number != NullElement) {
+                if(element != NullElement) {
                     available_elements.push({x, y});
                 }
             }
@@ -521,11 +523,24 @@ export function Game() {
     }
 
     function on_cell_activated(item_info: ItemInfo) {
+        const cell = field.get_cell(item_info.x, item_info.y);
+        if(cell == NotActiveCell) return;
+
         const item = view.get_item_by_index(item_info.id); 
         if(item == undefined) return;
 
-        view.delete_item(item, true);
-        make_cell(item_info.x, item_info.y, CellId.Base);
+        view.delete_item(item, true);         
+        
+        switch(cell.type) {
+            case CellType.ActionLocked:
+                if(cell.cnt_acts == undefined) break;
+                if(cell.cnt_acts > 0) make_cell(item_info.x, item_info.y, CellId.Base);
+            break;
+            case bit.bor(CellType.ActionLockedNear, CellType.Wall):
+                if(cell.cnt_near_acts == undefined) break;
+                if(cell.cnt_near_acts > 0) make_cell(item_info.x, item_info.y, CellId.Base);
+            break;
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -556,9 +571,9 @@ export function Game() {
 
     function on_request_element(x: number, y: number): Element | typeof NullElement {
         const element = make_element(x, y, get_random_element_id());
-        if(element as number == NullElement) return NullElement;
+        if(element == NullElement) return NullElement;
 
-        view.request_element_animation(element as Element, x, y, 0);        
+        view.request_element_animation(element, x, y, 0);        
 
         return element;
     }
