@@ -1,5 +1,7 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
+local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
@@ -23,7 +25,7 @@ local CellType = ____match3_core.CellType
 local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.Game()
-    local setup_element_types, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_actiovation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, is_buster_element, try_iteract_with_other_buster, try_activate_vertical_buster, try_activate_horizontal_buster, try_activate_axis_buster, attack, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, field_width, field_height, busters, field, view, previous_states, selected_element, activated_elements
+    local setup_element_types, init_cell, init_element, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_activation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, is_buster_element, try_iteract_with_other_buster, try_activate_vertical_buster, try_activate_horizontal_buster, try_activate_axis_buster, attack, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, level_config, field_width, field_height, busters, field, view, previous_states, selected_element, activated_elements
     function setup_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -34,17 +36,33 @@ function ____exports.Game()
             )
         end
     end
-    function make_cell(x, y, cell_id)
+    function init_cell(x, y)
+        local cell_config = level_config.field.cells[y + 1][x + 1]
+        if __TS__ArrayIsArray(cell_config) then
+            local cells = __TS__ObjectAssign({}, cell_config)
+            local cell_id = table.remove(cells)
+            if cell_id ~= nil then
+                make_cell(x, y, cell_id, {under_cells = cells})
+            end
+        else
+            make_cell(x, y, cell_config)
+        end
+    end
+    function init_element(x, y)
+        make_element(x, y, level_config.field.elements[y + 1][x + 1])
+    end
+    function make_cell(x, y, cell_id, data)
         if cell_id == NotActiveCell then
             return NotActiveCell
         end
-        local data = GAME_CONFIG.cell_database[cell_id]
+        local config = GAME_CONFIG.cell_database[cell_id]
         local cell = {
             id = view.set_cell_view(x, y, cell_id),
-            type_id = data.type_id,
-            type = data.type,
-            cnt_acts = data.cnt_acts,
-            cnt_near_acts = data.cnt_near_acts
+            type_id = config.type_id,
+            type = config.type,
+            cnt_acts = config.cnt_acts,
+            cnt_near_acts = config.cnt_near_acts,
+            data = data
         }
         field.set_cell(x, y, cell)
         return cell
@@ -98,7 +116,7 @@ function ____exports.Game()
         if field.is_can_move_base(from_x, from_y, to_x, to_y) then
             return true
         end
-        return is_click_actiovation(from_x, from_y) or is_click_actiovation(to_x, to_y)
+        return is_click_activation(from_x, from_y) or is_click_activation(to_x, to_y)
     end
     function swap_elements(from_pos_x, from_pos_y, to_pos_x, to_pos_y)
         local cell_from = field.get_cell(from_pos_x, from_pos_y)
@@ -120,15 +138,15 @@ function ____exports.Game()
         if not field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y) then
             view.swap_element_animation(element_from, element_to, element_to_world_pos, element_from_world_pos)
         else
-            if is_buster_element(to_pos_x, to_pos_y) then
+            if is_buster_element(to_pos_x, to_pos_y) and not is_buster_element(from_pos_x, from_pos_y) then
                 try_activate_buster_element({x = to_pos_x, y = to_pos_y, other_x = from_pos_x, other_y = from_pos_y})
-            elseif is_buster_element(from_pos_x, from_pos_y) then
+            else
                 try_activate_buster_element({x = from_pos_x, y = from_pos_y, other_x = to_pos_x, other_y = to_pos_y})
             end
             process_game_step()
         end
     end
-    function is_click_actiovation(x, y)
+    function is_click_activation(x, y)
         local cell = field.get_cell(x, y)
         if cell == NotActiveCell or not field.is_available_cell_type_for_move(cell) then
             return false
@@ -143,7 +161,7 @@ function ____exports.Game()
         return true
     end
     function try_click_activation(x, y)
-        if not is_click_actiovation(x, y) then
+        if not is_click_activation(x, y) then
             return false
         end
         if not try_activate_buster_element({x = x, y = y}) then
@@ -184,24 +202,24 @@ function ____exports.Game()
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch45 = move_direction
-            local ____cond45 = ____switch45 == Direction.Up
-            if ____cond45 then
+            local ____switch50 = move_direction
+            local ____cond50 = ____switch50 == Direction.Up
+            if ____cond50 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond45 = ____cond45 or ____switch45 == Direction.Down
-            if ____cond45 then
+            ____cond50 = ____cond50 or ____switch50 == Direction.Down
+            if ____cond50 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond45 = ____cond45 or ____switch45 == Direction.Left
-            if ____cond45 then
+            ____cond50 = ____cond50 or ____switch50 == Direction.Left
+            if ____cond50 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond45 = ____cond45 or ____switch45 == Direction.Right
-            if ____cond45 then
+            ____cond50 = ____cond50 or ____switch50 == Direction.Right
+            if ____cond50 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -233,29 +251,29 @@ function ____exports.Game()
     end
     function on_combined(combined_element, combination)
         repeat
-            local ____switch53 = combination.type
-            local ____cond53 = ____switch53 == CombinationType.Comb4
-            if ____cond53 then
+            local ____switch58 = combination.type
+            local ____cond58 = ____switch58 == CombinationType.Comb4
+            if ____cond58 then
                 make_buster(combined_element, combination, combination.angle == 0 and ElementId.HorizontalBuster or ElementId.VerticalBuster)
                 break
             end
-            ____cond53 = ____cond53 or ____switch53 == CombinationType.Comb5
-            if ____cond53 then
+            ____cond58 = ____cond58 or ____switch58 == CombinationType.Comb5
+            if ____cond58 then
                 make_buster(combined_element, combination, ElementId.Diskosphere)
                 break
             end
-            ____cond53 = ____cond53 or ____switch53 == CombinationType.Comb2x2
-            if ____cond53 then
+            ____cond58 = ____cond58 or ____switch58 == CombinationType.Comb2x2
+            if ____cond58 then
                 make_buster(combined_element, combination, ElementId.Helicopter)
                 break
             end
-            ____cond53 = ____cond53 or (____switch53 == CombinationType.Comb3x3a or ____switch53 == CombinationType.Comb3x3b)
-            if ____cond53 then
+            ____cond58 = ____cond58 or (____switch58 == CombinationType.Comb3x3a or ____switch58 == CombinationType.Comb3x3b)
+            if ____cond58 then
                 make_buster(combined_element, combination, ElementId.Dynamite)
                 break
             end
-            ____cond53 = ____cond53 or (____switch53 == CombinationType.Comb3x4 or ____switch53 == CombinationType.Comb3x5)
-            if ____cond53 then
+            ____cond58 = ____cond58 or (____switch58 == CombinationType.Comb3x4 or ____switch58 == CombinationType.Comb3x5)
+            if ____cond58 then
                 make_buster(combined_element, combination, ElementId.AxisBuster)
                 break
             end
@@ -266,7 +284,7 @@ function ____exports.Game()
         until true
     end
     function is_buster_element(x, y)
-        return is_click_actiovation(x, y)
+        return is_click_activation(x, y)
     end
     function try_iteract_with_other_buster(data, types_for_check, on_interact)
         local element = field.get_element(data.x, data.y)
@@ -526,6 +544,33 @@ function ____exports.Game()
         ) then
             return
         end
+        if try_iteract_with_other_buster(
+            data,
+            {ElementId.Diskosphere},
+            function(item, other_item)
+                view.squash_animation(
+                    item,
+                    {other_item},
+                    function()
+                        local other_element = field.get_element(other_item.x, other_item.y)
+                        if other_element == NullElement then
+                            return
+                        end
+                        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                            local element_data = GAME_CONFIG.element_database[element_id]
+                            local elements = field.get_all_elements_by_type(element_data.type.index)
+                            for ____, element in ipairs(elements) do
+                                field.remove_element(element.x, element.y, true, true)
+                            end
+                        end
+                        field.remove_element(item.x, item.y, true, true)
+                        field.remove_element(other_item.x, other_item.y, true, true)
+                    end
+                )
+            end
+        ) then
+            return
+        end
         if data.other_x ~= nil and data.other_y ~= nil then
             local element = field.get_element(data.x, data.y)
             if element == NullElement then
@@ -567,34 +612,34 @@ function ____exports.Game()
             return false
         end
         repeat
-            local ____switch128 = element.type
-            local ____cond128 = ____switch128 == ElementId.AxisBuster
-            if ____cond128 then
+            local ____switch141 = element.type
+            local ____cond141 = ____switch141 == ElementId.AxisBuster
+            if ____cond141 then
                 try_activate_axis_buster(data)
                 break
             end
-            ____cond128 = ____cond128 or ____switch128 == ElementId.VerticalBuster
-            if ____cond128 then
+            ____cond141 = ____cond141 or ____switch141 == ElementId.VerticalBuster
+            if ____cond141 then
                 try_activate_vertical_buster(data)
                 break
             end
-            ____cond128 = ____cond128 or ____switch128 == ElementId.HorizontalBuster
-            if ____cond128 then
+            ____cond141 = ____cond141 or ____switch141 == ElementId.HorizontalBuster
+            if ____cond141 then
                 try_activate_horizontal_buster(data)
                 break
             end
-            ____cond128 = ____cond128 or ____switch128 == ElementId.Helicopter
-            if ____cond128 then
+            ____cond141 = ____cond141 or ____switch141 == ElementId.Helicopter
+            if ____cond141 then
                 try_activate_helicopter(data)
                 break
             end
-            ____cond128 = ____cond128 or ____switch128 == ElementId.Dynamite
-            if ____cond128 then
+            ____cond141 = ____cond141 or ____switch141 == ElementId.Dynamite
+            if ____cond141 then
                 try_activate_dynamite(data)
                 break
             end
-            ____cond128 = ____cond128 or ____switch128 == ElementId.Diskosphere
-            if ____cond128 then
+            ____cond141 = ____cond141 or ____switch141 == ElementId.Diskosphere
+            if ____cond141 then
                 try_activate_diskosphere(data)
                 break
             end
@@ -631,24 +676,42 @@ function ____exports.Game()
         end
         view.delete_item(item, true)
         repeat
-            local ____switch135 = cell.type
-            local ____cond135 = ____switch135 == CellType.ActionLocked
-            if ____cond135 then
+            local ____switch148 = cell.type
+            local ____cond148 = ____switch148 == CellType.ActionLocked
+            if ____cond148 then
                 if cell.cnt_acts == nil then
                     break
                 end
                 if cell.cnt_acts > 0 then
-                    make_cell(item_info.x, item_info.y, CellId.Base)
+                    if cell.data ~= nil then
+                        local cell_id = table.remove(cell.data.under_cells)
+                        if cell_id ~= nil then
+                            make_cell(item_info.x, item_info.y, cell_id, cell.data)
+                        else
+                            make_cell(item_info.x, item_info.y, CellId.Base)
+                        end
+                    else
+                        make_cell(item_info.x, item_info.y, CellId.Base)
+                    end
                 end
                 break
             end
-            ____cond135 = ____cond135 or ____switch135 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond135 then
+            ____cond148 = ____cond148 or ____switch148 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond148 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
                 if cell.cnt_near_acts > 0 then
-                    make_cell(item_info.x, item_info.y, CellId.Base)
+                    if cell.data ~= nil then
+                        local cell_id = table.remove(cell.data.under_cells)
+                        if cell_id ~= nil then
+                            make_cell(item_info.x, item_info.y, cell_id, cell.data)
+                        else
+                            make_cell(item_info.x, item_info.y, CellId.Base)
+                        end
+                    else
+                        make_cell(item_info.x, item_info.y, CellId.Base)
+                    end
                 end
                 break
             end
@@ -720,24 +783,24 @@ function ____exports.Game()
             local message_id, _message, sender = flow.until_any_message()
             view.do_message(message_id, _message, sender)
             repeat
-                local ____switch160 = message_id
-                local ____cond160 = ____switch160 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond160 then
+                local ____switch181 = message_id
+                local ____cond181 = ____switch181 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond181 then
                     on_down(_message.item)
                     break
                 end
-                ____cond160 = ____cond160 or ____switch160 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond160 then
+                ____cond181 = ____cond181 or ____switch181 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond181 then
                     on_up(_message.item)
                     break
                 end
-                ____cond160 = ____cond160 or ____switch160 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond160 then
+                ____cond181 = ____cond181 or ____switch181 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond181 then
                     on_move(_message)
                     break
                 end
-                ____cond160 = ____cond160 or ____switch160 == to_hash("REVERT_STEP")
-                if ____cond160 then
+                ____cond181 = ____cond181 or ____switch181 == to_hash("REVERT_STEP")
+                if ____cond181 then
                     revert_step()
                     break
                 end
@@ -748,7 +811,7 @@ function ____exports.Game()
     move_delay_after_combination = GAME_CONFIG.move_delay_after_combination
     wait_time_after_move = GAME_CONFIG.wait_time_after_move
     buster_delay = GAME_CONFIG.buster_delay
-    local level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
+    level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     field_width = level_config.field.width
     field_height = level_config.field.height
     local move_direction = level_config.field.move_direction
@@ -774,14 +837,15 @@ function ____exports.Game()
                 do
                     local x = 0
                     while x < field_width do
-                        make_cell(x, y, level_config.field.cells[y + 1][x + 1])
-                        make_element(x, y, level_config.field.elements[y + 1][x + 1])
+                        init_cell(x, y)
+                        init_element(x, y)
                         x = x + 1
                     end
                 end
                 y = y + 1
             end
         end
+        GameStorage.set("hammer_counts", 5)
         busters.hammer_active = GameStorage.get("hammer_counts") <= 0
         previous_states[#previous_states + 1] = field.save_state()
         wait_event()

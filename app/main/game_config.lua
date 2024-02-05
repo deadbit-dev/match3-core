@@ -89,6 +89,13 @@ ____exports._GAME_CONFIG = {
         [____exports.ElementId.Dynamite] = {type = {index = ____exports.ElementId.Dynamite, is_movable = true, is_clickable = true}, percentage = 0, view = "dynamite_buster"},
         [____exports.ElementId.Diskosphere] = {type = {index = ____exports.ElementId.Diskosphere, is_movable = true, is_clickable = true}, percentage = 0, view = "diskosphere_buster"}
     },
+    base_elements = {
+        ____exports.ElementId.Dimonde,
+        ____exports.ElementId.Gold,
+        ____exports.ElementId.Topaz,
+        ____exports.ElementId.Ruby,
+        ____exports.ElementId.Emerald
+    },
     levels = {{field = {
         width = 8,
         height = 8,
@@ -143,7 +150,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
                 ____exports.CellId.Box,
-                ____exports.CellId.Box,
+                {____exports.CellId.Grass, ____exports.CellId.Box},
                 ____exports.CellId.Base
             },
             {

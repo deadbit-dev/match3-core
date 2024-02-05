@@ -207,6 +207,14 @@ export const _GAME_CONFIG = {
         }
     } as {[key in ElementId]: {type: ElementType, percentage: number, view: string}},
 
+    base_elements: [
+        ElementId.Dimonde,
+        ElementId.Gold,
+        ElementId.Topaz,
+        ElementId.Ruby,
+        ElementId.Emerald
+    ],
+
     levels: [
         {
             // LEVEL 0
@@ -217,14 +225,12 @@ export const _GAME_CONFIG = {
                 offset_border: 10,
                 move_direction: Direction.Up,
                 
-                
-                
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, [CellId.Grass, CellId.Box], CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]

@@ -85,11 +85,12 @@ export function Game() {
         
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
-                make_cell(x, y, level_config['field']['cells'][y][x]);
-                make_element(x, y, level_config['field']['elements'][y][x]);
+                init_cell(x, y);
+                init_element(x, y);
             }
         }
 
+        GameStorage.set('hammer_counts', 5);
         busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
         previous_states.push(field.save_state());
         
@@ -102,16 +103,32 @@ export function Game() {
         }
     }
 
-    function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell): Cell | typeof NotActiveCell {
-        if(cell_id as number == NotActiveCell) return NotActiveCell;
+    function init_cell(x: number, y: number) {
+        // TODO: load save
+        const cell_config = level_config['field']['cells'][y][x];
+        if(Array.isArray(cell_config)) {
+            const cells = Object.assign([], cell_config);
+            const cell_id = cells.pop();
+            if(cell_id != undefined) make_cell(x, y, cell_id, {under_cells: cells});
+        } else make_cell(x, y, cell_config);
+    }
 
-        const data = GAME_CONFIG.cell_database[cell_id as CellId];
+    function init_element(x: number, y: number) {
+        // TODO: load save
+        make_element(x, y, level_config['field']['elements'][y][x]);
+    }
+
+    function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell, data?: any): Cell | typeof NotActiveCell {
+        if(cell_id == NotActiveCell) return NotActiveCell;
+
+        const config = GAME_CONFIG.cell_database[cell_id];
         const cell = {
             id: view.set_cell_view(x, y, cell_id),
-            type_id: data.type_id,
-            type: data.type,
-            cnt_acts: data.cnt_acts,
-            cnt_near_acts: data.cnt_near_acts,
+            type_id: config.type_id,
+            type: config.type,
+            cnt_acts: config.cnt_acts,
+            cnt_near_acts: config.cnt_near_acts,
+            data: data
         };
 
         field.set_cell(x, y, cell);
@@ -165,7 +182,7 @@ export function Game() {
     function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
         if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
         
-        return (is_click_actiovation(from_x, from_y) || is_click_actiovation(to_x, to_y));
+        return (is_click_activation(from_x, from_y) || is_click_activation(to_x, to_y));
     }
 
     function swap_elements(from_pos_x: number, from_pos_y: number, to_pos_x: number, to_pos_y: number) {
@@ -188,15 +205,15 @@ export function Game() {
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
         } else {
-            if(is_buster_element(to_pos_x, to_pos_y)) try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
-            else if(is_buster_element(from_pos_x, from_pos_y)) try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
+            if(is_buster_element(to_pos_x, to_pos_y) && !is_buster_element(from_pos_x, from_pos_y)) try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
+            else try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
             process_game_step();
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
 
-    function is_click_actiovation(x: number, y: number) {
+    function is_click_activation(x: number, y: number) {
         const cell = field.get_cell(x, y);
         if(cell == NotActiveCell || !field.is_available_cell_type_for_move(cell)) return false;
 
@@ -208,7 +225,7 @@ export function Game() {
     }
 
     function try_click_activation(x: number, y: number) {
-        if(!is_click_actiovation(x, y)) return false;
+        if(!is_click_activation(x, y)) return false;
         if(!try_activate_buster_element({x, y})) return false;
 
         process_game_step();
@@ -306,7 +323,7 @@ export function Game() {
     }
 
     function is_buster_element(x: number, y: number) {
-        return is_click_actiovation(x, y);
+        return is_click_activation(x, y);
     }
 
     function try_iteract_with_other_buster(data: ActivationData, types_for_check: number[], on_interact: FncOnInteract) {
@@ -483,6 +500,23 @@ export function Game() {
             });
         })) return;
 
+        if(try_iteract_with_other_buster(data, [ElementId.Diskosphere], (item, other_item) => {
+            view.squash_animation(item, [other_item], () => {
+                const other_element = field.get_element(other_item.x, other_item.y);
+                if(other_element == NullElement) return;
+                
+                for(const element_id of GAME_CONFIG.base_elements) {
+                    const element_data = GAME_CONFIG.element_database[element_id];
+                    const elements = field.get_all_elements_by_type(element_data.type.index);
+                    
+                    for(const element of elements) field.remove_element(element.x, element.y, true, true);
+                }
+
+                field.remove_element(item.x, item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, true);
+            });
+        })) return;
+
         if(data.other_x != undefined && data.other_y != undefined) {
             const element = field.get_element(data.x, data.y);
             if(element == NullElement) return;
@@ -549,11 +583,23 @@ export function Game() {
         switch(cell.type) {
             case CellType.ActionLocked:
                 if(cell.cnt_acts == undefined) break;
-                if(cell.cnt_acts > 0) make_cell(item_info.x, item_info.y, CellId.Base);
+                if(cell.cnt_acts > 0) {
+                    if(cell.data != undefined) {
+                        const cell_id = (cell.data.under_cells as CellId[]).pop();
+                        if(cell_id != undefined) make_cell(item_info.x, item_info.y, cell_id, cell.data);
+                        else make_cell(item_info.x, item_info.y, CellId.Base);
+                    } else make_cell(item_info.x, item_info.y, CellId.Base);
+                }
             break;
             case bit.bor(CellType.ActionLockedNear, CellType.Wall):
                 if(cell.cnt_near_acts == undefined) break;
-                if(cell.cnt_near_acts > 0) make_cell(item_info.x, item_info.y, CellId.Base);
+                if(cell.cnt_near_acts > 0) {
+                    if(cell.data != undefined) {
+                        const cell_id = (cell.data.under_cells as CellId[]).pop();
+                        if(cell_id != undefined) make_cell(item_info.x, item_info.y, cell_id, cell.data);
+                        else make_cell(item_info.x, item_info.y, CellId.Base);
+                    } else make_cell(item_info.x, item_info.y, CellId.Base);
+                }
             break;
         }
     }
