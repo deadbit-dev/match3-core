@@ -247,14 +247,16 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
                         for(let i = 0; i < mask.length && is_combined; i++) {
                             for(let j = 0; j < mask[0].length && is_combined; j++) {
                                 if(mask[i][j] == 1) {
+                                    const cell = get_cell(x+j, y+i);
                                     const element = get_element(x+j, y+i);
-                                    if(element as number == NullElement) {
+                                    
+                                    if(cell == NotActiveCell || !is_available_cell_type_for_move(cell) || element == NullElement) {
                                         is_combined = false;
                                         break;
                                     }
 
                                     // проверка на участие элемента в предыдущих комбинациях
-                                    if(!is_unique_element_combination(element as Element, combinations)) {
+                                    if(!is_unique_element_combination(element, combinations)) {
                                         is_combined = false;
                                         break;
                                     }
@@ -262,11 +264,11 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
                                     combination.elements.push({
                                         x: x+j,
                                         y: y+i,
-                                        id: (element as Element).id
+                                        id: (element).id
                                     });
 
-                                    if(last_element as number != NullElement) {
-                                        is_combined = is_combined_elements(last_element as Element, element as Element);
+                                    if(last_element != NullElement) {
+                                        is_combined = is_combined_elements(last_element, element);
                                     }
 
                                     last_element = element;
@@ -880,7 +882,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
 
     return {
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
-        get_neighbor_cells, get_neighbor_elements, is_valid_element_pos, try_move, try_click, process_state, save_state, load_state,
+        get_neighbor_cells, get_neighbor_elements, is_valid_element_pos, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_all_available_steps, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,

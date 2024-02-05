@@ -169,9 +169,15 @@ export function Game() {
     }
 
     function swap_elements(from_pos_x: number, from_pos_y: number, to_pos_x: number, to_pos_y: number) {
+        const cell_from = field.get_cell(from_pos_x, from_pos_y);
+        const cell_to = field.get_cell(to_pos_x, to_pos_y);
+
+        if(cell_from == NotActiveCell || cell_to == NotActiveCell) return;
+        if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return;
+
         const element_from = field.get_element(from_pos_x, from_pos_y);
         const element_to = field.get_element(to_pos_x, to_pos_y);
-
+        
         if((element_from as number == NullElement) || (element_to as number == NullElement)) return;
 
         const element_to_world_pos = view.get_cell_world_pos(to_pos_x, to_pos_y, 0);
@@ -191,6 +197,9 @@ export function Game() {
     //-----------------------------------------------------------------------------------------------------------------------------------
 
     function is_click_actiovation(x: number, y: number) {
+        const cell = field.get_cell(x, y);
+        if(cell == NotActiveCell || !field.is_available_cell_type_for_move(cell)) return false;
+
         const element = field.get_element(x, y);
         if(element == NullElement) return false;
         if(!GAME_CONFIG.element_database[element.type as ElementId].type.is_clickable) return false;

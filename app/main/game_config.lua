@@ -215,7 +215,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
                 NullElement,
-                NullElement,
+                ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde
             },
             {
@@ -224,7 +224,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
-                NullElement,
+                ____exports.ElementId.HorizontalBuster,
                 NullElement,
                 ____exports.ElementId.Topaz
             },

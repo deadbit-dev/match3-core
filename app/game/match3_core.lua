@@ -85,7 +85,7 @@ function ____exports.Field(size_x, size_y, move_direction)
     if move_direction == nil then
         move_direction = Direction.Up
     end
-    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
     end
@@ -186,6 +186,15 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
         return neighbors
     end
+    function is_available_cell_type_for_move(cell)
+        local is_not_moved = bit.band(cell.type, ____exports.CellType.NotMoved) == ____exports.CellType.NotMoved
+        local is_locked = bit.band(cell.type, ____exports.CellType.Locked) == ____exports.CellType.Locked
+        local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall
+        if is_not_moved or is_locked or is_wall then
+            return false
+        end
+        return true
+    end
     state = {cells = {}, element_types = {}, elements = {}}
     local last_moved_elements = {}
     damaged_elements = {}
@@ -257,8 +266,9 @@ function ____exports.Field(size_x, size_y, move_direction)
                                                 local j = 0
                                                 while j < #mask[1] and is_combined do
                                                     if mask[i + 1][j + 1] == 1 then
+                                                        local cell = get_cell(x + j, y + i)
                                                         local element = get_element(x + j, y + i)
-                                                        if element == ____exports.NullElement then
+                                                        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell) or element == ____exports.NullElement then
                                                             is_combined = false
                                                             break
                                                         end
@@ -505,15 +515,6 @@ function ____exports.Field(size_x, size_y, move_direction)
             )
             set_element(x, y, ____exports.NullElement)
         end
-    end
-    local function is_available_cell_type_for_move(cell)
-        local is_not_moved = bit.band(cell.type, ____exports.CellType.NotMoved) == ____exports.CellType.NotMoved
-        local is_locked = bit.band(cell.type, ____exports.CellType.Locked) == ____exports.CellType.Locked
-        local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall
-        if is_not_moved or is_locked or is_wall then
-            return false
-        end
-        return true
     end
     local function is_valid_element_pos(x, y)
         if x < 0 or x >= size_x or y < 0 or y >= size_y then
@@ -883,6 +884,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         get_neighbor_cells = get_neighbor_cells,
         get_neighbor_elements = get_neighbor_elements,
         is_valid_element_pos = is_valid_element_pos,
+        is_available_cell_type_for_move = is_available_cell_type_for_move,
         try_move = try_move,
         try_click = try_click,
         process_state = process_state,
