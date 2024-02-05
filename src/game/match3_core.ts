@@ -847,8 +847,14 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
                 st.elements[y][x] = state.elements[y][x];
             }
         }
+
+        const copy_state = json.decode(json.encode(st)) as GameState;
+        for(const [key, value] of Object.entries(copy_state.element_types)) {
+            const id = tonumber(key);
+            if(id != undefined) copy_state.element_types[id] = value;
+        }
     
-        return st;
+        return copy_state;
     }
 
     // загрузить состояние игры

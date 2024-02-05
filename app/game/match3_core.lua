@@ -2,6 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
@@ -837,7 +838,16 @@ function ____exports.Field(size_x, size_y, move_direction)
                 y = y + 1
             end
         end
-        return st
+        local copy_state = json.decode(json.encode(st))
+        for ____, ____value in ipairs(__TS__ObjectEntries(copy_state.element_types)) do
+            local key = ____value[1]
+            local value = ____value[2]
+            local id = tonumber(key)
+            if id ~= nil then
+                copy_state.element_types[id] = value
+            end
+        end
+        return copy_state
     end
     local function load_state(st)
         state.element_types = st.element_types

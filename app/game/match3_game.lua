@@ -78,7 +78,7 @@ function ____exports.Game()
             flow.delay(move_delay_after_combination)
             process_move()
         end
-        previous_states[#previous_states + 1] = json.decode(json.encode(field.save_state()))
+        previous_states[#previous_states + 1] = field.save_state()
     end
     function get_move_direction(dir)
         local cs45 = 0.7
@@ -771,7 +771,7 @@ function ____exports.Game()
             end
         end
         busters.hammer_active = GameStorage.get("hammer_counts") <= 0
-        previous_states[#previous_states + 1] = json.decode(json.encode(field.save_state()))
+        previous_states[#previous_states + 1] = field.save_state()
         wait_event()
     end
     init()

@@ -91,7 +91,7 @@ export function Game() {
         }
 
         busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
-        previous_states.push(json.decode(json.encode(field.save_state())));
+        previous_states.push(field.save_state());
         
         wait_event();
     }
@@ -148,7 +148,7 @@ export function Game() {
             process_move();
         }
 
-        previous_states.push(json.decode(json.encode(field.save_state())));
+        previous_states.push(field.save_state());
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
