@@ -67,9 +67,10 @@ ____exports._GAME_CONFIG = {
     spawn_element_time = 0.5,
     buster_delay = 0.5,
     cell_database = {
-        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_base"},
-        [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
+        [____exports.CellId.Base] = {type_id = ____exports.CellId.Base, type = CellType.Base, view = "cell_base"},
+        [____exports.CellId.Grass] = {type_id = ____exports.CellId.Grass, type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
         [____exports.CellId.Box] = {
+            type_id = ____exports.CellId.Box,
             type = bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts = 0,
             view = "cell_box"
@@ -192,7 +193,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.VerticalBuster,
                 ____exports.ElementId.VerticalBuster,
                 ____exports.ElementId.Diskosphere,
-                ____exports.ElementId.Dimonde,
+                ____exports.ElementId.Diskosphere,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold
@@ -254,7 +255,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Gold,
+                ____exports.ElementId.Helicopter,
                 NullElement
             }
         }

@@ -14,7 +14,7 @@
 import * as flow from 'ludobits.m.flow';
 import { GoManager } from '../modules/GoManager';
 
-import { CombinationInfo, Element, GameState, ItemInfo, NullElement, Field } from "./match3_core";
+import { CombinationInfo, Element, GameState, ItemInfo, NullElement, Field, NotActiveCell } from "./match3_core";
 import { CellId, ElementId } from "../main/game_config";
 import { Direction } from '../utils/math_utils';
 import { IGameItem } from '../modules/modules_const';
@@ -94,6 +94,7 @@ export function View() {
     function set_cell_view(x: number, y: number, cell_id: CellId, z_index = -1): number {
         const pos = get_cell_world_pos(x, y, z_index);
         const _go = gm.make_go('cell_view', pos);
+
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         return gm.add_game_item({ _hash: _go });
@@ -102,6 +103,7 @@ export function View() {
     function set_element_view(x: number, y: number, element_id: ElementId, spawn_anim = false, z_index = 0): number {
         const pos = get_cell_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
+
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.element_database[element_id].view);
         
         if(spawn_anim) {
@@ -185,19 +187,38 @@ export function View() {
     function revert_step_animation(current_state: GameState, previous_state: GameState) {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
+                const current_cell = current_state.cells[y][x];
+                if(current_cell != NotActiveCell) {
+                    const current_cell_item = get_item_by_index(current_cell.id);
+                    if(current_cell_item != undefined) {
+                        gm.delete_item(current_cell_item);
+                        const previous_cell = previous_state.cells[y][x];
+                        if(previous_cell != NotActiveCell) {
+                            previous_cell.id = set_cell_view(x, y, previous_cell.type_id);
+                            previous_state.cells[y][x] = previous_cell;
+                        }
+                    }
+                }
+
                 const current_element = current_state.elements[y][x];
-                if(current_element as number != NullElement) {
-                    const current_item = get_item_by_index((current_element as Element).id);
-                    if(current_item != undefined) {
+                if(current_element != NullElement) {
+                    const current_element_item = get_item_by_index(current_element.id);
+                    if(current_element_item != undefined) {
                         const pos = {x, y};
-                        go.animate(current_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.1, 0.1, 1), damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                            gm.delete_item(current_item);
+                        go.animate(current_element_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.1, 0.1, 1), damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
+                            gm.delete_item(current_element_item);
                             const previous_element = previous_state.elements[pos.y][pos.x];
-                            if(previous_element as number != NullElement) {
-                                (previous_element as Element).id = set_element_view(pos.x, pos.y, (previous_element as Element).type, true);
+                            if(previous_element != NullElement) {
+                                previous_element.id = set_element_view(pos.x, pos.y, previous_element.type, true);
                                 previous_state.elements[pos.y][pos.x] = previous_element;
                             }
                         });
+                    }
+                } else {
+                    const previous_element = previous_state.elements[y][x];
+                    if(previous_element != NullElement) {
+                        previous_element.id = set_element_view(x, y, previous_element.type, true);
+                        previous_state.elements[y][x] = previous_element;
                     }
                 }
             }

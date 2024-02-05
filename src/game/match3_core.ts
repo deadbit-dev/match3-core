@@ -91,6 +91,7 @@ export const NotActiveCell = -1;
 // описание свойств клетки
 export interface Cell {
     id: number;
+    type_id: number;
     type: number; // маска свойств
     cnt_acts?: number; // число активаций которое произошло(при реакции в качестве соседней клетки + условие наличия флага ActionLocked)
     cnt_near_acts?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций
@@ -246,7 +247,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
                         for(let i = 0; i < mask.length && is_combined; i++) {
                             for(let j = 0; j < mask[0].length && is_combined; j++) {
                                 if(mask[i][j] == 1) {
-                                    const element = state.elements[y+i][x+j];
+                                    const element = get_element(x+j, y+i);
                                     if(element as number == NullElement) {
                                         is_combined = false;
                                         break;
@@ -313,13 +314,13 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         // логика тут в том что мы делаем пробное перемещение элементов, а затем получаем все возможные комбинации (get_all_combinations)
         // затем смотрим присутствует ли среди них комбинация хоть с одним из элементов, который был в позиции from_x, from_y или to_x, to_y
        
-        const element_from = state.elements[from_y][from_x];
+        const element_from = get_element(from_x, from_y);
         if(element_from == NullElement) return false;
 
         const element_type_from = state.element_types[element_from.type];
         if(!element_type_from.is_movable) return false;
 
-        const element_to = state.elements[to_y][to_x];
+        const element_to = get_element(to_x, to_y);
         if(element_to != NullElement) {
             const element_type_to = state.element_types[element_from.type];
             if(!element_type_to.is_movable) return false;
@@ -374,13 +375,14 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         // тут важно учесть что т.к. сначала вызвали try_damage_element то в этот момент при большом сборе будет образовываться новый элемент на поле,
         // соответственно нам нужно удалить все элементы не просто с массива elements, но и проверив что id у них не изменился, чтобы случайно не удалить новый созданный
         for(const item of combination.elements) {
-            const element = state.elements[item.y][item.x];
-            if(element != NullElement && element.id == item.id) {
-                on_cell_activation(item);
+            const cell = get_cell(item.x, item.y);
+            const element = get_element(item.x, item.y);
+            if(cell != NotActiveCell && element != NullElement && element.id == item.id) {
+                on_cell_activation({x: item.x, y: item.y, id: cell.id});
                 on_near_activation(get_neighbor_cells(item.x, item.y));
                 try_damage_element({x: item.x, y: item.y, element: element});
                 damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
-                state.elements[item.y][item.x] = NullElement;
+                set_element(item.x, item.y, NullElement);
             }
         }
     }
@@ -419,7 +421,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     function on_near_activation_base(items: ItemInfo[]) {
         // если клетка из массива содержит флаг ActionLockedNear то увеличиваем счетчик cnt_near_acts и вызываем событие cb_on_cell_activated
         for(const item of items) {
-            const cell = state.cells[item.y][item.x];
+            const cell = get_cell(item.x, item.y);
             if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.cnt_near_acts != undefined) {
                 cell.cnt_near_acts++;
                 if(cb_on_cell_activated != undefined) cb_on_cell_activated(item);
@@ -439,7 +441,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
     
     function on_cell_activation_base(item: ItemInfo) {
-        const cell = state.cells[item.y][item.x];
+        const cell = get_cell(item.x, item.y);
         if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) && cell.cnt_acts != undefined) {
             cell.cnt_acts++;
             if(cb_on_cell_activated != undefined) cb_on_cell_activated(item);
@@ -475,8 +477,8 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         const free_cells: ItemInfo[] = []; 
         for(let y = 0; y < size_y; y++) {
             for(let x = 0; x < size_x; x++) {
-                const cell = state.cells[y][x];
-                if(cell != NotActiveCell && state.elements[y][x] == NullElement) {
+                const cell = get_cell(x, y);
+                if(cell != NotActiveCell && get_element(x, y) == NullElement) {
                     free_cells.push({x, y, id: cell.id});
                 }
             }
@@ -489,7 +491,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         const target_elements: ItemInfo[] = []; 
         for(let y = 0; y < size_y; y++) {
             for(let x = 0; x < size_x; x++) {
-                const element = state.elements[y][x];
+                const element = get_element(x, y);
                 if(element != NullElement && element.type == element_type) {
                     target_elements.push({x, y, id: element.id});
                 }
@@ -522,20 +524,19 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
 
     function swap_elements(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const elements_from = state.elements[from_y][from_x]; 
-        state.elements[from_y][from_x] = state.elements[to_y][to_x];
-        state.elements[to_y][to_x] = elements_from;
+        const elements_from = get_element(from_x, from_y); 
+        set_element(from_x, from_y, get_element(to_x, to_y));
+        set_element(to_x, to_y, elements_from);
     }
 
     // возвращает соседние клетки
     function get_neighbor_cells(x: number, y: number, mask = [[0, 1, 0,], [1, 0, 1], [0, 1, 0]]) {
         const neighbors: ItemInfo[] = [];
 
-        
         for (let i = y - 1; i <= y + 1; i++) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
-                    const item = state.cells[i][j];
+                    const item = get_cell(j, i);
                     if(item != NotActiveCell) neighbors.push({x: j, y: i, id: item.id});
                 }
             }
@@ -551,7 +552,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         for (let i = y - 1; i <= y + 1; i++) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
-                    const item = state.elements[i][j];
+                    const item = get_element(j, i);
                     if(item != NullElement) neighbors.push({x: j, y: i, id: item.id});
                 }
             }
@@ -565,14 +566,17 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         // удаляем элемент с массива и вызываем try_damage_element если is_damaging = true
         // и вызываем on_near_activation для соседей если свойство is_near_activation = true
 
-        const element = state.elements[y][x];
+        const cell = get_cell(x, y);
+        if(cell == NotActiveCell) return;
+
+        const element = get_element(x, y);
         if(element == NullElement) return;
 
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
         if(is_damaging && try_damage_element({x, y, element: element})) {
-            on_cell_activation({x, y, id: element.id});
+            on_cell_activation({x, y, id: cell.id});
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
-            state.elements[y][x] = NullElement;
+            set_element(x, y, NullElement);
         }
     }
 
@@ -598,20 +602,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     // на основе ограничений клетки, а также на соответствущее разрешение перемещения у элемента(is_move) 
     // возвращает результат если успех, то уже применен ход (т.е. элементы перемещен и поменялся местами)
     function try_move(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const cell_from = state.cells[from_y][from_x];
+        const cell_from = get_cell(from_x, from_y);
         if(cell_from == NotActiveCell || !is_available_cell_type_for_move(cell_from)) return false;
         
-        const cell_to = state.cells[to_y][to_x];
+        const cell_to = get_cell(to_x, to_y);
         if(cell_to == NotActiveCell || !is_available_cell_type_for_move(cell_to)) return false;
 
         const is_can = is_can_move(from_x, from_y, to_x, to_y);
         if(is_can) {
             swap_elements(from_x, from_y, to_x, to_y);
             
-            const element_from = state.elements[from_y][from_x];
+            const element_from = get_element(from_x, from_y);
             if(element_from != NullElement) last_moved_elements.push({x: from_x, y: from_y, id: element_from.id});
         
-            const element_to = state.elements[to_y][to_x];
+            const element_to = get_element(to_x, to_y);
             if(element_to != NullElement) last_moved_elements.push({x: to_x, y: to_y, id: element_to.id});
         }
 
@@ -622,10 +626,10 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     // по идее тут проверяем на базовые правила доступности клика на основе ограничений клетки, а также на соответствущее разрешение клика у элемента(is_click) 
     // ничего больше не делаем, т.е. не удаляем и т.п.
     function try_click(x: number, y: number) {
-        const cell = state.cells[y][x];
+        const cell = get_cell(x, y);
         if(cell == NotActiveCell) return false;
         
-        const element = state.elements[y][x];
+        const element = get_element(x, y);
         if(element == NullElement) return false;
         
         const element_type = state.element_types[element.type];
@@ -666,14 +670,14 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
 
     function try_move_element_from_up(x: number, y:number) {
         for(let j = y; j >= 0; j--) {
-            const cell = state.cells[j][x];
+            const cell = get_cell(x, j);
             if(cell != NotActiveCell) {
                 if(!is_available_cell_type_for_move(cell)) return false;
                 
-                const element = state.elements[j][x];
+                const element = get_element(x, j);
                 if(element != NullElement) {
-                    state.elements[y][x] = element;
-                    state.elements[j][x] = NullElement;
+                    set_element(x, y, element);
+                    set_element(x, j, NullElement);
 
                     on_move_element(x, j, x, y, element);
                     last_moved_elements.push({x, y, id: element.id});
@@ -683,19 +687,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             }
         }
 
-        return false;
+        request_element(x, y);
+        return true;
     }
     
     function try_move_element_from_down(x: number, y:number) {
         for(let j = y; j < size_y; j++) {
-            const cell = state.cells[j][x];
+            const cell = get_cell(x, j);
             if(cell != NotActiveCell) {
                 if(!is_available_cell_type_for_move(cell)) return false;
                 
-                const element = state.elements[j][x];
+                const element = get_element(x, j);
                 if(element != NullElement) {
-                    state.elements[y][x] = element;
-                    state.elements[j][x] = NullElement;
+                    set_element(x, y, element);
+                    set_element(x, j, NullElement);
 
                     on_move_element(x, j, x, y, element);
                     last_moved_elements.push({x, y, id: element.id});
@@ -705,19 +710,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             }
         }
 
-        return false;
+        request_element(x, y);
+        return true;
     }
     
     function try_move_element_from_left(x: number, y:number) {
         for(let j = x; j >= 0; j--) {
-            const cell = state.cells[y][j];
+            const cell = get_cell(j, y);
             if(cell != NotActiveCell) {
                 if(!is_available_cell_type_for_move(cell)) return false;
                 
-                const element = state.elements[y][j];
+                const element = get_element(j, y);
                 if(element != NullElement) {
-                    state.elements[y][x] = element;
-                    state.elements[y][j] = NullElement;
+                    set_element(x, y, element);
+                    set_element(j, y, NullElement);
 
                     on_move_element(j, y, x, y, element);
                     last_moved_elements.push({x, y, id: element.id});
@@ -727,19 +733,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             }
         }
 
-        return false;
+        request_element(x, y);
+        return true;
     }
 
     function try_move_element_from_right(x: number, y:number) {
         for(let j = x; j < size_x; j++) {
-            const cell = state.cells[y][j];
+            const cell = get_cell(j, y);
             if(cell != NotActiveCell) {
                 if(!is_available_cell_type_for_move(cell)) return false;
                 
-                const element = state.elements[y][j];
+                const element = get_element(j, y);
                 if(element != NullElement) {
-                    state.elements[y][x] = element;
-                    state.elements[y][j] = NullElement;
+                    set_element(x, y, element);
+                    set_element(j, y, NullElement);
 
                     on_move_element(j, y, x, y, element);
                     last_moved_elements.push({x, y, id: element.id});
@@ -749,7 +756,8 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             }
         }
 
-        return false;
+        request_element(x, y);
+        return true;
     }
    
    
@@ -760,10 +768,10 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             case Direction.Up:
                 for(let y = size_y - 1; y >= 0; y--) {
                     for(let x = 0; x < size_x; x++) {
-                        const cell = state.cells[y][x];
-                        const empty = state.elements[y][x];
+                        const cell = get_cell(x, y);
+                        const empty = get_element(x, y);
                         if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            if(!try_move_element_from_up(x, y)) request_element(x, y);
+                            try_move_element_from_up(x, y);
                             is_procesed = true;
                         }
                     }
@@ -772,10 +780,10 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             case Direction.Down:
                 for(let y = 0; y < size_y; y++) {
                     for(let x = 0; x < size_x; x++) {
-                        const cell = state.cells[y][x];
-                        const empty = state.elements[y][x];
+                        const cell = get_cell(x, y);
+                        const empty = get_element(x, y);
                         if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            if(!try_move_element_from_down(x, y)) request_element(x, y);
+                            try_move_element_from_down(x, y);
                             is_procesed = true;
                         }
                     }
@@ -784,10 +792,10 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             case Direction.Left:
                 for(let x = size_x - 1; x >= 0; x--) {
                     for(let y = 0; y < size_y; y++) {
-                        const cell = state.cells[y][x];
-                        const empty = state.elements[y][x];
+                        const cell = get_cell(x, y);
+                        const empty = get_element(x, y);
                         if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            if(!try_move_element_from_left(x, y)) request_element(x, y);
+                            try_move_element_from_left(x, y);
                             is_procesed = true;   
                         }
                     }
@@ -796,10 +804,10 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             case Direction.Right:
                 for(let x = 0; x < size_x; x++) {
                     for(let y = 0; y < size_y; y++) {
-                        const cell = state.cells[y][x];
-                        const empty = state.elements[y][x];
+                        const cell = get_cell(x, y);
+                        const empty = get_element(x, y);
                         if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            if(!try_move_element_from_right(x, y)) request_element(x, y);
+                            try_move_element_from_right(x, y);
                             is_procesed = true;
                         }
                     }
@@ -829,7 +837,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
             element_types: state.element_types,
             elements: []
         };
-        
+
         for(let y = 0; y < size_y; y++) {
             st.cells[y] = [];
             st.elements[y] = [];

@@ -84,7 +84,7 @@ function ____exports.Field(size_x, size_y, move_direction)
     if move_direction == nil then
         move_direction = Direction.Up
     end
-    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, swap_elements, get_neighbor_cells, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
     end
@@ -110,7 +110,7 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     function on_near_activation_base(items)
         for ____, item in ipairs(items) do
-            local cell = state.cells[item.y + 1][item.x + 1]
+            local cell = get_cell(item.x, item.y)
             if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.cnt_near_acts ~= nil then
                 cell.cnt_near_acts = cell.cnt_near_acts + 1
                 if cb_on_cell_activated ~= nil then
@@ -127,7 +127,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
     end
     function on_cell_activation_base(item)
-        local cell = state.cells[item.y + 1][item.x + 1]
+        local cell = get_cell(item.x, item.y)
         if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLocked) == ____exports.CellType.ActionLocked and cell.cnt_acts ~= nil then
             cell.cnt_acts = cell.cnt_acts + 1
             if cb_on_cell_activated ~= nil then
@@ -142,10 +142,23 @@ function ____exports.Field(size_x, size_y, move_direction)
             on_cell_activation_base(item)
         end
     end
+    function get_cell(x, y)
+        return state.cells[y + 1][x + 1]
+    end
+    function set_element(x, y, element)
+        state.elements[y + 1][x + 1] = element
+    end
+    function get_element(x, y)
+        return state.elements[y + 1][x + 1]
+    end
     function swap_elements(from_x, from_y, to_x, to_y)
-        local elements_from = state.elements[from_y + 1][from_x + 1]
-        state.elements[from_y + 1][from_x + 1] = state.elements[to_y + 1][to_x + 1]
-        state.elements[to_y + 1][to_x + 1] = elements_from
+        local elements_from = get_element(from_x, from_y)
+        set_element(
+            from_x,
+            from_y,
+            get_element(to_x, to_y)
+        )
+        set_element(to_x, to_y, elements_from)
     end
     function get_neighbor_cells(x, y, mask)
         if mask == nil then
@@ -159,7 +172,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                     local j = x - 1
                     while j <= x + 1 do
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
-                            local item = state.cells[i + 1][j + 1]
+                            local item = get_cell(j, i)
                             if item ~= ____exports.NotActiveCell then
                                 neighbors[#neighbors + 1] = {x = j, y = i, id = item.id}
                             end
@@ -243,7 +256,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                                                 local j = 0
                                                 while j < #mask[1] and is_combined do
                                                     if mask[i + 1][j + 1] == 1 then
-                                                        local element = state.elements[y + i + 1][x + j + 1]
+                                                        local element = get_element(x + j, y + i)
                                                         if element == ____exports.NullElement then
                                                             is_combined = false
                                                             break
@@ -287,7 +300,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         cb_is_combined_elements = fnc
     end
     local function is_can_move_base(from_x, from_y, to_x, to_y)
-        local element_from = state.elements[from_y + 1][from_x + 1]
+        local element_from = get_element(from_x, from_y)
         if element_from == ____exports.NullElement then
             return false
         end
@@ -295,7 +308,7 @@ function ____exports.Field(size_x, size_y, move_direction)
         if not element_type_from.is_movable then
             return false
         end
-        local element_to = state.elements[to_y + 1][to_x + 1]
+        local element_to = get_element(to_x, to_y)
         if element_to ~= ____exports.NullElement then
             local element_type_to = state.element_types[element_from.type]
             if not element_type_to.is_movable then
@@ -347,9 +360,10 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function on_combined_base(combined_element, combination)
         for ____, item in ipairs(combination.elements) do
-            local element = state.elements[item.y + 1][item.x + 1]
-            if element ~= ____exports.NullElement and element.id == item.id then
-                on_cell_activation(item)
+            local cell = get_cell(item.x, item.y)
+            local element = get_element(item.x, item.y)
+            if cell ~= ____exports.NotActiveCell and element ~= ____exports.NullElement and element.id == item.id then
+                on_cell_activation({x = item.x, y = item.y, id = cell.id})
                 on_near_activation(get_neighbor_cells(item.x, item.y))
                 try_damage_element({x = item.x, y = item.y, element = element})
                 __TS__ArraySplice(
@@ -360,7 +374,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                     ),
                     1
                 )
-                state.elements[item.y + 1][item.x + 1] = ____exports.NullElement
+                set_element(item.x, item.y, ____exports.NullElement)
             end
         end
     end
@@ -403,8 +417,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 do
                     local x = 0
                     while x < size_x do
-                        local cell = state.cells[y + 1][x + 1]
-                        if cell ~= ____exports.NotActiveCell and state.elements[y + 1][x + 1] == ____exports.NullElement then
+                        local cell = get_cell(x, y)
+                        if cell ~= ____exports.NotActiveCell and get_element(x, y) == ____exports.NullElement then
                             free_cells[#free_cells + 1] = {x = x, y = y, id = cell.id}
                         end
                         x = x + 1
@@ -423,7 +437,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                 do
                     local x = 0
                     while x < size_x do
-                        local element = state.elements[y + 1][x + 1]
+                        local element = get_element(x, y)
                         if element ~= ____exports.NullElement and element.type == element_type then
                             target_elements[#target_elements + 1] = {x = x, y = y, id = element.id}
                         end
@@ -438,17 +452,8 @@ function ____exports.Field(size_x, size_y, move_direction)
     local function set_cell(x, y, cell)
         state.cells[y + 1][x + 1] = cell
     end
-    local function get_cell(x, y)
-        return state.cells[y + 1][x + 1]
-    end
     local function set_element_type(id, element_type)
         state.element_types[id] = element_type
-    end
-    local function set_element(x, y, element)
-        state.elements[y + 1][x + 1] = element
-    end
-    local function get_element(x, y)
-        return state.elements[y + 1][x + 1]
     end
     local function get_neighbor_elements(x, y, mask)
         if mask == nil then
@@ -462,7 +467,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                     local j = x - 1
                     while j <= x + 1 do
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
-                            local item = state.elements[i + 1][j + 1]
+                            local item = get_element(j, i)
                             if item ~= ____exports.NullElement then
                                 neighbors[#neighbors + 1] = {x = j, y = i, id = item.id}
                             end
@@ -476,7 +481,11 @@ function ____exports.Field(size_x, size_y, move_direction)
         return neighbors
     end
     local function remove_element(x, y, is_damaging, is_near_activation)
-        local element = state.elements[y + 1][x + 1]
+        local cell = get_cell(x, y)
+        if cell == ____exports.NotActiveCell then
+            return
+        end
+        local element = get_element(x, y)
         if element == ____exports.NullElement then
             return
         end
@@ -484,7 +493,7 @@ function ____exports.Field(size_x, size_y, move_direction)
             on_near_activation(get_neighbor_cells(x, y))
         end
         if is_damaging and try_damage_element({x = x, y = y, element = element}) then
-            on_cell_activation({x = x, y = y, id = element.id})
+            on_cell_activation({x = x, y = y, id = cell.id})
             __TS__ArraySplice(
                 damaged_elements,
                 __TS__ArrayFindIndex(
@@ -493,7 +502,7 @@ function ____exports.Field(size_x, size_y, move_direction)
                 ),
                 1
             )
-            state.elements[y + 1][x + 1] = ____exports.NullElement
+            set_element(x, y, ____exports.NullElement)
         end
     end
     local function is_available_cell_type_for_move(cell)
@@ -516,22 +525,22 @@ function ____exports.Field(size_x, size_y, move_direction)
         return true
     end
     local function try_move(from_x, from_y, to_x, to_y)
-        local cell_from = state.cells[from_y + 1][from_x + 1]
+        local cell_from = get_cell(from_x, from_y)
         if cell_from == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_from) then
             return false
         end
-        local cell_to = state.cells[to_y + 1][to_x + 1]
+        local cell_to = get_cell(to_x, to_y)
         if cell_to == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_to) then
             return false
         end
         local is_can = is_can_move(from_x, from_y, to_x, to_y)
         if is_can then
             swap_elements(from_x, from_y, to_x, to_y)
-            local element_from = state.elements[from_y + 1][from_x + 1]
+            local element_from = get_element(from_x, from_y)
             if element_from ~= ____exports.NullElement then
                 last_moved_elements[#last_moved_elements + 1] = {x = from_x, y = from_y, id = element_from.id}
             end
-            local element_to = state.elements[to_y + 1][to_x + 1]
+            local element_to = get_element(to_x, to_y)
             if element_to ~= ____exports.NullElement then
                 last_moved_elements[#last_moved_elements + 1] = {x = to_x, y = to_y, id = element_to.id}
             end
@@ -539,11 +548,11 @@ function ____exports.Field(size_x, size_y, move_direction)
         return is_can
     end
     local function try_click(x, y)
-        local cell = state.cells[y + 1][x + 1]
+        local cell = get_cell(x, y)
         if cell == ____exports.NotActiveCell then
             return false
         end
-        local element = state.elements[y + 1][x + 1]
+        local element = get_element(x, y)
         if element == ____exports.NullElement then
             return false
         end
@@ -586,15 +595,15 @@ function ____exports.Field(size_x, size_y, move_direction)
         do
             local j = y
             while j >= 0 do
-                local cell = state.cells[j + 1][x + 1]
+                local cell = get_cell(x, j)
                 if cell ~= ____exports.NotActiveCell then
                     if not is_available_cell_type_for_move(cell) then
                         return false
                     end
-                    local element = state.elements[j + 1][x + 1]
+                    local element = get_element(x, j)
                     if element ~= ____exports.NullElement then
-                        state.elements[y + 1][x + 1] = element
-                        state.elements[j + 1][x + 1] = ____exports.NullElement
+                        set_element(x, y, element)
+                        set_element(x, j, ____exports.NullElement)
                         on_move_element(
                             x,
                             j,
@@ -609,21 +618,22 @@ function ____exports.Field(size_x, size_y, move_direction)
                 j = j - 1
             end
         end
-        return false
+        request_element(x, y)
+        return true
     end
     local function try_move_element_from_down(x, y)
         do
             local j = y
             while j < size_y do
-                local cell = state.cells[j + 1][x + 1]
+                local cell = get_cell(x, j)
                 if cell ~= ____exports.NotActiveCell then
                     if not is_available_cell_type_for_move(cell) then
                         return false
                     end
-                    local element = state.elements[j + 1][x + 1]
+                    local element = get_element(x, j)
                     if element ~= ____exports.NullElement then
-                        state.elements[y + 1][x + 1] = element
-                        state.elements[j + 1][x + 1] = ____exports.NullElement
+                        set_element(x, y, element)
+                        set_element(x, j, ____exports.NullElement)
                         on_move_element(
                             x,
                             j,
@@ -638,21 +648,22 @@ function ____exports.Field(size_x, size_y, move_direction)
                 j = j + 1
             end
         end
-        return false
+        request_element(x, y)
+        return true
     end
     local function try_move_element_from_left(x, y)
         do
             local j = x
             while j >= 0 do
-                local cell = state.cells[y + 1][j + 1]
+                local cell = get_cell(j, y)
                 if cell ~= ____exports.NotActiveCell then
                     if not is_available_cell_type_for_move(cell) then
                         return false
                     end
-                    local element = state.elements[y + 1][j + 1]
+                    local element = get_element(j, y)
                     if element ~= ____exports.NullElement then
-                        state.elements[y + 1][x + 1] = element
-                        state.elements[y + 1][j + 1] = ____exports.NullElement
+                        set_element(x, y, element)
+                        set_element(j, y, ____exports.NullElement)
                         on_move_element(
                             j,
                             y,
@@ -667,21 +678,22 @@ function ____exports.Field(size_x, size_y, move_direction)
                 j = j - 1
             end
         end
-        return false
+        request_element(x, y)
+        return true
     end
     local function try_move_element_from_right(x, y)
         do
             local j = x
             while j < size_x do
-                local cell = state.cells[y + 1][j + 1]
+                local cell = get_cell(j, y)
                 if cell ~= ____exports.NotActiveCell then
                     if not is_available_cell_type_for_move(cell) then
                         return false
                     end
-                    local element = state.elements[y + 1][j + 1]
+                    local element = get_element(j, y)
                     if element ~= ____exports.NullElement then
-                        state.elements[y + 1][x + 1] = element
-                        state.elements[y + 1][j + 1] = ____exports.NullElement
+                        set_element(x, y, element)
+                        set_element(j, y, ____exports.NullElement)
                         on_move_element(
                             j,
                             y,
@@ -696,26 +708,25 @@ function ____exports.Field(size_x, size_y, move_direction)
                 j = j + 1
             end
         end
-        return false
+        request_element(x, y)
+        return true
     end
     local function process_move()
         local is_procesed = false
         repeat
-            local ____switch159 = move_direction
-            local ____cond159 = ____switch159 == Direction.Up
-            if ____cond159 then
+            local ____switch160 = move_direction
+            local ____cond160 = ____switch160 == Direction.Up
+            if ____cond160 then
                 do
                     local y = size_y - 1
                     while y >= 0 do
                         do
                             local x = 0
                             while x < size_x do
-                                local cell = state.cells[y + 1][x + 1]
-                                local empty = state.elements[y + 1][x + 1]
+                                local cell = get_cell(x, y)
+                                local empty = get_element(x, y)
                                 if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    if not try_move_element_from_up(x, y) then
-                                        request_element(x, y)
-                                    end
+                                    try_move_element_from_up(x, y)
                                     is_procesed = true
                                 end
                                 x = x + 1
@@ -726,20 +737,18 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond159 = ____cond159 or ____switch159 == Direction.Down
-            if ____cond159 then
+            ____cond160 = ____cond160 or ____switch160 == Direction.Down
+            if ____cond160 then
                 do
                     local y = 0
                     while y < size_y do
                         do
                             local x = 0
                             while x < size_x do
-                                local cell = state.cells[y + 1][x + 1]
-                                local empty = state.elements[y + 1][x + 1]
+                                local cell = get_cell(x, y)
+                                local empty = get_element(x, y)
                                 if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    if not try_move_element_from_down(x, y) then
-                                        request_element(x, y)
-                                    end
+                                    try_move_element_from_down(x, y)
                                     is_procesed = true
                                 end
                                 x = x + 1
@@ -750,20 +759,18 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond159 = ____cond159 or ____switch159 == Direction.Left
-            if ____cond159 then
+            ____cond160 = ____cond160 or ____switch160 == Direction.Left
+            if ____cond160 then
                 do
                     local x = size_x - 1
                     while x >= 0 do
                         do
                             local y = 0
                             while y < size_y do
-                                local cell = state.cells[y + 1][x + 1]
-                                local empty = state.elements[y + 1][x + 1]
+                                local cell = get_cell(x, y)
+                                local empty = get_element(x, y)
                                 if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    if not try_move_element_from_left(x, y) then
-                                        request_element(x, y)
-                                    end
+                                    try_move_element_from_left(x, y)
                                     is_procesed = true
                                 end
                                 y = y + 1
@@ -774,20 +781,18 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond159 = ____cond159 or ____switch159 == Direction.Right
-            if ____cond159 then
+            ____cond160 = ____cond160 or ____switch160 == Direction.Right
+            if ____cond160 then
                 do
                     local x = 0
                     while x < size_x do
                         do
                             local y = 0
                             while y < size_y do
-                                local cell = state.cells[y + 1][x + 1]
-                                local empty = state.elements[y + 1][x + 1]
+                                local cell = get_cell(x, y)
+                                local empty = get_element(x, y)
                                 if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    if not try_move_element_from_right(x, y) then
-                                        request_element(x, y)
-                                    end
+                                    try_move_element_from_right(x, y)
                                     is_procesed = true
                                 end
                                 y = y + 1
@@ -803,13 +808,13 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function process_state(mode)
         repeat
-            local ____switch177 = mode
-            local ____cond177 = ____switch177 == ____exports.ProcessMode.Combinate
-            if ____cond177 then
+            local ____switch174 = mode
+            local ____cond174 = ____switch174 == ____exports.ProcessMode.Combinate
+            if ____cond174 then
                 return process_combinate()
             end
-            ____cond177 = ____cond177 or ____switch177 == ____exports.ProcessMode.MoveElements
-            if ____cond177 then
+            ____cond174 = ____cond174 or ____switch174 == ____exports.ProcessMode.MoveElements
+            if ____cond174 then
                 return process_move()
             end
         until true

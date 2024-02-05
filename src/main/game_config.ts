@@ -75,22 +75,25 @@ export const _GAME_CONFIG = {
 
     cell_database: {
         [CellId.Base]: {
+            type_id: CellId.Base,
             type: CellType.Base,
             view: 'cell_base'
         },
 
         [CellId.Grass]: {
+            type_id: CellId.Grass,
             type: CellType.ActionLocked,
             cnt_acts: 0,
             view: 'cell_grass'
         },
 
         [CellId.Box]: {
+            type_id: CellId.Box,
             type: bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts: 0,
             view: 'cell_box'
         }
-    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
+    } as {[key in CellId]: {type_id: number, type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -229,13 +232,13 @@ export const _GAME_CONFIG = {
 
                 elements: [
                     [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.HorizontalBuster, ElementId.HorizontalBuster, ElementId.Emerald, NullElement],
-                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Diskosphere, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Diskosphere, ElementId.Diskosphere, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, NullElement, ElementId.Dimonde],
                     [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
                     [ElementId.Gold, ElementId.Gold, ElementId.Dynamite, ElementId.Dynamite, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Helicopter, ElementId.Helicopter, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement]
+                    [NullElement, ElementId.Helicopter, ElementId.Helicopter, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, NullElement]
                 ]
             },
 

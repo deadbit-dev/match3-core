@@ -91,7 +91,7 @@ export function Game() {
         }
 
         busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
-        previous_states.push(field.save_state());
+        previous_states.push(json.decode(json.encode(field.save_state())));
         
         wait_event();
     }
@@ -108,6 +108,7 @@ export function Game() {
         const data = GAME_CONFIG.cell_database[cell_id as CellId];
         const cell = {
             id: view.set_cell_view(x, y, cell_id),
+            type_id: data.type_id,
             type: data.type,
             cnt_acts: data.cnt_acts,
             cnt_near_acts: data.cnt_near_acts,
@@ -147,7 +148,7 @@ export function Game() {
             process_move();
         }
 
-        previous_states.push(field.save_state());
+        previous_states.push(json.decode(json.encode(field.save_state())));
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -181,7 +182,8 @@ export function Game() {
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
         } else {
-            try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
+            if(is_buster_element(to_pos_x, to_pos_y)) try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
+            else if(is_buster_element(from_pos_x, from_pos_y)) try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
             process_game_step();
         }
     }
@@ -294,6 +296,10 @@ export function Game() {
         }
     }
 
+    function is_buster_element(x: number, y: number) {
+        return is_click_actiovation(x, y);
+    }
+
     function try_iteract_with_other_buster(data: ActivationData, types_for_check: number[], on_interact: FncOnInteract) {
         const element = field.get_element(data.x, data.y);
         if(element == NullElement) return false;
@@ -381,9 +387,9 @@ export function Game() {
 
         const target = available_elements[math.random(0, available_elements.length - 1)];
         view.attack_animation(element, target.x, target.y, () => {
+            field.remove_element(x, y, true, true);
             if(!try_activate_buster_element({x: target.x, y: target.y}))
                 field.remove_element(target.x, target.y, true, true);
-            field.remove_element(x, y, true, true);
         });
     }
 

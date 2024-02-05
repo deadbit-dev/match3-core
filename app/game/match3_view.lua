@@ -4,6 +4,7 @@ local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
 local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
+local NotActiveCell = ____match3_core.NotActiveCell
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
 function ____exports.View()
@@ -272,13 +273,25 @@ function ____exports.View()
                 do
                     local x = 0
                     while x < field_width do
+                        local current_cell = current_state.cells[y + 1][x + 1]
+                        if current_cell ~= NotActiveCell then
+                            local current_cell_item = get_item_by_index(current_cell.id)
+                            if current_cell_item ~= nil then
+                                gm.delete_item(current_cell_item)
+                                local previous_cell = previous_state.cells[y + 1][x + 1]
+                                if previous_cell ~= NotActiveCell then
+                                    previous_cell.id = set_cell_view(x, y, previous_cell.type_id)
+                                    previous_state.cells[y + 1][x + 1] = previous_cell
+                                end
+                            end
+                        end
                         local current_element = current_state.elements[y + 1][x + 1]
                         if current_element ~= NullElement then
-                            local current_item = get_item_by_index(current_element.id)
-                            if current_item ~= nil then
+                            local current_element_item = get_item_by_index(current_element.id)
+                            if current_element_item ~= nil then
                                 local pos = {x = x, y = y}
                                 go.animate(
-                                    current_item._hash,
+                                    current_element_item._hash,
                                     "scale",
                                     go.PLAYBACK_ONCE_FORWARD,
                                     vmath.vector3(0.1, 0.1, 1),
@@ -286,7 +299,7 @@ function ____exports.View()
                                     damaged_element_time,
                                     damaged_element_delay,
                                     function()
-                                        gm.delete_item(current_item)
+                                        gm.delete_item(current_element_item)
                                         local previous_element = previous_state.elements[pos.y + 1][pos.x + 1]
                                         if previous_element ~= NullElement then
                                             previous_element.id = set_element_view(pos.x, pos.y, previous_element.type, true)
@@ -294,6 +307,12 @@ function ____exports.View()
                                         end
                                     end
                                 )
+                            end
+                        else
+                            local previous_element = previous_state.elements[y + 1][x + 1]
+                            if previous_element ~= NullElement then
+                                previous_element.id = set_element_view(x, y, previous_element.type, true)
+                                previous_state.elements[y + 1][x + 1] = previous_element
                             end
                         end
                         x = x + 1
