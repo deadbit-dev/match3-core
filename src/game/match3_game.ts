@@ -599,7 +599,7 @@ export function Game() {
             case CellType.ActionLocked:
                 if(cell.cnt_acts == undefined) break;
                 if(cell.cnt_acts > 0) {
-                    if(cell.data != undefined) {
+                    if(cell.data != undefined && cell.data.under_cells != undefined) {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
                         if(cell_id != undefined) make_cell(item_info.x, item_info.y, cell_id, cell.data);
                         else make_cell(item_info.x, item_info.y, CellId.Base);
@@ -609,7 +609,7 @@ export function Game() {
             case bit.bor(CellType.ActionLockedNear, CellType.Wall):
                 if(cell.cnt_near_acts == undefined) break;
                 if(cell.cnt_near_acts > 0) {
-                    if(cell.data != undefined) {
+                    if(cell.data != undefined && cell.data.under_cells != undefined) {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
                         if(cell_id != undefined) make_cell(item_info.x, item_info.y, cell_id, cell.data);
                         else make_cell(item_info.x, item_info.y, CellId.Base);

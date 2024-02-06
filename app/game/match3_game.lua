@@ -697,7 +697,7 @@ function ____exports.Game()
                     break
                 end
                 if cell.cnt_acts > 0 then
-                    if cell.data ~= nil then
+                    if cell.data ~= nil and cell.data.under_cells ~= nil then
                         local cell_id = table.remove(cell.data.under_cells)
                         if cell_id ~= nil then
                             make_cell(item_info.x, item_info.y, cell_id, cell.data)
@@ -716,7 +716,7 @@ function ____exports.Game()
                     break
                 end
                 if cell.cnt_near_acts > 0 then
-                    if cell.data ~= nil then
+                    if cell.data ~= nil and cell.data.under_cells ~= nil then
                         local cell_id = table.remove(cell.data.under_cells)
                         if cell_id ~= nil then
                             make_cell(item_info.x, item_info.y, cell_id, cell.data)
