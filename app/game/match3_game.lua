@@ -138,7 +138,7 @@ function ____exports.Game()
         if not field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y) then
             view.swap_element_animation(element_from, element_to, element_to_world_pos, element_from_world_pos)
         else
-            if not is_buster_element(to_pos_x, to_pos_y) and is_buster_element(from_pos_x, from_pos_y) or is_diskosphere(from_pos_x, from_pos_y) then
+            if not is_buster_element(to_pos_x, to_pos_y) and is_buster_element(from_pos_x, from_pos_y) or not is_diskosphere(to_pos_x, to_pos_y) and is_diskosphere(from_pos_x, from_pos_y) then
                 try_activate_buster_element({x = from_pos_x, y = from_pos_y, other_x = to_pos_x, other_y = to_pos_y})
             else
                 try_activate_buster_element({x = to_pos_x, y = to_pos_y, other_x = from_pos_x, other_y = from_pos_y})

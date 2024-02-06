@@ -208,7 +208,7 @@ export function Game() {
             // if(is_buster_element(to_pos_x, to_pos_y) && !is_buster_element(from_pos_x, from_pos_y) || is_diskosphere(to_pos_x, to_pos_y) || (is_axis_buster(to_pos_x, to_pos_y) && is_axis_buster(from_pos_x, from_pos_y))) {
             //     try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
             // } else try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
-            if((!is_buster_element(to_pos_x, to_pos_y) && is_buster_element(from_pos_x, from_pos_y)) || is_diskosphere(from_pos_x, from_pos_y)) {
+            if((!is_buster_element(to_pos_x, to_pos_y) && is_buster_element(from_pos_x, from_pos_y)) || (!is_diskosphere(to_pos_x, to_pos_y) && is_diskosphere(from_pos_x, from_pos_y))) {
                 try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
             } else try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
             process_game_step();
