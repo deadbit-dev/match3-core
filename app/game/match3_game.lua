@@ -422,7 +422,7 @@ function ____exports.Game()
             end
         end
         if #available_elements == 0 then
-            field.remove_element(x, y, true, true)
+            field.remove_element(x, y, true, false)
             return
         end
         local target = available_elements[math.random(0, #available_elements - 1) + 1]
@@ -431,9 +431,9 @@ function ____exports.Game()
             target.x,
             target.y,
             function()
-                field.remove_element(x, y, true, true)
+                field.remove_element(x, y, true, false)
                 if not try_activate_buster_element({x = target.x, y = target.y}) then
-                    field.remove_element(target.x, target.y, true, true)
+                    field.remove_element(target.x, target.y, true, false)
                 end
             end
         )
@@ -458,22 +458,22 @@ function ____exports.Game()
                     item,
                     {other_item},
                     function()
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                     end
                 )
             end
         )
         if field.is_valid_element_pos(data.x - 1, data.y) and not try_activate_buster_element({x = data.x - 1, y = data.y}) then
-            field.remove_element(data.x - 1, data.y, true, true)
+            field.remove_element(data.x - 1, data.y, true, false)
         end
         if field.is_valid_element_pos(data.x, data.y - 1) and not try_activate_buster_element({x = data.x, y = data.y - 1}) then
-            field.remove_element(data.x, data.y - 1, true, true)
+            field.remove_element(data.x, data.y - 1, true, false)
         end
         if field.is_valid_element_pos(data.x + 1, data.y) and not try_activate_buster_element({x = data.x + 1, y = data.y}) then
-            field.remove_element(data.x + 1, data.y, true, true)
+            field.remove_element(data.x + 1, data.y, true, false)
         end
         if field.is_valid_element_pos(data.x, data.y + 1) and not try_activate_buster_element({x = data.x, y = data.y + 1}) then
-            field.remove_element(data.x, data.y + 1, true, true)
+            field.remove_element(data.x, data.y + 1, true, false)
         end
         attack(data.x, data.y, helicopter)
         do
@@ -499,13 +499,13 @@ function ____exports.Game()
                     item,
                     {other_item},
                     function()
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                         range = 3
                     end
                 )
             end
         )
-        field.remove_element(data.x, data.y, true, true)
+        field.remove_element(data.x, data.y, true, false)
         do
             local y = data.y - range
             while y <= data.y + range do
@@ -514,7 +514,7 @@ function ____exports.Game()
                     while x <= data.x + range do
                         if field.is_valid_element_pos(x, y) then
                             if not try_activate_buster_element({x = x, y = y}) then
-                                field.remove_element(x, y, true, true)
+                                field.remove_element(x, y, true, false)
                             end
                         end
                         x = x + 1
@@ -544,11 +544,11 @@ function ____exports.Game()
                         local element_data = GAME_CONFIG.element_database[element_id]
                         local elements = field.get_all_elements_by_type(element_data.type.index)
                         for ____, element in ipairs(elements) do
-                            field.remove_element(element.x, element.y, true, true)
+                            field.remove_element(element.x, element.y, true, false)
                             make_element(element.x, element.y, other_element.type, true)
                         end
-                        field.remove_element(item.x, item.y, true, true)
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(item.x, item.y, true, false)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                         for ____, element in ipairs(elements) do
                             try_activate_buster_element({x = element.x, y = element.y})
                         end
@@ -577,8 +577,8 @@ function ____exports.Game()
                                 field.remove_element(element.x, element.y, true, false)
                             end
                         end
-                        field.remove_element(item.x, item.y, true, true)
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(item.x, item.y, true, false)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                     end
                 )
             end
@@ -601,9 +601,9 @@ function ____exports.Game()
                     local element_id = other_element.type
                     local element_data = GAME_CONFIG.element_database[element_id]
                     local elements = field.get_all_elements_by_type(element_data.type.index)
-                    field.remove_element(data.x, data.y, true, true)
+                    field.remove_element(data.x, data.y, true, false)
                     for ____, element in ipairs(elements) do
-                        field.remove_element(element.x, element.y, true, true)
+                        field.remove_element(element.x, element.y, true, false)
                     end
                 end
             )

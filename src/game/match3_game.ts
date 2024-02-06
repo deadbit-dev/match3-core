@@ -422,15 +422,15 @@ export function Game() {
         }
 
         if(available_elements.length == 0) {
-            field.remove_element(x, y, true, true);
+            field.remove_element(x, y, true, false);
             return;
         }
 
         const target = available_elements[math.random(0, available_elements.length - 1)];
         view.attack_animation(element, target.x, target.y, () => {
-            field.remove_element(x, y, true, true);
+            field.remove_element(x, y, true, false);
             if(!try_activate_buster_element({x: target.x, y: target.y}))
-                field.remove_element(target.x, target.y, true, true);
+                field.remove_element(target.x, target.y, true, false);
         });
     }
 
@@ -443,18 +443,18 @@ export function Game() {
 
         const was_iteraction = try_iteract_with_other_buster(data, [ElementId.Helicopter], (item, other_item) => {
             view.squash_animation(item, [other_item], () => {
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, false);
             });
         });
 
         if(field.is_valid_element_pos(data.x - 1, data.y) && !try_activate_buster_element({x: data.x - 1, y: data.y}))
-            field.remove_element(data.x - 1, data.y, true, true);
+            field.remove_element(data.x - 1, data.y, true, false);
         if(field.is_valid_element_pos(data.x, data.y - 1) && !try_activate_buster_element({x: data.x, y: data.y - 1}))
-            field.remove_element(data.x, data.y - 1, true, true);
+            field.remove_element(data.x, data.y - 1, true, false);
         if(field.is_valid_element_pos(data.x + 1, data.y) && !try_activate_buster_element({x: data.x + 1, y: data.y}))
-            field.remove_element(data.x + 1, data.y, true, true);
+            field.remove_element(data.x + 1, data.y, true, false);
         if(field.is_valid_element_pos(data.x, data.y + 1) && !try_activate_buster_element({x: data.x, y: data.y + 1}))
-            field.remove_element(data.x, data.y + 1, true, true);
+            field.remove_element(data.x, data.y + 1, true, false);
     
         attack(data.x, data.y, helicopter);
         
@@ -474,18 +474,18 @@ export function Game() {
        
         try_iteract_with_other_buster(data, [ElementId.Dynamite], (item, other_item) => {
             view.squash_animation(item, [other_item], () => {
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, false);
                 range = 3;
             });
         });
 
-        field.remove_element(data.x, data.y, true, true);
+        field.remove_element(data.x, data.y, true, false);
 
         for(let y = data.y - range; y <= data.y + range; y++) {
             for(let x = data.x - range; x <= data.x + range; x++) {
                 if(field.is_valid_element_pos(x, y)) {
                     if(!try_activate_buster_element({x, y}))
-                        field.remove_element(x, y, true, true);
+                        field.remove_element(x, y, true, false);
                 }
             }
         }
@@ -504,12 +504,12 @@ export function Game() {
                 const elements = field.get_all_elements_by_type(element_data.type.index);
 
                 for(const element of elements) {
-                    field.remove_element(element.x, element.y, true, true);
+                    field.remove_element(element.x, element.y, true, false);
                     make_element(element.x, element.y, other_element.type, true);
                 }
 
-                field.remove_element(item.x, item.y, true, true);
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(item.x, item.y, true, false);
+                field.remove_element(other_item.x, other_item.y, true, false);
 
                 for(const element of elements) try_activate_buster_element({x: element.x, y: element.y});
             });
@@ -527,8 +527,8 @@ export function Game() {
                     for(const element of elements) field.remove_element(element.x, element.y, true, false);
                 }
 
-                field.remove_element(item.x, item.y, true, true);
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(item.x, item.y, true, false);
+                field.remove_element(other_item.x, other_item.y, true, false);
             });
         })) return;
 
@@ -544,8 +544,8 @@ export function Game() {
                 const element_data = GAME_CONFIG.element_database[element_id];
                 const elements = field.get_all_elements_by_type(element_data.type.index);
 
-                field.remove_element(data.x, data.y, true, true);
-                for(const element of elements) field.remove_element(element.x, element.y, true, true);
+                field.remove_element(data.x, data.y, true, false);
+                for(const element of elements) field.remove_element(element.x, element.y, true, false);
             });
             
             return;
