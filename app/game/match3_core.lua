@@ -454,8 +454,9 @@ function ____exports.Field(size_x, size_y, move_direction)
                 do
                     local x = 0
                     while x < size_x do
+                        local cell = get_cell(x, y)
                         local element = get_element(x, y)
-                        if element ~= ____exports.NullElement and element.type == element_type then
+                        if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) and element ~= ____exports.NullElement and element.type == element_type then
                             target_elements[#target_elements + 1] = {x = x, y = y, id = element.id}
                         end
                         x = x + 1

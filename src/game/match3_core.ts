@@ -502,8 +502,9 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         const target_elements: ItemInfo[] = []; 
         for(let y = 0; y < size_y; y++) {
             for(let x = 0; x < size_x; x++) {
+                const cell = get_cell(x, y);
                 const element = get_element(x, y);
-                if(element != NullElement && element.type == element_type) {
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement && element.type == element_type) {
                     target_elements.push({x, y, id: element.id});
                 }
             }
