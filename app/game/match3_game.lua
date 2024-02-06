@@ -327,7 +327,7 @@ function ____exports.Game()
                     item,
                     {other_item},
                     function()
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                         try_activate_axis_buster({x = item.x, y = item.y})
                     end
                 )
@@ -335,13 +335,13 @@ function ____exports.Game()
         ) then
             return
         end
-        field.remove_element(data.x, data.y, true, true)
+        field.remove_element(data.x, data.y, true, false)
         do
             local y = 0
             while y < field_height do
                 if y ~= data.y then
                     if not try_activate_buster_element({x = data.x, y = y}) then
-                        field.remove_element(data.x, y, true, true)
+                        field.remove_element(data.x, y, true, false)
                     end
                 end
                 y = y + 1
@@ -357,7 +357,7 @@ function ____exports.Game()
                     item,
                     {other_item},
                     function()
-                        field.remove_element(other_item.x, other_item.y, true, true)
+                        field.remove_element(other_item.x, other_item.y, true, false)
                         try_activate_axis_buster({x = item.x, y = item.y})
                     end
                 )
@@ -365,13 +365,13 @@ function ____exports.Game()
         ) then
             return
         end
-        field.remove_element(data.x, data.y, true, true)
+        field.remove_element(data.x, data.y, true, false)
         do
             local x = 0
             while x < field_width do
                 if x ~= data.x then
                     if not try_activate_buster_element({x = x, y = data.y}) then
-                        field.remove_element(x, data.y, true, true)
+                        field.remove_element(x, data.y, true, false)
                     end
                 end
                 x = x + 1
@@ -379,13 +379,13 @@ function ____exports.Game()
         end
     end
     function try_activate_axis_buster(data)
-        field.remove_element(data.x, data.y, true, true)
+        field.remove_element(data.x, data.y, true, false)
         do
             local y = 0
             while y < field_height do
                 if y ~= data.y then
                     if not try_activate_buster_element({x = data.x, y = y}) then
-                        field.remove_element(data.x, y, true, true)
+                        field.remove_element(data.x, y, true, false)
                     end
                 end
                 y = y + 1
@@ -396,7 +396,7 @@ function ____exports.Game()
             while x < field_width do
                 if x ~= data.x then
                     if not try_activate_buster_element({x = x, y = data.y}) then
-                        field.remove_element(x, data.y, true, true)
+                        field.remove_element(x, data.y, true, false)
                     end
                 end
                 x = x + 1

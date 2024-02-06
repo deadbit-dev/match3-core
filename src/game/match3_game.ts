@@ -359,17 +359,17 @@ export function Game() {
     function try_activate_vertical_buster(data: ActivationData) {
         if(try_iteract_with_other_buster(data, [ElementId.HorizontalBuster, ElementId.VerticalBuster], (item, other_item) => {
             view.squash_animation(item, [other_item], () => {
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, false);
                 try_activate_axis_buster({x: item.x, y: item.y});
             });
         })) return;
 
-        field.remove_element(data.x, data.y, true, true);
+        field.remove_element(data.x, data.y, true, false);
         
         for(let y = 0; y < field_height; y++) {
             if(y != data.y) {
                 if(!try_activate_buster_element({x: data.x, y}))
-                    field.remove_element(data.x, y, true, true);
+                    field.remove_element(data.x, y, true, false);
             }
         }
     }
@@ -377,35 +377,35 @@ export function Game() {
     function try_activate_horizontal_buster(data: ActivationData) {
         if(try_iteract_with_other_buster(data, [ElementId.HorizontalBuster, ElementId.VerticalBuster], (item, other_item) => {
             view.squash_animation(item, [other_item], () => {
-                field.remove_element(other_item.x, other_item.y, true, true);
+                field.remove_element(other_item.x, other_item.y, true, false);
                 try_activate_axis_buster({x: item.x, y: item.y});
             });
         })) return;
 
-        field.remove_element(data.x, data.y, true, true);
+        field.remove_element(data.x, data.y, true, false);
         
         for(let x = 0; x < field_width; x++) {
             if(x != data.x) {
                 if(!try_activate_buster_element({x, y: data.y}))
-                    field.remove_element(x, data.y, true, true);
+                    field.remove_element(x, data.y, true, false);
             }
         }
     }
 
     function try_activate_axis_buster(data: ActivationData) {
-        field.remove_element(data.x, data.y, true, true);
+        field.remove_element(data.x, data.y, true, false);
 
         for(let y = 0; y < field_height; y++) {
             if(y != data.y) {
                 if(!try_activate_buster_element({x: data.x, y}))
-                    field.remove_element(data.x, y, true, true);
+                    field.remove_element(data.x, y, true, false);
             }
         }
         
         for(let x = 0; x < field_width; x++) {
             if(x != data.x) {
                 if(!try_activate_buster_element({x, y: data.y}))
-                    field.remove_element(x, data.y, true, true);
+                    field.remove_element(x, data.y, true, false);
             }
         }
     }
