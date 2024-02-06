@@ -96,7 +96,7 @@ function ____exports.View()
             vmath.vector3(scale_ratio, scale_ratio, 1),
             _go
         )
-        return gm.add_game_item({_hash = _go})
+        return gm.add_game_item({_hash = _go, is_clickable = true})
     end
     local function set_element_view(x, y, element_id, spawn_anim, z_index)
         if spawn_anim == nil then

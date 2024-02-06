@@ -163,7 +163,7 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     function get_neighbor_cells(x, y, mask)
         if mask == nil then
-            mask = {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}}
+            mask = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}}
         end
         local neighbors = {}
         do
@@ -496,15 +496,15 @@ function ____exports.Field(size_x, size_y, move_direction)
         if cell == ____exports.NotActiveCell then
             return
         end
+        on_cell_activation({x = x, y = y, id = cell.id})
+        if is_near_activation then
+            on_near_activation(get_neighbor_cells(x, y))
+        end
         local element = get_element(x, y)
         if element == ____exports.NullElement then
             return
         end
-        if is_near_activation then
-            on_near_activation(get_neighbor_cells(x, y))
-        end
         if is_damaging and try_damage_element({x = x, y = y, element = element}) then
-            on_cell_activation({x = x, y = y, id = cell.id})
             __TS__ArraySplice(
                 damaged_elements,
                 __TS__ArrayFindIndex(

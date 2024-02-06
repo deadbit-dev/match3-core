@@ -532,7 +532,7 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
 
     // возвращает соседние клетки
-    function get_neighbor_cells(x: number, y: number, mask = [[0, 1, 0,], [1, 0, 1], [0, 1, 0]]) {
+    function get_neighbor_cells(x: number, y: number, mask = [[0, 1, 0,], [1, 1, 1], [0, 1, 0]]) {
         const neighbors: ItemInfo[] = [];
 
         for (let i = y - 1; i <= y + 1; i++) {
@@ -571,12 +571,13 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         const cell = get_cell(x, y);
         if(cell == NotActiveCell) return;
 
+        on_cell_activation({x, y, id: cell.id});
+        if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
+
         const element = get_element(x, y);
         if(element == NullElement) return;
-
-        if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
-        if(is_damaging && try_damage_element({x, y, element: element})) {
-            on_cell_activation({x, y, id: cell.id});
+        
+        if(is_damaging && try_damage_element({x, y, element: element})) {    
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
             set_element(x, y, NullElement);
         }

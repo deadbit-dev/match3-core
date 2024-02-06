@@ -25,7 +25,7 @@ local CellType = ____match3_core.CellType
 local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.Game()
-    local setup_element_types, init_cell, init_element, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_activation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, is_buster_element, try_iteract_with_other_buster, try_activate_vertical_buster, try_activate_horizontal_buster, try_activate_axis_buster, attack, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, level_config, field_width, field_height, busters, field, view, previous_states, selected_element, activated_elements
+    local setup_element_types, init_cell, init_element, make_cell, make_element, process_move, process_game_step, get_move_direction, is_can_move, swap_elements, is_click_activation, try_click_activation, try_hammer_activation, on_down, on_move, on_up, make_buster, on_combined, is_buster_element, is_diskosphere, try_iteract_with_other_buster, try_activate_vertical_buster, try_activate_horizontal_buster, try_activate_axis_buster, attack, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_activate_buster_element, on_damaged_element, on_cell_activated, get_random_element_id, on_request_element, revert_step, wait_event, min_swipe_distance, move_delay_after_combination, wait_time_after_move, buster_delay, level_config, field_width, field_height, busters, field, view, previous_states, selected_element, activated_elements
     function setup_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -138,7 +138,7 @@ function ____exports.Game()
         if not field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y) then
             view.swap_element_animation(element_from, element_to, element_to_world_pos, element_from_world_pos)
         else
-            if is_buster_element(to_pos_x, to_pos_y) and not is_buster_element(from_pos_x, from_pos_y) then
+            if is_buster_element(to_pos_x, to_pos_y) and not is_buster_element(from_pos_x, from_pos_y) or is_diskosphere(to_pos_x, to_pos_y) then
                 try_activate_buster_element({x = to_pos_x, y = to_pos_y, other_x = from_pos_x, other_y = from_pos_y})
             else
                 try_activate_buster_element({x = from_pos_x, y = from_pos_y, other_x = to_pos_x, other_y = to_pos_y})
@@ -174,7 +174,7 @@ function ____exports.Game()
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
         end
-        field.remove_element(x, y, true, false)
+        field.remove_element(x, y, true, true)
         flow.delay(buster_delay)
         process_game_step()
         GameStorage.set(
@@ -285,6 +285,13 @@ function ____exports.Game()
     end
     function is_buster_element(x, y)
         return is_click_activation(x, y)
+    end
+    function is_diskosphere(x, y)
+        local element = field.get_element(x, y)
+        if element == NullElement then
+            return false
+        end
+        return element.type == ElementId.Diskosphere
     end
     function try_iteract_with_other_buster(data, types_for_check, on_interact)
         local element = field.get_element(data.x, data.y)
@@ -612,34 +619,34 @@ function ____exports.Game()
             return false
         end
         repeat
-            local ____switch141 = element.type
-            local ____cond141 = ____switch141 == ElementId.AxisBuster
-            if ____cond141 then
+            local ____switch143 = element.type
+            local ____cond143 = ____switch143 == ElementId.AxisBuster
+            if ____cond143 then
                 try_activate_axis_buster(data)
                 break
             end
-            ____cond141 = ____cond141 or ____switch141 == ElementId.VerticalBuster
-            if ____cond141 then
+            ____cond143 = ____cond143 or ____switch143 == ElementId.VerticalBuster
+            if ____cond143 then
                 try_activate_vertical_buster(data)
                 break
             end
-            ____cond141 = ____cond141 or ____switch141 == ElementId.HorizontalBuster
-            if ____cond141 then
+            ____cond143 = ____cond143 or ____switch143 == ElementId.HorizontalBuster
+            if ____cond143 then
                 try_activate_horizontal_buster(data)
                 break
             end
-            ____cond141 = ____cond141 or ____switch141 == ElementId.Helicopter
-            if ____cond141 then
+            ____cond143 = ____cond143 or ____switch143 == ElementId.Helicopter
+            if ____cond143 then
                 try_activate_helicopter(data)
                 break
             end
-            ____cond141 = ____cond141 or ____switch141 == ElementId.Dynamite
-            if ____cond141 then
+            ____cond143 = ____cond143 or ____switch143 == ElementId.Dynamite
+            if ____cond143 then
                 try_activate_dynamite(data)
                 break
             end
-            ____cond141 = ____cond141 or ____switch141 == ElementId.Diskosphere
-            if ____cond141 then
+            ____cond143 = ____cond143 or ____switch143 == ElementId.Diskosphere
+            if ____cond143 then
                 try_activate_diskosphere(data)
                 break
             end
@@ -676,9 +683,9 @@ function ____exports.Game()
         end
         view.delete_item(item, true)
         repeat
-            local ____switch148 = cell.type
-            local ____cond148 = ____switch148 == CellType.ActionLocked
-            if ____cond148 then
+            local ____switch150 = cell.type
+            local ____cond150 = ____switch150 == CellType.ActionLocked
+            if ____cond150 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -696,8 +703,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond148 = ____cond148 or ____switch148 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond148 then
+            ____cond150 = ____cond150 or ____switch150 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond150 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -783,24 +790,24 @@ function ____exports.Game()
             local message_id, _message, sender = flow.until_any_message()
             view.do_message(message_id, _message, sender)
             repeat
-                local ____switch181 = message_id
-                local ____cond181 = ____switch181 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond181 then
+                local ____switch183 = message_id
+                local ____cond183 = ____switch183 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond183 then
                     on_down(_message.item)
                     break
                 end
-                ____cond181 = ____cond181 or ____switch181 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond181 then
+                ____cond183 = ____cond183 or ____switch183 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond183 then
                     on_up(_message.item)
                     break
                 end
-                ____cond181 = ____cond181 or ____switch181 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond181 then
+                ____cond183 = ____cond183 or ____switch183 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond183 then
                     on_move(_message)
                     break
                 end
-                ____cond181 = ____cond181 or ____switch181 == to_hash("REVERT_STEP")
-                if ____cond181 then
+                ____cond183 = ____cond183 or ____switch183 == to_hash("REVERT_STEP")
+                if ____cond183 then
                     revert_step()
                     break
                 end

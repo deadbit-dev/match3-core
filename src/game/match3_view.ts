@@ -97,7 +97,7 @@ export function View() {
 
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-        return gm.add_game_item({ _hash: _go });
+        return gm.add_game_item({ _hash: _go, is_clickable: true });
     }
 
     function set_element_view(x: number, y: number, element_id: ElementId, spawn_anim = false, z_index = 0): number {
