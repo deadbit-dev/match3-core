@@ -205,8 +205,9 @@ export function Game() {
         if(!field.try_move(from_pos_x, from_pos_y, to_pos_x, to_pos_y)) {
             view.swap_element_animation(element_from as Element, element_to as Element, element_to_world_pos, element_from_world_pos);
         } else {
-            if(is_buster_element(to_pos_x, to_pos_y) && !is_buster_element(from_pos_x, from_pos_y) || is_diskosphere(to_pos_x, to_pos_y)) try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
-            else try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
+            if(is_buster_element(to_pos_x, to_pos_y) && !is_buster_element(from_pos_x, from_pos_y) || is_diskosphere(to_pos_x, to_pos_y) || is_axis_buster(to_pos_x, to_pos_y)) {
+                try_activate_buster_element({x: to_pos_x, y: to_pos_y, other_x: from_pos_x, other_y: from_pos_y });
+            } else try_activate_buster_element({x: from_pos_x, y: from_pos_y, other_x: to_pos_x, other_y: to_pos_y });
             process_game_step();
         }
     }
@@ -236,7 +237,7 @@ export function Game() {
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
-        field.remove_element(x, y, true, true);
+        field.remove_element(x, y, true, false);
         flow.delay(buster_delay);
         process_game_step();
 
@@ -324,6 +325,13 @@ export function Game() {
 
     function is_buster_element(x: number, y: number) {
         return is_click_activation(x, y);
+    }
+
+    function is_axis_buster(x: number, y: number) {
+        const element = field.get_element(x, y);
+        if(element == NullElement) return false;
+
+        return (element.type == ElementId.VerticalBuster || element.type == ElementId.HorizontalBuster);
     }
 
     function is_diskosphere(x: number, y: number) {
@@ -516,7 +524,7 @@ export function Game() {
                     const element_data = GAME_CONFIG.element_database[element_id];
                     const elements = field.get_all_elements_by_type(element_data.type.index);
                     
-                    for(const element of elements) field.remove_element(element.x, element.y, true, true);
+                    for(const element of elements) field.remove_element(element.x, element.y, true, false);
                 }
 
                 field.remove_element(item.x, item.y, true, true);

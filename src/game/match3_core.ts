@@ -443,11 +443,20 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
     }
     
     function on_cell_activation_base(item: ItemInfo) {
+        let activated = false;
+
         const cell = get_cell(item.x, item.y);
         if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) && cell.cnt_acts != undefined) {
             cell.cnt_acts++;
-            if(cb_on_cell_activated != undefined) cb_on_cell_activated(item);
+            activated = true;
         }
+        
+        if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.cnt_near_acts != undefined) {
+            cell.cnt_near_acts++;
+            activated = true;
+        }
+        
+        if(activated && cb_on_cell_activated != undefined) cb_on_cell_activated(item);
     }
 
     function set_callback_on_cell_activation(fnc: FncOnCellActivation) {
@@ -573,6 +582,8 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
 
         on_cell_activation({x, y, id: cell.id});
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
+
+        if(!is_available_cell_type_for_move(cell)) return;
 
         const element = get_element(x, y);
         if(element == NullElement) return;

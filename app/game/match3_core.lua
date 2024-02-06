@@ -128,12 +128,18 @@ function ____exports.Field(size_x, size_y, move_direction)
         end
     end
     function on_cell_activation_base(item)
+        local activated = false
         local cell = get_cell(item.x, item.y)
         if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLocked) == ____exports.CellType.ActionLocked and cell.cnt_acts ~= nil then
             cell.cnt_acts = cell.cnt_acts + 1
-            if cb_on_cell_activated ~= nil then
-                cb_on_cell_activated(item)
-            end
+            activated = true
+        end
+        if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.cnt_near_acts ~= nil then
+            cell.cnt_near_acts = cell.cnt_near_acts + 1
+            activated = true
+        end
+        if activated and cb_on_cell_activated ~= nil then
+            cb_on_cell_activated(item)
         end
     end
     function on_cell_activation(item)
@@ -500,6 +506,9 @@ function ____exports.Field(size_x, size_y, move_direction)
         if is_near_activation then
             on_near_activation(get_neighbor_cells(x, y))
         end
+        if not is_available_cell_type_for_move(cell) then
+            return
+        end
         local element = get_element(x, y)
         if element == ____exports.NullElement then
             return
@@ -716,9 +725,9 @@ function ____exports.Field(size_x, size_y, move_direction)
     local function process_move()
         local is_procesed = false
         repeat
-            local ____switch160 = move_direction
-            local ____cond160 = ____switch160 == Direction.Up
-            if ____cond160 then
+            local ____switch162 = move_direction
+            local ____cond162 = ____switch162 == Direction.Up
+            if ____cond162 then
                 do
                     local y = size_y - 1
                     while y >= 0 do
@@ -739,8 +748,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond160 = ____cond160 or ____switch160 == Direction.Down
-            if ____cond160 then
+            ____cond162 = ____cond162 or ____switch162 == Direction.Down
+            if ____cond162 then
                 do
                     local y = 0
                     while y < size_y do
@@ -761,8 +770,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond160 = ____cond160 or ____switch160 == Direction.Left
-            if ____cond160 then
+            ____cond162 = ____cond162 or ____switch162 == Direction.Left
+            if ____cond162 then
                 do
                     local x = size_x - 1
                     while x >= 0 do
@@ -783,8 +792,8 @@ function ____exports.Field(size_x, size_y, move_direction)
                 end
                 break
             end
-            ____cond160 = ____cond160 or ____switch160 == Direction.Right
-            if ____cond160 then
+            ____cond162 = ____cond162 or ____switch162 == Direction.Right
+            if ____cond162 then
                 do
                     local x = 0
                     while x < size_x do
@@ -810,13 +819,13 @@ function ____exports.Field(size_x, size_y, move_direction)
     end
     local function process_state(mode)
         repeat
-            local ____switch174 = mode
-            local ____cond174 = ____switch174 == ____exports.ProcessMode.Combinate
-            if ____cond174 then
+            local ____switch176 = mode
+            local ____cond176 = ____switch176 == ____exports.ProcessMode.Combinate
+            if ____cond176 then
                 return process_combinate()
             end
-            ____cond174 = ____cond174 or ____switch174 == ____exports.ProcessMode.MoveElements
-            if ____cond174 then
+            ____cond176 = ____cond176 or ____switch176 == ____exports.ProcessMode.MoveElements
+            if ____cond176 then
                 return process_move()
             end
         until true
