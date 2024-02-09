@@ -27,15 +27,15 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/horizontal_buster.png"
+  image: "/assets/horizontal_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/vertical_buster.png"
+  image: "/assets/vertical_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/axis_buster.png"
+  image: "/assets/axis_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {

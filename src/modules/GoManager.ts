@@ -214,16 +214,16 @@ export function GoManager() {
 
     function on_click(x: number, y: number, isDown: boolean, isMove = false) {
         if (isMove) {
-            Manager.send_game('MSG_ON_MOVE', { x, y });
+            Manager.send_view('MSG_ON_MOVE', { x, y });
             return on_move(x, y);
         }
         if (isDown) {
-            Manager.send_game('MSG_ON_DOWN', { x, y });
+            Manager.send_view('MSG_ON_DOWN', { x, y });
             return on_down(x, y);
         }
         else {
             on_up(x, y);
-            Manager.send_game('MSG_ON_UP', { x, y });
+            Manager.send_view('MSG_ON_UP', { x, y });
         }
     }
 
@@ -250,8 +250,8 @@ export function GoManager() {
             const item = items[i];
             hashes.push(item._hash);
         }
-        Manager.send_game('MSG_ON_DOWN_HASHES', { hashes });
-        Manager.send_game('MSG_ON_DOWN_ITEM', { item });
+        Manager.send_view('MSG_ON_DOWN_HASHES', { hashes });
+        Manager.send_view('MSG_ON_DOWN_ITEM', { item });
     }
 
     function on_move(x: number, y: number) {
@@ -268,7 +268,7 @@ export function GoManager() {
         const np = (sp + dp) as vmath.vector3;
         np.z = src.z;
         go.set_position(np, _hash);
-        Manager.send_game('MSG_ON_MOVE_ITEM', { item: down_item });
+        Manager.send_view('MSG_ON_MOVE_ITEM', { item: down_item });
     }
 
     function on_up(x: number, y: number) {
@@ -283,13 +283,13 @@ export function GoManager() {
                 hashes.push(item._hash);
 
             }
-            Manager.send_game('MSG_ON_UP_HASHES', { hashes });
+            Manager.send_view('MSG_ON_UP_HASHES', { hashes });
         }
 
         if (!down_item)
             return;
         const item = down_item;
-        Manager.send_game('MSG_ON_UP_ITEM', { item });
+        Manager.send_view('MSG_ON_UP_ITEM', { item });
         down_item = null;
     }
 

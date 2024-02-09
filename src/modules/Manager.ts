@@ -3,7 +3,7 @@
 import * as broadcast from 'ludobits.m.broadcast';
 
 import { MessageId, Messages, VoidCallback, _SystemMessages, _ID_MESSAGES } from "./modules_const";
-import { ID_YANDEX_METRICA, VK_SHARE_URL, _UserMessages } from "../main/game_config";
+import { ID_YANDEX_METRICA, LOGIC_ID, MANAGER_ID, UI_ID, VIEW_ID, VK_SHARE_URL, _UserMessages } from "../main/game_config";
 
 import { register_log, update_debug_log } from "./Log";
 import { register_storage } from "./Storage";
@@ -44,9 +44,6 @@ export function register_manager() {
 
 
 function ManagerModule() {
-    const MANAGER_ID = 'main:/manager';
-    const UI_ID = '/ui#game';
-    const LOGIC_ID = '/game_logic#game';
     let _is_ready = false;
     let broadcast_messages: (string | hash)[] = [];
 
@@ -93,6 +90,14 @@ function ManagerModule() {
     }
 
     function send_raw_ui(message_id: string | hash, message_data?: any, receiver = UI_ID) {
+        send_raw(message_id, message_data, receiver);
+    }
+
+    function send_raw_view(message_id: string | hash, message_data?: any, receiver = VIEW_ID) {
+        send_raw(message_id, message_data, receiver);
+    }
+
+    function send_view<T extends MessageId>(message_id: T, message_data?: Messages[T], receiver = VIEW_ID) {
         send_raw(message_id, message_data, receiver);
     }
 
@@ -153,7 +158,7 @@ function ManagerModule() {
     }
 
 
-    return { init, on_message, send, send_raw, send_game, send_raw_game, send_raw_ui, is_ready, init_gui, on_message_gui, update, final, register_message, trigger_message, MANAGER_ID };
+    return { init, on_message, send, send_raw, send_game, send_raw_game, send_view, send_raw_view, send_raw_ui, is_ready, init_gui, on_message_gui, update, final, register_message, trigger_message, MANAGER_ID };
 }
 
 

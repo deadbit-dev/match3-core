@@ -1,20 +1,27 @@
 local ____exports = {}
 local flow = require("ludobits.m.flow")
-local ____match3_game = require("game.match3_game")
-local Game = ____match3_game.Game
+local ____match3_view = require("game.match3_view")
+local View = ____match3_view.View
 function ____exports.init(self)
+    msg.post(".", "acquire_input_focus")
     flow.start(
-        function() return Game() end,
+        function() return View() end,
         {}
     )
 end
 function ____exports.on_message(self, message_id, message, sender)
     flow.on_message(message_id, message, sender)
 end
+function ____exports.on_input(self, action_id, action)
+    if action_id == hash("touch") then
+        msg.post(".", action_id, action)
+    end
+end
 function ____exports.final(self)
     flow.stop()
 end
 init = ____exports.init
 on_message = ____exports.on_message
+on_input = ____exports.on_input
 final = ____exports.final
 

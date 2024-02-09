@@ -1,5 +1,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ElementId } from "../main/game_config";
 import { Direction, rotate_matrix_90 } from "../utils/math_utils";
@@ -91,7 +92,6 @@ export const NotActiveCell = -1;
 // описание свойств клетки
 export interface Cell {
     id: number;
-    type_id: number;
     type: number; // маска свойств
     cnt_acts?: number; // число активаций которое произошло(при реакции в качестве соседней клетки + условие наличия флага ActionLocked)
     cnt_near_acts?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций

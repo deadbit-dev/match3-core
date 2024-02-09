@@ -10,7 +10,7 @@ function ____exports.init(self)
     )
     self.druid:new_button(
         "revert_step_button",
-        function() return Manager.send_game("REVERT_STEP") end
+        function() return Manager.send_raw_game(to_hash("REVERT_STEP")) end
     )
     self.druid:new_button(
         "hammer_button",

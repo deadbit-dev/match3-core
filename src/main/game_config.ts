@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { CellType, NotActiveCell, ElementType, NullElement } from "../game/match3_core";
-import { VoidMessage } from "../modules/modules_const";
+import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, Cell, Element, ElementType, StepInfo, CombinationInfo } from "../game/match3_core";
+import { PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Direction } from "../utils/math_utils";
-// import { band } from "../utils/utils";
 
 export const IS_DEBUG_MODE = true;
 
@@ -28,6 +27,11 @@ export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
+export const MANAGER_ID = 'main:/manager';
+export const UI_ID = '/ui#game';
+export const LOGIC_ID = '/game_logic#game';
+export const VIEW_ID = '/game_view#view';
+
 export enum CellId {
     Base,
     Grass,
@@ -40,9 +44,9 @@ export enum ElementId {
     Topaz,
     Ruby,
     Emerald,
-    VerticalBuster,
-    HorizontalBuster,
-    AxisBuster,
+    VerticalRocket,
+    HorizontalRocket,
+    AxisRocket,
     Helicopter,
     Dynamite,
     Diskosphere
@@ -75,30 +79,26 @@ export const _GAME_CONFIG = {
 
     cell_database: {
         [CellId.Base]: {
-            type_id: CellId.Base,
             type: CellType.Base,
             view: 'cell_base'
         },
 
         [CellId.Grass]: {
-            type_id: CellId.Grass,
             type: CellType.ActionLocked,
             cnt_acts: 0,
             view: 'cell_grass'
         },
 
         [CellId.Box]: {
-            type_id: CellId.Box,
             type: bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts: 0,
             view: 'cell_box'
         }
-    } as {[key in CellId]: {type_id: number, type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
+    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
 
     element_database: {
         [ElementId.Dimonde]: {
             type: {
-                index: ElementId.Dimonde,
                 is_movable: true,
                 is_clickable: false
             },
@@ -108,7 +108,6 @@ export const _GAME_CONFIG = {
 
         [ElementId.Gold]: {
             type: {
-                index: ElementId.Gold,
                 is_movable: true,
                 is_clickable: false
             },
@@ -118,7 +117,6 @@ export const _GAME_CONFIG = {
 
         [ElementId.Topaz]: {
             type: {
-                index: ElementId.Topaz,
                 is_movable: true,
                 is_clickable: false
             },
@@ -128,7 +126,6 @@ export const _GAME_CONFIG = {
             
         [ElementId.Ruby]: {
             type: {
-                index: ElementId.Ruby,
                 is_movable: true,
                 is_clickable: false
             },
@@ -138,7 +135,6 @@ export const _GAME_CONFIG = {
         
         [ElementId.Emerald]: {
             type: {
-                index: ElementId.Emerald,
                 is_movable: true,
                 is_clickable: false
             },
@@ -146,39 +142,35 @@ export const _GAME_CONFIG = {
             view: 'element_emerald'
         },
 
-        [ElementId.VerticalBuster]: {
+        [ElementId.VerticalRocket]: {
             type: {
-                index: ElementId.VerticalBuster,
                 is_movable: true,
                 is_clickable: true
             },
             percentage: 0,
-            view: 'vertical_buster'
+            view: 'vertical_rocket_buster'
         },
 
-        [ElementId.HorizontalBuster]: {
+        [ElementId.HorizontalRocket]: {
             type: {
-                index: ElementId.HorizontalBuster,
                 is_movable: true,
                 is_clickable: true
             },
             percentage: 0,
-            view: 'horizontal_buster'
+            view: 'horizontal_rocket_buster'
         },
 
-        [ElementId.AxisBuster]: {
+        [ElementId.AxisRocket]: {
             type: {
-                index: ElementId.AxisBuster,
                 is_movable: true,
                 is_clickable: true
             },
             percentage: 0,
-            view: 'axis_buster'
+            view: 'axis_rocket_buster'
         },
         
         [ElementId.Helicopter]: {
             type: {
-                index: ElementId.Helicopter,
                 is_movable: true,
                 is_clickable: true
             },
@@ -188,7 +180,6 @@ export const _GAME_CONFIG = {
 
         [ElementId.Dynamite]: {
             type: {
-                index: ElementId.Dynamite,
                 is_movable: true,
                 is_clickable: true
             },
@@ -198,14 +189,13 @@ export const _GAME_CONFIG = {
 
         [ElementId.Diskosphere]: {
             type: {
-                index: ElementId.Diskosphere,
                 is_movable: true,
                 is_clickable: true
             },
             percentage: 0,
             view: 'diskosphere_buster'
         }
-    } as {[key in ElementId]: {type: ElementType, percentage: number, view: string}},
+    } as {[key in ElementId]: {type: {is_movable: boolean, is_clickable: boolean}, percentage: number, view: string}},
 
     base_elements: [
         ElementId.Dimonde,
@@ -237,11 +227,11 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.HorizontalBuster, ElementId.HorizontalBuster, ElementId.Emerald, NullElement],
-                    [ElementId.Dimonde, ElementId.VerticalBuster, ElementId.VerticalBuster, ElementId.Diskosphere, ElementId.Diskosphere, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.HorizontalRocket, ElementId.HorizontalRocket, ElementId.Emerald, NullElement],
+                    [ElementId.Dimonde, ElementId.VerticalRocket, ElementId.VerticalRocket, ElementId.Diskosphere, ElementId.Diskosphere, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.HorizontalBuster, NullElement, ElementId.Topaz],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.HorizontalRocket, NullElement, ElementId.Topaz],
                     [ElementId.Gold, ElementId.Gold, ElementId.Dynamite, ElementId.Dynamite, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
                     [NullElement, ElementId.Helicopter, ElementId.Helicopter, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, NullElement]
@@ -262,8 +252,25 @@ export const _STORAGE_CONFIG = {
     hammer_counts: 3,
 };
 
+export interface CellMessage extends ItemInfo { variety: number }
+export interface ElementMessage extends ItemInfo { type: number }
+export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
+export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo }
+export interface MoveElementMessage extends StepInfo { element: Element }
+export interface DamagedElementMessage { id: number }
+export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
-    REVERT_STEP: VoidMessage
+    ON_MAKE_CELL: CellMessage,
+    ON_MAKE_ELEMENT: ElementMessage,
+    SWAP_ELEMENTS: StepInfo,
+    ON_SWAP_ELEMENTS: SwapElementsMessage,
+    CLICK_ACTIVATION: PosXYMessage,
+    ON_COMBINED: CombinedMessage,
+    ON_MOVE_ELEMENT: MoveElementMessage,
+    ON_DAMAGED_ELEMENT: DamagedElementMessage,
+    ON_REQUEST_ELEMENT: ItemInfo,
+    REVERT_STEP: VoidMessage,
+    ON_REVERT_STEP: RevertStepMessage
 };

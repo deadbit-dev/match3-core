@@ -6,17 +6,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as flow from 'ludobits.m.flow';
-import { Game } from './match3_game';
+import { View } from './match3_view';
 
 interface props {
 }
 
 export function init(this: props) {
-    flow.start(() => Game(), {});
+    msg.post('.', 'acquire_input_focus');
+    flow.start(() => View(), {});
 }
 
 export function on_message(this: props, message_id: hash, message: any, sender: any): void {
     flow.on_message(message_id, message, sender);
+}
+
+export function on_input(this: props, action_id: string | hash, action: any): void {
+    if (action_id == hash('touch'))
+        msg.post('.', action_id, action);
 }
 
 export function final(this: props): void {
