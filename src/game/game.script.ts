@@ -22,7 +22,7 @@ export function on_message(this: props, message_id: hash, message: any, sender: 
 
 export function final(this: props): void {
     flow.stop();
-    EventBus.off('SET_FIELD');
+    EventBus.off('LOAD_FIELD');
     EventBus.off('SWAP_ELEMENTS');
     EventBus.off('CLICK_ACTIVATION');
     EventBus.off('REVERT_STEP');

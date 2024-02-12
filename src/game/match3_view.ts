@@ -76,7 +76,7 @@ export function View() {
 
     function init() {
         set_events();
-        EventBus.send('SET_FIELD');
+        EventBus.send('LOAD_FIELD');
         
         input_listener();
     }
@@ -269,9 +269,6 @@ export function View() {
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         
         game_id_to_view_index[id] = gm.add_game_item({ _hash: _go, is_clickable: true });
-
-
-        print("MAKE_VIEW: ", x, y, id);
     }
 
     //#endregion LOGIC
@@ -310,15 +307,6 @@ export function View() {
         // BACK
         go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
-    }
-    
-    function attack_animation(element: Element, target_x: number, target_y: number, on_complite?: () => void) {
-        const target_world_pos = get_world_pos(target_x, target_y);
-        const item = gm.get_item_by_index(element.id);
-        if(item == undefined) return;
-        
-        flow.go_animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, 1, 0.1);
-        if(on_complite != undefined) on_complite();
     }
 
     function on_combined_animation(combination_element: ItemInfo, combination: CombinationInfo) {
@@ -386,25 +374,21 @@ export function View() {
                 }
 
                 const current_element = current_state.elements[y][x];
-                if(current_element != NullElement) {
-                    // const current_element_view_item = get_view_item_by_game_id(current_element.id);
-                    // if(current_element_view_item != undefined) {
-                        // go.animate(current_element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.1, 0.1, 1), damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                            delete_view_item_by_game_id(current_element.id);
-                            print("DELETE_ELEMENT_VIEW: ", x, y, current_element.id);
-                        // });
-                    // }
-                }
+                if(current_element != NullElement) delete_view_item_by_game_id(current_element.id);
 
                 const previous_element = previous_state.elements[y][x];
-                if(previous_element != NullElement) {
-                    make_element_view(x, y, previous_element.id, previous_element.type, true);
-                    print("MAKE_ELEMENT_VIEW: ", x, y, previous_element.id);
-                }
+                if(previous_element != NullElement) make_element_view(x, y, previous_element.id, previous_element.type, true);
             }
         }
-
-        // flow.delay(2);
+    }
+    
+    function remove_random_element_animation(element: Element, target_x: number, target_y: number, on_complite?: () => void) {
+        const target_world_pos = get_world_pos(target_x, target_y);
+        const item = gm.get_item_by_index(element.id);
+        if(item == undefined) return;
+        
+        flow.go_animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, 1, 0.1);
+        if(on_complite != undefined) on_complite();
     }
 
     //#endregion ANIMATIONS
@@ -433,10 +417,7 @@ export function View() {
     }
 
     function delete_view_item_by_game_id(id: number) {
-        const view_item = get_view_item_by_game_id(id);
-        if(view_item == undefined) return;
-        
-        gm.delete_item(view_item, true);
+        gm.delete_item(get_view_item_by_game_id(id), true);
         delete game_id_to_view_index[id];
     }
 

@@ -19,7 +19,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, set_field, init_cell, init_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_vertical_rocket, try_activate_horizontal_rocket, try_activate_axis_rocket, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_hammer_activation, swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_combined, on_move_element, on_damaged_element, on_cell_activated, on_request_element, is_click_activation, get_random_element_id, remove_random_element, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_vertical_rocket, try_activate_horizontal_rocket, try_activate_axis_rocket, try_activate_helicopter, try_activate_dynamite, try_activate_diskosphere, try_hammer_activation, swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_combined, on_move_element, on_damaged_element, on_cell_activated, on_request_element, is_click_activation, get_random_element_id, remove_random_element, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -34,7 +34,7 @@ function ____exports.Game()
         EventBus.send("UPDATED_HAMMER")
     end
     function set_events()
-        EventBus.on("SET_FIELD", set_field)
+        EventBus.on("LOAD_FIELD", load_field)
         EventBus.on(
             "SWAP_ELEMENTS",
             function(elements)
@@ -55,15 +55,15 @@ function ____exports.Game()
         )
         EventBus.on("REVERT_STEP", revert_step)
     end
-    function set_field()
+    function load_field()
         do
             local y = 0
             while y < field_height do
                 do
                     local x = 0
                     while x < field_width do
-                        init_cell(x, y)
-                        init_element(x, y)
+                        load_cell(x, y)
+                        load_element(x, y)
                         x = x + 1
                     end
                 end
@@ -74,7 +74,7 @@ function ____exports.Game()
         previous_states[#previous_states + 1] = state
         EventBus.send("ON_SET_FIELD", state)
     end
-    function init_cell(x, y)
+    function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
         if __TS__ArrayIsArray(cell_config) then
             local cells = __TS__ObjectAssign({}, cell_config)
@@ -86,7 +86,7 @@ function ____exports.Game()
             make_cell(x, y, cell_config)
         end
     end
-    function init_element(x, y)
+    function load_element(x, y)
         make_element(x, y, level_config.field.elements[y + 1][x + 1])
     end
     function make_cell(x, y, cell_id, data, with_event)
@@ -454,7 +454,44 @@ function ____exports.Game()
         if current_state == nil or previous_state == nil then
             return false
         end
-        field.load_state(previous_state)
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        local cell = previous_state.cells[y + 1][x + 1]
+                        if cell ~= NotActiveCell then
+                            local ____make_cell_10 = make_cell
+                            local ____x_8 = x
+                            local ____y_9 = y
+                            local ____opt_2 = cell and cell.data
+                            if ____opt_2 ~= nil then
+                                ____opt_2 = ____opt_2.variety
+                            end
+                            ____make_cell_10(____x_8, ____y_9, ____opt_2, cell and cell.data)
+                        else
+                            field.set_cell(x, y, NotActiveCell)
+                        end
+                        local element = previous_state.elements[y + 1][x + 1]
+                        if element ~= NullElement then
+                            make_element(
+                                x,
+                                y,
+                                element.type,
+                                false,
+                                element.data
+                            )
+                        else
+                            field.set_element(x, y, NullElement)
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        previous_state = field.save_state()
         previous_states[#previous_states + 1] = previous_state
         EventBus.send("ON_REVERT_STEP", {current_state = current_state, previous_state = previous_state})
         return true
@@ -467,29 +504,29 @@ function ____exports.Game()
     end
     function try_combo(combined_element, combination)
         repeat
-            local ____switch112 = combination.type
-            local ____cond112 = ____switch112 == CombinationType.Comb4
-            if ____cond112 then
+            local ____switch118 = combination.type
+            local ____cond118 = ____switch118 == CombinationType.Comb4
+            if ____cond118 then
                 make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket, true)
                 return true
             end
-            ____cond112 = ____cond112 or ____switch112 == CombinationType.Comb5
-            if ____cond112 then
+            ____cond118 = ____cond118 or ____switch118 == CombinationType.Comb5
+            if ____cond118 then
                 make_element(combined_element.x, combined_element.y, ElementId.Diskosphere, true)
                 return true
             end
-            ____cond112 = ____cond112 or ____switch112 == CombinationType.Comb2x2
-            if ____cond112 then
+            ____cond118 = ____cond118 or ____switch118 == CombinationType.Comb2x2
+            if ____cond118 then
                 make_element(combined_element.x, combined_element.y, ElementId.Helicopter, true)
                 break
             end
-            ____cond112 = ____cond112 or (____switch112 == CombinationType.Comb3x3a or ____switch112 == CombinationType.Comb3x3b)
-            if ____cond112 then
+            ____cond118 = ____cond118 or (____switch118 == CombinationType.Comb3x3a or ____switch118 == CombinationType.Comb3x3b)
+            if ____cond118 then
                 make_element(combined_element.x, combined_element.y, ElementId.Dynamite, true)
                 return true
             end
-            ____cond112 = ____cond112 or (____switch112 == CombinationType.Comb3x4 or ____switch112 == CombinationType.Comb3x5)
-            if ____cond112 then
+            ____cond118 = ____cond118 or (____switch118 == CombinationType.Comb3x4 or ____switch118 == CombinationType.Comb3x5)
+            if ____cond118 then
                 make_element(combined_element.x, combined_element.y, ElementId.AxisRocket, true)
                 return true
             end
@@ -530,9 +567,9 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch121 = cell.type
-            local ____cond121 = ____switch121 == CellType.ActionLocked
-            if ____cond121 then
+            local ____switch127 = cell.type
+            local ____cond127 = ____switch127 == CellType.ActionLocked
+            if ____cond127 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -578,8 +615,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond121 = ____cond121 or ____switch121 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond121 then
+            ____cond127 = ____cond127 or ____switch127 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond127 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -679,9 +716,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_2 = index
-                    index = ____index_2 - 1
-                    if ____index_2 == 0 then
+                    local ____index_11 = index
+                    index = ____index_11 - 1
+                    if ____index_11 == 0 then
                         return tonumber(key)
                     end
                 end

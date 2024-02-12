@@ -97,7 +97,7 @@ export function Game() {
     }
     
     function set_events() {
-        EventBus.on('SET_FIELD', set_field);
+        EventBus.on('LOAD_FIELD', load_field);
 
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
@@ -112,11 +112,11 @@ export function Game() {
         EventBus.on('REVERT_STEP', revert_step);
     }
 
-    function set_field() {
+    function load_field() {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
-                init_cell(x, y);
-                init_element(x, y);
+                load_cell(x, y);
+                load_element(x, y);
             }
         }
 
@@ -126,7 +126,7 @@ export function Game() {
         EventBus.send('ON_SET_FIELD', state);
     }
 
-    function init_cell(x: number, y: number) {
+    function load_cell(x: number, y: number) {
         // TODO: load save
         const cell_config = level_config['field']['cells'][y][x];
         if(Array.isArray(cell_config)) {
@@ -136,7 +136,7 @@ export function Game() {
         } else make_cell(x, y, cell_config);
     }
 
-    function init_element(x: number, y: number) {
+    function load_element(x: number, y: number) {
         // TODO: load save
         make_element(x, y, level_config['field']['elements'][y][x]);
     }
@@ -454,8 +454,20 @@ export function Game() {
         const current_state = previous_states.pop();
         let previous_state = previous_states.pop();
         if(current_state == undefined || previous_state == undefined) return false;
-        
-        field.load_state(previous_state);
+
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                const cell = previous_state.cells[y][x];
+                if(cell != NotActiveCell) make_cell(x, y, cell?.data?.variety, cell?.data);
+                else field.set_cell(x, y, NotActiveCell);
+
+                const element = previous_state.elements[y][x];
+                if(element != NullElement) make_element(x, y, element.type, false, element.data);
+                else field.set_element(x, y, NullElement);
+            }
+        }
+
+        previous_state = field.save_state();
         previous_states.push(previous_state);
 
         EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
@@ -510,6 +522,8 @@ export function Game() {
         write_game_step_event('ON_DAMAGED_ELEMENT', {id: damaged_info.element.id});
     }
 
+
+    // TODO: refactoring
     function on_cell_activated(item_info: ItemInfo) {
         const cell = field.get_cell(item_info.x, item_info.y);
         if(cell == NotActiveCell) return;
@@ -522,26 +536,30 @@ export function Game() {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
                         if(cell_id != undefined) {
                             const new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data, true);
-                            if(new_cell != NotActiveCell) write_game_step_event('ON_CELL_ACTIVATED', {
-                                x: item_info.x,
-                                y: item_info.y,
-                                id: new_cell.id,
-                                variety: cell_id,
-                                previous_id: item_info.id 
-                            });
+                            if(new_cell != NotActiveCell) {
+                                write_game_step_event('ON_CELL_ACTIVATED', {
+                                    x: item_info.x,
+                                    y: item_info.y,
+                                    id: new_cell.id,
+                                    variety: cell_id,
+                                    previous_id: item_info.id 
+                                });
+                            }
 
                             return;
                         }
                     } 
                     
                     const new_cell = make_cell(item_info.x, item_info.y, CellId.Base, null, true);
-                    if(new_cell != NotActiveCell) write_game_step_event('ON_CELL_ACTIVATED', {
-                        x: item_info.x,
-                        y: item_info.y,
-                        id: new_cell.id,
-                        variety: CellId.Base,
-                        previous_id: item_info.id 
-                    });
+                    if(new_cell != NotActiveCell) {
+                        write_game_step_event('ON_CELL_ACTIVATED', {
+                            x: item_info.x,
+                            y: item_info.y,
+                            id: new_cell.id,
+                            variety: CellId.Base,
+                            previous_id: item_info.id 
+                        });
+                    }
                 }
             break;
             case bit.bor(CellType.ActionLockedNear, CellType.Wall):
@@ -551,26 +569,30 @@ export function Game() {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
                         if(cell_id != undefined) {
                             const new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data, true);
-                            if(new_cell != NotActiveCell) write_game_step_event('ON_CELL_ACTIVATED', {
-                                x: item_info.x,
-                                y: item_info.y,
-                                id: new_cell.id,
-                                variety: cell_id,
-                                previous_id: item_info.id 
-                            });
+                            if(new_cell != NotActiveCell) {
+                                write_game_step_event('ON_CELL_ACTIVATED', {
+                                    x: item_info.x,
+                                    y: item_info.y,
+                                    id: new_cell.id,
+                                    variety: cell_id,
+                                    previous_id: item_info.id 
+                                });
+                            }
 
                             return;
                         }
                     }
                     
                     const new_cell = make_cell(item_info.x, item_info.y, CellId.Base, null, true);
-                    if(new_cell != NotActiveCell) write_game_step_event('ON_CELL_ACTIVATED', {
-                        x: item_info.x,
-                        y: item_info.y,
-                        id: new_cell.id,
-                        variety: CellId.Base,
-                        previous_id: item_info.id 
-                    });
+                    if(new_cell != NotActiveCell) {
+                        write_game_step_event('ON_CELL_ACTIVATED', {
+                            x: item_info.x,
+                            y: item_info.y,
+                            id: new_cell.id,
+                            variety: CellId.Base,
+                            previous_id: item_info.id 
+                        });
+                    }
                 }
             break;
         }

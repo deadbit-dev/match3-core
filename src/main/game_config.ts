@@ -264,8 +264,8 @@ export const _GAME_CONFIG = {
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
                     [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Helicopter, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Helicopter, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
                     [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, NullElement]
                 ]
             },
@@ -371,7 +371,7 @@ export interface RevertStepMessage { current_state: GameState, previous_state: G
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
-    SET_FIELD: VoidMessage,
+    LOAD_FIELD: VoidMessage,
     ON_SET_FIELD: GameState,
     ON_MAKE_ELEMENT: ElementMessage,
     

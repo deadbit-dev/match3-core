@@ -273,7 +273,6 @@ function ____exports.View()
             )
         end
         game_id_to_view_index[id] = gm.add_game_item({_hash = _go, is_clickable = true})
-        print("MAKE_VIEW: ", x, y, id)
     end
     function on_swap_element_animation(element_from, element_to)
         local from_world_pos = get_world_pos(element_from.x, element_from.y)
@@ -465,7 +464,6 @@ function ____exports.View()
                         local current_element = current_state.elements[y + 1][x + 1]
                         if current_element ~= NullElement then
                             delete_view_item_by_game_id(current_element.id)
-                            print("DELETE_ELEMENT_VIEW: ", x, y, current_element.id)
                         end
                         local previous_element = previous_state.elements[y + 1][x + 1]
                         if previous_element ~= NullElement then
@@ -476,7 +474,6 @@ function ____exports.View()
                                 previous_element.type,
                                 true
                             )
-                            print("MAKE_ELEMENT_VIEW: ", x, y, previous_element.id)
                         end
                         x = x + 1
                     end
@@ -513,11 +510,10 @@ function ____exports.View()
         return gm.get_item_by_index(view_index)
     end
     function delete_view_item_by_game_id(id)
-        local view_item = get_view_item_by_game_id(id)
-        if view_item == nil then
-            return
-        end
-        gm.delete_item(view_item, true)
+        gm.delete_item(
+            get_view_item_by_game_id(id),
+            true
+        )
         __TS__Delete(game_id_to_view_index, id)
     end
     local game_width = 540
@@ -553,10 +549,10 @@ function ____exports.View()
     is_processing = false
     local function init()
         set_events()
-        EventBus.send("SET_FIELD")
+        EventBus.send("LOAD_FIELD")
         input_listener()
     end
-    local function attack_animation(element, target_x, target_y, on_complite)
+    local function remove_random_element_animation(element, target_x, target_y, on_complite)
         local target_world_pos = get_world_pos(target_x, target_y)
         local item = gm.get_item_by_index(element.id)
         if item == nil then
