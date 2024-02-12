@@ -18,7 +18,7 @@ import * as camera from '../utils/camera';
 import { Direction } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, ElementId } from "../main/game_config";
+import { ActivatedCellMessage, CellId, CombinedMessage, DamagedElementMessage, ElementId, ElementMessage, GameStepEventBuffer, MoveElementMessage, SwapElementsMessage } from "../main/game_config";
 
 import { 
     Element,
@@ -26,7 +26,8 @@ import {
     ItemInfo,
     NullElement,
     NotActiveCell,
-    CombinationInfo
+    CombinationInfo,
+    StepInfo
 } from "./match3_core";
 
 
@@ -71,12 +72,95 @@ export function View() {
 
     const game_id_to_view_index: {[key in number]: number} = {};
     let selected_element: IGameItem | null = null;
+    let is_processing = false;
 
     function init() {
-        process();
+        set_events();
+        EventBus.send('SET_FIELD');
+        
+        input_listener();
     }
 
-    function process() {
+    function on_game_step(events: GameStepEventBuffer) {
+        is_processing = true;
+
+        for(const event of events) {
+            if(event.key == 'ON_SWAP_ELEMENTS') {
+                const message = event.value as SwapElementsMessage;
+                on_swap_element_animation(message.element_from, message.element_to);
+                flow.delay(0.3);
+            }
+            else if(event.key == 'ON_WRONG_SWAP_ELEMENTS') {
+                const message = event.value as SwapElementsMessage;
+                on_wrong_swap_element_animation(message.element_from, message.element_to);
+            }
+            else if(event.key == 'ON_COMBINED') {
+                flow.delay(0.3);
+            }
+            else if(event.key == 'ON_COMBO') {
+                const message = event.value as CombinedMessage;
+                on_combined_animation(message.combined_element, message.combination);
+                flow.delay(0.5);
+            }
+            else if(event.key == 'BUSTER_ACTIVATED') {
+                flow.delay(1);
+            }
+            else if(event.key == 'ON_DAMAGED_ELEMENT') {
+                const message = event.value as DamagedElementMessage;
+                on_damaged_element_animation(message.id);
+            }
+            else if(event.key == 'ON_CELL_ACTIVATED') {
+                const message = event.value as ActivatedCellMessage;
+                delete_view_item_by_game_id(message.previous_id);
+                make_cell_view(message.x, message.y, message.id, message.variety);
+            }
+            else if(event.key == 'ON_MAKE_ELEMENT') {
+                const message = event.value as ElementMessage;
+                make_element_view(message.x, message.y, message.id, message.type, true);
+            }
+            else if(event.key == 'ON_MOVE_ELEMENT') {
+                const message = event.value as MoveElementMessage;
+                on_move_element_animation(message.from_x, message.from_y, message.to_x, message.to_y, message.element);
+            }
+            else if(event.key == 'ON_REQUEST_ELEMENT') {
+                const message = event.value as ElementMessage;
+                make_element_view(message.x, message.y, message.id, message.type);
+                request_element_animation(message.x, message.y, message.id);
+            }
+            else if(event.key == 'END_MOVE_PHASE') {
+                flow.delay(1);
+            }
+        }
+
+        is_processing = false;
+    }
+
+    function set_events() {
+        EventBus.on('ON_SET_FIELD', (state) => {
+            if(state == undefined) return;
+            on_set_field(state);
+        });
+
+        EventBus.on('GAME_STEP', (events) => {
+            if(events == undefined) return;
+            flow.start(() => on_game_step(events));
+        });
+
+        EventBus.on('TRY_REVERT_STEP', () => {
+            if(is_processing) return;
+            EventBus.send('REVERT_STEP');
+        });
+
+        EventBus.on('ON_REVERT_STEP', (states) => {
+            if(states == undefined) return;
+            flow.start(() => revert_step_animation(states.current_state, states.previous_state));
+        });
+    }
+
+    //#endregion MAIN
+    //#region INPUT         
+
+    function input_listener() {
         while (true) {
             const [message_id, _message, sender] = flow.until_any_message();
             gm.do_message(message_id, _message, sender);
@@ -92,54 +176,13 @@ export function View() {
                 case ID_MESSAGES.MSG_ON_MOVE:
                     on_move((_message as Messages['MSG_ON_MOVE']));
                 break;
-
-                case to_hash('ON_MAKE_CELL'):
-                    const cell = (_message as Messages['ON_MAKE_CELL']);
-                    set_cell_view(cell.x, cell.y, cell.id, cell.variety);
-                break;
-
-                case to_hash('ON_MAKE_ELEMENT'):
-                    const element = (_message as Messages['ON_MAKE_ELEMENT']);
-                    set_element_view(element.x, element.y, element.id, element.type);
-                break;
-
-                case to_hash('ON_SWAP_ELEMENTS'):
-                    const swap_elements = (_message as Messages['ON_SWAP_ELEMENTS']);
-                    on_swap_element_animation(swap_elements.element_from, swap_elements.element_to);
-                break;
-
-                case to_hash('ON_COMBINED'):
-                    const combined_data = (_message as Messages['ON_COMBINED']);
-                    on_combined_animation(combined_data.combined_element, combined_data.combination);
-                break;
-
-                case to_hash('ON_MOVE_ELEMENT'):
-                    const move_element = (_message as Messages['ON_MOVE_ELEMENT']);
-                    on_move_element_animation(move_element.from_x, move_element.from_y, move_element.to_x, move_element.to_y, move_element.element);
-                break;
-
-                case to_hash('ON_DAMAGED_ELEMENT'):
-                    const damaged_element = (_message as Messages['ON_DAMAGED_ELEMENT']);
-                    on_damaged_element_animation(damaged_element.id);
-                break;
-
-                case to_hash('ON_REQUEST_ELEMENT'):
-                    const request_element = (_message as Messages['ON_REQUEST_ELEMENT']);
-                    request_element_animation(request_element.x, request_element.y, request_element.id);
-                break;
-
-                case to_hash('ON_REVERT_STEP'):
-                    const revert_step_data = (_message as Messages['ON_REVERT_STEP']);
-                    revert_step_animation(revert_step_data.current_state, revert_step_data.previous_state);
-                break;
             }
         }
     }
 
-    //#endregion MAIN
-    //#region INPUT         
-
     function on_down(item: IGameItem) {
+        if(is_processing) return;
+
         selected_element = item;
     }
     
@@ -150,7 +193,7 @@ export function View() {
         const selected_element_world_pos = go.get_world_position(selected_element._hash);
         const delta = (world_pos - selected_element_world_pos) as vmath.vector3;
         
-        if(math.abs(delta.x + delta.y) < min_swipe_distance) return;
+        if(vmath.length(delta) < min_swipe_distance) return;
 
         const selected_element_pos = get_field_pos(selected_element_world_pos);
         const element_to_pos = {x: selected_element_pos.x, y: selected_element_pos.y};
@@ -168,7 +211,7 @@ export function View() {
         const is_valid_y = (element_to_pos.y >= 0) && (element_to_pos.y < field_height);
         if(!is_valid_x || !is_valid_y) return;
 
-        Manager.send_raw_game(to_hash('SWAP_ELEMENTS'), {
+        EventBus.send('SWAP_ELEMENTS', {
             from_x: selected_element_pos.x,
             from_y: selected_element_pos.y,
             to_x: element_to_pos.x,
@@ -179,19 +222,32 @@ export function View() {
     }
 
     function on_up(item: IGameItem) {
+        if(selected_element == null) return;
+
         const item_world_pos = go.get_world_position(item._hash);
         const element_pos = get_field_pos(item_world_pos);
 
-        // Manager.send_raw_game(to_hash('CLICK_ACTIVATION'), {
-        //     x: element_pos.x,
-        //     y: element_pos.y
-        // });
+        EventBus.send('CLICK_ACTIVATION', {
+            x: element_pos.x,
+            y: element_pos.y
+        });
     }
 
     //#endregion INPUT
-    //#region SETUP         
+    //#region LOGIC         
 
-    function set_cell_view(x: number, y: number, id: number, cell_id: CellId, z_index = -1) {
+    function on_set_field(state: GameState) {
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                const cell = state.cells[y][x];
+                if(cell != NotActiveCell) make_cell_view(x, y, cell.id, cell?.data?.variety);
+                const element = state.elements[y][x];
+                if(element != NullElement) make_element_view(x, y, element.id, element.type, true);
+            }
+        }
+    }
+
+    function make_cell_view(x: number, y: number, id: number, cell_id: CellId, z_index = -1) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('cell_view', pos);
 
@@ -201,7 +257,7 @@ export function View() {
         game_id_to_view_index[id] = gm.add_game_item({ _hash: _go, is_clickable: true });
     }
 
-    function set_element_view(x: number, y: number, id: number, type: ElementId, spawn_anim = false, z_index = 0) {
+    function make_element_view(x: number, y: number, id: number, type: ElementId, spawn_anim = false, z_index = 0) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
 
@@ -213,34 +269,48 @@ export function View() {
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         
         game_id_to_view_index[id] = gm.add_game_item({ _hash: _go, is_clickable: true });
+
+
+        print("MAKE_VIEW: ", x, y, id);
     }
 
-    //#endregion SETUP  
-    //#region HELPERS       
+    //#endregion LOGIC
+    //#region ANIMATIONS
+    
+    function on_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
+        const from_world_pos = get_world_pos(element_from.x, element_from.y);
+        const to_world_pos = get_world_pos(element_to.x, element_to.y);
 
-    function get_world_pos(x: number, y: number, z = 0) {
-        return vmath.vector3(cells_offset.x + cell_size * x + cell_size * 0.5, cells_offset.y - cell_size * y - cell_size * 0.5, z);
+        const item_from = get_view_item_by_game_id(element_from.id);
+        if(item_from == undefined) return;
+        
+        const item_to = get_view_item_by_game_id(element_to.id);
+        if(item_to == undefined) return;
+
+        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
     }
     
-    function get_field_pos(world_pos: vmath.vector3): {x: number, y: number} {        
-        return {x: (world_pos.x - cells_offset.x - cell_size * 0.5) / cell_size, y: (cells_offset.y - world_pos.y - cell_size * 0.5) / cell_size};
-    }
-    
-    function get_move_direction(dir: vmath.vector3) {
-        const cs45 = 0.7;
-        if(dir.y > cs45) return Direction.Up;
-        else if(dir.y < -cs45) return Direction.Down;
-        else if(dir.x < -cs45) return Direction.Left;
-        else if(dir.x > cs45) return Direction.Right;
-        else return Direction.None;
-    }
+    function on_wrong_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
+        const from_world_pos = get_world_pos(element_from.x, element_from.y);
+        const to_world_pos = get_world_pos(element_to.x, element_to.y);
+        
+        const item_from = get_view_item_by_game_id(element_from.id);
+        if(item_from == undefined) return;
 
-    function get_view_index_by_game_id(id: number) {
-        return game_id_to_view_index[id];
-    }
+        const item_to = get_view_item_by_game_id(element_to.id);
+        if(item_to == undefined) return;
 
-    //#endregion GET HELPERS
-    //#region ANIMATIONS    
+        // FORWARD
+        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+
+        flow.delay(swap_element_time);
+
+        // BACK
+        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+    }
     
     function attack_animation(element: Element, target_x: number, target_y: number, on_complite?: () => void) {
         const target_world_pos = get_world_pos(target_x, target_y);
@@ -256,36 +326,17 @@ export function View() {
         for(let i = 0; i < combination.elements.length; i++) {
             const element = combination.elements[i];
             const item = gm.get_item_by_index(element.id);
-            if(item != undefined) {
-                const is_last = (i == combination.elements.length - 1); 
-                if(!is_last) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos, squash_element_easing, squash_element_time, 0);
-                else flow.go_animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos, squash_element_easing, squash_element_time, 0);
-            }
+            if(item != undefined) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
+                squash_element_easing, squash_element_time, 0);
         }
-    }
-
-    function on_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
-        const from_world_pos = get_world_pos(element_from.x, element_from.y);
-        const to_world_pos = get_world_pos(element_to.x, element_to.y);
-
-        const item_from = gm.get_item_by_index(element_from.id);
-        if(item_from == undefined) return;
-
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-
-        const item_to = gm.get_item_by_index(element_to.id);
-        if(item_to == undefined) return;
-
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
     }
     
     function on_damaged_element_animation(element_id: number) {
-        const element_view_index = get_view_index_by_game_id(element_id);
-        const element_item = gm.get_item_by_index(element_view_index);
-        if(element_item != undefined) {
-            go.animate(element_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
+        const element_view_item = get_view_item_by_game_id(element_id);
+        if(element_view_item != undefined) {
+            go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                    gm.delete_item(element_item, true);
+                    delete_view_item_by_game_id(element_id);
                 }); 
         }
     }
@@ -293,15 +344,14 @@ export function View() {
     function on_move_element_animation(from_x: number, from_y: number, to_x: number, to_y: number, element: Element) {
         const to_world_pos = get_world_pos(to_x, to_y, 0);
         
-        const item_from = gm.get_item_by_index(element.id);
+        const item_from = get_view_item_by_game_id(element.id);
         if(item_from == undefined) return;
 
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
     }
 
     function request_element_animation(x: number, y: number, id: number) {
-        const element_view_index = get_view_index_by_game_id(id);
-        const item_from = gm.get_item_by_index(element_view_index);
+        const item_from = get_view_item_by_game_id(id);
         if(item_from == undefined) return;
 
         const world_pos = get_world_pos(x, y);
@@ -329,38 +379,68 @@ export function View() {
             for (let x = 0; x < field_width; x++) {
                 const current_cell = current_state.cells[y][x];
                 if(current_cell != NotActiveCell) {
-                    const current_cell_view_index = get_view_index_by_game_id(current_cell.id);
-                    const current_cell_item = gm.get_item_by_index(current_cell_view_index);
-                    if(current_cell_item != undefined) {
-                        gm.delete_item(current_cell_item);
-
-                        const previous_cell = previous_state.cells[y][x];
-                        if(previous_cell != NotActiveCell) set_cell_view(x, y, previous_cell.id, previous_cell?.data?.variety);
-                    }
+                    delete_view_item_by_game_id(current_cell.id);
+                    
+                    const previous_cell = previous_state.cells[y][x];
+                    if(previous_cell != NotActiveCell) make_cell_view(x, y, previous_cell.id, previous_cell?.data?.variety);
                 }
 
                 const current_element = current_state.elements[y][x];
                 if(current_element != NullElement) {
-                    const current_element_view_index = get_view_index_by_game_id(current_element.id);
-                    const current_element_view_item = gm.get_item_by_index(current_element_view_index);
-                    if(current_element_view_item != undefined) {
-                        const pos = {x, y};
-                        go.animate(current_element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.1, 0.1, 1), damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                            gm.delete_item(current_element_view_item);
-                            
-                            const previous_element = previous_state.elements[pos.y][pos.x];
-                            if(previous_element != NullElement) set_element_view(pos.x, pos.y, previous_element.id, previous_element.type, true);
-                        });
-                    }
-                } else {
-                    const previous_element = previous_state.elements[y][x];
-                    if(previous_element != NullElement) set_element_view(x, y, previous_element.id, previous_element.type, true);
+                    // const current_element_view_item = get_view_item_by_game_id(current_element.id);
+                    // if(current_element_view_item != undefined) {
+                        // go.animate(current_element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(0.1, 0.1, 1), damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
+                            delete_view_item_by_game_id(current_element.id);
+                            print("DELETE_ELEMENT_VIEW: ", x, y, current_element.id);
+                        // });
+                    // }
+                }
+
+                const previous_element = previous_state.elements[y][x];
+                if(previous_element != NullElement) {
+                    make_element_view(x, y, previous_element.id, previous_element.type, true);
+                    print("MAKE_ELEMENT_VIEW: ", x, y, previous_element.id);
                 }
             }
         }
+
+        // flow.delay(2);
     }
 
     //#endregion ANIMATIONS
+    //#region HELPERS       
+
+    function get_world_pos(x: number, y: number, z = 0) {
+        return vmath.vector3(cells_offset.x + cell_size * x + cell_size * 0.5, cells_offset.y - cell_size * y - cell_size * 0.5, z);
+    }
+    
+    function get_field_pos(world_pos: vmath.vector3): {x: number, y: number} {        
+        return {x: (world_pos.x - cells_offset.x - cell_size * 0.5) / cell_size, y: (cells_offset.y - world_pos.y - cell_size * 0.5) / cell_size};
+    }
+    
+    function get_move_direction(dir: vmath.vector3) {
+        const cs45 = 0.7;
+        if(dir.y > cs45) return Direction.Up;
+        else if(dir.y < -cs45) return Direction.Down;
+        else if(dir.x < -cs45) return Direction.Left;
+        else if(dir.x > cs45) return Direction.Right;
+        else return Direction.None;
+    }
+
+    function get_view_item_by_game_id(id: number) {
+        const view_index = game_id_to_view_index[id];
+        return gm.get_item_by_index(view_index);
+    }
+
+    function delete_view_item_by_game_id(id: number) {
+        const view_item = get_view_item_by_game_id(id);
+        if(view_item == undefined) return;
+        
+        gm.delete_item(view_item, true);
+        delete game_id_to_view_index[id];
+    }
+
+    //#endregion GET HELPERS
 
     return init();
 }

@@ -11,6 +11,7 @@ function ____exports.init(self)
 end
 function ____exports.on_message(self, message_id, message, sender)
     flow.on_message(message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
 end
 function ____exports.on_input(self, action_id, action)
     if action_id == hash("touch") then
@@ -19,6 +20,10 @@ function ____exports.on_input(self, action_id, action)
 end
 function ____exports.final(self)
     flow.stop()
+    EventBus.off("ON_SET_FIELD")
+    EventBus.off("GAME_STEP")
+    EventBus.off("ON_REVERT_STEP")
+    EventBus.off("TRY_REVERT_STEP")
 end
 init = ____exports.init
 on_message = ____exports.on_message

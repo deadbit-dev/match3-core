@@ -1,16 +1,45 @@
 local ____exports = {}
 local druid = require("druid.druid")
+local ____utils = require("utils.utils")
+local set_text = ____utils.set_text
+local set_text_colors = ____utils.set_text_colors
 function ____exports.init(self)
     Manager.init_gui()
     self.druid = druid.new(self)
     self.busters = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].busters
+    set_text(
+        "current_level",
+        GameStorage.get("current_level")
+    )
+    self.druid:new_button(
+        "previous_level_button",
+        function()
+            local previous_level = GameStorage.get("current_level") - 1
+            if previous_level < 0 then
+                return
+            end
+            GameStorage.set("current_level", previous_level)
+            Scene.restart()
+        end
+    )
+    self.druid:new_button(
+        "next_level_button",
+        function()
+            local next_level = GameStorage.get("current_level") + 1
+            if next_level >= #GAME_CONFIG.levels then
+                return
+            end
+            GameStorage.set("current_level", next_level)
+            Scene.restart()
+        end
+    )
     self.druid:new_button(
         "restart_button",
         function() return Scene.restart() end
     )
     self.druid:new_button(
         "revert_step_button",
-        function() return Manager.send_raw_game(to_hash("REVERT_STEP")) end
+        function() return EventBus.send("TRY_REVERT_STEP") end
     )
     self.druid:new_button(
         "hammer_button",
@@ -18,6 +47,21 @@ function ____exports.init(self)
             if GameStorage.get("hammer_counts") > 0 then
                 self.busters.hammer_active = not self.busters.hammer_active
             end
+            set_text_colors({"hammer_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
+            set_text(
+                "hammer_counts",
+                GameStorage.get("hammer_counts")
+            )
+        end
+    )
+    EventBus.on(
+        "UPDATED_HAMMER",
+        function()
+            set_text_colors({"hammer_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
+            set_text(
+                "hammer_counts",
+                GameStorage.get("hammer_counts")
+            )
         end
     )
 end
@@ -26,14 +70,6 @@ function ____exports.on_input(self, action_id, action)
 end
 function ____exports.update(self, dt)
     self.druid:update(dt)
-    gui.set_alpha(
-        gui.get_node("hammer_button"),
-        self.busters.hammer_active and 0.5 or 1
-    )
-    gui.set_text(
-        gui.get_node("hammer_counts"),
-        tostring(GameStorage.get("hammer_counts"))
-    )
 end
 function ____exports.on_message(self, message_id, message, sender)
     Manager.on_message_gui(self, message_id, message, sender)
@@ -41,6 +77,7 @@ function ____exports.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
     self.druid:final()
+    EventBus.off("UPDATED_HAMMER")
 end
 init = ____exports.init
 on_input = ____exports.on_input

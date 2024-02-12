@@ -3,7 +3,7 @@
 import * as broadcast from 'ludobits.m.broadcast';
 
 import { MessageId, Messages, VoidCallback, _SystemMessages, _ID_MESSAGES } from "./modules_const";
-import { ID_YANDEX_METRICA, LOGIC_ID, MANAGER_ID, UI_ID, VIEW_ID, VK_SHARE_URL, _UserMessages } from "../main/game_config";
+import { ID_YANDEX_METRICA, VK_SHARE_URL, _UserMessages } from "../main/game_config";
 
 import { register_log, update_debug_log } from "./Log";
 import { register_storage } from "./Storage";
@@ -16,6 +16,7 @@ import { register_system } from "./System";
 import { register_rate } from "./Rate";
 import { register_metrica } from "./Metrica";
 import { register_camera } from "./Camera";
+import { register_event_bus } from './EventBus';
 
 
 /*
@@ -44,6 +45,11 @@ export function register_manager() {
 
 
 function ManagerModule() {
+    const MANAGER_ID = 'main:/manager';
+    const UI_ID = '/ui#game';
+    const LOGIC_ID = '/game_logic#game';
+    const VIEW_ID = '/game_view#view';
+    
     let _is_ready = false;
     let broadcast_messages: (string | hash)[] = [];
 
@@ -60,6 +66,7 @@ function ManagerModule() {
         register_camera();
         register_ads();
         register_rate();
+        register_event_bus();
 
         Metrica.init(ID_YANDEX_METRICA);
         Ads.set_social_share_params(VK_SHARE_URL);
@@ -118,6 +125,7 @@ function ManagerModule() {
         Sound._on_message(_this, message_id, message, sender);
         Ads._on_message(_this, message_id, message, sender);
         Rate._on_message(_this, message_id, message, sender);
+        EventBus._on_message(_this, message_id, message, sender);
     }
 
     function update(dt: number) {
@@ -132,6 +140,7 @@ function ManagerModule() {
     // можно вызывать в каждом on_message всех gui чтобы применялись нужные методы
     function on_message_gui(_this: any, message_id: hash, message: any, sender: hash) {
         broadcast.on_message(message_id, message, sender);
+        EventBus._on_message(_this, message_id, message, sender);
         if (message_id == to_hash('APPLY_CUSTOM_LANG')) {
             Lang.apply();
         }

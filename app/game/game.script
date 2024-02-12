@@ -10,9 +10,14 @@ function ____exports.init(self)
 end
 function ____exports.on_message(self, message_id, message, sender)
     flow.on_message(message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
     flow.stop()
+    EventBus.off("SET_FIELD")
+    EventBus.off("SWAP_ELEMENTS")
+    EventBus.off("CLICK_ACTIVATION")
+    EventBus.off("REVERT_STEP")
 end
 init = ____exports.init
 on_message = ____exports.on_message

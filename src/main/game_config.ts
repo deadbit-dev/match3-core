@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, Cell, Element, ElementType, StepInfo, CombinationInfo } from "../game/match3_core";
-import { PosXYMessage, VoidMessage } from "../modules/modules_const";
+import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, Element, StepInfo, CombinationInfo } from "../game/match3_core";
+import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Direction } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
@@ -26,11 +26,6 @@ export const ID_YANDEX_METRICA = "";
 export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
-
-export const MANAGER_ID = 'main:/manager';
-export const UI_ID = '/ui#game';
-export const LOGIC_ID = '/game_logic#game';
-export const VIEW_ID = '/game_view#view';
 
 export enum CellId {
     Base,
@@ -241,6 +236,117 @@ export const _GAME_CONFIG = {
             busters: {
                 hammer_active: false
             }
+        },
+        
+        {
+            // LEVEL 1
+            field: {
+                width: 8,
+                height: 8,
+                cell_size: 64,
+                offset_border: 10,
+                move_direction: Direction.Up,
+                
+                cells: [
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, [CellId.Grass, CellId.Box], CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
+                ],
+
+                elements: [
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
+                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Diskosphere],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Helicopter, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
+                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, NullElement]
+                ]
+            },
+
+            busters: {
+                hammer_active: false
+            }
+        },
+
+        {
+            // LEVEL 2
+            field: {
+                width: 8,
+                height: 8,
+                cell_size: 64,
+                offset_border: 10,
+                move_direction: Direction.Up,
+                
+                cells: [
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
+                    [CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass],
+                    [CellId.Base, CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Grass, NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Grass, NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass, CellId.Base],
+                    [CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass],
+                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
+                ],
+
+                elements: [
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
+                    [ElementId.Dimonde, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Diskosphere],
+                    [ElementId.Dimonde, ElementId.Gold, NullElement, ElementId.Dynamite, ElementId.Emerald, NullElement, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Helicopter, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Ruby],
+                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, NullElement]
+                ]
+            },
+
+            busters: {
+                hammer_active: false
+            }
+        },
+
+        {
+            // LEVEL 3
+            field: {
+                width: 8,
+                height: 8,
+                cell_size: 64,
+                offset_border: 10,
+                move_direction: Direction.Up,
+                
+                cells: [
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass],
+                    [CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass, CellId.Base],
+                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass],
+                    [CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base]
+                ],
+
+                elements: [
+                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Ruby],
+                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Diskosphere],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Helicopter, ElementId.Ruby, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
+                    [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, ElementId.Ruby]
+                ]
+            },
+
+            busters: {
+                hammer_active: false
+            }
         }
     ]
 };
@@ -248,29 +354,48 @@ export const _GAME_CONFIG = {
 
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
-    current_level: 0,
+    current_level: 2,
     hammer_counts: 3,
 };
 
-export interface CellMessage extends ItemInfo { variety: number }
+export type GameStepEventBuffer = {key: MessageId, value: Messages[MessageId]}[];
+
+
 export interface ElementMessage extends ItemInfo { type: number }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo }
+export interface ActivatedCellMessage extends ItemInfo { variety: number, previous_id: number }
 export interface MoveElementMessage extends StepInfo { element: Element }
 export interface DamagedElementMessage { id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
-    ON_MAKE_CELL: CellMessage,
+    SET_FIELD: VoidMessage,
+    ON_SET_FIELD: GameState,
     ON_MAKE_ELEMENT: ElementMessage,
+    
     SWAP_ELEMENTS: StepInfo,
     ON_SWAP_ELEMENTS: SwapElementsMessage,
+    ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
-    ON_COMBINED: CombinedMessage,
+    
+    BUSTER_ACTIVATED: VoidMessage,
+
+    ON_COMBINED: VoidMessage,
+    ON_COMBO: CombinedMessage,
+    ON_CELL_ACTIVATED: ActivatedCellMessage,
     ON_MOVE_ELEMENT: MoveElementMessage,
     ON_DAMAGED_ELEMENT: DamagedElementMessage,
-    ON_REQUEST_ELEMENT: ItemInfo,
+    ON_REQUEST_ELEMENT: ElementMessage,
+
+    END_MOVE_PHASE: VoidMessage,
+
+    GAME_STEP: GameStepEventBuffer,
+    
+    TRY_REVERT_STEP: VoidMessage,
     REVERT_STEP: VoidMessage,
-    ON_REVERT_STEP: RevertStepMessage
+    ON_REVERT_STEP: RevertStepMessage,
+
+    UPDATED_HAMMER: VoidMessage
 };

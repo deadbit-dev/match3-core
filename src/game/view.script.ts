@@ -16,8 +16,9 @@ export function init(this: props) {
     flow.start(() => View(), {});
 }
 
-export function on_message(this: props, message_id: hash, message: any, sender: any): void {
+export function on_message(this: props, message_id: hash, message: any, sender: hash): void {
     flow.on_message(message_id, message, sender);
+    Manager.on_message(this, message_id, message, sender);
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
@@ -27,4 +28,8 @@ export function on_input(this: props, action_id: string | hash, action: any): vo
 
 export function final(this: props): void {
     flow.stop();
+    EventBus.off('ON_SET_FIELD');
+    EventBus.off('GAME_STEP');
+    EventBus.off('ON_REVERT_STEP');
+    EventBus.off('TRY_REVERT_STEP');
 }
