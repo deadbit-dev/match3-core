@@ -5,7 +5,6 @@ local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
-local Direction = ____math_utils.Direction
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
@@ -81,10 +80,7 @@ ____exports.ProcessMode.Combinate = 0
 ____exports.ProcessMode[____exports.ProcessMode.Combinate] = "Combinate"
 ____exports.ProcessMode.MoveElements = 1
 ____exports.ProcessMode[____exports.ProcessMode.MoveElements] = "MoveElements"
-function ____exports.Field(size_x, size_y, move_direction)
-    if move_direction == nil then
-        move_direction = Direction.Up
-    end
+function ____exports.Field(size_x, size_y)
     local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
@@ -633,200 +629,37 @@ function ____exports.Field(size_x, size_y, move_direction)
         request_element(x, y)
         return true
     end
-    local function try_move_element_from_down(x, y)
-        do
-            local j = y
-            while j < size_y do
-                local cell = get_cell(x, j)
-                if cell ~= ____exports.NotActiveCell then
-                    if not is_available_cell_type_for_move(cell) then
-                        return false
-                    end
-                    local element = get_element(x, j)
-                    if element ~= ____exports.NullElement then
-                        set_element(x, y, element)
-                        set_element(x, j, ____exports.NullElement)
-                        on_move_element(
-                            x,
-                            j,
-                            x,
-                            y,
-                            element
-                        )
-                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
-                        return true
-                    end
-                end
-                j = j + 1
-            end
-        end
-        request_element(x, y)
-        return true
-    end
-    local function try_move_element_from_left(x, y)
-        do
-            local j = x
-            while j >= 0 do
-                local cell = get_cell(j, y)
-                if cell ~= ____exports.NotActiveCell then
-                    if not is_available_cell_type_for_move(cell) then
-                        return false
-                    end
-                    local element = get_element(j, y)
-                    if element ~= ____exports.NullElement then
-                        set_element(x, y, element)
-                        set_element(j, y, ____exports.NullElement)
-                        on_move_element(
-                            j,
-                            y,
-                            x,
-                            y,
-                            element
-                        )
-                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
-                        return true
-                    end
-                end
-                j = j - 1
-            end
-        end
-        request_element(x, y)
-        return true
-    end
-    local function try_move_element_from_right(x, y)
-        do
-            local j = x
-            while j < size_x do
-                local cell = get_cell(j, y)
-                if cell ~= ____exports.NotActiveCell then
-                    if not is_available_cell_type_for_move(cell) then
-                        return false
-                    end
-                    local element = get_element(j, y)
-                    if element ~= ____exports.NullElement then
-                        set_element(x, y, element)
-                        set_element(j, y, ____exports.NullElement)
-                        on_move_element(
-                            j,
-                            y,
-                            x,
-                            y,
-                            element
-                        )
-                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
-                        return true
-                    end
-                end
-                j = j + 1
-            end
-        end
-        request_element(x, y)
-        return true
-    end
     local function process_move()
         local is_procesed = false
-        repeat
-            local ____switch162 = move_direction
-            local ____cond162 = ____switch162 == Direction.Up
-            if ____cond162 then
-                do
-                    local y = size_y - 1
-                    while y >= 0 do
-                        do
-                            local x = 0
-                            while x < size_x do
-                                local cell = get_cell(x, y)
-                                local empty = get_element(x, y)
-                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    try_move_element_from_up(x, y)
-                                    is_procesed = true
-                                end
-                                x = x + 1
-                            end
-                        end
-                        y = y - 1
-                    end
-                end
-                break
-            end
-            ____cond162 = ____cond162 or ____switch162 == Direction.Down
-            if ____cond162 then
-                do
-                    local y = 0
-                    while y < size_y do
-                        do
-                            local x = 0
-                            while x < size_x do
-                                local cell = get_cell(x, y)
-                                local empty = get_element(x, y)
-                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    try_move_element_from_down(x, y)
-                                    is_procesed = true
-                                end
-                                x = x + 1
-                            end
-                        end
-                        y = y + 1
-                    end
-                end
-                break
-            end
-            ____cond162 = ____cond162 or ____switch162 == Direction.Left
-            if ____cond162 then
-                do
-                    local x = size_x - 1
-                    while x >= 0 do
-                        do
-                            local y = 0
-                            while y < size_y do
-                                local cell = get_cell(x, y)
-                                local empty = get_element(x, y)
-                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    try_move_element_from_left(x, y)
-                                    is_procesed = true
-                                end
-                                y = y + 1
-                            end
-                        end
-                        x = x - 1
-                    end
-                end
-                break
-            end
-            ____cond162 = ____cond162 or ____switch162 == Direction.Right
-            if ____cond162 then
+        do
+            local y = size_y - 1
+            while y >= 0 do
                 do
                     local x = 0
                     while x < size_x do
-                        do
-                            local y = 0
-                            while y < size_y do
-                                local cell = get_cell(x, y)
-                                local empty = get_element(x, y)
-                                if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    try_move_element_from_right(x, y)
-                                    is_procesed = true
-                                end
-                                y = y + 1
-                            end
+                        local cell = get_cell(x, y)
+                        local empty = get_element(x, y)
+                        if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                            try_move_element_from_up(x, y)
+                            is_procesed = true
                         end
                         x = x + 1
                     end
                 end
-                break
+                y = y - 1
             end
-        until true
+        end
         return is_procesed
     end
     local function process_state(mode)
         repeat
-            local ____switch176 = mode
-            local ____cond176 = ____switch176 == ____exports.ProcessMode.Combinate
-            if ____cond176 then
+            local ____switch151 = mode
+            local ____cond151 = ____switch151 == ____exports.ProcessMode.Combinate
+            if ____cond151 then
                 return process_combinate()
             end
-            ____cond176 = ____cond176 or ____switch176 == ____exports.ProcessMode.MoveElements
-            if ____cond176 then
+            ____cond151 = ____cond151 or ____switch151 == ____exports.ProcessMode.MoveElements
+            if ____cond151 then
                 return process_move()
             end
         until true

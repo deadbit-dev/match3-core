@@ -766,7 +766,7 @@ function ____exports.Game()
     field_height = level_config.field.height
     local move_direction = level_config.field.move_direction
     busters = level_config.busters
-    field = Field(field_width, field_height, move_direction)
+    field = Field(field_width, field_height)
     game_item_counter = 0
     previous_states = {}
     activated_elements = {}

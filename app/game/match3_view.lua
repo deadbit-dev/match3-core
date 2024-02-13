@@ -14,7 +14,7 @@ local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 function ____exports.View()
-    local on_game_step, set_events, input_listener, on_down, on_move, on_up, on_set_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_damaged_element_animation, on_move_element_animation, request_element_animation, revert_step_animation, get_world_pos, get_field_pos, get_move_direction, get_view_item_by_game_id, delete_view_item_by_game_id, swap_element_easing, swap_element_time, move_elements_easing, move_elements_time, squash_element_easing, squash_element_time, spawn_element_easing, spawn_element_time, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, min_swipe_distance, field_width, field_height, move_direction, cell_size, scale_ratio, cells_offset, gm, game_id_to_view_index, selected_element, is_processing
+    local on_game_step, set_events, input_listener, on_down, on_move, on_up, on_set_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_damaged_element_animation, on_move_element_animation, request_element_animation, revert_step_animation, get_world_pos, get_field_pos, get_move_direction, get_view_item_by_game_id, delete_view_item_by_game_id, swap_element_easing, swap_element_time, move_elements_easing, move_elements_time, squash_element_easing, squash_element_time, spawn_element_easing, spawn_element_time, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, min_swipe_distance, field_width, field_height, cell_size, scale_ratio, cells_offset, gm, game_id_to_view_index, selected_element, is_processing
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
@@ -407,29 +407,7 @@ function ____exports.View()
             return
         end
         local world_pos = get_world_pos(x, y)
-        repeat
-            local ____switch69 = move_direction
-            local ____cond69 = ____switch69 == Direction.Up
-            if ____cond69 then
-                gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size)
-                break
-            end
-            ____cond69 = ____cond69 or ____switch69 == Direction.Down
-            if ____cond69 then
-                gm.set_position_xy(item_from, world_pos.x, world_pos.y - field_height * cell_size)
-                break
-            end
-            ____cond69 = ____cond69 or ____switch69 == Direction.Left
-            if ____cond69 then
-                gm.set_position_xy(item_from, world_pos.x - field_width * cell_size, world_pos.y)
-                break
-            end
-            ____cond69 = ____cond69 or ____switch69 == Direction.Right
-            if ____cond69 then
-                gm.set_position_xy(item_from, world_pos.x + field_width * cell_size, world_pos.y)
-                break
-            end
-        until true
+        gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size)
         go.animate(
             item_from._hash,
             "position",
@@ -539,7 +517,7 @@ function ____exports.View()
     field_height = level_config.field.height
     local offset_border = level_config.field.offset_border
     local origin_cell_size = level_config.field.cell_size
-    move_direction = level_config.field.move_direction
+    local move_direction = level_config.field.move_direction
     cell_size = math.min((game_width - offset_border * 2) / field_width, 100)
     scale_ratio = cell_size / origin_cell_size
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size), 0)

@@ -53,7 +53,7 @@ export function Game() {
     //#endregion CONFIGURATIONS
     //#region MAIN          
 
-    const field = Field(field_width, field_height, move_direction);
+    const field = Field(field_width, field_height);
 
     let game_item_counter = 0;
     let previous_states: GameState[] = [];

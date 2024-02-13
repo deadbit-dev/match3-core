@@ -160,7 +160,7 @@ type FncOnMoveElement = (from_x:number, from_y: number, to_x: number, to_y: numb
 type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
-export function Field(size_x: number, size_y: number, move_direction = Direction.Up) {
+export function Field(size_x: number, size_y: number) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
     
     let state: GameState = {
@@ -705,129 +705,18 @@ export function Field(size_x: number, size_y: number, move_direction = Direction
         request_element(x, y);
         return true;
     }
-    
-    function try_move_element_from_down(x: number, y:number) {
-        for(let j = y; j < size_y; j++) {
-            const cell = get_cell(x, j);
-            if(cell != NotActiveCell) {
-                if(!is_available_cell_type_for_move(cell)) return false;
-                
-                const element = get_element(x, j);
-                if(element != NullElement) {
-                    set_element(x, y, element);
-                    set_element(x, j, NullElement);
-
-                    on_move_element(x, j, x, y, element);
-                    last_moved_elements.push({x, y, id: element.id});
-                    
-                    return true;
-                }
-            }
-        }
-
-        request_element(x, y);
-        return true;
-    }
-    
-    function try_move_element_from_left(x: number, y:number) {
-        for(let j = x; j >= 0; j--) {
-            const cell = get_cell(j, y);
-            if(cell != NotActiveCell) {
-                if(!is_available_cell_type_for_move(cell)) return false;
-                
-                const element = get_element(j, y);
-                if(element != NullElement) {
-                    set_element(x, y, element);
-                    set_element(j, y, NullElement);
-
-                    on_move_element(j, y, x, y, element);
-                    last_moved_elements.push({x, y, id: element.id});
-                    
-                    return true;
-                }
-            }
-        }
-
-        request_element(x, y);
-        return true;
-    }
-
-    function try_move_element_from_right(x: number, y:number) {
-        for(let j = x; j < size_x; j++) {
-            const cell = get_cell(j, y);
-            if(cell != NotActiveCell) {
-                if(!is_available_cell_type_for_move(cell)) return false;
-                
-                const element = get_element(j, y);
-                if(element != NullElement) {
-                    set_element(x, y, element);
-                    set_element(j, y, NullElement);
-
-                    on_move_element(j, y, x, y, element);
-                    last_moved_elements.push({x, y, id: element.id});
-                    
-                    return true;
-                }
-            }
-        }
-
-        request_element(x, y);
-        return true;
-    }
-   
-   
 
     function process_move() {
         let is_procesed = false;
-        switch(move_direction) {
-            case Direction.Up:
-                for(let y = size_y - 1; y >= 0; y--) {
-                    for(let x = 0; x < size_x; x++) {
-                        const cell = get_cell(x, y);
-                        const empty = get_element(x, y);
-                        if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            try_move_element_from_up(x, y);
-                            is_procesed = true;
-                        }
-                    }
+        for(let y = size_y - 1; y >= 0; y--) {
+            for(let x = 0; x < size_x; x++) {
+                const cell = get_cell(x, y);
+                const empty = get_element(x, y);
+                if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
+                    try_move_element_from_up(x, y);
+                    is_procesed = true;
                 }
-            break;
-            case Direction.Down:
-                for(let y = 0; y < size_y; y++) {
-                    for(let x = 0; x < size_x; x++) {
-                        const cell = get_cell(x, y);
-                        const empty = get_element(x, y);
-                        if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            try_move_element_from_down(x, y);
-                            is_procesed = true;
-                        }
-                    }
-                }
-            break;
-            case Direction.Left:
-                for(let x = size_x - 1; x >= 0; x--) {
-                    for(let y = 0; y < size_y; y++) {
-                        const cell = get_cell(x, y);
-                        const empty = get_element(x, y);
-                        if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            try_move_element_from_left(x, y);
-                            is_procesed = true;   
-                        }
-                    }
-                }
-            break;
-            case Direction.Right:
-                for(let x = 0; x < size_x; x++) {
-                    for(let y = 0; y < size_y; y++) {
-                        const cell = get_cell(x, y);
-                        const empty = get_element(x, y);
-                        if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
-                            try_move_element_from_right(x, y);
-                            is_procesed = true;
-                        }
-                    }
-                }
-            break;
+            }
         }
 
         return is_procesed;

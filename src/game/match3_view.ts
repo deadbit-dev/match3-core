@@ -343,21 +343,7 @@ export function View() {
         if(item_from == undefined) return;
 
         const world_pos = get_world_pos(x, y);
-
-        switch(move_direction) {
-            case Direction.Up:
-                gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size);
-            break;
-            case Direction.Down:
-                gm.set_position_xy(item_from, world_pos.x, world_pos.y - field_height * cell_size);
-            break;
-            case Direction.Left:
-                gm.set_position_xy(item_from, world_pos.x - field_width * cell_size, world_pos.y);
-            break;
-            case Direction.Right:
-                gm.set_position_xy(item_from, world_pos.x + field_width * cell_size, world_pos.y);
-            break;
-        }
+        gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size);
         
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, world_pos, move_elements_easing, move_elements_time);
     }
