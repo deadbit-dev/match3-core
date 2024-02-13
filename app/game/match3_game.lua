@@ -434,7 +434,7 @@ function ____exports.Game()
             end
             process_game_step()
         else
-            write_game_step_event("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, id = element_from.id}, element_to = {x = to_x, y = to_y, id = element_to.id}})
+            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, id = element_from.id}, element_to = {x = to_x, y = to_y, id = element_to.id}})
         end
     end
     function process_game_step()
@@ -518,7 +518,7 @@ function ____exports.Game()
             ____cond118 = ____cond118 or ____switch118 == CombinationType.Comb2x2
             if ____cond118 then
                 make_element(combined_element.x, combined_element.y, ElementId.Helicopter, true)
-                break
+                return true
             end
             ____cond118 = ____cond118 or (____switch118 == CombinationType.Comb3x3a or ____switch118 == CombinationType.Comb3x3b)
             if ____cond118 then

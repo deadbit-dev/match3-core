@@ -90,10 +90,6 @@ export function View() {
                 on_swap_element_animation(message.element_from, message.element_to);
                 flow.delay(0.3);
             }
-            else if(event.key == 'ON_WRONG_SWAP_ELEMENTS') {
-                const message = event.value as SwapElementsMessage;
-                on_wrong_swap_element_animation(message.element_from, message.element_to);
-            }
             else if(event.key == 'ON_COMBINED') {
                 flow.delay(0.3);
             }
@@ -139,6 +135,11 @@ export function View() {
         EventBus.on('ON_SET_FIELD', (state) => {
             if(state == undefined) return;
             on_set_field(state);
+        });
+
+        EventBus.on('ON_WRONG_SWAP_ELEMENTS', (elements) => {
+            if(elements == undefined) return;
+            flow.start(() => on_wrong_swap_element_animation(elements.element_from, elements.element_to));
         });
 
         EventBus.on('GAME_STEP', (events) => {

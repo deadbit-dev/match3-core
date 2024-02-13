@@ -68,5 +68,5 @@ export function on_message(this: props, message_id: string | hash, message: any,
 
 export function final(this: props): void {
     this.druid.final();
-    EventBus.off('UPDATED_HAMMER');
+    EventBus.off_all_current_script();
 }

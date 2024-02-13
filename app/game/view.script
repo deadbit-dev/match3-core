@@ -20,10 +20,7 @@ function ____exports.on_input(self, action_id, action)
 end
 function ____exports.final(self)
     flow.stop()
-    EventBus.off("ON_SET_FIELD")
-    EventBus.off("GAME_STEP")
-    EventBus.off("ON_REVERT_STEP")
-    EventBus.off("TRY_REVERT_STEP")
+    EventBus.off_all_current_script()
 end
 init = ____exports.init
 on_message = ____exports.on_message

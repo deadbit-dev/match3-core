@@ -431,7 +431,7 @@ export function Game() {
             
             process_game_step();
         } else {
-            write_game_step_event('ON_WRONG_SWAP_ELEMENTS', {
+            EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 element_from: {x: from_x, y: from_y, id: element_from.id},
                 element_to: {x: to_x, y: to_y, id: element_to.id}
             });
@@ -495,7 +495,7 @@ export function Game() {
                 return true;
             case CombinationType.Comb2x2:
                 make_element(combined_element.x, combined_element.y, ElementId.Helicopter, true);
-            break;
+                return true;
             case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
                 make_element(combined_element.x, combined_element.y, ElementId.Dynamite, true);
                 return true;

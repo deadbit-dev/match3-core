@@ -22,9 +22,6 @@ function ____exports.View()
                 local message = event.value
                 on_swap_element_animation(message.element_from, message.element_to)
                 flow.delay(0.3)
-            elseif event.key == "ON_WRONG_SWAP_ELEMENTS" then
-                local message = event.value
-                on_wrong_swap_element_animation(message.element_from, message.element_to)
             elseif event.key == "ON_COMBINED" then
                 flow.delay(0.3)
             elseif event.key == "ON_COMBO" then
@@ -79,6 +76,15 @@ function ____exports.View()
             end
         )
         EventBus.on(
+            "ON_WRONG_SWAP_ELEMENTS",
+            function(elements)
+                if elements == nil then
+                    return
+                end
+                flow.start(function() return on_wrong_swap_element_animation(elements.element_from, elements.element_to) end)
+            end
+        )
+        EventBus.on(
             "GAME_STEP",
             function(events)
                 if events == nil then
@@ -111,19 +117,19 @@ function ____exports.View()
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch31 = message_id
-                local ____cond31 = ____switch31 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond31 then
+                local ____switch33 = message_id
+                local ____cond33 = ____switch33 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond33 then
                     on_down(_message.item)
                     break
                 end
-                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond31 then
+                ____cond33 = ____cond33 or ____switch33 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond33 then
                     on_up(_message.item)
                     break
                 end
-                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond31 then
+                ____cond33 = ____cond33 or ____switch33 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond33 then
                     on_move(_message)
                     break
                 end
@@ -151,24 +157,24 @@ function ____exports.View()
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch37 = move_direction
-            local ____cond37 = ____switch37 == Direction.Up
-            if ____cond37 then
+            local ____switch39 = move_direction
+            local ____cond39 = ____switch39 == Direction.Up
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == Direction.Down
-            if ____cond37 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Down
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == Direction.Left
-            if ____cond37 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Left
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == Direction.Right
-            if ____cond37 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Right
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end

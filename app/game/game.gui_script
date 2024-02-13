@@ -77,7 +77,7 @@ function ____exports.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
     self.druid:final()
-    EventBus.off("UPDATED_HAMMER")
+    EventBus.off_all_current_script()
 end
 init = ____exports.init
 on_input = ____exports.on_input

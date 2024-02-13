@@ -112,8 +112,22 @@ function EventBusModule() {
         _off(message_id, false);
     }
 
-    function off_all<T extends MessageId>(message_id: T) {
+    function off_all_id_message<T extends MessageId>(message_id: T) {
         _off(message_id, true);
+    }
+
+    function off_all_current_script() {
+        const url = msg.url();
+        const url_key = url_to_key(url);
+
+        // удаляем все слушатели для этого url(скрипта), который вызвал этот метод
+        for (const k in listeners) {
+            const list = listeners[k];
+            for (const k in list) {
+                if (k == url_key)
+                    delete list[k];
+            }
+        }
     }
 
     function send<T extends MessageId>(message_id: T, message_data?: Messages[T]) {
@@ -139,5 +153,7 @@ function EventBusModule() {
         }
     }
 
-    return { _on_message, on, once, off, off_all, send };
+    return { _on_message, on, once, off, off_all_id_message, off_all_current_script, send };
+
+
 }
