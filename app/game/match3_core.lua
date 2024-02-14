@@ -313,6 +313,14 @@ function ____exports.Field(size_x, size_y)
         cb_is_combined_elements = fnc
     end
     local function is_can_move_base(from_x, from_y, to_x, to_y)
+        local cell_from = get_cell(from_x, from_y)
+        if cell_from == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_from) then
+            return false
+        end
+        local cell_to = get_cell(to_x, to_y)
+        if cell_to == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_to) then
+            return false
+        end
         local element_from = get_element(from_x, from_y)
         if element_from == ____exports.NullElement then
             return false
@@ -522,6 +530,13 @@ function ____exports.Field(size_x, size_y)
             set_element(x, y, ____exports.NullElement)
         end
     end
+    local function is_available_cell_type_for_click(cell)
+        local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall
+        if is_wall then
+            return false
+        end
+        return true
+    end
     local function is_valid_element_pos(x, y)
         if x < 0 or x >= size_x or y < 0 or y >= size_y then
             return false
@@ -533,14 +548,6 @@ function ____exports.Field(size_x, size_y)
         return true
     end
     local function try_move(from_x, from_y, to_x, to_y)
-        local cell_from = get_cell(from_x, from_y)
-        if cell_from == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_from) then
-            return false
-        end
-        local cell_to = get_cell(to_x, to_y)
-        if cell_to == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_to) then
-            return false
-        end
         local is_can = is_can_move(from_x, from_y, to_x, to_y)
         if is_can then
             swap_elements(from_x, from_y, to_x, to_y)
@@ -557,7 +564,7 @@ function ____exports.Field(size_x, size_y)
     end
     local function try_click(x, y)
         local cell = get_cell(x, y)
-        if cell == ____exports.NotActiveCell then
+        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_click(cell) then
             return false
         end
         local element = get_element(x, y)
@@ -653,13 +660,13 @@ function ____exports.Field(size_x, size_y)
     end
     local function process_state(mode)
         repeat
-            local ____switch151 = mode
-            local ____cond151 = ____switch151 == ____exports.ProcessMode.Combinate
-            if ____cond151 then
+            local ____switch153 = mode
+            local ____cond153 = ____switch153 == ____exports.ProcessMode.Combinate
+            if ____cond153 then
                 return process_combinate()
             end
-            ____cond151 = ____cond151 or ____switch151 == ____exports.ProcessMode.MoveElements
-            if ____cond151 then
+            ____cond153 = ____cond153 or ____switch153 == ____exports.ProcessMode.MoveElements
+            if ____cond153 then
                 return process_move()
             end
         until true

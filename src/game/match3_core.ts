@@ -316,6 +316,12 @@ export function Field(size_x: number, size_y: number) {
         // логика тут в том что мы делаем пробное перемещение элементов, а затем получаем все возможные комбинации (get_all_combinations)
         // затем смотрим присутствует ли среди них комбинация хоть с одним из элементов, который был в позиции from_x, from_y или to_x, to_y
        
+        const cell_from = get_cell(from_x, from_y);
+        if(cell_from == NotActiveCell || !is_available_cell_type_for_move(cell_from)) return false;
+        
+        const cell_to = get_cell(to_x, to_y);
+        if(cell_to == NotActiveCell || !is_available_cell_type_for_move(cell_to)) return false;
+        
         const element_from = get_element(from_x, from_y);
         if(element_from == NullElement) return false;
 
@@ -603,6 +609,13 @@ export function Field(size_x: number, size_y: number) {
 
         return true;
     }
+
+    function is_available_cell_type_for_click(cell: Cell): boolean {
+        const is_wall = bit.band(cell.type, CellType.Wall) == CellType.Wall;
+        if(is_wall) return false;
+
+        return true;
+    }
     
     function is_valid_element_pos(x: number, y: number) {
         if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;
@@ -617,12 +630,6 @@ export function Field(size_x: number, size_y: number) {
     // на основе ограничений клетки, а также на соответствущее разрешение перемещения у элемента(is_move) 
     // возвращает результат если успех, то уже применен ход (т.е. элементы перемещен и поменялся местами)
     function try_move(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const cell_from = get_cell(from_x, from_y);
-        if(cell_from == NotActiveCell || !is_available_cell_type_for_move(cell_from)) return false;
-        
-        const cell_to = get_cell(to_x, to_y);
-        if(cell_to == NotActiveCell || !is_available_cell_type_for_move(cell_to)) return false;
-
         const is_can = is_can_move(from_x, from_y, to_x, to_y);
         if(is_can) {
             swap_elements(from_x, from_y, to_x, to_y);
@@ -642,7 +649,7 @@ export function Field(size_x: number, size_y: number) {
     // ничего больше не делаем, т.е. не удаляем и т.п.
     function try_click(x: number, y: number) {
         const cell = get_cell(x, y);
-        if(cell == NotActiveCell) return false;
+        if(cell == NotActiveCell || !is_available_cell_type_for_click(cell)) return false;
         
         const element = get_element(x, y);
         if(element == NullElement) return false;

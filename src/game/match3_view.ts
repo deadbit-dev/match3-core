@@ -17,8 +17,8 @@ import * as camera from '../utils/camera';
 
 import { Direction } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
-import { IGameItem, Messages, PosXYMessage } from '../modules/modules_const';
-import { ActivatedCellMessage, CellId, CombinedMessage, DamagedElementMessage, ElementId, ElementMessage, GameStepEventBuffer, MoveElementMessage, SwapElementsMessage } from "../main/game_config";
+import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
+import { ActivatedCellMessage, CellId, CombinedMessage, ComboMessage, DamagedElementMessage, DynamiteActivationMessage, ElementId, ElementMessage, GameStepEventBuffer, MoveElementMessage, RocketActivationMessage, SwapElementsMessage } from "../main/game_config";
 
 import { 
     Element,
@@ -85,46 +85,16 @@ export function View() {
         is_processing = true;
 
         for(const event of events) {
-            if(event.key == 'ON_SWAP_ELEMENTS') {
-                const message = event.value as SwapElementsMessage;
-                on_swap_element_animation(message.element_from, message.element_to);
-                flow.delay(0.3);
-            }
-            else if(event.key == 'ON_COMBINED') {
-                flow.delay(0.3);
-            }
-            else if(event.key == 'ON_COMBO') {
-                const message = event.value as CombinedMessage;
-                on_combined_animation(message.combined_element, message.combination);
-                flow.delay(0.5);
-            }
-            else if(event.key == 'BUSTER_ACTIVATED') {
-                flow.delay(1);
-            }
-            else if(event.key == 'ON_DAMAGED_ELEMENT') {
-                const message = event.value as DamagedElementMessage;
-                on_damaged_element_animation(message.id);
-            }
-            else if(event.key == 'ON_CELL_ACTIVATED') {
-                const message = event.value as ActivatedCellMessage;
-                delete_view_item_by_game_id(message.previous_id);
-                make_cell_view(message.x, message.y, message.id, message.variety);
-            }
-            else if(event.key == 'ON_MAKE_ELEMENT') {
-                const message = event.value as ElementMessage;
-                make_element_view(message.x, message.y, message.id, message.type, true);
-            }
-            else if(event.key == 'ON_MOVE_ELEMENT') {
-                const message = event.value as MoveElementMessage;
-                on_move_element_animation(message.from_x, message.from_y, message.to_x, message.to_y, message.element);
-            }
-            else if(event.key == 'ON_REQUEST_ELEMENT') {
-                const message = event.value as ElementMessage;
-                make_element_view(message.x, message.y, message.id, message.type);
-                request_element_animation(message.x, message.y, message.id);
-            }
-            else if(event.key == 'END_MOVE_PHASE') {
-                flow.delay(1);
+            switch(event.key) {
+                case 'ON_SWAP_ELEMENTS': on_swap_element_animation(event.value); break;
+                case 'ON_COMBINED': on_combined_animation(event.value); break;
+                case 'ON_COMBO': on_combo_animation(event.value); break;
+                case 'ROCKET_ACTIVATED': on_rocket_activated_animation(event.value); break;
+                case 'DYNAMITE_ACTIVATED': on_dynamite_activated_animation(event.value); break;
+                case 'MOVE_PHASE_BEGIN': flow.delay(0.5); break;
+                case 'ON_MOVE_ELEMENT': on_move_element_animation(event.value); break;
+                case 'ON_REQUEST_ELEMENT': on_request_element_animation(event.value); break;
+                case 'MOVE_PHASE_END': flow.delay(1); break;
             }
         }
 
@@ -189,7 +159,7 @@ export function View() {
     
     function on_move(pos: PosXYMessage) {
         if(selected_element == null) return;
-            
+
         const world_pos = camera.screen_to_world(pos.x, pos.y);
         const selected_element_world_pos = go.get_world_position(selected_element._hash);
         const delta = (world_pos - selected_element_world_pos) as vmath.vector3;
@@ -275,7 +245,11 @@ export function View() {
     //#endregion LOGIC
     //#region ANIMATIONS
     
-    function on_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
+    function on_swap_element_animation(message: Messages[MessageId]) {
+        const swap_elements = message as SwapElementsMessage;
+        const element_from = swap_elements.element_from;
+        const element_to = swap_elements.element_to;
+
         const from_world_pos = get_world_pos(element_from.x, element_from.y);
         const to_world_pos = get_world_pos(element_to.x, element_to.y);
 
@@ -299,6 +273,8 @@ export function View() {
         const item_to = get_view_item_by_game_id(element_to.id);
         if(item_to == undefined) return;
 
+        is_processing = true;
+
         // FORWARD
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
         go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
@@ -308,16 +284,51 @@ export function View() {
         // BACK
         go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+
+        flow.delay(swap_element_time);
+
+        is_processing = false;
     }
 
-    function on_combined_animation(combination_element: ItemInfo, combination: CombinationInfo) {
-        const target_element_world_pos = get_world_pos(combination_element.x, combination_element.y);
-        for(let i = 0; i < combination.elements.length; i++) {
-            const element = combination.elements[i];
+    function on_combined_animation(message: Messages[MessageId]) {
+        const combined = message as CombinedMessage;
+        for(const element of combined.combination.elements)
+            on_damaged_element_animation(element.id);
+    }
+
+    function on_combo_animation(message: Messages[MessageId]) {
+        const combo = message as ComboMessage;
+        const target_element_world_pos = get_world_pos(combo.combined_element.x, combo.combined_element.y);
+        for(let i = 0; i < combo.combination.elements.length; i++) {
+            const element = combo.combination.elements[i];
             const item = gm.get_item_by_index(element.id);
             if(item != undefined) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
                 squash_element_easing, squash_element_time, 0);
+
+            on_damaged_element_animation(element.id);
         }
+        
+        make_element_view(
+            combo.maked_element.x,
+            combo.maked_element.y,
+            combo.maked_element.id,
+            combo.maked_element.type
+        );
+    }
+
+    function on_rocket_activated_animation(message: Messages[MessageId]) {
+        const roket_activation = message as RocketActivationMessage;
+        on_damaged_element_animation(roket_activation.rocket.id);
+        for(const element of roket_activation.damaged_elements)
+            on_damaged_element_animation(element.id);
+    }
+
+    function on_dynamite_activated_animation(message: Messages[MessageId]) {
+        const dynamite_activation = message as DynamiteActivationMessage;
+        on_damaged_element_animation(dynamite_activation.dynamite.id);
+        for(const element of dynamite_activation.damaged_elements)
+            on_damaged_element_animation(element.id);
+        flow.delay(0.2);
     }
     
     function on_damaged_element_animation(element_id: number) {
@@ -330,20 +341,24 @@ export function View() {
         }
     }
 
-    function on_move_element_animation(from_x: number, from_y: number, to_x: number, to_y: number, element: Element) {
-        const to_world_pos = get_world_pos(to_x, to_y, 0);
+    function on_move_element_animation(message: Messages[MessageId]) {
+        const move = message as MoveElementMessage;
+        const to_world_pos = get_world_pos(move.to_x, move.to_y, 0);
         
-        const item_from = get_view_item_by_game_id(element.id);
+        const item_from = get_view_item_by_game_id(move.element.id);
         if(item_from == undefined) return;
 
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
     }
 
-    function request_element_animation(x: number, y: number, id: number) {
-        const item_from = get_view_item_by_game_id(id);
+    function on_request_element_animation(message: Messages[MessageId]) {
+        const request_element = message as ElementMessage;
+        make_element_view(request_element.x, request_element.y, request_element.id, request_element.type);
+        
+        const item_from = get_view_item_by_game_id(request_element.id);
         if(item_from == undefined) return;
 
-        const world_pos = get_world_pos(x, y);
+        const world_pos = get_world_pos(request_element.x, request_element.y);
         gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size);
         
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, world_pos, move_elements_easing, move_elements_time);

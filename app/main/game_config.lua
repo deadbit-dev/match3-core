@@ -359,7 +359,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Emerald,
+                ____exports.ElementId.VerticalRocket,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.VerticalRocket,
                 NullElement

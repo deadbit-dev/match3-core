@@ -259,7 +259,7 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.VerticalRocket, ElementId.Gold, ElementId.VerticalRocket, NullElement],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Diskosphere],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
@@ -360,10 +360,25 @@ export const _STORAGE_CONFIG = {
 
 export type GameStepEventBuffer = {key: MessageId, value: Messages[MessageId]}[];
 
-
 export interface ElementMessage extends ItemInfo { type: number }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo }
+export interface ComboMessage extends CombinedMessage { maked_element: ElementMessage }
+
+export interface RocketActivationMessage { rocket: ItemInfo, damaged_elements: ItemInfo[] }
+export interface SwapedRocketsActivationMessage extends RocketActivationMessage { other_rocket: ItemInfo }
+
+export interface HelicopterActivationMessage { helicopter: ItemInfo, damaged_elements: ItemInfo[], target_elements: (ItemInfo | typeof NullElement)[] }
+export interface SwapedHelicoptersActivationMessage extends HelicopterActivationMessage{ other_helicopter: ItemInfo }
+
+export interface DynamiteActivationMessage { dynamite: ItemInfo, damaged_elements: ItemInfo[] }
+export interface SwapeDynamitesActivationMessage extends DynamiteActivationMessage { other_dynamite: ItemInfo }
+
+export interface DiskosphereActivationMessage { diskosphere: ItemInfo, damaged_elements: ItemInfo[]}
+export interface SwapedDiskospheresActivationMessage extends DiskosphereActivationMessage { other_diskosphere: ItemInfo }
+export interface SwapedDiskosphereWithBusterActivationMessage extends DiskosphereActivationMessage { other_buster: ItemInfo, maked_elements: ItemInfo[] }
+export interface SwapedDiskosphereWithElementActivationMessage extends DiskosphereActivationMessage { other_element: ItemInfo }
+
 export interface ActivatedCellMessage extends ItemInfo { variety: number, previous_id: number }
 export interface MoveElementMessage extends StepInfo { element: Element }
 export interface DamagedElementMessage { id: number }
@@ -379,17 +394,34 @@ export type _UserMessages = {
     ON_SWAP_ELEMENTS: SwapElementsMessage,
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
-    
-    BUSTER_ACTIVATED: VoidMessage,
 
-    ON_COMBINED: VoidMessage,
-    ON_COMBO: CombinedMessage,
+    ROCKET_ACTIVATED: RocketActivationMessage,
+    AXIS_ROCKET_ACTIVATED: RocketActivationMessage,
+    SWAPED_ROCKETS_ACTIVATED: SwapedRocketsActivationMessage,
+
+    HELICOPTER_ACTIVATED: HelicopterActivationMessage,
+    SWAPED_HELICOPTERS_ACTIVATED: SwapedHelicoptersActivationMessage,
+
+    DYNAMITE_ACTIVATED: DynamiteActivationMessage,
+    SWAPED_DYNAMITES_ACTIVATED: SwapeDynamitesActivationMessage,
+
+    DISKOSPHERE_ACTIVATED: DiskosphereActivationMessage,
+    SWAPED_DISKOSPHERES_ACTIVATED: SwapedDiskospheresActivationMessage,
+    SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereWithBusterActivationMessage,
+    SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedDiskosphereWithElementActivationMessage,
+
+    ON_COMBINED: CombinedMessage,
+    ON_COMBO: ComboMessage,
     ON_CELL_ACTIVATED: ActivatedCellMessage,
+    
+    PROCESS_GAME_STEP_BEGIN: VoidMessage,
+    
     ON_MOVE_ELEMENT: MoveElementMessage,
     ON_DAMAGED_ELEMENT: DamagedElementMessage,
     ON_REQUEST_ELEMENT: ElementMessage,
 
-    END_MOVE_PHASE: VoidMessage,
+    MOVE_PHASE_BEGIN: VoidMessage,
+    MOVE_PHASE_END: VoidMessage,
 
     GAME_STEP: GameStepEventBuffer,
     

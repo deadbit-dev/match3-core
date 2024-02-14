@@ -12,10 +12,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable no-case-declarations */
 
-
-import * as flow from 'ludobits.m.flow';
-import { CellId, ElementId, GameStepEventBuffer } from '../main/game_config';
 import { MessageId, Messages } from '../modules/modules_const';
+
+import { CellId, ElementId,
+    GameStepEventBuffer,
+    RocketActivationMessage,
+    SwapedRocketsActivationMessage,
+    HelicopterActivationMessage,
+    SwapedHelicoptersActivationMessage,
+    DynamiteActivationMessage, 
+    SwapeDynamitesActivationMessage,
+    DiskosphereActivationMessage,
+    SwapedDiskospheresActivationMessage,
+    SwapedDiskosphereWithBusterActivationMessage,
+    SwapedDiskosphereWithElementActivationMessage
+} from '../main/game_config';
 
 import {
     Field,
@@ -31,15 +42,6 @@ import {
     GameState,
     CellType
 } from './match3_core';
-
-interface ActivationData {
-    x: number;
-    y: number;
-    other_x?: number;
-    other_y?: number;
-}
-
-type FncOnInteract = (item: ItemInfo, other_item: ItemInfo) => void;
 
 export function Game() {
     //#region CONFIG        
@@ -101,12 +103,17 @@ export function Game() {
 
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
-            swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
+            if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
+            
+            try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
+            process_game_step();
         });
 
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
+            
             try_click_activation(pos.x, pos.y);
+            process_game_step();
         });
 
         EventBus.on('REVERT_STEP', revert_step);
@@ -158,7 +165,7 @@ export function Game() {
         return cell;
     }
 
-    function make_element(x: number, y: number, element_id: ElementId | typeof NullElement, with_event = false, data: any = null): Element | typeof NullElement {
+    function make_element(x: number, y: number, element_id: ElementId | typeof NullElement, data: any = null): Element | typeof NullElement {
         if(element_id == NullElement) return NullElement;
         
         const element: Element = {
@@ -169,8 +176,6 @@ export function Game() {
 
         field.set_element(x, y, element);
 
-        if(with_event) write_game_step_event('ON_MAKE_ELEMENT', {x, y, id: element.id, type: element_id});
-
         return element;
     }
 
@@ -178,218 +183,472 @@ export function Game() {
     //#region ACTIONS       
     
     function try_click_activation(x: number, y: number) {
-        if(!try_activate_buster_element({x, y}) && !try_hammer_activation(x, y)) return false;
+        if(try_hammer_activation(x, y)) return true;
+        if(field.try_click(x, y) && try_activate_buster_element(x, y)) return true;
 
-        process_game_step();
+        return false;
+    }
+
+    function try_activate_buster_element(x: number, y: number) {
+        if(try_activate_vertical_rocket(x, y)) return true;
+        if(try_activate_horizontal_rocket(x, y)) return true;
+        if(try_activate_axis_rocket(x, y)) return true;
+        if(try_activate_helicopter(x, y)) return true;
+        if(try_activate_dynamite(x, y)) return true;
+        if(try_activate_diskosphere(x, y)) return true;
+
+        return false;
+    }
+
+    function try_activate_swaped_busters(x: number, y: number, other_x: number, other_y: number) {
+        if(try_activate_swaped_rocket_with_element(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_rockets(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_helicopters(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_helicopter_with_element(x, y, other_x, other_y)) return true;
+        if(try_activate_dynamite(x, y)) return true;
+        if(try_activate_swaped_dynamites(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_dynamite_with_element(x, y, other_x, other_y)) return true;
+        if(try_activate_diskosphere(x, y)) return true;
+        if(try_activate_swaped_diskospheres(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_diskosphere_with_buster(x, y, other_x, other_y)) return true;
+        if(try_activate_swaped_diskosphere_with_element(x, y, other_x, other_y)) return true;
+
+        return false;
+    }
+
+    function try_activate_vertical_rocket(x: number, y: number) { 
+        const rocket = field.get_element(x, y);
+        if(rocket == NullElement || rocket.type != ElementId.VerticalRocket) return false;
+        
+        if(activated_elements.findIndex((element_id) => element_id == rocket.id) != -1) return false;
+        activated_elements.push(rocket.id);
+
+        const event_data = {} as RocketActivationMessage;
+        write_game_step_event('ROCKET_ACTIVATED', event_data);
+        
+        event_data.rocket = {x, y, id: rocket.id};
+        event_data.damaged_elements = [];
+        
+        for(let i = 0; i < field_height; i++) {
+            if(i != y) {
+                if(!try_activate_buster_element(x, i)) {
+                    const element = field.get_element(x, i);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x, y: i, id: element.id});
+                        field.remove_element(x, i, true, false);
+                    }
+                }
+            }
+        }
+
+        field.remove_element(x, y, true, false);
+
+        return true;
+    }
+    
+    function try_activate_horizontal_rocket(x: number, y: number) {
+        const rocket = field.get_element(x, y);
+        if(rocket == NullElement || rocket.type != ElementId.HorizontalRocket) return false;
+
+        if(activated_elements.findIndex((element_id) => element_id == rocket.id) != -1) return false;
+        activated_elements.push(rocket.id);
+
+        const event_data = {} as RocketActivationMessage;
+        write_game_step_event('ROCKET_ACTIVATED', event_data);
+        
+        event_data.rocket = {x, y, id: rocket.id};
+        event_data.damaged_elements = [];
+        
+        for(let i = 0; i < field_width; i++) {
+            if(i != x) {
+                if(!try_activate_buster_element(i, y)) {
+                    const element = field.get_element(i, y);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x: i, y, id: element.id});
+                        field.remove_element(i, y, true, false);
+                    }
+                }
+            }
+        }
+
+        field.remove_element(x, y, true, false);
+
+        return true;
+    }
+    
+    function try_activate_swaped_rocket_with_element(x: number, y: number, other_x: number, other_y: number) {
+        const rocket = field.get_element(x, y);
+        if(rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(rocket.type)) return false;
+
+        const other_element = field.get_element(other_x, other_y);
+        if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
+        
+        if(try_activate_vertical_rocket(x, y)) return true;
+        if(try_activate_horizontal_rocket(x, y)) return true;
+
+        return false;
+    }
+    
+    function try_activate_swaped_rockets(x: number, y: number, other_x: number, other_y: number) {
+        const rocket = field.get_element(x, y);
+        if(rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(rocket.type)) return false;
+        
+        if(activated_elements.findIndex((element_id) => element_id == rocket.id) != -1) return false;
+        activated_elements.push(rocket.id);
+
+        const other_rocket = field.get_element(other_x, other_y);
+        if(other_rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_rocket.type)) return false;
+
+        if(activated_elements.findIndex((element_id) => element_id == other_rocket.id) != -1) return false;
+        activated_elements.push(other_rocket.id);
+        
+        const event_data = {} as SwapedRocketsActivationMessage;
+        write_game_step_event('SWAPED_ROCKETS_ACTIVATED', event_data);
+        
+        event_data.rocket = {x, y, id: rocket.id};
+        event_data.other_rocket = {x: other_x, y: other_y, id: other_rocket.id};
+        event_data.damaged_elements = [];
+    
+        for(let i = 0; i < field_height; i++) {
+            if(i != y) {
+                if(!try_activate_buster_element(x, i)) {
+                    const element = field.get_element(x, i);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x, y: i, id: element.id});
+                        field.remove_element(x, i, true, false);
+                    }
+                }
+            }
+        }
+        
+        for(let i = 0; i < field_width; i++) {
+            if(i != x) {
+                if(!try_activate_buster_element(i, y)) {
+                    const element = field.get_element(i, y);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x: i, y, id: element.id});
+                        field.remove_element(i, y, true, false);
+                    }
+                }
+            }
+        }
+
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
+
         return true;
     }
 
-    function try_activate_buster_element(data: ActivationData) {
-        const element = field.get_element(data.x, data.y);
-        if(element == NullElement) return false;
+   
+
+    function try_activate_axis_rocket(x: number, y: number) {
+        const rocket = field.get_element(x, y);
+        if(rocket == NullElement || rocket.type != ElementId.AxisRocket) return false;
+
+        if(activated_elements.findIndex((element_id) => element_id == rocket.id) != -1) return false;
+        activated_elements.push(rocket.id);
+
+        const event_data = {} as RocketActivationMessage;
+        write_game_step_event('AXIS_ROCKET_ACTIVATED', event_data);
         
-        switch(element.type) {
-            case ElementId.AxisRocket: try_activate_axis_rocket(data); break;
-            case ElementId.VerticalRocket: try_activate_vertical_rocket(data); break;
-            case ElementId.HorizontalRocket: try_activate_horizontal_rocket(data); break;
-            case ElementId.Helicopter: try_activate_helicopter(data); break;
-            case ElementId.Dynamite: try_activate_dynamite(data); break;
-            case ElementId.Diskosphere: try_activate_diskosphere(data); break;
-            default: return false;
+        event_data.rocket = {x, y, id: rocket.id};
+        event_data.damaged_elements = [];
+        
+        for(let i = 0; i < field_height; i++) {
+            if(i != y) {
+                if(!try_activate_buster_element(x, i)) {
+                    const element = field.get_element(x, i);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x, y: i, id: element.id});
+                        field.remove_element(x, i, true, false);
+                    }
+                }
+            }
+        }
+        
+        for(let i = 0; i < field_width; i++) {
+            if(i != x) {
+                if(!try_activate_buster_element(i, y)) {
+                    const element = field.get_element(i, y);
+                    if(element != NullElement) {
+                        event_data.damaged_elements.push({x: i, y, id: element.id});
+                        field.remove_element(i, y, true, false);
+                    }
+                }
+            }
         }
 
-        write_game_step_event('BUSTER_ACTIVATED', {});
+        field.remove_element(x, y, true, false);
 
         return true;
     }
 
-    function try_activate_vertical_rocket(data: ActivationData) { 
-        const element = field.get_element(data.x, data.y);
-        if(element == NullElement) return false;
+    function try_activate_helicopter(x: number, y: number) {
+        const helicopter = field.get_element(x, y);
+        if(helicopter == NullElement || helicopter.type != ElementId.Helicopter) return false;
 
-        if(data.other_x != undefined && data.other_y != undefined) {
-            const other_element = field.get_element(data.other_x, data.other_y);
-            if(other_element != NullElement && [ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_element.type)) {
-                field.remove_element(data.other_x, data.other_y, true, false);
-                try_activate_axis_rocket({x: data.x, y: data.y});
-                return;
-            }
-        }
+        if(activated_elements.findIndex((element_id) => element_id == helicopter.id) != -1) return false;
+        activated_elements.push(helicopter.id);
         
-        field.remove_element(data.x, data.y, true, false);
+        const event_data = {} as HelicopterActivationMessage;
+        write_game_step_event('HELICOPTER_ACTIVATED', event_data);
         
-        for(let y = 0; y < field_height; y++) {
-            if(y != data.y) {
-                if(!try_activate_buster_element({x: data.x, y}))
-                    field.remove_element(data.x, y, true, false);
-            }
-        }
+        event_data.helicopter = {x, y, id: helicopter.id};
+        event_data.damaged_elements = remove_element_by_mask(x, y, [
+            [0, 1, 0],
+            [1, 0, 1],
+            [0, 1, 0]
+        ]);
+
+        event_data.target_elements.push(remove_random_element());
+
+        field.remove_element(x, y, true, false);
+        
+        return true;
     }
 
-    function try_activate_horizontal_rocket(data: ActivationData) {
-        const element = field.get_element(data.x, data.y);
-        if(element == NullElement) return false;
-
-        if(data.other_x != undefined && data.other_y != undefined) {
-            const other_element = field.get_element(data.other_x, data.other_y);
-            if(other_element != NullElement && [ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_element.type)) {
-                field.remove_element(data.other_x, data.other_y, true, false);
-                try_activate_axis_rocket({x: data.x, y: data.y});
-                return;
-            }
-        }
-
-        field.remove_element(data.x, data.y, true, false);
-        
-        for(let x = 0; x < field_width; x++) {
-            if(x != data.x) {
-                if(!try_activate_buster_element({x, y: data.y}))
-                    field.remove_element(x, data.y, true, false);
-            }
-        }
-    }
-
-    function try_activate_axis_rocket(data: ActivationData) {
-        field.remove_element(data.x, data.y, true, false);
-
-        for(let y = 0; y < field_height; y++) {
-            if(y != data.y) {
-                if(!try_activate_buster_element({x: data.x, y}))
-                    field.remove_element(data.x, y, true, false);
-            }
-        }
-        
-        for(let x = 0; x < field_width; x++) {
-            if(x != data.x) {
-                if(!try_activate_buster_element({x, y: data.y}))
-                    field.remove_element(x, data.y, true, false);
-            }
-        }
-    }
-
-    function try_activate_helicopter(data: ActivationData) {
-        let helicopter = field.get_element(data.x, data.y);
-        if(helicopter == NullElement) return false;
-        
-        if(activated_elements.findIndex((element_id) => element_id == (helicopter as Element).id) != -1) return false;
+    function try_activate_swaped_helicopters(x: number, y: number, other_x: number, other_y: number) {
+        const helicopter = field.get_element(x, y);
+        if(helicopter == NullElement || helicopter.type != ElementId.Helicopter) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == helicopter.id) != -1) return false;
         activated_elements.push(helicopter.id);
 
-        let was_iteraction = false;
+        const other_helicopter = field.get_element(other_x, other_y);
+        if(other_helicopter == NullElement || other_helicopter.type == ElementId.Helicopter) return false;
 
-        if(data.other_x != undefined && data.other_y != undefined) {
-            const other_element = field.get_element(data.other_x, data.other_y);
-            if(other_element != NullElement && other_element.type == ElementId.Helicopter) {
-                field.remove_element(data.other_x, data.other_y, true, false);
-                was_iteraction = true;
-            }
+        if(activated_elements.findIndex((element_id) => element_id == other_helicopter.id) != -1) return false;
+        activated_elements.push(other_helicopter.id);
+
+        const event_data = {} as SwapedHelicoptersActivationMessage;
+        write_game_step_event('SWAPED_HELICOPTERS_ACTIVATED', event_data);
+        
+        event_data.helicopter = {x, y, id: helicopter.id};
+        event_data.other_helicopter = {x: other_x, y: other_y, id: other_helicopter.id};
+        event_data.damaged_elements = remove_element_by_mask(x, y, [
+            [0, 1, 0],
+            [1, 0, 1],
+            [0, 1, 0]
+        ]);
+
+        for(let i = 0; i < 3; i++) {
+            event_data.target_elements.push(remove_random_element());
         }
 
-        if(field.is_valid_element_pos(data.x - 1, data.y) && !try_activate_buster_element({x: data.x - 1, y: data.y}))
-            field.remove_element(data.x - 1, data.y, true, false);
-        if(field.is_valid_element_pos(data.x, data.y - 1) && !try_activate_buster_element({x: data.x, y: data.y - 1}))
-            field.remove_element(data.x, data.y - 1, true, false);
-        if(field.is_valid_element_pos(data.x + 1, data.y) && !try_activate_buster_element({x: data.x + 1, y: data.y}))
-            field.remove_element(data.x + 1, data.y, true, false);
-        if(field.is_valid_element_pos(data.x, data.y + 1) && !try_activate_buster_element({x: data.x, y: data.y + 1}))
-            field.remove_element(data.x, data.y + 1, true, false);
-    
-        remove_random_element(data.x, data.y, helicopter);
-        
-        for(let i = 0; i < 2 && was_iteraction; i++) {
-            helicopter = make_element(data.x, data.y, ElementId.Helicopter, true);
-            if(helicopter != NullElement) {
-                activated_elements.push(helicopter.id);
-                remove_random_element(data.x, data.y, helicopter);
-            }
-        }
-        
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
+
         return true;
     }
 
-    function try_activate_dynamite(data: ActivationData) {
-        let dynamite = field.get_element(data.x, data.y);
-        if(dynamite == NullElement) return false;
+    function try_activate_swaped_helicopter_with_element(x: number, y: number, other_x: number, other_y: number) {
+        const helicopter = field.get_element(x, y);
+        if(helicopter == NullElement || helicopter.type != ElementId.Helicopter) return false;
         
-        if(activated_elements.findIndex((element_id) => element_id == (dynamite as Element).id) != -1) return false;
+        const other_element = field.get_element(other_x, other_y);
+        if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
+
+        try_activate_helicopter(x, y);
+
+        return true;
+    }
+
+    function try_activate_dynamite(x: number, y: number) {
+        const dynamite = field.get_element(x, y);
+        if(dynamite == NullElement || dynamite.type != ElementId.Dynamite) return false;
+        
+        if(activated_elements.findIndex((element_id) => element_id == dynamite.id) != -1) return false;
         activated_elements.push(dynamite.id);
 
-        let range = 2;
-        if(data.other_x != undefined && data.other_y != undefined) {
-            const other_element = field.get_element(data.other_x, data.other_y);
-            if(other_element != NullElement && other_element.type == ElementId.Dynamite) {
-                field.remove_element(data.other_x, data.other_y, true, false);
-                range = 3;
-            }
-        }
+        const event_data = {} as DynamiteActivationMessage;
+        write_game_step_event('DYNAMITE_ACTIVATED', event_data);
+        
+        event_data.dynamite = {x, y, id: dynamite.id};
+        event_data.damaged_elements = remove_element_by_mask(x, y, [
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1]
+        ]);
 
-        field.remove_element(data.x, data.y, true, false);
-
-        for(let y = data.y - range; y <= data.y + range; y++) {
-            for(let x = data.x - range; x <= data.x + range; x++) {
-                if(field.is_valid_element_pos(x, y)) {
-                    if(!try_activate_buster_element({x, y})) {
-                        field.remove_element(x, y, true, false);
-                    }
-                }
-            }
-        }
+        field.remove_element(x, y, true, false);
 
         return true;
     }
 
-    function try_activate_diskosphere(data: ActivationData) {
-        const element = field.get_element(data.x, data.y);
-        if(element == NullElement) return false;
+    function try_activate_swaped_dynamites(x: number, y: number, other_x: number, other_y: number) {
+        const dynamite = field.get_element(x, y);
+        if(dynamite == NullElement || dynamite.type != ElementId.Dynamite) return false;
+        
+        if(activated_elements.findIndex((element_id) => element_id == dynamite.id) != -1) return false;
+        activated_elements.push(dynamite.id);
 
-        if(data.other_x != undefined && data.other_y != undefined) {
-            const other_element = field.get_element(data.other_x, data.other_y);
-            if(other_element != NullElement) {
-                if([ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_element.type)) {
-                    const element_id = get_random_element_id();
-                    if(element_id == NullElement) return;
+        const other_dynamite = field.get_element(other_x, other_y);
+        if(other_dynamite == NullElement || other_dynamite.type != ElementId.Dynamite) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == dynamite.id) != -1) return false;
+        activated_elements.push(dynamite.id);
 
-                    const elements = field.get_all_elements_by_type(element_id);
-                    for(const element of elements) {
-                        field.remove_element(element.x, element.y, true, false);
-                        make_element(element.x, element.y, other_element.type, true);
-                    }
+        const event_data = {} as SwapeDynamitesActivationMessage;
+        write_game_step_event('SWAPED_DYNAMITES_ACTIVATED', event_data);
+        
+        event_data.dynamite = {x, y, id: dynamite.id};
+        event_data.other_dynamite = {x: other_x, y: other_y, id: other_dynamite.id};
+        event_data.damaged_elements = remove_element_by_mask(x, y, [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1]
+        ]);
+        
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
 
-                    field.remove_element(data.x, data.y, true, false);
-                    field.remove_element(data.other_x, data.other_y, true, false);
+        return true;
+    }
 
-                    for(const element of elements) try_activate_buster_element({x: element.x, y: element.y});
+    function try_activate_swaped_dynamite_with_element(x: number, y: number, other_x: number, other_y: number) {
+        const dynamite = field.get_element(x, y);
+        if(dynamite == NullElement || dynamite.type != ElementId.Dynamite) return false;
+        
+        const other_element = field.get_element(other_x, other_y);
+        if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
 
-                    return;
-                }
-                
-                if(other_element.type == ElementId.Diskosphere) {
-                    for(const element_id of GAME_CONFIG.base_elements) {
-                        const elements = field.get_all_elements_by_type(element_id);
-                        for(const element of elements) field.remove_element(element.x, element.y, true, false);
-                    }
+        try_activate_dynamite(x, y);
 
-                    field.remove_element(data.x, data.y, true, false);
-                    field.remove_element(data.other_x, data.other_y, true, false);
+        return true;
+    }
 
-                    return;
-                }
+    function try_activate_diskosphere(x: number, y: number) {
+        const diskosphere = field.get_element(x, y);
+        if(diskosphere == NullElement || diskosphere.type != ElementId.Diskosphere) return false;
 
-                field.remove_element(data.x, data.y, true, false);
-            
-                const elements = field.get_all_elements_by_type(other_element.type);
-                for(const element of elements) field.remove_element(element.x, element.y, true, false);
-                
-                return;
-            }
-        }
+        if(activated_elements.findIndex((element_id) => element_id == diskosphere.id) != -1) return false;
+        activated_elements.push(diskosphere.id);
 
         const element_id = get_random_element_id();
-        if(element_id == NullElement) return;
+        if(element_id == NullElement) return false;
 
-        field.remove_element(data.x, data.y, true, true);
+        const event_data = {} as DiskosphereActivationMessage;
+        write_game_step_event('DISKOSPHERE_ACTIVATED', event_data);
+        
+        event_data.diskosphere = {x, y, id: diskosphere.id};
 
         const elements = field.get_all_elements_by_type(element_id);
         for(const element of elements) field.remove_element(element.x, element.y, true, true);
+        event_data.damaged_elements = elements;
+
+        field.remove_element(x, y, true, false);
+
+        return true;
+    }
+
+    function try_activate_swaped_diskospheres(x: number, y: number, other_x: number, other_y: number) {
+        const diskosphere = field.get_element(x, y);
+        if(diskosphere == NullElement || diskosphere.type != ElementId.Diskosphere) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == diskosphere.id) != -1) return false;
+        activated_elements.push(diskosphere.id);
+
+        const other_diskosphere = field.get_element(other_x, other_y);
+        if(other_diskosphere == NullElement || other_diskosphere.type != ElementId.Diskosphere) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == other_diskosphere.id) != -1) return false;
+        activated_elements.push(other_diskosphere.id);
+
+        const event_data = {} as SwapedDiskospheresActivationMessage;
+        write_game_step_event('SWAPED_DISKOSPHERES_ACTIVATED', event_data);
+        
+        event_data.diskosphere = {x, y, id: diskosphere.id};
+        event_data.other_diskosphere = {x: other_x, y: other_y, id: other_diskosphere.id};
+        event_data.damaged_elements = [];
+    
+        for(const element_id of GAME_CONFIG.base_elements) {
+            const elements = field.get_all_elements_by_type(element_id);
+            for(const element of elements) {
+                field.remove_element(element.x, element.y, true, false);
+                event_data.damaged_elements.push(element);
+            }
+        }
+
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
+
+        return true;
+    }
+
+    function try_activate_swaped_diskosphere_with_buster(x: number, y: number, other_x: number, other_y: number) {
+        const diskosphere = field.get_element(x, y);
+        if(diskosphere == NullElement || diskosphere.type != ElementId.Diskosphere) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == diskosphere.id) != -1) return false;
+        activated_elements.push(diskosphere.id);
+
+        const other_buster = field.get_element(other_x, other_y);
+        if(other_buster == NullElement || ![ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(diskosphere.type)) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == other_buster.id) != -1) return false;
+        activated_elements.push(other_buster.id);
+
+        const event_data = {} as SwapedDiskosphereWithBusterActivationMessage;
+        write_game_step_event('SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED', event_data);
+        
+        event_data.diskosphere = {x, y, id: diskosphere.id};
+        event_data.other_buster = {x: other_x, y: other_y, id: other_buster.id};
+        event_data.damaged_elements = [];
+        event_data.maked_elements = [];
+
+        const element_id = get_random_element_id();
+        if(element_id == NullElement) return false;
+
+        const elements = field.get_all_elements_by_type(element_id);
+        for(const element of elements) {
+            field.remove_element(element.x, element.y, true, false);
+            event_data.damaged_elements.push(element);
+
+            const maked_element = make_element(element.x, element.y, other_buster.type, true);
+            if(maked_element != NullElement) event_data.maked_elements.push({x: element.x, y: element.y, id: maked_element.id});
+        }
+
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
+
+        for(const element of elements) try_activate_buster_element(element.x, element.y);
+
+        return true;
+    }
+
+    function try_activate_swaped_diskosphere_with_element(x: number, y: number, other_x: number, other_y: number) {
+        const diskosphere = field.get_element(x, y);
+        if(diskosphere == NullElement || diskosphere.type != ElementId.Diskosphere) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == diskosphere.id) != -1) return false;
+        activated_elements.push(diskosphere.id);
+
+        const other_element = field.get_element(other_x, other_y);
+        if(other_element == NullElement) return false;
+
+        const event_data = {} as SwapedDiskosphereWithElementActivationMessage;
+        write_game_step_event('SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED', event_data);
+        
+        event_data.diskosphere = {x, y, id: diskosphere.id};
+        event_data.other_element = {x: other_x, y: other_y, id: other_element.id};
+        event_data.damaged_elements = [];
+
+        const elements = field.get_all_elements_by_type(other_element.type);
+        for(const element of elements) {
+            field.remove_element(element.x, element.y, true, false);
+            event_data.damaged_elements.push(element);
+        }
+
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
+
+        return true;
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -406,43 +665,42 @@ export function Game() {
         return true;
     }
 
-    function swap_elements(from_x: number, from_y: number, to_x: number, to_y: number) {
+    function try_swap_elements(from_x: number, from_y: number, to_x: number, to_y: number) {
         const cell_from = field.get_cell(from_x, from_y);
         const cell_to = field.get_cell(to_x, to_y);
 
-        if(cell_from == NotActiveCell || cell_to == NotActiveCell) return;
-        if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return;
+        if(cell_from == NotActiveCell || cell_to == NotActiveCell) return false;
+        if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return false;
 
         const element_from = field.get_element(from_x, from_y);
         const element_to = field.get_element(to_x, to_y);
         
-        if((element_from == NullElement) || (element_to == NullElement)) return;
-
-        if(field.try_move(from_x, from_y, to_x, to_y)) {
-
-            write_game_step_event('ON_SWAP_ELEMENTS', {
-                element_from: {x: to_x, y: to_y, id: element_to.id},
-                element_to: {x: from_x, y: from_y, id: element_from.id}
-            });
-
-            const is_click_to = !is_click_activation(to_x, to_y) && is_click_activation(from_x, from_y);
-            if(is_click_to) try_activate_buster_element({x: from_x, y: from_y, other_x: to_x, other_y: to_y });
-            else try_activate_buster_element({x: to_x, y: to_y, other_x: from_x, other_y: from_y });
-            
-            process_game_step();
-        } else {
+        if((element_from == NullElement) || (element_to == NullElement)) return false;
+        
+        if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 element_from: {x: from_x, y: from_y, id: element_from.id},
                 element_to: {x: to_x, y: to_y, id: element_to.id}
             });
+
+            return false;
         }
+        
+        write_game_step_event('ON_SWAP_ELEMENTS', {
+            element_from: {x: to_x, y: to_y, id: element_to.id},
+            element_to: {x: from_x, y: from_y, id: element_from.id}
+        });
+
+        return true;
     }
 
     function process_game_step() {
-        if(field.process_state(ProcessMode.MoveElements)) write_game_step_event('END_MOVE_PHASE', {});
+        write_game_step_event('MOVE_PHASE_BEGIN', {});
+        
+        if(field.process_state(ProcessMode.MoveElements)) write_game_step_event('MOVE_PHASE_END', {});
         while(field.process_state(ProcessMode.Combinate)){
             field.process_state(ProcessMode.MoveElements);
-            write_game_step_event('END_MOVE_PHASE', {});
+            write_game_step_event('MOVE_PHASE_END', {});
         }
 
         previous_states.push(field.save_state());
@@ -462,7 +720,7 @@ export function Game() {
                 else field.set_cell(x, y, NotActiveCell);
 
                 const element = previous_state.elements[y][x];
-                if(element != NullElement) make_element(x, y, element.type, false, element.data);
+                if(element != NullElement) make_element(x, y, element.type, element.data);
                 else field.set_element(x, y, NullElement);
             }
         }
@@ -481,27 +739,38 @@ export function Game() {
     function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
         if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
         
-        return (is_click_activation(from_x, from_y) || is_click_activation(to_x, to_y));
+        return (is_buster(from_x, from_y) || is_buster(to_x, to_y));
     }
 
     function try_combo(combined_element: ItemInfo, combination: CombinationInfo) {
+        let element;
         switch(combination.type) {
             case CombinationType.Comb4:
-                make_element(combined_element.x, combined_element.y,
-                    (combination.angle == 0) ? ElementId.HorizontalRocket : ElementId.VerticalRocket, true);
-                return true;
+                element = make_element(combined_element.x, combined_element.y,
+                    (combination.angle == 0) ? ElementId.HorizontalRocket : ElementId.VerticalRocket);
+            break;
             case CombinationType.Comb5:
-                make_element(combined_element.x, combined_element.y, ElementId.Diskosphere, true);
-                return true;
+                element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere);
+            break;
             case CombinationType.Comb2x2:
-                make_element(combined_element.x, combined_element.y, ElementId.Helicopter, true);
-                return true;
+                element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter);
+            break;
             case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
-                make_element(combined_element.x, combined_element.y, ElementId.Dynamite, true);
-                return true;
+                element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite);
+            break;
             case CombinationType.Comb3x4: case CombinationType.Comb3x5:
-                make_element(combined_element.x, combined_element.y, ElementId.AxisRocket, true);
-                return true;
+                element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket);
+            break;
+        }
+
+        if(element != undefined && element != NullElement) {
+            write_game_step_event('ON_COMBO', {
+                combined_element,
+                combination,
+                maked_element: {x: combined_element.x, y: combined_element.y, id: element.id, type: element.type}
+            });
+
+            return true;
         }
 
         return false;
@@ -509,8 +778,7 @@ export function Game() {
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
         field.on_combined_base(combined_element, combination);
-        if(try_combo(combined_element, combination)) write_game_step_event('ON_COMBO', {combined_element, combination});
-        else write_game_step_event('ON_COMBINED', {});
+        if(!try_combo(combined_element, combination)) write_game_step_event('ON_COMBINED', {combined_element, combination});
     }
 
     function on_move_element(from_x:number, from_y: number, to_x: number, to_y: number, element: Element) {
@@ -519,7 +787,7 @@ export function Game() {
 
     function on_damaged_element(damaged_info: DamagedInfo) {
         activated_elements.splice(activated_elements.findIndex((element_id) => element_id == damaged_info.element.id), 1);
-        write_game_step_event('ON_DAMAGED_ELEMENT', {id: damaged_info.element.id});
+        // write_game_step_event('ON_DAMAGED_ELEMENT', {id: damaged_info.element.id});
     }
 
 
@@ -608,17 +876,10 @@ export function Game() {
     }
 
     //#endregion CALLBACKS
-    //#region HELPERS       
-    
-    function is_click_activation(x: number, y: number) {
-        const cell = field.get_cell(x, y);
-        if(cell == NotActiveCell || !field.is_available_cell_type_for_move(cell)) return false;
+    //#region HELPERS    
 
-        const element = field.get_element(x, y);
-        if(element == NullElement) return false;
-        if(!GAME_CONFIG.element_database[element.type as ElementId].type.is_clickable) return false;
-
-        return true;
+    function is_buster(x: number, y: number) {
+        return field.try_click(x, y);
     }
 
     function get_random_element_id(): ElementId | typeof NullElement {
@@ -645,25 +906,48 @@ export function Game() {
         return NullElement;
     }
     
-    function remove_random_element(x: number, y: number, element: Element) {
+    function remove_random_element() {
         const available_elements = [];
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const element = field.get_element(x, y);
                 if(element != NullElement) {
-                    available_elements.push({x, y});
+                    available_elements.push({x, y, id: element.id});
                 }
             }
         }
 
-        field.remove_element(x, y, true, false);
-        if(available_elements.length == 0) return;
+        if(available_elements.length == 0) return NullElement;
 
         const target = available_elements[math.random(0, available_elements.length - 1)];
-        if(!try_activate_buster_element({x: target.x, y: target.y}))
+        if(!try_activate_buster_element(target.x, target.y))
            field.remove_element(target.x, target.y, true, false);
 
         return target;
+    }
+    
+    function remove_element_by_mask(x: number, y: number, mask: number[][]) {
+        const removed_elements = [];
+        
+        // FIXME: start pos in mask by field coordinate
+        const mask_half_width = (mask.length - 1) / 2;
+        const mask_half_height = (mask[0].length - 1) / 2;
+
+        for (let i = y - mask_half_height; i <= y + mask_half_height; i++) {
+            for (let j = mask_half_width; j <= x + mask_half_width; j++) {
+                if (mask[i - (y - mask_half_height)][j - (x - mask_half_width)] == 1) {
+                    if(field.is_valid_element_pos(j, i) && !try_activate_buster_element(j, i)) {
+                        const element = field.get_element(j, i);
+                        if(element != NullElement) {
+                            removed_elements.push({x: j, y: i, id: element.id});
+                            field.remove_element(j, i, true, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        return removed_elements;
     }
 
     function write_game_step_event<T extends MessageId>(message_id: T, message: Messages[T]) {
