@@ -189,17 +189,17 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.HorizontalRocket,
-                ____exports.ElementId.HorizontalRocket,
                 ____exports.ElementId.Emerald,
+                ____exports.ElementId.Gold,
+                ____exports.ElementId.Dynamite,
                 NullElement
             },
             {
                 ____exports.ElementId.Dimonde,
-                ____exports.ElementId.VerticalRocket,
-                ____exports.ElementId.VerticalRocket,
-                ____exports.ElementId.Diskosphere,
-                ____exports.ElementId.Diskosphere,
+                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Gold,
+                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold
@@ -208,7 +208,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Dynamite,
+                ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
@@ -230,7 +230,7 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.HorizontalRocket,
+                ____exports.ElementId.Emerald,
                 NullElement,
                 ____exports.ElementId.Topaz
             },
@@ -256,12 +256,12 @@ ____exports._GAME_CONFIG = {
             },
             {
                 NullElement,
-                ____exports.ElementId.Helicopter,
-                ____exports.ElementId.Helicopter,
+                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Helicopter,
+                ____exports.ElementId.Topaz,
                 NullElement
             }
         }
@@ -356,29 +356,29 @@ ____exports._GAME_CONFIG = {
         elements = {
             {
                 NullElement,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.VerticalRocket,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.VerticalRocket,
                 NullElement
             },
             {
                 ____exports.ElementId.Dimonde,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Topaz,
-                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Ruby,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
-                ____exports.ElementId.Diskosphere
+                ____exports.ElementId.Gold
             },
             {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Dynamite,
+                ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
@@ -400,25 +400,25 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
-                NullElement,
+                ____exports.ElementId.Emerald,
                 NullElement,
                 ____exports.ElementId.Topaz
             },
             {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Emerald,
-                ____exports.ElementId.Gold,
+                ____exports.ElementId.VerticalRocket,
+                ____exports.ElementId.HorizontalRocket,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold
             },
             {
-                ____exports.ElementId.Helicopter,
-                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Dimonde,
+                ____exports.ElementId.Topaz,
+                ____exports.ElementId.VerticalRocket,
+                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
@@ -426,12 +426,12 @@ ____exports._GAME_CONFIG = {
             },
             {
                 NullElement,
-                ____exports.ElementId.Gold,
-                ____exports.ElementId.Gold,
+                ____exports.ElementId.Topaz,
+                ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.HorizontalRocket,
-                ____exports.ElementId.Gold,
+                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Topaz,
                 NullElement
             }
         }
@@ -531,7 +531,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.VerticalRocket,
+                ____exports.ElementId.Dimonde,
                 NullElement
             },
             {
@@ -542,13 +542,13 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
                 NullElement,
-                ____exports.ElementId.Diskosphere
+                ____exports.ElementId.Topaz
             },
             {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 NullElement,
-                ____exports.ElementId.Dynamite,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Emerald,
                 NullElement,
                 ____exports.ElementId.Gold,
@@ -561,8 +561,8 @@ ____exports._GAME_CONFIG = {
                 NullElement,
                 NullElement,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Gold,
-                ____exports.ElementId.Dimonde
+                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Gold
             },
             {
                 ____exports.ElementId.Dimonde,
@@ -599,8 +599,8 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
-                ____exports.ElementId.Topaz,
-                ____exports.ElementId.HorizontalRocket,
+                ____exports.ElementId.Helicopter,
+                ____exports.ElementId.Helicopter,
                 ____exports.ElementId.Gold,
                 NullElement
             }
@@ -711,14 +711,14 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
-                ____exports.ElementId.Ruby,
-                ____exports.ElementId.Diskosphere
+                ____exports.ElementId.Diskosphere,
+                ____exports.ElementId.Dynamite
             },
             {
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.Dynamite,
+                ____exports.ElementId.Emerald,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
@@ -755,7 +755,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold
             },
             {
-                ____exports.ElementId.Helicopter,
+                ____exports.ElementId.Ruby,
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Topaz,
@@ -770,7 +770,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Emerald,
                 ____exports.ElementId.Topaz,
-                ____exports.ElementId.HorizontalRocket,
+                ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Ruby
             }

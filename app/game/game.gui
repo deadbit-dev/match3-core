@@ -46,7 +46,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/hammer_button"
+  texture: "ui/lable"
   id: "hammer_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_BOTTOM
@@ -200,6 +200,65 @@ nodes {
 }
 nodes {
   position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 50.0
+    y: 50.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "ui/hammer"
+  id: "hammer_icon"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "hammer_button"
+  layer: ""
+  inherit_alpha: true
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
     x: 160.0
     y: 95.0
     z: 0.0
@@ -231,12 +290,71 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/restart_button"
+  texture: "ui/lable"
   id: "restart_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_BOTTOM
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
+  layer: ""
+  inherit_alpha: true
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 90.0
+    y: 90.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "ui/restart_icon"
+  id: "restart_icon"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "restart_button"
   layer: ""
   inherit_alpha: true
   slice9 {
@@ -289,7 +407,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/revert_step_button"
+  texture: "ui/lable"
   id: "revert_step_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -297,6 +415,65 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   layer: ""
   inherit_alpha: false
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 90.0
+    y: 90.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "ui/arrow_icon"
+  id: "revert_step_icon"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "revert_step_button"
+  layer: ""
+  inherit_alpha: true
   slice9 {
     x: 0.0
     y: 0.0
@@ -347,7 +524,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/revert_step_button"
+  texture: "ui/lable"
   id: "previous_level_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -355,6 +532,65 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   layer: ""
   inherit_alpha: false
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 50.0
+    y: 50.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "ui/arrow_icon"
+  id: "previous_level_icon"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "previous_level_button"
+  layer: ""
+  inherit_alpha: true
   slice9 {
     x: 0.0
     y: 0.0
@@ -382,7 +618,7 @@ nodes {
   rotation {
     x: 0.0
     y: 0.0
-    z: 180.0
+    z: 0.0
     w: 1.0
   }
   scale {
@@ -405,7 +641,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/revert_step_button"
+  texture: "ui/lable"
   id: "next_level_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -413,6 +649,65 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   layer: ""
   inherit_alpha: false
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 180.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 50.0
+    y: 50.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "ui/arrow_icon"
+  id: "next_level_icon"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "next_level_button"
+  layer: ""
+  inherit_alpha: true
   slice9 {
     x: 0.0
     y: 0.0

@@ -599,6 +599,8 @@ export function Field(size_x: number, size_y: number) {
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
             set_element(x, y, NullElement);
         }
+
+        return element;
     }
 
     function is_available_cell_type_for_move(cell: Cell): boolean {

@@ -529,6 +529,7 @@ function ____exports.Field(size_x, size_y)
             )
             set_element(x, y, ____exports.NullElement)
         end
+        return element
     end
     local function is_available_cell_type_for_click(cell)
         local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall

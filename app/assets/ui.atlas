@@ -1,17 +1,17 @@
 images {
-  image: "/assets/hammer_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/restart_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
   image: "/assets/lable.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/revert_step_button.png"
+  image: "/assets/hammer.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/arrow_icon.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/restart_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

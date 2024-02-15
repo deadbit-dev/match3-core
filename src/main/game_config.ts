@@ -222,14 +222,14 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.HorizontalRocket, ElementId.HorizontalRocket, ElementId.Emerald, NullElement],
-                    [ElementId.Dimonde, ElementId.VerticalRocket, ElementId.VerticalRocket, ElementId.Diskosphere, ElementId.Diskosphere, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
+                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dynamite, NullElement],
+                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.HorizontalRocket, NullElement, ElementId.Topaz],
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
                     [ElementId.Gold, ElementId.Gold, ElementId.Dynamite, ElementId.Dynamite, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Helicopter, ElementId.Helicopter, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, NullElement]
+                    [NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Topaz, NullElement]
                 ]
             },
 
@@ -247,7 +247,7 @@ export const _GAME_CONFIG = {
                 offset_border: 10,
                 move_direction: Direction.Up,
                 
-                cells: [
+               cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -259,14 +259,14 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.VerticalRocket, ElementId.Gold, ElementId.VerticalRocket, NullElement],
-                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Diskosphere],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
+                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
+                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Helicopter, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, NullElement]
+                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
+                    [ElementId.Gold, ElementId.Gold, ElementId.VerticalRocket, ElementId.HorizontalRocket, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [ElementId.Gold, ElementId.Topaz, ElementId.VerticalRocket, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
+                    [NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Topaz, NullElement]
                 ]
             },
 
@@ -296,14 +296,14 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
-                    [ElementId.Dimonde, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Diskosphere],
-                    [ElementId.Dimonde, ElementId.Gold, NullElement, ElementId.Dynamite, ElementId.Emerald, NullElement, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, NullElement],
+                    [ElementId.Dimonde, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Topaz],
+                    [ElementId.Dimonde, ElementId.Gold, NullElement, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
                     [ElementId.Gold, ElementId.Gold, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Gold, ElementId.Gold],
                     [ElementId.Helicopter, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Ruby],
-                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, NullElement]
+                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Helicopter, ElementId.Helicopter, ElementId.Gold, NullElement]
                 ]
             },
 
@@ -334,13 +334,13 @@ export const _GAME_CONFIG = {
 
                 elements: [
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Ruby],
-                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Diskosphere],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Dynamite, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Diskosphere, ElementId.Dynamite],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
                     [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
                     [ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Helicopter, ElementId.Ruby, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
-                    [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.HorizontalRocket, ElementId.Gold, ElementId.Ruby]
+                    [ElementId.Ruby, ElementId.Ruby, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
+                    [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
                 ]
             },
 
@@ -365,19 +365,13 @@ export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemI
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo }
 export interface ComboMessage extends CombinedMessage { maked_element: ElementMessage }
 
-export interface RocketActivationMessage { rocket: ItemInfo, damaged_elements: ItemInfo[] }
-export interface SwapedRocketsActivationMessage extends RocketActivationMessage { other_rocket: ItemInfo }
+export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[] }
+export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
 
-export interface HelicopterActivationMessage { helicopter: ItemInfo, damaged_elements: ItemInfo[], target_elements: (ItemInfo | typeof NullElement)[] }
-export interface SwapedHelicoptersActivationMessage extends HelicopterActivationMessage{ other_helicopter: ItemInfo }
+export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
+export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_elements: (ItemInfo | typeof NullElement)[] }
 
-export interface DynamiteActivationMessage { dynamite: ItemInfo, damaged_elements: ItemInfo[] }
-export interface SwapeDynamitesActivationMessage extends DynamiteActivationMessage { other_dynamite: ItemInfo }
-
-export interface DiskosphereActivationMessage { diskosphere: ItemInfo, damaged_elements: ItemInfo[]}
-export interface SwapedDiskospheresActivationMessage extends DiskosphereActivationMessage { other_diskosphere: ItemInfo }
-export interface SwapedDiskosphereWithBusterActivationMessage extends DiskosphereActivationMessage { other_buster: ItemInfo, maked_elements: ItemInfo[] }
-export interface SwapedDiskosphereWithElementActivationMessage extends DiskosphereActivationMessage { other_element: ItemInfo }
+export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
 export interface ActivatedCellMessage extends ItemInfo { variety: number, previous_id: number }
 export interface MoveElementMessage extends StepInfo { element: Element }
@@ -395,20 +389,24 @@ export type _UserMessages = {
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
 
-    ROCKET_ACTIVATED: RocketActivationMessage,
-    AXIS_ROCKET_ACTIVATED: RocketActivationMessage,
-    SWAPED_ROCKETS_ACTIVATED: SwapedRocketsActivationMessage,
+    SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED: SwapedDiskosphereActivationMessage,
+    
+    DISKOSPHERE_ACTIVATED: ActivationMessage,
+    SWAPED_DISKOSPHERES_ACTIVATED: SwapedActivationMessage,
+    SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereActivationMessage,
+    SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedActivationMessage,
+
+    ROCKET_ACTIVATED: ActivationMessage,
+    AXIS_ROCKET_ACTIVATED: ActivationMessage,
+    SWAPED_ROCKETS_ACTIVATED: SwapedActivationMessage,
 
     HELICOPTER_ACTIVATED: HelicopterActivationMessage,
     SWAPED_HELICOPTERS_ACTIVATED: SwapedHelicoptersActivationMessage,
 
-    DYNAMITE_ACTIVATED: DynamiteActivationMessage,
-    SWAPED_DYNAMITES_ACTIVATED: SwapeDynamitesActivationMessage,
+    DYNAMITE_ACTIVATED: ActivationMessage,
+    SWAPED_DYNAMITES_ACTIVATED: SwapedActivationMessage,
 
-    DISKOSPHERE_ACTIVATED: DiskosphereActivationMessage,
-    SWAPED_DISKOSPHERES_ACTIVATED: SwapedDiskospheresActivationMessage,
-    SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereWithBusterActivationMessage,
-    SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedDiskosphereWithElementActivationMessage,
+    HAMMER_ACTIVATED: ItemInfo,
 
     ON_COMBINED: CombinedMessage,
     ON_COMBO: ComboMessage,
