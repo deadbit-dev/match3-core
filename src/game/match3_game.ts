@@ -706,10 +706,14 @@ export function Game() {
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
-        const removed_element = field.remove_element(x, y, true, false);
-        if(removed_element == undefined) return false;
-
-        write_game_step_event('HAMMER_ACTIVATED', {x, y, id: removed_element.id});
+        // FIXME: for buster under wall
+        if(is_buster(x, y)) try_activate_buster_element(x, y);
+        else {
+            const removed_element = field.remove_element(x, y, true, false);
+            if(removed_element == undefined) return false;
+            
+            write_game_step_event('HAMMER_ACTIVATED', {x, y, id: removed_element.id});
+        }
         
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
         busters.hammer_active = false;

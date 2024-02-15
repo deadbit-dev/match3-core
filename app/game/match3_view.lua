@@ -149,7 +149,7 @@ function ____exports.View()
                 end
                 ____cond20 = ____cond20 or ____switch20 == "MOVE_PHASE_BEGIN"
                 if ____cond20 then
-                    flow.delay(1)
+                    flow.delay(0.1)
                     break
                 end
                 ____cond20 = ____cond20 or ____switch20 == "ON_MOVE_ELEMENT"
@@ -253,6 +253,7 @@ function ____exports.View()
         local item_world_pos = go.get_world_position(item._hash)
         local element_pos = get_field_pos(item_world_pos)
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
+        selected_element = nil
     end
     function on_set_field(state)
         do
@@ -446,6 +447,7 @@ function ____exports.View()
                 end
             end
         )
+        flow.delay(swap_element_time + damaged_element_time)
     end
     function on_swaped_diskospheres_animation(message)
         local activation = message
@@ -477,7 +479,7 @@ function ____exports.View()
                 end
             end
         )
-        flow.delay(swap_element_time)
+        flow.delay(swap_element_time + damaged_element_time)
     end
     function on_rocket_activated_animation(message)
         local activation = message

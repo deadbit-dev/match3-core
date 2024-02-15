@@ -863,11 +863,15 @@ function ____exports.Game()
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
         end
-        local removed_element = field.remove_element(x, y, true, false)
-        if removed_element == nil then
-            return false
+        if is_buster(x, y) then
+            try_activate_buster_element(x, y)
+        else
+            local removed_element = field.remove_element(x, y, true, false)
+            if removed_element == nil then
+                return false
+            end
+            write_game_step_event("HAMMER_ACTIVATED", {x = x, y = y, id = removed_element.id})
         end
-        write_game_step_event("HAMMER_ACTIVATED", {x = x, y = y, id = removed_element.id})
         GameStorage.set(
             "hammer_counts",
             GameStorage.get("hammer_counts") - 1
@@ -959,29 +963,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element
         repeat
-            local ____switch210 = combination.type
-            local ____cond210 = ____switch210 == CombinationType.Comb4
-            if ____cond210 then
+            local ____switch212 = combination.type
+            local ____cond212 = ____switch212 == CombinationType.Comb4
+            if ____cond212 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == CombinationType.Comb5
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == CombinationType.Comb5
+            if ____cond212 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == CombinationType.Comb2x2
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == CombinationType.Comb2x2
+            if ____cond212 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond210 = ____cond210 or (____switch210 == CombinationType.Comb3x3a or ____switch210 == CombinationType.Comb3x3b)
-            if ____cond210 then
+            ____cond212 = ____cond212 or (____switch212 == CombinationType.Comb3x3a or ____switch212 == CombinationType.Comb3x3b)
+            if ____cond212 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond210 = ____cond210 or (____switch210 == CombinationType.Comb3x4 or ____switch210 == CombinationType.Comb3x5)
-            if ____cond210 then
+            ____cond212 = ____cond212 or (____switch212 == CombinationType.Comb3x4 or ____switch212 == CombinationType.Comb3x5)
+            if ____cond212 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1022,9 +1026,9 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch220 = cell.type
-            local ____cond220 = ____switch220 == CellType.ActionLocked
-            if ____cond220 then
+            local ____switch222 = cell.type
+            local ____cond222 = ____switch222 == CellType.ActionLocked
+            if ____cond222 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -1070,8 +1074,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond220 then
+            ____cond222 = ____cond222 or ____switch222 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond222 then
                 if cell.cnt_near_acts == nil then
                     break
                 end

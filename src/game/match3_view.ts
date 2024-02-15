@@ -136,7 +136,7 @@ export function View() {
                 case 'HAMMER_ACTIVATED': on_hammer_activated_animation(event.value); break;
                 
                 case 'ON_CELL_ACTIVATED': on_cell_activated_animation(event.value); break;
-                case 'MOVE_PHASE_BEGIN': flow.delay(1); break;
+                case 'MOVE_PHASE_BEGIN': flow.delay(0.1); break;
                 case 'ON_MOVE_ELEMENT': on_move_element_animation(event.value); break;
                 case 'ON_REQUEST_ELEMENT': on_request_element_animation(event.value); break;
                 case 'MOVE_PHASE_END': flow.delay(1); break;
@@ -220,6 +220,8 @@ export function View() {
             x: element_pos.x,
             y: element_pos.y
         });
+
+        selected_element = null;
     }
 
     //#endregion INPUT
@@ -339,6 +341,8 @@ export function View() {
             for(const element of activation.maked_elements)
                 make_element_view(element.x, element.y, element.id, element.type);
         });
+
+        flow.delay(swap_element_time + damaged_element_time);
     }
   
     function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
@@ -363,7 +367,7 @@ export function View() {
                 make_element_view(element.x, element.y, element.id, element.type);
         });
 
-        flow.delay(swap_element_time);
+        flow.delay(swap_element_time + damaged_element_time);
     }
 
     function on_rocket_activated_animation(message: Messages[MessageId]) {
