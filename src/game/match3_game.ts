@@ -567,7 +567,7 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        event_data.target_element = remove_random_element();
+        event_data.target_element = remove_random_element(event_data.damaged_elements);
 
         field.remove_element(x, y, true, false);
         
@@ -601,7 +601,7 @@ export function Game() {
         ]);
 
         for(let i = 0; i < 3; i++) {
-            event_data.target_elements.push(remove_random_element());
+            event_data.target_elements.push(remove_random_element(event_data.damaged_elements));
         }
 
         field.remove_element(x, y, true, false);
@@ -957,12 +957,12 @@ export function Game() {
         return NullElement;
     }
     
-    function remove_random_element() {
+    function remove_random_element(exclude?: ItemInfo[]) {
         const available_elements = [];
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const element = field.get_element(x, y);
-                if(element != NullElement) {
+                if(element != NullElement && exclude != undefined && exclude.findIndex((item) => item.id == element.id) == -1) {
                     available_elements.push({x, y, id: element.id});
                 }
             }
@@ -971,8 +971,8 @@ export function Game() {
         if(available_elements.length == 0) return NullElement;
 
         const target = available_elements[math.random(0, available_elements.length - 1)];
-        if(!try_activate_buster_element(target.x, target.y))
-           field.remove_element(target.x, target.y, true, false);
+        if(is_buster(target.x, target.y)) try_activate_buster_element(target.x, target.y);
+        else field.remove_element(target.x, target.y, true, false);
 
         return target;
     }

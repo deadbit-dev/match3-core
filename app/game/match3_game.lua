@@ -631,7 +631,7 @@ function ____exports.Game()
         write_game_step_event("HELICOPTER_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, id = helicopter.id}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-        event_data.target_element = remove_random_element()
+        event_data.target_element = remove_random_element(event_data.damaged_elements)
         field.remove_element(x, y, true, false)
         return true
     end
@@ -668,7 +668,7 @@ function ____exports.Game()
             local i = 0
             while i < 3 do
                 local ____event_data_target_elements_14 = event_data.target_elements
-                ____event_data_target_elements_14[#____event_data_target_elements_14 + 1] = remove_random_element()
+                ____event_data_target_elements_14[#____event_data_target_elements_14 + 1] = remove_random_element(event_data.damaged_elements)
                 i = i + 1
             end
         end
@@ -1170,7 +1170,7 @@ function ____exports.Game()
         end
         return NullElement
     end
-    function remove_random_element()
+    function remove_random_element(exclude)
         local available_elements = {}
         do
             local y = 0
@@ -1179,7 +1179,10 @@ function ____exports.Game()
                     local x = 0
                     while x < field_width do
                         local element = field.get_element(x, y)
-                        if element ~= NullElement then
+                        if element ~= NullElement and exclude ~= nil and __TS__ArrayFindIndex(
+                            exclude,
+                            function(____, item) return item.id == element.id end
+                        ) == -1 then
                             available_elements[#available_elements + 1] = {x = x, y = y, id = element.id}
                         end
                         x = x + 1
@@ -1192,7 +1195,9 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_elements[math.random(0, #available_elements - 1) + 1]
-        if not try_activate_buster_element(target.x, target.y) then
+        if is_buster(target.x, target.y) then
+            try_activate_buster_element(target.x, target.y)
+        else
             field.remove_element(target.x, target.y, true, false)
         end
         return target

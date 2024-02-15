@@ -398,20 +398,17 @@ export function View() {
                 damage_element_animation(element.id);
             
             let target_element = activation.target_elements.pop();
-            if(target_element != undefined && target_element != NullElement) {
-                remove_random_element_animation(activation.element, target_element, () => {
-                    target_element = activation.target_elements.pop();
-                    if(target_element != undefined && target_element != NullElement) {
-                        remove_random_element_animation(activation.other_element, target_element, () => {
-                            target_element = activation.target_elements.pop();
-                            if(target_element != undefined && target_element != NullElement) {
-                                make_element_view(activation.element.x, activation.element.y, activation.element.id, ElementId.Helicopter);
-                                remove_random_element_animation(activation.element, target_element);
-                            }
-                        });
-                    }
-                });
-            }
+            if(target_element != undefined && target_element != NullElement)
+                remove_random_element_animation(activation.element, target_element);
+                
+            target_element = activation.target_elements.pop();
+            if(target_element != undefined && target_element != NullElement)
+                remove_random_element_animation(activation.other_element, target_element);
+
+
+            target_element = activation.target_elements.pop();
+            if(target_element != undefined && target_element != NullElement)
+                damage_element_animation(target_element.id);
         });
 
         flow.delay(3);

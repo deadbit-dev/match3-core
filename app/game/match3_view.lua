@@ -10,8 +10,6 @@ local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
 local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
-local ____game_config = require("main.game_config")
-local ElementId = ____game_config.ElementId
 local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
@@ -524,26 +522,15 @@ function ____exports.View()
                 end
                 local target_element = table.remove(activation.target_elements)
                 if target_element ~= nil and target_element ~= NullElement then
-                    remove_random_element_animation(
-                        activation.element,
-                        target_element,
-                        function()
-                            target_element = table.remove(activation.target_elements)
-                            if target_element ~= nil and target_element ~= NullElement then
-                                remove_random_element_animation(
-                                    activation.other_element,
-                                    target_element,
-                                    function()
-                                        target_element = table.remove(activation.target_elements)
-                                        if target_element ~= nil and target_element ~= NullElement then
-                                            make_element_view(activation.element.x, activation.element.y, activation.element.id, ElementId.Helicopter)
-                                            remove_random_element_animation(activation.element, target_element)
-                                        end
-                                    end
-                                )
-                            end
-                        end
-                    )
+                    remove_random_element_animation(activation.element, target_element)
+                end
+                target_element = table.remove(activation.target_elements)
+                if target_element ~= nil and target_element ~= NullElement then
+                    remove_random_element_animation(activation.other_element, target_element)
+                end
+                target_element = table.remove(activation.target_elements)
+                if target_element ~= nil and target_element ~= NullElement then
+                    damage_element_animation(target_element.id)
                 end
             end
         )
