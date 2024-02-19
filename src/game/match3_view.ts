@@ -27,7 +27,8 @@ import {
     NullElement,
     NotActiveCell,
     CombinationInfo,
-    StepInfo
+    StepInfo,
+    Cell
 } from "./match3_core";
 
 
@@ -59,7 +60,6 @@ export function View() {
     const field_height = level_config['field']['height'];
     const offset_border = level_config['field']['offset_border'];
     const origin_cell_size = level_config['field']['cell_size'];
-    const move_direction = level_config['field']['move_direction'];
 
     const cell_size = math.min((game_width - offset_border * 2) / field_width, 100);
     const scale_ratio = cell_size / origin_cell_size;
@@ -70,7 +70,8 @@ export function View() {
 
     const gm = GoManager();
 
-    const game_id_to_view_index: {[key in number]: number} = {};
+    const game_id_to_view_index: {[key in number]: number[]} = {};
+
     let selected_element: IGameItem | null = null;
     let is_processing = false;
 
@@ -229,26 +230,34 @@ export function View() {
 
     function on_set_field(state: GameState) {
         for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
+            for (let x = 0; x < field_width; x++) {                
                 const cell = state.cells[y][x];
-                if(cell != NotActiveCell) make_cell_view(x, y, cell.id, cell?.data?.variety);
+                if(cell != NotActiveCell) {
+                    try_make_under_cell(x, y, cell);
+                    make_cell_view(x, y, cell.id, cell.uid, cell?.data?.z_index);
+                }
+                
                 const element = state.elements[y][x];
-                if(element != NullElement) make_element_view(x, y, element.id, element.type, true);
+                if(element != NullElement) make_element_view(x, y, element.type, element.uid, true);
             }
         }
     }
 
-    function make_cell_view(x: number, y: number, id: number, cell_id: CellId, z_index = -1) {
+    function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index = GAME_CONFIG.default_cell_z_index) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('cell_view', pos);
 
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         
-        game_id_to_view_index[id] = gm.add_game_item({ _hash: _go, is_clickable: true });
+        const index = gm.add_game_item({ _hash: _go, is_clickable: true });
+        if(game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
+        if(id != undefined) game_id_to_view_index[id].push(index);
+
+        return index;
     }
 
-    function make_element_view(x: number, y: number, id: number, type: ElementId, spawn_anim = false, z_index = 0) {
+    function make_element_view(x: number, y: number, type: ElementId, id: number, spawn_anim = false, z_index = GAME_CONFIG.default_element_z_index) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
 
@@ -259,7 +268,11 @@ export function View() {
             go.animate(_go, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(scale_ratio, scale_ratio, 1), spawn_element_easing, spawn_element_time);
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
         
-        game_id_to_view_index[id] = gm.add_game_item({ _hash: _go, is_clickable: true });
+        const index = gm.add_game_item({ _hash: _go, is_clickable: true });
+        if(game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
+        if(id != undefined) game_id_to_view_index[id].push(index);
+
+        return index;
     }
 
     //#endregion LOGIC
@@ -275,10 +288,10 @@ export function View() {
         const from_world_pos = get_world_pos(element_from.x, element_from.y);
         const to_world_pos = get_world_pos(element_to.x, element_to.y);
         
-        const item_from = get_view_item_by_game_id(element_from.id);
+        const item_from = get_first_view_item_by_game_id(element_from.uid);
         if(item_from == undefined) return;
 
-        const item_to = get_view_item_by_game_id(element_to.id);
+        const item_to = get_first_view_item_by_game_id(element_to.uid);
         if(item_to == undefined) return;
 
         is_processing = true;
@@ -301,7 +314,7 @@ export function View() {
     function on_combined_animation(message: Messages[MessageId]) {
         const combined = message as CombinedMessage;
         for(const element of combined.combination.elements)
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
     }
 
     function on_combo_animation(message: Messages[MessageId]) {
@@ -309,37 +322,37 @@ export function View() {
         const target_element_world_pos = get_world_pos(combo.combined_element.x, combo.combined_element.y);
         for(let i = 0; i < combo.combination.elements.length; i++) {
             const element = combo.combination.elements[i];
-            const item = gm.get_item_by_index(element.id);
+            const item = get_first_view_item_by_game_id(element.uid);
             if(item != undefined) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
                 squash_element_easing, squash_element_time, 0);
 
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
         }
         
         make_element_view(
             combo.maked_element.x,
             combo.maked_element.y,
-            combo.maked_element.id,
-            combo.maked_element.type
+            combo.maked_element.type,
+            combo.maked_element.uid
         );
     }
 
     function on_diskisphere_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        damage_element_animation(activation.element.id);
+        damage_element_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
     }
 
     function on_swaped_buster_with_diskosphere_animation(message: Messages[MessageId]) {
         const activation = message as SwapedDiskosphereActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.other_element.id);
-            damage_element_animation(activation.element.id);
+            damage_element_animation(activation.other_element.uid);
+            damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
             for(const element of activation.maked_elements)
-                make_element_view(element.x, element.y, element.id, element.type);
+                make_element_view(element.x, element.y, element.type, element.uid);
         });
 
         flow.delay(swap_element_time + damaged_element_time);
@@ -348,10 +361,10 @@ export function View() {
     function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.element.id);
-            damage_element_animation(activation.other_element.id);
+            damage_element_animation(activation.element.uid);
+            damage_element_animation(activation.other_element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
         });
         
     }
@@ -359,12 +372,12 @@ export function View() {
     function on_swaped_diskosphere_with_buster_animation(message: Messages[MessageId]) {
         const activation = message as SwapedDiskosphereActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.other_element.id);
-            damage_element_animation(activation.element.id);
+            damage_element_animation(activation.other_element.uid);
+            damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
             for(const element of activation.maked_elements)
-                make_element_view(element.x, element.y, element.id, element.type);
+                make_element_view(element.x, element.y, element.type, element.uid);
         });
 
         flow.delay(swap_element_time + damaged_element_time);
@@ -372,34 +385,36 @@ export function View() {
 
     function on_rocket_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        damage_element_animation(activation.element.id);
+        damage_element_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
     }
 
     function on_swaped_rockets_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.other_element.id);
-            damage_element_animation(activation.element.id);
+            damage_element_animation(activation.other_element.uid);
+            damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
         });
     }
 
     function on_helicopter_activated_animation(message: Messages[MessageId]) {
         const activation = message as HelicopterActivationMessage;
         for(const element of activation.damaged_elements)
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
         if(activation.target_element != NullElement) remove_random_element_animation(activation.element, activation.target_element);
-        else damage_element_animation(activation.element.id);
+        else damage_element_animation(activation.element.uid);
+
+        flow.delay(1.3);
     }
 
     function on_swaped_helicopters_animation(message: Messages[MessageId]) {
         const activation = message as SwapedHelicoptersActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
             
             let target_element = activation.target_elements.pop();
             if(target_element != undefined && target_element != NullElement)
@@ -411,8 +426,10 @@ export function View() {
 
 
             target_element = activation.target_elements.pop();
-            if(target_element != undefined && target_element != NullElement)
-                damage_element_animation(target_element.id);
+            if(target_element != undefined && target_element != NullElement) {
+                make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid);
+                remove_random_element_animation(activation.element, target_element, 1);
+            }
         });
 
         flow.delay(3);
@@ -420,47 +437,47 @@ export function View() {
 
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        activate_buster_animation(activation.element.id);
+        activate_buster_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
-            damage_element_animation(element.id);
+            damage_element_animation(element.uid);
     }
 
     function on_swaped_dynamites_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            delete_view_item_by_game_id(activation.other_element.id);
-            activate_buster_animation(activation.element.id);
+            delete_view_item_by_game_id(activation.other_element.uid);
+            activate_buster_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
         });
     }
 
     function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
         squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.element.id);
+            damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
-                damage_element_animation(element.id);
+                damage_element_animation(element.uid);
         });
     }
 
     function on_hammer_activated_animation(message: Messages[MessageId]) {
         const activation = message as ItemInfo;
-        damage_element_animation(activation.id);
+        damage_element_animation(activation.uid);
         EventBus.send("UPDATED_HAMMER");
     }
 
     function on_cell_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivatedCellMessage;
-        delete_view_item_by_game_id(activation.previous_id);
-        make_cell_view(activation.x, activation.y, activation.id, activation.variety);
+        delete_all_view_items_by_game_id(activation.previous_id);
+        make_cell_view(activation.x, activation.y, activation.id, activation.uid);
     }
 
     function on_move_element_animation(message: Messages[MessageId]) {
         const move = message as MoveElementMessage;
         const to_world_pos = get_world_pos(move.to_x, move.to_y, 0);
         
-        const item_from = get_view_item_by_game_id(move.element.id);
+        const item_from = get_first_view_item_by_game_id(move.element.uid);
         if(item_from == undefined) return;
 
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
@@ -468,9 +485,9 @@ export function View() {
 
     function on_request_element_animation(message: Messages[MessageId]) {
         const request_element = message as ElementMessage;
-        make_element_view(request_element.x, request_element.y, request_element.id, request_element.type);
+        make_element_view(request_element.x, request_element.y, request_element.type, request_element.uid);
         
-        const item_from = get_view_item_by_game_id(request_element.id);
+        const item_from = get_first_view_item_by_game_id(request_element.uid);
         if(item_from == undefined) return;
 
         const world_pos = get_world_pos(request_element.x, request_element.y);
@@ -484,36 +501,39 @@ export function View() {
             for (let x = 0; x < field_width; x++) {
                 const current_cell = current_state.cells[y][x];
                 if(current_cell != NotActiveCell) {
-                    delete_view_item_by_game_id(current_cell.id);
+                    delete_view_item_by_game_id(current_cell.uid);
                     
                     const previous_cell = previous_state.cells[y][x];
-                    if(previous_cell != NotActiveCell) make_cell_view(x, y, previous_cell.id, previous_cell?.data?.variety);
+                    if(previous_cell != NotActiveCell) {
+                        try_make_under_cell(x, y, previous_cell);
+                        make_cell_view(x, y, previous_cell.id, previous_cell.uid, previous_cell?.data?.z_index);
+                    }
                 }
 
                 const current_element = current_state.elements[y][x];
-                if(current_element != NullElement) delete_view_item_by_game_id(current_element.id);
+                if(current_element != NullElement) delete_view_item_by_game_id(current_element.uid);
 
                 const previous_element = previous_state.elements[y][x];
-                if(previous_element != NullElement) make_element_view(x, y, previous_element.id, previous_element.type, true);
+                if(previous_element != NullElement) make_element_view(x, y, previous_element.type, previous_element.uid, true);
             }
         }
     }
     
-    function remove_random_element_animation(element: ItemInfo, target_element: ItemInfo, on_complited?: () => void) {
+    function remove_random_element_animation(element: ItemInfo, target_element: ItemInfo, view_index?: number, on_complited?: () => void) {
         const target_world_pos = get_world_pos(target_element.x, target_element.y);
-        const item = gm.get_item_by_index(element.id);
+        const item = view_index != undefined ? get_view_item_by_game_id_and_index(element.uid, view_index) : get_first_view_item_by_game_id(element.uid);
         if(item == undefined) return;
         
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, 1, 0.1, () => {
-            damage_element_animation(target_element.id);
-            damage_element_animation(element.id, () => {
+            damage_element_animation(target_element.uid);
+            damage_element_animation(element.uid, () => {
                 if(on_complited != undefined) on_complited();
             });
         });
     }
     
     function damage_element_animation(element_id: number, on_complite?: () => void) {
-        const element_view_item = get_view_item_by_game_id(element_id);
+        const element_view_item = get_first_view_item_by_game_id(element_id);
         if(element_view_item != undefined) {
             go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
@@ -524,7 +544,7 @@ export function View() {
     }
 
     function activate_buster_animation(element_id: number, on_complite?: () => void) {
-        const element_view_item = get_view_item_by_game_id(element_id);
+        const element_view_item = get_first_view_item_by_game_id(element_id);
         if(element_view_item != undefined) {
             go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, go.EASING_INELASTIC, damaged_element_time, damaged_element_delay, () => {
@@ -538,10 +558,10 @@ export function View() {
         const from_world_pos = get_world_pos(element_from.x, element_from.y);
         const to_world_pos = get_world_pos(element_to.x, element_to.y);
 
-        const item_from = get_view_item_by_game_id(element_from.id);
+        const item_from = get_first_view_item_by_game_id(element_from.uid);
         if(item_from == undefined) return;
         
-        const item_to = get_view_item_by_game_id(element_to.id);
+        const item_to = get_first_view_item_by_game_id(element_to.uid);
         if(item_to == undefined) return;
 
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
@@ -551,7 +571,7 @@ export function View() {
     function squash_element_animation(element: ItemInfo, target_element: ItemInfo, on_complite?: () => void) {
         const to_world_pos = get_world_pos(target_element.x, target_element.y);
         
-        const item = get_view_item_by_game_id(element.id);
+        const item = get_first_view_item_by_game_id(element.uid);
         if(item == undefined) return;
         
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
@@ -579,14 +599,59 @@ export function View() {
         else return Direction.None;
     }
 
-    function get_view_item_by_game_id(id: number) {
-        const view_index = game_id_to_view_index[id];
-        return gm.get_item_by_index(view_index);
+    function get_first_view_item_by_game_id(id: number) {
+        const indices = game_id_to_view_index[id];
+        if(indices == undefined) return;
+
+        return gm.get_item_by_index(indices[0]);
+    }
+
+    function get_view_item_by_game_id_and_index(id: number, index: number) {
+        const indices = game_id_to_view_index[id];
+        if(indices == undefined) return;
+
+        return gm.get_item_by_index(indices[index]);
+    }
+
+    function get_all_view_items_by_game_id(id: number) {
+        const indices = game_id_to_view_index[id];
+        if(indices == undefined) return;
+
+        const items = [];
+        for(const index of indices)
+            items.push(gm.get_item_by_index(index));
+
+        return items;
     }
 
     function delete_view_item_by_game_id(id: number) {
-        gm.delete_item(get_view_item_by_game_id(id), true);
+        const item = get_first_view_item_by_game_id(id);
+        if(item == undefined) {
+            delete game_id_to_view_index[id];
+            return false;
+        }
+
+        gm.delete_item(item, true);
+        game_id_to_view_index[id].splice(0, 1);
+
+        return true;
+    }
+
+    function delete_all_view_items_by_game_id(id: number) {
+        const items = get_all_view_items_by_game_id(id);
+        if(items == undefined) return false;
+
+        for(const item of items) gm.delete_item(item, true);
         delete game_id_to_view_index[id];
+
+        return true;
+    }
+
+    function try_make_under_cell(x: number, y: number, cell: Cell) {
+        if(cell.data != undefined && cell.data.is_render_under_cell && cell.data.under_cells != undefined) {
+            const cell_id = (cell.data.under_cells as CellId[])[(cell.data.under_cells as CellId[]).length - 1];
+            if(cell_id != undefined) make_cell_view(x, y, cell_id, cell.uid, cell.data?.z_index - 1);
+        }
     }
 
     //#endregion GET HELPERS

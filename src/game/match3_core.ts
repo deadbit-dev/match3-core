@@ -92,6 +92,7 @@ export const NotActiveCell = -1;
 // описание свойств клетки
 export interface Cell {
     id: number;
+    uid: number;
     type: number; // маска свойств
     cnt_acts?: number; // число активаций которое произошло(при реакции в качестве соседней клетки + условие наличия флага ActionLocked)
     cnt_near_acts?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций
@@ -111,7 +112,7 @@ export const NullElement = -1;
 
 // непосредственно элемент
 export interface Element {
-    id: number;
+    uid: number;
     type: number;
     data?: any;
 }
@@ -120,7 +121,7 @@ export interface Element {
 export interface ItemInfo {
     x: number;
     y: number;
-    id: number;
+    uid: number;
 }
 
 export interface DamagedInfo {
@@ -199,7 +200,7 @@ export function Field(size_x: number, size_y: number) {
     function is_unique_element_combination(element: Element, combinations: CombinationInfo[]) {
         for(const comb of combinations) {
             for(const elem of comb.elements) {
-                if(elem.id == element.id) return false;
+                if(elem.uid == element.uid) return false;
             }
         }
 
@@ -264,7 +265,7 @@ export function Field(size_x: number, size_y: number) {
                                     combination.elements.push({
                                         x: x+j,
                                         y: y+i,
-                                        id: (element).id
+                                        uid: (element).uid
                                     });
 
                                     if(last_element != NullElement) {
@@ -341,8 +342,8 @@ export function Field(size_x: number, size_y: number) {
         
         for(const combination of combinations) {
             for(const element of combination.elements) {
-                const is_from = element.id == element_from.id; 
-                const is_to = element_to != NullElement && element_to.id == element.id; 
+                const is_from = element.uid == element_from.uid; 
+                const is_to = element_to != NullElement && element_to.uid == element.uid; 
                 if(is_from || is_to) {
                     was = true;
                     break;
@@ -385,11 +386,11 @@ export function Field(size_x: number, size_y: number) {
         for(const item of combination.elements) {
             const cell = get_cell(item.x, item.y);
             const element = get_element(item.x, item.y);
-            if(cell != NotActiveCell && element != NullElement && element.id == item.id) {
-                on_cell_activation({x: item.x, y: item.y, id: cell.id});
+            if(cell != NotActiveCell && element != NullElement && element.uid == item.uid) {
+                on_cell_activation({x: item.x, y: item.y, uid: cell.uid});
                 on_near_activation(get_neighbor_cells(item.x, item.y));
                 try_damage_element({x: item.x, y: item.y, element: element});
-                damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
+                damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
                 set_element(item.x, item.y, NullElement);
             }
         }
@@ -416,8 +417,8 @@ export function Field(size_x: number, size_y: number) {
     // попытка нанести урон элементу, смысл в том чтобы вызвать колбек активации, при этом только 1 раз за жизнь элемента
     // при успехе вызываем колбек cb_on_damaged_element 
     function try_damage_element(damaged_info: DamagedInfo) {
-        if(damaged_elements.find((element) => element == damaged_info.element.id) == undefined) {
-            damaged_elements.push(damaged_info.element.id);
+        if(damaged_elements.find((element) => element == damaged_info.element.uid) == undefined) {
+            damaged_elements.push(damaged_info.element.uid);
             if(cb_on_damaged_element != null) cb_on_damaged_element(damaged_info);
             return true;
         }
@@ -496,7 +497,7 @@ export function Field(size_x: number, size_y: number) {
             for(let x = 0; x < size_x; x++) {
                 const cell = get_cell(x, y);
                 if(cell != NotActiveCell && get_element(x, y) == NullElement) {
-                    free_cells.push({x, y, id: cell.id});
+                    free_cells.push({x, y, uid: cell.uid});
                 }
             }
         }
@@ -511,7 +512,7 @@ export function Field(size_x: number, size_y: number) {
                 const cell = get_cell(x, y);
                 const element = get_element(x, y);
                 if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement && element.type == element_type) {
-                    target_elements.push({x, y, id: element.id});
+                    target_elements.push({x, y, uid: element.uid});
                 }
             }
         }
@@ -555,7 +556,7 @@ export function Field(size_x: number, size_y: number) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
                     const item = get_cell(j, i);
-                    if(item != NotActiveCell) neighbors.push({x: j, y: i, id: item.id});
+                    if(item != NotActiveCell) neighbors.push({x: j, y: i, uid: item.uid});
                 }
             }
         }
@@ -571,7 +572,7 @@ export function Field(size_x: number, size_y: number) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
                     const item = get_element(j, i);
-                    if(item != NullElement) neighbors.push({x: j, y: i, id: item.id});
+                    if(item != NullElement) neighbors.push({x: j, y: i, uid: item.uid});
                 }
             }
         }
@@ -587,7 +588,7 @@ export function Field(size_x: number, size_y: number) {
         const cell = get_cell(x, y);
         if(cell == NotActiveCell) return;
 
-        on_cell_activation({x, y, id: cell.id});
+        on_cell_activation({x, y, uid: cell.uid});
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
 
         if(!is_available_cell_type_for_move(cell)) return;
@@ -596,7 +597,7 @@ export function Field(size_x: number, size_y: number) {
         if(element == NullElement) return;
         
         if(is_damaging && try_damage_element({x, y, element: element})) {    
-            damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.id), 1);
+            damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
             set_element(x, y, NullElement);
         }
 
@@ -637,10 +638,10 @@ export function Field(size_x: number, size_y: number) {
             swap_elements(from_x, from_y, to_x, to_y);
             
             const element_from = get_element(from_x, from_y);
-            if(element_from != NullElement) last_moved_elements.push({x: from_x, y: from_y, id: element_from.id});
+            if(element_from != NullElement) last_moved_elements.push({x: from_x, y: from_y, uid: element_from.uid});
         
             const element_to = get_element(to_x, to_y);
-            if(element_to != NullElement) last_moved_elements.push({x: to_x, y: to_y, id: element_to.id});
+            if(element_to != NullElement) last_moved_elements.push({x: to_x, y: to_y, uid: element_to.uid});
         }
 
         return is_can; 
@@ -668,7 +669,7 @@ export function Field(size_x: number, size_y: number) {
             let found = false;
             for(const element of combination.elements) {
                 for(const last_moved_element of last_moved_elements) {
-                    if(last_moved_element.id == element.id) {
+                    if(last_moved_element.uid == element.uid) {
                         on_combinated(element, combination);
                         found = true;
                         break;
@@ -688,7 +689,7 @@ export function Field(size_x: number, size_y: number) {
     function request_element(x: number, y: number) {
         const element = on_request_element(x, y);
         if(element as number != NullElement) {
-            last_moved_elements.push({x, y, id: (element as Element).id});
+            last_moved_elements.push({x, y, uid: (element as Element).uid});
         }
     }
 
@@ -704,7 +705,7 @@ export function Field(size_x: number, size_y: number) {
                     set_element(x, j, NullElement);
 
                     on_move_element(x, j, x, y, element);
-                    last_moved_elements.push({x, y, id: element.id});
+                    last_moved_elements.push({x, y, uid: element.uid});
                     
                     return true;
                 }

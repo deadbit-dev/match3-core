@@ -94,23 +94,24 @@ function ____exports.Game()
     function load_element(x, y)
         make_element(x, y, level_config.field.elements[y + 1][x + 1])
     end
-    function make_cell(x, y, cell_id, data, with_event)
-        if with_event == nil then
-            with_event = false
-        end
+    function make_cell(x, y, cell_id, data)
         if cell_id == NotActiveCell then
             return NotActiveCell
         end
         local config = GAME_CONFIG.cell_database[cell_id]
+        local ____cell_id_1 = cell_id
         local ____game_item_counter_0 = game_item_counter
         game_item_counter = ____game_item_counter_0 + 1
         local cell = {
-            id = ____game_item_counter_0,
+            id = ____cell_id_1,
+            uid = ____game_item_counter_0,
             type = config.type,
             cnt_acts = config.cnt_acts,
             cnt_near_acts = config.cnt_near_acts,
-            data = __TS__ObjectAssign({variety = cell_id}, data)
+            data = __TS__ObjectAssign({}, data)
         }
+        cell.data.is_render_under_cell = config.is_render_under_cell
+        cell.data.z_index = config.z_index
         field.set_cell(x, y, cell)
         return cell
     end
@@ -121,9 +122,9 @@ function ____exports.Game()
         if element_id == NullElement then
             return NullElement
         end
-        local ____game_item_counter_1 = game_item_counter
-        game_item_counter = ____game_item_counter_1 + 1
-        local element = {id = ____game_item_counter_1, type = element_id, data = data}
+        local ____game_item_counter_2 = game_item_counter
+        game_item_counter = ____game_item_counter_2 + 1
+        local element = {uid = ____game_item_counter_2, type = element_id, data = data}
         field.set_element(x, y, element)
         return element
     end
@@ -216,14 +217,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == diskosphere.id end
+            function(____, element_id) return element_id == diskosphere.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = diskosphere.id
+        activated_elements[#activated_elements + 1] = diskosphere.uid
         local event_data = {}
         write_game_step_event("DISKOSPHERE_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = diskosphere.id}
+        event_data.element = {x = x, y = y, uid = diskosphere.uid}
         local elements = field.get_all_elements_by_type(element_id)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, true)
@@ -243,29 +244,29 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == diskosphere.id end
+            function(____, element_id) return element_id == diskosphere.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == other_diskosphere.id end
+            function(____, element_id) return element_id == other_diskosphere.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = diskosphere.id
-        activated_elements[#activated_elements + 1] = other_diskosphere.id
+        activated_elements[#activated_elements + 1] = diskosphere.uid
+        activated_elements[#activated_elements + 1] = other_diskosphere.uid
         local event_data = {}
         write_game_step_event("SWAPED_DISKOSPHERES_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = diskosphere.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_diskosphere.id}
+        event_data.element = {x = x, y = y, uid = diskosphere.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_diskosphere.uid}
         event_data.damaged_elements = {}
         for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
             local elements = field.get_all_elements_by_type(element_id)
             for ____, element in ipairs(elements) do
                 field.remove_element(element.x, element.y, true, false)
-                local ____event_data_damaged_elements_2 = event_data.damaged_elements
-                ____event_data_damaged_elements_2[#____event_data_damaged_elements_2 + 1] = element
+                local ____event_data_damaged_elements_3 = event_data.damaged_elements
+                ____event_data_damaged_elements_3[#____event_data_damaged_elements_3 + 1] = element
             end
         end
         field.remove_element(x, y, true, false)
@@ -283,22 +284,22 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == diskosphere.id end
+            function(____, element_id) return element_id == diskosphere.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == other_buster.id end
+            function(____, element_id) return element_id == other_buster.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = diskosphere.id
-        activated_elements[#activated_elements + 1] = other_buster.id
+        activated_elements[#activated_elements + 1] = diskosphere.uid
+        activated_elements[#activated_elements + 1] = other_buster.uid
         local event_data = {}
         write_game_step_event("SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = diskosphere.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_buster.id}
+        event_data.element = {x = x, y = y, uid = diskosphere.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_buster.uid}
         event_data.damaged_elements = {}
         event_data.maked_elements = {}
         local element_id = get_random_element_id()
@@ -308,17 +309,16 @@ function ____exports.Game()
         local elements = field.get_all_elements_by_type(element_id)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, false)
-            local ____event_data_damaged_elements_3 = event_data.damaged_elements
-            ____event_data_damaged_elements_3[#____event_data_damaged_elements_3 + 1] = element
+            local ____event_data_damaged_elements_4 = event_data.damaged_elements
+            ____event_data_damaged_elements_4[#____event_data_damaged_elements_4 + 1] = element
             local maked_element = make_element(element.x, element.y, other_buster.type, true)
             if maked_element ~= NullElement then
-                local ____event_data_maked_elements_4 = event_data.maked_elements
-                ____event_data_maked_elements_4[#____event_data_maked_elements_4 + 1] = {x = element.x, y = element.y, id = maked_element.id, type = maked_element.type}
+                local ____event_data_maked_elements_5 = event_data.maked_elements
+                ____event_data_maked_elements_5[#____event_data_maked_elements_5 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
             end
         end
         field.remove_element(x, y, true, false)
         field.remove_element(other_x, other_y, true, false)
-        print("DISKO")
         for ____, element in ipairs(elements) do
             try_activate_buster_element(element.x, element.y)
         end
@@ -335,21 +335,21 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == buster.id end
+            function(____, element_id) return element_id == buster.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == diskosphere.id end
+            function(____, element_id) return element_id == diskosphere.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = buster.id
-        activated_elements[#activated_elements + 1] = diskosphere.id
+        activated_elements[#activated_elements + 1] = buster.uid
+        activated_elements[#activated_elements + 1] = diskosphere.uid
         local event_data = {}
-        event_data.element = {x = other_x, y = other_y, id = diskosphere.id}
-        event_data.other_element = {x = x, y = y, id = buster.id}
+        event_data.element = {x = other_x, y = other_y, uid = diskosphere.uid}
+        event_data.other_element = {x = x, y = y, uid = buster.uid}
         event_data.damaged_elements = {}
         event_data.maked_elements = {}
         write_game_step_event("SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED", event_data)
@@ -360,12 +360,12 @@ function ____exports.Game()
         local elements = field.get_all_elements_by_type(element_id)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, false)
-            local ____event_data_damaged_elements_5 = event_data.damaged_elements
-            ____event_data_damaged_elements_5[#____event_data_damaged_elements_5 + 1] = element
+            local ____event_data_damaged_elements_6 = event_data.damaged_elements
+            ____event_data_damaged_elements_6[#____event_data_damaged_elements_6 + 1] = element
             local maked_element = make_element(element.x, element.y, buster.type, true)
             if maked_element ~= NullElement then
-                local ____event_data_maked_elements_6 = event_data.maked_elements
-                ____event_data_maked_elements_6[#____event_data_maked_elements_6 + 1] = {x = element.x, y = element.y, id = maked_element.id, type = maked_element.type}
+                local ____event_data_maked_elements_7 = event_data.maked_elements
+                ____event_data_maked_elements_7[#____event_data_maked_elements_7 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
             end
         end
         field.remove_element(x, y, true, false)
@@ -386,21 +386,21 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == diskosphere.id end
+            function(____, element_id) return element_id == diskosphere.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = diskosphere.id
+        activated_elements[#activated_elements + 1] = diskosphere.uid
         local event_data = {}
         write_game_step_event("SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = diskosphere.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_element.id}
+        event_data.element = {x = x, y = y, uid = diskosphere.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
         event_data.damaged_elements = {}
         local elements = field.get_all_elements_by_type(other_element.type)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, false)
-            local ____event_data_damaged_elements_7 = event_data.damaged_elements
-            ____event_data_damaged_elements_7[#____event_data_damaged_elements_7 + 1] = element
+            local ____event_data_damaged_elements_8 = event_data.damaged_elements
+            ____event_data_damaged_elements_8[#____event_data_damaged_elements_8 + 1] = element
         end
         field.remove_element(x, y, true, false)
         field.remove_element(other_x, other_y, true, false)
@@ -413,15 +413,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == rocket.id end
+            function(____, element_id) return element_id == rocket.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = rocket.id
-        print("ROCKET")
+        activated_elements[#activated_elements + 1] = rocket.uid
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = rocket.id}
+        event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
         do
             local i = 0
@@ -432,8 +431,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(x, i, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_8 = event_data.damaged_elements
-                            ____event_data_damaged_elements_8[#____event_data_damaged_elements_8 + 1] = {x = x, y = i, id = removed_element.id}
+                            local ____event_data_damaged_elements_9 = event_data.damaged_elements
+                            ____event_data_damaged_elements_9[#____event_data_damaged_elements_9 + 1] = {x = x, y = i, uid = removed_element.uid}
                         end
                     end
                 end
@@ -450,14 +449,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == rocket.id end
+            function(____, element_id) return element_id == rocket.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = rocket.id
+        activated_elements[#activated_elements + 1] = rocket.uid
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = rocket.id}
+        event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
         do
             local i = 0
@@ -468,8 +467,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(i, y, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_9 = event_data.damaged_elements
-                            ____event_data_damaged_elements_9[#____event_data_damaged_elements_9 + 1] = {x = i, y = y, id = removed_element.id}
+                            local ____event_data_damaged_elements_10 = event_data.damaged_elements
+                            ____event_data_damaged_elements_10[#____event_data_damaged_elements_10 + 1] = {x = i, y = y, uid = removed_element.uid}
                         end
                     end
                 end
@@ -507,22 +506,22 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == rocket.id end
+            function(____, element_id) return element_id == rocket.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == other_rocket.id end
+            function(____, element_id) return element_id == other_rocket.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = rocket.id
-        activated_elements[#activated_elements + 1] = other_rocket.id
+        activated_elements[#activated_elements + 1] = rocket.uid
+        activated_elements[#activated_elements + 1] = other_rocket.uid
         local event_data = {}
         write_game_step_event("SWAPED_ROCKETS_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = rocket.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_rocket.id}
+        event_data.element = {x = x, y = y, uid = rocket.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_rocket.uid}
         event_data.damaged_elements = {}
         do
             local i = 0
@@ -533,8 +532,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(x, i, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_10 = event_data.damaged_elements
-                            ____event_data_damaged_elements_10[#____event_data_damaged_elements_10 + 1] = {x = x, y = i, id = removed_element.id}
+                            local ____event_data_damaged_elements_11 = event_data.damaged_elements
+                            ____event_data_damaged_elements_11[#____event_data_damaged_elements_11 + 1] = {x = x, y = i, uid = removed_element.uid}
                         end
                     end
                 end
@@ -550,8 +549,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(i, y, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_11 = event_data.damaged_elements
-                            ____event_data_damaged_elements_11[#____event_data_damaged_elements_11 + 1] = {x = i, y = y, id = removed_element.id}
+                            local ____event_data_damaged_elements_12 = event_data.damaged_elements
+                            ____event_data_damaged_elements_12[#____event_data_damaged_elements_12 + 1] = {x = i, y = y, uid = removed_element.uid}
                         end
                     end
                 end
@@ -569,14 +568,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == rocket.id end
+            function(____, element_id) return element_id == rocket.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = rocket.id
+        activated_elements[#activated_elements + 1] = rocket.uid
         local event_data = {}
         write_game_step_event("AXIS_ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = rocket.id}
+        event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
         do
             local i = 0
@@ -587,8 +586,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(x, i, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_12 = event_data.damaged_elements
-                            ____event_data_damaged_elements_12[#____event_data_damaged_elements_12 + 1] = {x = x, y = i, id = removed_element.id}
+                            local ____event_data_damaged_elements_13 = event_data.damaged_elements
+                            ____event_data_damaged_elements_13[#____event_data_damaged_elements_13 + 1] = {x = x, y = i, uid = removed_element.uid}
                         end
                     end
                 end
@@ -604,8 +603,8 @@ function ____exports.Game()
                     else
                         local removed_element = field.remove_element(i, y, true, false)
                         if removed_element ~= nil then
-                            local ____event_data_damaged_elements_13 = event_data.damaged_elements
-                            ____event_data_damaged_elements_13[#____event_data_damaged_elements_13 + 1] = {x = i, y = y, id = removed_element.id}
+                            local ____event_data_damaged_elements_14 = event_data.damaged_elements
+                            ____event_data_damaged_elements_14[#____event_data_damaged_elements_14 + 1] = {x = i, y = y, uid = removed_element.uid}
                         end
                     end
                 end
@@ -622,14 +621,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == helicopter.id end
+            function(____, element_id) return element_id == helicopter.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = helicopter.id
+        activated_elements[#activated_elements + 1] = helicopter.uid
         local event_data = {}
         write_game_step_event("HELICOPTER_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = helicopter.id}
+        event_data.element = {x = x, y = y, uid = helicopter.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
         event_data.target_element = remove_random_element(event_data.damaged_elements)
         field.remove_element(x, y, true, false)
@@ -646,29 +645,29 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == helicopter.id end
+            function(____, element_id) return element_id == helicopter.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == other_helicopter.id end
+            function(____, element_id) return element_id == other_helicopter.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = helicopter.id
-        activated_elements[#activated_elements + 1] = other_helicopter.id
+        activated_elements[#activated_elements + 1] = helicopter.uid
+        activated_elements[#activated_elements + 1] = other_helicopter.uid
         local event_data = {}
         event_data.target_elements = {}
         write_game_step_event("SWAPED_HELICOPTERS_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = helicopter.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_helicopter.id}
+        event_data.element = {x = x, y = y, uid = helicopter.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_helicopter.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
         do
             local i = 0
             while i < 3 do
-                local ____event_data_target_elements_14 = event_data.target_elements
-                ____event_data_target_elements_14[#____event_data_target_elements_14 + 1] = remove_random_element(event_data.damaged_elements)
+                local ____event_data_target_elements_15 = event_data.target_elements
+                ____event_data_target_elements_15[#____event_data_target_elements_15 + 1] = remove_random_element(event_data.damaged_elements)
                 i = i + 1
             end
         end
@@ -695,14 +694,14 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == dynamite.id end
+            function(____, element_id) return element_id == dynamite.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = dynamite.id
+        activated_elements[#activated_elements + 1] = dynamite.uid
         local event_data = {}
         write_game_step_event("DYNAMITE_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = dynamite.id}
+        event_data.element = {x = x, y = y, uid = dynamite.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {
             {
                 1,
@@ -754,22 +753,22 @@ function ____exports.Game()
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == dynamite.id end
+            function(____, element_id) return element_id == dynamite.uid end
         ) ~= -1 then
             return false
         end
         if __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == other_dynamite.id end
+            function(____, element_id) return element_id == other_dynamite.uid end
         ) ~= -1 then
             return false
         end
-        activated_elements[#activated_elements + 1] = dynamite.id
-        activated_elements[#activated_elements + 1] = other_dynamite.id
+        activated_elements[#activated_elements + 1] = dynamite.uid
+        activated_elements[#activated_elements + 1] = other_dynamite.uid
         local event_data = {}
         write_game_step_event("SWAPED_DYNAMITES_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, id = dynamite.id}
-        event_data.other_element = {x = other_x, y = other_y, id = other_dynamite.id}
+        event_data.element = {x = x, y = y, uid = dynamite.uid}
+        event_data.other_element = {x = other_x, y = other_y, uid = other_dynamite.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {
             {
                 1,
@@ -870,7 +869,7 @@ function ____exports.Game()
             if removed_element == nil then
                 return false
             end
-            write_game_step_event("HAMMER_ACTIVATED", {x = x, y = y, id = removed_element.id})
+            write_game_step_event("HAMMER_ACTIVATED", {x = x, y = y, uid = removed_element.uid})
         end
         GameStorage.set(
             "hammer_counts",
@@ -894,10 +893,10 @@ function ____exports.Game()
             return false
         end
         if not field.try_move(from_x, from_y, to_x, to_y) then
-            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, id = element_from.id}, element_to = {x = to_x, y = to_y, id = element_to.id}})
+            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, uid = element_from.uid}, element_to = {x = to_x, y = to_y, uid = element_to.uid}})
             return false
         end
-        write_game_step_event("ON_SWAP_ELEMENTS", {element_from = {x = to_x, y = to_y, id = element_to.id}, element_to = {x = from_x, y = from_y, id = element_from.id}})
+        write_game_step_event("ON_SWAP_ELEMENTS", {element_from = {x = to_x, y = to_y, uid = element_to.uid}, element_to = {x = from_x, y = from_y, uid = element_from.uid}})
         return true
     end
     function process_game_step()
@@ -926,14 +925,7 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = previous_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
-                            local ____make_cell_23 = make_cell
-                            local ____x_21 = x
-                            local ____y_22 = y
-                            local ____opt_15 = cell and cell.data
-                            if ____opt_15 ~= nil then
-                                ____opt_15 = ____opt_15.variety
-                            end
-                            ____make_cell_23(____x_21, ____y_22, ____opt_15, cell and cell.data)
+                            make_cell(x, y, cell.id, cell and cell.data)
                         else
                             field.set_cell(x, y, NotActiveCell)
                         end
@@ -991,7 +983,7 @@ function ____exports.Game()
             end
         until true
         if element ~= nil and element ~= NullElement then
-            write_game_step_event("ON_COMBO", {combined_element = combined_element, combination = combination, maked_element = {x = combined_element.x, y = combined_element.y, id = element.id, type = element.type}})
+            write_game_step_event("ON_COMBO", {combined_element = combined_element, combination = combination, maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}})
             return true
         end
         return false
@@ -1014,7 +1006,7 @@ function ____exports.Game()
     function on_damaged_element(damaged_info)
         local index = __TS__ArrayFindIndex(
             activated_elements,
-            function(____, element_id) return element_id == damaged_info.element.id end
+            function(____, element_id) return element_id == damaged_info.element.uid end
         )
         if index ~= -1 then
             __TS__ArraySplice(activated_elements, index, 1)
@@ -1025,6 +1017,7 @@ function ____exports.Game()
         if cell == NotActiveCell then
             return
         end
+        local new_cell = NotActiveCell
         repeat
             local ____switch222 = cell.type
             local ____cond222 = ____switch222 == CellType.ActionLocked
@@ -1033,44 +1026,14 @@ function ____exports.Game()
                     break
                 end
                 if cell.cnt_acts > 0 then
-                    if cell.data ~= nil and cell.data.under_cells ~= nil then
+                    if cell.data ~= nil and cell.data.under_cells ~= nil and #cell.data.under_cells > 0 then
                         local cell_id = table.remove(cell.data.under_cells)
                         if cell_id ~= nil then
-                            local new_cell = make_cell(
-                                item_info.x,
-                                item_info.y,
-                                cell_id,
-                                cell.data,
-                                true
-                            )
-                            if new_cell ~= NotActiveCell then
-                                write_game_step_event("ON_CELL_ACTIVATED", {
-                                    x = item_info.x,
-                                    y = item_info.y,
-                                    id = new_cell.id,
-                                    variety = cell_id,
-                                    previous_id = item_info.id
-                                })
-                            end
-                            return
+                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data)
+                            break
                         end
                     end
-                    local new_cell = make_cell(
-                        item_info.x,
-                        item_info.y,
-                        CellId.Base,
-                        nil,
-                        true
-                    )
-                    if new_cell ~= NotActiveCell then
-                        write_game_step_event("ON_CELL_ACTIVATED", {
-                            x = item_info.x,
-                            y = item_info.y,
-                            id = new_cell.id,
-                            variety = CellId.Base,
-                            previous_id = item_info.id
-                        })
-                    end
+                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
                 end
                 break
             end
@@ -1080,48 +1043,27 @@ function ____exports.Game()
                     break
                 end
                 if cell.cnt_near_acts > 0 then
-                    if cell.data ~= nil and cell.data.under_cells ~= nil then
+                    if cell.data ~= nil and cell.data.under_cells ~= nil and #cell.data.under_cells > 0 then
                         local cell_id = table.remove(cell.data.under_cells)
                         if cell_id ~= nil then
-                            local new_cell = make_cell(
-                                item_info.x,
-                                item_info.y,
-                                cell_id,
-                                cell.data,
-                                true
-                            )
-                            if new_cell ~= NotActiveCell then
-                                write_game_step_event("ON_CELL_ACTIVATED", {
-                                    x = item_info.x,
-                                    y = item_info.y,
-                                    id = new_cell.id,
-                                    variety = cell_id,
-                                    previous_id = item_info.id
-                                })
-                            end
-                            return
+                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data)
+                            break
                         end
                     end
-                    local new_cell = make_cell(
-                        item_info.x,
-                        item_info.y,
-                        CellId.Base,
-                        nil,
-                        true
-                    )
-                    if new_cell ~= NotActiveCell then
-                        write_game_step_event("ON_CELL_ACTIVATED", {
-                            x = item_info.x,
-                            y = item_info.y,
-                            id = new_cell.id,
-                            variety = CellId.Base,
-                            previous_id = item_info.id
-                        })
-                    end
+                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
                 end
                 break
             end
         until true
+        if new_cell ~= NotActiveCell then
+            write_game_step_event("ON_CELL_ACTIVATED", {
+                x = item_info.x,
+                y = item_info.y,
+                uid = new_cell.uid,
+                id = new_cell.id,
+                previous_id = item_info.uid
+            })
+        end
     end
     function on_request_element(x, y)
         local element = make_element(
@@ -1132,7 +1074,7 @@ function ____exports.Game()
         if element == NullElement then
             return NullElement
         end
-        write_game_step_event("ON_REQUEST_ELEMENT", {x = x, y = y, id = element.id, type = element.type})
+        write_game_step_event("ON_REQUEST_ELEMENT", {x = x, y = y, uid = element.uid, type = element.type})
         return element
     end
     function is_buster(x, y)
@@ -1164,9 +1106,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_24 = index
-                    index = ____index_24 - 1
-                    if ____index_24 == 0 then
+                    local ____index_18 = index
+                    index = ____index_18 - 1
+                    if ____index_18 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1185,9 +1127,9 @@ function ____exports.Game()
                         local element = field.get_element(x, y)
                         if element ~= NullElement and exclude ~= nil and __TS__ArrayFindIndex(
                             exclude,
-                            function(____, item) return item.id == element.id end
+                            function(____, item) return item.uid == element.uid end
                         ) == -1 then
-                            available_elements[#available_elements + 1] = {x = x, y = y, id = element.id}
+                            available_elements[#available_elements + 1] = {x = x, y = y, uid = element.uid}
                         end
                         x = x + 1
                     end
@@ -1224,7 +1166,7 @@ function ____exports.Game()
                                 else
                                     local removed_element = field.remove_element(j, i, true, is_near_activation)
                                     if removed_element ~= nil then
-                                        removed_elements[#removed_elements + 1] = {x = j, y = i, id = removed_element.id}
+                                        removed_elements[#removed_elements + 1] = {x = j, y = i, uid = removed_element.uid}
                                     end
                                 end
                             end
@@ -1247,7 +1189,6 @@ function ____exports.Game()
     level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     field_width = level_config.field.width
     field_height = level_config.field.height
-    local move_direction = level_config.field.move_direction
     busters = level_config.busters
     field = Field(field_width, field_height)
     game_item_counter = 0

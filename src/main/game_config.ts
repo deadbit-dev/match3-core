@@ -72,10 +72,13 @@ export const _GAME_CONFIG = {
     
     buster_delay: 0.5,
 
+    default_cell_z_index: -1,
+    default_element_z_index: 0,
+
     cell_database: {
         [CellId.Base]: {
             type: CellType.Base,
-            view: 'cell_base'
+            view: 'cell_base',
         },
 
         [CellId.Grass]: {
@@ -87,9 +90,11 @@ export const _GAME_CONFIG = {
         [CellId.Box]: {
             type: bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts: 0,
-            view: 'cell_box'
+            is_render_under_cell: true,
+            view: 'cell_box',
+            z_index: 1
         }
-    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, view: string}},
+    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index?: number}},
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -208,14 +213,13 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
-                move_direction: Direction.Up,
                 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, [CellId.Grass, CellId.Box], CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
@@ -223,7 +227,7 @@ export const _GAME_CONFIG = {
 
                 elements: [
                     [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dynamite, NullElement],
-                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
                     [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
@@ -245,7 +249,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
-                move_direction: Direction.Up,
                 
                cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -282,7 +285,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
-                move_direction: Direction.Up,
                 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -319,7 +321,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
-                move_direction: Direction.Up,
                 
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -373,7 +374,7 @@ export interface SwapedHelicoptersActivationMessage extends SwapedActivationMess
 
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
-export interface ActivatedCellMessage extends ItemInfo { variety: number, previous_id: number }
+export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface MoveElementMessage extends StepInfo { element: Element }
 export interface DamagedElementMessage { id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }

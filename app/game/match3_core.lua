@@ -95,9 +95,9 @@ function ____exports.Field(size_x, size_y)
     function try_damage_element(damaged_info)
         if __TS__ArrayFind(
             damaged_elements,
-            function(____, element) return element == damaged_info.element.id end
+            function(____, element) return element == damaged_info.element.uid end
         ) == nil then
-            damaged_elements[#damaged_elements + 1] = damaged_info.element.id
+            damaged_elements[#damaged_elements + 1] = damaged_info.element.uid
             if cb_on_damaged_element ~= nil then
                 cb_on_damaged_element(damaged_info)
             end
@@ -177,7 +177,7 @@ function ____exports.Field(size_x, size_y)
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
                             local item = get_cell(j, i)
                             if item ~= ____exports.NotActiveCell then
-                                neighbors[#neighbors + 1] = {x = j, y = i, id = item.id}
+                                neighbors[#neighbors + 1] = {x = j, y = i, uid = item.uid}
                             end
                         end
                         j = j + 1
@@ -225,7 +225,7 @@ function ____exports.Field(size_x, size_y)
     local function is_unique_element_combination(element, combinations)
         for ____, comb in ipairs(combinations) do
             for ____, elem in ipairs(comb.elements) do
-                if elem.id == element.id then
+                if elem.uid == element.uid then
                     return false
                 end
             end
@@ -279,7 +279,7 @@ function ____exports.Field(size_x, size_y)
                                                             break
                                                         end
                                                         local ____combination_elements_0 = combination.elements
-                                                        ____combination_elements_0[#____combination_elements_0 + 1] = {x = x + j, y = y + i, id = element.id}
+                                                        ____combination_elements_0[#____combination_elements_0 + 1] = {x = x + j, y = y + i, uid = element.uid}
                                                         if last_element ~= ____exports.NullElement then
                                                             is_combined = is_combined_elements(last_element, element)
                                                         end
@@ -341,8 +341,8 @@ function ____exports.Field(size_x, size_y)
         local combinations = get_all_combinations()
         for ____, combination in ipairs(combinations) do
             for ____, element in ipairs(combination.elements) do
-                local is_from = element.id == element_from.id
-                local is_to = element_to ~= ____exports.NullElement and element_to.id == element.id
+                local is_from = element.uid == element_from.uid
+                local is_to = element_to ~= ____exports.NullElement and element_to.uid == element.uid
                 if is_from or is_to then
                     was = true
                     break
@@ -383,15 +383,15 @@ function ____exports.Field(size_x, size_y)
         for ____, item in ipairs(combination.elements) do
             local cell = get_cell(item.x, item.y)
             local element = get_element(item.x, item.y)
-            if cell ~= ____exports.NotActiveCell and element ~= ____exports.NullElement and element.id == item.id then
-                on_cell_activation({x = item.x, y = item.y, id = cell.id})
+            if cell ~= ____exports.NotActiveCell and element ~= ____exports.NullElement and element.uid == item.uid then
+                on_cell_activation({x = item.x, y = item.y, uid = cell.uid})
                 on_near_activation(get_neighbor_cells(item.x, item.y))
                 try_damage_element({x = item.x, y = item.y, element = element})
                 __TS__ArraySplice(
                     damaged_elements,
                     __TS__ArrayFindIndex(
                         damaged_elements,
-                        function(____, elem) return elem == element.id end
+                        function(____, elem) return elem == element.uid end
                     ),
                     1
                 )
@@ -440,7 +440,7 @@ function ____exports.Field(size_x, size_y)
                     while x < size_x do
                         local cell = get_cell(x, y)
                         if cell ~= ____exports.NotActiveCell and get_element(x, y) == ____exports.NullElement then
-                            free_cells[#free_cells + 1] = {x = x, y = y, id = cell.id}
+                            free_cells[#free_cells + 1] = {x = x, y = y, uid = cell.uid}
                         end
                         x = x + 1
                     end
@@ -461,7 +461,7 @@ function ____exports.Field(size_x, size_y)
                         local cell = get_cell(x, y)
                         local element = get_element(x, y)
                         if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) and element ~= ____exports.NullElement and element.type == element_type then
-                            target_elements[#target_elements + 1] = {x = x, y = y, id = element.id}
+                            target_elements[#target_elements + 1] = {x = x, y = y, uid = element.uid}
                         end
                         x = x + 1
                     end
@@ -491,7 +491,7 @@ function ____exports.Field(size_x, size_y)
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
                             local item = get_element(j, i)
                             if item ~= ____exports.NullElement then
-                                neighbors[#neighbors + 1] = {x = j, y = i, id = item.id}
+                                neighbors[#neighbors + 1] = {x = j, y = i, uid = item.uid}
                             end
                         end
                         j = j + 1
@@ -507,7 +507,7 @@ function ____exports.Field(size_x, size_y)
         if cell == ____exports.NotActiveCell then
             return
         end
-        on_cell_activation({x = x, y = y, id = cell.id})
+        on_cell_activation({x = x, y = y, uid = cell.uid})
         if is_near_activation then
             on_near_activation(get_neighbor_cells(x, y))
         end
@@ -523,7 +523,7 @@ function ____exports.Field(size_x, size_y)
                 damaged_elements,
                 __TS__ArrayFindIndex(
                     damaged_elements,
-                    function(____, elem) return elem == element.id end
+                    function(____, elem) return elem == element.uid end
                 ),
                 1
             )
@@ -554,11 +554,11 @@ function ____exports.Field(size_x, size_y)
             swap_elements(from_x, from_y, to_x, to_y)
             local element_from = get_element(from_x, from_y)
             if element_from ~= ____exports.NullElement then
-                last_moved_elements[#last_moved_elements + 1] = {x = from_x, y = from_y, id = element_from.id}
+                last_moved_elements[#last_moved_elements + 1] = {x = from_x, y = from_y, uid = element_from.uid}
             end
             local element_to = get_element(to_x, to_y)
             if element_to ~= ____exports.NullElement then
-                last_moved_elements[#last_moved_elements + 1] = {x = to_x, y = to_y, id = element_to.id}
+                last_moved_elements[#last_moved_elements + 1] = {x = to_x, y = to_y, uid = element_to.uid}
             end
         end
         return is_can
@@ -584,7 +584,7 @@ function ____exports.Field(size_x, size_y)
             local found = false
             for ____, element in ipairs(combination.elements) do
                 for ____, last_moved_element in ipairs(last_moved_elements) do
-                    if last_moved_element.id == element.id then
+                    if last_moved_element.uid == element.uid then
                         on_combinated(element, combination)
                         found = true
                         break
@@ -604,7 +604,7 @@ function ____exports.Field(size_x, size_y)
     local function request_element(x, y)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
-            last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+            last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
         end
     end
     local function try_move_element_from_up(x, y)
@@ -627,7 +627,7 @@ function ____exports.Field(size_x, size_y)
                             y,
                             element
                         )
-                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, id = element.id}
+                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
                         return true
                     end
                 end

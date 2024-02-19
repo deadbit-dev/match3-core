@@ -3,8 +3,6 @@ local ____match3_core = require("game.match3_core")
 local CellType = ____match3_core.CellType
 local NotActiveCell = ____match3_core.NotActiveCell
 local NullElement = ____match3_core.NullElement
-local ____math_utils = require("utils.math_utils")
-local Direction = ____math_utils.Direction
 ____exports.IS_DEBUG_MODE = true
 ____exports.ADS_CONFIG = {
     is_mediation = true,
@@ -66,13 +64,17 @@ ____exports._GAME_CONFIG = {
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,
+    default_cell_z_index = -1,
+    default_element_z_index = 0,
     cell_database = {
         [____exports.CellId.Base] = {type = CellType.Base, view = "cell_base"},
         [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
         [____exports.CellId.Box] = {
             type = bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts = 0,
-            view = "cell_box"
+            is_render_under_cell = true,
+            view = "cell_box",
+            z_index = 1
         }
     },
     element_database = {
@@ -100,7 +102,6 @@ ____exports._GAME_CONFIG = {
         height = 8,
         cell_size = 64,
         offset_border = 10,
-        move_direction = Direction.Up,
         cells = {
             {
                 NotActiveCell,
@@ -138,8 +139,8 @@ ____exports._GAME_CONFIG = {
                 ____exports.CellId.Box,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
-                ____exports.CellId.Box,
-                ____exports.CellId.Box,
+                {____exports.CellId.Grass, ____exports.CellId.Box},
+                {____exports.CellId.Grass, ____exports.CellId.Box},
                 ____exports.CellId.Base
             },
             {
@@ -148,7 +149,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.CellId.Box,
                 ____exports.CellId.Base,
                 ____exports.CellId.Base,
-                ____exports.CellId.Box,
+                {____exports.CellId.Grass, ____exports.CellId.Box},
                 {____exports.CellId.Grass, ____exports.CellId.Box},
                 ____exports.CellId.Base
             },
@@ -199,7 +200,7 @@ ____exports._GAME_CONFIG = {
                 ____exports.ElementId.Ruby,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Ruby,
-                ____exports.ElementId.Emerald,
+                ____exports.ElementId.Topaz,
                 ____exports.ElementId.Gold,
                 ____exports.ElementId.Dimonde,
                 ____exports.ElementId.Gold
@@ -270,7 +271,6 @@ ____exports._GAME_CONFIG = {
         height = 8,
         cell_size = 64,
         offset_border = 10,
-        move_direction = Direction.Up,
         cells = {
             {
                 NotActiveCell,
@@ -440,7 +440,6 @@ ____exports._GAME_CONFIG = {
         height = 8,
         cell_size = 64,
         offset_border = 10,
-        move_direction = Direction.Up,
         cells = {
             {
                 NotActiveCell,
@@ -610,7 +609,6 @@ ____exports._GAME_CONFIG = {
         height = 8,
         cell_size = 64,
         offset_border = 10,
-        move_direction = Direction.Up,
         cells = {
             {
                 ____exports.CellId.Base,
