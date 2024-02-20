@@ -480,7 +480,7 @@ function ____exports.Game()
     end
     function try_activate_swaped_rocket_with_element(x, y, other_x, other_y)
         local rocket = field.get_element(x, y)
-        if rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket}, rocket.type) then
+        if rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket, ElementId.AxisRocket}, rocket.type) then
             return false
         end
         local other_element = field.get_element(other_x, other_y)
@@ -491,6 +491,9 @@ function ____exports.Game()
             return true
         end
         if try_activate_horizontal_rocket(x, y) then
+            return true
+        end
+        if try_activate_axis_rocket(x, y) then
             return true
         end
         return false
@@ -866,16 +869,16 @@ function ____exports.Game()
             try_activate_buster_element(x, y)
         else
             local removed_element = field.remove_element(x, y, true, false)
-            if removed_element == nil then
-                return false
+            if removed_element ~= nil then
+                write_game_step_event("ACTIVATED_ELEMENT", {x = x, y = y, uid = removed_element.uid})
             end
-            write_game_step_event("HAMMER_ACTIVATED", {x = x, y = y, uid = removed_element.uid})
         end
         GameStorage.set(
             "hammer_counts",
             GameStorage.get("hammer_counts") - 1
         )
         busters.hammer_active = false
+        EventBus.send("UPDATED_HAMMER")
         return true
     end
     function try_swap_elements(from_x, from_y, to_x, to_y)
@@ -955,29 +958,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element
         repeat
-            local ____switch212 = combination.type
-            local ____cond212 = ____switch212 == CombinationType.Comb4
-            if ____cond212 then
+            local ____switch213 = combination.type
+            local ____cond213 = ____switch213 == CombinationType.Comb4
+            if ____cond213 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond212 = ____cond212 or ____switch212 == CombinationType.Comb5
-            if ____cond212 then
+            ____cond213 = ____cond213 or ____switch213 == CombinationType.Comb5
+            if ____cond213 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond212 = ____cond212 or ____switch212 == CombinationType.Comb2x2
-            if ____cond212 then
+            ____cond213 = ____cond213 or ____switch213 == CombinationType.Comb2x2
+            if ____cond213 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond212 = ____cond212 or (____switch212 == CombinationType.Comb3x3a or ____switch212 == CombinationType.Comb3x3b)
-            if ____cond212 then
+            ____cond213 = ____cond213 or (____switch213 == CombinationType.Comb3x3a or ____switch213 == CombinationType.Comb3x3b)
+            if ____cond213 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond212 = ____cond212 or (____switch212 == CombinationType.Comb3x4 or ____switch212 == CombinationType.Comb3x5)
-            if ____cond212 then
+            ____cond213 = ____cond213 or (____switch213 == CombinationType.Comb3x4 or ____switch213 == CombinationType.Comb3x5)
+            if ____cond213 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -995,13 +998,7 @@ function ____exports.Game()
         end
     end
     function on_move_element(from_x, from_y, to_x, to_y, element)
-        write_game_step_event("ON_MOVE_ELEMENT", {
-            from_x = from_x,
-            from_y = from_y,
-            to_x = to_x,
-            to_y = to_y,
-            element = element
-        })
+        write_game_step_event("ON_MOVE_ELEMENT", {path = {{x = from_x, y = from_y}, {x = to_x, y = to_y}}, element = element})
     end
     function on_damaged_element(damaged_info)
         local index = __TS__ArrayFindIndex(
@@ -1019,9 +1016,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch222 = cell.type
-            local ____cond222 = ____switch222 == CellType.ActionLocked
-            if ____cond222 then
+            local ____switch223 = cell.type
+            local ____cond223 = ____switch223 == CellType.ActionLocked
+            if ____cond223 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -1037,8 +1034,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond222 = ____cond222 or ____switch222 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond222 then
+            ____cond223 = ____cond223 or ____switch223 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond223 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -1183,14 +1180,14 @@ function ____exports.Game()
         game_step_events[#game_step_events + 1] = {key = message_id, value = message}
     end
     function send_game_step()
-        EventBus.send("GAME_STEP", game_step_events)
+        EventBus.send("ON_GAME_STEP", game_step_events)
         game_step_events = {}
     end
     level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     field_width = level_config.field.width
     field_height = level_config.field.height
     busters = level_config.busters
-    field = Field(field_width, field_height)
+    field = Field(field_width, field_height, level_config.field.complex_move)
     game_item_counter = 0
     previous_states = {}
     activated_elements = {}

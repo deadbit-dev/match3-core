@@ -80,7 +80,10 @@ ____exports.ProcessMode.Combinate = 0
 ____exports.ProcessMode[____exports.ProcessMode.Combinate] = "Combinate"
 ____exports.ProcessMode.MoveElements = 1
 ____exports.ProcessMode[____exports.ProcessMode.MoveElements] = "MoveElements"
-function ____exports.Field(size_x, size_y)
+function ____exports.Field(size_x, size_y, complex_process_move)
+    if complex_process_move == nil then
+        complex_process_move = true
+    end
     local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
@@ -175,9 +178,9 @@ function ____exports.Field(size_x, size_y)
                     local j = x - 1
                     while j <= x + 1 do
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
-                            local item = get_cell(j, i)
-                            if item ~= ____exports.NotActiveCell then
-                                neighbors[#neighbors + 1] = {x = j, y = i, uid = item.uid}
+                            local cell = get_cell(j, i)
+                            if cell ~= ____exports.NotActiveCell then
+                                neighbors[#neighbors + 1] = {x = j, y = i, uid = cell.uid}
                             end
                         end
                         j = j + 1
@@ -489,9 +492,9 @@ function ____exports.Field(size_x, size_y)
                     local j = x - 1
                     while j <= x + 1 do
                         if i >= 0 and i < size_y and j >= 0 and j < size_x and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
-                            local item = get_element(j, i)
-                            if item ~= ____exports.NullElement then
-                                neighbors[#neighbors + 1] = {x = j, y = i, uid = item.uid}
+                            local element = get_element(j, i)
+                            if element ~= ____exports.NullElement then
+                                neighbors[#neighbors + 1] = {x = j, y = i, uid = element.uid}
                             end
                         end
                         j = j + 1
@@ -637,7 +640,40 @@ function ____exports.Field(size_x, size_y)
         request_element(x, y)
         return true
     end
-    local function process_move()
+    local function try_move_element_from_corners(x, y)
+        local neighbor_cells = get_neighbor_cells(x, y, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
+        local available_cells = {}
+        for ____, neighbor_cell in ipairs(neighbor_cells) do
+            local cell = get_cell(neighbor_cell.x, neighbor_cell.y)
+            if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                available_cells[#available_cells + 1] = neighbor_cell
+            end
+        end
+        if #available_cells == 0 then
+            return false
+        end
+        local neighbor_elements = get_neighbor_elements(x, y, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
+        local neighbor_element = table.remove(neighbor_elements)
+        if neighbor_element == nil then
+            return false
+        end
+        local element = get_element(neighbor_element.x, neighbor_element.y)
+        if element == ____exports.NullElement then
+            return false
+        end
+        set_element(x, y, element)
+        set_element(neighbor_element.x, neighbor_element.y, ____exports.NullElement)
+        on_move_element(
+            neighbor_element.x,
+            neighbor_element.y,
+            x,
+            y,
+            element
+        )
+        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
+        return true
+    end
+    local function process_falling()
         local is_procesed = false
         do
             local y = size_y - 1
@@ -646,8 +682,8 @@ function ____exports.Field(size_x, size_y)
                     local x = 0
                     while x < size_x do
                         local cell = get_cell(x, y)
-                        local empty = get_element(x, y)
-                        if empty == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                        local element = get_element(x, y)
+                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
                             try_move_element_from_up(x, y)
                             is_procesed = true
                         end
@@ -659,15 +695,46 @@ function ____exports.Field(size_x, size_y)
         end
         return is_procesed
     end
+    local function process_filling()
+        do
+            local y = size_y - 1
+            while y >= 0 do
+                do
+                    local x = 0
+                    while x < size_x do
+                        local cell = get_cell(x, y)
+                        local element = get_element(x, y)
+                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                            if try_move_element_from_corners(x, y) then
+                                return true
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y - 1
+            end
+        end
+        return false
+    end
+    local function process_move()
+        local is_procesed = process_falling()
+        if complex_process_move then
+            while process_filling() do
+                process_falling()
+            end
+        end
+        return is_procesed
+    end
     local function process_state(mode)
         repeat
-            local ____switch153 = mode
-            local ____cond153 = ____switch153 == ____exports.ProcessMode.Combinate
-            if ____cond153 then
+            local ____switch168 = mode
+            local ____cond168 = ____switch168 == ____exports.ProcessMode.Combinate
+            if ____cond168 then
                 return process_combinate()
             end
-            ____cond153 = ____cond153 or ____switch153 == ____exports.ProcessMode.MoveElements
-            if ____cond153 then
+            ____cond168 = ____cond168 or ____switch168 == ____exports.ProcessMode.MoveElements
+            if ____cond168 then
                 return process_move()
             end
         until true

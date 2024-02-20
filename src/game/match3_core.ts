@@ -161,7 +161,7 @@ type FncOnMoveElement = (from_x:number, from_y: number, to_x: number, to_y: numb
 type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
-export function Field(size_x: number, size_y: number) {
+export function Field(size_x: number, size_y: number, complex_process_move = true) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
     
     let state: GameState = {
@@ -555,8 +555,8 @@ export function Field(size_x: number, size_y: number) {
         for (let i = y - 1; i <= y + 1; i++) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
-                    const item = get_cell(j, i);
-                    if(item != NotActiveCell) neighbors.push({x: j, y: i, uid: item.uid});
+                    const cell = get_cell(j, i);
+                    if(cell != NotActiveCell) neighbors.push({x: j, y: i, uid: cell.uid});
                 }
             }
         }
@@ -571,8 +571,8 @@ export function Field(size_x: number, size_y: number) {
         for (let i = y - 1; i <= y + 1; i++) {
             for (let j = x - 1; j <= x + 1; j++) {
                 if (i >= 0 && i < size_y && j >= 0 && j < size_x && mask[i - (y - 1)][j - (x - 1)] == 1) {
-                    const item = get_element(j, i);
-                    if(item != NullElement) neighbors.push({x: j, y: i, uid: item.uid});
+                    const element = get_element(j, i);
+                    if(element != NullElement) neighbors.push({x: j, y: i, uid: element.uid});
                 }
             }
         }
@@ -595,7 +595,7 @@ export function Field(size_x: number, size_y: number) {
 
         const element = get_element(x, y);
         if(element == NullElement) return;
-        
+
         if(is_damaging && try_damage_element({x, y, element: element})) {    
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
             set_element(x, y, NullElement);
@@ -715,20 +715,79 @@ export function Field(size_x: number, size_y: number) {
         request_element(x, y);
         return true;
     }
+    
+    function try_move_element_from_corners(x: number, y: number) {
+        const neighbor_cells = get_neighbor_cells(x, y, [
+            [1, 0, 1],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]);
 
-    function process_move() {
+        const available_cells = [];
+        for(const neighbor_cell of neighbor_cells) {
+            const cell = get_cell(neighbor_cell.x, neighbor_cell.y);
+            if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) available_cells.push(neighbor_cell);
+        }
+        
+        if(available_cells.length == 0) return false;
+
+        const neighbor_elements = get_neighbor_elements(x, y, [
+            [1, 0, 1],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]);
+
+        const neighbor_element = neighbor_elements.pop();
+        if(neighbor_element == undefined) return false;
+
+        const element = get_element(neighbor_element.x, neighbor_element.y);
+        if(element == NullElement) return false;
+
+        set_element(x, y, element);
+        set_element(neighbor_element.x, neighbor_element.y, NullElement);
+
+        on_move_element(neighbor_element.x, neighbor_element.y, x, y, element);
+        last_moved_elements.push({x, y, uid: element.uid});
+
+        return true;
+    }
+
+    function process_falling() {
         let is_procesed = false;
         for(let y = size_y - 1; y >= 0; y--) {
             for(let x = 0; x < size_x; x++) {
                 const cell = get_cell(x, y);
-                const empty = get_element(x, y);
-                if((empty == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
+                const element = get_element(x, y);
+                if((element == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
                     try_move_element_from_up(x, y);
                     is_procesed = true;
                 }
             }
         }
 
+        return is_procesed;
+    }
+
+    function process_filling() {
+        for(let y = size_y - 1; y >= 0; y--) {
+            for(let x = 0; x < size_x; x++) {
+                const cell = get_cell(x, y);
+                const element = get_element(x, y);
+                if((element == NullElement) && (cell != NotActiveCell) && is_available_cell_type_for_move(cell)) {
+                    if(try_move_element_from_corners(x, y)) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function process_move() {
+        const is_procesed = process_falling();
+        if(complex_process_move) {
+            while(process_filling())
+                process_falling();
+        }
         return is_procesed;
     }
 

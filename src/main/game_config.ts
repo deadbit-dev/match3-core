@@ -213,6 +213,7 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
+                complex_move: false,
                 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -249,6 +250,7 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
+                complex_move: false,
                 
                cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -262,8 +264,8 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
-                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [NullElement, ElementId.Dimonde, ElementId.AxisRocket, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
+                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
                     [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
@@ -285,6 +287,7 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
+                complex_move: false,
                 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -321,6 +324,7 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 64,
                 offset_border: 10,
+                complex_move: false,
                 
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -342,6 +346,43 @@ export const _GAME_CONFIG = {
                     [ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [ElementId.Ruby, ElementId.Ruby, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
                     [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
+                ]
+            },
+
+            busters: {
+                hammer_active: false
+            }
+        },
+        
+        {
+            // LEVEL 4
+            field: {
+                width: 8,
+                height: 8,
+                cell_size: 64,
+                offset_border: 10,
+                complex_move: true,
+                
+                cells: [
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass,CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base]
+                ],
+
+                elements: [
+                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Gold],
+                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dynamite, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
+                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
+                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
+                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
+                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
                 ]
             },
 
@@ -375,7 +416,7 @@ export interface SwapedHelicoptersActivationMessage extends SwapedActivationMess
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
-export interface MoveElementMessage extends StepInfo { element: Element }
+export interface MoveElementMessage { path: {x: number, y: number}[], element: Element }
 export interface DamagedElementMessage { id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
@@ -407,8 +448,6 @@ export type _UserMessages = {
     DYNAMITE_ACTIVATED: ActivationMessage,
     SWAPED_DYNAMITES_ACTIVATED: SwapedActivationMessage,
 
-    HAMMER_ACTIVATED: ItemInfo,
-
     ON_COMBINED: CombinedMessage,
     ON_COMBO: ComboMessage,
     ON_CELL_ACTIVATED: ActivatedCellMessage,
@@ -422,11 +461,12 @@ export type _UserMessages = {
     MOVE_PHASE_BEGIN: VoidMessage,
     MOVE_PHASE_END: VoidMessage,
 
-    GAME_STEP: GameStepEventBuffer,
+    ON_GAME_STEP: GameStepEventBuffer,
     
     TRY_REVERT_STEP: VoidMessage,
     REVERT_STEP: VoidMessage,
     ON_REVERT_STEP: RevertStepMessage,
 
+    ACTIVATED_ELEMENT: ItemInfo,
     UPDATED_HAMMER: VoidMessage
 };

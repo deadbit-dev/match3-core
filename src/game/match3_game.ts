@@ -49,7 +49,7 @@ export function Game() {
     //#endregion CONFIGURATIONS
     //#region MAIN          
 
-    const field = Field(field_width, field_height);
+    const field = Field(field_width, field_height, level_config.field.complex_move);
 
     let game_item_counter = 0;
     let previous_states: GameState[] = [];
@@ -452,13 +452,14 @@ export function Game() {
     
     function try_activate_swaped_rocket_with_element(x: number, y: number, other_x: number, other_y: number) {
         const rocket = field.get_element(x, y);
-        if(rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(rocket.type)) return false;
+        if(rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket, ElementId.AxisRocket].includes(rocket.type)) return false;
 
         const other_element = field.get_element(other_x, other_y);
         if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
         
         if(try_activate_vertical_rocket(x, y)) return true;
         if(try_activate_horizontal_rocket(x, y)) return true;
+        if(try_activate_axis_rocket(x, y)) return true;
 
         return false;
     }
@@ -691,8 +692,6 @@ export function Game() {
         return true;
     }
 
-    
-
     function try_activate_swaped_buster_with_buster(x: number, y: number, other_x: number, other_y: number) {
         if(!is_buster(x, y) || !is_buster(other_x, other_y)) return false;
         
@@ -709,13 +708,13 @@ export function Game() {
         if(is_buster(x, y)) try_activate_buster_element(x, y);
         else {
             const removed_element = field.remove_element(x, y, true, false);
-            if(removed_element == undefined) return false;
-            
-            write_game_step_event('HAMMER_ACTIVATED', {x, y, uid: removed_element.uid});
+            if(removed_element != undefined) write_game_step_event('ACTIVATED_ELEMENT', {x, y, uid: removed_element.uid});
         }
-        
+
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
         busters.hammer_active = false;
+
+        EventBus.send('UPDATED_HAMMER');
 
         return true;
     }
@@ -837,7 +836,7 @@ export function Game() {
     }
 
     function on_move_element(from_x:number, from_y: number, to_x: number, to_y: number, element: Element) {
-        write_game_step_event('ON_MOVE_ELEMENT', {from_x, from_y, to_x, to_y, element});
+        write_game_step_event('ON_MOVE_ELEMENT', {path: [{x: from_x, y: from_y}, {x: to_x, y: to_y}], element});
     }
 
     function on_damaged_element(damaged_info: DamagedInfo) {
@@ -845,7 +844,6 @@ export function Game() {
         if(index != -1) activated_elements.splice(index, 1);
     }
 
-    // TODO: refactoring
     function on_cell_activated(item_info: ItemInfo) {
         const cell = field.get_cell(item_info.x, item_info.y);
         if(cell == NotActiveCell) return;
@@ -978,7 +976,7 @@ export function Game() {
     }
 
     function send_game_step() {
-        EventBus.send('GAME_STEP', game_step_events);
+        EventBus.send('ON_GAME_STEP', game_step_events);
         game_step_events = {} as GameStepEventBuffer;
     }
 

@@ -93,7 +93,7 @@ export function View() {
             flow.start(() => on_wrong_swap_element_animation(elements.element_from, elements.element_to));
         });
 
-        EventBus.on('GAME_STEP', (events) => {
+        EventBus.on('ON_GAME_STEP', (events) => {
             if(events == undefined) return;
             flow.start(() => on_game_step(events));
         });
@@ -125,6 +125,7 @@ export function View() {
                 case 'SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED': on_swaped_diskosphere_with_buster_animation(event.value); break;
                 case 'SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED': on_swaped_diskosphere_with_element_animation(event.value); break;
 
+                case 'AXIS_ROCKET_ACTIVATED': on_axis_rocket_activated_animation(event.value); break;
                 case 'ROCKET_ACTIVATED': on_rocket_activated_animation(event.value); break;
                 case 'SWAPED_ROCKETS_ACTIVATED': on_swaped_rockets_animation(event.value); break;
                 
@@ -134,7 +135,7 @@ export function View() {
                 case 'DYNAMITE_ACTIVATED': on_dynamite_activated_animation(event.value); break;
                 case 'SWAPED_DYNAMITES_ACTIVATED': on_swaped_dynamites_animation(event.value); break;
 
-                case 'HAMMER_ACTIVATED': on_hammer_activated_animation(event.value); break;
+                case 'ACTIVATED_ELEMENT': on_activated_element_animation(event.value); break;
                 
                 case 'ON_CELL_ACTIVATED': on_cell_activated_animation(event.value); break;
                 case 'MOVE_PHASE_BEGIN': flow.delay(0.1); break;
@@ -383,6 +384,13 @@ export function View() {
         flow.delay(swap_element_time + damaged_element_time);
     }
 
+    function on_axis_rocket_activated_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedActivationMessage;
+        damage_element_animation(activation.element.uid);
+        for(const element of activation.damaged_elements)
+            damage_element_animation(element.uid);
+    }
+
     function on_rocket_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
         damage_element_animation(activation.element.uid);
@@ -461,10 +469,9 @@ export function View() {
         });
     }
 
-    function on_hammer_activated_animation(message: Messages[MessageId]) {
+    function on_activated_element_animation(message: Messages[MessageId]) {
         const activation = message as ItemInfo;
         damage_element_animation(activation.uid);
-        EventBus.send("UPDATED_HAMMER");
     }
 
     function on_cell_activated_animation(message: Messages[MessageId]) {
@@ -475,12 +482,14 @@ export function View() {
 
     function on_move_element_animation(message: Messages[MessageId]) {
         const move = message as MoveElementMessage;
-        const to_world_pos = get_world_pos(move.to_x, move.to_y, 0);
+        for(const pos of move.path) {
+            const to_world_pos = get_world_pos(pos.x, pos.y, 0);
         
-        const item_from = get_first_view_item_by_game_id(move.element.uid);
-        if(item_from == undefined) return;
+            const item_from = get_first_view_item_by_game_id(move.element.uid);
+            if(item_from == undefined) return;
 
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
+        }
     }
 
     function on_request_element_animation(message: Messages[MessageId]) {
@@ -501,7 +510,7 @@ export function View() {
             for (let x = 0; x < field_width; x++) {
                 const current_cell = current_state.cells[y][x];
                 if(current_cell != NotActiveCell) {
-                    delete_view_item_by_game_id(current_cell.uid);
+                    delete_all_view_items_by_game_id(current_cell.uid);
                     
                     const previous_cell = previous_state.cells[y][x];
                     if(previous_cell != NotActiveCell) {
