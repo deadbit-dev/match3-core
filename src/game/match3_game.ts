@@ -29,13 +29,13 @@ import {
     Element,
     NullElement,
     NotActiveCell,
-    DamagedInfo,
     CombinationType,
     CombinationInfo,
     ProcessMode,
     ItemInfo,
     GameState,
-    CellType
+    CellType,
+    MovedInfo
 } from './match3_core';
 
 export function Game() {
@@ -60,7 +60,7 @@ export function Game() {
         field.init();
 
         field.set_callback_is_can_move(is_can_move);
-        field.set_callback_on_move_element(on_move_element);
+        field.set_callback_on_moved_elements(on_moved_elements);
         field.set_callback_on_combinated(on_combined);
         field.set_callback_on_damaged_element(on_damaged_element);
         field.set_callback_on_request_element(on_request_element);
@@ -99,15 +99,15 @@ export function Game() {
             if(elements == undefined) return;
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
             
-            try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
-            process_game_step();
+            const result = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
+            process_game_step(result);
         });
 
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
 
             try_click_activation(pos.x, pos.y);
-            process_game_step();
+            process_game_step(true);
         });
 
         EventBus.on('REVERT_STEP', revert_step);
@@ -124,7 +124,7 @@ export function Game() {
         const state = field.save_state();
         previous_states.push(state);
 
-        EventBus.send('ON_SET_FIELD', state);
+        EventBus.send('ON_LOAD_FIELD', state);
     }
 
     function load_cell(x: number, y: number) {
@@ -639,7 +639,7 @@ export function Game() {
             [1, 1, 0, 1, 1],
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1]
-        ], true);
+        ]);
 
         field.remove_element(x, y, true, false);
 
@@ -672,7 +672,7 @@ export function Game() {
             [1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1]
-        ], true);
+        ]);
         
         field.remove_element(x, y, true, false);
         field.remove_element(other_x, other_y, true, false);
@@ -708,7 +708,7 @@ export function Game() {
         if(is_buster(x, y)) try_activate_buster_element(x, y);
         else {
             const removed_element = field.remove_element(x, y, true, false);
-            if(removed_element != undefined) write_game_step_event('ACTIVATED_ELEMENT', {x, y, uid: removed_element.uid});
+            if(removed_element != undefined) write_game_step_event('ON_ELEMENT_ACTIVATED', {x, y, uid: removed_element.uid});
         }
 
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
@@ -748,13 +748,17 @@ export function Game() {
         return true;
     }
 
-    function process_game_step() {
-        write_game_step_event('MOVE_PHASE_BEGIN', {});
-        
-        if(field.process_state(ProcessMode.MoveElements)) write_game_step_event('MOVE_PHASE_END', {});
+    function process_game_step(after_activation = false) {
+        if(after_activation) {
+            write_game_step_event('ON_MOVE_PHASE_BEGIN', {});
+            if(field.process_state(ProcessMode.MoveElements))
+                write_game_step_event('ON_MOVE_PHASE_END', {});
+        }
+
         while(field.process_state(ProcessMode.Combinate)){
-            field.process_state(ProcessMode.MoveElements);
-            write_game_step_event('MOVE_PHASE_END', {});
+            write_game_step_event('ON_MOVE_PHASE_BEGIN', {});
+            if(field.process_state(ProcessMode.MoveElements))
+                write_game_step_event('ON_MOVE_PHASE_END', {});
         }
 
         previous_states.push(field.save_state());
@@ -830,18 +834,22 @@ export function Game() {
         return false;
     }
 
+    function on_damaged_element(item: ItemInfo) {
+        const index = activated_elements.findIndex((element_id) => element_id == item.uid);
+        if(index != -1) activated_elements.splice(index, 1);
+    }
+
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
         field.on_combined_base(combined_element, combination);
         if(!try_combo(combined_element, combination)) write_game_step_event('ON_COMBINED', {combined_element, combination});
     }
-
-    function on_move_element(from_x:number, from_y: number, to_x: number, to_y: number, element: Element) {
-        write_game_step_event('ON_MOVE_ELEMENT', {path: [{x: from_x, y: from_y}, {x: to_x, y: to_y}], element});
+    
+    function on_request_element(x: number, y: number): Element | typeof NullElement {
+        return make_element(x, y, get_random_element_id());
     }
 
-    function on_damaged_element(damaged_info: DamagedInfo) {
-        const index = activated_elements.findIndex((element_id) => element_id == damaged_info.element.uid);
-        if(index != -1) activated_elements.splice(index, 1);
+    function on_moved_elements(elements: MovedInfo[]) {
+        write_game_step_event('ON_MOVED_ELEMENTS', elements);
     }
 
     function on_cell_activated(item_info: ItemInfo) {
@@ -864,6 +872,7 @@ export function Game() {
                     new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
                 }
             break;
+
             case bit.bor(CellType.ActionLockedNear, CellType.Wall):
                 if(cell.cnt_near_acts == undefined) break;
                 if(cell.cnt_near_acts > 0) {
@@ -889,15 +898,6 @@ export function Game() {
                 previous_id: item_info.uid 
             });
         }
-    }
-
-    function on_request_element(x: number, y: number): Element | typeof NullElement {
-        const element = make_element(x, y, get_random_element_id());
-        if(element == NullElement) return NullElement;
-
-        write_game_step_event('ON_REQUEST_ELEMENT', {x, y, uid: element.uid, type: element.type});
-
-        return element;
     }
 
     //#endregion CALLBACKS

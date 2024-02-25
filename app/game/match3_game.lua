@@ -19,7 +19,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_vertical_rocket, try_activate_horizontal_rocket, try_activate_swaped_rocket_with_element, try_activate_swaped_rockets, try_activate_axis_rocket, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_hammer_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_combined, on_move_element, on_damaged_element, on_cell_activated, on_request_element, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_vertical_rocket, try_activate_horizontal_rocket, try_activate_swaped_rocket_with_element, try_activate_swaped_rockets, try_activate_axis_rocket, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_hammer_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -44,8 +44,8 @@ function ____exports.Game()
                 if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
                     return
                 end
-                try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
-                process_game_step()
+                local result = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
+                process_game_step(result)
             end
         )
         EventBus.on(
@@ -55,7 +55,7 @@ function ____exports.Game()
                     return
                 end
                 try_click_activation(pos.x, pos.y)
-                process_game_step()
+                process_game_step(true)
             end
         )
         EventBus.on("REVERT_STEP", revert_step)
@@ -77,7 +77,7 @@ function ____exports.Game()
         end
         local state = field.save_state()
         previous_states[#previous_states + 1] = state
-        EventBus.send("ON_SET_FIELD", state)
+        EventBus.send("ON_LOAD_FIELD", state)
     end
     function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
@@ -741,7 +741,7 @@ function ____exports.Game()
                 1,
                 1
             }
-        }, true)
+        })
         field.remove_element(x, y, true, false)
         return true
     end
@@ -836,7 +836,7 @@ function ____exports.Game()
                 1,
                 1
             }
-        }, true)
+        })
         field.remove_element(x, y, true, false)
         field.remove_element(other_x, other_y, true, false)
         return true
@@ -870,7 +870,7 @@ function ____exports.Game()
         else
             local removed_element = field.remove_element(x, y, true, false)
             if removed_element ~= nil then
-                write_game_step_event("ACTIVATED_ELEMENT", {x = x, y = y, uid = removed_element.uid})
+                write_game_step_event("ON_ELEMENT_ACTIVATED", {x = x, y = y, uid = removed_element.uid})
             end
         end
         GameStorage.set(
@@ -902,14 +902,21 @@ function ____exports.Game()
         write_game_step_event("ON_SWAP_ELEMENTS", {element_from = {x = to_x, y = to_y, uid = element_to.uid}, element_to = {x = from_x, y = from_y, uid = element_from.uid}})
         return true
     end
-    function process_game_step()
-        write_game_step_event("MOVE_PHASE_BEGIN", {})
-        if field.process_state(ProcessMode.MoveElements) then
-            write_game_step_event("MOVE_PHASE_END", {})
+    function process_game_step(after_activation)
+        if after_activation == nil then
+            after_activation = false
+        end
+        if after_activation then
+            write_game_step_event("ON_MOVE_PHASE_BEGIN", {})
+            if field.process_state(ProcessMode.MoveElements) then
+                write_game_step_event("ON_MOVE_PHASE_END", {})
+            end
         end
         while field.process_state(ProcessMode.Combinate) do
-            field.process_state(ProcessMode.MoveElements)
-            write_game_step_event("MOVE_PHASE_END", {})
+            write_game_step_event("ON_MOVE_PHASE_BEGIN", {})
+            if field.process_state(ProcessMode.MoveElements) then
+                write_game_step_event("ON_MOVE_PHASE_END", {})
+            end
         end
         previous_states[#previous_states + 1] = field.save_state()
         send_game_step()
@@ -958,29 +965,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element
         repeat
-            local ____switch213 = combination.type
-            local ____cond213 = ____switch213 == CombinationType.Comb4
-            if ____cond213 then
+            local ____switch215 = combination.type
+            local ____cond215 = ____switch215 == CombinationType.Comb4
+            if ____cond215 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == CombinationType.Comb5
-            if ____cond213 then
+            ____cond215 = ____cond215 or ____switch215 == CombinationType.Comb5
+            if ____cond215 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == CombinationType.Comb2x2
-            if ____cond213 then
+            ____cond215 = ____cond215 or ____switch215 == CombinationType.Comb2x2
+            if ____cond215 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond213 = ____cond213 or (____switch213 == CombinationType.Comb3x3a or ____switch213 == CombinationType.Comb3x3b)
-            if ____cond213 then
+            ____cond215 = ____cond215 or (____switch215 == CombinationType.Comb3x3a or ____switch215 == CombinationType.Comb3x3b)
+            if ____cond215 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond213 = ____cond213 or (____switch213 == CombinationType.Comb3x4 or ____switch213 == CombinationType.Comb3x5)
-            if ____cond213 then
+            ____cond215 = ____cond215 or (____switch215 == CombinationType.Comb3x4 or ____switch215 == CombinationType.Comb3x5)
+            if ____cond215 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -991,23 +998,30 @@ function ____exports.Game()
         end
         return false
     end
+    function on_damaged_element(item)
+        local index = __TS__ArrayFindIndex(
+            activated_elements,
+            function(____, element_id) return element_id == item.uid end
+        )
+        if index ~= -1 then
+            __TS__ArraySplice(activated_elements, index, 1)
+        end
+    end
     function on_combined(combined_element, combination)
         field.on_combined_base(combined_element, combination)
         if not try_combo(combined_element, combination) then
             write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination})
         end
     end
-    function on_move_element(from_x, from_y, to_x, to_y, element)
-        write_game_step_event("ON_MOVE_ELEMENT", {path = {{x = from_x, y = from_y}, {x = to_x, y = to_y}}, element = element})
-    end
-    function on_damaged_element(damaged_info)
-        local index = __TS__ArrayFindIndex(
-            activated_elements,
-            function(____, element_id) return element_id == damaged_info.element.uid end
+    function on_request_element(x, y)
+        return make_element(
+            x,
+            y,
+            get_random_element_id()
         )
-        if index ~= -1 then
-            __TS__ArraySplice(activated_elements, index, 1)
-        end
+    end
+    function on_moved_elements(elements)
+        write_game_step_event("ON_MOVED_ELEMENTS", elements)
     end
     function on_cell_activated(item_info)
         local cell = field.get_cell(item_info.x, item_info.y)
@@ -1016,9 +1030,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch223 = cell.type
-            local ____cond223 = ____switch223 == CellType.ActionLocked
-            if ____cond223 then
+            local ____switch226 = cell.type
+            local ____cond226 = ____switch226 == CellType.ActionLocked
+            if ____cond226 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -1034,8 +1048,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond223 = ____cond223 or ____switch223 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond223 then
+            ____cond226 = ____cond226 or ____switch226 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond226 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -1061,18 +1075,6 @@ function ____exports.Game()
                 previous_id = item_info.uid
             })
         end
-    end
-    function on_request_element(x, y)
-        local element = make_element(
-            x,
-            y,
-            get_random_element_id()
-        )
-        if element == NullElement then
-            return NullElement
-        end
-        write_game_step_event("ON_REQUEST_ELEMENT", {x = x, y = y, uid = element.uid, type = element.type})
-        return element
     end
     function is_buster(x, y)
         return field.try_click(x, y)
@@ -1195,7 +1197,7 @@ function ____exports.Game()
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)
-        field.set_callback_on_move_element(on_move_element)
+        field.set_callback_on_moved_elements(on_moved_elements)
         field.set_callback_on_combinated(on_combined)
         field.set_callback_on_damaged_element(on_damaged_element)
         field.set_callback_on_request_element(on_request_element)

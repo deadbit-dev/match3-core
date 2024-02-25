@@ -6,14 +6,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as flow from 'ludobits.m.flow';
+import * as flux from 'utils.flux';
+
 import { View } from './match3_view';
 
 interface props {
+    animator: FluxGroup
 }
 
 export function init(this: props) {
+    this.animator = flux.group();
     msg.post('.', 'acquire_input_focus');
-    flow.start(() => View(), {});
+    flow.start(() => View(this.animator), {});
+}
+
+export function update(this: props, dt: number): void {
+    this.animator.update(dt);
 }
 
 export function on_message(this: props, message_id: hash, message: any, sender: hash): void {

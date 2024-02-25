@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, Element, StepInfo, CombinationInfo } from "../game/match3_core";
+import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo } from "../game/match3_core";
 import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
-import { Direction } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
 
@@ -51,21 +50,22 @@ export enum ElementId {
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
     min_swipe_distance: 32,
+    
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
-
-    move_elements_easing: go.EASING_INOUTBACK,
-    move_elements_time: 0.75,
-    move_delay_after_combination: 1,
-    wait_time_after_move: 0.5,
+    squash_element_easing: go.EASING_INCUBIC,
+    squash_element_time: 0.3,
+    
+    dynamite_activation_duration: 1,
+    helicopter_fly_duration: 0.7,
     
     damaged_element_easing: go.EASING_INOUTBACK,
     damaged_element_time: 0.5,
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.5,
-
-    squash_element_easing: go.EASING_INCUBIC,
-    squash_element_time: 0.3,
+    
+    move_elements_easing: go.EASING_INOUTBACK,
+    move_elements_time: 0.75,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -377,7 +377,7 @@ export const _GAME_CONFIG = {
                 elements: [
                     [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Gold],
                     [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dynamite, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
@@ -401,6 +401,7 @@ export const _STORAGE_CONFIG = {
 };
 
 export type GameStepEventBuffer = {key: MessageId, value: Messages[MessageId]}[];
+export type MovedElementsMessage = MovedInfo[];
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
@@ -416,15 +417,12 @@ export interface SwapedHelicoptersActivationMessage extends SwapedActivationMess
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
-export interface MoveElementMessage { path: {x: number, y: number}[], element: Element }
-export interface DamagedElementMessage { id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
     LOAD_FIELD: VoidMessage,
-    ON_SET_FIELD: GameState,
-    ON_MAKE_ELEMENT: ElementMessage,
+    ON_LOAD_FIELD: GameState,
     
     SWAP_ELEMENTS: StepInfo,
     ON_SWAP_ELEMENTS: SwapElementsMessage,
@@ -452,14 +450,9 @@ export type _UserMessages = {
     ON_COMBO: ComboMessage,
     ON_CELL_ACTIVATED: ActivatedCellMessage,
     
-    PROCESS_GAME_STEP_BEGIN: VoidMessage,
-    
-    ON_MOVE_ELEMENT: MoveElementMessage,
-    ON_DAMAGED_ELEMENT: DamagedElementMessage,
-    ON_REQUEST_ELEMENT: ElementMessage,
-
-    MOVE_PHASE_BEGIN: VoidMessage,
-    MOVE_PHASE_END: VoidMessage,
+    ON_MOVE_PHASE_BEGIN: VoidMessage,
+    ON_MOVED_ELEMENTS: MovedElementsMessage,
+    ON_MOVE_PHASE_END: VoidMessage,
 
     ON_GAME_STEP: GameStepEventBuffer,
     
@@ -467,6 +460,6 @@ export type _UserMessages = {
     REVERT_STEP: VoidMessage,
     ON_REVERT_STEP: RevertStepMessage,
 
-    ACTIVATED_ELEMENT: ItemInfo,
+    ON_ELEMENT_ACTIVATED: ItemInfo,
     UPDATED_HAMMER: VoidMessage
 };

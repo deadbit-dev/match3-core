@@ -89,6 +89,8 @@ export enum CellType {
 // вместо null для неактивной клетки
 export const NotActiveCell = -1;
 
+export const OutsideField = -1;
+
 // описание свойств клетки
 export interface Cell {
     id: number;
@@ -124,18 +126,25 @@ export interface ItemInfo {
     uid: number;
 }
 
-export interface DamagedInfo {
-    x: number;
-    y: number;
-    element: Element;
-}
-
 // информация о ходе
 export interface StepInfo {
     from_x: number;
     from_y: number;
     to_x: number;
     to_y: number;
+}
+
+export enum MoveType {
+    Swaped,
+    Falled,
+    Requested,
+    Filled
+}
+
+// FIXME: extends of ItemInfo, beacause from_x and from_y dont used anyway!
+export interface MovedInfo {
+    points: [{to_x: number, to_y: number, type: MoveType}];
+    data: Element;
 }
 
 // описание игровых данных для импорта/экспорта
@@ -156,8 +165,9 @@ type FncOnNearActivation = (items: ItemInfo[]) => void;
 type FncOnCellActivation = (cell: ItemInfo) => void;
 type FncOnCellActivated = (cell: ItemInfo) => void;
 type FncIsCombined = (e1: Element, e2: Element) => boolean;
-type FncOnDamagedElement = (info: DamagedInfo) => void;
-type FncOnMoveElement = (from_x:number, from_y: number, to_x: number, to_y: number, element: Element) => void;
+type FncOnDamagedElement = (item: ItemInfo) => void;
+type FncOnMoveElement = (from_x: number, from_y: number, to_x: number, to_y: number, element: Element) => void;
+type FncOnMovedElements = (elements: MovedInfo[], state: GameState) => void;
 type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
@@ -170,7 +180,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         elements: []
     };
     
-    const last_moved_elements: ItemInfo[] = [];
+    const moved_elements: MovedInfo[] = [];
     const damaged_elements: number[] = [];
 
     // кастомные колбеки 
@@ -182,6 +192,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     let cb_on_cell_activated: FncOnCellActivated;
     let cb_on_damaged_element: FncOnDamagedElement;
     let cb_on_move_element: FncOnMoveElement;
+    let cb_on_moved_elements: FncOnMovedElements;
     let cb_on_request_element: FncOnRequestElement;
 
     function init() {
@@ -377,6 +388,14 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         cb_on_move_element = fnc;
     }
 
+    function on_moved_elements(elements: MovedInfo[], state: GameState) {
+        if(cb_on_moved_elements != null) return cb_on_moved_elements(elements, state);
+    }
+
+    function set_callback_on_moved_elements(fnc: FncOnMovedElements) {
+        cb_on_moved_elements = fnc;
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------------
     // базовая обработка при комбинации
     function on_combined_base(combined_element: ItemInfo, combination: CombinationInfo) {
@@ -389,9 +408,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             if(cell != NotActiveCell && element != NullElement && element.uid == item.uid) {
                 on_cell_activation({x: item.x, y: item.y, uid: cell.uid});
                 on_near_activation(get_neighbor_cells(item.x, item.y));
-                try_damage_element({x: item.x, y: item.y, element: element});
-                damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
-                set_element(item.x, item.y, NullElement);
+                if(try_damage_element(item)) {
+                    set_element(item.x, item.y, NullElement);
+                    damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
+                }
             }
         }
     }
@@ -416,10 +436,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
     // попытка нанести урон элементу, смысл в том чтобы вызвать колбек активации, при этом только 1 раз за жизнь элемента
     // при успехе вызываем колбек cb_on_damaged_element 
-    function try_damage_element(damaged_info: DamagedInfo) {
-        if(damaged_elements.find((element) => element == damaged_info.element.uid) == undefined) {
-            damaged_elements.push(damaged_info.element.uid);
-            if(cb_on_damaged_element != null) cb_on_damaged_element(damaged_info);
+    function try_damage_element(item: ItemInfo) {
+        if(damaged_elements.find((element) => element == item.uid) == undefined) {
+            damaged_elements.push(item.uid);
+            if(cb_on_damaged_element != null) cb_on_damaged_element(item);
             return true;
         }
 
@@ -596,7 +616,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         const element = get_element(x, y);
         if(element == NullElement) return;
 
-        if(is_damaging && try_damage_element({x, y, element: element})) {    
+        if(is_damaging && try_damage_element({x, y, uid: element.uid})) {
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
             set_element(x, y, NullElement);
         }
@@ -622,10 +642,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     
     function is_valid_element_pos(x: number, y: number) {
         if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;
-
-        const element = get_element(x, y);
-        if(element == NullElement) return false;
-
         return true;
     }
 
@@ -638,10 +654,18 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             swap_elements(from_x, from_y, to_x, to_y);
             
             const element_from = get_element(from_x, from_y);
-            if(element_from != NullElement) last_moved_elements.push({x: from_x, y: from_y, uid: element_from.uid});
+            if(element_from != NullElement) {
+                const index = moved_elements.findIndex((e) => e.data.uid == element_from.uid); 
+                if(index == -1) moved_elements.push({points: [{to_x, to_y, type: MoveType.Swaped}], data: element_from});
+                else moved_elements[index].points.push({to_x, to_y, type: MoveType.Swaped});
+            }
         
             const element_to = get_element(to_x, to_y);
-            if(element_to != NullElement) last_moved_elements.push({x: to_x, y: to_y, uid: element_to.uid});
+            if(element_to != NullElement) {
+                const index = moved_elements.findIndex((e) => e.data.uid == element_to.uid); 
+                if(index == -1) moved_elements.push({points: [{to_x: from_x, to_y: from_y, type: MoveType.Swaped}], data: element_to});
+                else moved_elements[index].points.push({to_x: from_x, to_y: from_y, type: MoveType.Swaped});
+            }
         }
 
         return is_can; 
@@ -668,8 +692,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         for(const combination of get_all_combinations()) {
             let found = false;
             for(const element of combination.elements) {
-                for(const last_moved_element of last_moved_elements) {
-                    if(last_moved_element.uid == element.uid) {
+                for(const last_moved_element of moved_elements) {
+                    if(last_moved_element.data.uid == element.uid) {
                         on_combinated(element, combination);
                         found = true;
                         break;
@@ -681,16 +705,14 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             if(found) is_procesed = true;
         }
         
-        last_moved_elements.splice(0, last_moved_elements.length);
+        moved_elements.splice(0, moved_elements.length);
         
         return is_procesed;
     }
 
     function request_element(x: number, y: number) {
         const element = on_request_element(x, y);
-        if(element as number != NullElement) {
-            last_moved_elements.push({x, y, uid: (element as Element).uid});
-        }
+        if(element != NullElement) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Requested}], data: element});
     }
 
     function try_move_element_from_up(x: number, y:number) {
@@ -705,7 +727,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                     set_element(x, j, NullElement);
 
                     on_move_element(x, j, x, y, element);
-                    last_moved_elements.push({x, y, uid: element.uid});
+                    
+                    const index = moved_elements.findIndex((e) => e.data.uid == element.uid); 
+                    if(index == -1) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Falled}], data: element});
+                    else moved_elements[index].points.push({to_x: x, to_y: y, type: MoveType.Falled});
                     
                     return true;
                 }
@@ -747,7 +772,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         set_element(neighbor_element.x, neighbor_element.y, NullElement);
 
         on_move_element(neighbor_element.x, neighbor_element.y, x, y, element);
-        last_moved_elements.push({x, y, uid: element.uid});
+    
+        const index = moved_elements.findIndex((e) => e.data.uid == neighbor_element.uid); 
+        if(index == -1) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Filled}], data: element});
+        else moved_elements[index].points.push({to_x: x, to_y: y, type: MoveType.Filled});
 
         return true;
     }
@@ -784,10 +812,14 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
     function process_move() {
         const is_procesed = process_falling();
+        
         if(complex_process_move) {
             while(process_filling())
                 process_falling();
         }
+
+        // FIXME: one state ? write element data into the messsage or send message on each falling
+        if(is_procesed) on_moved_elements(Object.assign([], moved_elements), save_state());
         return is_procesed;
     }
 
@@ -855,7 +887,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
         get_neighbor_cells, get_neighbor_elements, is_valid_element_pos, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_all_available_steps, get_free_cells, get_all_elements_by_type, try_damage_element,
-        set_callback_on_move_element, set_callback_is_can_move, is_can_move_base,
+        set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,
         set_callback_on_damaged_element,

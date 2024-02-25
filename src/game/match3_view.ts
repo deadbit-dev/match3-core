@@ -18,42 +18,40 @@ import * as camera from '../utils/camera';
 import { Direction } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ComboMessage, DamagedElementMessage, ElementId, ElementMessage, GameStepEventBuffer, HelicopterActivationMessage, MoveElementMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage } from "../main/game_config";
+import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage } from "../main/game_config";
 
 import { 
-    Element,
     GameState,
     ItemInfo,
     NullElement,
     NotActiveCell,
-    CombinationInfo,
-    StepInfo,
-    Cell
+    Cell,
+    Element,
+    MoveType
 } from "./match3_core";
 
 
-export function View() {
+export function View(animator: FluxGroup) {
     //#region CONFIG        
 
     const game_width = 540;
     const game_height = 960;
  
+    const min_swipe_distance = GAME_CONFIG.min_swipe_distance;
     const swap_element_easing = GAME_CONFIG.swap_element_easing;
     const swap_element_time = GAME_CONFIG.swap_element_time;
-    const move_elements_easing = GAME_CONFIG.move_elements_easing;
-    const move_elements_time = GAME_CONFIG.move_elements_time;
     const squash_element_easing = GAME_CONFIG.squash_element_easing;
     const squash_element_time = GAME_CONFIG.squash_element_time;
-    const spawn_element_easing = GAME_CONFIG.spawn_element_easing;
-    const spawn_element_time = GAME_CONFIG.spawn_element_time;
+    const dynamite_activation_duration = GAME_CONFIG.dynamite_activation_duration;
+    const helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration;
     const damaged_element_easing = GAME_CONFIG.damaged_element_easing;
     const damaged_element_delay = GAME_CONFIG.damaged_element_delay;
     const damaged_element_time = GAME_CONFIG.damaged_element_time;
     const damaged_element_scale = GAME_CONFIG.damaged_element_scale;
-    const min_swipe_distance = GAME_CONFIG.min_swipe_distance;
-    const move_delay_after_combination = GAME_CONFIG.move_delay_after_combination;
-    const wait_time_after_move = GAME_CONFIG.wait_time_after_move;
-    const buster_delay = GAME_CONFIG.buster_delay;
+    const move_elements_easing = GAME_CONFIG.move_elements_easing;
+    const move_elements_time = GAME_CONFIG.move_elements_time;
+    const spawn_element_easing = GAME_CONFIG.spawn_element_easing;
+    const spawn_element_time = GAME_CONFIG.spawn_element_time;
     
     const level_config = GAME_CONFIG.levels[GameStorage.get('current_level')];
     const field_width = level_config['field']['width'];
@@ -65,27 +63,61 @@ export function View() {
     const scale_ratio = cell_size / origin_cell_size;
     const cells_offset = vmath.vector3(game_width / 2 - (field_width / 2 * cell_size), -(game_height / 2 - (field_height / 2 * cell_size)), 0);
 
+    const event_to_animation: {[key in string]: (data: Messages[MessageId]) => number} = {
+        'ON_SWAP_ELEMENTS': on_swap_element_animation,
+        'ON_COMBINED': on_combined_animation,
+        'ON_COMBO': on_combo_animation,
+        
+        'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
+        'ON_CELL_ACTIVATED': on_cell_activated_animation,
+        
+        // DISKOSPHERE
+        'SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED': on_swaped_buster_with_diskosphere_animation,
+        'DISKOSPHERE_ACTIVATED': on_diskisphere_activated_animation,
+        'SWAPED_DISKOSPHERES_ACTIVATED': on_swaped_diskospheres_animation,
+        'SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED': on_swaped_diskosphere_with_buster_animation,
+        'SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED': on_swaped_diskosphere_with_element_animation,
+        
+        // ROCKET
+        'AXIS_ROCKET_ACTIVATED': on_axis_rocket_activated_animation,
+        'ROCKET_ACTIVATED': on_rocket_activated_animation,
+        'SWAPED_ROCKETS_ACTIVATED': on_swaped_rockets_animation,
+
+        // HELICOPTER
+        'HELICOPTER_ACTIVATED': on_helicopter_activated_animation,
+        'SWAPED_HELICOPTERS_ACTIVATED': on_swaped_helicopters_animation,
+        
+        // DYNAMITE
+        'DYNAMITE_ACTIVATED': on_dynamite_activated_animation,
+        'SWAPED_DYNAMITES_ACTIVATED': on_swaped_dynamites_animation,
+
+        // MOVE
+        'ON_MOVE_PHASE_BEGIN': on_move_phase_begin,
+        'ON_MOVED_ELEMENTS': on_moved_elements_animation,
+        'ON_MOVE_PHASE_END': on_move_phase_end
+    };
+
     //#endregion FIELDS
     //#region MAIN          
 
     const gm = GoManager();
-
     const game_id_to_view_index: {[key in number]: number[]} = {};
 
     let selected_element: IGameItem | null = null;
+    let combinate_duration_counter = 0;
+    let move_duration_counter = 0;
     let is_processing = false;
 
     function init() {
         set_events();
         EventBus.send('LOAD_FIELD');
-        
         input_listener();
     }
     
     function set_events() {
-        EventBus.on('ON_SET_FIELD', (state) => {
+        EventBus.on('ON_LOAD_FIELD', (state) => {
             if(state == undefined) return;
-            on_set_field(state);
+            on_load_field(state);
         });
 
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', (elements) => {
@@ -113,35 +145,14 @@ export function View() {
         is_processing = true;
 
         for(const event of events) {
-            switch(event.key) {
-                case 'ON_SWAP_ELEMENTS': on_swap_element_animation(event.value); break;
-                case 'ON_COMBINED': on_combined_animation(event.value); break;
-                case 'ON_COMBO': on_combo_animation(event.value); break;
-                
-                case 'SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED': on_swaped_buster_with_diskosphere_animation(event.value); break;
-                
-                case 'DISKOSPHERE_ACTIVATED': on_diskisphere_activated_animation(event.value); break;
-                case 'SWAPED_DISKOSPHERES_ACTIVATED': on_swaped_diskospheres_animation(event.value); break;
-                case 'SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED': on_swaped_diskosphere_with_buster_animation(event.value); break;
-                case 'SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED': on_swaped_diskosphere_with_element_animation(event.value); break;
-
-                case 'AXIS_ROCKET_ACTIVATED': on_axis_rocket_activated_animation(event.value); break;
-                case 'ROCKET_ACTIVATED': on_rocket_activated_animation(event.value); break;
-                case 'SWAPED_ROCKETS_ACTIVATED': on_swaped_rockets_animation(event.value); break;
-                
-                case 'HELICOPTER_ACTIVATED': on_helicopter_activated_animation(event.value); break;
-                case 'SWAPED_HELICOPTERS_ACTIVATED': on_swaped_helicopters_animation(event.value); break;
-                
-                case 'DYNAMITE_ACTIVATED': on_dynamite_activated_animation(event.value); break;
-                case 'SWAPED_DYNAMITES_ACTIVATED': on_swaped_dynamites_animation(event.value); break;
-
-                case 'ACTIVATED_ELEMENT': on_activated_element_animation(event.value); break;
-                
-                case 'ON_CELL_ACTIVATED': on_cell_activated_animation(event.value); break;
-                case 'MOVE_PHASE_BEGIN': flow.delay(0.1); break;
-                case 'ON_MOVE_ELEMENT': on_move_element_animation(event.value); break;
-                case 'ON_REQUEST_ELEMENT': on_request_element_animation(event.value); break;
-                case 'MOVE_PHASE_END': flow.delay(1); break;
+            const event_duration = event_to_animation[event.key](event.value);
+            if(event.key == 'ON_MOVED_ELEMENTS') {
+                move_duration_counter = event_duration;
+                print("MOVE: ", move_duration_counter);
+            }
+            else if(event_duration > combinate_duration_counter) {
+                combinate_duration_counter = event_duration;
+                print("COMB: ", combinate_duration_counter);
             }
         }
 
@@ -229,7 +240,7 @@ export function View() {
     //#endregion INPUT
     //#region LOGIC         
 
-    function on_set_field(state: GameState) {
+    function on_load_field(state: GameState) {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {                
                 const cell = state.cells[y][x];
@@ -281,8 +292,22 @@ export function View() {
     
     function on_swap_element_animation(message: Messages[MessageId]) {
         const elements = message as SwapElementsMessage;
-        swap_elements_animation(elements.element_from, elements.element_to);
-        flow.delay(swap_element_time + 0.1);
+        const element_from = elements.element_from;
+        const element_to = elements.element_to;
+        
+        const from_world_pos = get_world_pos(element_from.x, element_from.y);
+        const to_world_pos = get_world_pos(element_to.x, element_to.y);
+
+        const item_from = get_first_view_item_by_game_id(element_from.uid);
+        if(item_from == undefined) return 0;
+        
+        const item_to = get_first_view_item_by_game_id(element_to.uid);
+        if(item_to == undefined) return 0;
+
+        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+
+        return swap_element_time + 0.1;
     }
     
     function on_wrong_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
@@ -299,23 +324,23 @@ export function View() {
 
         // FORWARD
         go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
+            // BACK
+            go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
+                is_processing = false;
+            });
+        });
 
-        flow.delay(swap_element_time);
-
-        // BACK
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
-
-        flow.delay(swap_element_time);
-
-        is_processing = false;
+        return spawn_element_time * 2;
     }
 
     function on_combined_animation(message: Messages[MessageId]) {
         const combined = message as CombinedMessage;
         for(const element of combined.combination.elements)
             damage_element_animation(element.uid);
+
+        return damaged_element_time;
     }
 
     function on_combo_animation(message: Messages[MessageId]) {
@@ -325,9 +350,7 @@ export function View() {
             const element = combo.combination.elements[i];
             const item = get_first_view_item_by_game_id(element.uid);
             if(item != undefined) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
-                squash_element_easing, squash_element_time, 0);
-
-            damage_element_animation(element.uid);
+                squash_element_easing, squash_element_time, 0, () => delete_view_item_by_game_id(element.uid));
         }
         
         make_element_view(
@@ -336,6 +359,8 @@ export function View() {
             combo.maked_element.type,
             combo.maked_element.uid
         );
+
+        return squash_element_time;
     }
 
     function on_diskisphere_activated_animation(message: Messages[MessageId]) {
@@ -343,11 +368,13 @@ export function View() {
         damage_element_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
             damage_element_animation(element.uid);
+
+        return damaged_element_time;
     }
 
     function on_swaped_buster_with_diskosphere_animation(message: Messages[MessageId]) {
         const activation = message as SwapedDiskosphereActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             damage_element_animation(activation.other_element.uid);
             damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
@@ -356,32 +383,33 @@ export function View() {
                 make_element_view(element.x, element.y, element.type, element.uid);
         });
 
-        flow.delay(swap_element_time + damaged_element_time);
+        return squash_duration + damaged_element_time;
     }
   
     function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             damage_element_animation(activation.element.uid);
             damage_element_animation(activation.other_element.uid);
             for(const element of activation.damaged_elements)
                 damage_element_animation(element.uid);
         });
         
+        return squash_duration + damaged_element_time;
     }
     
     function on_swaped_diskosphere_with_buster_animation(message: Messages[MessageId]) {
         const activation = message as SwapedDiskosphereActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.other_element.uid);
-            damage_element_animation(activation.element.uid);
-            for(const element of activation.damaged_elements)
-                damage_element_animation(element.uid);
-            for(const element of activation.maked_elements)
-                make_element_view(element.x, element.y, element.type, element.uid);
-        });
+        
+        damage_element_animation(activation.other_element.uid);
+        damage_element_animation(activation.element.uid);
+        
+        for(const element of activation.damaged_elements)
+            damage_element_animation(element.uid);
+        for(const element of activation.maked_elements)
+            make_element_view(element.x, element.y, element.type, element.uid);
 
-        flow.delay(swap_element_time + damaged_element_time);
+        return damaged_element_time;
     }
 
     function on_axis_rocket_activated_animation(message: Messages[MessageId]) {
@@ -389,6 +417,8 @@ export function View() {
         damage_element_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
             damage_element_animation(element.uid);
+
+        return damaged_element_time;
     }
 
     function on_rocket_activated_animation(message: Messages[MessageId]) {
@@ -396,31 +426,39 @@ export function View() {
         damage_element_animation(activation.element.uid);
         for(const element of activation.damaged_elements)
             damage_element_animation(element.uid);
+
+        return damaged_element_time;
     }
 
     function on_swaped_rockets_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             damage_element_animation(activation.other_element.uid);
             damage_element_animation(activation.element.uid);
             for(const element of activation.damaged_elements)
                 damage_element_animation(element.uid);
         });
+
+        return squash_duration + damaged_element_time;
     }
 
     function on_helicopter_activated_animation(message: Messages[MessageId]) {
         const activation = message as HelicopterActivationMessage;
         for(const element of activation.damaged_elements)
             damage_element_animation(element.uid);
-        if(activation.target_element != NullElement) remove_random_element_animation(activation.element, activation.target_element);
-        else damage_element_animation(activation.element.uid);
+        
+        if(activation.target_element != NullElement) {
+            remove_random_element_animation(activation.element, activation.target_element);
+            return damaged_element_time + helicopter_fly_duration;
+        }
 
-        flow.delay(1.3);
+        return damage_element_animation(activation.element.uid);
     }
 
     function on_swaped_helicopters_animation(message: Messages[MessageId]) {
         const activation = message as SwapedHelicoptersActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
+        
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             for(const element of activation.damaged_elements)
                 damage_element_animation(element.uid);
             
@@ -440,69 +478,119 @@ export function View() {
             }
         });
 
-        flow.delay(3);
+        return squash_duration + (damaged_element_time > helicopter_fly_duration ? damaged_element_time : helicopter_fly_duration);
     }
 
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        activate_buster_animation(activation.element.uid);
-        for(const element of activation.damaged_elements)
-            damage_element_animation(element.uid);
+        const activation_duration = activate_buster_animation(activation.element.uid, () => {
+            for(const element of activation.damaged_elements)
+                damage_element_animation(element.uid);
+        });
+
+        return activation_duration + damaged_element_time;
     }
 
     function on_swaped_dynamites_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             delete_view_item_by_game_id(activation.other_element.uid);
-            activate_buster_animation(activation.element.uid);
-            for(const element of activation.damaged_elements)
-                damage_element_animation(element.uid);
+            activate_buster_animation(activation.element.uid, () => {
+                for(const element of activation.damaged_elements)
+                    damage_element_animation(element.uid);
+            });
         });
+
+        return squash_duration + damaged_element_time * 2;
     }
 
     function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
-        squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.element.uid);
-            for(const element of activation.damaged_elements)
-                damage_element_animation(element.uid);
-        });
+        damage_element_animation(activation.element.uid);
+        for(const element of activation.damaged_elements)
+            damage_element_animation(element.uid);
+
+        return damaged_element_time;
     }
 
-    function on_activated_element_animation(message: Messages[MessageId]) {
+    function on_element_activated_animation(message: Messages[MessageId]) {
         const activation = message as ItemInfo;
-        damage_element_animation(activation.uid);
+        return damage_element_animation(activation.uid);
     }
 
     function on_cell_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivatedCellMessage;
         delete_all_view_items_by_game_id(activation.previous_id);
         make_cell_view(activation.x, activation.y, activation.id, activation.uid);
+
+        return 0;
     }
 
-    function on_move_element_animation(message: Messages[MessageId]) {
-        const move = message as MoveElementMessage;
-        for(const pos of move.path) {
-            const to_world_pos = get_world_pos(pos.x, pos.y, 0);
-        
-            const item_from = get_first_view_item_by_game_id(move.element.uid);
-            if(item_from == undefined) return;
+    function on_move_phase_begin(message: Messages[MessageId]) {
+        flow.delay(combinate_duration_counter);
+        return 0;
+    }
 
-            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, move_elements_easing, move_elements_time);
+    function on_moved_elements_animation(message: Messages[MessageId]) {
+        const elements = message as MovedElementsMessage;
+
+        let delay = 0;
+        for(let i = 0; i < elements.length; i++) {
+            delay = i * 0.1;
+            
+            let animation = null;
+            let anim_pos: {x: number, y: number} = {} as {x: number, y: number};
+            
+            const element = elements[i];
+            for(let p = 0; p < element.points.length; p++) {
+                const point = element.points[p];
+                if(point.type != MoveType.Swaped) {
+                    if(point.type == MoveType.Requested)
+                        make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid);
+
+                    const item_from = get_first_view_item_by_game_id(element.data.uid);
+                    if(item_from != undefined) {
+                        const to_world_pos = get_world_pos(point.to_x, point.to_y);
+                        
+                        if(point.type == MoveType.Requested)
+                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * cell_size);
+                       
+                        if(animation == null) {
+                            anim_pos = {
+                                x: go.get(item_from._hash, 'position.x'),
+                                y: go.get(item_from._hash, 'position.y')
+                            };
+
+                            animation = animator.to(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
+                                .delay(delay)
+                                .ease('backinout')
+                                .onupdate(() => {
+                                    go.set(item_from._hash, 'position.x', anim_pos.x);
+                                    go.set(item_from._hash, 'position.y', anim_pos.y);
+                                });
+                        } else {
+                            animation = animation.after(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
+                                .ease('backinout')
+                                .onupdate(() => {
+                                    go.set(item_from._hash, 'position.x', anim_pos.x);
+                                    go.set(item_from._hash, 'position.y', anim_pos.y);
+                                });
+                        }
+
+                        print(point.to_x, point.to_y);
+                    }
+                }
+            }
         }
+
+        return move_elements_time + delay;
     }
 
-    function on_request_element_animation(message: Messages[MessageId]) {
-        const request_element = message as ElementMessage;
-        make_element_view(request_element.x, request_element.y, request_element.type, request_element.uid);
-        
-        const item_from = get_first_view_item_by_game_id(request_element.uid);
-        if(item_from == undefined) return;
-
-        const world_pos = get_world_pos(request_element.x, request_element.y);
-        gm.set_position_xy(item_from, world_pos.x, world_pos.y + field_height * cell_size);
-        
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, world_pos, move_elements_easing, move_elements_time);
+    function on_move_phase_end(message: Messages[MessageId]) {
+        flow.delay(move_duration_counter);
+        move_duration_counter = 0;
+        combinate_duration_counter = 0;
+        return 0;
     }
 
     function on_revert_step_animation(current_state: GameState, previous_state: GameState) {
@@ -531,14 +619,16 @@ export function View() {
     function remove_random_element_animation(element: ItemInfo, target_element: ItemInfo, view_index?: number, on_complited?: () => void) {
         const target_world_pos = get_world_pos(target_element.x, target_element.y);
         const item = view_index != undefined ? get_view_item_by_game_id_and_index(element.uid, view_index) : get_first_view_item_by_game_id(element.uid);
-        if(item == undefined) return;
+        if(item == undefined) return 0;
         
-        go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, 1, 0.1, () => {
+        go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, helicopter_fly_duration, 0, () => {
             damage_element_animation(target_element.uid);
             damage_element_animation(element.uid, () => {
                 if(on_complited != undefined) on_complited();
             });
         });
+
+        return helicopter_fly_duration + damaged_element_time;
     }
     
     function damage_element_animation(element_id: number, on_complite?: () => void) {
@@ -550,6 +640,8 @@ export function View() {
                     if(on_complite != undefined) on_complite();
                 }); 
         }
+
+        return damaged_element_time;
     }
 
     function activate_buster_animation(element_id: number, on_complite?: () => void) {
@@ -561,31 +653,21 @@ export function View() {
                     if(on_complite != undefined) on_complite();
                 }); 
         }
-    }
 
-    function swap_elements_animation(element_from: ItemInfo, element_to: ItemInfo) {
-        const from_world_pos = get_world_pos(element_from.x, element_from.y);
-        const to_world_pos = get_world_pos(element_to.x, element_to.y);
-
-        const item_from = get_first_view_item_by_game_id(element_from.uid);
-        if(item_from == undefined) return;
-        
-        const item_to = get_first_view_item_by_game_id(element_to.uid);
-        if(item_to == undefined) return;
-
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+        return damaged_element_time;
     }
     
     function squash_element_animation(element: ItemInfo, target_element: ItemInfo, on_complite?: () => void) {
         const to_world_pos = get_world_pos(target_element.x, target_element.y);
         
         const item = get_first_view_item_by_game_id(element.uid);
-        if(item == undefined) return;
+        if(item == undefined) return 0;
         
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
             if(on_complite != undefined) on_complite();
         });
+
+        return swap_element_time;
     }
 
     //#endregion ANIMATIONS

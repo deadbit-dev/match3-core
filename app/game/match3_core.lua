@@ -2,6 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
@@ -74,7 +75,17 @@ ____exports.CellType[____exports.CellType.Disabled] = "Disabled"
 ____exports.CellType.Wall = 6
 ____exports.CellType[____exports.CellType.Wall] = "Wall"
 ____exports.NotActiveCell = -1
+____exports.OutsideField = -1
 ____exports.NullElement = -1
+____exports.MoveType = MoveType or ({})
+____exports.MoveType.Swaped = 0
+____exports.MoveType[____exports.MoveType.Swaped] = "Swaped"
+____exports.MoveType.Falled = 1
+____exports.MoveType[____exports.MoveType.Falled] = "Falled"
+____exports.MoveType.Requested = 2
+____exports.MoveType[____exports.MoveType.Requested] = "Requested"
+____exports.MoveType.Filled = 3
+____exports.MoveType[____exports.MoveType.Filled] = "Filled"
 ____exports.ProcessMode = ProcessMode or ({})
 ____exports.ProcessMode.Combinate = 0
 ____exports.ProcessMode[____exports.ProcessMode.Combinate] = "Combinate"
@@ -84,7 +95,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     if complex_process_move == nil then
         complex_process_move = true
     end
-    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, save_state, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
     end
@@ -95,14 +106,14 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             return is_combined_elements_base(e1, e2)
         end
     end
-    function try_damage_element(damaged_info)
+    function try_damage_element(item)
         if __TS__ArrayFind(
             damaged_elements,
-            function(____, element) return element == damaged_info.element.uid end
+            function(____, element) return element == item.uid end
         ) == nil then
-            damaged_elements[#damaged_elements + 1] = damaged_info.element.uid
+            damaged_elements[#damaged_elements + 1] = item.uid
             if cb_on_damaged_element ~= nil then
-                cb_on_damaged_element(damaged_info)
+                cb_on_damaged_element(item)
             end
             return true
         end
@@ -200,12 +211,42 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return true
     end
+    function save_state()
+        local st = {cells = {}, element_types = state.element_types, elements = {}}
+        do
+            local y = 0
+            while y < size_y do
+                st.cells[y + 1] = {}
+                st.elements[y + 1] = {}
+                do
+                    local x = 0
+                    while x < size_x do
+                        st.cells[y + 1][x + 1] = state.cells[y + 1][x + 1]
+                        st.elements[y + 1][x + 1] = state.elements[y + 1][x + 1]
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        local copy_state = json.decode(json.encode(st))
+        for ____, ____value in ipairs(__TS__ObjectEntries(copy_state.element_types)) do
+            local key = ____value[1]
+            local value = ____value[2]
+            local id = tonumber(key)
+            if id ~= nil then
+                copy_state.element_types[id] = value
+            end
+        end
+        return copy_state
+    end
     state = {cells = {}, element_types = {}, elements = {}}
-    local last_moved_elements = {}
+    local moved_elements = {}
     damaged_elements = {}
     local cb_is_can_move
     local cb_on_combinated
     local cb_on_move_element
+    local cb_on_moved_elements
     local cb_on_request_element
     local function init()
         do
@@ -382,6 +423,14 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local function set_callback_on_move_element(fnc)
         cb_on_move_element = fnc
     end
+    local function on_moved_elements(elements, state)
+        if cb_on_moved_elements ~= nil then
+            return cb_on_moved_elements(elements, state)
+        end
+    end
+    local function set_callback_on_moved_elements(fnc)
+        cb_on_moved_elements = fnc
+    end
     local function on_combined_base(combined_element, combination)
         for ____, item in ipairs(combination.elements) do
             local cell = get_cell(item.x, item.y)
@@ -389,16 +438,17 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             if cell ~= ____exports.NotActiveCell and element ~= ____exports.NullElement and element.uid == item.uid then
                 on_cell_activation({x = item.x, y = item.y, uid = cell.uid})
                 on_near_activation(get_neighbor_cells(item.x, item.y))
-                try_damage_element({x = item.x, y = item.y, element = element})
-                __TS__ArraySplice(
-                    damaged_elements,
-                    __TS__ArrayFindIndex(
+                if try_damage_element(item) then
+                    set_element(item.x, item.y, ____exports.NullElement)
+                    __TS__ArraySplice(
                         damaged_elements,
-                        function(____, elem) return elem == element.uid end
-                    ),
-                    1
-                )
-                set_element(item.x, item.y, ____exports.NullElement)
+                        __TS__ArrayFindIndex(
+                            damaged_elements,
+                            function(____, elem) return elem == element.uid end
+                        ),
+                        1
+                    )
+                end
             end
         end
     end
@@ -521,7 +571,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if element == ____exports.NullElement then
             return
         end
-        if is_damaging and try_damage_element({x = x, y = y, element = element}) then
+        if is_damaging and try_damage_element({x = x, y = y, uid = element.uid}) then
             __TS__ArraySplice(
                 damaged_elements,
                 __TS__ArrayFindIndex(
@@ -545,10 +595,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if x < 0 or x >= size_x or y < 0 or y >= size_y then
             return false
         end
-        local element = get_element(x, y)
-        if element == ____exports.NullElement then
-            return false
-        end
         return true
     end
     local function try_move(from_x, from_y, to_x, to_y)
@@ -557,11 +603,29 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             swap_elements(from_x, from_y, to_x, to_y)
             local element_from = get_element(from_x, from_y)
             if element_from ~= ____exports.NullElement then
-                last_moved_elements[#last_moved_elements + 1] = {x = from_x, y = from_y, uid = element_from.uid}
+                local index = __TS__ArrayFindIndex(
+                    moved_elements,
+                    function(____, e) return e.data.uid == element_from.uid end
+                )
+                if index == -1 then
+                    moved_elements[#moved_elements + 1] = {points = {{to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}}, data = element_from}
+                else
+                    local ____moved_elements_index_points_1 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_1[#____moved_elements_index_points_1 + 1] = {to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}
+                end
             end
             local element_to = get_element(to_x, to_y)
             if element_to ~= ____exports.NullElement then
-                last_moved_elements[#last_moved_elements + 1] = {x = to_x, y = to_y, uid = element_to.uid}
+                local index = __TS__ArrayFindIndex(
+                    moved_elements,
+                    function(____, e) return e.data.uid == element_to.uid end
+                )
+                if index == -1 then
+                    moved_elements[#moved_elements + 1] = {points = {{to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}}, data = element_to}
+                else
+                    local ____moved_elements_index_points_2 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_2[#____moved_elements_index_points_2 + 1] = {to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}
+                end
             end
         end
         return is_can
@@ -586,8 +650,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         for ____, combination in ipairs(get_all_combinations()) do
             local found = false
             for ____, element in ipairs(combination.elements) do
-                for ____, last_moved_element in ipairs(last_moved_elements) do
-                    if last_moved_element.uid == element.uid then
+                for ____, last_moved_element in ipairs(moved_elements) do
+                    if last_moved_element.data.uid == element.uid then
                         on_combinated(element, combination)
                         found = true
                         break
@@ -601,13 +665,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 is_procesed = true
             end
         end
-        __TS__ArraySplice(last_moved_elements, 0, #last_moved_elements)
+        __TS__ArraySplice(moved_elements, 0, #moved_elements)
         return is_procesed
     end
     local function request_element(x, y)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
-            last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
+            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Requested}}, data = element}
         end
     end
     local function try_move_element_from_up(x, y)
@@ -630,7 +694,16 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                             y,
                             element
                         )
-                        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
+                        local index = __TS__ArrayFindIndex(
+                            moved_elements,
+                            function(____, e) return e.data.uid == element.uid end
+                        )
+                        if index == -1 then
+                            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Falled}}, data = element}
+                        else
+                            local ____moved_elements_index_points_3 = moved_elements[index + 1].points
+                            ____moved_elements_index_points_3[#____moved_elements_index_points_3 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Falled}
+                        end
                         return true
                     end
                 end
@@ -670,7 +743,16 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             y,
             element
         )
-        last_moved_elements[#last_moved_elements + 1] = {x = x, y = y, uid = element.uid}
+        local index = __TS__ArrayFindIndex(
+            moved_elements,
+            function(____, e) return e.data.uid == neighbor_element.uid end
+        )
+        if index == -1 then
+            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
+        else
+            local ____moved_elements_index_points_4 = moved_elements[index + 1].points
+            ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
+        end
         return true
     end
     local function process_falling()
@@ -724,49 +806,26 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 process_falling()
             end
         end
+        if is_procesed then
+            on_moved_elements(
+                __TS__ObjectAssign({}, moved_elements),
+                save_state()
+            )
+        end
         return is_procesed
     end
     local function process_state(mode)
         repeat
-            local ____switch168 = mode
-            local ____cond168 = ____switch168 == ____exports.ProcessMode.Combinate
-            if ____cond168 then
+            local ____switch184 = mode
+            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
+            if ____cond184 then
                 return process_combinate()
             end
-            ____cond168 = ____cond168 or ____switch168 == ____exports.ProcessMode.MoveElements
-            if ____cond168 then
+            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
+            if ____cond184 then
                 return process_move()
             end
         until true
-    end
-    local function save_state()
-        local st = {cells = {}, element_types = state.element_types, elements = {}}
-        do
-            local y = 0
-            while y < size_y do
-                st.cells[y + 1] = {}
-                st.elements[y + 1] = {}
-                do
-                    local x = 0
-                    while x < size_x do
-                        st.cells[y + 1][x + 1] = state.cells[y + 1][x + 1]
-                        st.elements[y + 1][x + 1] = state.elements[y + 1][x + 1]
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
-        local copy_state = json.decode(json.encode(st))
-        for ____, ____value in ipairs(__TS__ObjectEntries(copy_state.element_types)) do
-            local key = ____value[1]
-            local value = ____value[2]
-            local id = tonumber(key)
-            if id ~= nil then
-                copy_state.element_types[id] = value
-            end
-        end
-        return copy_state
     end
     local function load_state(st)
         state.element_types = st.element_types
@@ -814,6 +873,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         get_all_elements_by_type = get_all_elements_by_type,
         try_damage_element = try_damage_element,
         set_callback_on_move_element = set_callback_on_move_element,
+        set_callback_on_moved_elements = set_callback_on_moved_elements,
         set_callback_is_can_move = set_callback_is_can_move,
         is_can_move_base = is_can_move_base,
         set_callback_is_combined_elements = set_callback_is_combined_elements,

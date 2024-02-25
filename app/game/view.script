@@ -1,13 +1,18 @@
 local ____exports = {}
 local flow = require("ludobits.m.flow")
+local flux = require("utils.flux")
 local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.init(self)
+    self.animator = flux.group()
     msg.post(".", "acquire_input_focus")
     flow.start(
-        function() return View() end,
+        function() return View(self.animator) end,
         {}
     )
+end
+function ____exports.update(self, dt)
+    self.animator:update(dt)
 end
 function ____exports.on_message(self, message_id, message, sender)
     flow.on_message(message_id, message, sender)
@@ -23,6 +28,7 @@ function ____exports.final(self)
     EventBus.off_all_current_script()
 end
 init = ____exports.init
+update = ____exports.update
 on_message = ____exports.on_message
 on_input = ____exports.on_input
 final = ____exports.final
