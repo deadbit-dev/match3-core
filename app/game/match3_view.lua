@@ -575,14 +575,28 @@ function ____exports.View(animator)
     end
     function on_moved_elements_animation(message)
         local elements = message
+        local delayed_row_in_column = {}
         local delay = 0
+        local max_delay = 0
+        local max_move_duration = 0
         do
             local i = 0
             while i < #elements do
-                delay = i * move_elements_time
+                local element = elements[i + 1]
+                if delayed_row_in_column[element.points[1].to_x + 1] == nil then
+                    delayed_row_in_column[element.points[1].to_x + 1] = 0
+                end
+                local ____delayed_row_in_column_8, ____temp_9 = delayed_row_in_column, element.points[1].to_x + 1
+                local ____delayed_row_in_column_index_10 = ____delayed_row_in_column_8[____temp_9]
+                ____delayed_row_in_column_8[____temp_9] = ____delayed_row_in_column_index_10 + 1
+                local delay_factor = ____delayed_row_in_column_index_10
+                delay = delay_factor * 0.3
+                if delay > max_delay then
+                    max_delay = delay
+                end
                 local animation = nil
                 local anim_pos = {}
-                local element = elements[i + 1]
+                local move_duration = 0
                 do
                     local p = 0
                     while p < #element.points do
@@ -602,7 +616,7 @@ function ____exports.View(animator)
                                         x = go.get(item_from._hash, "position.x"),
                                         y = go.get(item_from._hash, "position.y")
                                     }
-                                    animation = animator:to(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):delay(delay):ease("backinout"):onupdate(function()
+                                    animation = animator:to(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):delay(delay):onupdate(function()
                                         go.set(item_from._hash, "position.x", anim_pos.x)
                                         go.set(item_from._hash, "position.y", anim_pos.y)
                                     end)
@@ -612,15 +626,19 @@ function ____exports.View(animator)
                                         go.set(item_from._hash, "position.y", anim_pos.y)
                                     end)
                                 end
+                                move_duration = move_duration + move_elements_time
                             end
                         end
                         p = p + 1
                     end
                 end
+                if move_duration > max_move_duration then
+                    max_move_duration = move_duration
+                end
                 i = i + 1
             end
         end
-        return move_elements_time + delay
+        return max_move_duration + max_delay
     end
     function on_move_phase_end(message)
         flow.delay(move_duration_counter)
@@ -642,14 +660,14 @@ function ____exports.View(animator)
                             local previous_cell = previous_state.cells[y + 1][x + 1]
                             if previous_cell ~= NotActiveCell then
                                 try_make_under_cell(x, y, previous_cell)
-                                local ____make_cell_view_13 = make_cell_view
-                                local ____array_12 = __TS__SparseArrayNew(x, y, previous_cell.id, previous_cell.uid)
-                                local ____opt_8 = previous_cell and previous_cell.data
-                                if ____opt_8 ~= nil then
-                                    ____opt_8 = ____opt_8.z_index
+                                local ____make_cell_view_16 = make_cell_view
+                                local ____array_15 = __TS__SparseArrayNew(x, y, previous_cell.id, previous_cell.uid)
+                                local ____opt_11 = previous_cell and previous_cell.data
+                                if ____opt_11 ~= nil then
+                                    ____opt_11 = ____opt_11.z_index
                                 end
-                                __TS__SparseArrayPush(____array_12, ____opt_8)
-                                ____make_cell_view_13(__TS__SparseArraySpread(____array_12))
+                                __TS__SparseArrayPush(____array_15, ____opt_11)
+                                ____make_cell_view_16(__TS__SparseArraySpread(____array_15))
                             end
                         end
                         local current_element = current_state.elements[y + 1][x + 1]
@@ -675,13 +693,13 @@ function ____exports.View(animator)
     end
     function remove_random_element_animation(element, target_element, view_index, on_complited)
         local target_world_pos = get_world_pos(target_element.x, target_element.y)
-        local ____temp_14
+        local ____temp_17
         if view_index ~= nil then
-            ____temp_14 = get_view_item_by_game_id_and_index(element.uid, view_index)
+            ____temp_17 = get_view_item_by_game_id_and_index(element.uid, view_index)
         else
-            ____temp_14 = get_first_view_item_by_game_id(element.uid)
+            ____temp_17 = get_first_view_item_by_game_id(element.uid)
         end
-        local item = ____temp_14
+        local item = ____temp_17
         if item == nil then
             return 0
         end
@@ -844,14 +862,14 @@ function ____exports.View(animator)
         if cell.data ~= nil and cell.data.is_render_under_cell and cell.data.under_cells ~= nil then
             local cell_id = cell.data.under_cells[#cell.data.under_cells]
             if cell_id ~= nil then
-                local ____make_cell_view_18 = make_cell_view
-                local ____array_17 = __TS__SparseArrayNew(x, y, cell_id, cell.uid)
-                local ____opt_15 = cell.data
-                if ____opt_15 ~= nil then
-                    ____opt_15 = ____opt_15.z_index
+                local ____make_cell_view_21 = make_cell_view
+                local ____array_20 = __TS__SparseArrayNew(x, y, cell_id, cell.uid)
+                local ____opt_18 = cell.data
+                if ____opt_18 ~= nil then
+                    ____opt_18 = ____opt_18.z_index
                 end
-                __TS__SparseArrayPush(____array_17, ____opt_15 - 1)
-                ____make_cell_view_18(__TS__SparseArraySpread(____array_17))
+                __TS__SparseArrayPush(____array_20, ____opt_18 - 1)
+                ____make_cell_view_21(__TS__SparseArraySpread(____array_20))
             end
         end
     end

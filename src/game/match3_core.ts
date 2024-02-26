@@ -89,8 +89,6 @@ export enum CellType {
 // вместо null для неактивной клетки
 export const NotActiveCell = -1;
 
-export const OutsideField = -1;
-
 // описание свойств клетки
 export interface Cell {
     id: number;
@@ -712,7 +710,11 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
     function request_element(x: number, y: number) {
         const element = on_request_element(x, y);
-        if(element != NullElement) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Requested}], data: element});
+        if(element != NullElement) {
+            let j = 0;
+            const index = moved_elements.push({points: [{to_x: x, to_y: j, type: MoveType.Requested}], data: element}) - 1;
+            while(j++ < y) moved_elements[index].points.push({to_x: x, to_y: j, type: MoveType.Falled});
+        }
     }
 
     function try_move_element_from_up(x: number, y: number) {
@@ -728,9 +730,11 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                     on_move_element(x, j, x, y, element);
                     
-                    const index = moved_elements.findIndex((e) => e.data.uid == element.uid); 
-                    if(index == -1) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Falled}], data: element});
-                    else moved_elements[index].points.push({to_x: x, to_y: y, type: MoveType.Falled});
+                    while(j++ < y) {
+                        const index = moved_elements.findIndex((e) => e.data.uid == element.uid); 
+                        if(index == -1) moved_elements.push({points: [{to_x: x, to_y: j, type: MoveType.Falled}], data: element});
+                        else moved_elements[index].points.push({to_x: x, to_y: j, type: MoveType.Falled});
+                    }
                     
                     return true;
                 }

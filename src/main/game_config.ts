@@ -65,7 +65,7 @@ export const _GAME_CONFIG = {
     damaged_element_scale: 0.5,
     
     move_elements_easing: go.EASING_INOUTBACK,
-    move_elements_time: 0.5,
+    move_elements_time: 0.3,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,

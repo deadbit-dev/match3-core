@@ -75,7 +75,6 @@ ____exports.CellType[____exports.CellType.Disabled] = "Disabled"
 ____exports.CellType.Wall = 6
 ____exports.CellType[____exports.CellType.Wall] = "Wall"
 ____exports.NotActiveCell = -1
-____exports.OutsideField = -1
 ____exports.NullElement = -1
 ____exports.MoveType = MoveType or ({})
 ____exports.MoveType.Swaped = 0
@@ -671,7 +670,19 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local function request_element(x, y)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
-            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Requested}}, data = element}
+            local j = 0
+            local ____temp_3 = #moved_elements + 1
+            moved_elements[____temp_3] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
+            local index = ____temp_3 - 1
+            while true do
+                local ____j_5 = j
+                j = ____j_5 + 1
+                if not (____j_5 < y) then
+                    break
+                end
+                local ____moved_elements_index_points_4 = moved_elements[index + 1].points
+                ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+            end
         end
     end
     local function try_move_element_from_up(x, y)
@@ -694,15 +705,22 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                             y,
                             element
                         )
-                        local index = __TS__ArrayFindIndex(
-                            moved_elements,
-                            function(____, e) return e.data.uid == element.uid end
-                        )
-                        if index == -1 then
-                            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Falled}}, data = element}
-                        else
-                            local ____moved_elements_index_points_3 = moved_elements[index + 1].points
-                            ____moved_elements_index_points_3[#____moved_elements_index_points_3 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Falled}
+                        while true do
+                            local ____j_7 = j
+                            j = ____j_7 + 1
+                            if not (____j_7 < y) then
+                                break
+                            end
+                            local index = __TS__ArrayFindIndex(
+                                moved_elements,
+                                function(____, e) return e.data.uid == element.uid end
+                            )
+                            if index == -1 then
+                                moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Falled}}, data = element}
+                            else
+                                local ____moved_elements_index_points_6 = moved_elements[index + 1].points
+                                ____moved_elements_index_points_6[#____moved_elements_index_points_6 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+                            end
                         end
                         return true
                     end
@@ -750,8 +768,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if index == -1 then
             moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
         else
-            local ____moved_elements_index_points_4 = moved_elements[index + 1].points
-            ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
+            local ____moved_elements_index_points_8 = moved_elements[index + 1].points
+            ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
         end
         return true
     end
@@ -816,13 +834,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch184 = mode
-            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
-            if ____cond184 then
+            local ____switch186 = mode
+            local ____cond186 = ____switch186 == ____exports.ProcessMode.Combinate
+            if ____cond186 then
                 return process_combinate()
             end
-            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
-            if ____cond184 then
+            ____cond186 = ____cond186 or ____switch186 == ____exports.ProcessMode.MoveElements
+            if ____cond186 then
                 return process_move()
             end
         until true
