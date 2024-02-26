@@ -715,7 +715,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         if(element != NullElement) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Requested}], data: element});
     }
 
-    function try_move_element_from_up(x: number, y:number) {
+    function try_move_element_from_up(x: number, y: number) {
         for(let j = y; j >= 0; j--) {
             const cell = get_cell(x, j);
             if(cell != NotActiveCell) {

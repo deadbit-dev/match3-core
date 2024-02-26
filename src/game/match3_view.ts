@@ -349,16 +349,24 @@ export function View(animator: FluxGroup) {
         for(let i = 0; i < combo.combination.elements.length; i++) {
             const element = combo.combination.elements[i];
             const item = get_first_view_item_by_game_id(element.uid);
-            if(item != undefined) go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
-                squash_element_easing, squash_element_time, 0, () => delete_view_item_by_game_id(element.uid));
+            if(item != undefined) {
+                if(i == combo.combination.elements.length - 1) {
+                    go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
+                        squash_element_easing, squash_element_time, 0, () => {
+                            delete_view_item_by_game_id(element.uid);
+                            make_element_view(
+                                combo.maked_element.x,
+                                combo.maked_element.y,
+                                combo.maked_element.type,
+                                combo.maked_element.uid
+                            );
+                        });
+                } else {
+                    go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
+                        squash_element_easing, squash_element_time, 0, () => delete_view_item_by_game_id(element.uid));
+                }
+            }
         }
-        
-        make_element_view(
-            combo.maked_element.x,
-            combo.maked_element.y,
-            combo.maked_element.type,
-            combo.maked_element.uid
-        );
 
         return squash_element_time;
     }
@@ -536,7 +544,7 @@ export function View(animator: FluxGroup) {
 
         let delay = 0;
         for(let i = 0; i < elements.length; i++) {
-            delay = i * 0.1;
+            delay = i * move_elements_time; //- move_elements_time * (field_height - 1);
             
             let animation = null;
             let anim_pos: {x: number, y: number} = {} as {x: number, y: number};
@@ -553,7 +561,7 @@ export function View(animator: FluxGroup) {
                         const to_world_pos = get_world_pos(point.to_x, point.to_y);
                         
                         if(point.type == MoveType.Requested)
-                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * cell_size);
+                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size);
                        
                         if(animation == null) {
                             anim_pos = {
@@ -570,14 +578,11 @@ export function View(animator: FluxGroup) {
                                 });
                         } else {
                             animation = animation.after(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
-                                .ease('backinout')
                                 .onupdate(() => {
                                     go.set(item_from._hash, 'position.x', anim_pos.x);
                                     go.set(item_from._hash, 'position.y', anim_pos.y);
                                 });
                         }
-
-                        print(point.to_x, point.to_y);
                     }
                 }
             }
@@ -590,6 +595,7 @@ export function View(animator: FluxGroup) {
         flow.delay(move_duration_counter);
         move_duration_counter = 0;
         combinate_duration_counter = 0;
+        print("MOVE_END");
         return 0;
     }
 

@@ -367,21 +367,36 @@ function ____exports.View(animator)
                 local element = combo.combination.elements[i + 1]
                 local item = get_first_view_item_by_game_id(element.uid)
                 if item ~= nil then
-                    go.animate(
-                        item._hash,
-                        "position",
-                        go.PLAYBACK_ONCE_FORWARD,
-                        target_element_world_pos,
-                        squash_element_easing,
-                        squash_element_time,
-                        0,
-                        function() return delete_view_item_by_game_id(element.uid) end
-                    )
+                    if i == #combo.combination.elements - 1 then
+                        go.animate(
+                            item._hash,
+                            "position",
+                            go.PLAYBACK_ONCE_FORWARD,
+                            target_element_world_pos,
+                            squash_element_easing,
+                            squash_element_time,
+                            0,
+                            function()
+                                delete_view_item_by_game_id(element.uid)
+                                make_element_view(combo.maked_element.x, combo.maked_element.y, combo.maked_element.type, combo.maked_element.uid)
+                            end
+                        )
+                    else
+                        go.animate(
+                            item._hash,
+                            "position",
+                            go.PLAYBACK_ONCE_FORWARD,
+                            target_element_world_pos,
+                            squash_element_easing,
+                            squash_element_time,
+                            0,
+                            function() return delete_view_item_by_game_id(element.uid) end
+                        )
+                    end
                 end
                 i = i + 1
             end
         end
-        make_element_view(combo.maked_element.x, combo.maked_element.y, combo.maked_element.type, combo.maked_element.uid)
         return squash_element_time
     end
     function on_diskisphere_activated_animation(message)
@@ -564,7 +579,7 @@ function ____exports.View(animator)
         do
             local i = 0
             while i < #elements do
-                delay = i * 0.1
+                delay = i * move_elements_time
                 local animation = nil
                 local anim_pos = {}
                 local element = elements[i + 1]
@@ -580,7 +595,7 @@ function ____exports.View(animator)
                             if item_from ~= nil then
                                 local to_world_pos = get_world_pos(point.to_x, point.to_y)
                                 if point.type == MoveType.Requested then
-                                    gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * cell_size)
+                                    gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size)
                                 end
                                 if animation == nil then
                                     anim_pos = {
@@ -592,12 +607,11 @@ function ____exports.View(animator)
                                         go.set(item_from._hash, "position.y", anim_pos.y)
                                     end)
                                 else
-                                    animation = animation:after(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):ease("backinout"):onupdate(function()
+                                    animation = animation:after(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):onupdate(function()
                                         go.set(item_from._hash, "position.x", anim_pos.x)
                                         go.set(item_from._hash, "position.y", anim_pos.y)
                                     end)
                                 end
-                                print(point.to_x, point.to_y)
                             end
                         end
                         p = p + 1
@@ -612,6 +626,7 @@ function ____exports.View(animator)
         flow.delay(move_duration_counter)
         move_duration_counter = 0
         combinate_duration_counter = 0
+        print("MOVE_END")
         return 0
     end
     function on_revert_step_animation(current_state, previous_state)
