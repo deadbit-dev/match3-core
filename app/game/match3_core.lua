@@ -670,7 +670,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local function request_element(x, y)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
-            local j = 0
+            local j = GAME_CONFIG.movement_to_point and y - 1 or 0
             local ____temp_3 = #moved_elements + 1
             moved_elements[____temp_3] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
             local index = ____temp_3 - 1
@@ -705,6 +705,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                             y,
                             element
                         )
+                        j = GAME_CONFIG.movement_to_point and y - 1 or j
                         while true do
                             local ____j_7 = j
                             j = ____j_7 + 1

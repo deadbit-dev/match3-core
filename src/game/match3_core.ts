@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ElementId } from "../main/game_config";
-import { Direction, rotate_matrix_90 } from "../utils/math_utils";
+import { rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
@@ -711,7 +710,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     function request_element(x: number, y: number) {
         const element = on_request_element(x, y);
         if(element != NullElement) {
-            let j = 0;
+            let j = GAME_CONFIG.movement_to_point ? y - 1 : 0;
             const index = moved_elements.push({points: [{to_x: x, to_y: j, type: MoveType.Requested}], data: element}) - 1;
             while(j++ < y) moved_elements[index].points.push({to_x: x, to_y: j, type: MoveType.Falled});
         }
@@ -730,6 +729,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                     on_move_element(x, j, x, y, element);
                     
+                    j = GAME_CONFIG.movement_to_point ? y - 1 : j;
+
                     while(j++ < y) {
                         const index = moved_elements.findIndex((e) => e.data.uid == element.uid); 
                         if(index == -1) moved_elements.push({points: [{to_x: x, to_y: j, type: MoveType.Falled}], data: element});

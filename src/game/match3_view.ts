@@ -48,8 +48,8 @@ export function View(animator: FluxGroup) {
     const damaged_element_delay = GAME_CONFIG.damaged_element_delay;
     const damaged_element_time = GAME_CONFIG.damaged_element_time;
     const damaged_element_scale = GAME_CONFIG.damaged_element_scale;
-    const move_elements_easing = GAME_CONFIG.move_elements_easing;
-    const move_elements_time = GAME_CONFIG.move_elements_time;
+    const movement_to_point = GAME_CONFIG.movement_to_point;
+    const duration_of_movement_between_cells = GAME_CONFIG.duration_of_movement_bettween_cells;
     const spawn_element_easing = GAME_CONFIG.spawn_element_easing;
     const spawn_element_time = GAME_CONFIG.spawn_element_time;
     
@@ -546,37 +546,54 @@ export function View(animator: FluxGroup) {
             const element = elements[i];
             
             let delay = 0;
-            let move_duration = 0;
+            let total_move_duration = 0;
             let animation = null;
             let anim_pos: {x: number, y: number} = {} as {x: number, y: number};
             
             for(let p = 0; p < element.points.length; p++) {
                 const point = element.points[p];
                 if(point.type != MoveType.Swaped) {
-                    if(point.type == MoveType.Requested) {
+                    if(point.type == MoveType.Requested)
                         make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid);
-                        
-                        if(delayed_row_in_column[element.points[0].to_x] == null) delayed_row_in_column[element.points[0].to_x] = 0;
-                        const delay_factor = delayed_row_in_column[element.points[0].to_x]++;
-                        
-                        delay = delay_factor * move_elements_time;
-                        if(delay > max_delay) max_delay = delay;
-                    }
 
                     const item_from = get_first_view_item_by_game_id(element.data.uid);
                     if(item_from != undefined) {
                         const to_world_pos = get_world_pos(point.to_x, point.to_y);
                         
-                        if(point.type == MoveType.Requested)
-                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size * i);
+                        if(point.type == MoveType.Requested) {
+                            const j = (delayed_row_in_column[element.points[0].to_x] != null) ? delayed_row_in_column[element.points[0].to_x] : 0;
+                            gm.set_position_xy(item_from, to_world_pos.x, 0 + cell_size * j);
+                        }
                        
+                        let move_duration = 0;
+
                         if(animation == null) {
                             anim_pos = {
                                 x: go.get(item_from._hash, 'position.x'),
                                 y: go.get(item_from._hash, 'position.y')
                             };
+                            
+                            if(delayed_row_in_column[element.points[0].to_x] == null) delayed_row_in_column[element.points[0].to_x] = 0;
+                            const delay_factor = delayed_row_in_column[element.points[0].to_x]++;
+                        
+                            delay = delay_factor * duration_of_movement_between_cells;
 
-                            animation = animator.to(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
+                            if(delay > max_delay) max_delay = delay;
+
+                            if(movement_to_point) {
+                                const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
+                                const delta = diagonal / cell_size;
+                                const distance_beetwen_cells = (point.type == MoveType.Filled) ? diagonal : cell_size;
+                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
+                                move_duration = time * (math.abs(to_world_pos.y - anim_pos.y) / distance_beetwen_cells);
+                            } else {
+                                const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
+                                const delta = diagonal / cell_size;
+                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
+                                move_duration = time;
+                            }
+
+                            animation = animator.to(anim_pos, move_duration, {x: to_world_pos.x, y: to_world_pos.y})
                                 .delay(delay)
                                 .ease('linear')
                                 .onupdate(() => {
@@ -584,19 +601,35 @@ export function View(animator: FluxGroup) {
                                     go.set(item_from._hash, 'position.y', anim_pos.y);
                                 });
                         } else {
-                            animation = animation.after(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
+                            if(movement_to_point) {
+                                const previous_point = element.points[p - 1];
+                                const cuurent_world_pos = get_world_pos(previous_point.to_x, previous_point.to_y);
+                                
+                                const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
+                                const delta = diagonal / cell_size;
+                                const distance_beetwen_cells = (point.type == MoveType.Filled) ? diagonal : cell_size;
+                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
+                                move_duration = time * (math.abs(to_world_pos.y - cuurent_world_pos.y) / distance_beetwen_cells);
+                            } else {
+                                const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
+                                const delta = diagonal / cell_size;
+                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
+                                move_duration = time;
+                            }
+                            
+                            animation = animation.after(anim_pos, move_duration, {x: to_world_pos.x, y: to_world_pos.y})
                                 .onupdate(() => {
                                     go.set(item_from._hash, 'position.x', anim_pos.x);
                                     go.set(item_from._hash, 'position.y', anim_pos.y);
                                 });
                         }
 
-                        move_duration += move_elements_time;
+                        total_move_duration += move_duration;
                     }
                 }
             }
 
-            if(move_duration > max_move_duration) max_move_duration = move_duration;
+            if(total_move_duration > max_move_duration) max_move_duration = total_move_duration;
         }
 
         return max_move_duration + max_delay;
