@@ -92,9 +92,7 @@ export function View(animator: FluxGroup) {
         'SWAPED_DYNAMITES_ACTIVATED': on_swaped_dynamites_animation,
 
         // MOVE
-        'ON_MOVE_PHASE_BEGIN': on_move_phase_begin,
         'ON_MOVED_ELEMENTS': on_moved_elements_animation,
-        'ON_MOVE_PHASE_END': on_move_phase_end
     };
 
     //#endregion FIELDS
@@ -104,8 +102,8 @@ export function View(animator: FluxGroup) {
     const game_id_to_view_index: {[key in number]: number[]} = {};
 
     let selected_element: IGameItem | null = null;
-    let combinate_duration_counter = 0;
-    let move_duration_counter = 0;
+    let combinate_phase_duration = 0;
+    let move_phase_duration = 0;
     let is_processing = false;
 
     function init() {
@@ -145,15 +143,13 @@ export function View(animator: FluxGroup) {
         is_processing = true;
 
         for(const event of events) {
+            const is_move_phase = (event.key == 'ON_MOVED_ELEMENTS');
+            if(is_move_phase) on_move_phase_begin();
             const event_duration = event_to_animation[event.key](event.value);
-            if(event.key == 'ON_MOVED_ELEMENTS') {
-                move_duration_counter = event_duration;
-                print("MOVE: ", move_duration_counter);
-            }
-            else if(event_duration > combinate_duration_counter) {
-                combinate_duration_counter = event_duration;
-                print("COMB: ", combinate_duration_counter);
-            }
+            if(is_move_phase) {
+                move_phase_duration = event_duration;
+                on_move_phase_end();
+            } else if(event_duration > combinate_phase_duration) combinate_phase_duration = event_duration;
         }
 
         is_processing = false;
@@ -534,45 +530,45 @@ export function View(animator: FluxGroup) {
         return 0;
     }
 
-    function on_move_phase_begin(message: Messages[MessageId]) {
-        flow.delay(combinate_duration_counter);
-        return 0;
+    function on_move_phase_begin() {
+        flow.delay(combinate_phase_duration);
+        combinate_phase_duration = 0;
     }
 
     function on_moved_elements_animation(message: Messages[MessageId]) {
         const elements = message as MovedElementsMessage;
         const delayed_row_in_column: number[] = [];
 
-        let delay = 0;
         let max_delay = 0;
         let max_move_duration = 0;
         
         for(let i = 0; i < elements.length; i++) {
             const element = elements[i];
             
-            if(delayed_row_in_column[element.points[0].to_x] == null) delayed_row_in_column[element.points[0].to_x] = 0;
-
-            const delay_factor = delayed_row_in_column[element.points[0].to_x]++;
-            delay = delay_factor * 0.3;
-
-            if(delay > max_delay) max_delay = delay;
-
+            let delay = 0;
+            let move_duration = 0;
             let animation = null;
             let anim_pos: {x: number, y: number} = {} as {x: number, y: number};
-
-            let move_duration = 0;
+            
             for(let p = 0; p < element.points.length; p++) {
                 const point = element.points[p];
                 if(point.type != MoveType.Swaped) {
-                    if(point.type == MoveType.Requested)
+                    if(point.type == MoveType.Requested) {
                         make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid);
+                        
+                        if(delayed_row_in_column[element.points[0].to_x] == null) delayed_row_in_column[element.points[0].to_x] = 0;
+                        const delay_factor = delayed_row_in_column[element.points[0].to_x]++;
+                        
+                        delay = delay_factor * move_elements_time;
+                        if(delay > max_delay) max_delay = delay;
+                    }
 
                     const item_from = get_first_view_item_by_game_id(element.data.uid);
                     if(item_from != undefined) {
                         const to_world_pos = get_world_pos(point.to_x, point.to_y);
                         
                         if(point.type == MoveType.Requested)
-                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size);
+                            gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size * i);
                        
                         if(animation == null) {
                             anim_pos = {
@@ -582,6 +578,7 @@ export function View(animator: FluxGroup) {
 
                             animation = animator.to(anim_pos, move_elements_time, {x: to_world_pos.x, y: to_world_pos.y})
                                 .delay(delay)
+                                .ease('linear')
                                 .onupdate(() => {
                                     go.set(item_from._hash, 'position.x', anim_pos.x);
                                     go.set(item_from._hash, 'position.y', anim_pos.y);
@@ -605,12 +602,9 @@ export function View(animator: FluxGroup) {
         return max_move_duration + max_delay;
     }
 
-    function on_move_phase_end(message: Messages[MessageId]) {
-        flow.delay(move_duration_counter);
-        move_duration_counter = 0;
-        combinate_duration_counter = 0;
-        print("MOVE_END");
-        return 0;
+    function on_move_phase_end() {
+        flow.delay(move_phase_duration);
+        move_phase_duration = 0;
     }
 
     function on_revert_step_animation(current_state: GameState, previous_state: GameState) {

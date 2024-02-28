@@ -749,17 +749,10 @@ export function Game() {
     }
 
     function process_game_step(after_activation = false) {
-        if(after_activation) {
-            write_game_step_event('ON_MOVE_PHASE_BEGIN', {});
-            if(field.process_state(ProcessMode.MoveElements))
-                write_game_step_event('ON_MOVE_PHASE_END', {});
-        }
+        if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        while(field.process_state(ProcessMode.Combinate)){
-            write_game_step_event('ON_MOVE_PHASE_BEGIN', {});
-            if(field.process_state(ProcessMode.MoveElements))
-                write_game_step_event('ON_MOVE_PHASE_END', {});
-        }
+        while(field.process_state(ProcessMode.Combinate))
+            field.process_state(ProcessMode.MoveElements);
 
         previous_states.push(field.save_state());
 

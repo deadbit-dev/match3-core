@@ -65,7 +65,7 @@ export const _GAME_CONFIG = {
     damaged_element_scale: 0.5,
     
     move_elements_easing: go.EASING_INOUTBACK,
-    move_elements_time: 0.3,
+    move_elements_time: 0.15,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -450,10 +450,7 @@ export type _UserMessages = {
     ON_COMBO: ComboMessage,
     ON_CELL_ACTIVATED: ActivatedCellMessage,
     
-    ON_MOVE_PHASE_BEGIN: VoidMessage,
     ON_MOVED_ELEMENTS: MovedElementsMessage,
-    ON_MOVE_PHASE_END: VoidMessage,
-
     ON_GAME_STEP: GameStepEventBuffer,
     
     TRY_REVERT_STEP: VoidMessage,

@@ -18,7 +18,7 @@ local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, move_elements_time, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_duration_counter, move_duration_counter, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, move_elements_time, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -69,13 +69,16 @@ function ____exports.View(animator)
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
+            local is_move_phase = event.key == "ON_MOVED_ELEMENTS"
+            if is_move_phase then
+                on_move_phase_begin()
+            end
             local event_duration = event_to_animation[event.key](event.value)
-            if event.key == "ON_MOVED_ELEMENTS" then
-                move_duration_counter = event_duration
-                print("MOVE: ", move_duration_counter)
-            elseif event_duration > combinate_duration_counter then
-                combinate_duration_counter = event_duration
-                print("COMB: ", combinate_duration_counter)
+            if is_move_phase then
+                move_phase_duration = event_duration
+                on_move_phase_end()
+            elseif event_duration > combinate_phase_duration then
+                combinate_phase_duration = event_duration
             end
         end
         is_processing = false
@@ -85,19 +88,19 @@ function ____exports.View(animator)
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch25 = message_id
-                local ____cond25 = ____switch25 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond25 then
+                local ____switch26 = message_id
+                local ____cond26 = ____switch26 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond26 then
                     on_down(_message.item)
                     break
                 end
-                ____cond25 = ____cond25 or ____switch25 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond25 then
+                ____cond26 = ____cond26 or ____switch26 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond26 then
                     on_up(_message.item)
                     break
                 end
-                ____cond25 = ____cond25 or ____switch25 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond25 then
+                ____cond26 = ____cond26 or ____switch26 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond26 then
                     on_move(_message)
                     break
                 end
@@ -125,24 +128,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch31 = move_direction
-            local ____cond31 = ____switch31 == Direction.Up
-            if ____cond31 then
+            local ____switch32 = move_direction
+            local ____cond32 = ____switch32 == Direction.Up
+            if ____cond32 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond31 = ____cond31 or ____switch31 == Direction.Down
-            if ____cond31 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Down
+            if ____cond32 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond31 = ____cond31 or ____switch31 == Direction.Left
-            if ____cond31 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Left
+            if ____cond32 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond31 = ____cond31 or ____switch31 == Direction.Right
-            if ____cond31 then
+            ____cond32 = ____cond32 or ____switch32 == Direction.Right
+            if ____cond32 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -569,34 +572,23 @@ function ____exports.View(animator)
         make_cell_view(activation.x, activation.y, activation.id, activation.uid)
         return 0
     end
-    function on_move_phase_begin(message)
-        flow.delay(combinate_duration_counter)
-        return 0
+    function on_move_phase_begin()
+        flow.delay(combinate_phase_duration)
+        combinate_phase_duration = 0
     end
     function on_moved_elements_animation(message)
         local elements = message
         local delayed_row_in_column = {}
-        local delay = 0
         local max_delay = 0
         local max_move_duration = 0
         do
             local i = 0
             while i < #elements do
                 local element = elements[i + 1]
-                if delayed_row_in_column[element.points[1].to_x + 1] == nil then
-                    delayed_row_in_column[element.points[1].to_x + 1] = 0
-                end
-                local ____delayed_row_in_column_8, ____temp_9 = delayed_row_in_column, element.points[1].to_x + 1
-                local ____delayed_row_in_column_index_10 = ____delayed_row_in_column_8[____temp_9]
-                ____delayed_row_in_column_8[____temp_9] = ____delayed_row_in_column_index_10 + 1
-                local delay_factor = ____delayed_row_in_column_index_10
-                delay = delay_factor * 0.3
-                if delay > max_delay then
-                    max_delay = delay
-                end
+                local delay = 0
+                local move_duration = 0
                 local animation = nil
                 local anim_pos = {}
-                local move_duration = 0
                 do
                     local p = 0
                     while p < #element.points do
@@ -604,19 +596,30 @@ function ____exports.View(animator)
                         if point.type ~= MoveType.Swaped then
                             if point.type == MoveType.Requested then
                                 make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid)
+                                if delayed_row_in_column[element.points[1].to_x + 1] == nil then
+                                    delayed_row_in_column[element.points[1].to_x + 1] = 0
+                                end
+                                local ____delayed_row_in_column_8, ____temp_9 = delayed_row_in_column, element.points[1].to_x + 1
+                                local ____delayed_row_in_column_index_10 = ____delayed_row_in_column_8[____temp_9]
+                                ____delayed_row_in_column_8[____temp_9] = ____delayed_row_in_column_index_10 + 1
+                                local delay_factor = ____delayed_row_in_column_index_10
+                                delay = delay_factor * move_elements_time
+                                if delay > max_delay then
+                                    max_delay = delay
+                                end
                             end
                             local item_from = get_first_view_item_by_game_id(element.data.uid)
                             if item_from ~= nil then
                                 local to_world_pos = get_world_pos(point.to_x, point.to_y)
                                 if point.type == MoveType.Requested then
-                                    gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size)
+                                    gm.set_position_xy(item_from, to_world_pos.x, to_world_pos.y + field_height * 2 * cell_size * i)
                                 end
                                 if animation == nil then
                                     anim_pos = {
                                         x = go.get(item_from._hash, "position.x"),
                                         y = go.get(item_from._hash, "position.y")
                                     }
-                                    animation = animator:to(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):delay(delay):onupdate(function()
+                                    animation = animator:to(anim_pos, move_elements_time, {x = to_world_pos.x, y = to_world_pos.y}):delay(delay):ease("linear"):onupdate(function()
                                         go.set(item_from._hash, "position.x", anim_pos.x)
                                         go.set(item_from._hash, "position.y", anim_pos.y)
                                     end)
@@ -640,12 +643,9 @@ function ____exports.View(animator)
         end
         return max_move_duration + max_delay
     end
-    function on_move_phase_end(message)
-        flow.delay(move_duration_counter)
-        move_duration_counter = 0
-        combinate_duration_counter = 0
-        print("MOVE_END")
-        return 0
+    function on_move_phase_end()
+        flow.delay(move_phase_duration)
+        move_phase_duration = 0
     end
     function on_revert_step_animation(current_state, previous_state)
         do
@@ -916,15 +916,13 @@ function ____exports.View(animator)
         SWAPED_HELICOPTERS_ACTIVATED = on_swaped_helicopters_animation,
         DYNAMITE_ACTIVATED = on_dynamite_activated_animation,
         SWAPED_DYNAMITES_ACTIVATED = on_swaped_dynamites_animation,
-        ON_MOVE_PHASE_BEGIN = on_move_phase_begin,
-        ON_MOVED_ELEMENTS = on_moved_elements_animation,
-        ON_MOVE_PHASE_END = on_move_phase_end
+        ON_MOVED_ELEMENTS = on_moved_elements_animation
     }
     gm = GoManager()
     game_id_to_view_index = {}
     selected_element = nil
-    combinate_duration_counter = 0
-    move_duration_counter = 0
+    combinate_phase_duration = 0
+    move_phase_duration = 0
     is_processing = false
     local function init()
         set_events()
