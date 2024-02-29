@@ -964,5 +964,5 @@ ____exports._GAME_CONFIG = {
         }, busters = {hammer_active = false}}
     }
 }
-____exports._STORAGE_CONFIG = {current_level = 2, hammer_counts = 3}
+____exports._STORAGE_CONFIG = {current_level = 4, hammer_counts = 3}
 return ____exports

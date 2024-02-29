@@ -403,7 +403,7 @@ export const _GAME_CONFIG = {
 
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
-    current_level: 2,
+    current_level: 4,
     hammer_counts: 3,
 };
 
