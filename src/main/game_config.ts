@@ -57,21 +57,21 @@ export const _GAME_CONFIG = {
     squash_element_time: 0.3,
     
     dynamite_activation_duration: 1,
-    helicopter_fly_duration: 0.7,
+    helicopter_fly_duration: 0.75,
     
     damaged_element_easing: go.EASING_INOUTBACK,
-    damaged_element_time: 0.5,
+    damaged_element_time: 0.55,
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.5,
     
     // ---------------Вариант движения в точку-----------------
-    // movement_to_point: true,
-    // duration_of_movement_bettween_cells: 0.07,
+    movement_to_point: true,
+    duration_of_movement_bettween_cells: 0.07,
     // --------------------------------------------------------
 
     // ---------------Вариант движения по каждой клетке -----------------
-    movement_to_point: false,
-    duration_of_movement_bettween_cells: 0.15,
+    // movement_to_point: false,
+    // duration_of_movement_bettween_cells: 0.15,
     // ------------------------------------------------------------------
 
     spawn_element_easing: go.EASING_INCUBIC,

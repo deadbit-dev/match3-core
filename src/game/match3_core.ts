@@ -689,8 +689,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         for(const combination of get_all_combinations()) {
             let found = false;
             for(const element of combination.elements) {
-                for(const last_moved_element of moved_elements) {
-                    if(last_moved_element.data.uid == element.uid) {
+                for(const moved_element of moved_elements) {
+                    if(moved_element.data.uid == element.uid) {
                         on_combinated(element, combination);
                         found = true;
                         break;

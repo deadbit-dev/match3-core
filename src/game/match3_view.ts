@@ -60,6 +60,7 @@ export function View(animator: FluxGroup) {
     const origin_cell_size = level_config['field']['cell_size'];
 
     const cell_size = math.min((game_width - offset_border * 2) / field_width, 100);
+    print("CELL_SIZE: ", cell_size);
     const scale_ratio = cell_size / origin_cell_size;
     const cells_offset = vmath.vector3(game_width / 2 - (field_width / 2 * cell_size), -(game_height / 2 - (field_height / 2 * cell_size)), 0);
 
@@ -456,7 +457,7 @@ export function View(animator: FluxGroup) {
             return damaged_element_time + helicopter_fly_duration;
         }
 
-        return damage_element_animation(activation.element.uid);
+        return damage_element_animation(activation.element.uid) + 0.2;
     }
 
     function on_swaped_helicopters_animation(message: Messages[MessageId]) {
@@ -482,7 +483,7 @@ export function View(animator: FluxGroup) {
             }
         });
 
-        return squash_duration + (damaged_element_time > helicopter_fly_duration ? damaged_element_time : helicopter_fly_duration);
+        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2;
     }
 
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
@@ -531,7 +532,7 @@ export function View(animator: FluxGroup) {
     }
 
     function on_move_phase_begin() {
-        flow.delay(combinate_phase_duration);
+        flow.delay(combinate_phase_duration + 0.2);
         combinate_phase_duration = 0;
     }
 
@@ -568,10 +569,8 @@ export function View(animator: FluxGroup) {
                         let move_duration = 0;
 
                         if(animation == null) {
-                            anim_pos = {
-                                x: go.get(item_from._hash, 'position.x'),
-                                y: go.get(item_from._hash, 'position.y')
-                            };
+                            anim_pos.x = go.get(item_from._hash, 'position.x');
+                            anim_pos.y = go.get(item_from._hash, 'position.y');
                             
                             if(delayed_row_in_column[element.points[0].to_x] == null) delayed_row_in_column[element.points[0].to_x] = 0;
                             const delay_factor = delayed_row_in_column[element.points[0].to_x]++;
@@ -584,8 +583,16 @@ export function View(animator: FluxGroup) {
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;
                                 const distance_beetwen_cells = (point.type == MoveType.Filled) ? diagonal : cell_size;
-                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
-                                move_duration = time * (math.abs(to_world_pos.y - anim_pos.y) / distance_beetwen_cells);
+                                const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells;
+                                const v = (to_world_pos - vmath.vector3(anim_pos.x, anim_pos.y, 0)) as vmath.vector3;
+                                const l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2));
+                                move_duration = time * (l / distance_beetwen_cells);
+                                print("DURATION: ", duration_of_movement_between_cells);
+                                print("ORIGINAL DISTANCE: ", distance_beetwen_cells);
+                                print("CALCULATE DISTANCE: ", l);
+                                print("DELTA: ", delta);
+                                if(point.type == MoveType.Filled) print("FILLED: ", move_duration);
+                                else print("OTHER: ", move_duration);
                             } else {
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;
@@ -603,13 +610,21 @@ export function View(animator: FluxGroup) {
                         } else {
                             if(movement_to_point) {
                                 const previous_point = element.points[p - 1];
-                                const cuurent_world_pos = get_world_pos(previous_point.to_x, previous_point.to_y);
+                                const current_world_pos = get_world_pos(previous_point.to_x, previous_point.to_y);
                                 
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;
                                 const distance_beetwen_cells = (point.type == MoveType.Filled) ? diagonal : cell_size;
                                 const time = (point.type == MoveType.Filled) ? (duration_of_movement_between_cells * delta) : duration_of_movement_between_cells; 
-                                move_duration = time * (math.abs(to_world_pos.y - cuurent_world_pos.y) / distance_beetwen_cells);
+                                const v = (to_world_pos - current_world_pos) as vmath.vector3;
+                                const l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2));
+                                move_duration = time * (l / distance_beetwen_cells);
+                                print("DURATION: ", duration_of_movement_between_cells);
+                                print("ORIGINAL DISTANCE: ", distance_beetwen_cells);
+                                print("CALCULATE DISTANCE: ", l);
+                                print("DELTA: ", delta);
+                                if(point.type == MoveType.Filled) print("FILLED: ", move_duration);
+                                else print("OTHER: ", move_duration);
                             } else {
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;

@@ -495,7 +495,7 @@ function ____exports.View(animator)
             remove_random_element_animation(activation.element, activation.target_element)
             return damaged_element_time + helicopter_fly_duration
         end
-        return damage_element_animation(activation.element.uid)
+        return damage_element_animation(activation.element.uid) + 0.2
     end
     function on_swaped_helicopters_animation(message)
         local activation = message
@@ -521,7 +521,7 @@ function ____exports.View(animator)
                 end
             end
         )
-        return squash_duration + (damaged_element_time > helicopter_fly_duration and damaged_element_time or helicopter_fly_duration)
+        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
     end
     function on_dynamite_activated_animation(message)
         local activation = message
@@ -573,7 +573,7 @@ function ____exports.View(animator)
         return 0
     end
     function on_move_phase_begin()
-        flow.delay(combinate_phase_duration)
+        flow.delay(combinate_phase_duration + 0.2)
         combinate_phase_duration = 0
     end
     function on_moved_elements_animation(message)
@@ -606,10 +606,8 @@ function ____exports.View(animator)
                                 end
                                 local move_duration = 0
                                 if animation == nil then
-                                    anim_pos = {
-                                        x = go.get(item_from._hash, "position.x"),
-                                        y = go.get(item_from._hash, "position.y")
-                                    }
+                                    anim_pos.x = go.get(item_from._hash, "position.x")
+                                    anim_pos.y = go.get(item_from._hash, "position.y")
                                     if delayed_row_in_column[element.points[1].to_x + 1] == nil then
                                         delayed_row_in_column[element.points[1].to_x + 1] = 0
                                     end
@@ -626,7 +624,18 @@ function ____exports.View(animator)
                                         local delta = diagonal / cell_size
                                         local distance_beetwen_cells = point.type == MoveType.Filled and diagonal or cell_size
                                         local time = point.type == MoveType.Filled and duration_of_movement_between_cells * delta or duration_of_movement_between_cells
-                                        move_duration = time * (math.abs(to_world_pos.y - anim_pos.y) / distance_beetwen_cells)
+                                        local v = to_world_pos - vmath.vector3(anim_pos.x, anim_pos.y, 0)
+                                        local l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2))
+                                        move_duration = time * (l / distance_beetwen_cells)
+                                        print("DURATION: ", duration_of_movement_between_cells)
+                                        print("ORIGINAL DISTANCE: ", distance_beetwen_cells)
+                                        print("CALCULATE DISTANCE: ", l)
+                                        print("DELTA: ", delta)
+                                        if point.type == MoveType.Filled then
+                                            print("FILLED: ", move_duration)
+                                        else
+                                            print("OTHER: ", move_duration)
+                                        end
                                     else
                                         local diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2))
                                         local delta = diagonal / cell_size
@@ -640,12 +649,23 @@ function ____exports.View(animator)
                                 else
                                     if movement_to_point then
                                         local previous_point = element.points[p]
-                                        local cuurent_world_pos = get_world_pos(previous_point.to_x, previous_point.to_y)
+                                        local current_world_pos = get_world_pos(previous_point.to_x, previous_point.to_y)
                                         local diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2))
                                         local delta = diagonal / cell_size
                                         local distance_beetwen_cells = point.type == MoveType.Filled and diagonal or cell_size
                                         local time = point.type == MoveType.Filled and duration_of_movement_between_cells * delta or duration_of_movement_between_cells
-                                        move_duration = time * (math.abs(to_world_pos.y - cuurent_world_pos.y) / distance_beetwen_cells)
+                                        local v = to_world_pos - current_world_pos
+                                        local l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2))
+                                        move_duration = time * (l / distance_beetwen_cells)
+                                        print("DURATION: ", duration_of_movement_between_cells)
+                                        print("ORIGINAL DISTANCE: ", distance_beetwen_cells)
+                                        print("CALCULATE DISTANCE: ", l)
+                                        print("DELTA: ", delta)
+                                        if point.type == MoveType.Filled then
+                                            print("FILLED: ", move_duration)
+                                        else
+                                            print("OTHER: ", move_duration)
+                                        end
                                     else
                                         local diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2))
                                         local delta = diagonal / cell_size
@@ -924,6 +944,7 @@ function ____exports.View(animator)
     local offset_border = level_config.field.offset_border
     local origin_cell_size = level_config.field.cell_size
     cell_size = math.min((game_width - offset_border * 2) / field_width, 100)
+    print("CELL_SIZE: ", cell_size)
     scale_ratio = cell_size / origin_cell_size
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size), 0)
     event_to_animation = {

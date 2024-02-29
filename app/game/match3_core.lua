@@ -649,8 +649,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         for ____, combination in ipairs(get_all_combinations()) do
             local found = false
             for ____, element in ipairs(combination.elements) do
-                for ____, last_moved_element in ipairs(moved_elements) do
-                    if last_moved_element.data.uid == element.uid then
+                for ____, moved_element in ipairs(moved_elements) do
+                    if moved_element.data.uid == element.uid then
                         on_combinated(element, combination)
                         found = true
                         break
