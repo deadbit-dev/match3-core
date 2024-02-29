@@ -141,46 +141,50 @@
 
 	function resize_game_canvas() {
 		// Hack for iOS when exit from Fullscreen mode
-		if (is_iOS) {
-			window.scrollTo(0, 0);
-		}
+				if (is_iOS) {
+					window.scrollTo(0, 0);
+				}
 
-		var app_container = document.getElementById('app-container');
-		var game_canvas = document.getElementById('canvas');
-		var innerWidth = window.innerWidth;
-		var innerHeight = window.innerHeight - buttonHeight;
-		if (prevInnerWidth == innerWidth && prevInnerHeight == innerHeight)
-		{
-			return;
-		}
-		prevInnerWidth = innerWidth;
-		prevInnerHeight = innerHeight;
-
-		var targetRatio = width / height;
-		var actualRatio = innerWidth / innerHeight;
+				var app_container = document.getElementById('app-container');
+				var game_canvas = document.getElementById('canvas');
+				var innerWidth = window.innerWidth;
+				var innerHeight = window.innerHeight - buttonHeight;
+				if (innerWidth == 0 || innerHeight == 0){
+					setTimeout(resize_game_canvas, 500);
+					console.log("Resize fix");
+					return;
+				}
+				if (prevInnerWidth == innerWidth && prevInnerHeight == innerHeight)
+				{
+					return;
+				}
+				prevInnerWidth = innerWidth;
+				prevInnerHeight = innerHeight;
+				var isVert = true;
+				var width = isVert ? 540 : 960;
+				var height = isVert ? 960 : 540;
+				var targetRatio = width / height;
+				var actualRatio = innerWidth / innerHeight;
 
 		//Fit
-		if (actualRatio > targetRatio) {
-			width = innerHeight * targetRatio;
-			height = innerHeight;
-			app_container.style.marginLeft = ((innerWidth - width) / 2) + "px";
-			app_container.style.marginTop = "0px";
-		}
-		else {
-			width = innerWidth;
-			height = innerWidth / targetRatio;
-			app_container.style.marginLeft = "0px";
-			app_container.style.marginTop = ((innerHeight - height) / 2) + "px";
-		}
-	
-	
-	
-	
-		app_container.style.width = width + "px";
-		app_container.style.height = height + buttonHeight + "px";
-		game_canvas.width = width;
-		game_canvas.height = height;
-	}
+				if (actualRatio > targetRatio) {
+					width = innerHeight * targetRatio;
+					height = innerHeight;
+					app_container.style.marginLeft = ((innerWidth - width) / 2) + "px";
+					app_container.style.marginTop = "0px";
+				}
+				else {
+					width = innerWidth;
+					height = innerWidth / targetRatio;
+					app_container.style.marginLeft = "0px";
+					app_container.style.marginTop = ((innerHeight - height) / 2) + "px";
+				}
+
+				app_container.style.width = width + "px";
+				app_container.style.height = height + buttonHeight + "px";
+				game_canvas.width = width;
+				game_canvas.height = height;
+			}
 	resize_game_canvas();
 	window.addEventListener('resize', resize_game_canvas, false);
 	window.addEventListener('orientationchange', resize_game_canvas, false);

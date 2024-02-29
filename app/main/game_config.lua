@@ -47,20 +47,29 @@ ____exports.ElementId.Dynamite = 9
 ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 10
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
+local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
+local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
+local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
+local ____temp_0
+if sys.get_sys_info().system_name == "HTML5" then
+    ____temp_0 = html5.run("new URL(location).searchParams.get('move')==null") == "true"
+else
+    ____temp_0 = true
+end
 ____exports._GAME_CONFIG = {
     min_swipe_distance = 32,
-    swap_element_easing = go.EASING_LINEAR,
+    swap_element_easing = ____go_EASING_LINEAR_1,
     swap_element_time = 0.25,
-    squash_element_easing = go.EASING_INCUBIC,
+    squash_element_easing = ____go_EASING_INCUBIC_2,
     squash_element_time = 0.3,
     dynamite_activation_duration = 1,
     helicopter_fly_duration = 0.75,
-    damaged_element_easing = go.EASING_INOUTBACK,
+    damaged_element_easing = ____go_EASING_INOUTBACK_3,
     damaged_element_time = 0.55,
     damaged_element_delay = 0.1,
     damaged_element_scale = 0.5,
-    movement_to_point = true,
-    duration_of_movement_bettween_cells = 0.07,
+    movement_to_point = ____temp_0,
+    duration_of_movement_bettween_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.07")) or 0.07,
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,

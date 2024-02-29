@@ -50,23 +50,23 @@ export enum ElementId {
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
     min_swipe_distance: 32,
-    
+
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
     squash_element_easing: go.EASING_INCUBIC,
     squash_element_time: 0.3,
-    
+
     dynamite_activation_duration: 1,
     helicopter_fly_duration: 0.75,
-    
+
     damaged_element_easing: go.EASING_INOUTBACK,
     damaged_element_time: 0.55,
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.5,
-    
+
     // ---------------Вариант движения в точку-----------------
-    movement_to_point: true,
-    duration_of_movement_bettween_cells: 0.07,
+    movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
+    duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.07`))! : 0.07,
     // --------------------------------------------------------
 
     // ---------------Вариант движения по каждой клетке -----------------
@@ -76,7 +76,7 @@ export const _GAME_CONFIG = {
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
-    
+
     buster_delay: 0.5,
 
     default_cell_z_index: -1,
@@ -101,7 +101,7 @@ export const _GAME_CONFIG = {
             view: 'cell_box',
             z_index: 1
         }
-    } as {[key in CellId]: {type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index?: number}},
+    } as { [key in CellId]: { type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index?: number } },
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -130,7 +130,7 @@ export const _GAME_CONFIG = {
             percentage: 10,
             view: 'element_topaz'
         },
-            
+
         [ElementId.Ruby]: {
             type: {
                 is_movable: true,
@@ -139,7 +139,7 @@ export const _GAME_CONFIG = {
             percentage: 10,
             view: 'element_ruby'
         },
-        
+
         [ElementId.Emerald]: {
             type: {
                 is_movable: true,
@@ -175,7 +175,7 @@ export const _GAME_CONFIG = {
             percentage: 0,
             view: 'axis_rocket_buster'
         },
-        
+
         [ElementId.Helicopter]: {
             type: {
                 is_movable: true,
@@ -202,7 +202,7 @@ export const _GAME_CONFIG = {
             percentage: 0,
             view: 'diskosphere_buster'
         }
-    } as {[key in ElementId]: {type: {is_movable: boolean, is_clickable: boolean}, percentage: number, view: string}},
+    } as { [key in ElementId]: { type: { is_movable: boolean, is_clickable: boolean }, percentage: number, view: string } },
 
     base_elements: [
         ElementId.Dimonde,
@@ -221,7 +221,7 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 complex_move: false,
-                
+
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
@@ -249,7 +249,7 @@ export const _GAME_CONFIG = {
                 hammer_active: false
             }
         },
-        
+
         {
             // LEVEL 1
             field: {
@@ -258,8 +258,8 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 complex_move: false,
-                
-               cells: [
+
+                cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -295,7 +295,7 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 complex_move: false,
-                
+
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass],
@@ -332,7 +332,7 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 complex_move: false,
-                
+
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass],
@@ -360,7 +360,7 @@ export const _GAME_CONFIG = {
                 hammer_active: false
             }
         },
-        
+
         {
             // LEVEL 4
             field: {
@@ -369,12 +369,12 @@ export const _GAME_CONFIG = {
                 cell_size: 64,
                 offset_border: 10,
                 complex_move: true,
-                
+
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass,CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
@@ -407,7 +407,7 @@ export const _STORAGE_CONFIG = {
     hammer_counts: 3,
 };
 
-export type GameStepEventBuffer = {key: MessageId, value: Messages[MessageId]}[];
+export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
 export type MovedElementsMessage = MovedInfo[];
 
 export interface ElementMessage extends ItemInfo { type: number }
@@ -431,14 +431,14 @@ export interface RevertStepMessage { current_state: GameState, previous_state: G
 export type _UserMessages = {
     LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
-    
+
     SWAP_ELEMENTS: StepInfo,
     ON_SWAP_ELEMENTS: SwapElementsMessage,
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
 
     SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED: SwapedDiskosphereActivationMessage,
-    
+
     DISKOSPHERE_ACTIVATED: ActivationMessage,
     SWAPED_DISKOSPHERES_ACTIVATED: SwapedActivationMessage,
     SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereActivationMessage,
@@ -458,10 +458,10 @@ export type _UserMessages = {
     ON_COMBINED: CombinedMessage,
     ON_COMBO: ComboMessage,
     ON_CELL_ACTIVATED: ActivatedCellMessage,
-    
+
     ON_MOVED_ELEMENTS: MovedElementsMessage,
     ON_GAME_STEP: GameStepEventBuffer,
-    
+
     TRY_REVERT_STEP: VoidMessage,
     REVERT_STEP: VoidMessage,
     ON_REVERT_STEP: RevertStepMessage,
