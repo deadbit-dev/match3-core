@@ -18,7 +18,7 @@ local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -493,9 +493,9 @@ function ____exports.View(animator)
         end
         if activation.target_element ~= NullElement then
             remove_random_element_animation(activation.element, activation.target_element)
-            return damaged_element_time + helicopter_fly_duration
+            return damaged_element_time + helicopter_fly_duration + 0.2
         end
-        return damage_element_animation(activation.element.uid) + 0.2
+        return damage_element_animation(activation.element.uid)
     end
     function on_swaped_helicopters_animation(message)
         local activation = message
@@ -518,6 +518,22 @@ function ____exports.View(animator)
                 if target_element ~= nil and target_element ~= NullElement then
                     make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid)
                     remove_random_element_animation(activation.element, target_element, 1)
+                end
+            end
+        )
+        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
+    end
+    function on_swaped_helicopter_with_element_animation(message)
+        local activation = message
+        local squash_duration = squash_element_animation(
+            activation.element,
+            activation.element,
+            function()
+                for ____, element in ipairs(activation.damaged_elements) do
+                    damage_element_animation(element.uid)
+                end
+                if activation.target_element ~= NullElement then
+                    remove_random_element_animation(activation.element, activation.target_element)
                 end
             end
         )
@@ -963,6 +979,7 @@ function ____exports.View(animator)
         SWAPED_ROCKETS_ACTIVATED = on_swaped_rockets_animation,
         HELICOPTER_ACTIVATED = on_helicopter_activated_animation,
         SWAPED_HELICOPTERS_ACTIVATED = on_swaped_helicopters_animation,
+        SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED = on_swaped_helicopter_with_element_animation,
         DYNAMITE_ACTIVATED = on_dynamite_activated_animation,
         SWAPED_DYNAMITES_ACTIVATED = on_swaped_dynamites_animation,
         ON_MOVED_ELEMENTS = on_moved_elements_animation

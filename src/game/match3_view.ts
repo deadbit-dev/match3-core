@@ -18,7 +18,7 @@ import * as camera from '../utils/camera';
 import { Direction } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage } from "../main/game_config";
+import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage } from "../main/game_config";
 
 import { 
     GameState,
@@ -87,6 +87,7 @@ export function View(animator: FluxGroup) {
         // HELICOPTER
         'HELICOPTER_ACTIVATED': on_helicopter_activated_animation,
         'SWAPED_HELICOPTERS_ACTIVATED': on_swaped_helicopters_animation,
+        'SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED': on_swaped_helicopter_with_element_animation, 
         
         // DYNAMITE
         'DYNAMITE_ACTIVATED': on_dynamite_activated_animation,
@@ -454,10 +455,10 @@ export function View(animator: FluxGroup) {
         
         if(activation.target_element != NullElement) {
             remove_random_element_animation(activation.element, activation.target_element);
-            return damaged_element_time + helicopter_fly_duration;
+            return damaged_element_time + helicopter_fly_duration + 0.2;
         }
 
-        return damage_element_animation(activation.element.uid) + 0.2;
+        return damage_element_animation(activation.element.uid);
     }
 
     function on_swaped_helicopters_animation(message: Messages[MessageId]) {
@@ -481,6 +482,19 @@ export function View(animator: FluxGroup) {
                 make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid);
                 remove_random_element_animation(activation.element, target_element, 1);
             }
+        });
+
+        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2;
+    }
+
+    function on_swaped_helicopter_with_element_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedHelicopterWithElementMessage;
+        const squash_duration = squash_element_animation(activation.element, activation.element, () => {
+            for(const element of activation.damaged_elements)
+                damage_element_animation(element.uid);
+        
+            if(activation.target_element != NullElement)
+                remove_random_element_animation(activation.element, activation.target_element);
         });
 
         return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2;

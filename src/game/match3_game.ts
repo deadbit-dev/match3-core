@@ -20,7 +20,8 @@ import { CellId, ElementId,
     SwapedActivationMessage,
     HelicopterActivationMessage,
     SwapedHelicoptersActivationMessage,
-    SwapedDiskosphereActivationMessage
+    SwapedDiskosphereActivationMessage,
+    SwapedHelicopterWithElementMessage
 } from '../main/game_config';
 
 import {
@@ -616,8 +617,26 @@ export function Game() {
         
         const other_element = field.get_element(other_x, other_y);
         if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
+    
+        if(activated_elements.findIndex((element_id) => element_id == helicopter.uid) != -1) return false;
+        activated_elements.push(helicopter.uid);
 
-        try_activate_helicopter(x, y);
+        const event_data = {} as SwapedHelicopterWithElementMessage;
+
+        write_game_step_event('SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED', event_data);
+        
+        event_data.element = {x, y, uid: helicopter.uid};
+        event_data.other_element = {x: other_x, y: other_y, uid: other_element.uid};
+        event_data.damaged_elements = remove_element_by_mask(x, y, [
+            [0, 1, 0],
+            [1, 0, 1],
+            [0, 1, 0]
+        ]);
+
+        event_data.target_element = remove_random_element(event_data.damaged_elements);
+
+        field.remove_element(x, y, true, false);
+        field.remove_element(other_x, other_y, true, false);
 
         return true;
     }

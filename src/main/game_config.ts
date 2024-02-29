@@ -420,6 +420,7 @@ export interface SwapedActivationMessage extends ActivationMessage { other_eleme
 
 export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
 export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_elements: (ItemInfo | typeof NullElement)[] }
+export interface SwapedHelicopterWithElementMessage extends SwapedActivationMessage { target_element: ItemInfo | typeof NullElement }
 
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
@@ -449,6 +450,7 @@ export type _UserMessages = {
 
     HELICOPTER_ACTIVATED: HelicopterActivationMessage,
     SWAPED_HELICOPTERS_ACTIVATED: SwapedHelicoptersActivationMessage,
+    SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED: SwapedHelicopterWithElementMessage,
 
     DYNAMITE_ACTIVATED: ActivationMessage,
     SWAPED_DYNAMITES_ACTIVATED: SwapedActivationMessage,
