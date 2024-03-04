@@ -485,28 +485,16 @@ export function View(animator: FluxGroup) {
 
     function on_swaped_buster_with_diskosphere_animation(message: Messages[MessageId]) {
         const activation = message as SwapedDiskosphereActivationMessage;
-        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.other_element.uid);
-            damage_element_animation(activation.element.uid);
-            for(const element of activation.damaged_elements)
-                damage_element_animation(element.uid);
-            for(const element of activation.maked_elements)
-                make_element_view(element.x, element.y, element.type, element.uid);
-        });
-
-        return squash_duration + damaged_element_time;
-    }
-  
-    function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedActivationMessage;
-        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(activation.element.uid);
-            damage_element_animation(activation.other_element.uid);
-            for(const element of activation.damaged_elements)
-                damage_element_animation(element.uid);
-        });
         
-        return squash_duration + damaged_element_time;
+        damage_element_animation(activation.other_element.uid);
+        damage_element_animation(activation.element.uid);
+        
+        for(const element of activation.damaged_elements)
+            damage_element_animation(element.uid);
+        for(const element of activation.maked_elements)
+            make_element_view(element.x, element.y, element.type, element.uid);
+
+        return damaged_element_time;
     }
     
     function on_swaped_diskosphere_with_buster_animation(message: Messages[MessageId]) {
@@ -521,6 +509,18 @@ export function View(animator: FluxGroup) {
             make_element_view(element.x, element.y, element.type, element.uid);
 
         return damaged_element_time;
+    }
+
+    function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedActivationMessage;
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
+            damage_element_animation(activation.element.uid);
+            damage_element_animation(activation.other_element.uid);
+            for(const element of activation.damaged_elements)
+                damage_element_animation(element.uid);
+        });
+        
+        return squash_duration + damaged_element_time;
     }
 
     function on_axis_rocket_activated_animation(message: Messages[MessageId]) {
