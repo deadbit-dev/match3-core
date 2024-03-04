@@ -8,6 +8,8 @@ local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local ____exports = {}
+local ____math_utils = require("utils.math_utils")
+local is_valid_pos = ____math_utils.is_valid_pos
 local ____game_config = require("main.game_config")
 local CellId = ____game_config.CellId
 local ElementId = ____game_config.ElementId
@@ -971,7 +973,7 @@ function ____exports.Game()
         return is_buster(from_x, from_y) or is_buster(to_x, to_y)
     end
     function try_combo(combined_element, combination)
-        local element
+        local element = NullElement
         repeat
             local ____switch215 = combination.type
             local ____cond215 = ____switch215 == CombinationType.Comb4
@@ -1000,7 +1002,7 @@ function ____exports.Game()
                 break
             end
         until true
-        if element ~= nil and element ~= NullElement then
+        if element ~= NullElement then
             write_game_step_event("ON_COMBO", {combined_element = combined_element, combination = combination, maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}})
             return true
         end
@@ -1167,7 +1169,7 @@ function ____exports.Game()
                     local j = x - (#mask[1] - 1) / 2
                     while j <= x + (#mask[1] - 1) / 2 do
                         if mask[i - (y - (#mask - 1) / 2) + 1][j - (x - (#mask[1] - 1) / 2) + 1] == 1 then
-                            if field.is_valid_element_pos(j, i) then
+                            if is_valid_pos(j, i, field_width, field_height) then
                                 if is_buster(j, i) then
                                     try_activate_buster_element(j, i)
                                 else

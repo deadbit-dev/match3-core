@@ -17,6 +17,29 @@ ____exports.VK_SHARE_URL = ""
 ____exports.ID_YANDEX_METRICA = ""
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
+____exports.SubstrateId = SubstrateId or ({})
+____exports.SubstrateId.OutsideArc = 0
+____exports.SubstrateId[____exports.SubstrateId.OutsideArc] = "OutsideArc"
+____exports.SubstrateId.OutsideInsideAngle = 1
+____exports.SubstrateId[____exports.SubstrateId.OutsideInsideAngle] = "OutsideInsideAngle"
+____exports.SubstrateId.OutsideAngle = 2
+____exports.SubstrateId[____exports.SubstrateId.OutsideAngle] = "OutsideAngle"
+____exports.SubstrateId.LeftRightStrip = 3
+____exports.SubstrateId[____exports.SubstrateId.LeftRightStrip] = "LeftRightStrip"
+____exports.SubstrateId.LeftStripTopBottomInsideAngle = 4
+____exports.SubstrateId[____exports.SubstrateId.LeftStripTopBottomInsideAngle] = "LeftStripTopBottomInsideAngle"
+____exports.SubstrateId.LeftStripTopInsideAngle = 5
+____exports.SubstrateId[____exports.SubstrateId.LeftStripTopInsideAngle] = "LeftStripTopInsideAngle"
+____exports.SubstrateId.LeftStripBottomInsideAngle = 6
+____exports.SubstrateId[____exports.SubstrateId.LeftStripBottomInsideAngle] = "LeftStripBottomInsideAngle"
+____exports.SubstrateId.LeftStrip = 7
+____exports.SubstrateId[____exports.SubstrateId.LeftStrip] = "LeftStrip"
+____exports.SubstrateId.TopBottomInsideAngle = 8
+____exports.SubstrateId[____exports.SubstrateId.TopBottomInsideAngle] = "TopBottomInsideAngle"
+____exports.SubstrateId.InsideAngle = 9
+____exports.SubstrateId[____exports.SubstrateId.InsideAngle] = "InsideAngle"
+____exports.SubstrateId.Full = 10
+____exports.SubstrateId[____exports.SubstrateId.Full] = "Full"
 ____exports.CellId = CellId or ({})
 ____exports.CellId.Base = 0
 ____exports.CellId[____exports.CellId.Base] = "Base"
@@ -74,8 +97,22 @@ ____exports._GAME_CONFIG = {
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,
+    default_substrate_z_index = -2,
     default_cell_z_index = -1,
     default_element_z_index = 0,
+    substrate_database = {
+        [____exports.SubstrateId.OutsideArc] = "ouside_arc",
+        [____exports.SubstrateId.OutsideInsideAngle] = "outside_inside_angle",
+        [____exports.SubstrateId.OutsideAngle] = "outside_angle",
+        [____exports.SubstrateId.LeftRightStrip] = "left_right_strip",
+        [____exports.SubstrateId.LeftStripTopBottomInsideAngle] = "left_strip_top_inside_angle",
+        [____exports.SubstrateId.LeftStripTopInsideAngle] = "left_strip_top_inside_angle",
+        [____exports.SubstrateId.LeftStripBottomInsideAngle] = "left_strip_bottom_inside_angle",
+        [____exports.SubstrateId.LeftStrip] = "left_strip",
+        [____exports.SubstrateId.TopBottomInsideAngle] = "top_bottom_inside_angle",
+        [____exports.SubstrateId.InsideAngle] = "inside_angle",
+        [____exports.SubstrateId.Full] = "full"
+    },
     cell_database = {
         [____exports.CellId.Base] = {type = CellType.Base, view = "cell_base"},
         [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
@@ -960,6 +997,113 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Dimonde,
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Ruby
+                }
+            }
+        }, busters = {hammer_active = false}},
+        {field = {
+            width = 6,
+            height = 6,
+            cell_size = 128,
+            offset_border = 20,
+            complex_move = true,
+            cells = {
+                {
+                    NotActiveCell,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    NotActiveCell
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    NotActiveCell,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    NotActiveCell
+                }
+            },
+            elements = {
+                {
+                    NullElement,
+                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
+                    NullElement
+                },
+                {
+                    ____exports.ElementId.Ruby,
+                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Dimonde
+                },
+                {
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold
+                },
+                {
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Ruby,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Dimonde
+                },
+                {
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde
+                },
+                {
+                    NullElement,
+                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
+                    NullElement
                 }
             }
         }, busters = {hammer_active = false}}

@@ -590,12 +590,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return true
     end
-    local function is_valid_element_pos(x, y)
-        if x < 0 or x >= size_x or y < 0 or y >= size_y then
-            return false
-        end
-        return true
-    end
     local function try_move(from_x, from_y, to_x, to_y)
         local is_can = is_can_move(from_x, from_y, to_x, to_y)
         if is_can then
@@ -835,13 +829,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch186 = mode
-            local ____cond186 = ____switch186 == ____exports.ProcessMode.Combinate
-            if ____cond186 then
+            local ____switch184 = mode
+            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
+            if ____cond184 then
                 return process_combinate()
             end
-            ____cond186 = ____cond186 or ____switch186 == ____exports.ProcessMode.MoveElements
-            if ____cond186 then
+            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
+            if ____cond184 then
                 return process_move()
             end
         until true
@@ -879,7 +873,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         swap_elements = swap_elements,
         get_neighbor_cells = get_neighbor_cells,
         get_neighbor_elements = get_neighbor_elements,
-        is_valid_element_pos = is_valid_element_pos,
         is_available_cell_type_for_move = is_available_cell_type_for_move,
         try_move = try_move,
         try_click = try_click,

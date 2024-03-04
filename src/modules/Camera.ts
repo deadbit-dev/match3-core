@@ -39,9 +39,9 @@ function CameraModule() {
         }
     }
 
-    function set_go_prjection(anchor_x: number, anchor_y: number) {
+    function set_go_prjection(anchor_x: number, anchor_y: number, near = -1, far = 1) {
         // вверх прижаты элементы
-        msg.post("@render:", "use_width_projection", { anchor_x, anchor_y, near: -1, far: 1 });
+        msg.post("@render:", "use_width_projection", { anchor_x, anchor_y, near, far });
         camera.set_align(anchor_x, anchor_y);
         camera.update_window_size();
     }

@@ -14,6 +14,8 @@
 
 import { MessageId, Messages } from '../modules/modules_const';
 
+import { is_valid_pos } from '../utils/math_utils';
+
 import { CellId, ElementId,
     GameStepEventBuffer,
     ActivationMessage,
@@ -813,7 +815,8 @@ export function Game() {
     }
 
     function try_combo(combined_element: ItemInfo, combination: CombinationInfo) {
-        let element;
+        let element: Element | typeof NullElement = NullElement;
+        
         switch(combination.type) {
             case CombinationType.Comb4:
                 element = make_element(combined_element.x, combined_element.y,
@@ -833,7 +836,7 @@ export function Game() {
             break;
         }
 
-        if(element != undefined && element != NullElement) {
+        if(element != NullElement) {
             write_game_step_event('ON_COMBO', {
                 combined_element,
                 combination,
@@ -969,7 +972,7 @@ export function Game() {
         for(let i = y - (mask.length - 1) / 2; i <= y + (mask.length - 1) / 2; i++) {
             for(let j = x - (mask[0].length - 1) / 2; j <= x + (mask[0].length - 1) / 2; j++) {
                 if(mask[i - (y - (mask.length - 1) / 2)][j - (x - (mask[0].length - 1) / 2)] == 1) {
-                    if(field.is_valid_element_pos(j, i)) {
+                    if(is_valid_pos(j, i, field_width, field_height)) {
                         if(is_buster(j, i)) try_activate_buster_element(j, i);
                         else {
                             const removed_element = field.remove_element(j, i, true, is_near_activation);

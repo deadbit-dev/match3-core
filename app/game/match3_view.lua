@@ -9,16 +9,33 @@ local flow = require("ludobits.m.flow")
 local camera = require("utils.camera")
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
+local is_valid_pos = ____math_utils.is_valid_pos
+local rotate_matrix_90 = ____math_utils.rotate_matrix_90
 local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
 local ____game_config = require("main.game_config")
+local CellId = ____game_config.CellId
 local ElementId = ____game_config.ElementId
+local SubstrateId = ____game_config.SubstrateId
 local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
+local SubstrateMasks = {
+    {{0, 1, 0}, {1, 0, 1}, {0, 0, 0}},
+    {{0, 1, 0}, {1, 0, 0}, {0, 0, 1}},
+    {{0, 1, 0}, {1, 0, 0}, {0, 0, 0}},
+    {{0, 0, 0}, {1, 0, 1}, {0, 0, 0}},
+    {{0, 0, 1}, {1, 0, 0}, {0, 0, 1}},
+    {{0, 0, 1}, {1, 0, 0}, {0, 0, 0}},
+    {{0, 0, 0}, {1, 0, 0}, {0, 0, 1}},
+    {{0, 0, 0}, {1, 0, 0}, {0, 0, 0}},
+    {{0, 0, 1}, {0, 0, 0}, {0, 0, 1}},
+    {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}},
+    {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
+}
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_buster_animation, on_axis_rocket_activated_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -176,6 +193,7 @@ function ____exports.View(animator)
                     while x < field_width do
                         local cell = state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
+                            make_substrate_view(x, y, state.cells)
                             try_make_under_cell(x, y, cell)
                             local ____make_cell_view_5 = make_cell_view
                             local ____array_4 = __TS__SparseArrayNew(x, y, cell.id, cell.uid)
@@ -200,6 +218,63 @@ function ____exports.View(animator)
                     end
                 end
                 y = y + 1
+            end
+        end
+    end
+    function make_substrate_view(x, y, cells, z_index)
+        if z_index == nil then
+            z_index = GAME_CONFIG.default_substrate_z_index
+        end
+        do
+            local mask_index = 0
+            while mask_index < #SubstrateMasks do
+                local mask = SubstrateMasks[mask_index + 1]
+                local is_90_mask = false
+                if mask_index == SubstrateId.LeftRightStrip then
+                    is_90_mask = true
+                end
+                local angle = 0
+                local max_angle = is_90_mask and 90 or 270
+                while angle <= max_angle do
+                    local is_valid = true
+                    do
+                        local i = y - (#mask - 1) / 2
+                        while i <= y + (#mask - 1) / 2 and is_valid do
+                            do
+                                local j = x - (#mask[1] - 1) / 2
+                                while j <= x + (#mask[1] - 1) / 2 and is_valid do
+                                    if mask[i - (y - (#mask - 1) / 2) + 1][j - (x - (#mask[1] - 1) / 2) + 1] == 1 then
+                                        if is_valid_pos(j, i, #cells[1], #cells) then
+                                            local cell = cells[i + 1][j + 1]
+                                            is_valid = cell == NotActiveCell
+                                        else
+                                            is_valid = true
+                                        end
+                                    end
+                                    j = j + 1
+                                end
+                            end
+                            i = i + 1
+                        end
+                    end
+                    if is_valid then
+                        local pos = get_world_pos(x, y, z_index)
+                        local _go = gm.make_go("substrate_view", pos)
+                        gm.set_rotation_hash(_go, -angle)
+                        sprite.play_flipbook(
+                            msg.url(nil, _go, "sprite"),
+                            GAME_CONFIG.substrate_database[mask_index]
+                        )
+                        go.set_scale(
+                            vmath.vector3(scale_ratio, scale_ratio, 1),
+                            _go
+                        )
+                        return
+                    end
+                    mask = rotate_matrix_90(mask)
+                    angle = angle + 90
+                end
+                mask_index = mask_index + 1
             end
         end
     end
@@ -646,15 +721,6 @@ function ____exports.View(animator)
                                         local v = to_world_pos - vmath.vector3(anim_pos.x, anim_pos.y, 0)
                                         local l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2))
                                         move_duration = time * (l / distance_beetwen_cells)
-                                        print("DURATION: ", duration_of_movement_between_cells)
-                                        print("ORIGINAL DISTANCE: ", distance_beetwen_cells)
-                                        print("CALCULATE DISTANCE: ", l)
-                                        print("DELTA: ", delta)
-                                        if point.type == MoveType.Filled then
-                                            print("FILLED: ", move_duration)
-                                        else
-                                            print("OTHER: ", move_duration)
-                                        end
                                     else
                                         local diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2))
                                         local delta = diagonal / cell_size
@@ -676,15 +742,6 @@ function ____exports.View(animator)
                                         local v = to_world_pos - current_world_pos
                                         local l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2))
                                         move_duration = time * (l / distance_beetwen_cells)
-                                        print("DURATION: ", duration_of_movement_between_cells)
-                                        print("ORIGINAL DISTANCE: ", distance_beetwen_cells)
-                                        print("CALCULATE DISTANCE: ", l)
-                                        print("DELTA: ", delta)
-                                        if point.type == MoveType.Filled then
-                                            print("FILLED: ", move_duration)
-                                        else
-                                            print("OTHER: ", move_duration)
-                                        end
                                     else
                                         local diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2))
                                         local delta = diagonal / cell_size
@@ -947,7 +1004,6 @@ function ____exports.View(animator)
     swap_element_time = GAME_CONFIG.swap_element_time
     squash_element_easing = GAME_CONFIG.squash_element_easing
     squash_element_time = GAME_CONFIG.squash_element_time
-    local dynamite_activation_duration = GAME_CONFIG.dynamite_activation_duration
     helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration
     damaged_element_easing = GAME_CONFIG.damaged_element_easing
     damaged_element_delay = GAME_CONFIG.damaged_element_delay

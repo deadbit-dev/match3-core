@@ -637,11 +637,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         return true;
     }
     
-    function is_valid_element_pos(x: number, y: number) {
-        if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;
-        return true;
-    }
-
     // ввод пользователя на перемещение элементов
     // на основе ограничений клетки, а также на соответствущее разрешение перемещения у элемента(is_move) 
     // возвращает результат если успех, то уже применен ход (т.е. элементы перемещен и поменялся местами)
@@ -890,7 +885,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
     return {
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
-        get_neighbor_cells, get_neighbor_elements, is_valid_element_pos, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
+        get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_all_available_steps, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,

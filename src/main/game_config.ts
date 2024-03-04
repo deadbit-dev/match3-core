@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo } from "../game/match3_core";
 import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
@@ -25,6 +26,20 @@ export const ID_YANDEX_METRICA = "";
 export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
+
+export enum SubstrateId {
+    OutsideArc,
+    OutsideInsideAngle,
+    OutsideAngle,
+    LeftRightStrip,
+    LeftStripTopBottomInsideAngle,
+    LeftStripTopInsideAngle,
+    LeftStripBottomInsideAngle,
+    LeftStrip,
+    TopBottomInsideAngle,
+    InsideAngle,
+    Full
+}
 
 export enum CellId {
     Base,
@@ -73,8 +88,23 @@ export const _GAME_CONFIG = {
 
     buster_delay: 0.5,
 
+    default_substrate_z_index: -2,
     default_cell_z_index: -1,
     default_element_z_index: 0,
+
+    substrate_database: {
+        [SubstrateId.OutsideArc]: 'ouside_arc',
+        [SubstrateId.OutsideInsideAngle]: 'outside_inside_angle',
+        [SubstrateId.OutsideAngle]: 'outside_angle',
+        [SubstrateId.LeftRightStrip]: 'left_right_strip',
+        [SubstrateId.LeftStripTopBottomInsideAngle]: 'left_strip_top_inside_angle',
+        [SubstrateId.LeftStripTopInsideAngle]: 'left_strip_top_inside_angle',
+        [SubstrateId.LeftStripBottomInsideAngle]: 'left_strip_bottom_inside_angle',
+        [SubstrateId.LeftStrip]: 'left_strip',
+        [SubstrateId.TopBottomInsideAngle]: 'top_bottom_inside_angle',
+        [SubstrateId.InsideAngle]: 'inside_angle', 
+        [SubstrateId.Full]: 'full'
+    } as { [key in SubstrateId]: string},
 
     cell_database: {
         [CellId.Base]: {
@@ -384,6 +414,39 @@ export const _GAME_CONFIG = {
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
+                ]
+            },
+
+            busters: {
+                hammer_active: false
+            }
+        },
+        
+        {
+            // LEVEL 5
+            field: {
+                width: 6,
+                height: 6,
+                cell_size: 128,
+                offset_border: 20,
+                complex_move: true,
+
+                cells: [
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
+                ],
+
+                elements: [
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
+                    [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
+                    [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Dimonde],
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement]
                 ]
             },
 

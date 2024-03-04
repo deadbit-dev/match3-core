@@ -106,6 +106,31 @@ function ____exports.rotate_matrix_90(matrix)
     end
     return rotated_matrix
 end
+function ____exports.is_valid_pos(x, y, size_x, size_y)
+    if x < 0 or x >= size_x or y < 0 or y >= size_y then
+        return false
+    end
+    return true
+end
+function ____exports.get_neighbors(x, y, array, mask)
+    local neighbors = {}
+    do
+        local i = y - 1
+        while i <= y + 1 do
+            do
+                local j = x - 1
+                while j <= x + 1 do
+                    if i >= 0 and i < #array and j >= 0 and j < #array[1] and mask[i - (y - 1) + 1][j - (x - 1) + 1] == 1 then
+                        neighbors[#neighbors + 1] = array[i + 1][j + 1]
+                    end
+                    j = j + 1
+                end
+            end
+            i = i + 1
+        end
+    end
+    return neighbors
+end
 function ____exports.get_debug_intersect_points()
     return {a, b, c, d}
 end

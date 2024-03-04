@@ -92,7 +92,24 @@ export function rotate_matrix_90(matrix: number[][]): number[][] {
     return rotated_matrix;
 }
 
+export function is_valid_pos(x: number, y: number, size_x: number, size_y: number): boolean {
+    if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;
+    return true;
+}
+
+export function get_neighbors<T>(x: number, y: number, array: T[][], mask: number[][]): T[] {
+    const neighbors = [];
+    for (let i = y - 1; i <= y + 1; i++) {
+        for (let j = x - 1; j <= x + 1; j++) {
+            if (i >= 0 && i < array.length && j >= 0 && j < array[0].length && mask[i - (y - 1)][j - (x - 1)] == 1) {
+                neighbors.push(array[i][j]);
+            }
+        }
+    }
+
+    return neighbors;
+}
+
 export function get_debug_intersect_points() {
     return [a, b, c, d];
 }
-

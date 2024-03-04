@@ -15,10 +15,10 @@
 import * as flow from 'ludobits.m.flow';
 import * as camera from '../utils/camera';
 
-import { Direction } from '../utils/math_utils';
+import { Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage } from "../main/game_config";
+import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId } from "../main/game_config";
 
 import { 
     GameState,
@@ -30,6 +30,73 @@ import {
     MoveType
 } from "./match3_core";
 
+const SubstrateMasks = [
+    [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 0, 0]
+    ],
+
+    [
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 0, 1]
+    ],
+
+    [
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 0, 0]
+    ],
+
+    [
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 0, 0]
+    ],
+
+    [
+        [0, 0, 1],
+        [1, 0, 0],
+        [0, 0, 1]
+    ],
+
+    [
+        [0, 0, 1],
+        [1, 0, 0],
+        [0, 0, 0]
+    ],
+
+    [
+        [0, 0, 0],
+        [1, 0, 0],
+        [0, 0, 1]
+    ],
+
+    [
+        [0, 0, 0],
+        [1, 0, 0],
+        [0, 0, 0]
+    ],
+
+    [
+        [0, 0, 1],
+        [0, 0, 0],
+        [0, 0, 1]
+    ],
+
+    [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 1]
+    ],
+
+    [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ]
+];
 
 export function View(animator: FluxGroup) {
     //#region CONFIG        
@@ -42,7 +109,6 @@ export function View(animator: FluxGroup) {
     const swap_element_time = GAME_CONFIG.swap_element_time;
     const squash_element_easing = GAME_CONFIG.squash_element_easing;
     const squash_element_time = GAME_CONFIG.squash_element_time;
-    const dynamite_activation_duration = GAME_CONFIG.dynamite_activation_duration;
     const helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration;
     const damaged_element_easing = GAME_CONFIG.damaged_element_easing;
     const damaged_element_delay = GAME_CONFIG.damaged_element_delay;
@@ -242,12 +308,50 @@ export function View(animator: FluxGroup) {
             for (let x = 0; x < field_width; x++) {                
                 const cell = state.cells[y][x];
                 if(cell != NotActiveCell) {
+                    make_substrate_view(x, y, state.cells);
                     try_make_under_cell(x, y, cell);
                     make_cell_view(x, y, cell.id, cell.uid, cell?.data?.z_index);
                 }
                 
                 const element = state.elements[y][x];
                 if(element != NullElement) make_element_view(x, y, element.type, element.uid, true);
+            }
+        }
+    }
+
+    function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
+        for(let mask_index = 0; mask_index < SubstrateMasks.length; mask_index++) {
+            let mask = SubstrateMasks[mask_index];
+    
+            let is_90_mask = false;
+            if(mask_index == SubstrateId.LeftRightStrip) is_90_mask = true;
+            
+            let angle = 0;
+            const max_angle = is_90_mask ? 90 : 270;
+            while(angle <= max_angle) {
+                let is_valid = true;
+                for(let i = y - (mask.length - 1) / 2; (i <= y + (mask.length - 1) / 2) && is_valid; i++) {
+                    for(let j = x - (mask[0].length - 1) / 2; (j <= x + (mask[0].length - 1) / 2) && is_valid; j++) {
+                        if(mask[i - (y - (mask.length - 1) / 2)][j - (x - (mask[0].length - 1) / 2)] == 1) {
+                            if(is_valid_pos(j, i, cells[0].length, cells.length)) {
+                                const cell = cells[i][j];
+                                is_valid = (cell == NotActiveCell);
+                            } else is_valid = true;
+                        }
+                    }
+                }
+
+                if(is_valid) {
+                    const pos = get_world_pos(x, y, z_index);
+                    const _go = gm.make_go('substrate_view', pos);
+                    gm.set_rotation_hash(_go, -angle);
+                    sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
+                    go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+                    return;
+                }
+                
+                mask = rotate_matrix_90(mask);
+                angle += 90;
             }
         }
     }
@@ -551,6 +655,7 @@ export function View(animator: FluxGroup) {
         combinate_phase_duration = 0;
     }
 
+    // TODO: refactoring
     function on_moved_elements_animation(message: Messages[MessageId]) {
         const elements = message as MovedElementsMessage;
         const delayed_row_in_column: number[] = [];
@@ -602,12 +707,6 @@ export function View(animator: FluxGroup) {
                                 const v = (to_world_pos - vmath.vector3(anim_pos.x, anim_pos.y, 0)) as vmath.vector3;
                                 const l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2));
                                 move_duration = time * (l / distance_beetwen_cells);
-                                print("DURATION: ", duration_of_movement_between_cells);
-                                print("ORIGINAL DISTANCE: ", distance_beetwen_cells);
-                                print("CALCULATE DISTANCE: ", l);
-                                print("DELTA: ", delta);
-                                if(point.type == MoveType.Filled) print("FILLED: ", move_duration);
-                                else print("OTHER: ", move_duration);
                             } else {
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;
@@ -634,12 +733,6 @@ export function View(animator: FluxGroup) {
                                 const v = (to_world_pos - current_world_pos) as vmath.vector3;
                                 const l = math.sqrt(math.pow(v.x, 2) + math.pow(v.y, 2));
                                 move_duration = time * (l / distance_beetwen_cells);
-                                print("DURATION: ", duration_of_movement_between_cells);
-                                print("ORIGINAL DISTANCE: ", distance_beetwen_cells);
-                                print("CALCULATE DISTANCE: ", l);
-                                print("DELTA: ", delta);
-                                if(point.type == MoveType.Filled) print("FILLED: ", move_duration);
-                                else print("OTHER: ", move_duration);
                             } else {
                                 const diagonal = math.sqrt(math.pow(cell_size, 2) + math.pow(cell_size, 2));
                                 const delta = diagonal / cell_size;

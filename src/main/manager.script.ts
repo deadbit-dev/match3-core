@@ -27,7 +27,7 @@ export function init(this: props) {
     default_style.scroll.WHEEL_SCROLL_SPEED = 10;
     druid.set_default_style(default_style);
 
-    Camera.set_go_prjection(-1, 1);
+    Camera.set_go_prjection(-1, 1, -3, 3);
     
     Scene.load("game", true);
     Scene.set_bg('#88dfeb');
