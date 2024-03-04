@@ -30,7 +30,7 @@ export function init(this: props) {
     Camera.set_go_prjection(-1, 1);
     
     Scene.load("game", true);
-    Scene.set_bg('#321553');
+    Scene.set_bg('#88dfeb');
 }
 
 export function update(this: props, dt: number): void {

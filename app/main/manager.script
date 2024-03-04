@@ -17,7 +17,7 @@ function ____exports.init(self)
     druid.set_default_style(default_style)
     Camera.set_go_prjection(-1, 1)
     Scene.load("game", true)
-    Scene.set_bg("#321553")
+    Scene.set_bg("#88dfeb")
 end
 function ____exports.update(self, dt)
     Manager.update(dt)

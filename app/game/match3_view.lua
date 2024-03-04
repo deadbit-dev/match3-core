@@ -217,6 +217,9 @@ function ____exports.View(animator)
             vmath.vector3(scale_ratio, scale_ratio, 1),
             _go
         )
+        if cell_id == CellId.Base then
+            gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
+        end
         local index = gm.add_game_item({_hash = _go, is_clickable = true})
         if game_id_to_view_index[id] == nil then
             game_id_to_view_index[id] = {}
@@ -959,10 +962,9 @@ function ____exports.View(animator)
     field_height = level_config.field.height
     local offset_border = level_config.field.offset_border
     local origin_cell_size = level_config.field.cell_size
-    cell_size = math.min((game_width - offset_border * 2) / field_width, 100)
-    print("CELL_SIZE: ", cell_size)
+    cell_size = math.floor(math.min((game_width - offset_border * 2) / field_width, 100))
     scale_ratio = cell_size / origin_cell_size
-    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size), 0)
+    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size) + 50, 0)
     event_to_animation = {
         ON_SWAP_ELEMENTS = on_swap_element_animation,
         ON_COMBINED = on_combined_animation,

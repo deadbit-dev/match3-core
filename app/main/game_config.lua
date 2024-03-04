@@ -50,6 +50,7 @@ ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
+local ____temp_4 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#ffffff'") or "#ffffff"
 local ____temp_0
 if sys.get_sys_info().system_name == "HTML5" then
     ____temp_0 = html5.run("new URL(location).searchParams.get('move')==null") == "true"
@@ -62,12 +63,12 @@ ____exports._GAME_CONFIG = {
     swap_element_time = 0.25,
     squash_element_easing = ____go_EASING_INCUBIC_2,
     squash_element_time = 0.3,
-    dynamite_activation_duration = 1,
     helicopter_fly_duration = 0.75,
     damaged_element_easing = ____go_EASING_INOUTBACK_3,
     damaged_element_time = 0.55,
     damaged_element_delay = 0.1,
-    damaged_element_scale = 0.5,
+    damaged_element_scale = 0.3,
+    base_cell_color = ____temp_4,
     movement_to_point = ____temp_0,
     duration_of_movement_bettween_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.07")) or 0.07,
     spawn_element_easing = go.EASING_INCUBIC,
@@ -110,8 +111,8 @@ ____exports._GAME_CONFIG = {
         {field = {
             width = 8,
             height = 8,
-            cell_size = 64,
-            offset_border = 10,
+            cell_size = 128,
+            offset_border = 20,
             complex_move = false,
             cells = {
                 {
@@ -281,8 +282,8 @@ ____exports._GAME_CONFIG = {
         {field = {
             width = 8,
             height = 8,
-            cell_size = 64,
-            offset_border = 10,
+            cell_size = 128,
+            offset_border = 20,
             complex_move = false,
             cells = {
                 {
@@ -452,8 +453,8 @@ ____exports._GAME_CONFIG = {
         {field = {
             width = 8,
             height = 8,
-            cell_size = 64,
-            offset_border = 10,
+            cell_size = 128,
+            offset_border = 20,
             complex_move = false,
             cells = {
                 {
@@ -623,8 +624,8 @@ ____exports._GAME_CONFIG = {
         {field = {
             width = 8,
             height = 8,
-            cell_size = 64,
-            offset_border = 10,
+            cell_size = 128,
+            offset_border = 20,
             complex_move = false,
             cells = {
                 {
@@ -794,8 +795,8 @@ ____exports._GAME_CONFIG = {
         {field = {
             width = 8,
             height = 8,
-            cell_size = 64,
-            offset_border = 10,
+            cell_size = 128,
+            offset_border = 20,
             complex_move = true,
             cells = {
                 {

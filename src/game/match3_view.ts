@@ -59,10 +59,9 @@ export function View(animator: FluxGroup) {
     const offset_border = level_config['field']['offset_border'];
     const origin_cell_size = level_config['field']['cell_size'];
 
-    const cell_size = math.min((game_width - offset_border * 2) / field_width, 100);
-    print("CELL_SIZE: ", cell_size);
+    const cell_size = math.floor(math.min((game_width - offset_border * 2) / field_width, 100));
     const scale_ratio = cell_size / origin_cell_size;
-    const cells_offset = vmath.vector3(game_width / 2 - (field_width / 2 * cell_size), -(game_height / 2 - (field_height / 2 * cell_size)), 0);
+    const cells_offset = vmath.vector3(game_width / 2 - (field_width / 2 * cell_size), -(game_height / 2 - (field_height / 2 * cell_size)) + 50, 0);
 
     const event_to_animation: {[key in string]: (data: Messages[MessageId]) => number} = {
         'ON_SWAP_ELEMENTS': on_swap_element_animation,
@@ -259,6 +258,8 @@ export function View(animator: FluxGroup) {
 
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+
+        if(cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
         
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
         if(game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];

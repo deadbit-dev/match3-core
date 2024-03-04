@@ -56,23 +56,17 @@ export const _GAME_CONFIG = {
     squash_element_easing: go.EASING_INCUBIC,
     squash_element_time: 0.3,
 
-    dynamite_activation_duration: 1,
     helicopter_fly_duration: 0.75,
 
     damaged_element_easing: go.EASING_INOUTBACK,
     damaged_element_time: 0.55,
     damaged_element_delay: 0.1,
-    damaged_element_scale: 0.5,
+    damaged_element_scale: 0.3,
 
-    // ---------------Вариант движения в точку-----------------
+    base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#ffffff'`) : '#ffffff',
+
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
     duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.07`))! : 0.07,
-    // --------------------------------------------------------
-
-    // ---------------Вариант движения по каждой клетке -----------------
-    // movement_to_point: false,
-    // duration_of_movement_bettween_cells: 0.15,
-    // ------------------------------------------------------------------
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -218,8 +212,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
-                cell_size: 64,
-                offset_border: 10,
+                cell_size: 128,
+                offset_border: 20,
                 complex_move: false,
 
                 cells: [
@@ -255,8 +249,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
-                cell_size: 64,
-                offset_border: 10,
+                cell_size: 128,
+                offset_border: 20,
                 complex_move: false,
 
                 cells: [
@@ -292,8 +286,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
-                cell_size: 64,
-                offset_border: 10,
+                cell_size: 128,
+                offset_border: 20,
                 complex_move: false,
 
                 cells: [
@@ -329,8 +323,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
-                cell_size: 64,
-                offset_border: 10,
+                cell_size: 128,
+                offset_border: 20,
                 complex_move: false,
 
                 cells: [
@@ -366,8 +360,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
-                cell_size: 64,
-                offset_border: 10,
+                cell_size: 128,
+                offset_border: 20,
                 complex_move: true,
 
                 cells: [
