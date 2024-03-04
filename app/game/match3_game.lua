@@ -3,9 +3,9 @@ local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
+local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayPush = ____lualib.__TS__ArrayPush
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
-local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
@@ -149,6 +149,7 @@ function ____exports.Game()
         if __TS__ArrayIndexOf(activated_elements, element.uid) ~= -1 then
             return false
         end
+        activated_elements[#activated_elements + 1] = element.uid
         local activated = false
         if try_activate_rocket(x, y) then
             activated = true
@@ -159,8 +160,8 @@ function ____exports.Game()
         elseif try_activate_diskosphere(x, y) then
             activated = true
         end
-        if activated then
-            activated_elements[#activated_elements + 1] = element.uid
+        if not activated then
+            __TS__ArraySplice(activated_elements, #activated_elements - 1, 1)
         end
         return activated
     end
@@ -173,6 +174,7 @@ function ____exports.Game()
         if __TS__ArrayIndexOf(activated_elements, element.uid) ~= -1 or __TS__ArrayIndexOf(activated_elements, other_element.uid) ~= -1 then
             return false
         end
+        __TS__ArrayPush(activated_elements, element.uid, other_element.uid)
         local activated = false
         if try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y) then
             activated = true
@@ -205,8 +207,8 @@ function ____exports.Game()
         elseif try_activate_swaped_buster_with_buster(x, y, other_x, other_y) then
             activated = true
         end
-        if activated then
-            __TS__ArrayPush(activated_elements, element.uid, other_element.uid)
+        if not activated then
+            __TS__ArraySplice(activated_elements, #activated_elements - 2, 2)
         end
         return activated
     end

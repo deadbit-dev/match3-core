@@ -196,13 +196,15 @@ export function Game() {
         if(element == NullElement) return false;
         if(activated_elements.indexOf(element.uid) != -1) return false;
         
+        activated_elements.push(element.uid);
+
         let activated = false;
         if(try_activate_rocket(x, y)) activated = true;
         else if(try_activate_helicopter(x, y)) activated = true;
         else if(try_activate_dynamite(x, y)) activated = true;
         else if(try_activate_diskosphere(x, y)) activated = true;
 
-        if(activated) activated_elements.push(element.uid);
+        if(!activated) activated_elements.splice(activated_elements.length - 1, 1);
 
         return activated;
     }
@@ -213,6 +215,8 @@ export function Game() {
 
         if(element == NullElement || other_element == NullElement) return false;
         if(activated_elements.indexOf(element.uid) != -1 || activated_elements.indexOf(other_element.uid) != -1) return false;
+
+        activated_elements.push(element.uid, other_element.uid);
 
         let activated = false;
         if(try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y)) activated = true;
@@ -231,7 +235,7 @@ export function Game() {
         else if(try_activate_swaped_dynamite_with_element(other_x, other_y, x, y)) activated = true;
         else if(try_activate_swaped_buster_with_buster(x, y, other_x, other_y)) activated = true;
 
-        if(activated) activated_elements.push(element.uid, other_element.uid);
+        if(!activated) activated_elements.splice(activated_elements.length - 2, 2);
 
         return activated;
     }
