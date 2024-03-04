@@ -73,7 +73,7 @@ ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
-local ____temp_4 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#ffffff'") or "#ffffff"
+local ____temp_4 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#c4a378'") or "#c4a378"
 local ____temp_0
 if sys.get_sys_info().system_name == "HTML5" then
     ____temp_0 = html5.run("new URL(location).searchParams.get('move')==null") == "true"
