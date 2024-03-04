@@ -93,7 +93,7 @@ export const _GAME_CONFIG = {
     default_element_z_index: 0,
 
     substrate_database: {
-        [SubstrateId.OutsideArc]: 'ouside_arc',
+        [SubstrateId.OutsideArc]: 'outside_arc',
         [SubstrateId.OutsideInsideAngle]: 'outside_inside_angle',
         [SubstrateId.OutsideAngle]: 'outside_angle',
         [SubstrateId.LeftRightStrip]: 'left_right_strip',
