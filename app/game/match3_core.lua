@@ -654,9 +654,11 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     break
                 end
             end
-            if found then
-                is_procesed = true
+            if not found then
+                local element = combination.elements[math.random(0, #combination.elements - 1) + 1]
+                on_combinated(element, combination)
             end
+            is_procesed = true
         end
         __TS__ArraySplice(moved_elements, 0, #moved_elements)
         return is_procesed

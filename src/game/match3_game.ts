@@ -533,9 +533,7 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        for(let i = 0; i < 3; i++) {
-            event_data.target_elements.push(remove_random_element(event_data.damaged_elements));
-        }
+        for(let i = 0; i < 3; i++) event_data.target_elements.push(remove_random_element(event_data.damaged_elements));
 
         field.remove_element(x, y, true, false);
         field.remove_element(other_x, other_y, true, false);

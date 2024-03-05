@@ -694,7 +694,12 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                 if(found) break;
             }
             
-            if(found) is_procesed = true;
+            if(!found) {
+                const element = combination.elements[math.random(0, combination.elements.length - 1)];
+                on_combinated(element, combination);
+            }
+
+            is_procesed = true;
         }
         
         moved_elements.splice(0, moved_elements.length);
