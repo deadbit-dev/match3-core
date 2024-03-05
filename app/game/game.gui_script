@@ -42,25 +42,75 @@ function ____exports.init(self)
         function() return EventBus.send("TRY_REVERT_STEP") end
     )
     self.druid:new_button(
+        "spinning_button",
+        function()
+            if GameStorage.get("spinning_counts") > 0 then
+                self.busters.spinning_active = not self.busters.spinning_active
+            end
+            self.busters.hammer_active = false
+            self.busters.horizontal_rocket_active = false
+            self.busters.vertical_rocket_active = false
+            EventBus.send("UPDATED_BUTTONS")
+        end
+    )
+    self.druid:new_button(
         "hammer_button",
         function()
             if GameStorage.get("hammer_counts") > 0 then
                 self.busters.hammer_active = not self.busters.hammer_active
             end
+            self.busters.spinning_active = false
+            self.busters.horizontal_rocket_active = false
+            self.busters.vertical_rocket_active = false
+            EventBus.send("UPDATED_BUTTONS")
+        end
+    )
+    self.druid:new_button(
+        "horizontal_rocket_button",
+        function()
+            if GameStorage.get("horizontal_rocket_counts") > 0 then
+                self.busters.horizontal_rocket_active = not self.busters.horizontal_rocket_active
+            end
+            self.busters.spinning_active = false
+            self.busters.hammer_active = false
+            self.busters.vertical_rocket_active = false
+            EventBus.send("UPDATED_BUTTONS")
+        end
+    )
+    self.druid:new_button(
+        "vertical_rocket_button",
+        function()
+            if GameStorage.get("vertical_rocket_counts") > 0 then
+                self.busters.vertical_rocket_active = not self.busters.vertical_rocket_active
+            end
+            self.busters.spinning_active = false
+            self.busters.hammer_active = false
+            self.busters.horizontal_rocket_active = false
+            EventBus.send("UPDATED_BUTTONS")
+        end
+    )
+    EventBus.on(
+        "UPDATED_BUTTONS",
+        function()
+            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active and 0.5 or 1)
+            set_text(
+                "spinning_counts",
+                GameStorage.get("spinning_counts")
+            )
             set_text_colors({"hammer_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
             set_text(
                 "hammer_counts",
                 GameStorage.get("hammer_counts")
             )
-        end
-    )
-    EventBus.on(
-        "UPDATED_HAMMER",
-        function()
-            set_text_colors({"hammer_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
+            set_text_colors({"horizontal_rocket_button"}, "#fff", self.busters.horizontal_rocket_active and 0.5 or 1)
             set_text(
-                "hammer_counts",
-                GameStorage.get("hammer_counts")
+                "horizontal_rocket_counts",
+                GameStorage.get("horizontal_rocket_counts")
+            )
+            set_text_colors({"vertical_rocket_button"}, "#fff", self.busters.vertical_rocket_active and 0.5 or 1)
+            set_text(
+                "vertical_rocket_counts",
+                GameStorage.get("vertical_rocket_counts")
             )
         end
     )

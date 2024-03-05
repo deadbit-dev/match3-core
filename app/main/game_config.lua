@@ -833,7 +833,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Ruby
                 }
             }
-        }, busters = {hammer_active = false}},
+        }, busters = {spinning_active = false, hammer_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 8,
             height = 8,
@@ -1116,5 +1116,11 @@ ____exports._GAME_CONFIG = {
         }, busters = {hammer_active = false}}
     }
 }
-____exports._STORAGE_CONFIG = {current_level = 4, hammer_counts = 3}
+____exports._STORAGE_CONFIG = {
+    current_level = 4,
+    hammer_counts = 3,
+    spinning_counts = 3,
+    horizontal_rocket_counts = 3,
+    vertical_rocket_counts = 3
+}
 return ____exports

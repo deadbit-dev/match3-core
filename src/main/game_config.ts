@@ -387,7 +387,10 @@ export const _GAME_CONFIG = {
             },
 
             busters: {
-                hammer_active: false
+                spinning_active: false,
+                hammer_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         },
 
@@ -470,6 +473,9 @@ export const _GAME_CONFIG = {
 export const _STORAGE_CONFIG = {
     current_level: 4,
     hammer_counts: 3,
+    spinning_counts: 3,
+    horizontal_rocket_counts: 3,
+    vertical_rocket_counts: 3
 };
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
@@ -533,5 +539,6 @@ export type _UserMessages = {
     ON_REVERT_STEP: RevertStepMessage,
 
     ON_ELEMENT_ACTIVATED: ItemInfo,
-    UPDATED_HAMMER: VoidMessage
+
+    UPDATED_BUTTONS: VoidMessage,
 };

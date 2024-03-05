@@ -23,7 +23,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_hammer_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -33,9 +33,15 @@ function ____exports.Game()
         end
     end
     function set_busters()
+        GameStorage.set("spinning_counts", 5)
+        busters.spinning_active = GameStorage.get("spinning_counts") <= 0
         GameStorage.set("hammer_counts", 5)
         busters.hammer_active = GameStorage.get("hammer_counts") <= 0
-        EventBus.send("UPDATED_HAMMER")
+        GameStorage.set("horizontal_rocket_counts", 5)
+        busters.horizontal_rocket_active = GameStorage.get("horizontal_rocket_counts") <= 0
+        GameStorage.set("vertical_rocket_counts", 5)
+        busters.vertical_rocket_active = GameStorage.get("vertical_rocket_counts") <= 0
+        EventBus.send("UPDATED_BUTTONS")
     end
     function set_events()
         EventBus.on("LOAD_FIELD", load_field)
@@ -150,7 +156,16 @@ function ____exports.Game()
         return element
     end
     function try_click_activation(x, y)
+        if try_spinning_activation(x, y) then
+            return true
+        end
         if try_hammer_activation(x, y) then
+            return true
+        end
+        if try_horizontal_rocket_activation(x, y) then
+            return true
+        end
+        if try_vertical_rocket_activation(x, y) then
             return true
         end
         if field.try_click(x, y) and try_activate_buster_element(x, y) then
@@ -637,6 +652,18 @@ function ____exports.Game()
         end
         return try_activate_buster_element(x, y, false) and try_activate_buster_element(other_x, other_y, false)
     end
+    function try_spinning_activation(x, y)
+        if not busters.spinning_active or GameStorage.get("spinning_counts") <= 0 then
+            return false
+        end
+        GameStorage.set(
+            "spinning_counts",
+            GameStorage.get("spinning_counts") - 1
+        )
+        busters.spinning_active = false
+        EventBus.send("UPDATED_BUTTONS")
+        return true
+    end
     function try_hammer_activation(x, y)
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
@@ -654,7 +681,31 @@ function ____exports.Game()
             GameStorage.get("hammer_counts") - 1
         )
         busters.hammer_active = false
-        EventBus.send("UPDATED_HAMMER")
+        EventBus.send("UPDATED_BUTTONS")
+        return true
+    end
+    function try_horizontal_rocket_activation(x, y)
+        if not busters.horizontal_rocket_active or GameStorage.get("horizontal_rocket_counts") <= 0 then
+            return false
+        end
+        GameStorage.set(
+            "horizontal_rocket_counts",
+            GameStorage.get("horizontal_rocket_counts") - 1
+        )
+        busters.horizontal_rocket_active = false
+        EventBus.send("UPDATED_BUTTONS")
+        return true
+    end
+    function try_vertical_rocket_activation(x, y)
+        if not busters.vertical_rocket_active or GameStorage.get("vertical_rocket_counts") <= 0 then
+            return false
+        end
+        GameStorage.set(
+            "vertical_rocket_counts",
+            GameStorage.get("vertical_rocket_counts") - 1
+        )
+        busters.hammer_active = false
+        EventBus.send("UPDATED_BUTTONS")
         return true
     end
     function try_swap_elements(from_x, from_y, to_x, to_y)
@@ -735,29 +786,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch171 = combination.type
-            local ____cond171 = ____switch171 == CombinationType.Comb4
-            if ____cond171 then
+            local ____switch180 = combination.type
+            local ____cond180 = ____switch180 == CombinationType.Comb4
+            if ____cond180 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond171 = ____cond171 or ____switch171 == CombinationType.Comb5
-            if ____cond171 then
+            ____cond180 = ____cond180 or ____switch180 == CombinationType.Comb5
+            if ____cond180 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond171 = ____cond171 or ____switch171 == CombinationType.Comb2x2
-            if ____cond171 then
+            ____cond180 = ____cond180 or ____switch180 == CombinationType.Comb2x2
+            if ____cond180 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond171 = ____cond171 or (____switch171 == CombinationType.Comb3x3a or ____switch171 == CombinationType.Comb3x3b)
-            if ____cond171 then
+            ____cond180 = ____cond180 or (____switch180 == CombinationType.Comb3x3a or ____switch180 == CombinationType.Comb3x3b)
+            if ____cond180 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond171 = ____cond171 or (____switch171 == CombinationType.Comb3x4 or ____switch171 == CombinationType.Comb3x5)
-            if ____cond171 then
+            ____cond180 = ____cond180 or (____switch180 == CombinationType.Comb3x4 or ____switch180 == CombinationType.Comb3x5)
+            if ____cond180 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -800,9 +851,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch182 = cell.type
-            local ____cond182 = ____switch182 == CellType.ActionLocked
-            if ____cond182 then
+            local ____switch191 = cell.type
+            local ____cond191 = ____switch191 == CellType.ActionLocked
+            if ____cond191 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -818,8 +869,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond182 = ____cond182 or ____switch182 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond182 then
+            ____cond191 = ____cond191 or ____switch191 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond191 then
                 if cell.cnt_near_acts == nil then
                     break
                 end

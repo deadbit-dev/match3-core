@@ -526,7 +526,7 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "ui/lable"
-  id: "rocket_button"
+  id: "vertical_rocket_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_BOTTOM
   pivot: PIVOT_CENTER
@@ -585,12 +585,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "ui/lable"
-  id: "rocket_lable"
+  id: "vertical_rocket_lable"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "rocket_button"
+  parent: "vertical_rocket_button"
   layer: ""
   inherit_alpha: false
   slice9 {
@@ -646,7 +646,7 @@ nodes {
   text: "3\n"
   ""
   font: "myFont"
-  id: "rocket_counts"
+  id: "vertical_rocket_counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
@@ -664,7 +664,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  parent: "rocket_lable"
+  parent: "vertical_rocket_lable"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -712,12 +712,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "ui/rocket_icon"
-  id: "rocket_icon"
+  id: "vertical_rocket_icon"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "rocket_button"
+  parent: "vertical_rocket_button"
   layer: ""
   inherit_alpha: true
   slice9 {
@@ -771,7 +771,7 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "ui/lable"
-  id: "bow_button"
+  id: "horizontal_rocket_button"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_BOTTOM
   pivot: PIVOT_CENTER
@@ -830,12 +830,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "ui/lable"
-  id: "bow_lable"
+  id: "horizontal_rocket_lable"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "bow_button"
+  parent: "horizontal_rocket_button"
   layer: ""
   inherit_alpha: false
   slice9 {
@@ -891,7 +891,7 @@ nodes {
   text: "3\n"
   ""
   font: "myFont"
-  id: "bow_counts"
+  id: "horizontal_rocket_counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
@@ -909,7 +909,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  parent: "bow_lable"
+  parent: "horizontal_rocket_lable"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -933,7 +933,7 @@ nodes {
   rotation {
     x: 0.0
     y: 0.0
-    z: 180.0
+    z: -90.0
     w: 1.0
   }
   scale {
@@ -956,13 +956,13 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/arrow_icon"
-  id: "bow_icon"
+  texture: "ui/rocket_icon"
+  id: "horizontal_rocket_icon"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "bow_button"
+  parent: "horizontal_rocket_button"
   layer: ""
   inherit_alpha: true
   slice9 {

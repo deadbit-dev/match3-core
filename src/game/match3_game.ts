@@ -89,10 +89,19 @@ export function Game() {
     }
     
     function set_busters() {
+        GameStorage.set('spinning_counts', 5);
+        busters.spinning_active = (GameStorage.get('spinning_counts') <= 0);
+        
         GameStorage.set('hammer_counts', 5);
         busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
+        
+        GameStorage.set('horizontal_rocket_counts', 5);
+        busters.horizontal_rocket_active = (GameStorage.get('horizontal_rocket_counts') <= 0);
 
-        EventBus.send('UPDATED_HAMMER');
+        GameStorage.set('vertical_rocket_counts', 5);
+        busters.vertical_rocket_active = (GameStorage.get('vertical_rocket_counts') <= 0);
+
+        EventBus.send('UPDATED_BUTTONS');
     }
     
     function set_events() {
@@ -198,7 +207,11 @@ export function Game() {
     //#region ACTIONS       
     
     function try_click_activation(x: number, y: number) {
+        if(try_spinning_activation(x, y)) return true;
         if(try_hammer_activation(x, y)) return true;
+        if(try_horizontal_rocket_activation(x, y)) return true;
+        if(try_vertical_rocket_activation(x, y)) return true;
+
         if(field.try_click(x, y) && try_activate_buster_element(x, y)) return true;
 
         return false;
@@ -630,6 +643,19 @@ export function Game() {
         return try_activate_buster_element(x, y, false) && try_activate_buster_element(other_x, other_y, false);
     }
     
+    function try_spinning_activation(x: number, y: number) {
+        if(!busters.spinning_active || GameStorage.get('spinning_counts') <= 0) return false;
+        
+        // TODO
+
+        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
+        busters.spinning_active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+
+        return true;
+    }
+    
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
@@ -643,7 +669,33 @@ export function Game() {
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
         busters.hammer_active = false;
 
-        EventBus.send('UPDATED_HAMMER');
+        EventBus.send('UPDATED_BUTTONS');
+
+        return true;
+    }
+
+    function try_horizontal_rocket_activation(x: number, y: number) {
+        if(!busters.horizontal_rocket_active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
+        
+        // TODO
+
+        GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') - 1);
+        busters.horizontal_rocket_active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+
+        return true;
+    }
+    
+    function try_vertical_rocket_activation(x: number, y: number) {
+        if(!busters.vertical_rocket_active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
+        
+        // TODO
+
+        GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') - 1);
+        busters.hammer_active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
 
         return true;
     }
