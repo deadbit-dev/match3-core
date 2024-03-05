@@ -676,8 +676,28 @@ export function Game() {
 
     function try_horizontal_rocket_activation(x: number, y: number) {
         if(!busters.horizontal_rocket_active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
+
+        const element = field.get_element(x, y);
+        if(element == NullElement) return false;
+
+        const event_data = {} as ActivationMessage;
+        write_game_step_event('ROCKET_ACTIVATED', event_data);
         
-        // TODO
+        event_data.element = {x, y, uid: element.uid};
+        event_data.damaged_elements = [];
+        
+        for(let i = 0; i < field_width; i++) {
+            if(i != x) {
+                if(is_buster(i, y)) try_activate_buster_element(i, y);
+                else {
+                    const removed_element = field.remove_element(i, y, true, false);
+                    if(removed_element != undefined) event_data.damaged_elements.push({x: i, y, uid: removed_element.uid});
+                }
+            }
+        }
+
+        if(is_buster(x, y)) try_activate_buster_element(x, y);
+        else field.remove_element(x, y, true, false);
 
         GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') - 1);
         busters.horizontal_rocket_active = false;
@@ -690,10 +710,30 @@ export function Game() {
     function try_vertical_rocket_activation(x: number, y: number) {
         if(!busters.vertical_rocket_active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
         
-        // TODO
+        const element = field.get_element(x, y);
+        if(element == NullElement) return false;
+
+        const event_data = {} as ActivationMessage;
+        write_game_step_event('ROCKET_ACTIVATED', event_data);
+        
+        event_data.element = {x, y, uid: element.uid};
+        event_data.damaged_elements = [];
+        
+        for(let i = 0; i < field_height; i++) {
+            if(i != y) {
+                if(is_buster(x, i)) try_activate_buster_element(x, i);
+                else {
+                    const removed_element = field.remove_element(x, i, true, false);
+                    if(removed_element != undefined) event_data.damaged_elements.push({x, y: i, uid: removed_element.uid});
+                }
+            }
+        }
+
+        if(is_buster(x, y)) try_activate_buster_element(x, y);
+        else field.remove_element(x, y, true, false);
 
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') - 1);
-        busters.hammer_active = false;
+        busters.vertical_rocket_active = false;
 
         EventBus.send('UPDATED_BUTTONS');
 
