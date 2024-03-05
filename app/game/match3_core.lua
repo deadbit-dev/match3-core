@@ -730,45 +730,35 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function try_move_element_from_corners(x, y)
         local neighbor_cells = get_neighbor_cells(x, y, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
-        local available_cells = {}
         for ____, neighbor_cell in ipairs(neighbor_cells) do
             local cell = get_cell(neighbor_cell.x, neighbor_cell.y)
             if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
-                available_cells[#available_cells + 1] = neighbor_cell
+                local element = get_element(neighbor_cell.x, neighbor_cell.y)
+                if element ~= ____exports.NullElement then
+                    set_element(x, y, element)
+                    set_element(neighbor_cell.x, neighbor_cell.y, ____exports.NullElement)
+                    on_move_element(
+                        neighbor_cell.x,
+                        neighbor_cell.y,
+                        x,
+                        y,
+                        element
+                    )
+                    local index = __TS__ArrayFindIndex(
+                        moved_elements,
+                        function(____, e) return e.data.uid == element.uid end
+                    )
+                    if index == -1 then
+                        moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
+                    else
+                        local ____moved_elements_index_points_8 = moved_elements[index + 1].points
+                        ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
+                    end
+                    return true
+                end
             end
         end
-        if #available_cells == 0 then
-            return false
-        end
-        local neighbor_elements = get_neighbor_elements(x, y, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
-        local neighbor_element = table.remove(neighbor_elements)
-        if neighbor_element == nil then
-            return false
-        end
-        local element = get_element(neighbor_element.x, neighbor_element.y)
-        if element == ____exports.NullElement then
-            return false
-        end
-        set_element(x, y, element)
-        set_element(neighbor_element.x, neighbor_element.y, ____exports.NullElement)
-        on_move_element(
-            neighbor_element.x,
-            neighbor_element.y,
-            x,
-            y,
-            element
-        )
-        local index = __TS__ArrayFindIndex(
-            moved_elements,
-            function(____, e) return e.data.uid == neighbor_element.uid end
-        )
-        if index == -1 then
-            moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
-        else
-            local ____moved_elements_index_points_8 = moved_elements[index + 1].points
-            ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
-        end
-        return true
+        return false
     end
     local function process_falling()
         local is_procesed = false
@@ -831,13 +821,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch184 = mode
-            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
-            if ____cond184 then
+            local ____switch182 = mode
+            local ____cond182 = ____switch182 == ____exports.ProcessMode.Combinate
+            if ____cond182 then
                 return process_combinate()
             end
-            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
-            if ____cond184 then
+            ____cond182 = ____cond182 or ____switch182 == ____exports.ProcessMode.MoveElements
+            if ____cond182 then
                 return process_move()
             end
         until true

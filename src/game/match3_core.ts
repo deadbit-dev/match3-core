@@ -753,36 +753,26 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             [0, 0, 0]
         ]);
 
-        const available_cells = [];
         for(const neighbor_cell of neighbor_cells) {
             const cell = get_cell(neighbor_cell.x, neighbor_cell.y);
-            if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) available_cells.push(neighbor_cell);
+            if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                const element = get_element(neighbor_cell.x, neighbor_cell.y);
+                if(element != NullElement) {
+                    set_element(x, y, element);
+                    set_element(neighbor_cell.x, neighbor_cell.y, NullElement);
+
+                    on_move_element(neighbor_cell.x, neighbor_cell.y, x, y, element);
+
+                    const index = moved_elements.findIndex((e) => e.data.uid == element.uid); 
+                    if(index == -1) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Filled}], data: element});
+                    else moved_elements[index].points.push({to_x: x, to_y: y, type: MoveType.Filled});
+
+                    return true;
+                }
+            }
         }
-        
-        if(available_cells.length == 0) return false;
 
-        const neighbor_elements = get_neighbor_elements(x, y, [
-            [1, 0, 1],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]);
-
-        const neighbor_element = neighbor_elements.pop();
-        if(neighbor_element == undefined) return false;
-
-        const element = get_element(neighbor_element.x, neighbor_element.y);
-        if(element == NullElement) return false;
-
-        set_element(x, y, element);
-        set_element(neighbor_element.x, neighbor_element.y, NullElement);
-
-        on_move_element(neighbor_element.x, neighbor_element.y, x, y, element);
-    
-        const index = moved_elements.findIndex((e) => e.data.uid == neighbor_element.uid); 
-        if(index == -1) moved_elements.push({points: [{to_x: x, to_y: y, type: MoveType.Filled}], data: element});
-        else moved_elements[index].points.push({to_x: x, to_y: y, type: MoveType.Filled});
-
-        return true;
+        return false;
     }
 
     function process_falling() {
