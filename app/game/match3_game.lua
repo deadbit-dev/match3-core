@@ -561,43 +561,7 @@ function ____exports.Game()
         local event_data = {}
         write_game_step_event("DYNAMITE_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, uid = dynamite.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                0,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            }
-        })
+        event_data.damaged_elements = remove_element_by_mask(x, y, {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}})
         field.remove_element(x, y, true, false)
         return true
     end
@@ -620,8 +584,6 @@ function ____exports.Game()
                 1,
                 1,
                 1,
-                1,
-                1,
                 1
             },
             {
@@ -629,26 +591,13 @@ function ____exports.Game()
                 1,
                 1,
                 1,
-                1,
-                1,
                 1
             },
             {
-                1,
-                1,
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
                 1,
                 1,
                 0,
                 1,
-                1,
                 1
             },
             {
@@ -656,22 +605,9 @@ function ____exports.Game()
                 1,
                 1,
                 1,
-                1,
-                1,
                 1
             },
             {
-                1,
-                1,
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
                 1,
                 1,
                 1,

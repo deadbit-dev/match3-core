@@ -579,11 +579,9 @@ export function Game() {
         
         event_data.element = {x, y, uid: dynamite.uid};
         event_data.damaged_elements = remove_element_by_mask(x, y, [
-            [1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1],
-            [1, 1, 0, 1, 1],
-            [1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1]
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1]
         ]);
 
         field.remove_element(x, y, true, false);
@@ -604,13 +602,11 @@ export function Game() {
         event_data.element = {x, y, uid: dynamite.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_dynamite.uid};
         event_data.damaged_elements = remove_element_by_mask(x, y, [
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1]
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1]
         ]);
         
         field.remove_element(x, y, true, false);
