@@ -1007,11 +1007,13 @@ function ____exports.View(animator)
     local level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     field_width = level_config.field.width
     field_height = level_config.field.height
+    local max_field_width = level_config.field.max_width
+    local max_field_height = level_config.field.height
     local offset_border = level_config.field.offset_border
     local origin_cell_size = level_config.field.cell_size
-    cell_size = math.floor(math.min((game_width - offset_border * 2) / field_width, 100))
+    cell_size = math.floor(math.min((game_width - offset_border * 2) / max_field_width, 100))
     scale_ratio = cell_size / origin_cell_size
-    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - field_height / 2 * cell_size) + 50, 0)
+    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     event_to_animation = {
         ON_SWAP_ELEMENTS = on_swap_element_animation,
         ON_COMBINED = on_combined_animation,

@@ -244,6 +244,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
@@ -280,6 +282,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
@@ -316,6 +320,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
@@ -352,6 +358,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
@@ -388,6 +396,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 8,
                 height: 8,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
@@ -424,6 +434,8 @@ export const _GAME_CONFIG = {
             field: {
                 width: 6,
                 height: 6,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 
