@@ -774,7 +774,7 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Helicopter,
                     ____exports.ElementId.Topaz,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Emerald,
@@ -784,8 +784,8 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.HorizontalRocket,
+                    ____exports.ElementId.Helicopter,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Topaz,
@@ -794,7 +794,7 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Helicopter,
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Ruby,
                     ____exports.ElementId.Ruby,

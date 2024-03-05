@@ -763,7 +763,10 @@ export function Game() {
     }
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
+        if(is_buster(combined_element.x, combined_element.y)) return;
+
         field.on_combined_base(combined_element, combination);
+        
         if(!try_combo(combined_element, combination)) write_game_step_event('ON_COMBINED', {combined_element, combination});
     }
     

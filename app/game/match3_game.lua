@@ -775,6 +775,9 @@ function ____exports.Game()
         end
     end
     function on_combined(combined_element, combination)
+        if is_buster(combined_element.x, combined_element.y) then
+            return
+        end
         field.on_combined_base(combined_element, combination)
         if not try_combo(combined_element, combination) then
             write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination})
@@ -797,9 +800,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch181 = cell.type
-            local ____cond181 = ____switch181 == CellType.ActionLocked
-            if ____cond181 then
+            local ____switch182 = cell.type
+            local ____cond182 = ____switch182 == CellType.ActionLocked
+            if ____cond182 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -815,8 +818,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond181 = ____cond181 or ____switch181 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond181 then
+            ____cond182 = ____cond182 or ____switch182 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond182 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
