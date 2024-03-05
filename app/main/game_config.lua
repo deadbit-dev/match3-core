@@ -94,6 +94,7 @@ ____exports._GAME_CONFIG = {
     base_cell_color = ____temp_4,
     movement_to_point = ____temp_0,
     duration_of_movement_bettween_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.07")) or 0.07,
+    complex_move = true,
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     buster_delay = 0.5,
@@ -150,7 +151,6 @@ ____exports._GAME_CONFIG = {
             height = 8,
             cell_size = 128,
             offset_border = 20,
-            complex_move = false,
             cells = {
                 {
                     NotActiveCell,
@@ -321,7 +321,6 @@ ____exports._GAME_CONFIG = {
             height = 8,
             cell_size = 128,
             offset_border = 20,
-            complex_move = false,
             cells = {
                 {
                     NotActiveCell,
@@ -492,7 +491,6 @@ ____exports._GAME_CONFIG = {
             height = 8,
             cell_size = 128,
             offset_border = 20,
-            complex_move = false,
             cells = {
                 {
                     NotActiveCell,
@@ -663,7 +661,6 @@ ____exports._GAME_CONFIG = {
             height = 8,
             cell_size = 128,
             offset_border = 20,
-            complex_move = false,
             cells = {
                 {
                     ____exports.CellId.Base,
@@ -834,7 +831,6 @@ ____exports._GAME_CONFIG = {
             height = 8,
             cell_size = 128,
             offset_border = 20,
-            complex_move = true,
             cells = {
                 {
                     ____exports.CellId.Base,
@@ -1005,7 +1001,6 @@ ____exports._GAME_CONFIG = {
             height = 6,
             cell_size = 128,
             offset_border = 20,
-            complex_move = true,
             cells = {
                 {
                     NotActiveCell,
@@ -1083,25 +1078,25 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
                     ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Dimonde
                 },
                 {
                     ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Helicopter,
+                    ____exports.ElementId.Dimonde,
                     ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Helicopter,
                     ____exports.ElementId.Dimonde
                 },
                 {
                     NullElement,
                     ____exports.ElementId.Topaz,
                     ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
                     ____exports.ElementId.Emerald,
                     NullElement
                 }

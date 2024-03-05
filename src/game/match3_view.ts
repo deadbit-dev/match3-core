@@ -136,6 +136,8 @@ export function View(animator: FluxGroup) {
         
         'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
         'ON_CELL_ACTIVATED': on_cell_activated_animation,
+
+        'ON_BUSTER_ACTIVATION': on_buster_activation_begin,
         
         // DISKOSPHERE
         'SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED': on_swaped_buster_with_diskosphere_animation,
@@ -145,7 +147,6 @@ export function View(animator: FluxGroup) {
         'SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED': on_swaped_diskosphere_with_element_animation,
         
         // ROCKET
-        'AXIS_ROCKET_ACTIVATED': on_axis_rocket_activated_animation,
         'ROCKET_ACTIVATED': on_rocket_activated_animation,
         'SWAPED_ROCKETS_ACTIVATED': on_swaped_rockets_animation,
 
@@ -212,12 +213,13 @@ export function View(animator: FluxGroup) {
         for(const event of events) {
             const is_move_phase = (event.key == 'ON_MOVED_ELEMENTS');
             if(is_move_phase) on_move_phase_begin();
+            
             const event_duration = event_to_animation[event.key](event.value);
+            
             if(is_move_phase) {
                 move_phase_duration = event_duration;
                 on_move_phase_end();
-            } else if(event_duration > combinate_phase_duration) combinate_phase_duration = event_duration;
-        }
+            } else if(event_duration > combinate_phase_duration) combinate_phase_duration = event_duration;         }
 
         is_processing = false;
     }
@@ -474,6 +476,12 @@ export function View(animator: FluxGroup) {
         return squash_element_time;
     }
 
+    function on_buster_activation_begin(message: Messages[MessageId]) {
+        flow.delay(combinate_phase_duration + 0.2);
+        combinate_phase_duration = 0;
+        return 0;
+    }
+
     function on_diskisphere_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
         damage_element_animation(activation.element.uid);
@@ -521,15 +529,6 @@ export function View(animator: FluxGroup) {
         });
         
         return squash_duration + damaged_element_time;
-    }
-
-    function on_axis_rocket_activated_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedActivationMessage;
-        damage_element_animation(activation.element.uid);
-        for(const element of activation.damaged_elements)
-            damage_element_animation(element.uid);
-
-        return damaged_element_time;
     }
 
     function on_rocket_activated_animation(message: Messages[MessageId]) {

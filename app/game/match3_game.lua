@@ -48,8 +48,25 @@ function ____exports.Game()
                 if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
                     return
                 end
-                local result = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
-                process_game_step(result)
+                local is_from_buster = is_buster(elements.to_x, elements.to_y)
+                local is_to_buster = is_buster(elements.from_x, elements.from_y)
+                local is_procesed = field.process_state(ProcessMode.Combinate)
+                if is_procesed and (is_from_buster or is_to_buster) then
+                    write_game_step_event("ON_BUSTER_ACTIVATION", {})
+                end
+                local is_activated = false
+                if is_from_buster or is_to_buster then
+                    is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
+                    if not is_activated then
+                        if is_from_buster then
+                            is_activated = try_activate_buster_element(elements.to_x, elements.to_y)
+                        end
+                        if is_to_buster then
+                            is_activated = try_activate_buster_element(elements.from_x, elements.from_y)
+                        end
+                    end
+                end
+                process_game_step(is_procesed or is_activated)
             end
         )
         EventBus.on(
@@ -141,15 +158,20 @@ function ____exports.Game()
         end
         return false
     end
-    function try_activate_buster_element(x, y)
+    function try_activate_buster_element(x, y, with_check)
+        if with_check == nil then
+            with_check = true
+        end
         local element = field.get_element(x, y)
         if element == NullElement then
             return false
         end
-        if __TS__ArrayIndexOf(activated_elements, element.uid) ~= -1 then
-            return false
+        if with_check then
+            if __TS__ArrayIndexOf(activated_elements, element.uid) ~= -1 then
+                return false
+            end
+            activated_elements[#activated_elements + 1] = element.uid
         end
-        activated_elements[#activated_elements + 1] = element.uid
         local activated = false
         if try_activate_rocket(x, y) then
             activated = true
@@ -160,7 +182,7 @@ function ____exports.Game()
         elseif try_activate_diskosphere(x, y) then
             activated = true
         end
-        if not activated then
+        if not activated and with_check then
             __TS__ArraySplice(activated_elements, #activated_elements - 1, 1)
         end
         return activated
@@ -677,9 +699,7 @@ function ____exports.Game()
         if not is_buster(x, y) or not is_buster(other_x, other_y) then
             return false
         end
-        try_activate_buster_element(x, y)
-        try_activate_buster_element(other_x, other_y)
-        return true
+        return try_activate_buster_element(x, y, false) and try_activate_buster_element(other_x, other_y, false)
     end
     function try_hammer_activation(x, y)
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
@@ -779,29 +799,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch165 = combination.type
-            local ____cond165 = ____switch165 == CombinationType.Comb4
-            if ____cond165 then
+            local ____switch171 = combination.type
+            local ____cond171 = ____switch171 == CombinationType.Comb4
+            if ____cond171 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond165 = ____cond165 or ____switch165 == CombinationType.Comb5
-            if ____cond165 then
+            ____cond171 = ____cond171 or ____switch171 == CombinationType.Comb5
+            if ____cond171 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond165 = ____cond165 or ____switch165 == CombinationType.Comb2x2
-            if ____cond165 then
+            ____cond171 = ____cond171 or ____switch171 == CombinationType.Comb2x2
+            if ____cond171 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond165 = ____cond165 or (____switch165 == CombinationType.Comb3x3a or ____switch165 == CombinationType.Comb3x3b)
-            if ____cond165 then
+            ____cond171 = ____cond171 or (____switch171 == CombinationType.Comb3x3a or ____switch171 == CombinationType.Comb3x3b)
+            if ____cond171 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond165 = ____cond165 or (____switch165 == CombinationType.Comb3x4 or ____switch165 == CombinationType.Comb3x5)
-            if ____cond165 then
+            ____cond171 = ____cond171 or (____switch171 == CombinationType.Comb3x4 or ____switch171 == CombinationType.Comb3x5)
+            if ____cond171 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -841,9 +861,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch175 = cell.type
-            local ____cond175 = ____switch175 == CellType.ActionLocked
-            if ____cond175 then
+            local ____switch181 = cell.type
+            local ____cond181 = ____switch181 == CellType.ActionLocked
+            if ____cond181 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -859,8 +879,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond175 = ____cond175 or ____switch175 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond175 then
+            ____cond181 = ____cond181 or ____switch181 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond181 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -1000,7 +1020,7 @@ function ____exports.Game()
     field_width = level_config.field.width
     field_height = level_config.field.height
     busters = level_config.busters
-    field = Field(field_width, field_height, level_config.field.complex_move)
+    field = Field(field_width, field_height, GAME_CONFIG.complex_move)
     game_item_counter = 0
     previous_states = {}
     activated_elements = {}

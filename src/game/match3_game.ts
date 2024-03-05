@@ -52,7 +52,7 @@ export function Game() {
     //#endregion CONFIGURATIONS
     //#region MAIN          
 
-    const field = Field(field_width, field_height, level_config.field.complex_move);
+    const field = Field(field_width, field_height, GAME_CONFIG.complex_move);
 
     let game_item_counter = 0;
     let previous_states: GameState[] = [];
@@ -101,9 +101,23 @@ export function Game() {
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
+
+            const is_from_buster = is_buster(elements.to_x, elements.to_y);
+            const is_to_buster = is_buster(elements.from_x, elements.from_y);
+            const is_procesed = field.process_state(ProcessMode.Combinate);
+
+            if(is_procesed && (is_from_buster || is_to_buster)) write_game_step_event('ON_BUSTER_ACTIVATION', {});
             
-            const result = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
-            process_game_step(result);
+            let is_activated = false;
+            if(is_from_buster || is_to_buster) {
+                is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
+                if(!is_activated) {
+                    if(is_from_buster) is_activated = try_activate_buster_element(elements.to_x, elements.to_y);
+                    if(is_to_buster) is_activated = try_activate_buster_element(elements.from_x, elements.from_y);
+                }
+            }
+            
+            process_game_step(is_procesed || is_activated);
         });
 
         EventBus.on('CLICK_ACTIVATION', (pos) => {
@@ -190,13 +204,14 @@ export function Game() {
         return false;
     }
 
-    function try_activate_buster_element(x: number, y: number) {
+    function try_activate_buster_element(x: number, y: number, with_check = true) {
         const element = field.get_element(x, y);
-        
         if(element == NullElement) return false;
-        if(activated_elements.indexOf(element.uid) != -1) return false;
-        
-        activated_elements.push(element.uid);
+
+        if(with_check) {
+            if(activated_elements.indexOf(element.uid) != -1) return false;
+            activated_elements.push(element.uid);
+        }
 
         let activated = false;
         if(try_activate_rocket(x, y)) activated = true;
@@ -204,7 +219,7 @@ export function Game() {
         else if(try_activate_dynamite(x, y)) activated = true;
         else if(try_activate_diskosphere(x, y)) activated = true;
 
-        if(!activated) activated_elements.splice(activated_elements.length - 1, 1);
+        if(!activated && with_check) activated_elements.splice(activated_elements.length - 1, 1);
 
         return activated;
     }
@@ -471,7 +486,7 @@ export function Game() {
 
         const other_element = field.get_element(other_x, other_y);
         if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
-        
+
         if(try_activate_rocket(x, y)) return true;
 
         return false;
@@ -534,7 +549,7 @@ export function Game() {
         
         const other_element = field.get_element(other_x, other_y);
         if(other_element == NullElement || !GAME_CONFIG.base_elements.includes(other_element.type)) return false;
-    
+
         const event_data = {} as SwapedHelicopterWithElementMessage;
 
         write_game_step_event('SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED', event_data);
@@ -618,11 +633,7 @@ export function Game() {
 
     function try_activate_swaped_buster_with_buster(x: number, y: number, other_x: number, other_y: number) {
         if(!is_buster(x, y) || !is_buster(other_x, other_y)) return false;
-        
-        try_activate_buster_element(x, y);
-        try_activate_buster_element(other_x, other_y);
-        
-        return true;
+        return try_activate_buster_element(x, y, false) && try_activate_buster_element(other_x, other_y, false);
     }
     
     function try_hammer_activation(x: number, y: number) {

@@ -83,6 +83,8 @@ export const _GAME_CONFIG = {
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
     duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.07`))! : 0.07,
 
+    complex_move: true,
+
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
 
@@ -244,7 +246,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: false,
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -281,7 +282,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: false,
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -318,7 +318,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: false,
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -355,7 +354,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: false,
 
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -392,7 +390,6 @@ export const _GAME_CONFIG = {
                 height: 8,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: true,
 
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
@@ -429,7 +426,6 @@ export const _GAME_CONFIG = {
                 height: 6,
                 cell_size: 128,
                 offset_border: 20,
-                complex_move: true,
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
@@ -444,9 +440,9 @@ export const _GAME_CONFIG = {
                     [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
                     [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
                     [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Emerald, ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Dimonde],
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement]
+                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Helicopter, ElementId.Dimonde, ElementId.Emerald, ElementId.Helicopter, ElementId.Dimonde],
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
                 ]
             },
 
@@ -494,6 +490,8 @@ export type _UserMessages = {
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
 
+    ON_BUSTER_ACTIVATION: VoidMessage,
+
     SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED: SwapedDiskosphereActivationMessage,
 
     DISKOSPHERE_ACTIVATED: ActivationMessage,
@@ -502,7 +500,6 @@ export type _UserMessages = {
     SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedActivationMessage,
 
     ROCKET_ACTIVATED: ActivationMessage,
-    AXIS_ROCKET_ACTIVATED: ActivationMessage,
     SWAPED_ROCKETS_ACTIVATED: SwapedActivationMessage,
 
     HELICOPTER_ACTIVATED: HelicopterActivationMessage,
