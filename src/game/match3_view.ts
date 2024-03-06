@@ -174,6 +174,7 @@ export function View(animator: FluxGroup) {
     const game_id_to_view_index: {[key in number]: number[]} = {};
 
     let selected_element: IGameItem | null = null;
+    let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
@@ -260,16 +261,20 @@ export function View(animator: FluxGroup) {
         if(is_processing) return;
 
         if(selected_element != null) {
-            const selected_element_world_pos = go.get_world_position(selected_element._hash);
-            const current_element_world_pos = go.get_world_position(item._hash);
+            go.cancel_animations(selected_element._hash, 'position.y');
+            go.set_position(selected_element_position, selected_element._hash);
+
+            const selected_element_world_pos = go.get_position(selected_element._hash);
+            const current_element_world_pos = go.get_position(item._hash);
 
             const selected_element_pos = get_field_pos(selected_element_world_pos);
             const current_element_pos = get_field_pos(current_element_world_pos);
 
             const is_valid_x = (math.abs(selected_element_pos.x - current_element_pos.x) <= 1);
             const is_valid_y = (math.abs(selected_element_pos.y - current_element_pos.y) <= 1);
+            const is_corner = (math.abs(selected_element_pos.x - current_element_pos.x) != 0) && (math.abs(selected_element_pos.y - current_element_pos.y) != 0);
 
-            if(is_valid_x && is_valid_y) {
+            if(is_valid_x && is_valid_y && !is_corner) {
                 EventBus.send('SWAP_ELEMENTS', {
                     from_x: selected_element_pos.x,
                     from_y: selected_element_pos.y,
@@ -325,6 +330,10 @@ export function View(animator: FluxGroup) {
 
         const item_world_pos = go.get_world_position(item._hash);
         const element_pos = get_field_pos(item_world_pos);
+
+        selected_element_position = item_world_pos;
+
+        go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, item_world_pos.y + 4, go.EASING_OUTBOUNCE, 1.5);
 
         EventBus.send('CLICK_ACTIVATION', {
             x: element_pos.x,

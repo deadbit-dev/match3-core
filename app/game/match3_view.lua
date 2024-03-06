@@ -35,7 +35,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -138,13 +138,16 @@ function ____exports.View(animator)
             return
         end
         if selected_element ~= nil then
-            local selected_element_world_pos = go.get_world_position(selected_element._hash)
-            local current_element_world_pos = go.get_world_position(item._hash)
+            go.cancel_animations(selected_element._hash, "position.y")
+            go.set_position(selected_element_position, selected_element._hash)
+            local selected_element_world_pos = go.get_position(selected_element._hash)
+            local current_element_world_pos = go.get_position(item._hash)
             local selected_element_pos = get_field_pos(selected_element_world_pos)
             local current_element_pos = get_field_pos(current_element_world_pos)
             local is_valid_x = math.abs(selected_element_pos.x - current_element_pos.x) <= 1
             local is_valid_y = math.abs(selected_element_pos.y - current_element_pos.y) <= 1
-            if is_valid_x and is_valid_y then
+            local is_corner = math.abs(selected_element_pos.x - current_element_pos.x) ~= 0 and math.abs(selected_element_pos.y - current_element_pos.y) ~= 0
+            if is_valid_x and is_valid_y and not is_corner then
                 EventBus.send("SWAP_ELEMENTS", {from_x = selected_element_pos.x, from_y = selected_element_pos.y, to_x = current_element_pos.x, to_y = current_element_pos.y})
                 selected_element = nil
                 return
@@ -203,6 +206,15 @@ function ____exports.View(animator)
         end
         local item_world_pos = go.get_world_position(item._hash)
         local element_pos = get_field_pos(item_world_pos)
+        selected_element_position = item_world_pos
+        go.animate(
+            item._hash,
+            "position.y",
+            go.PLAYBACK_LOOP_PINGPONG,
+            item_world_pos.y + 4,
+            go.EASING_OUTBOUNCE,
+            1.5
+        )
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
     end
     function on_load_field(state)
