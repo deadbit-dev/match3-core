@@ -35,7 +35,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -62,6 +62,15 @@ function ____exports.View(animator)
                     return
                 end
                 flow.start(function() return on_game_step(events) end)
+            end
+        )
+        EventBus.on(
+            "TRY_ACTIVATE_SPINNING",
+            function()
+                if is_processing then
+                    return
+                end
+                EventBus.send("ACTIVATE_SPINNING")
             end
         )
         EventBus.on(
@@ -105,19 +114,19 @@ function ____exports.View(animator)
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch26 = message_id
-                local ____cond26 = ____switch26 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond26 then
+                local ____switch28 = message_id
+                local ____cond28 = ____switch28 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond28 then
                     on_down(_message.item)
                     break
                 end
-                ____cond26 = ____cond26 or ____switch26 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond26 then
+                ____cond28 = ____cond28 or ____switch28 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond28 then
                     on_up(_message.item)
                     break
                 end
-                ____cond26 = ____cond26 or ____switch26 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond26 then
+                ____cond28 = ____cond28 or ____switch28 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond28 then
                     on_move(_message)
                     break
                 end
@@ -127,6 +136,19 @@ function ____exports.View(animator)
     function on_down(item)
         if is_processing then
             return
+        end
+        if selected_element ~= nil then
+            local selected_element_world_pos = go.get_world_position(selected_element._hash)
+            local current_element_world_pos = go.get_world_position(item._hash)
+            local selected_element_pos = get_field_pos(selected_element_world_pos)
+            local current_element_pos = get_field_pos(current_element_world_pos)
+            local is_valid_x = math.abs(selected_element_pos.x - current_element_pos.x) <= 1
+            local is_valid_y = math.abs(selected_element_pos.y - current_element_pos.y) <= 1
+            if is_valid_x and is_valid_y then
+                EventBus.send("SWAP_ELEMENTS", {from_x = selected_element_pos.x, from_y = selected_element_pos.y, to_x = current_element_pos.x, to_y = current_element_pos.y})
+                selected_element = nil
+                return
+            end
         end
         selected_element = item
     end
@@ -145,24 +167,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch32 = move_direction
-            local ____cond32 = ____switch32 == Direction.Up
-            if ____cond32 then
+            local ____switch36 = move_direction
+            local ____cond36 = ____switch36 == Direction.Up
+            if ____cond36 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond32 = ____cond32 or ____switch32 == Direction.Down
-            if ____cond32 then
+            ____cond36 = ____cond36 or ____switch36 == Direction.Down
+            if ____cond36 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond32 = ____cond32 or ____switch32 == Direction.Left
-            if ____cond32 then
+            ____cond36 = ____cond36 or ____switch36 == Direction.Left
+            if ____cond36 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond32 = ____cond32 or ____switch32 == Direction.Right
-            if ____cond32 then
+            ____cond36 = ____cond36 or ____switch36 == Direction.Right
+            if ____cond36 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -182,7 +204,6 @@ function ____exports.View(animator)
         local item_world_pos = go.get_world_position(item._hash)
         local element_pos = get_field_pos(item_world_pos)
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
-        selected_element = nil
     end
     function on_load_field(state)
         do
@@ -647,6 +668,38 @@ function ____exports.View(animator)
         end
         return damaged_element_time
     end
+    function on_spinning_activated_animation(message)
+        local data = message
+        for ____, swap_info in ipairs(data) do
+            local from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y)
+            local to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y)
+            local item_from = get_first_view_item_by_game_id(swap_info.element_from.uid)
+            if item_from == nil then
+                return 0
+            end
+            local item_to = get_first_view_item_by_game_id(swap_info.element_to.uid)
+            if item_to == nil then
+                return 0
+            end
+            go.animate(
+                item_from._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                to_world_pos,
+                swap_element_easing,
+                swap_element_time
+            )
+            go.animate(
+                item_to._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                from_world_pos,
+                swap_element_easing,
+                swap_element_time
+            )
+        end
+        return swap_element_time + 0.1
+    end
     function on_element_activated_animation(message)
         local activation = message
         return damage_element_animation(activation.uid)
@@ -1020,6 +1073,7 @@ function ____exports.View(animator)
         ON_COMBO = on_combo_animation,
         ON_ELEMENT_ACTIVATED = on_element_activated_animation,
         ON_CELL_ACTIVATED = on_cell_activated_animation,
+        ON_SPINNING_ACTIVATED = on_spinning_activated_animation,
         ON_BUSTER_ACTIVATION = on_buster_activation_begin,
         SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED = on_swaped_buster_with_diskosphere_animation,
         DISKOSPHERE_ACTIVATED = on_diskisphere_activated_animation,

@@ -50,6 +50,7 @@ function ____exports.init(self)
             self.busters.hammer_active = false
             self.busters.horizontal_rocket_active = false
             self.busters.vertical_rocket_active = false
+            EventBus.send("TRY_ACTIVATE_SPINNING")
             EventBus.send("UPDATED_BUTTONS")
         end
     )
@@ -59,7 +60,6 @@ function ____exports.init(self)
             if GameStorage.get("hammer_counts") > 0 then
                 self.busters.hammer_active = not self.busters.hammer_active
             end
-            self.busters.spinning_active = false
             self.busters.horizontal_rocket_active = false
             self.busters.vertical_rocket_active = false
             EventBus.send("UPDATED_BUTTONS")
@@ -71,7 +71,6 @@ function ____exports.init(self)
             if GameStorage.get("horizontal_rocket_counts") > 0 then
                 self.busters.horizontal_rocket_active = not self.busters.horizontal_rocket_active
             end
-            self.busters.spinning_active = false
             self.busters.hammer_active = false
             self.busters.vertical_rocket_active = false
             EventBus.send("UPDATED_BUTTONS")
@@ -83,7 +82,6 @@ function ____exports.init(self)
             if GameStorage.get("vertical_rocket_counts") > 0 then
                 self.busters.vertical_rocket_active = not self.busters.vertical_rocket_active
             end
-            self.busters.spinning_active = false
             self.busters.hammer_active = false
             self.busters.horizontal_rocket_active = false
             EventBus.send("UPDATED_BUTTONS")
@@ -92,7 +90,7 @@ function ____exports.init(self)
     EventBus.on(
         "UPDATED_BUTTONS",
         function()
-            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active and 0.5 or 1)
+            set_text_colors({"spinning_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
             set_text(
                 "spinning_counts",
                 GameStorage.get("spinning_counts")

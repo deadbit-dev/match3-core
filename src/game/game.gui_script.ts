@@ -42,18 +42,18 @@ export function init(this: props): void {
     
     this.druid.new_button('spinning_button', () => {
         if(GameStorage.get('spinning_counts') > 0) this.busters.spinning_active = !this.busters.spinning_active;
-
+    
         this.busters.hammer_active = false;
         this.busters.horizontal_rocket_active = false;
         this.busters.vertical_rocket_active = false;
-        
+
+        EventBus.send('TRY_ACTIVATE_SPINNING');
         EventBus.send('UPDATED_BUTTONS');
     });
 
     this.druid.new_button('hammer_button', () => {
         if(GameStorage.get('hammer_counts') > 0) this.busters.hammer_active = !this.busters.hammer_active;
  
-        this.busters.spinning_active = false;
         this.busters.horizontal_rocket_active = false;
         this.busters.vertical_rocket_active = false;
 
@@ -63,7 +63,6 @@ export function init(this: props): void {
     this.druid.new_button('horizontal_rocket_button', () => {
         if(GameStorage.get('horizontal_rocket_counts') > 0) this.busters.horizontal_rocket_active = !this.busters.horizontal_rocket_active;
         
-        this.busters.spinning_active = false;
         this.busters.hammer_active = false;
         this.busters.vertical_rocket_active = false;
 
@@ -73,7 +72,6 @@ export function init(this: props): void {
     this.druid.new_button('vertical_rocket_button', () => {
         if(GameStorage.get('vertical_rocket_counts') > 0) this.busters.vertical_rocket_active = !this.busters.vertical_rocket_active;
         
-        this.busters.spinning_active = false;
         this.busters.hammer_active = false;
         this.busters.horizontal_rocket_active = false;
 
@@ -81,7 +79,7 @@ export function init(this: props): void {
     });
     
     EventBus.on('UPDATED_BUTTONS', () => {
-        set_text_colors(['spinning_button'], '#fff', this.busters.spinning_active ? 0.5 : 1);
+        set_text_colors(['spinning_button'], '#fff', this.busters.hammer_active ? 0.5 : 1);
         set_text('spinning_counts', GameStorage.get('spinning_counts'));
         
         set_text_colors(['hammer_button'], '#fff', this.busters.hammer_active ? 0.5 : 1);

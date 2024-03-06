@@ -498,6 +498,8 @@ export interface SwapedDiskosphereActivationMessage extends SwapedActivationMess
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
+export type SpinningActivationMessage = SwapElementsMessage[];
+
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
     LOAD_FIELD: VoidMessage,
@@ -507,6 +509,10 @@ export type _UserMessages = {
     ON_SWAP_ELEMENTS: SwapElementsMessage,
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
+
+    TRY_ACTIVATE_SPINNING: VoidMessage,
+    ACTIVATE_SPINNING: VoidMessage,
+    ON_SPINNING_ACTIVATED: SpinningActivationMessage,
 
     ON_BUSTER_ACTIVATION: VoidMessage,
 
@@ -540,5 +546,5 @@ export type _UserMessages = {
 
     ON_ELEMENT_ACTIVATED: ItemInfo,
 
-    UPDATED_BUTTONS: VoidMessage,
+    UPDATED_BUTTONS: VoidMessage
 };

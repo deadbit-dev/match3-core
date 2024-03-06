@@ -18,7 +18,7 @@ import * as camera from '../utils/camera';
 import { Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId } from "../main/game_config";
+import { CellId, CombinedMessage, ComboMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage } from "../main/game_config";
 
 import { 
     GameState,
@@ -139,6 +139,8 @@ export function View(animator: FluxGroup) {
         'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
         'ON_CELL_ACTIVATED': on_cell_activated_animation,
 
+        'ON_SPINNING_ACTIVATED': on_spinning_activated_animation,
+
         'ON_BUSTER_ACTIVATION': on_buster_activation_begin,
         
         // DISKOSPHERE
@@ -198,6 +200,11 @@ export function View(animator: FluxGroup) {
             flow.start(() => on_game_step(events));
         });
 
+        EventBus.on('TRY_ACTIVATE_SPINNING', () => {
+            if(is_processing) return;
+            EventBus.send('ACTIVATE_SPINNING');
+        });
+
         EventBus.on('TRY_REVERT_STEP', () => {
             if(is_processing) return;
             EventBus.send('REVERT_STEP');
@@ -252,6 +259,29 @@ export function View(animator: FluxGroup) {
     function on_down(item: IGameItem) {
         if(is_processing) return;
 
+        if(selected_element != null) {
+            const selected_element_world_pos = go.get_world_position(selected_element._hash);
+            const current_element_world_pos = go.get_world_position(item._hash);
+
+            const selected_element_pos = get_field_pos(selected_element_world_pos);
+            const current_element_pos = get_field_pos(current_element_world_pos);
+
+            const is_valid_x = (math.abs(selected_element_pos.x - current_element_pos.x) <= 1);
+            const is_valid_y = (math.abs(selected_element_pos.y - current_element_pos.y) <= 1);
+
+            if(is_valid_x && is_valid_y) {
+                EventBus.send('SWAP_ELEMENTS', {
+                    from_x: selected_element_pos.x,
+                    from_y: selected_element_pos.y,
+                    to_x: current_element_pos.x,
+                    to_y: current_element_pos.y
+                });
+
+                selected_element = null;
+                return;
+            }
+        }
+
         selected_element = item;
     }
     
@@ -300,8 +330,6 @@ export function View(animator: FluxGroup) {
             x: element_pos.x,
             y: element_pos.y
         });
-
-        selected_element = null;
     }
 
     //#endregion INPUT
@@ -637,6 +665,25 @@ export function View(animator: FluxGroup) {
 
         return damaged_element_time;
     }
+
+    function on_spinning_activated_animation(message: Messages[MessageId]) {
+        const data = message as SpinningActivationMessage;
+        for(const swap_info of data) {
+            const from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y);
+            const to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y);
+
+            const item_from = get_first_view_item_by_game_id(swap_info.element_from.uid);
+            if(item_from == undefined) return 0;
+        
+            const item_to = get_first_view_item_by_game_id(swap_info.element_to.uid);
+            if(item_to == undefined) return 0;
+
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+            go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+        }
+        
+        return swap_element_time + 0.1;
+    }    
 
     function on_element_activated_animation(message: Messages[MessageId]) {
         const activation = message as ItemInfo;
