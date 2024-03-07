@@ -514,7 +514,8 @@ export type _UserMessages = {
     ACTIVATE_SPINNING: VoidMessage,
     ON_SPINNING_ACTIVATED: SpinningActivationMessage,
 
-    ON_ELEMENT_SELECTED: ItemInfo
+    ON_ELEMENT_SELECTED: ItemInfo,
+    ON_ELEMENT_UNSELECTED: ItemInfo,
 
     ON_BUSTER_ACTIVATION: VoidMessage,
 

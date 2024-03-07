@@ -1,7 +1,7 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
-local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
+local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayPush = ____lualib.__TS__ArrayPush
@@ -23,7 +23,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -81,8 +81,44 @@ function ____exports.Game()
                 if pos == nil then
                     return
                 end
-                try_click_activation(pos.x, pos.y)
-                process_game_step(true)
+                if try_click_activation(pos.x, pos.y) then
+                    process_game_step(true)
+                else
+                    local element = field.get_element(pos.x, pos.y)
+                    if element ~= NullElement then
+                        if selected_element ~= nil and selected_element.uid == element.uid then
+                            EventBus.send(
+                                "ON_ELEMENT_UNSELECTED",
+                                __TS__ObjectAssign({}, selected_element)
+                            )
+                            selected_element = nil
+                        else
+                            local is_swap = false
+                            if selected_element ~= nil then
+                                EventBus.send(
+                                    "ON_ELEMENT_UNSELECTED",
+                                    __TS__ObjectAssign({}, selected_element)
+                                )
+                                local neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+                                for ____, neighbor in ipairs(neighbors) do
+                                    if neighbor.uid == element.uid then
+                                        is_swap = true
+                                        break
+                                    end
+                                end
+                            end
+                            if selected_element ~= nil and is_swap then
+                                EventBus.send("SWAP_ELEMENTS", {from_x = selected_element.x, from_y = selected_element.y, to_x = pos.x, to_y = pos.y})
+                            else
+                                selected_element = {x = pos.x, y = pos.y, uid = element.uid}
+                                EventBus.send(
+                                    "ON_ELEMENT_SELECTED",
+                                    __TS__ObjectAssign({}, selected_element)
+                                )
+                            end
+                        end
+                    end
+                end
             end
         )
         EventBus.on("ACTIVATE_SPINNING", try_spinning_activation)
@@ -169,10 +205,6 @@ function ____exports.Game()
         if field.try_click(x, y) and try_activate_buster_element(x, y) then
             return true
         end
-        local element = field.get_element(x, y)
-        if element ~= NullElement then
-            EventBus.send("ON_ELEMENT_SELECTED", {x = x, y = y, uid = element.uid})
-        end
         return false
     end
     function try_activate_buster_element(x, y, with_check)
@@ -189,6 +221,11 @@ function ____exports.Game()
             end
             activated_elements[#activated_elements + 1] = element.uid
         end
+        EventBus.send(
+            "ON_ELEMENT_UNSELECTED",
+            __TS__ObjectAssign({}, selected_element)
+        )
+        selected_element = nil
         local activated = false
         if try_activate_rocket(x, y) then
             activated = true
@@ -697,6 +734,11 @@ function ____exports.Game()
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
         end
+        EventBus.send(
+            "ON_ELEMENT_UNSELECTED",
+            __TS__ObjectAssign({}, selected_element)
+        )
+        selected_element = nil
         if is_buster(x, y) then
             try_activate_buster_element(x, y)
         else
@@ -717,6 +759,11 @@ function ____exports.Game()
         if not busters.horizontal_rocket_active or GameStorage.get("horizontal_rocket_counts") <= 0 then
             return false
         end
+        EventBus.send(
+            "ON_ELEMENT_UNSELECTED",
+            __TS__ObjectAssign({}, selected_element)
+        )
+        selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
         event_data.element = {}
@@ -748,6 +795,11 @@ function ____exports.Game()
         if not busters.vertical_rocket_active or GameStorage.get("vertical_rocket_counts") <= 0 then
             return false
         end
+        EventBus.send(
+            "ON_ELEMENT_UNSELECTED",
+            __TS__ObjectAssign({}, selected_element)
+        )
+        selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
         event_data.element = {}
@@ -789,6 +841,11 @@ function ____exports.Game()
         if element_from == NullElement or element_to == NullElement then
             return false
         end
+        EventBus.send(
+            "ON_ELEMENT_UNSELECTED",
+            __TS__ObjectAssign({}, selected_element)
+        )
+        selected_element = nil
         if not field.try_move(from_x, from_y, to_x, to_y) then
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, uid = element_from.uid}, element_to = {x = to_x, y = to_y, uid = element_to.uid}})
             return false
@@ -853,29 +910,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch195 = combination.type
-            local ____cond195 = ____switch195 == CombinationType.Comb4
-            if ____cond195 then
+            local ____switch205 = combination.type
+            local ____cond205 = ____switch205 == CombinationType.Comb4
+            if ____cond205 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond195 = ____cond195 or ____switch195 == CombinationType.Comb5
-            if ____cond195 then
+            ____cond205 = ____cond205 or ____switch205 == CombinationType.Comb5
+            if ____cond205 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond195 = ____cond195 or ____switch195 == CombinationType.Comb2x2
-            if ____cond195 then
+            ____cond205 = ____cond205 or ____switch205 == CombinationType.Comb2x2
+            if ____cond205 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond195 = ____cond195 or (____switch195 == CombinationType.Comb3x3a or ____switch195 == CombinationType.Comb3x3b)
-            if ____cond195 then
+            ____cond205 = ____cond205 or (____switch205 == CombinationType.Comb3x3a or ____switch205 == CombinationType.Comb3x3b)
+            if ____cond205 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond195 = ____cond195 or (____switch195 == CombinationType.Comb3x4 or ____switch195 == CombinationType.Comb3x5)
-            if ____cond195 then
+            ____cond205 = ____cond205 or (____switch205 == CombinationType.Comb3x4 or ____switch205 == CombinationType.Comb3x5)
+            if ____cond205 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -918,9 +975,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch206 = cell.type
-            local ____cond206 = ____switch206 == CellType.ActionLocked
-            if ____cond206 then
+            local ____switch216 = cell.type
+            local ____cond216 = ____switch216 == CellType.ActionLocked
+            if ____cond216 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -936,8 +993,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond206 = ____cond206 or ____switch206 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond206 then
+            ____cond216 = ____cond216 or ____switch216 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond216 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -1082,6 +1139,7 @@ function ____exports.Game()
     previous_states = {}
     activated_elements = {}
     game_step_events = {}
+    selected_element = nil
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)

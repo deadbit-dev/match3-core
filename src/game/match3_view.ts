@@ -174,7 +174,7 @@ export function View(animator: FluxGroup) {
     const game_id_to_view_index: {[key in number]: number[]} = {};
 
     let selected_element: IGameItem | null = null;
-    let selected_element_position: vmath.vector3;
+    let selected_element_scale: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
@@ -205,13 +205,21 @@ export function View(animator: FluxGroup) {
             if(element == undefined) return;
 
             const item = get_first_view_item_by_game_id(element.uid);
-            const item_world_pos = get_world_pos(element.x, element.y);
-
             if(item == undefined) return;
 
-            selected_element = item;
-            selected_element_position = item_world_pos;
-            go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, item_world_pos.y + 4, go.EASING_OUTBOUNCE, 1.5);
+            selected_element_scale = go.get_scale(item._hash);
+            go.animate(item._hash, 'scale.x', go.PLAYBACK_LOOP_PINGPONG, selected_element_scale.x + 0.05, go.EASING_OUTBOUNCE, 1.5);
+            go.animate(item._hash, 'scale.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_scale.y + 0.05, go.EASING_OUTBOUNCE, 1.5);
+        });
+
+        EventBus.on('ON_ELEMENT_UNSELECTED', (element) => {
+            if(element == undefined) return;
+
+            const item = get_first_view_item_by_game_id(element.uid);
+            if(item == undefined) return;
+
+            go.cancel_animations(item._hash);
+            go.set_scale(selected_element_scale, item._hash);
         });
 
         EventBus.on('TRY_ACTIVATE_SPINNING', () => {
@@ -272,40 +280,13 @@ export function View(animator: FluxGroup) {
 
     function on_down(item: IGameItem) {
         if(is_processing) return;
-
-        if(selected_element != null) {
-            go.cancel_animations(selected_element._hash, 'position.y');
-            go.set_position(selected_element_position, selected_element._hash);
-
-            const selected_element_world_pos = go.get_position(selected_element._hash);
-            const current_element_world_pos = go.get_position(item._hash);
-
-            const selected_element_pos = get_field_pos(selected_element_world_pos);
-            const current_element_pos = get_field_pos(current_element_world_pos);
-
-            const is_valid_x = (math.abs(selected_element_pos.x - current_element_pos.x) <= 1);
-            const is_valid_y = (math.abs(selected_element_pos.y - current_element_pos.y) <= 1);
-            const is_corner = (math.abs(selected_element_pos.x - current_element_pos.x) != 0) && (math.abs(selected_element_pos.y - current_element_pos.y) != 0);
-            const is_equal = (selected_element_pos.x == current_element_pos.x) && (selected_element_pos.y == current_element_pos.y);
-
-            if(is_valid_x && is_valid_y && !is_corner && !is_equal) {
-                EventBus.send('SWAP_ELEMENTS', {
-                    from_x: selected_element_pos.x,
-                    from_y: selected_element_pos.y,
-                    to_x: current_element_pos.x,
-                    to_y: current_element_pos.y
-                });
-
-                selected_element = null;
-                return;
-            }
-        }
-
+        
         selected_element = item;
     }
     
     function on_move(pos: PosXYMessage) {
         if(selected_element == null) return;
+
 
         const world_pos = camera.screen_to_world(pos.x, pos.y);
         const selected_element_world_pos = go.get_world_position(selected_element._hash);

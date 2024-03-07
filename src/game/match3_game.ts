@@ -14,7 +14,7 @@
 
 import { MessageId, Messages } from '../modules/modules_const';
 
-import { is_valid_pos } from '../utils/math_utils';
+import { get_neighbors, is_valid_pos } from '../utils/math_utils';
 
 import { CellId, ElementId,
     GameStepEventBuffer,
@@ -59,6 +59,7 @@ export function Game() {
     let previous_states: GameState[] = [];
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
+    let selected_element: ItemInfo | null = null;  
     
     function init() {
         field.init();
@@ -133,12 +134,43 @@ export function Game() {
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
 
-            try_click_activation(pos.x, pos.y);
-            process_game_step(true);
+            if(try_click_activation(pos.x, pos.y)) process_game_step(true);
+            else {
+                const element = field.get_element(pos.x, pos.y);
+                if(element != NullElement) {
+                    if(selected_element != null && selected_element.uid == element.uid) {
+                        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                        selected_element = null;
+                    } else {
+                        let is_swap = false;
+                        if(selected_element != null) {
+                            EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                            const neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, [
+                                [0, 1, 0],
+                                [1, 0, 1],
+                                [0, 1, 0]
+                            ]);
+
+                            for(const neighbor of neighbors) {
+                                if(neighbor.uid == element.uid) {
+                                    is_swap = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(selected_element != null && is_swap) EventBus.send('SWAP_ELEMENTS', {from_x: selected_element.x, from_y: selected_element.y, to_x: pos.x, to_y: pos.y});
+                        else {
+                            selected_element = {x: pos.x, y: pos.y, uid: element.uid};
+                            EventBus.send('ON_ELEMENT_SELECTED', Object.assign({}, selected_element));
+                        }
+                    }
+                }
+            }
         });
 
         EventBus.on('ACTIVATE_SPINNING', try_spinning_activation);
-
+        
         EventBus.on('REVERT_STEP', revert_step);
     }
 
@@ -215,10 +247,6 @@ export function Game() {
         if(try_vertical_rocket_activation(x, y)) return true;
 
         if(field.try_click(x, y) && try_activate_buster_element(x, y)) return true;
-
-        const element = field.get_element(x, y);
-        if(element != NullElement) EventBus.send('ON_ELEMENT_SELECTED', {x, y, uid: element.uid});
-
         return false;
     }
 
@@ -230,6 +258,9 @@ export function Game() {
             if(activated_elements.indexOf(element.uid) != -1) return false;
             activated_elements.push(element.uid);
         }
+
+        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        selected_element = null;
 
         let activated = false;
         if(try_activate_rocket(x, y)) activated = true;
@@ -684,6 +715,9 @@ export function Game() {
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
         
+        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        selected_element = null;       
+
         // FIXME: for buster under wall
         if(is_buster(x, y)) try_activate_buster_element(x, y);
         else {
@@ -702,6 +736,9 @@ export function Game() {
     function try_horizontal_rocket_activation(x: number, y: number) {
         if(!busters.horizontal_rocket_active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
 
+        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        selected_element = null;
+        
         const event_data = {} as ActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
         
@@ -726,6 +763,9 @@ export function Game() {
     
     function try_vertical_rocket_activation(x: number, y: number) {
         if(!busters.vertical_rocket_active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
+    
+        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        selected_element = null;
         
         const event_data = {} as ActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
@@ -760,6 +800,9 @@ export function Game() {
         const element_to = field.get_element(to_x, to_y);
         
         if((element_from == NullElement) || (element_to == NullElement)) return false;
+
+        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        selected_element = null;
         
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {

@@ -35,7 +35,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_scale, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -71,20 +71,40 @@ function ____exports.View(animator)
                     return
                 end
                 local item = get_first_view_item_by_game_id(element.uid)
-                local item_world_pos = get_world_pos(element.x, element.y)
                 if item == nil then
                     return
                 end
-                selected_element = item
-                selected_element_position = item_world_pos
+                selected_element_scale = go.get_scale(item._hash)
                 go.animate(
                     item._hash,
-                    "position.y",
+                    "scale.x",
                     go.PLAYBACK_LOOP_PINGPONG,
-                    item_world_pos.y + 4,
+                    selected_element_scale.x + 0.05,
                     go.EASING_OUTBOUNCE,
                     1.5
                 )
+                go.animate(
+                    item._hash,
+                    "scale.y",
+                    go.PLAYBACK_LOOP_PINGPONG,
+                    selected_element_scale.y + 0.05,
+                    go.EASING_OUTBOUNCE,
+                    1.5
+                )
+            end
+        )
+        EventBus.on(
+            "ON_ELEMENT_UNSELECTED",
+            function(element)
+                if element == nil then
+                    return
+                end
+                local item = get_first_view_item_by_game_id(element.uid)
+                if item == nil then
+                    return
+                end
+                go.cancel_animations(item._hash)
+                go.set_scale(selected_element_scale, item._hash)
             end
         )
         EventBus.on(
@@ -137,19 +157,19 @@ function ____exports.View(animator)
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch31 = message_id
-                local ____cond31 = ____switch31 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond31 then
+                local ____switch34 = message_id
+                local ____cond34 = ____switch34 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond34 then
                     on_down(_message.item)
                     break
                 end
-                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond31 then
+                ____cond34 = ____cond34 or ____switch34 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond34 then
                     on_up(_message.item)
                     break
                 end
-                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond31 then
+                ____cond34 = ____cond34 or ____switch34 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond34 then
                     on_move(_message)
                     break
                 end
@@ -159,23 +179,6 @@ function ____exports.View(animator)
     function on_down(item)
         if is_processing then
             return
-        end
-        if selected_element ~= nil then
-            go.cancel_animations(selected_element._hash, "position.y")
-            go.set_position(selected_element_position, selected_element._hash)
-            local selected_element_world_pos = go.get_position(selected_element._hash)
-            local current_element_world_pos = go.get_position(item._hash)
-            local selected_element_pos = get_field_pos(selected_element_world_pos)
-            local current_element_pos = get_field_pos(current_element_world_pos)
-            local is_valid_x = math.abs(selected_element_pos.x - current_element_pos.x) <= 1
-            local is_valid_y = math.abs(selected_element_pos.y - current_element_pos.y) <= 1
-            local is_corner = math.abs(selected_element_pos.x - current_element_pos.x) ~= 0 and math.abs(selected_element_pos.y - current_element_pos.y) ~= 0
-            local is_equal = selected_element_pos.x == current_element_pos.x and selected_element_pos.y == current_element_pos.y
-            if is_valid_x and is_valid_y and not is_corner and not is_equal then
-                EventBus.send("SWAP_ELEMENTS", {from_x = selected_element_pos.x, from_y = selected_element_pos.y, to_x = current_element_pos.x, to_y = current_element_pos.y})
-                selected_element = nil
-                return
-            end
         end
         selected_element = item
     end
@@ -194,24 +197,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch39 = move_direction
-            local ____cond39 = ____switch39 == Direction.Up
-            if ____cond39 then
+            local ____switch40 = move_direction
+            local ____cond40 = ____switch40 == Direction.Up
+            if ____cond40 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Down
-            if ____cond39 then
+            ____cond40 = ____cond40 or ____switch40 == Direction.Down
+            if ____cond40 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Left
-            if ____cond39 then
+            ____cond40 = ____cond40 or ____switch40 == Direction.Left
+            if ____cond40 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond39 = ____cond39 or ____switch39 == Direction.Right
-            if ____cond39 then
+            ____cond40 = ____cond40 or ____switch40 == Direction.Right
+            if ____cond40 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
