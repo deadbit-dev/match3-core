@@ -216,6 +216,9 @@ export function Game() {
 
         if(field.try_click(x, y) && try_activate_buster_element(x, y)) return true;
 
+        const element = field.get_element(x, y);
+        if(element != NullElement) EventBus.send('ON_ELEMENT_SELECTED', {x, y, uid: element.uid});
+
         return false;
     }
 

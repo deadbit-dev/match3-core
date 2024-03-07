@@ -90,7 +90,7 @@ function ____exports.init(self)
     EventBus.on(
         "UPDATED_BUTTONS",
         function()
-            set_text_colors({"spinning_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
+            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active_active and 0.5 or 1)
             set_text(
                 "spinning_counts",
                 GameStorage.get("spinning_counts")

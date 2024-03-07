@@ -169,6 +169,10 @@ function ____exports.Game()
         if field.try_click(x, y) and try_activate_buster_element(x, y) then
             return true
         end
+        local element = field.get_element(x, y)
+        if element ~= NullElement then
+            EventBus.send("ON_ELEMENT_SELECTED", {x = x, y = y, uid = element.uid})
+        end
         return false
     end
     function try_activate_buster_element(x, y, with_check)
@@ -849,29 +853,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch194 = combination.type
-            local ____cond194 = ____switch194 == CombinationType.Comb4
-            if ____cond194 then
+            local ____switch195 = combination.type
+            local ____cond195 = ____switch195 == CombinationType.Comb4
+            if ____cond195 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond194 = ____cond194 or ____switch194 == CombinationType.Comb5
-            if ____cond194 then
+            ____cond195 = ____cond195 or ____switch195 == CombinationType.Comb5
+            if ____cond195 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond194 = ____cond194 or ____switch194 == CombinationType.Comb2x2
-            if ____cond194 then
+            ____cond195 = ____cond195 or ____switch195 == CombinationType.Comb2x2
+            if ____cond195 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond194 = ____cond194 or (____switch194 == CombinationType.Comb3x3a or ____switch194 == CombinationType.Comb3x3b)
-            if ____cond194 then
+            ____cond195 = ____cond195 or (____switch195 == CombinationType.Comb3x3a or ____switch195 == CombinationType.Comb3x3b)
+            if ____cond195 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond194 = ____cond194 or (____switch194 == CombinationType.Comb3x4 or ____switch194 == CombinationType.Comb3x5)
-            if ____cond194 then
+            ____cond195 = ____cond195 or (____switch195 == CombinationType.Comb3x4 or ____switch195 == CombinationType.Comb3x5)
+            if ____cond195 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -914,9 +918,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch205 = cell.type
-            local ____cond205 = ____switch205 == CellType.ActionLocked
-            if ____cond205 then
+            local ____switch206 = cell.type
+            local ____cond206 = ____switch206 == CellType.ActionLocked
+            if ____cond206 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -932,8 +936,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond205 then
+            ____cond206 = ____cond206 or ____switch206 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond206 then
                 if cell.cnt_near_acts == nil then
                     break
                 end

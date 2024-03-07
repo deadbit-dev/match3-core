@@ -65,6 +65,29 @@ function ____exports.View(animator)
             end
         )
         EventBus.on(
+            "ON_ELEMENT_SELECTED",
+            function(element)
+                if element == nil then
+                    return
+                end
+                local item = get_first_view_item_by_game_id(element.uid)
+                local item_world_pos = get_world_pos(element.x, element.y)
+                if item == nil then
+                    return
+                end
+                selected_element = item
+                selected_element_position = item_world_pos
+                go.animate(
+                    item._hash,
+                    "position.y",
+                    go.PLAYBACK_LOOP_PINGPONG,
+                    item_world_pos.y + 4,
+                    go.EASING_OUTBOUNCE,
+                    1.5
+                )
+            end
+        )
+        EventBus.on(
             "TRY_ACTIVATE_SPINNING",
             function()
                 if is_processing then
@@ -114,19 +137,19 @@ function ____exports.View(animator)
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch28 = message_id
-                local ____cond28 = ____switch28 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond28 then
+                local ____switch31 = message_id
+                local ____cond31 = ____switch31 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond31 then
                     on_down(_message.item)
                     break
                 end
-                ____cond28 = ____cond28 or ____switch28 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond28 then
+                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond31 then
                     on_up(_message.item)
                     break
                 end
-                ____cond28 = ____cond28 or ____switch28 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond28 then
+                ____cond31 = ____cond31 or ____switch31 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond31 then
                     on_move(_message)
                     break
                 end
@@ -147,7 +170,8 @@ function ____exports.View(animator)
             local is_valid_x = math.abs(selected_element_pos.x - current_element_pos.x) <= 1
             local is_valid_y = math.abs(selected_element_pos.y - current_element_pos.y) <= 1
             local is_corner = math.abs(selected_element_pos.x - current_element_pos.x) ~= 0 and math.abs(selected_element_pos.y - current_element_pos.y) ~= 0
-            if is_valid_x and is_valid_y and not is_corner then
+            local is_equal = selected_element_pos.x == current_element_pos.x and selected_element_pos.y == current_element_pos.y
+            if is_valid_x and is_valid_y and not is_corner and not is_equal then
                 EventBus.send("SWAP_ELEMENTS", {from_x = selected_element_pos.x, from_y = selected_element_pos.y, to_x = current_element_pos.x, to_y = current_element_pos.y})
                 selected_element = nil
                 return
@@ -170,24 +194,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch36 = move_direction
-            local ____cond36 = ____switch36 == Direction.Up
-            if ____cond36 then
+            local ____switch39 = move_direction
+            local ____cond39 = ____switch39 == Direction.Up
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == Direction.Down
-            if ____cond36 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Down
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == Direction.Left
-            if ____cond36 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Left
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == Direction.Right
-            if ____cond36 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Right
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -206,16 +230,8 @@ function ____exports.View(animator)
         end
         local item_world_pos = go.get_world_position(item._hash)
         local element_pos = get_field_pos(item_world_pos)
-        selected_element_position = item_world_pos
-        go.animate(
-            item._hash,
-            "position.y",
-            go.PLAYBACK_LOOP_PINGPONG,
-            item_world_pos.y + 4,
-            go.EASING_OUTBOUNCE,
-            1.5
-        )
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
+        selected_element = nil
     end
     function on_load_field(state)
         do
