@@ -2,6 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
 local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush
 local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
+local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local ____exports = {}
@@ -35,7 +36,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, on_combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_buster_with_diskosphere_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_swaped_diskosphere_with_element_animation, on_spinning_activated_animation, on_element_activated_animation, on_cell_activated_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_scale, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_scale, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -486,13 +487,26 @@ function ____exports.View(animator)
     end
     function on_combined_animation(message)
         local combined = message
-        for ____, element in ipairs(combined.combination.elements) do
-            damage_element_animation(element.uid)
+        if combined.maked_element == nil then
+            for ____, element in ipairs(combined.combination.elements) do
+                damage_element_animation(message, element.x, element.y, element.uid)
+            end
+            for ____, cell in ipairs(combined.activated_cells) do
+                local skip = false
+                for ____, element in ipairs(combined.combination.elements) do
+                    if cell.x == element.x and cell.y == element.y then
+                        skip = true
+                    end
+                end
+                if not skip then
+                    activate_cell_animation(cell)
+                end
+            end
+            return damaged_element_time
         end
-        return damaged_element_time
+        return combo_animation(combined)
     end
-    function on_combo_animation(message)
-        local combo = message
+    function combo_animation(combo)
         local target_element_world_pos = get_world_pos(combo.combined_element.x, combo.combined_element.y)
         do
             local i = 0
@@ -511,7 +525,9 @@ function ____exports.View(animator)
                             0,
                             function()
                                 delete_view_item_by_game_id(element.uid)
-                                make_element_view(combo.maked_element.x, combo.maked_element.y, combo.maked_element.type, combo.maked_element.uid)
+                                if combo.maked_element ~= nil then
+                                    make_element_view(combo.maked_element.x, combo.maked_element.y, combo.maked_element.type, combo.maked_element.uid)
+                                end
                             end
                         )
                     else
@@ -530,6 +546,9 @@ function ____exports.View(animator)
                 i = i + 1
             end
         end
+        for ____, cell in ipairs(combo.activated_cells) do
+            activate_cell_animation(cell)
+        end
         return squash_element_time
     end
     function on_buster_activation_begin(message)
@@ -539,30 +558,40 @@ function ____exports.View(animator)
     end
     function on_diskisphere_activated_animation(message)
         local activation = message
-        damage_element_animation(activation.element.uid)
+        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
         for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
+            damage_element_animation(message, element.x, element.y, element.uid)
         end
-        return damaged_element_time
-    end
-    function on_swaped_buster_with_diskosphere_animation(message)
-        local activation = message
-        damage_element_animation(activation.other_element.uid)
-        damage_element_animation(activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
-        end
-        for ____, element in ipairs(activation.maked_elements) do
-            make_element_view(element.x, element.y, element.type, element.uid)
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
         end
         return damaged_element_time
     end
     function on_swaped_diskosphere_with_buster_animation(message)
         local activation = message
-        damage_element_animation(activation.other_element.uid)
-        damage_element_animation(activation.element.uid)
+        damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
+        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
         for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
+            damage_element_animation(message, element.x, element.y, element.uid)
+        end
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
         end
         for ____, element in ipairs(activation.maked_elements) do
             make_element_view(element.x, element.y, element.type, element.uid)
@@ -575,20 +604,61 @@ function ____exports.View(animator)
             activation.other_element,
             activation.element,
             function()
-                damage_element_animation(activation.element.uid)
-                damage_element_animation(activation.other_element.uid)
+                damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
+                damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
                 for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(element.uid)
+                    damage_element_animation(message, element.x, element.y, element.uid)
                 end
             end
         )
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
         return squash_duration + damaged_element_time
+    end
+    function on_swaped_diskosphere_with_element_animation(message)
+        local activation = message
+        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
+        for ____, element in ipairs(activation.damaged_elements) do
+            damage_element_animation(message, element.x, element.y, element.uid)
+        end
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
+        return damaged_element_time
     end
     function on_rocket_activated_animation(message)
         local activation = message
-        damage_element_animation(activation.element.uid)
+        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
         for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
+            damage_element_animation(message, element.x, element.y, element.uid)
+        end
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
         end
         return damaged_element_time
     end
@@ -598,25 +668,50 @@ function ____exports.View(animator)
             activation.other_element,
             activation.element,
             function()
-                damage_element_animation(activation.other_element.uid)
-                damage_element_animation(activation.element.uid)
+                damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
+                damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
                 for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(element.uid)
+                    damage_element_animation(message, element.x, element.y, element.uid)
                 end
             end
         )
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
         return squash_duration + damaged_element_time
     end
     function on_helicopter_activated_animation(message)
         local activation = message
         for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
+            damage_element_animation(message, element.x, element.y, element.uid)
+        end
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if activation.target_element ~= NullElement and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
+                skip = true
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
         end
         if activation.target_element ~= NullElement then
-            remove_random_element_animation(activation.element, activation.target_element)
+            remove_random_element_animation(message, activation.element, activation.target_element)
             return damaged_element_time + helicopter_fly_duration + 0.2
         end
-        return damage_element_animation(activation.element.uid)
+        return damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
     end
     function on_swaped_helicopters_animation(message)
         local activation = message
@@ -625,23 +720,39 @@ function ____exports.View(animator)
             activation.element,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(element.uid)
+                    damage_element_animation(message, element.x, element.y, element.uid)
                 end
                 local target_element = table.remove(activation.target_elements)
                 if target_element ~= nil and target_element ~= NullElement then
-                    remove_random_element_animation(activation.element, target_element)
+                    remove_random_element_animation(message, activation.element, target_element)
                 end
                 target_element = table.remove(activation.target_elements)
                 if target_element ~= nil and target_element ~= NullElement then
-                    remove_random_element_animation(activation.other_element, target_element)
+                    remove_random_element_animation(message, activation.other_element, target_element)
                 end
                 target_element = table.remove(activation.target_elements)
                 if target_element ~= nil and target_element ~= NullElement then
                     make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid)
-                    remove_random_element_animation(activation.element, target_element, 1)
+                    remove_random_element_animation(message, activation.element, target_element, 1)
                 end
             end
         )
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            for ____, element in ipairs(activation.target_elements) do
+                if element ~= NullElement and cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
         return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
     end
     function on_swaped_helicopter_with_element_animation(message)
@@ -651,13 +762,27 @@ function ____exports.View(animator)
             activation.element,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(element.uid)
+                    damage_element_animation(message, element.x, element.y, element.uid)
                 end
                 if activation.target_element ~= NullElement then
-                    remove_random_element_animation(activation.element, activation.target_element)
+                    remove_random_element_animation(message, activation.element, activation.target_element)
                 end
             end
         )
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if activation.target_element ~= NullElement and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
+                skip = true
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
         return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
     end
     function on_dynamite_activated_animation(message)
@@ -666,10 +791,21 @@ function ____exports.View(animator)
             activation.element.uid,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(element.uid)
+                    damage_element_animation(message, element.x, element.y, element.uid)
                 end
             end
         )
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
+        end
         return activation_duration + damaged_element_time
     end
     function on_swaped_dynamites_animation(message)
@@ -683,21 +819,24 @@ function ____exports.View(animator)
                     activation.element.uid,
                     function()
                         for ____, element in ipairs(activation.damaged_elements) do
-                            damage_element_animation(element.uid)
+                            damage_element_animation(message, element.x, element.y, element.uid)
                         end
                     end
                 )
             end
         )
-        return squash_duration + damaged_element_time * 2
-    end
-    function on_swaped_diskosphere_with_element_animation(message)
-        local activation = message
-        damage_element_animation(activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(element.uid)
+        for ____, cell in ipairs(activation.activated_cells) do
+            local skip = false
+            for ____, element in ipairs(activation.damaged_elements) do
+                if cell.x == element.x and cell.y == element.y then
+                    skip = true
+                end
+            end
+            if not skip then
+                activate_cell_animation(cell)
+            end
         end
-        return damaged_element_time
+        return squash_duration + damaged_element_time * 2
     end
     function on_spinning_activated_animation(message)
         local data = message
@@ -733,12 +872,11 @@ function ____exports.View(animator)
     end
     function on_element_activated_animation(message)
         local activation = message
-        return damage_element_animation(activation.uid)
+        return damage_element_animation(message, activation.x, activation.y, activation.uid)
     end
-    function on_cell_activated_animation(message)
-        local activation = message
-        delete_all_view_items_by_game_id(activation.previous_id)
-        make_cell_view(activation.x, activation.y, activation.id, activation.uid)
+    function activate_cell_animation(cell)
+        delete_all_view_items_by_game_id(cell.previous_id)
+        make_cell_view(cell.x, cell.y, cell.id, cell.uid)
         return 0
     end
     function on_move_phase_begin()
@@ -890,7 +1028,7 @@ function ____exports.View(animator)
             end
         end
     end
-    function remove_random_element_animation(element, target_element, view_index, on_complited)
+    function remove_random_element_animation(message, element, target_element, view_index, on_complited)
         local target_world_pos = get_world_pos(target_element.x, target_element.y)
         local ____temp_17
         if view_index ~= nil then
@@ -911,8 +1049,11 @@ function ____exports.View(animator)
             helicopter_fly_duration,
             0,
             function()
-                damage_element_animation(target_element.uid)
+                damage_element_animation(message, target_element.x, target_element.y, target_element.uid)
                 damage_element_animation(
+                    message,
+                    element.x,
+                    element.y,
                     element.uid,
                     function()
                         if on_complited ~= nil then
@@ -924,7 +1065,7 @@ function ____exports.View(animator)
         )
         return helicopter_fly_duration + damaged_element_time
     end
-    function damage_element_animation(element_id, on_complite)
+    function damage_element_animation(data, x, y, element_id, on_complite)
         local element_view_item = get_first_view_item_by_game_id(element_id)
         if element_view_item ~= nil then
             go.animate(
@@ -937,6 +1078,23 @@ function ____exports.View(animator)
                 damaged_element_delay,
                 function()
                     delete_view_item_by_game_id(element_id)
+                    for ____, ____value in ipairs(__TS__ObjectEntries(data)) do
+                        local key = ____value[1]
+                        local value = ____value[2]
+                        if key == "activated_cells" then
+                            local found = false
+                            for ____, cell in ipairs(value) do
+                                if cell.x == x and cell.y == y then
+                                    activate_cell_animation(cell)
+                                    found = true
+                                    break
+                                end
+                            end
+                            if found then
+                                break
+                            end
+                        end
+                    end
                     if on_complite ~= nil then
                         on_complite()
                     end
@@ -1101,14 +1259,12 @@ function ____exports.View(animator)
     event_to_animation = {
         ON_SWAP_ELEMENTS = on_swap_element_animation,
         ON_COMBINED = on_combined_animation,
-        ON_COMBO = on_combo_animation,
         ON_ELEMENT_ACTIVATED = on_element_activated_animation,
-        ON_CELL_ACTIVATED = on_cell_activated_animation,
         ON_SPINNING_ACTIVATED = on_spinning_activated_animation,
         ON_BUSTER_ACTIVATION = on_buster_activation_begin,
-        SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED = on_swaped_buster_with_diskosphere_animation,
         DISKOSPHERE_ACTIVATED = on_diskisphere_activated_animation,
         SWAPED_DISKOSPHERES_ACTIVATED = on_swaped_diskospheres_animation,
+        SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED = on_swaped_diskosphere_with_buster_animation,
         SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED = on_swaped_diskosphere_with_buster_animation,
         SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED = on_swaped_diskosphere_with_element_animation,
         ROCKET_ACTIVATED = on_rocket_activated_animation,

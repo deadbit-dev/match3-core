@@ -14,7 +14,7 @@
 
 import { MessageId, Messages } from '../modules/modules_const';
 
-import { get_neighbors, is_valid_pos } from '../utils/math_utils';
+import { is_valid_pos } from '../utils/math_utils';
 
 import { CellId, ElementId,
     GameStepEventBuffer,
@@ -24,7 +24,9 @@ import { CellId, ElementId,
     SwapedHelicoptersActivationMessage,
     SwapedDiskosphereActivationMessage,
     SwapedHelicopterWithElementMessage,
-    SpinningActivationMessage
+    SpinningActivationMessage,
+    CombinedMessage,
+    ActivatedCellMessage,
 } from '../main/game_config';
 
 import {
@@ -59,7 +61,9 @@ export function Game() {
     let previous_states: GameState[] = [];
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
-    let selected_element: ItemInfo | null = null;  
+    let selected_element: ItemInfo | null = null;
+
+    let last_type_of_message: MessageId | null = null;
     
     function init() {
         field.init();
@@ -131,6 +135,7 @@ export function Game() {
             process_game_step(is_procesed || is_activated);
         });
 
+        // TODO: refactoring
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
 
@@ -315,6 +320,7 @@ export function Game() {
         write_game_step_event('DISKOSPHERE_ACTIVATED', event_data);
         
         event_data.element = {x, y, uid: diskosphere.uid};
+        event_data.activated_cells = [];
 
         const elements = field.get_all_elements_by_type(element_id);
         for(const element of elements) field.remove_element(element.x, element.y, true, true);
@@ -338,6 +344,7 @@ export function Game() {
         event_data.element = {x, y, uid: diskosphere.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_diskosphere.uid};
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
     
         for(const element_id of GAME_CONFIG.base_elements) {
             const elements = field.get_all_elements_by_type(element_id);
@@ -365,6 +372,7 @@ export function Game() {
         
         event_data.element = {x, y, uid: diskosphere.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_buster.uid};
+        event_data.activated_cells = [];
         event_data.damaged_elements = [];
         event_data.maked_elements = [];
 
@@ -398,6 +406,7 @@ export function Game() {
         const event_data = {} as SwapedDiskosphereActivationMessage;
         event_data.element = {x: other_x, y: other_y, uid: diskosphere.uid};
         event_data.other_element = {x, y, uid: buster.uid};
+        event_data.activated_cells = [];
         event_data.damaged_elements = [];
         event_data.maked_elements = [];
 
@@ -436,6 +445,7 @@ export function Game() {
         event_data.element = {x, y, uid: diskosphere.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_element.uid};
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
 
         const elements = field.get_all_elements_by_type(other_element.type);
         for(const element of elements) {
@@ -455,9 +465,10 @@ export function Game() {
         
         const event_data = {} as ActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
-        
+
         event_data.element = {x, y, uid: rocket.uid};
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
      
         if(rocket.type == ElementId.VerticalRocket || rocket.type == ElementId.AxisRocket) {
             for(let i = 0; i < field_height; i++) {
@@ -502,6 +513,7 @@ export function Game() {
         event_data.element = {x, y, uid: rocket.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_rocket.uid};
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
     
         for(let i = 0; i < field_height; i++) {
             if(i != y) {
@@ -547,6 +559,7 @@ export function Game() {
 
         const event_data = {} as HelicopterActivationMessage;
         write_game_step_event('HELICOPTER_ACTIVATED', event_data);
+        event_data.activated_cells = [];
         
         event_data.element = {x, y, uid: helicopter.uid};
         event_data.damaged_elements = remove_element_by_mask(x, y, [
@@ -571,6 +584,7 @@ export function Game() {
 
         const event_data = {} as SwapedHelicoptersActivationMessage;
         event_data.target_elements = [];
+        event_data.activated_cells = [];
 
         write_game_step_event('SWAPED_HELICOPTERS_ACTIVATED', event_data);
         
@@ -600,6 +614,7 @@ export function Game() {
         const event_data = {} as SwapedHelicopterWithElementMessage;
 
         write_game_step_event('SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED', event_data);
+        event_data.activated_cells = [];
         
         event_data.element = {x, y, uid: helicopter.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_element.uid};
@@ -623,6 +638,7 @@ export function Game() {
         
         const event_data = {} as ActivationMessage;
         write_game_step_event('DYNAMITE_ACTIVATED', event_data);
+        event_data.activated_cells = [];
         
         event_data.element = {x, y, uid: dynamite.uid};
         event_data.damaged_elements = remove_element_by_mask(x, y, [
@@ -645,6 +661,7 @@ export function Game() {
 
         const event_data = {} as SwapedActivationMessage;
         write_game_step_event('SWAPED_DYNAMITES_ACTIVATED', event_data);
+        event_data.activated_cells = [];
         
         event_data.element = {x, y, uid: dynamite.uid};
         event_data.other_element = {x: other_x, y: other_y, uid: other_dynamite.uid};
@@ -889,11 +906,12 @@ export function Game() {
         }
 
         if(element != NullElement) {
-            write_game_step_event('ON_COMBO', {
-                combined_element,
-                combination,
-                maked_element: {x: combined_element.x, y: combined_element.y, uid: element.uid, type: element.type}
-            });
+            (game_step_events[game_step_events.length - 1].value as CombinedMessage).maked_element = {
+                x: combined_element.x,
+                y: combined_element.y,
+                uid: element.uid,
+                type: element.type
+            };
 
             return true;
         }
@@ -909,9 +927,10 @@ export function Game() {
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
         if(is_buster(combined_element.x, combined_element.y)) return;
 
+        write_game_step_event('ON_COMBINED', {combined_element, combination, activated_cells: []});
+
         field.on_combined_base(combined_element, combination);
-        
-        if(!try_combo(combined_element, combination)) write_game_step_event('ON_COMBINED', {combined_element, combination});
+        try_combo(combined_element, combination);
     }
     
     function on_request_element(x: number, y: number): Element | typeof NullElement {
@@ -960,13 +979,17 @@ export function Game() {
         }
 
         if(new_cell != NotActiveCell) {
-            write_game_step_event('ON_CELL_ACTIVATED', {
-                x: item_info.x,
-                y: item_info.y,
-                uid: new_cell.uid,
-                id: new_cell.id,
-                previous_id: item_info.uid 
-            });
+            for(const [key, value] of Object.entries(game_step_events[game_step_events.length - 1].value)) {
+                if(key == 'activated_cells') {
+                    (value as ActivatedCellMessage[]).push({
+                        x: item_info.x,
+                        y: item_info.y,
+                        uid: new_cell.uid,
+                        id: new_cell.id,
+                        previous_id: item_info.uid 
+                    });
+                }
+            }
         }
     }
 

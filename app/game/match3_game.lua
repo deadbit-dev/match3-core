@@ -300,6 +300,7 @@ function ____exports.Game()
         local event_data = {}
         write_game_step_event("DISKOSPHERE_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, uid = diskosphere.uid}
+        event_data.activated_cells = {}
         local elements = field.get_all_elements_by_type(element_id)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, true)
@@ -322,6 +323,7 @@ function ____exports.Game()
         event_data.element = {x = x, y = y, uid = diskosphere.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_diskosphere.uid}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
             local elements = field.get_all_elements_by_type(element_id)
             for ____, element in ipairs(elements) do
@@ -347,6 +349,7 @@ function ____exports.Game()
         write_game_step_event("SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, uid = diskosphere.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_buster.uid}
+        event_data.activated_cells = {}
         event_data.damaged_elements = {}
         event_data.maked_elements = {}
         local element_id = get_random_element_id()
@@ -383,6 +386,7 @@ function ____exports.Game()
         local event_data = {}
         event_data.element = {x = other_x, y = other_y, uid = diskosphere.uid}
         event_data.other_element = {x = x, y = y, uid = buster.uid}
+        event_data.activated_cells = {}
         event_data.damaged_elements = {}
         event_data.maked_elements = {}
         write_game_step_event("SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED", event_data)
@@ -422,6 +426,7 @@ function ____exports.Game()
         event_data.element = {x = x, y = y, uid = diskosphere.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         local elements = field.get_all_elements_by_type(other_element.type)
         for ____, element in ipairs(elements) do
             field.remove_element(element.x, element.y, true, false)
@@ -441,6 +446,7 @@ function ____exports.Game()
         write_game_step_event("ROCKET_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         if rocket.type == ElementId.VerticalRocket or rocket.type == ElementId.AxisRocket then
             do
                 local i = 0
@@ -496,6 +502,7 @@ function ____exports.Game()
         event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_rocket.uid}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         do
             local i = 0
             while i < field_height do
@@ -555,6 +562,7 @@ function ____exports.Game()
         end
         local event_data = {}
         write_game_step_event("HELICOPTER_ACTIVATED", event_data)
+        event_data.activated_cells = {}
         event_data.element = {x = x, y = y, uid = helicopter.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
         event_data.target_element = remove_random_element(event_data.damaged_elements)
@@ -572,6 +580,7 @@ function ____exports.Game()
         end
         local event_data = {}
         event_data.target_elements = {}
+        event_data.activated_cells = {}
         write_game_step_event("SWAPED_HELICOPTERS_ACTIVATED", event_data)
         event_data.element = {x = x, y = y, uid = helicopter.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_helicopter.uid}
@@ -599,6 +608,7 @@ function ____exports.Game()
         end
         local event_data = {}
         write_game_step_event("SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED", event_data)
+        event_data.activated_cells = {}
         event_data.element = {x = x, y = y, uid = helicopter.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
@@ -614,6 +624,7 @@ function ____exports.Game()
         end
         local event_data = {}
         write_game_step_event("DYNAMITE_ACTIVATED", event_data)
+        event_data.activated_cells = {}
         event_data.element = {x = x, y = y, uid = dynamite.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}})
         field.remove_element(x, y, true, false)
@@ -630,6 +641,7 @@ function ____exports.Game()
         end
         local event_data = {}
         write_game_step_event("SWAPED_DYNAMITES_ACTIVATED", event_data)
+        event_data.activated_cells = {}
         event_data.element = {x = x, y = y, uid = dynamite.uid}
         event_data.other_element = {x = other_x, y = other_y, uid = other_dynamite.uid}
         event_data.damaged_elements = remove_element_by_mask(x, y, {
@@ -938,7 +950,7 @@ function ____exports.Game()
             end
         until true
         if element ~= NullElement then
-            write_game_step_event("ON_COMBO", {combined_element = combined_element, combination = combination, maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}})
+            game_step_events[#game_step_events].value.maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}
             return true
         end
         return false
@@ -953,10 +965,9 @@ function ____exports.Game()
         if is_buster(combined_element.x, combined_element.y) then
             return
         end
+        write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination, activated_cells = {}})
         field.on_combined_base(combined_element, combination)
-        if not try_combo(combined_element, combination) then
-            write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination})
-        end
+        try_combo(combined_element, combination)
     end
     function on_request_element(x, y)
         return make_element(
@@ -975,9 +986,9 @@ function ____exports.Game()
         end
         local new_cell = NotActiveCell
         repeat
-            local ____switch216 = cell.type
-            local ____cond216 = ____switch216 == CellType.ActionLocked
-            if ____cond216 then
+            local ____switch215 = cell.type
+            local ____cond215 = ____switch215 == CellType.ActionLocked
+            if ____cond215 then
                 if cell.cnt_acts == nil then
                     break
                 end
@@ -993,8 +1004,8 @@ function ____exports.Game()
                 end
                 break
             end
-            ____cond216 = ____cond216 or ____switch216 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond216 then
+            ____cond215 = ____cond215 or ____switch215 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
+            if ____cond215 then
                 if cell.cnt_near_acts == nil then
                     break
                 end
@@ -1012,13 +1023,19 @@ function ____exports.Game()
             end
         until true
         if new_cell ~= NotActiveCell then
-            write_game_step_event("ON_CELL_ACTIVATED", {
-                x = item_info.x,
-                y = item_info.y,
-                uid = new_cell.uid,
-                id = new_cell.id,
-                previous_id = item_info.uid
-            })
+            for ____, ____value in ipairs(__TS__ObjectEntries(game_step_events[#game_step_events].value)) do
+                local key = ____value[1]
+                local value = ____value[2]
+                if key == "activated_cells" then
+                    value[#value + 1] = {
+                        x = item_info.x,
+                        y = item_info.y,
+                        uid = new_cell.uid,
+                        id = new_cell.id,
+                        previous_id = item_info.uid
+                    }
+                end
+            end
         end
     end
     function is_buster(x, y)
@@ -1140,6 +1157,7 @@ function ____exports.Game()
     activated_elements = {}
     game_step_events = {}
     selected_element = nil
+    local last_type_of_message = nil
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)

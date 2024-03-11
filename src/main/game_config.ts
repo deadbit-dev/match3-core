@@ -74,7 +74,7 @@ export const _GAME_CONFIG = {
     helicopter_fly_duration: 0.75,
 
     damaged_element_easing: go.EASING_INOUTBACK,
-    damaged_element_time: 0.55,
+    damaged_element_time: 1, //0.55,
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.3,
 
@@ -483,10 +483,9 @@ export type MovedElementsMessage = MovedInfo[];
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
-export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo }
-export interface ComboMessage extends CombinedMessage { maked_element: ElementMessage }
+export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 
-export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[] }
+export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[]}
 export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
 
 export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
@@ -537,8 +536,6 @@ export type _UserMessages = {
     SWAPED_DYNAMITES_ACTIVATED: SwapedActivationMessage,
 
     ON_COMBINED: CombinedMessage,
-    ON_COMBO: ComboMessage,
-    ON_CELL_ACTIVATED: ActivatedCellMessage,
 
     ON_MOVED_ELEMENTS: MovedElementsMessage,
     ON_GAME_STEP: GameStepEventBuffer,
