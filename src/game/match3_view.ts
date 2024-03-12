@@ -135,13 +135,11 @@ export function View(animator: FluxGroup) {
         'ON_COMBINED': on_combined_animation,
         
         'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
-
         'ON_SPINNING_ACTIVATED': on_spinning_activated_animation,
-
+        
         'ON_BUSTER_ACTIVATION': on_buster_activation_begin,
         
         // DISKOSPHERE
-        
         'DISKOSPHERE_ACTIVATED': on_diskisphere_activated_animation,
         'SWAPED_DISKOSPHERES_ACTIVATED': on_swaped_diskospheres_animation,
         'SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED': on_swaped_diskosphere_with_buster_animation,
@@ -240,16 +238,25 @@ export function View(animator: FluxGroup) {
         is_processing = true;
 
         for(const event of events) {
-            const is_move_phase = (event.key == 'ON_MOVED_ELEMENTS');
-            if(is_move_phase) on_move_phase_begin();
-            
-            const event_duration = event_to_animation[event.key](event.value);
-            
-            if(is_move_phase) {
-                move_phase_duration = event_duration;
-                on_move_phase_end();
-            } else if(event_duration > combinate_phase_duration) combinate_phase_duration = event_duration;         }
-
+            switch(event.key) {
+                case 'ON_SWAP_ELEMENTS':
+                    flow.delay(event_to_animation[event.key](event.value));
+                break;
+                case 'ON_SPINNING_ACTIVATED':
+                    flow.delay(event_to_animation[event.key](event.value));
+                break;
+                case 'ON_MOVED_ELEMENTS':
+                    on_move_phase_begin();
+                    move_phase_duration = event_to_animation[event.key](event.value);
+                    on_move_phase_end();
+                break;
+                default:
+                    const event_duration = event_to_animation[event.key](event.value);
+                    if(event_duration > combinate_phase_duration) combinate_phase_duration = event_duration;
+                break;
+            }
+        }
+        
         is_processing = false;
     }
 
@@ -560,10 +567,14 @@ export function View(animator: FluxGroup) {
             if(!skip) activate_cell_animation(cell);
         }
 
-        for(const element of activation.maked_elements)
-            make_element_view(element.x, element.y, element.type, element.uid);
+        flow.delay(damaged_element_time);
 
-        return damaged_element_time;
+        for(const element of activation.maked_elements)
+            make_element_view(element.x, element.y, element.type, element.uid, true);
+
+        flow.delay(spawn_element_time);
+
+        return damaged_element_time + spawn_element_time;
     }
 
     function on_swaped_diskospheres_animation(message: Messages[MessageId]) {

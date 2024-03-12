@@ -139,17 +139,34 @@ function ____exports.View(animator)
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
-            local is_move_phase = event.key == "ON_MOVED_ELEMENTS"
-            if is_move_phase then
-                on_move_phase_begin()
-            end
-            local event_duration = event_to_animation[event.key](event.value)
-            if is_move_phase then
-                move_phase_duration = event_duration
-                on_move_phase_end()
-            elseif event_duration > combinate_phase_duration then
-                combinate_phase_duration = event_duration
-            end
+            repeat
+                local ____switch28 = event.key
+                local event_duration
+                local ____cond28 = ____switch28 == "ON_SWAP_ELEMENTS"
+                if ____cond28 then
+                    flow.delay(event_to_animation[event.key](event.value))
+                    break
+                end
+                ____cond28 = ____cond28 or ____switch28 == "ON_SPINNING_ACTIVATED"
+                if ____cond28 then
+                    flow.delay(event_to_animation[event.key](event.value))
+                    break
+                end
+                ____cond28 = ____cond28 or ____switch28 == "ON_MOVED_ELEMENTS"
+                if ____cond28 then
+                    on_move_phase_begin()
+                    move_phase_duration = event_to_animation[event.key](event.value)
+                    on_move_phase_end()
+                    break
+                end
+                do
+                    event_duration = event_to_animation[event.key](event.value)
+                    if event_duration > combinate_phase_duration then
+                        combinate_phase_duration = event_duration
+                    end
+                    break
+                end
+            until true
         end
         is_processing = false
     end
@@ -158,19 +175,19 @@ function ____exports.View(animator)
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch34 = message_id
-                local ____cond34 = ____switch34 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond34 then
+                local ____switch33 = message_id
+                local ____cond33 = ____switch33 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond33 then
                     on_down(_message.item)
                     break
                 end
-                ____cond34 = ____cond34 or ____switch34 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond34 then
+                ____cond33 = ____cond33 or ____switch33 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond33 then
                     on_up(_message.item)
                     break
                 end
-                ____cond34 = ____cond34 or ____switch34 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond34 then
+                ____cond33 = ____cond33 or ____switch33 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond33 then
                     on_move(_message)
                     break
                 end
@@ -198,24 +215,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch40 = move_direction
-            local ____cond40 = ____switch40 == Direction.Up
-            if ____cond40 then
+            local ____switch39 = move_direction
+            local ____cond39 = ____switch39 == Direction.Up
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond40 = ____cond40 or ____switch40 == Direction.Down
-            if ____cond40 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Down
+            if ____cond39 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond40 = ____cond40 or ____switch40 == Direction.Left
-            if ____cond40 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Left
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond40 = ____cond40 or ____switch40 == Direction.Right
-            if ____cond40 then
+            ____cond39 = ____cond39 or ____switch39 == Direction.Right
+            if ____cond39 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -593,10 +610,18 @@ function ____exports.View(animator)
                 activate_cell_animation(cell)
             end
         end
+        flow.delay(damaged_element_time)
         for ____, element in ipairs(activation.maked_elements) do
-            make_element_view(element.x, element.y, element.type, element.uid)
+            make_element_view(
+                element.x,
+                element.y,
+                element.type,
+                element.uid,
+                true
+            )
         end
-        return damaged_element_time
+        flow.delay(spawn_element_time)
+        return damaged_element_time + spawn_element_time
     end
     function on_swaped_diskospheres_animation(message)
         local activation = message
