@@ -26,7 +26,6 @@ import {
     NullElement,
     NotActiveCell,
     Cell,
-    Element,
     MoveType
 } from "./match3_core";
 

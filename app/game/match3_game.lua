@@ -57,19 +57,18 @@ function ____exports.Game()
                 local is_from_buster = is_buster(elements.to_x, elements.to_y)
                 local is_to_buster = is_buster(elements.from_x, elements.from_y)
                 local is_procesed = field.process_state(ProcessMode.Combinate)
-                if is_procesed and (is_from_buster or is_to_buster) then
-                    write_game_step_event("ON_BUSTER_ACTIVATION", {})
-                end
                 local is_activated = false
                 if is_from_buster or is_to_buster then
-                    is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
-                    if not is_activated then
+                    if is_procesed then
+                        write_game_step_event("ON_BUSTER_ACTIVATION", {})
                         if is_from_buster then
                             is_activated = try_activate_buster_element(elements.to_x, elements.to_y)
                         end
                         if is_to_buster then
                             is_activated = try_activate_buster_element(elements.from_x, elements.from_y)
                         end
+                    else
+                        is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y)
                     end
                 end
                 process_game_step(is_procesed or is_activated)
@@ -252,9 +251,9 @@ function ____exports.Game()
         end
         __TS__ArrayPush(activated_elements, element.uid, other_element.uid)
         local activated = false
-        if try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y) then
+        if try_activate_swaped_diskospheres(x, y, other_x, other_y) then
             activated = true
-        elseif try_activate_swaped_diskospheres(x, y, other_x, other_y) then
+        elseif try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y) then
             activated = true
         elseif try_activate_swaped_diskosphere_with_buster(x, y, other_x, other_y) then
             activated = true

@@ -122,15 +122,13 @@ export function Game() {
             const is_to_buster = is_buster(elements.from_x, elements.from_y);
             const is_procesed = field.process_state(ProcessMode.Combinate);
 
-            if(is_procesed && (is_from_buster || is_to_buster)) write_game_step_event('ON_BUSTER_ACTIVATION', {});
-            
             let is_activated = false;
-            if(is_from_buster || is_to_buster) {
-                is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
-                if(!is_activated) {
+            if((is_from_buster || is_to_buster)) {
+                if(is_procesed) {
+                    write_game_step_event('ON_BUSTER_ACTIVATION', {});
                     if(is_from_buster) is_activated = try_activate_buster_element(elements.to_x, elements.to_y);
                     if(is_to_buster) is_activated = try_activate_buster_element(elements.from_x, elements.from_y);
-                }
+                } else is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
             }
             
             process_game_step(is_procesed || is_activated);
@@ -289,8 +287,8 @@ export function Game() {
         activated_elements.push(element.uid, other_element.uid);
 
         let activated = false;
-        if(try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y)) activated = true;
-        else if(try_activate_swaped_diskospheres(x, y, other_x, other_y)) activated = true;
+        if(try_activate_swaped_diskospheres(x, y, other_x, other_y)) activated = true;
+        else if(try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y)) activated = true;
         else if(try_activate_swaped_diskosphere_with_buster(x, y, other_x, other_y)) activated = true;
         else if(try_activate_swaped_diskosphere_with_element(x, y, other_x, other_y)) activated = true;
         else if(try_activate_swaped_diskosphere_with_element(other_x, other_y, x, y)) activated = true;

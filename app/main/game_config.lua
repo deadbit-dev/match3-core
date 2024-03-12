@@ -768,7 +768,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Topaz,
                     ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Diskosphere,
                     ____exports.ElementId.Diskosphere,
                     ____exports.ElementId.Dynamite
                 },
@@ -778,7 +778,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Topaz,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Ruby,
+                    ____exports.ElementId.Helicopter,
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Topaz
                 },
