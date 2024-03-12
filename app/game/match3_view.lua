@@ -36,7 +36,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_scale, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, selected_element, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -75,21 +75,69 @@ function ____exports.View(animator)
                 if item == nil then
                     return
                 end
-                selected_element_scale = go.get_scale(item._hash)
+                selected_element_position = go.get_position(item._hash)
+                local square_easing = vmath.vector({
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                })
                 go.animate(
                     item._hash,
-                    "scale.x",
+                    "position.y",
                     go.PLAYBACK_LOOP_PINGPONG,
-                    selected_element_scale.x + 0.05,
-                    go.EASING_OUTBOUNCE,
-                    1.5
-                )
-                go.animate(
-                    item._hash,
-                    "scale.y",
-                    go.PLAYBACK_LOOP_PINGPONG,
-                    selected_element_scale.y + 0.05,
-                    go.EASING_OUTBOUNCE,
+                    selected_element_position.y + 1.5,
+                    square_easing,
                     1.5
                 )
             end
@@ -105,7 +153,7 @@ function ____exports.View(animator)
                     return
                 end
                 go.cancel_animations(item._hash)
-                go.set_scale(selected_element_scale, item._hash)
+                go.set_position(selected_element_position, item._hash)
             end
         )
         EventBus.on(

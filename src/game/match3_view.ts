@@ -170,7 +170,7 @@ export function View(animator: FluxGroup) {
     const game_id_to_view_index: {[key in number]: number[]} = {};
 
     let selected_element: IGameItem | null = null;
-    let selected_element_scale: vmath.vector3;
+    let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
@@ -203,9 +203,21 @@ export function View(animator: FluxGroup) {
             const item = get_first_view_item_by_game_id(element.uid);
             if(item == undefined) return;
 
-            selected_element_scale = go.get_scale(item._hash);
-            go.animate(item._hash, 'scale.x', go.PLAYBACK_LOOP_PINGPONG, selected_element_scale.x + 0.05, go.EASING_OUTBOUNCE, 1.5);
-            go.animate(item._hash, 'scale.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_scale.y + 0.05, go.EASING_OUTBOUNCE, 1.5);
+            selected_element_position = go.get_position(item._hash);
+
+            const square_easing = vmath.vector([
+                0, 0, 0, 0, 0, 0,
+                0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                1, 1, 1, 1, 1, 1,
+                0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 
+                0, 0, 0, 0, 0, 0,
+                -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
+                -1, -1, -1, -1, -1, -1,
+                -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
+                0, 0, 0, 0, 0, 0
+            ]);
+
+            go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_position.y + 1.5, square_easing, 1.5);
         });
 
         EventBus.on('ON_ELEMENT_UNSELECTED', (element) => {
@@ -215,7 +227,7 @@ export function View(animator: FluxGroup) {
             if(item == undefined) return;
 
             go.cancel_animations(item._hash);
-            go.set_scale(selected_element_scale, item._hash);
+            go.set_position(selected_element_position, item._hash);
         });
 
         EventBus.on('TRY_ACTIVATE_SPINNING', () => {
