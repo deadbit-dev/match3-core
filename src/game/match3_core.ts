@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { rotate_matrix_90 } from "../utils/math_utils";
+import { is_valid_pos, rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
@@ -874,8 +874,17 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     
     // возвращает массив всех возможных ходов(для подсказок например)
     function get_all_available_steps(): StepInfo[] {
-        // TODO
-        return [];
+        const steps: StepInfo[] = [];
+        for(let y = 0; y < size_y; y++) {
+            for(let x = 0; x < size_x; x++) {
+                if(is_valid_pos(x + 1, y, size_x, size_y) && is_can_move(x, y, x + 1, y))
+                    steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
+                if(is_valid_pos(x, y + 1, size_x, size_y) && is_can_move(x, y, x, y + 1))
+                    steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+            }
+        }
+
+        return steps;
     }
 
     return {

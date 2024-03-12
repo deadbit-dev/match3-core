@@ -6,6 +6,7 @@ local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
+local is_valid_pos = ____math_utils.is_valid_pos
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
@@ -852,7 +853,26 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
     end
     local function get_all_available_steps()
-        return {}
+        local steps = {}
+        do
+            local y = 0
+            while y < size_y do
+                do
+                    local x = 0
+                    while x < size_x do
+                        if is_valid_pos(x + 1, y, size_x, size_y) and is_can_move(x, y, x + 1, y) then
+                            steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
+                        end
+                        if is_valid_pos(x, y + 1, size_x, size_y) and is_can_move(x, y, x, y + 1) then
+                            steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        return steps
     end
     return {
         init = init,
