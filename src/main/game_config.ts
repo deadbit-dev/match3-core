@@ -482,6 +482,7 @@ export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }
 export type MovedElementsMessage = MovedInfo[];
 
 export interface ElementMessage extends ItemInfo { type: number }
+export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 
@@ -544,7 +545,7 @@ export type _UserMessages = {
     REVERT_STEP: VoidMessage,
     ON_REVERT_STEP: RevertStepMessage,
 
-    ON_ELEMENT_ACTIVATED: ItemInfo,
+    ON_ELEMENT_ACTIVATED: ElementActivationMessage,
 
     UPDATED_BUTTONS: VoidMessage
 };

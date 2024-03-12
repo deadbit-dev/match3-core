@@ -27,6 +27,7 @@ import { CellId, ElementId,
     SpinningActivationMessage,
     CombinedMessage,
     ActivatedCellMessage,
+    ElementActivationMessage,
 } from '../main/game_config';
 
 import {
@@ -738,8 +739,13 @@ export function Game() {
         // FIXME: for buster under wall
         if(is_buster(x, y)) try_activate_buster_element(x, y);
         else {
+            const event_data = {} as ElementActivationMessage;
+            event_data.x = x;
+            event_data.y = y;
+            event_data.activated_cells = [];
+            write_game_step_event('ON_ELEMENT_ACTIVATED', event_data);
             const removed_element = field.remove_element(x, y, true, false);
-            if(removed_element != undefined) write_game_step_event('ON_ELEMENT_ACTIVATED', {x, y, uid: removed_element.uid});
+            if(removed_element != undefined) event_data.uid = removed_element.uid;
         }
 
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
@@ -761,6 +767,7 @@ export function Game() {
         
         event_data.element = {} as ItemInfo;
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
         
         for(let i = 0; i < field_width; i++) {
             if(is_buster(i, y)) try_activate_buster_element(i, y);
@@ -789,6 +796,7 @@ export function Game() {
         
         event_data.element = {} as ItemInfo;
         event_data.damaged_elements = [];
+        event_data.activated_cells = [];
         
         for(let i = 0; i < field_height; i++) {
             if(is_buster(x, i)) try_activate_buster_element(x, i);

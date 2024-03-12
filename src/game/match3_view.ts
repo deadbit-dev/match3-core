@@ -18,7 +18,7 @@ import * as camera from '../utils/camera';
 import { Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage } from "../main/game_config";
+import { CellId, CombinedMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage, ElementActivationMessage } from "../main/game_config";
 
 import { 
     GameState,
@@ -771,8 +771,16 @@ export function View(animator: FluxGroup) {
     }    
 
     function on_element_activated_animation(message: Messages[MessageId]) {
-        const activation = message as ItemInfo;
-        return damage_element_animation(message, activation.x, activation.y, activation.uid);
+        const activation = message as ElementActivationMessage;
+        
+        damage_element_animation(message, activation.x, activation.y, activation.uid);
+        
+        for(const cell of activation.activated_cells) {
+            if(cell.x == activation.x && cell.y == activation.y) activate_cell_animation(cell);
+        }
+
+        return damaged_element_time;
+
     }
 
     function activate_cell_animation(cell: ActivatedCellMessage) {

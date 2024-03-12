@@ -872,7 +872,13 @@ function ____exports.View(animator)
     end
     function on_element_activated_animation(message)
         local activation = message
-        return damage_element_animation(message, activation.x, activation.y, activation.uid)
+        damage_element_animation(message, activation.x, activation.y, activation.uid)
+        for ____, cell in ipairs(activation.activated_cells) do
+            if cell.x == activation.x and cell.y == activation.y then
+                activate_cell_animation(cell)
+            end
+        end
+        return damaged_element_time
     end
     function activate_cell_animation(cell)
         delete_all_view_items_by_game_id(cell.previous_id)

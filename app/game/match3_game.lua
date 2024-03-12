@@ -754,9 +754,14 @@ function ____exports.Game()
         if is_buster(x, y) then
             try_activate_buster_element(x, y)
         else
+            local event_data = {}
+            event_data.x = x
+            event_data.y = y
+            event_data.activated_cells = {}
+            write_game_step_event("ON_ELEMENT_ACTIVATED", event_data)
             local removed_element = field.remove_element(x, y, true, false)
             if removed_element ~= nil then
-                write_game_step_event("ON_ELEMENT_ACTIVATED", {x = x, y = y, uid = removed_element.uid})
+                event_data.uid = removed_element.uid
             end
         end
         GameStorage.set(
@@ -780,6 +785,7 @@ function ____exports.Game()
         write_game_step_event("ROCKET_ACTIVATED", event_data)
         event_data.element = {}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         do
             local i = 0
             while i < field_width do
@@ -816,6 +822,7 @@ function ____exports.Game()
         write_game_step_event("ROCKET_ACTIVATED", event_data)
         event_data.element = {}
         event_data.damaged_elements = {}
+        event_data.activated_cells = {}
         do
             local i = 0
             while i < field_height do
