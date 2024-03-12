@@ -74,7 +74,7 @@ export const _GAME_CONFIG = {
     helicopter_fly_duration: 0.75,
 
     damaged_element_easing: go.EASING_INOUTBACK,
-    damaged_element_time: 1, //0.55,
+    damaged_element_time: 0.55,
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.3,
 
