@@ -47,6 +47,8 @@ ____exports.CellId.Grass = 1
 ____exports.CellId[____exports.CellId.Grass] = "Grass"
 ____exports.CellId.Box = 2
 ____exports.CellId[____exports.CellId.Box] = "Box"
+____exports.CellId.Web = 3
+____exports.CellId[____exports.CellId.Web] = "Web"
 ____exports.ElementId = ElementId or ({})
 ____exports.ElementId.Dimonde = 0
 ____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
@@ -73,7 +75,7 @@ ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
-local ____temp_4 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#c4a378'") or "#c4a378"
+local ____temp_4 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#c29754'") or "#c29754"
 local ____temp_0
 if sys.get_sys_info().system_name == "HTML5" then
     ____temp_0 = html5.run("new URL(location).searchParams.get('move')==null") == "true"
@@ -115,13 +117,20 @@ ____exports._GAME_CONFIG = {
         [____exports.SubstrateId.Full] = "full"
     },
     cell_database = {
-        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_base"},
+        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_white"},
         [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
         [____exports.CellId.Box] = {
             type = bit.bor(CellType.ActionLockedNear, CellType.Wall),
             cnt_near_acts = 0,
             is_render_under_cell = true,
             view = "cell_box",
+            z_index = 1
+        },
+        [____exports.CellId.Web] = {
+            type = bit.bor(CellType.Base, CellType.NotMoved),
+            cnt_near_acts = 0,
+            is_render_under_cell = true,
+            view = "cell_web",
             z_index = 1
         }
     },
@@ -1033,16 +1042,16 @@ ____exports._GAME_CONFIG = {
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    ____exports.CellId.Web,
+                    ____exports.CellId.Web,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    ____exports.CellId.Web,
+                    ____exports.CellId.Web,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },

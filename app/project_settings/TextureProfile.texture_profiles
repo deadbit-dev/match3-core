@@ -9,9 +9,11 @@ profiles {
     formats {
       format: TEXTURE_FORMAT_RGBA
       compression_level: BEST
-      compression_type: COMPRESSION_TYPE_WEBP_LOSSY
+      compression_type: COMPRESSION_TYPE_BASIS_UASTC
     }
     mipmaps: false
+    max_texture_size: 0
+    premultiply_alpha: true
   }
   platforms {
     os: OS_ID_ANDROID
@@ -21,5 +23,7 @@ profiles {
       compression_type: COMPRESSION_TYPE_DEFAULT
     }
     mipmaps: false
+    max_texture_size: 0
+    premultiply_alpha: true
   }
 }

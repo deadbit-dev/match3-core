@@ -321,6 +321,17 @@ function ____exports.View(animator)
                             end
                             __TS__SparseArrayPush(____array_4, ____opt_0)
                             ____make_cell_view_5(__TS__SparseArraySpread(____array_4))
+                            local pos = get_world_pos(x, y, -1.01)
+                            local _go = gm.make_go("cell_view", pos)
+                            sprite.play_flipbook(
+                                msg.url(nil, _go, "sprite"),
+                                "cell_white"
+                            )
+                            go.set_scale(
+                                vmath.vector3(scale_ratio, scale_ratio, 1),
+                                _go
+                            )
+                            gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
                         end
                         local element = state.elements[y + 1][x + 1]
                         if element ~= NullElement then
@@ -400,6 +411,9 @@ function ____exports.View(animator)
         if z_index == nil then
             z_index = GAME_CONFIG.default_cell_z_index
         end
+        if cell_id == CellId.Base then
+            return
+        end
         local pos = get_world_pos(x, y, z_index)
         local _go = gm.make_go("cell_view", pos)
         sprite.play_flipbook(
@@ -410,9 +424,6 @@ function ____exports.View(animator)
             vmath.vector3(scale_ratio, scale_ratio, 1),
             _go
         )
-        if cell_id == CellId.Base then
-            gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
-        end
         local index = gm.add_game_item({_hash = _go, is_clickable = true})
         if game_id_to_view_index[id] == nil then
             game_id_to_view_index[id] = {}

@@ -44,7 +44,8 @@ export enum SubstrateId {
 export enum CellId {
     Base,
     Grass,
-    Box
+    Box,
+    Web
 }
 
 export enum ElementId {
@@ -78,7 +79,7 @@ export const _GAME_CONFIG = {
     damaged_element_delay: 0.1,
     damaged_element_scale: 0.3,
 
-    base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#c4a378'`) : '#c4a378',
+    base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#c29754'`) : '#c29754',
 
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
     duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.07`))! : 0.07,
@@ -104,14 +105,14 @@ export const _GAME_CONFIG = {
         [SubstrateId.LeftStripBottomInsideAngle]: 'left_strip_bottom_inside_angle',
         [SubstrateId.LeftStrip]: 'left_strip',
         [SubstrateId.TopBottomInsideAngle]: 'top_bottom_inside_angle',
-        [SubstrateId.InsideAngle]: 'inside_angle', 
+        [SubstrateId.InsideAngle]: 'inside_angle',
         [SubstrateId.Full]: 'full'
-    } as { [key in SubstrateId]: string},
+    } as { [key in SubstrateId]: string },
 
     cell_database: {
         [CellId.Base]: {
             type: CellType.Base,
-            view: 'cell_base',
+            view: 'cell_white',
         },
 
         [CellId.Grass]: {
@@ -126,7 +127,15 @@ export const _GAME_CONFIG = {
             is_render_under_cell: true,
             view: 'cell_box',
             z_index: 1
-        }
+        },
+
+        [CellId.Web]: {
+            type: bit.bor(CellType.Base, CellType.NotMoved),
+            cnt_near_acts: 0,
+            is_render_under_cell: true,
+            view: 'cell_web',
+            z_index: 1
+        },
     } as { [key in CellId]: { type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index?: number } },
 
     element_database: {
@@ -431,7 +440,7 @@ export const _GAME_CONFIG = {
                 hammer_active: false
             }
         },
-        
+
         {
             // LEVEL 5
             field: {
@@ -445,8 +454,8 @@ export const _GAME_CONFIG = {
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Web, CellId.Web, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, CellId.Web, CellId.Web, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
                 ],
@@ -486,7 +495,7 @@ export interface ElementActivationMessage extends ItemInfo { activated_cells: Ac
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 
-export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[]}
+export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[] }
 export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
 
 export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
