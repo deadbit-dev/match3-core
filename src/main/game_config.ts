@@ -130,7 +130,7 @@ export const _GAME_CONFIG = {
         },
 
         [CellId.Web]: {
-            type: bit.bor(CellType.Base, CellType.NotMoved),
+            type: CellType.NotMoved,
             cnt_near_acts: 0,
             is_render_under_cell: true,
             view: 'cell_web',
