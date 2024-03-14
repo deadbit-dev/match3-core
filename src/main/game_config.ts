@@ -45,6 +45,9 @@ export enum CellId {
     Base,
     Grass,
     Box,
+    Stone0,
+    Stone1,
+    Stone2,
     Web
 }
 
@@ -92,7 +95,6 @@ export const _GAME_CONFIG = {
     buster_delay: 0.5,
 
     default_substrate_z_index: -2,
-    default_cell_z_index: -1,
     default_element_z_index: 0,
 
     substrate_database: {
@@ -113,30 +115,57 @@ export const _GAME_CONFIG = {
         [CellId.Base]: {
             type: CellType.Base,
             view: 'cell_white',
+            z_index: -1,
         },
 
         [CellId.Grass]: {
             type: CellType.ActionLocked,
             cnt_acts: 0,
-            view: 'cell_grass'
+            is_render_under_cell: true,
+            view: 'cell_grass',
+            z_index: -1,
         },
 
         [CellId.Box]: {
-            type: bit.bor(CellType.ActionLockedNear, CellType.Wall),
+            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
             cnt_near_acts: 0,
             is_render_under_cell: true,
             view: 'cell_box',
-            z_index: 1
+            z_index: 2
+        },
+
+        [CellId.Stone0]: {
+            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
+            cnt_near_acts: 0,
+            is_render_under_cell: true,
+            view: 'cell_stone_0',
+            z_index: 2
+        },
+
+        [CellId.Stone1]: {
+            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
+            cnt_near_acts: 0,
+            is_render_under_cell: true,
+            view: 'cell_stone_1',
+            z_index: 2
+        },
+
+        [CellId.Stone2]: {
+            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
+            cnt_near_acts: 0,
+            is_render_under_cell: true,
+            view: 'cell_stone_2',
+            z_index: 2
         },
 
         [CellId.Web]: {
-            type: CellType.NotMoved,
+            type: bit.bor(CellType.ActionLockedNear, CellType.NotMoved),
             cnt_near_acts: 0,
             is_render_under_cell: true,
             view: 'cell_web',
-            z_index: 1
+            z_index: 2
         },
-    } as { [key in CellId]: { type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index?: number } },
+    } as { [key in CellId]: { type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index: number } },
 
     element_database: {
         [ElementId.Dimonde]: {
@@ -260,13 +289,13 @@ export const _GAME_CONFIG = {
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
                 ],
 
                 elements: [
@@ -298,13 +327,13 @@ export const _GAME_CONFIG = {
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base,CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, [CellId.Grass, CellId.Box], CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
+                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Stone2, CellId.Stone1, CellId.Stone0], [CellId.Grass, CellId.Box], CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
+                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
                 ],
 
                 elements: [
@@ -336,13 +365,13 @@ export const _GAME_CONFIG = {
 
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass],
-                    [CellId.Base, CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Grass, NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Grass, NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass, CellId.Base],
-                    [CellId.Grass, NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, CellId.Grass],
-                    [NotActiveCell, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, NotActiveCell]
+                    [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
+                    [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
+                    [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
+                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
                 ],
 
                 elements: [
@@ -374,13 +403,13 @@ export const _GAME_CONFIG = {
 
                 cells: [
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass],
-                    [CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Grass, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass, CellId.Base],
-                    [CellId.Grass, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Grass],
-                    [CellId.Base, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, CellId.Base]
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass]],
+                    [CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, ], CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base],
+                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass]],
+                    [CellId.Base, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base]
                 ],
 
                 elements: [
@@ -417,11 +446,11 @@ export const _GAME_CONFIG = {
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Grass, CellId.Grass, CellId.Grass, CellId.Grass, [CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base]
+                    [[CellId.Base, CellId.Grass, CellId.Stone2, CellId.Stone1, CellId.Stone0], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
+                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base]
                 ],
 
                 elements: [
@@ -454,8 +483,8 @@ export const _GAME_CONFIG = {
                 cells: [
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Web, CellId.Web, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Web, CellId.Web, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Web], [CellId.Base, CellId.Web], CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Web], [CellId.Base, CellId.Web], CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
                 ],
@@ -464,7 +493,7 @@ export const _GAME_CONFIG = {
                     [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
                     [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
                     [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, ElementId.Dimonde],
+                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Dimonde],
                     [ElementId.Dimonde, ElementId.Helicopter, ElementId.Dimonde, ElementId.Emerald, ElementId.Helicopter, ElementId.Dimonde],
                     [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
                 ]

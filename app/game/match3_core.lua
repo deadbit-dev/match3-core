@@ -73,8 +73,6 @@ ____exports.CellType.Locked = 4
 ____exports.CellType[____exports.CellType.Locked] = "Locked"
 ____exports.CellType.Disabled = 5
 ____exports.CellType[____exports.CellType.Disabled] = "Disabled"
-____exports.CellType.Wall = 6
-____exports.CellType[____exports.CellType.Wall] = "Wall"
 ____exports.NotActiveCell = -1
 ____exports.NullElement = -1
 ____exports.MoveType = MoveType or ({})
@@ -95,7 +93,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     if complex_process_move == nil then
         complex_process_move = true
     end
-    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_move, save_state, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_activation, is_available_cell_type_for_move, save_state, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
     end
@@ -202,11 +200,18 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return neighbors
     end
+    function is_available_cell_type_for_activation(cell)
+        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+        if is_disabled then
+            return false
+        end
+        return true
+    end
     function is_available_cell_type_for_move(cell)
         local is_not_moved = bit.band(cell.type, ____exports.CellType.NotMoved) == ____exports.CellType.NotMoved
         local is_locked = bit.band(cell.type, ____exports.CellType.Locked) == ____exports.CellType.Locked
-        local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall
-        if is_not_moved or is_locked or is_wall then
+        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+        if is_not_moved or is_locked or is_disabled then
             return false
         end
         return true
@@ -314,7 +319,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                                     if mask[i + 1][j + 1] == 1 then
                                                         local cell = get_cell(x + j, y + i)
                                                         local element = get_element(x + j, y + i)
-                                                        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell) or element == ____exports.NullElement then
+                                                        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) or element == ____exports.NullElement then
                                                             is_combined = false
                                                             break
                                                         end
@@ -585,8 +590,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         return element
     end
     local function is_available_cell_type_for_click(cell)
-        local is_wall = bit.band(cell.type, ____exports.CellType.Wall) == ____exports.CellType.Wall
-        if is_wall then
+        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+        if is_disabled then
             return false
         end
         return true
@@ -822,13 +827,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch182 = mode
-            local ____cond182 = ____switch182 == ____exports.ProcessMode.Combinate
-            if ____cond182 then
+            local ____switch184 = mode
+            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
+            if ____cond184 then
                 return process_combinate()
             end
-            ____cond182 = ____cond182 or ____switch182 == ____exports.ProcessMode.MoveElements
-            if ____cond182 then
+            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
+            if ____cond184 then
                 return process_move()
             end
         until true

@@ -1,7 +1,4 @@
 local ____lualib = require("lualib_bundle")
-local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
-local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush
-local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
@@ -313,25 +310,7 @@ function ____exports.View(animator)
                         if cell ~= NotActiveCell then
                             make_substrate_view(x, y, state.cells)
                             try_make_under_cell(x, y, cell)
-                            local ____make_cell_view_5 = make_cell_view
-                            local ____array_4 = __TS__SparseArrayNew(x, y, cell.id, cell.uid)
-                            local ____opt_0 = cell and cell.data
-                            if ____opt_0 ~= nil then
-                                ____opt_0 = ____opt_0.z_index
-                            end
-                            __TS__SparseArrayPush(____array_4, ____opt_0)
-                            ____make_cell_view_5(__TS__SparseArraySpread(____array_4))
-                            local pos = get_world_pos(x, y, -1.01)
-                            local _go = gm.make_go("cell_view", pos)
-                            sprite.play_flipbook(
-                                msg.url(nil, _go, "sprite"),
-                                "cell_white"
-                            )
-                            go.set_scale(
-                                vmath.vector3(scale_ratio, scale_ratio, 1),
-                                _go
-                            )
-                            gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
+                            make_cell_view(x, y, cell.id, cell.uid)
                         end
                         local element = state.elements[y + 1][x + 1]
                         if element ~= NullElement then
@@ -408,13 +387,7 @@ function ____exports.View(animator)
         end
     end
     function make_cell_view(x, y, cell_id, id, z_index)
-        if z_index == nil then
-            z_index = GAME_CONFIG.default_cell_z_index
-        end
-        if cell_id == CellId.Base then
-            return
-        end
-        local pos = get_world_pos(x, y, z_index)
+        local pos = get_world_pos(x, y, z_index ~= nil and z_index or GAME_CONFIG.cell_database[cell_id].z_index)
         local _go = gm.make_go("cell_view", pos)
         sprite.play_flipbook(
             msg.url(nil, _go, "sprite"),
@@ -424,13 +397,16 @@ function ____exports.View(animator)
             vmath.vector3(scale_ratio, scale_ratio, 1),
             _go
         )
+        if cell_id == CellId.Base then
+            gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
+        end
         local index = gm.add_game_item({_hash = _go, is_clickable = true})
         if game_id_to_view_index[id] == nil then
             game_id_to_view_index[id] = {}
         end
         if id ~= nil then
-            local ____game_id_to_view_index_id_6 = game_id_to_view_index[id]
-            ____game_id_to_view_index_id_6[#____game_id_to_view_index_id_6 + 1] = index
+            local ____game_id_to_view_index_id_0 = game_id_to_view_index[id]
+            ____game_id_to_view_index_id_0[#____game_id_to_view_index_id_0 + 1] = index
         end
         return index
     end
@@ -471,8 +447,8 @@ function ____exports.View(animator)
             game_id_to_view_index[id] = {}
         end
         if id ~= nil then
-            local ____game_id_to_view_index_id_7 = game_id_to_view_index[id]
-            ____game_id_to_view_index_id_7[#____game_id_to_view_index_id_7 + 1] = index
+            local ____game_id_to_view_index_id_1 = game_id_to_view_index[id]
+            ____game_id_to_view_index_id_1[#____game_id_to_view_index_id_1 + 1] = index
         end
         return index
     end
@@ -1008,10 +984,10 @@ function ____exports.View(animator)
                                     if delayed_row_in_column[element.points[1].to_x + 1] == nil then
                                         delayed_row_in_column[element.points[1].to_x + 1] = 0
                                     end
-                                    local ____delayed_row_in_column_8, ____temp_9 = delayed_row_in_column, element.points[1].to_x + 1
-                                    local ____delayed_row_in_column_index_10 = ____delayed_row_in_column_8[____temp_9]
-                                    ____delayed_row_in_column_8[____temp_9] = ____delayed_row_in_column_index_10 + 1
-                                    local delay_factor = ____delayed_row_in_column_index_10
+                                    local ____delayed_row_in_column_2, ____temp_3 = delayed_row_in_column, element.points[1].to_x + 1
+                                    local ____delayed_row_in_column_index_4 = ____delayed_row_in_column_2[____temp_3]
+                                    ____delayed_row_in_column_2[____temp_3] = ____delayed_row_in_column_index_4 + 1
+                                    local delay_factor = ____delayed_row_in_column_index_4
                                     delay = delay_factor * duration_of_movement_between_cells
                                     if delay > max_delay then
                                         max_delay = delay
@@ -1087,14 +1063,7 @@ function ____exports.View(animator)
                             local previous_cell = previous_state.cells[y + 1][x + 1]
                             if previous_cell ~= NotActiveCell then
                                 try_make_under_cell(x, y, previous_cell)
-                                local ____make_cell_view_16 = make_cell_view
-                                local ____array_15 = __TS__SparseArrayNew(x, y, previous_cell.id, previous_cell.uid)
-                                local ____opt_11 = previous_cell and previous_cell.data
-                                if ____opt_11 ~= nil then
-                                    ____opt_11 = ____opt_11.z_index
-                                end
-                                __TS__SparseArrayPush(____array_15, ____opt_11)
-                                ____make_cell_view_16(__TS__SparseArraySpread(____array_15))
+                                make_cell_view(x, y, previous_cell.id, previous_cell.uid)
                             end
                         end
                         local current_element = current_state.elements[y + 1][x + 1]
@@ -1119,14 +1088,14 @@ function ____exports.View(animator)
         end
     end
     function remove_random_element_animation(message, element, target_element, view_index, on_complited)
-        local target_world_pos = get_world_pos(target_element.x, target_element.y)
-        local ____temp_17
+        local target_world_pos = get_world_pos(target_element.x, target_element.y, 3)
+        local ____temp_5
         if view_index ~= nil then
-            ____temp_17 = get_view_item_by_game_id_and_index(element.uid, view_index)
+            ____temp_5 = get_view_item_by_game_id_and_index(element.uid, view_index)
         else
-            ____temp_17 = get_first_view_item_by_game_id(element.uid)
+            ____temp_5 = get_first_view_item_by_game_id(element.uid)
         end
-        local item = ____temp_17
+        local item = ____temp_5
         if item == nil then
             return 0
         end
@@ -1307,16 +1276,26 @@ function ____exports.View(animator)
     end
     function try_make_under_cell(x, y, cell)
         if cell.data ~= nil and cell.data.is_render_under_cell and cell.data.under_cells ~= nil then
-            local cell_id = cell.data.under_cells[#cell.data.under_cells]
-            if cell_id ~= nil then
-                local ____make_cell_view_21 = make_cell_view
-                local ____array_20 = __TS__SparseArrayNew(x, y, cell_id, cell.uid)
-                local ____opt_18 = cell.data
-                if ____opt_18 ~= nil then
-                    ____opt_18 = ____opt_18.z_index
+            local depth = 0.1
+            do
+                local i = #cell.data.under_cells - 1
+                while i >= 0 do
+                    local cell_id = cell.data.under_cells[i + 1]
+                    if cell_id ~= nil then
+                        make_cell_view(
+                            x,
+                            y,
+                            cell_id,
+                            cell.uid,
+                            GAME_CONFIG.cell_database[cell_id].z_index - depth
+                        )
+                        depth = depth + 0.1
+                        if not GAME_CONFIG.cell_database[cell_id].is_render_under_cell then
+                            break
+                        end
+                    end
+                    i = i - 1
                 end
-                __TS__SparseArrayPush(____array_20, ____opt_18 - 1)
-                ____make_cell_view_21(__TS__SparseArraySpread(____array_20))
             end
         end
     end

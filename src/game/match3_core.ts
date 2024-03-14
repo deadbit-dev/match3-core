@@ -81,8 +81,7 @@ export enum CellType {
     ActionLockedNear,
     NotMoved,
     Locked,
-    Disabled,
-    Wall
+    Disabled
 }
 
 // вместо null для неактивной клетки
@@ -259,7 +258,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     const cell = get_cell(x+j, y+i);
                                     const element = get_element(x+j, y+i);
                                     
-                                    if(cell == NotActiveCell || !is_available_cell_type_for_move(cell) || element == NullElement) {
+                                    if(cell == NotActiveCell || !is_available_cell_type_for_activation(cell) || element == NullElement) {
                                         is_combined = false;
                                         break;
                                     }
@@ -470,11 +469,12 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         let activated = false;
 
         const cell = get_cell(item.x, item.y);
+    
         if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) && cell.cnt_acts != undefined) {
             cell.cnt_acts++;
             activated = true;
         }
-        
+
         if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.cnt_near_acts != undefined) {
             cell.cnt_near_acts++;
             activated = true;
@@ -621,18 +621,25 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         return element;
     }
 
+    function is_available_cell_type_for_activation(cell: Cell): boolean {
+        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+        if(is_disabled) return false;
+
+        return true;
+    }
+
     function is_available_cell_type_for_move(cell: Cell): boolean {
         const is_not_moved = bit.band(cell.type, CellType.NotMoved) == CellType.NotMoved;
-        const is_locked = bit.band(cell.type, CellType.Locked) == CellType.Locked; 
-        const is_wall = bit.band(cell.type, CellType.Wall) == CellType.Wall; 
-        if(is_not_moved || is_locked || is_wall) return false;
+        const is_locked = bit.band(cell.type, CellType.Locked) == CellType.Locked;
+        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+        if(is_not_moved || is_locked || is_disabled) return false;
 
         return true;
     }
 
     function is_available_cell_type_for_click(cell: Cell): boolean {
-        const is_wall = bit.band(cell.type, CellType.Wall) == CellType.Wall;
-        if(is_wall) return false;
+        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+        if(is_disabled) return false;
 
         return true;
     }

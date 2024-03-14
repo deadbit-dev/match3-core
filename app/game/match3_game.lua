@@ -991,43 +991,36 @@ function ____exports.Game()
             return
         end
         local new_cell = NotActiveCell
-        repeat
-            local ____switch215 = cell.type
-            local ____cond215 = ____switch215 == CellType.ActionLocked
-            if ____cond215 then
-                if cell.cnt_acts == nil then
-                    break
-                end
-                if cell.cnt_acts > 0 then
-                    if cell.data ~= nil and cell.data.under_cells ~= nil and #cell.data.under_cells > 0 then
-                        local cell_id = table.remove(cell.data.under_cells)
-                        if cell_id ~= nil then
-                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data)
-                            break
-                        end
-                    end
-                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
-                end
-                break
-            end
-            ____cond215 = ____cond215 or ____switch215 == bit.bor(CellType.ActionLockedNear, CellType.Wall)
-            if ____cond215 then
-                if cell.cnt_near_acts == nil then
-                    break
-                end
+        if bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear then
+            if cell.cnt_near_acts ~= nil then
                 if cell.cnt_near_acts > 0 then
                     if cell.data ~= nil and cell.data.under_cells ~= nil and #cell.data.under_cells > 0 then
                         local cell_id = table.remove(cell.data.under_cells)
                         if cell_id ~= nil then
                             new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data)
-                            break
                         end
                     end
-                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
+                    if new_cell == NotActiveCell then
+                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
+                    end
                 end
-                break
             end
-        until true
+        end
+        if bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked then
+            if cell.cnt_acts ~= nil then
+                if cell.cnt_acts > 0 then
+                    if cell.data ~= nil and cell.data.under_cells ~= nil and #cell.data.under_cells > 0 then
+                        local cell_id = table.remove(cell.data.under_cells)
+                        if cell_id ~= nil then
+                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data)
+                        end
+                    end
+                    if new_cell == NotActiveCell then
+                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
+                    end
+                end
+            end
+        end
         if new_cell ~= NotActiveCell then
             for ____, ____value in ipairs(__TS__ObjectEntries(game_step_events[#game_step_events].value)) do
                 local key = ____value[1]

@@ -361,15 +361,7 @@ export function View(animator: FluxGroup) {
                 if (cell != NotActiveCell) {
                     make_substrate_view(x, y, state.cells);
                     try_make_under_cell(x, y, cell);
-                    make_cell_view(x, y, cell.id, cell.uid, cell?.data?.z_index);
-
-                    // todo проверить Z_INDEX, а также добавление в списки для гошек нужно ли ?
-                    const pos = get_world_pos(x, y, -1.01);
-                    const _go = gm.make_go('cell_view', pos);
-                    sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), 'cell_white');
-                    go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-                    gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
-                    // ---
+                    make_cell_view(x, y, cell.id, cell.uid);
                 }
                 const element = state.elements[y][x];
                 if (element != NullElement) make_element_view(x, y, element.type, element.uid, true);
@@ -414,16 +406,14 @@ export function View(animator: FluxGroup) {
         }
     }
 
-    function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index = GAME_CONFIG.default_cell_z_index) {
-        if (cell_id == CellId.Base)
-            return;
-        const pos = get_world_pos(x, y, z_index);
+    function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
+        const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.cell_database[cell_id].z_index);
         const _go = gm.make_go('cell_view', pos);
 
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
 
-        //if (cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
+        if (cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
 
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
         if (game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
@@ -944,7 +934,7 @@ export function View(animator: FluxGroup) {
                     const previous_cell = previous_state.cells[y][x];
                     if (previous_cell != NotActiveCell) {
                         try_make_under_cell(x, y, previous_cell);
-                        make_cell_view(x, y, previous_cell.id, previous_cell.uid, previous_cell?.data?.z_index);
+                        make_cell_view(x, y, previous_cell.id, previous_cell.uid);
                     }
                 }
 
@@ -958,7 +948,7 @@ export function View(animator: FluxGroup) {
     }
 
     function remove_random_element_animation(message: Messages[MessageId], element: ItemInfo, target_element: ItemInfo, view_index?: number, on_complited?: () => void) {
-        const target_world_pos = get_world_pos(target_element.x, target_element.y);
+        const target_world_pos = get_world_pos(target_element.x, target_element.y, 3);
         const item = view_index != undefined ? get_view_item_by_game_id_and_index(element.uid, view_index) : get_first_view_item_by_game_id(element.uid);
         if (item == undefined) return 0;
 
@@ -1097,8 +1087,15 @@ export function View(animator: FluxGroup) {
 
     function try_make_under_cell(x: number, y: number, cell: Cell) {
         if (cell.data != undefined && cell.data.is_render_under_cell && cell.data.under_cells != undefined) {
-            const cell_id = (cell.data.under_cells as CellId[])[(cell.data.under_cells as CellId[]).length - 1];
-            if (cell_id != undefined) make_cell_view(x, y, cell_id, cell.uid, cell.data?.z_index - 1);
+            let depth = 0.1;
+            for(let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
+                const cell_id = (cell.data.under_cells as CellId[])[i];
+                if (cell_id != undefined) {
+                    make_cell_view(x, y, cell_id, cell.uid, GAME_CONFIG.cell_database[cell_id].z_index - depth);
+                    depth += 0.1;
+                    if (!GAME_CONFIG.cell_database[cell_id].is_render_under_cell) break;
+                }
+            }
         }
     }
 

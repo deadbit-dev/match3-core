@@ -952,36 +952,32 @@ export function Game() {
         if(cell == NotActiveCell) return;
 
         let new_cell: (Cell | typeof NotActiveCell) = NotActiveCell;
-        switch(cell.type) {
-            case CellType.ActionLocked:
-                if(cell.cnt_acts == undefined) break;
-                if(cell.cnt_acts > 0) {
-                    if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
-                        const cell_id = (cell.data.under_cells as CellId[]).pop();
-                        if(cell_id != undefined) {
-                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
-                            break;
-                        }
-                    } 
-                    
-                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
-                }
-            break;
 
-            case bit.bor(CellType.ActionLockedNear, CellType.Wall):
-                if(cell.cnt_near_acts == undefined) break;
+        if(bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) {
+            if(cell.cnt_near_acts != undefined) {
                 if(cell.cnt_near_acts > 0) {
                     if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
-                        if(cell_id != undefined) {
-                            new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
-                            break;
-                        }
+                        if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
                     }
                     
-                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
+                    if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
                 }
-            break;
+            }
+        }
+
+        if(bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) {
+            if(cell.cnt_acts != undefined) {
+                if(cell.cnt_acts > 0) {
+                    if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
+                        const cell_id = (cell.data.under_cells as CellId[]).pop();
+                        if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
+                    } 
+                    
+                    if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
+                }
+            }
+            
         }
 
         if(new_cell != NotActiveCell) {

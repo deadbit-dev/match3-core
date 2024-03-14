@@ -47,7 +47,13 @@ ____exports.CellId.Grass = 1
 ____exports.CellId[____exports.CellId.Grass] = "Grass"
 ____exports.CellId.Box = 2
 ____exports.CellId[____exports.CellId.Box] = "Box"
-____exports.CellId.Web = 3
+____exports.CellId.Stone0 = 3
+____exports.CellId[____exports.CellId.Stone0] = "Stone0"
+____exports.CellId.Stone1 = 4
+____exports.CellId[____exports.CellId.Stone1] = "Stone1"
+____exports.CellId.Stone2 = 5
+____exports.CellId[____exports.CellId.Stone2] = "Stone2"
+____exports.CellId.Web = 6
 ____exports.CellId[____exports.CellId.Web] = "Web"
 ____exports.ElementId = ElementId or ({})
 ____exports.ElementId.Dimonde = 0
@@ -101,7 +107,6 @@ ____exports._GAME_CONFIG = {
     spawn_element_time = 0.5,
     buster_delay = 0.5,
     default_substrate_z_index = -2,
-    default_cell_z_index = -1,
     default_element_z_index = 0,
     substrate_database = {
         [____exports.SubstrateId.OutsideArc] = "outside_arc",
@@ -117,21 +122,60 @@ ____exports._GAME_CONFIG = {
         [____exports.SubstrateId.Full] = "full"
     },
     cell_database = {
-        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_white"},
-        [____exports.CellId.Grass] = {type = CellType.ActionLocked, cnt_acts = 0, view = "cell_grass"},
+        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_white", z_index = -1},
+        [____exports.CellId.Grass] = {
+            type = CellType.ActionLocked,
+            cnt_acts = 0,
+            is_render_under_cell = true,
+            view = "cell_grass",
+            z_index = -1
+        },
         [____exports.CellId.Box] = {
-            type = bit.bor(CellType.ActionLockedNear, CellType.Wall),
+            type = bit.bor(
+                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
+                CellType.NotMoved
+            ),
             cnt_near_acts = 0,
             is_render_under_cell = true,
             view = "cell_box",
-            z_index = 1
+            z_index = 2
+        },
+        [____exports.CellId.Stone0] = {
+            type = bit.bor(
+                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
+                CellType.NotMoved
+            ),
+            cnt_near_acts = 0,
+            is_render_under_cell = true,
+            view = "cell_stone_0",
+            z_index = 2
+        },
+        [____exports.CellId.Stone1] = {
+            type = bit.bor(
+                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
+                CellType.NotMoved
+            ),
+            cnt_near_acts = 0,
+            is_render_under_cell = true,
+            view = "cell_stone_1",
+            z_index = 2
+        },
+        [____exports.CellId.Stone2] = {
+            type = bit.bor(
+                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
+                CellType.NotMoved
+            ),
+            cnt_near_acts = 0,
+            is_render_under_cell = true,
+            view = "cell_stone_2",
+            z_index = 2
         },
         [____exports.CellId.Web] = {
-            type = CellType.NotMoved,
+            type = bit.bor(CellType.ActionLockedNear, CellType.NotMoved),
             cnt_near_acts = 0,
             is_render_under_cell = true,
             view = "cell_web",
-            z_index = 1
+            z_index = 2
         }
     },
     element_database = {
@@ -174,17 +218,17 @@ ____exports._GAME_CONFIG = {
                     NotActiveCell
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
@@ -195,8 +239,8 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     {____exports.CellId.Grass, ____exports.CellId.Box},
@@ -205,8 +249,8 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     {____exports.CellId.Grass, ____exports.CellId.Box},
@@ -214,7 +258,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
@@ -224,7 +268,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
@@ -235,12 +279,12 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     NotActiveCell,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell
                 }
             },
@@ -346,33 +390,23 @@ ____exports._GAME_CONFIG = {
                     NotActiveCell
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
                     ____exports.CellId.Base
                 },
                 {
@@ -382,11 +416,21 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Box,
+                    ____exports.CellId.Box,
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Box,
+                    ____exports.CellId.Box,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0},
                     {____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
@@ -396,7 +440,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
@@ -407,12 +451,12 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     NotActiveCell,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell
                 }
             },
@@ -518,39 +562,29 @@ ____exports._GAME_CONFIG = {
                     NotActiveCell
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     NotActiveCell,
-                    ____exports.CellId.Grass
+                    {____exports.CellId.Base, ____exports.CellId.Grass}
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     NotActiveCell,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base
                 },
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    NotActiveCell,
-                    NotActiveCell,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
                     NotActiveCell,
                     ____exports.CellId.Grass,
@@ -559,32 +593,42 @@ ____exports._GAME_CONFIG = {
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    NotActiveCell,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
-                    ____exports.CellId.Grass,
+                    NotActiveCell,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    NotActiveCell,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    NotActiveCell,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    ____exports.CellId.Base
+                },
+                {
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     NotActiveCell,
-                    ____exports.CellId.Grass
+                    {____exports.CellId.Base, ____exports.CellId.Grass}
                 },
                 {
                     NotActiveCell,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell
                 }
             },
@@ -690,73 +734,73 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass
+                    {____exports.CellId.Base, ____exports.CellId.Grass}
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base
                 },
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    ____exports.CellId.Base
+                },
+                {
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass
+                    {____exports.CellId.Base, ____exports.CellId.Grass}
                 },
                 {
                     ____exports.CellId.Base,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base
                 }
             },
@@ -882,51 +926,57 @@ ____exports._GAME_CONFIG = {
                     ____exports.CellId.Base
                 },
                 {
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {
+                        ____exports.CellId.Base,
+                        ____exports.CellId.Grass,
+                        ____exports.CellId.Stone2,
+                        ____exports.CellId.Stone1,
+                        ____exports.CellId.Stone0
+                    },
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    ____exports.CellId.Grass,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
+                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
@@ -1042,16 +1092,16 @@ ____exports._GAME_CONFIG = {
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Web,
-                    ____exports.CellId.Web,
+                    {____exports.CellId.Base, ____exports.CellId.Web},
+                    {____exports.CellId.Base, ____exports.CellId.Web},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
                 {
                     ____exports.CellId.Base,
                     ____exports.CellId.Base,
-                    ____exports.CellId.Web,
-                    ____exports.CellId.Web,
+                    {____exports.CellId.Base, ____exports.CellId.Web},
+                    {____exports.CellId.Base, ____exports.CellId.Web},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },
@@ -1101,7 +1151,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Dimonde,
                     ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Dimonde
                 },
