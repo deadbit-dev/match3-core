@@ -23,7 +23,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, set_helper, reset_helper, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element, helper_data, helper_timer
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -51,6 +51,7 @@ function ____exports.Game()
                 if elements == nil then
                     return
                 end
+                reset_helper()
                 if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
                     return
                 end
@@ -80,6 +81,7 @@ function ____exports.Game()
                 if pos == nil then
                     return
                 end
+                reset_helper()
                 if try_click_activation(pos.x, pos.y) then
                     process_game_step(true)
                 else
@@ -140,7 +142,24 @@ function ____exports.Game()
         end
         local state = field.save_state()
         previous_states[#previous_states + 1] = state
+        local helper_message = {}
+        local steps = field.get_all_available_steps()
+        local random_picked_step = steps[math.random(0, #steps - 1) + 1]
+        helper_message.step = random_picked_step
+        local combination = field.get_step_combination(random_picked_step)
+        if combination ~= nil then
+            helper_message.combination = combination
+            for ____, element in ipairs(combination.elements) do
+                local is_x = element.x == random_picked_step.from_x and element.y == random_picked_step.from_y
+                local is_y = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
+                if is_x or is_y then
+                    helper_message.combined_element = element
+                    break
+                end
+            end
+        end
         EventBus.send("ON_LOAD_FIELD", state)
+        helper_timer = timer.delay(5, true, set_helper)
     end
     function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
@@ -190,6 +209,42 @@ function ____exports.Game()
         local element = {uid = ____game_item_counter_2, type = element_id, data = data}
         field.set_element(x, y, element)
         return element
+    end
+    function set_helper()
+        if helper_data ~= nil then
+            return
+        end
+        local steps = field.get_all_available_steps()
+        local random_picked_step = steps[math.random(0, #steps - 1) + 1]
+        local combination = field.get_step_combination(random_picked_step)
+        if combination ~= nil then
+            for ____, element in ipairs(combination.elements) do
+                local is_x = element.x == random_picked_step.from_x and element.y == random_picked_step.from_y
+                local is_y = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
+                if is_x or is_y then
+                    helper_data = {step = random_picked_step, combination = combination, combined_element = element}
+                    EventBus.send(
+                        "ON_SET_STEP_HELPER",
+                        __TS__ObjectAssign({}, helper_data)
+                    )
+                    break
+                end
+            end
+        end
+    end
+    function reset_helper()
+        if helper_timer == nil then
+            return
+        end
+        if helper_data ~= nil then
+            EventBus.send(
+                "ON_RESET_STEP_HELPER",
+                __TS__ObjectAssign({}, helper_data)
+            )
+        end
+        helper_data = nil
+        timer.cancel(helper_timer)
+        helper_timer = timer.delay(5, true, set_helper)
     end
     function try_click_activation(x, y)
         if try_hammer_activation(x, y) then
@@ -928,29 +983,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch205 = combination.type
-            local ____cond205 = ____switch205 == CombinationType.Comb4
-            if ____cond205 then
+            local ____switch218 = combination.type
+            local ____cond218 = ____switch218 == CombinationType.Comb4
+            if ____cond218 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == CombinationType.Comb5
-            if ____cond205 then
+            ____cond218 = ____cond218 or ____switch218 == CombinationType.Comb5
+            if ____cond218 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == CombinationType.Comb2x2
-            if ____cond205 then
+            ____cond218 = ____cond218 or ____switch218 == CombinationType.Comb2x2
+            if ____cond218 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond205 = ____cond205 or (____switch205 == CombinationType.Comb3x3a or ____switch205 == CombinationType.Comb3x3b)
-            if ____cond205 then
+            ____cond218 = ____cond218 or (____switch218 == CombinationType.Comb3x3a or ____switch218 == CombinationType.Comb3x3b)
+            if ____cond218 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond205 = ____cond205 or (____switch205 == CombinationType.Comb3x4 or ____switch205 == CombinationType.Comb3x5)
-            if ____cond205 then
+            ____cond218 = ____cond218 or (____switch218 == CombinationType.Comb3x4 or ____switch218 == CombinationType.Comb3x5)
+            if ____cond218 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1076,7 +1131,10 @@ function ____exports.Game()
         end
         return NullElement
     end
-    function remove_random_element(exclude)
+    function remove_random_element(exclude, only_base_elements)
+        if only_base_elements == nil then
+            only_base_elements = true
+        end
         local available_elements = {}
         do
             local y = 0
@@ -1089,7 +1147,13 @@ function ____exports.Game()
                             exclude,
                             function(____, item) return item.uid == element.uid end
                         ) == -1 then
-                            available_elements[#available_elements + 1] = {x = x, y = y, uid = element.uid}
+                            if only_base_elements then
+                                if __TS__ArrayIncludes(GAME_CONFIG.base_elements, element.type) then
+                                    available_elements[#available_elements + 1] = {x = x, y = y, uid = element.uid}
+                                end
+                            else
+                                available_elements[#available_elements + 1] = {x = x, y = y, uid = element.uid}
+                            end
                         end
                         x = x + 1
                     end
@@ -1156,7 +1220,7 @@ function ____exports.Game()
     activated_elements = {}
     game_step_events = {}
     selected_element = nil
-    local last_type_of_message = nil
+    helper_data = nil
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)

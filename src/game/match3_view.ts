@@ -169,7 +169,7 @@ export function View(animator: FluxGroup) {
     const gm = GoManager();
     const game_id_to_view_index: { [key in number]: number[] } = {};
 
-    let selected_element: IGameItem | null = null;
+    let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
@@ -204,20 +204,7 @@ export function View(animator: FluxGroup) {
             if (item == undefined) return;
 
             selected_element_position = go.get_position(item._hash);
-
-            const square_easing = vmath.vector([
-                0, 0, 0, 0, 0, 0,
-                0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
-                1, 1, 1, 1, 1, 1,
-                0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
-                0, 0, 0, 0, 0, 0,
-                -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
-                -1, -1, -1, -1, -1, -1,
-                -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
-                0, 0, 0, 0, 0, 0
-            ]);
-
-            go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_position.y + 1.5, square_easing, 1.5);
+            go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_position.y + 3, go.EASING_INCUBIC, 1);
         });
 
         EventBus.on('ON_ELEMENT_UNSELECTED', (element) => {
@@ -228,6 +215,44 @@ export function View(animator: FluxGroup) {
 
             go.cancel_animations(item._hash);
             go.set_position(selected_element_position, item._hash);
+        });
+
+        EventBus.on('ON_SET_STEP_HELPER', (combination_info) => {
+            if(combination_info == undefined) return;
+
+            const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
+            if(combined_item != undefined) {
+                const from_pos = go.get_position(combined_item._hash);
+                const to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y);
+                go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
+                go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
+            }
+
+            for(const element of combination_info.combination.elements) {
+                const item = get_first_view_item_by_game_id(element.uid);
+                if(item != undefined) {
+                    go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
+                }
+            }
+        });
+ 
+        EventBus.on('ON_RESET_STEP_HELPER', (combination_info) => {
+            if(combination_info == undefined) return;
+
+            const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
+            if(combined_item != undefined) {
+                go.cancel_animations(combined_item._hash);
+                const world_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
+                go.set_position(world_pos, combined_item._hash);
+            }
+
+            for(const element of combination_info.combination.elements) {
+                const item = get_first_view_item_by_game_id(element.uid);
+                if(item != undefined) {
+                    go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
+                    go.set(msg.url(undefined, item._hash, 'sprite'), 'tint', vmath.vector4(1, 1, 1, 1));
+                }
+            }
         });
 
         EventBus.on('TRY_ACTIVATE_SPINNING', () => {
@@ -298,15 +323,15 @@ export function View(animator: FluxGroup) {
     function on_down(item: IGameItem) {
         if (is_processing) return;
 
-        selected_element = item;
+        down_item = item;
     }
 
     function on_move(pos: PosXYMessage) {
-        if (selected_element == null) return;
+        if (down_item == null) return;
 
 
         const world_pos = camera.screen_to_world(pos.x, pos.y);
-        const selected_element_world_pos = go.get_world_position(selected_element._hash);
+        const selected_element_world_pos = go.get_world_position(down_item._hash);
         const delta = (world_pos - selected_element_world_pos) as vmath.vector3;
 
         if (vmath.length(delta) < min_swipe_distance) return;
@@ -334,11 +359,11 @@ export function View(animator: FluxGroup) {
             to_y: element_to_pos.y
         });
 
-        selected_element = null;
+        down_item = null;
     }
 
     function on_up(item: IGameItem) {
-        if (selected_element == null) return;
+        if (down_item == null) return;
 
         const item_world_pos = go.get_world_position(item._hash);
         const element_pos = get_field_pos(item_world_pos);
@@ -348,7 +373,7 @@ export function View(animator: FluxGroup) {
             y: element_pos.y
         });
 
-        selected_element = null;
+        down_item = null;
     }
 
     //#endregion INPUT
@@ -362,7 +387,8 @@ export function View(animator: FluxGroup) {
                     make_substrate_view(x, y, state.cells);
                     try_make_under_cell(x, y, cell);
                     make_cell_view(x, y, cell.id, cell.uid);
-                }
+                } else make_hole_substrate_view(x, y, state.cells);
+
                 const element = state.elements[y][x];
                 if (element != NullElement) make_element_view(x, y, element.type, element.uid, true);
             }
@@ -403,6 +429,40 @@ export function View(animator: FluxGroup) {
                 mask = rotate_matrix_90(mask);
                 angle += 90;
             }
+        }
+    }
+
+    function make_hole_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
+        let mask = [
+            [0, 1, 0],
+            [1, 0, 0],
+            [0, 0, 0]
+        ];
+
+        let angle = 0;
+        while (angle <= 270) {
+            let is_valid = true;
+            for (let i = y - (mask.length - 1) / 2; (i <= y + (mask.length - 1) / 2) && is_valid; i++) {
+                for (let j = x - (mask[0].length - 1) / 2; (j <= x + (mask[0].length - 1) / 2) && is_valid; j++) {
+                    if (mask[i - (y - (mask.length - 1) / 2)][j - (x - (mask[0].length - 1) / 2)] == 1) {
+                        if (is_valid_pos(j, i, cells[0].length, cells.length)) {
+                            const cell = cells[i][j];
+                            is_valid = (cell != NotActiveCell);
+                        } else is_valid = false;
+                    }
+                }
+            }
+
+            if (is_valid) {
+                const pos = get_world_pos(x, y, z_index);
+                const _go = gm.make_go('substrate_view', pos);
+                gm.set_rotation_hash(_go, -angle);
+                sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), "angle");
+                go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+            }
+
+            mask = rotate_matrix_90(mask);
+            angle += 90;
         }
     }
 
@@ -642,18 +702,19 @@ export function View(animator: FluxGroup) {
     function on_swaped_rockets_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
+            delete_view_item_by_game_id(activation.element.uid);
+            delete_view_item_by_game_id(activation.other_element.uid);
+            make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid);
             damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
             for (const element of activation.damaged_elements)
                 damage_element_animation(message, element.x, element.y, element.uid);
+            for (const cell of activation.activated_cells) {
+                let skip = false;
+                for (const element of activation.damaged_elements)
+                    if (cell.x == element.x && cell.y == element.y) skip = true;
+                if (!skip) activate_cell_animation(cell);
+            }
         });
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
 
         return squash_duration + damaged_element_time;
     }
@@ -1025,7 +1086,18 @@ export function View(animator: FluxGroup) {
     }
 
     function get_field_pos(world_pos: vmath.vector3): { x: number, y: number } {
-        return { x: (world_pos.x - cells_offset.x - cell_size * 0.5) / cell_size, y: (cells_offset.y - world_pos.y - cell_size * 0.5) / cell_size };
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const original_world_pos = get_world_pos(x, y);
+                const in_x = (world_pos.x >= original_world_pos.x - cell_size * 0.5) && (world_pos.x <= original_world_pos.x + cell_size * 0.5);
+                const in_y = (world_pos.y >= original_world_pos.y - cell_size * 0.5) && (world_pos.y <= original_world_pos.y + cell_size * 0.5);
+                if(in_x && in_y) {
+                    return {x, y};
+                }
+            }
+        }
+       
+        return {x: -1, y: -1};
     }
 
     function get_move_direction(dir: vmath.vector3) {

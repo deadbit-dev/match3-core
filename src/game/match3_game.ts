@@ -28,6 +28,7 @@ import { CellId, ElementId,
     CombinedMessage,
     ActivatedCellMessage,
     ElementActivationMessage,
+    StepHelperMessage,
 } from '../main/game_config';
 
 import {
@@ -63,9 +64,9 @@ export function Game() {
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
     let selected_element: ItemInfo | null = null;
+    let helper_data: StepHelperMessage | null = null;
+    let helper_timer: hash;
 
-    let last_type_of_message: MessageId | null = null;
-    
     function init() {
         field.init();
 
@@ -78,7 +79,7 @@ export function Game() {
 
         set_element_types();
         set_busters();
-        set_events();   
+        set_events();
     }
     
     //#endregion MAIN
@@ -116,6 +117,9 @@ export function Game() {
 
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
+
+            reset_helper();
+            
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
             const is_from_buster = is_buster(elements.to_x, elements.to_y);
@@ -137,6 +141,8 @@ export function Game() {
         // TODO: refactoring
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
+
+            reset_helper();
 
             if(try_click_activation(pos.x, pos.y)) process_game_step(true);
             else {
@@ -189,7 +195,29 @@ export function Game() {
         const state = field.save_state();
         previous_states.push(state);
 
+        const helper_message = {} as StepHelperMessage;
+        
+        const steps = field.get_all_available_steps();
+        const random_picked_step = steps[math.random(0, steps.length - 1)];
+        
+        helper_message.step = random_picked_step;
+
+        const combination = field.get_step_combination(random_picked_step);
+        if(combination != undefined) {
+            helper_message.combination = combination;
+            for(const element of combination.elements) {
+                const is_x = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
+                const is_y = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
+                if(is_x || is_y) {
+                    helper_message.combined_element = element;
+                    break;
+                }
+            }
+        }
+        
         EventBus.send('ON_LOAD_FIELD', state);
+
+        helper_timer = timer.delay(5, true, set_helper);
     }
 
     function load_cell(x: number, y: number) {
@@ -243,7 +271,40 @@ export function Game() {
     }
 
     //#endregion SETUP
-    //#region ACTIONS       
+    //#region ACTIONS
+    
+    function set_helper() {
+        if(helper_data != null) return;
+
+        const steps = field.get_all_available_steps();
+        const random_picked_step = steps[math.random(0, steps.length - 1)];
+        const combination = field.get_step_combination(random_picked_step);
+        if(combination != undefined) {
+            for(const element of combination.elements) {
+                const is_x = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
+                const is_y = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
+                if(is_x || is_y) {
+                    helper_data = {
+                        step: random_picked_step,
+                        combination: combination,
+                        combined_element: element
+                    };
+                    EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
+                    break;
+                }
+            }
+        }
+    }
+
+    function reset_helper() {
+        if(helper_timer == undefined) return;
+        
+        if(helper_data != null) EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, helper_data));
+        helper_data = null;
+        
+        timer.cancel(helper_timer);
+        helper_timer = timer.delay(5, true, set_helper);
+    }
     
     function try_click_activation(x: number, y: number) {
         if(try_hammer_activation(x, y)) return true;
@@ -1026,13 +1087,15 @@ export function Game() {
         return NullElement;
     }
     
-    function remove_random_element(exclude?: ItemInfo[]) {
+    function remove_random_element(exclude?: ItemInfo[], only_base_elements = true) {
         const available_elements = [];
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const element = field.get_element(x, y);
                 if(element != NullElement && exclude != undefined && exclude.findIndex((item) => item.uid == element.uid) == -1) {
-                    available_elements.push({x, y, uid: element.uid});
+                    if(only_base_elements) {
+                        if(GAME_CONFIG.base_elements.includes(element.type)) available_elements.push({x, y, uid: element.uid});
+                    } else available_elements.push({x, y, uid: element.uid});
                 }
             }
         }

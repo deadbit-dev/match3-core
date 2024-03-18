@@ -523,6 +523,7 @@ export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
+export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, combination: CombinationInfo }
 
 export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[] }
 export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
@@ -554,6 +555,9 @@ export type _UserMessages = {
 
     ON_ELEMENT_SELECTED: ItemInfo,
     ON_ELEMENT_UNSELECTED: ItemInfo,
+
+    ON_SET_STEP_HELPER: StepHelperMessage,
+    ON_RESET_STEP_HELPER: StepHelperMessage,
 
     ON_BUSTER_ACTIVATION: VoidMessage,
 

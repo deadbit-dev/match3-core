@@ -61,17 +61,17 @@ local CombinationMasks = {
     }}
 }
 ____exports.CellType = CellType or ({})
-____exports.CellType.Base = 0
+____exports.CellType.Base = 1
 ____exports.CellType[____exports.CellType.Base] = "Base"
-____exports.CellType.ActionLocked = 1
+____exports.CellType.ActionLocked = 2
 ____exports.CellType[____exports.CellType.ActionLocked] = "ActionLocked"
-____exports.CellType.ActionLockedNear = 2
+____exports.CellType.ActionLockedNear = 4
 ____exports.CellType[____exports.CellType.ActionLockedNear] = "ActionLockedNear"
-____exports.CellType.NotMoved = 3
+____exports.CellType.NotMoved = 8
 ____exports.CellType[____exports.CellType.NotMoved] = "NotMoved"
-____exports.CellType.Locked = 4
+____exports.CellType.Locked = 16
 ____exports.CellType[____exports.CellType.Locked] = "Locked"
-____exports.CellType.Disabled = 5
+____exports.CellType.Disabled = 32
 ____exports.CellType[____exports.CellType.Disabled] = "Disabled"
 ____exports.NotActiveCell = -1
 ____exports.NullElement = -1
@@ -865,10 +865,10 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 do
                     local x = 0
                     while x < size_x do
-                        if is_valid_pos(x + 1, y, size_x, size_y) and is_can_move(x, y, x + 1, y) then
+                        if is_valid_pos(x + 1, y, size_x, size_y) and is_can_move_base(x, y, x + 1, y) then
                             steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
                         end
-                        if is_valid_pos(x, y + 1, size_x, size_y) and is_can_move(x, y, x, y + 1) then
+                        if is_valid_pos(x, y + 1, size_x, size_y) and is_can_move_base(x, y, x, y + 1) then
                             steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
                         end
                         x = x + 1
@@ -878,6 +878,21 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             end
         end
         return steps
+    end
+    local function get_step_combination(step)
+        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y)
+        local combinations = get_all_combinations()
+        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y)
+        for ____, combination in ipairs(combinations) do
+            for ____, element in ipairs(combination.elements) do
+                local is_x = element.x == step.from_x or element.x == step.to_x
+                local is_y = element.y == step.from_y or element.y == step.to_y
+                if is_x and is_y then
+                    return combination
+                end
+            end
+        end
+        return nil
     end
     return {
         init = init,
@@ -897,6 +912,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         save_state = save_state,
         load_state = load_state,
         get_all_combinations = get_all_combinations,
+        get_step_combination = get_step_combination,
         get_all_available_steps = get_all_available_steps,
         get_free_cells = get_free_cells,
         get_all_elements_by_type = get_all_elements_by_type,
