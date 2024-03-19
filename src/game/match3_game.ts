@@ -277,6 +277,8 @@ export function Game() {
         if(helper_data != null) return;
 
         const steps = field.get_all_available_steps();
+        if(steps.length == 0) return;
+
         const random_picked_step = steps[math.random(0, steps.length - 1)];
         const combination = field.get_step_combination(random_picked_step);
         if(combination != undefined) {
@@ -294,16 +296,18 @@ export function Game() {
                 }
             }
         }
+
+        timer.delay(10, false, () => reset_helper(false));
     }
 
-    function reset_helper() {
+    function reset_helper(with_delay = true) {
         if(helper_timer == undefined) return;
         
         if(helper_data != null) EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, helper_data));
         helper_data = null;
         
         timer.cancel(helper_timer);
-        helper_timer = timer.delay(5, true, set_helper);
+        helper_timer = timer.delay(with_delay ? 5 : 0, true, set_helper);
     }
     
     function try_click_activation(x: number, y: number) {

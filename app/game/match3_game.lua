@@ -215,6 +215,9 @@ function ____exports.Game()
             return
         end
         local steps = field.get_all_available_steps()
+        if #steps == 0 then
+            return
+        end
         local random_picked_step = steps[math.random(0, #steps - 1) + 1]
         local combination = field.get_step_combination(random_picked_step)
         if combination ~= nil then
@@ -231,8 +234,16 @@ function ____exports.Game()
                 end
             end
         end
+        timer.delay(
+            10,
+            false,
+            function() return reset_helper(false) end
+        )
     end
-    function reset_helper()
+    function reset_helper(with_delay)
+        if with_delay == nil then
+            with_delay = true
+        end
         if helper_timer == nil then
             return
         end
@@ -244,7 +255,7 @@ function ____exports.Game()
         end
         helper_data = nil
         timer.cancel(helper_timer)
-        helper_timer = timer.delay(5, true, set_helper)
+        helper_timer = timer.delay(with_delay and 5 or 0, true, set_helper)
     end
     function try_click_activation(x, y)
         if try_hammer_activation(x, y) then
@@ -983,29 +994,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch218 = combination.type
-            local ____cond218 = ____switch218 == CombinationType.Comb4
-            if ____cond218 then
+            local ____switch220 = combination.type
+            local ____cond220 = ____switch220 == CombinationType.Comb4
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond218 = ____cond218 or ____switch218 == CombinationType.Comb5
-            if ____cond218 then
+            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb5
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond218 = ____cond218 or ____switch218 == CombinationType.Comb2x2
-            if ____cond218 then
+            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb2x2
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond218 = ____cond218 or (____switch218 == CombinationType.Comb3x3a or ____switch218 == CombinationType.Comb3x3b)
-            if ____cond218 then
+            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x3a or ____switch220 == CombinationType.Comb3x3b)
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond218 = ____cond218 or (____switch218 == CombinationType.Comb3x4 or ____switch218 == CombinationType.Comb3x5)
-            if ____cond218 then
+            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x4 or ____switch220 == CombinationType.Comb3x5)
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end

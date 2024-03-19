@@ -587,7 +587,7 @@ ____exports._GAME_CONFIG = {
                     {____exports.CellId.Base, ____exports.CellId.Grass},
                     NotActiveCell,
                     NotActiveCell,
-                    ____exports.CellId.Grass,
+                    {____exports.CellId.Base, ____exports.CellId.Grass},
                     ____exports.CellId.Base,
                     ____exports.CellId.Base
                 },

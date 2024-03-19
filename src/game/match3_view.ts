@@ -222,7 +222,7 @@ export function View(animator: FluxGroup) {
 
             const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
             if(combined_item != undefined) {
-                const from_pos = go.get_position(combined_item._hash);
+                const from_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y); //go.get_position(combined_item._hash);
                 const to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
@@ -387,7 +387,7 @@ export function View(animator: FluxGroup) {
                     make_substrate_view(x, y, state.cells);
                     try_make_under_cell(x, y, cell);
                     make_cell_view(x, y, cell.id, cell.uid);
-                } else make_hole_substrate_view(x, y, state.cells);
+                } //else make_hole_substrate_view(x, y, state.cells);
 
                 const element = state.elements[y][x];
                 if (element != NullElement) make_element_view(x, y, element.type, element.uid, true);

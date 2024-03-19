@@ -367,7 +367,7 @@ export const _GAME_CONFIG = {
                     [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
                     [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
                     [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, CellId.Grass, CellId.Base, CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
                     [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
                     [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
                     [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
