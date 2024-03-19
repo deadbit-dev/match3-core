@@ -222,8 +222,10 @@ export function View(animator: FluxGroup) {
 
             const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
             if(combined_item != undefined) {
-                const from_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y); //go.get_position(combined_item._hash);
-                const to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y);
+                const from_pos = go.get_position(combined_item._hash);
+                let to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y);
+                if(get_world_pos(combination_info.step.from_x, combination_info.step.from_y) == from_pos)
+                    to_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
             }
@@ -242,7 +244,9 @@ export function View(animator: FluxGroup) {
             const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
             if(combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
-                const world_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
+                let world_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
+                if(get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index) == get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index))
+                    world_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index);
                 go.set_position(world_pos, combined_item._hash);
             }
 

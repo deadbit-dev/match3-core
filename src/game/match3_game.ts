@@ -283,9 +283,9 @@ export function Game() {
         const combination = field.get_step_combination(random_picked_step);
         if(combination != undefined) {
             for(const element of combination.elements) {
-                const is_x = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
-                const is_y = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
-                if(is_x || is_y) {
+                const is_from = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
+                const is_to = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
+                if(is_from || is_to) {
                     helper_data = {
                         step: random_picked_step,
                         combination: combination,

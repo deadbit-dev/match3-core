@@ -222,9 +222,9 @@ function ____exports.Game()
         local combination = field.get_step_combination(random_picked_step)
         if combination ~= nil then
             for ____, element in ipairs(combination.elements) do
-                local is_x = element.x == random_picked_step.from_x and element.y == random_picked_step.from_y
-                local is_y = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
-                if is_x or is_y then
+                local is_from = element.x == random_picked_step.from_x and element.y == random_picked_step.from_y
+                local is_to = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
+                if is_from or is_to then
                     helper_data = {step = random_picked_step, combination = combination, combined_element = element}
                     EventBus.send(
                         "ON_SET_STEP_HELPER",
