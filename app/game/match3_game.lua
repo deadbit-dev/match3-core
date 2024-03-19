@@ -123,7 +123,13 @@ function ____exports.Game()
                 end
             end
         )
-        EventBus.on("ACTIVATE_SPINNING", try_spinning_activation)
+        EventBus.on(
+            "ACTIVATE_SPINNING",
+            function()
+                stop_helper_timer()
+                try_spinning_activation()
+            end
+        )
         EventBus.on("REVERT_STEP", revert_step)
     end
     function load_field()
@@ -404,7 +410,7 @@ function ____exports.Game()
             return false
         end
         local other_buster = field.get_element(other_x, other_y)
-        if other_buster == NullElement or not __TS__ArrayIncludes({ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket}, other_buster.type) then
+        if other_buster == NullElement or not __TS__ArrayIncludes({ElementId.Helicopter, ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket}, other_buster.type) then
             return false
         end
         local event_data = {}
@@ -991,29 +997,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch220 = combination.type
-            local ____cond220 = ____switch220 == CombinationType.Comb4
-            if ____cond220 then
+            local ____switch221 = combination.type
+            local ____cond221 = ____switch221 == CombinationType.Comb4
+            if ____cond221 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb5
-            if ____cond220 then
+            ____cond221 = ____cond221 or ____switch221 == CombinationType.Comb5
+            if ____cond221 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb2x2
-            if ____cond220 then
+            ____cond221 = ____cond221 or ____switch221 == CombinationType.Comb2x2
+            if ____cond221 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x3a or ____switch220 == CombinationType.Comb3x3b)
-            if ____cond220 then
+            ____cond221 = ____cond221 or (____switch221 == CombinationType.Comb3x3a or ____switch221 == CombinationType.Comb3x3b)
+            if ____cond221 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x4 or ____switch220 == CombinationType.Comb3x5)
-            if ____cond220 then
+            ____cond221 = ____cond221 or (____switch221 == CombinationType.Comb3x4 or ____switch221 == CombinationType.Comb3x5)
+            if ____cond221 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end

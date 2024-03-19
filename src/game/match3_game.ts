@@ -181,7 +181,10 @@ export function Game() {
             }
         });
 
-        EventBus.on('ACTIVATE_SPINNING', try_spinning_activation);
+        EventBus.on('ACTIVATE_SPINNING', () => {
+            stop_helper_timer();
+            try_spinning_activation();
+        });
         
         EventBus.on('REVERT_STEP', revert_step);
     }
@@ -436,7 +439,7 @@ export function Game() {
         if(diskosphere == NullElement || diskosphere.type != ElementId.Diskosphere) return false;
     
         const other_buster = field.get_element(other_x, other_y);
-        if(other_buster == NullElement || ![ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_buster.type)) return false;
+        if(other_buster == NullElement || ![ElementId.Helicopter, ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket].includes(other_buster.type)) return false;
     
         const event_data = {} as SwapedDiskosphereActivationMessage;
         write_game_step_event('SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED', event_data);
