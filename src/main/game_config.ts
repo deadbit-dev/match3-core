@@ -544,6 +544,8 @@ export type _UserMessages = {
     LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
 
+    SET_HELPER: VoidMessage,
+
     SWAP_ELEMENTS: StepInfo,
     ON_SWAP_ELEMENTS: SwapElementsMessage,
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,

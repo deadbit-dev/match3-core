@@ -23,7 +23,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, set_helper, reset_helper, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element, helper_data, helper_timer
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, set_helper_timer, stop_helper_timer, set_helper, reset_helper, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element, helper_data, helper_timer
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -45,13 +45,14 @@ function ____exports.Game()
     end
     function set_events()
         EventBus.on("LOAD_FIELD", load_field)
+        EventBus.on("SET_HELPER", set_helper_timer)
         EventBus.on(
             "SWAP_ELEMENTS",
             function(elements)
                 if elements == nil then
                     return
                 end
-                reset_helper()
+                stop_helper_timer()
                 if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
                     return
                 end
@@ -81,7 +82,7 @@ function ____exports.Game()
                 if pos == nil then
                     return
                 end
-                reset_helper()
+                stop_helper_timer()
                 if try_click_activation(pos.x, pos.y) then
                     process_game_step(true)
                 else
@@ -159,7 +160,6 @@ function ____exports.Game()
             end
         end
         EventBus.send("ON_LOAD_FIELD", state)
-        helper_timer = timer.delay(5, true, set_helper)
     end
     function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
@@ -210,10 +210,18 @@ function ____exports.Game()
         field.set_element(x, y, element)
         return element
     end
-    function set_helper()
-        if helper_data ~= nil then
+    function set_helper_timer()
+        helper_timer = timer.delay(5, false, set_helper)
+    end
+    function stop_helper_timer()
+        if helper_timer == nil then
             return
         end
+        timer.cancel(helper_timer)
+        reset_helper()
+    end
+    function set_helper()
+        reset_helper()
         local steps = field.get_all_available_steps()
         if #steps == 0 then
             return
@@ -234,28 +242,17 @@ function ____exports.Game()
                 end
             end
         end
-        timer.delay(
-            10,
-            false,
-            function() return reset_helper(false) end
-        )
+        helper_timer = timer.delay(10, false, set_helper)
     end
-    function reset_helper(with_delay)
-        if with_delay == nil then
-            with_delay = true
-        end
-        if helper_timer == nil then
+    function reset_helper()
+        if helper_data == nil then
             return
         end
-        if helper_data ~= nil then
-            EventBus.send(
-                "ON_RESET_STEP_HELPER",
-                __TS__ObjectAssign({}, helper_data)
-            )
-        end
+        EventBus.send(
+            "ON_RESET_STEP_HELPER",
+            __TS__ObjectAssign({}, helper_data)
+        )
         helper_data = nil
-        timer.cancel(helper_timer)
-        helper_timer = timer.delay(with_delay and 5 or 0, true, set_helper)
     end
     function try_click_activation(x, y)
         if try_hammer_activation(x, y) then

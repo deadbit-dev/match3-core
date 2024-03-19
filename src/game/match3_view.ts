@@ -28,6 +28,7 @@ import {
     Cell,
     MoveType
 } from "./match3_core";
+import { to } from 'utils.flux';
 
 const SubstrateMasks = [
     [
@@ -185,11 +186,15 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             if (state == undefined) return;
             on_load_field(state);
+            EventBus.send('SET_HELPER');
         });
 
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', (elements) => {
             if (elements == undefined) return;
-            flow.start(() => on_wrong_swap_element_animation(elements.element_from, elements.element_to));
+            flow.start(() => {
+                on_wrong_swap_element_animation(elements.element_from, elements.element_to);
+                EventBus.send('SET_HELPER');
+            });
         });
 
         EventBus.on('ON_GAME_STEP', (events) => {
@@ -223,9 +228,7 @@ export function View(animator: FluxGroup) {
             const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
             if(combined_item != undefined) {
                 const from_pos = go.get_position(combined_item._hash);
-                let to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y);
-                if(get_world_pos(combination_info.step.from_x, combination_info.step.from_y) == from_pos)
-                    to_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y);
+                const to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
             }
@@ -244,10 +247,11 @@ export function View(animator: FluxGroup) {
             const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
             if(combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
-                let world_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
-                if(get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index) == get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index))
-                    world_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index);
-                go.set_position(world_pos, combined_item._hash);
+                const to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index);
+                let from_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index);
+                if(from_pos.x == to_pos.x && from_pos.y == to_pos.y)
+                    from_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
+                go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.5);
             }
 
             for(const element of combination_info.combination.elements) {
@@ -299,6 +303,7 @@ export function View(animator: FluxGroup) {
         }
 
         is_processing = false;
+        EventBus.send('SET_HELPER');
     }
 
     //#endregion MAIN

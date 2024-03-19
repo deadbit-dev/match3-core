@@ -115,10 +115,12 @@ export function Game() {
     function set_events() {
         EventBus.on('LOAD_FIELD', load_field);
 
+        EventBus.on('SET_HELPER', set_helper_timer);
+
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
 
-            reset_helper();
+            stop_helper_timer();
             
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
@@ -142,7 +144,7 @@ export function Game() {
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
 
-            reset_helper();
+            stop_helper_timer();
 
             if(try_click_activation(pos.x, pos.y)) process_game_step(true);
             else {
@@ -216,8 +218,6 @@ export function Game() {
         }
         
         EventBus.send('ON_LOAD_FIELD', state);
-
-        helper_timer = timer.delay(5, true, set_helper);
     }
 
     function load_cell(x: number, y: number) {
@@ -273,8 +273,18 @@ export function Game() {
     //#endregion SETUP
     //#region ACTIONS
     
+    function set_helper_timer() {
+        helper_timer = timer.delay(5, false, set_helper);
+    }
+    
+    function stop_helper_timer() {
+        if(helper_timer == undefined) return;
+        timer.cancel(helper_timer);
+        reset_helper();
+    }
+    
     function set_helper() {
-        if(helper_data != null) return;
+        reset_helper();
 
         const steps = field.get_all_available_steps();
         if(steps.length == 0) return;
@@ -297,17 +307,14 @@ export function Game() {
             }
         }
 
-        timer.delay(10, false, () => reset_helper(false));
+        helper_timer = timer.delay(10, false, set_helper);
     }
 
-    function reset_helper(with_delay = true) {
-        if(helper_timer == undefined) return;
+    function reset_helper() {
+        if(helper_data == null) return;
         
-        if(helper_data != null) EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, helper_data));
+        EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, helper_data));
         helper_data = null;
-        
-        timer.cancel(helper_timer);
-        helper_timer = timer.delay(with_delay ? 5 : 0, true, set_helper);
     }
     
     function try_click_activation(x: number, y: number) {

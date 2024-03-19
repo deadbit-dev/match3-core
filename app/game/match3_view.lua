@@ -42,6 +42,7 @@ function ____exports.View(animator)
                     return
                 end
                 on_load_field(state)
+                EventBus.send("SET_HELPER")
             end
         )
         EventBus.on(
@@ -50,7 +51,10 @@ function ____exports.View(animator)
                 if elements == nil then
                     return
                 end
-                flow.start(function() return on_wrong_swap_element_animation(elements.element_from, elements.element_to) end)
+                flow.start(function()
+                    on_wrong_swap_element_animation(elements.element_from, elements.element_to)
+                    EventBus.send("SET_HELPER")
+                end)
             end
         )
         EventBus.on(
@@ -106,10 +110,7 @@ function ____exports.View(animator)
                 local combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid)
                 if combined_item ~= nil then
                     local from_pos = go.get_position(combined_item._hash)
-                    local to_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y)
-                    if get_world_pos(combination_info.step.from_x, combination_info.step.from_y) == from_pos then
-                        to_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y)
-                    end
+                    local to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index)
                     go.animate(
                         combined_item._hash,
                         "position.x",
@@ -151,11 +152,19 @@ function ____exports.View(animator)
                 local combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid)
                 if combined_item ~= nil then
                     go.cancel_animations(combined_item._hash)
-                    local world_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index)
-                    if get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index) == get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index) then
-                        world_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index)
+                    local to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index)
+                    local from_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index)
+                    if from_pos.x == to_pos.x and from_pos.y == to_pos.y then
+                        from_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index)
                     end
-                    go.set_position(world_pos, combined_item._hash)
+                    go.animate(
+                        combined_item._hash,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        from_pos,
+                        go.EASING_INCUBIC,
+                        0.5
+                    )
                 end
                 for ____, element in ipairs(combination_info.combination.elements) do
                     local item = get_first_view_item_by_game_id(element.uid)
@@ -202,20 +211,20 @@ function ____exports.View(animator)
         is_processing = true
         for ____, event in ipairs(events) do
             repeat
-                local ____switch42 = event.key
+                local ____switch41 = event.key
                 local event_duration
-                local ____cond42 = ____switch42 == "ON_SWAP_ELEMENTS"
-                if ____cond42 then
+                local ____cond41 = ____switch41 == "ON_SWAP_ELEMENTS"
+                if ____cond41 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond42 = ____cond42 or ____switch42 == "ON_SPINNING_ACTIVATED"
-                if ____cond42 then
+                ____cond41 = ____cond41 or ____switch41 == "ON_SPINNING_ACTIVATED"
+                if ____cond41 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond42 = ____cond42 or ____switch42 == "ON_MOVED_ELEMENTS"
-                if ____cond42 then
+                ____cond41 = ____cond41 or ____switch41 == "ON_MOVED_ELEMENTS"
+                if ____cond41 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -231,25 +240,26 @@ function ____exports.View(animator)
             until true
         end
         is_processing = false
+        EventBus.send("SET_HELPER")
     end
     function input_listener()
         while true do
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch47 = message_id
-                local ____cond47 = ____switch47 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond47 then
+                local ____switch46 = message_id
+                local ____cond46 = ____switch46 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond46 then
                     on_down(_message.item)
                     break
                 end
-                ____cond47 = ____cond47 or ____switch47 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond47 then
+                ____cond46 = ____cond46 or ____switch46 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond46 then
                     on_up(_message.item)
                     break
                 end
-                ____cond47 = ____cond47 or ____switch47 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond47 then
+                ____cond46 = ____cond46 or ____switch46 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond46 then
                     on_move(_message)
                     break
                 end
@@ -277,24 +287,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch53 = move_direction
-            local ____cond53 = ____switch53 == Direction.Up
-            if ____cond53 then
+            local ____switch52 = move_direction
+            local ____cond52 = ____switch52 == Direction.Up
+            if ____cond52 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond53 = ____cond53 or ____switch53 == Direction.Down
-            if ____cond53 then
+            ____cond52 = ____cond52 or ____switch52 == Direction.Down
+            if ____cond52 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond53 = ____cond53 or ____switch53 == Direction.Left
-            if ____cond53 then
+            ____cond52 = ____cond52 or ____switch52 == Direction.Left
+            if ____cond52 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond53 = ____cond53 or ____switch53 == Direction.Right
-            if ____cond53 then
+            ____cond52 = ____cond52 or ____switch52 == Direction.Right
+            if ____cond52 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
