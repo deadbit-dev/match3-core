@@ -85,6 +85,7 @@ function ____exports.View(animator)
                     go.EASING_INCUBIC,
                     1
                 )
+                EventBus.send("SET_HELPER")
             end
         )
         EventBus.on(
@@ -99,6 +100,7 @@ function ____exports.View(animator)
                 end
                 go.cancel_animations(item._hash)
                 go.set_position(selected_element_position, item._hash)
+                EventBus.send("SET_HELPER")
             end
         )
         EventBus.on(

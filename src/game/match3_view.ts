@@ -210,6 +210,8 @@ export function View(animator: FluxGroup) {
 
             selected_element_position = go.get_position(item._hash);
             go.animate(item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, selected_element_position.y + 3, go.EASING_INCUBIC, 1);
+
+            EventBus.send('SET_HELPER');
         });
 
         EventBus.on('ON_ELEMENT_UNSELECTED', (element) => {
@@ -220,6 +222,8 @@ export function View(animator: FluxGroup) {
 
             go.cancel_animations(item._hash);
             go.set_position(selected_element_position, item._hash);
+
+            EventBus.send('SET_HELPER');
         });
 
         EventBus.on('ON_SET_STEP_HELPER', (combination_info) => {
