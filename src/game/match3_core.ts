@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+
+import * as flow from 'ludobits.m.flow';
 import { is_valid_pos, rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
@@ -176,6 +178,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         elements: []
     };
     
+    const rotated_masks: number[][][][] = [];
     const moved_elements: MovedInfo[] = [];
     const damaged_elements: number[] = [];
 
@@ -194,6 +197,9 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     function init() {
         // заполняем массив cells с размерностью size_x, size_y с порядком: cells[y][x] is_active false, типа пустое поле
         // а также массив elements с размерностью size_x, size_y и значением NullElement
+
+        rotate_all_masks();
+
         for(let y = 0; y < size_y; y++) {
             state.cells[y] = [];
             state.elements[y] = [];
@@ -214,17 +220,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         return true;
     }
 
-    //-----------------------------------------------------------------------------------------------------------------------------------
-    // возвращает массив всех рабочих комбинаций в данном игровом состоянии
-    function get_all_combinations(): CombinationInfo[] {
-        // комбинации проверяются через сверку масок по всему игровому полю
-        // чтобы получить что вся комбинация работает нам нужно все элементы маски взять и пройтись правилом
-        // is_combined_elements, при этом допустим у нас комбинация Comb4, т.е. 4 подряд элемента должны удовлетворять правилу
-        // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
-        // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
-
-        const combinations: CombinationInfo[] = [];
-        // проходимся по всем маскам с конца
+    function rotate_all_masks() {
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             let mask = CombinationMasks[mask_index];
 
@@ -238,15 +234,40 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                 break;
             }
 
+            rotated_masks[mask_index] = [];
+            rotated_masks[mask_index].push(mask);
+
             let angle = 0;
             const max_angle = is_one_row_mask ? 90 : 270;
             while(angle <= max_angle) {
+                rotated_masks[mask_index].push(rotate_matrix_90(mask));
+                angle += 90;
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    // возвращает массив всех рабочих комбинаций в данном игровом состоянии
+    function get_all_combinations(): CombinationInfo[] {
+        // комбинации проверяются через сверку масок по всему игровому полю
+        // чтобы получить что вся комбинация работает нам нужно все элементы маски взять и пройтись правилом
+        // is_combined_elements, при этом допустим у нас комбинация Comb4, т.е. 4 подряд элемента должны удовлетворять правилу
+        // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
+        // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
+
+        const combinations: CombinationInfo[] = [];
+        // проходимся по всем маскам с конца
+        for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
+            let masks = rotated_masks[mask_index];
+
+            for(let i = 0; i < masks.length; i++) {
+                const mask = masks[i];
                 // проход по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
                     for(let x = 0; x + mask[0].length <= size_x; x++) {
                         const combination = {} as CombinationInfo;
                         combination.elements = [];
-                        combination.angle = angle;
+                        combination.angle = i * 90;
                         
                         let is_combined = true;
                         let last_element: Element | typeof NullElement = NullElement;
@@ -290,9 +311,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                         }
                     }
                 }
-                
-                mask = rotate_matrix_90(mask);
-                angle +=90;
             }
         }
 
@@ -888,6 +906,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                     steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
                 if(is_valid_pos(x, y + 1, size_x, size_y) && is_can_move_base(x, y, x, y + 1))
                     steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+
+                flow.frames(1);
             }
         }
 

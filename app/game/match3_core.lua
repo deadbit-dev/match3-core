@@ -5,6 +5,7 @@ local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
+local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
 local is_valid_pos = ____math_utils.is_valid_pos
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
@@ -93,7 +94,35 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     if complex_process_move == nil then
         complex_process_move = true
     end
-    local is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_activation, is_available_cell_type_for_move, save_state, state, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local rotate_all_masks, is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_activation, is_available_cell_type_for_move, save_state, state, rotated_masks, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    function rotate_all_masks()
+        do
+            local mask_index = #CombinationMasks - 1
+            while mask_index >= 0 do
+                local mask = CombinationMasks[mask_index + 1]
+                local is_one_row_mask = false
+                repeat
+                    local ____switch14 = mask_index
+                    local ____cond14 = ____switch14 == ____exports.CombinationType.Comb3 or ____switch14 == ____exports.CombinationType.Comb4 or ____switch14 == ____exports.CombinationType.Comb5
+                    if ____cond14 then
+                        is_one_row_mask = true
+                        break
+                    end
+                until true
+                rotated_masks[mask_index + 1] = {}
+                local ____rotated_masks_index_0 = rotated_masks[mask_index + 1]
+                ____rotated_masks_index_0[#____rotated_masks_index_0 + 1] = mask
+                local angle = 0
+                local max_angle = is_one_row_mask and 90 or 270
+                while angle <= max_angle do
+                    local ____rotated_masks_index_1 = rotated_masks[mask_index + 1]
+                    ____rotated_masks_index_1[#____rotated_masks_index_1 + 1] = rotate_matrix_90(mask)
+                    angle = angle + 90
+                end
+                mask_index = mask_index - 1
+            end
+        end
+    end
     function is_combined_elements_base(e1, e2)
         return e1.type == e2.type or state.element_types[e1.type] and state.element_types[e2.type] and state.element_types[e1.type].index == state.element_types[e2.type].index
     end
@@ -246,6 +275,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         return copy_state
     end
     state = {cells = {}, element_types = {}, elements = {}}
+    rotated_masks = {}
     local moved_elements = {}
     damaged_elements = {}
     local cb_is_can_move
@@ -254,6 +284,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local cb_on_moved_elements
     local cb_on_request_element
     local function init()
+        rotate_all_masks()
         do
             local y = 0
             while y < size_y do
@@ -286,72 +317,64 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         do
             local mask_index = #CombinationMasks - 1
             while mask_index >= 0 do
-                local mask = CombinationMasks[mask_index + 1]
-                local is_one_row_mask = false
-                repeat
-                    local ____switch14 = mask_index
-                    local ____cond14 = ____switch14 == ____exports.CombinationType.Comb3 or ____switch14 == ____exports.CombinationType.Comb4 or ____switch14 == ____exports.CombinationType.Comb5
-                    if ____cond14 then
-                        is_one_row_mask = true
-                        break
-                    end
-                until true
-                local angle = 0
-                local max_angle = is_one_row_mask and 90 or 270
-                while angle <= max_angle do
-                    do
-                        local y = 0
-                        while y + #mask <= size_y do
-                            do
-                                local x = 0
-                                while x + #mask[1] <= size_x do
-                                    local combination = {}
-                                    combination.elements = {}
-                                    combination.angle = angle
-                                    local is_combined = true
-                                    local last_element = ____exports.NullElement
-                                    do
-                                        local i = 0
-                                        while i < #mask and is_combined do
-                                            do
-                                                local j = 0
-                                                while j < #mask[1] and is_combined do
-                                                    if mask[i + 1][j + 1] == 1 then
-                                                        local cell = get_cell(x + j, y + i)
-                                                        local element = get_element(x + j, y + i)
-                                                        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) or element == ____exports.NullElement then
-                                                            is_combined = false
-                                                            break
+                local masks = rotated_masks[mask_index + 1]
+                do
+                    local i = 0
+                    while i < #masks do
+                        local mask = masks[i + 1]
+                        do
+                            local y = 0
+                            while y + #mask <= size_y do
+                                do
+                                    local x = 0
+                                    while x + #mask[1] <= size_x do
+                                        local combination = {}
+                                        combination.elements = {}
+                                        combination.angle = i * 90
+                                        local is_combined = true
+                                        local last_element = ____exports.NullElement
+                                        do
+                                            local i = 0
+                                            while i < #mask and is_combined do
+                                                do
+                                                    local j = 0
+                                                    while j < #mask[1] and is_combined do
+                                                        if mask[i + 1][j + 1] == 1 then
+                                                            local cell = get_cell(x + j, y + i)
+                                                            local element = get_element(x + j, y + i)
+                                                            if cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) or element == ____exports.NullElement then
+                                                                is_combined = false
+                                                                break
+                                                            end
+                                                            if not is_unique_element_combination(element, combinations) then
+                                                                is_combined = false
+                                                                break
+                                                            end
+                                                            local ____combination_elements_2 = combination.elements
+                                                            ____combination_elements_2[#____combination_elements_2 + 1] = {x = x + j, y = y + i, uid = element.uid}
+                                                            if last_element ~= ____exports.NullElement then
+                                                                is_combined = is_combined_elements(last_element, element)
+                                                            end
+                                                            last_element = element
                                                         end
-                                                        if not is_unique_element_combination(element, combinations) then
-                                                            is_combined = false
-                                                            break
-                                                        end
-                                                        local ____combination_elements_0 = combination.elements
-                                                        ____combination_elements_0[#____combination_elements_0 + 1] = {x = x + j, y = y + i, uid = element.uid}
-                                                        if last_element ~= ____exports.NullElement then
-                                                            is_combined = is_combined_elements(last_element, element)
-                                                        end
-                                                        last_element = element
+                                                        j = j + 1
                                                     end
-                                                    j = j + 1
                                                 end
+                                                i = i + 1
                                             end
-                                            i = i + 1
                                         end
+                                        if is_combined then
+                                            combination.type = mask_index
+                                            combinations[#combinations + 1] = combination
+                                        end
+                                        x = x + 1
                                     end
-                                    if is_combined then
-                                        combination.type = mask_index
-                                        combinations[#combinations + 1] = combination
-                                    end
-                                    x = x + 1
                                 end
+                                y = y + 1
                             end
-                            y = y + 1
                         end
+                        i = i + 1
                     end
-                    mask = rotate_matrix_90(mask)
-                    angle = angle + 90
                 end
                 mask_index = mask_index - 1
             end
@@ -609,8 +632,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 if index == -1 then
                     moved_elements[#moved_elements + 1] = {points = {{to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}}, data = element_from}
                 else
-                    local ____moved_elements_index_points_1 = moved_elements[index + 1].points
-                    ____moved_elements_index_points_1[#____moved_elements_index_points_1 + 1] = {to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}
+                    local ____moved_elements_index_points_3 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_3[#____moved_elements_index_points_3 + 1] = {to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}
                 end
             end
             local element_to = get_element(to_x, to_y)
@@ -622,8 +645,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 if index == -1 then
                     moved_elements[#moved_elements + 1] = {points = {{to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}}, data = element_to}
                 else
-                    local ____moved_elements_index_points_2 = moved_elements[index + 1].points
-                    ____moved_elements_index_points_2[#____moved_elements_index_points_2 + 1] = {to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}
+                    local ____moved_elements_index_points_4 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}
                 end
             end
         end
@@ -673,17 +696,17 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
             local j = GAME_CONFIG.movement_to_point and y - 1 or 0
-            local ____temp_3 = #moved_elements + 1
-            moved_elements[____temp_3] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
-            local index = ____temp_3 - 1
+            local ____temp_5 = #moved_elements + 1
+            moved_elements[____temp_5] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
+            local index = ____temp_5 - 1
             while true do
-                local ____j_5 = j
-                j = ____j_5 + 1
-                if not (____j_5 < y) then
+                local ____j_7 = j
+                j = ____j_7 + 1
+                if not (____j_7 < y) then
                     break
                 end
-                local ____moved_elements_index_points_4 = moved_elements[index + 1].points
-                ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+                local ____moved_elements_index_points_6 = moved_elements[index + 1].points
+                ____moved_elements_index_points_6[#____moved_elements_index_points_6 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
             end
         end
     end
@@ -709,9 +732,9 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                         )
                         j = GAME_CONFIG.movement_to_point and y - 1 or j
                         while true do
-                            local ____j_7 = j
-                            j = ____j_7 + 1
-                            if not (____j_7 < y) then
+                            local ____j_9 = j
+                            j = ____j_9 + 1
+                            if not (____j_9 < y) then
                                 break
                             end
                             local index = __TS__ArrayFindIndex(
@@ -721,8 +744,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                             if index == -1 then
                                 moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Falled}}, data = element}
                             else
-                                local ____moved_elements_index_points_6 = moved_elements[index + 1].points
-                                ____moved_elements_index_points_6[#____moved_elements_index_points_6 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+                                local ____moved_elements_index_points_8 = moved_elements[index + 1].points
+                                ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
                             end
                         end
                         return true
@@ -757,8 +780,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     if index == -1 then
                         moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
                     else
-                        local ____moved_elements_index_points_8 = moved_elements[index + 1].points
-                        ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
+                        local ____moved_elements_index_points_10 = moved_elements[index + 1].points
+                        ____moved_elements_index_points_10[#____moved_elements_index_points_10 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
                     end
                     return true
                 end
@@ -827,13 +850,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch184 = mode
-            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
-            if ____cond184 then
+            local ____switch187 = mode
+            local ____cond187 = ____switch187 == ____exports.ProcessMode.Combinate
+            if ____cond187 then
                 return process_combinate()
             end
-            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
-            if ____cond184 then
+            ____cond187 = ____cond187 or ____switch187 == ____exports.ProcessMode.MoveElements
+            if ____cond187 then
                 return process_move()
             end
         until true
@@ -871,6 +894,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                         if is_valid_pos(x, y + 1, size_x, size_y) and is_can_move_base(x, y, x, y + 1) then
                             steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
                         end
+                        flow.frames(1)
                         x = x + 1
                     end
                 end
