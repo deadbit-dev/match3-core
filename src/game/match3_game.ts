@@ -12,6 +12,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable no-case-declarations */
 
+
+import * as flow from 'ludobits.m.flow';
+
 import { MessageId, Messages } from '../modules/modules_const';
 
 import { is_valid_pos } from '../utils/math_utils';
@@ -64,6 +67,7 @@ export function Game() {
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
     let selected_element: ItemInfo | null = null;
+    let previous_helper_data: StepHelperMessage | null = null;
     let helper_data: StepHelperMessage | null = null;
     let helper_timer: hash;
 
@@ -199,26 +203,6 @@ export function Game() {
 
         const state = field.save_state();
         previous_states.push(state);
-
-        const helper_message = {} as StepHelperMessage;
-        
-        const steps = field.get_all_available_steps();
-        const random_picked_step = steps[math.random(0, steps.length - 1)];
-        
-        helper_message.step = random_picked_step;
-
-        const combination = field.get_step_combination(random_picked_step);
-        if(combination != undefined) {
-            helper_message.combination = combination;
-            for(const element of combination.elements) {
-                const is_x = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
-                const is_y = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
-                if(is_x || is_y) {
-                    helper_message.combined_element = element;
-                    break;
-                }
-            }
-        }
         
         EventBus.send('ON_LOAD_FIELD', state);
     }
@@ -277,6 +261,9 @@ export function Game() {
     //#region ACTIONS
     
     function set_helper_timer() {
+        const t0 = socket.gettime();
+        flow.start(() => search_helper_combination(), {parallel: true});
+        print("time: ", (socket.gettime() - t0) * 1000);
         helper_timer = timer.delay(5, false, set_helper);
     }
     
@@ -285,10 +272,8 @@ export function Game() {
         timer.cancel(helper_timer);
         reset_helper();
     }
-    
-    function set_helper() {
-        reset_helper();
 
+    function search_helper_combination() {
         const steps = field.get_all_available_steps();
         if(steps.length == 0) return;
 
@@ -304,20 +289,29 @@ export function Game() {
                         combination: combination,
                         combined_element: element
                     };
-                    EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
-                    break;
+
+                    return;
                 }
             }
         }
+    }
+    
+    function set_helper() {
+        if(helper_data != null) {
+            reset_helper();
 
-        helper_timer = timer.delay(10, false, set_helper);
+            previous_helper_data = Object.assign({}, helper_data);
+            EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
+        }
+
+        set_helper_timer();
     }
 
     function reset_helper() {
-        if(helper_data == null) return;
+        if(previous_helper_data == null) return;
         
-        EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, helper_data));
-        helper_data = null;
+        EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, previous_helper_data));
+        previous_helper_data = null;
     }
     
     function try_click_activation(x: number, y: number) {

@@ -10,6 +10,7 @@ local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
+local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
 local is_valid_pos = ____math_utils.is_valid_pos
 local ____game_config = require("main.game_config")
@@ -23,7 +24,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, set_helper_timer, stop_helper_timer, set_helper, reset_helper, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element, helper_data, helper_timer
+    local set_element_types, set_busters, set_events, load_field, load_cell, load_element, make_cell, make_element, set_helper_timer, stop_helper_timer, search_helper_combination, set_helper, reset_helper, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, process_game_step, revert_step, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -149,22 +150,6 @@ function ____exports.Game()
         end
         local state = field.save_state()
         previous_states[#previous_states + 1] = state
-        local helper_message = {}
-        local steps = field.get_all_available_steps()
-        local random_picked_step = steps[math.random(0, #steps - 1) + 1]
-        helper_message.step = random_picked_step
-        local combination = field.get_step_combination(random_picked_step)
-        if combination ~= nil then
-            helper_message.combination = combination
-            for ____, element in ipairs(combination.elements) do
-                local is_x = element.x == random_picked_step.from_x and element.y == random_picked_step.from_y
-                local is_y = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
-                if is_x or is_y then
-                    helper_message.combined_element = element
-                    break
-                end
-            end
-        end
         EventBus.send("ON_LOAD_FIELD", state)
     end
     function load_cell(x, y)
@@ -217,6 +202,15 @@ function ____exports.Game()
         return element
     end
     function set_helper_timer()
+        local t0 = socket.gettime()
+        flow.start(
+            function() return search_helper_combination() end,
+            {parallel = true}
+        )
+        print(
+            "time: ",
+            (socket.gettime() - t0) * 1000
+        )
         helper_timer = timer.delay(5, false, set_helper)
     end
     function stop_helper_timer()
@@ -226,8 +220,7 @@ function ____exports.Game()
         timer.cancel(helper_timer)
         reset_helper()
     end
-    function set_helper()
-        reset_helper()
+    function search_helper_combination()
         local steps = field.get_all_available_steps()
         if #steps == 0 then
             return
@@ -240,25 +233,31 @@ function ____exports.Game()
                 local is_to = element.x == random_picked_step.to_x and element.y == random_picked_step.to_y
                 if is_from or is_to then
                     helper_data = {step = random_picked_step, combination = combination, combined_element = element}
-                    EventBus.send(
-                        "ON_SET_STEP_HELPER",
-                        __TS__ObjectAssign({}, helper_data)
-                    )
-                    break
+                    return
                 end
             end
         end
-        helper_timer = timer.delay(10, false, set_helper)
+    end
+    function set_helper()
+        if helper_data ~= nil then
+            reset_helper()
+            previous_helper_data = __TS__ObjectAssign({}, helper_data)
+            EventBus.send(
+                "ON_SET_STEP_HELPER",
+                __TS__ObjectAssign({}, helper_data)
+            )
+        end
+        set_helper_timer()
     end
     function reset_helper()
-        if helper_data == nil then
+        if previous_helper_data == nil then
             return
         end
         EventBus.send(
             "ON_RESET_STEP_HELPER",
-            __TS__ObjectAssign({}, helper_data)
+            __TS__ObjectAssign({}, previous_helper_data)
         )
-        helper_data = nil
+        previous_helper_data = nil
     end
     function try_click_activation(x, y)
         if try_hammer_activation(x, y) then
@@ -997,29 +996,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch221 = combination.type
-            local ____cond221 = ____switch221 == CombinationType.Comb4
-            if ____cond221 then
+            local ____switch220 = combination.type
+            local ____cond220 = ____switch220 == CombinationType.Comb4
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond221 = ____cond221 or ____switch221 == CombinationType.Comb5
-            if ____cond221 then
+            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb5
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond221 = ____cond221 or ____switch221 == CombinationType.Comb2x2
-            if ____cond221 then
+            ____cond220 = ____cond220 or ____switch220 == CombinationType.Comb2x2
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond221 = ____cond221 or (____switch221 == CombinationType.Comb3x3a or ____switch221 == CombinationType.Comb3x3b)
-            if ____cond221 then
+            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x3a or ____switch220 == CombinationType.Comb3x3b)
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond221 = ____cond221 or (____switch221 == CombinationType.Comb3x4 or ____switch221 == CombinationType.Comb3x5)
-            if ____cond221 then
+            ____cond220 = ____cond220 or (____switch220 == CombinationType.Comb3x4 or ____switch220 == CombinationType.Comb3x5)
+            if ____cond220 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1234,6 +1233,7 @@ function ____exports.Game()
     activated_elements = {}
     game_step_events = {}
     selected_element = nil
+    previous_helper_data = nil
     helper_data = nil
     local function init()
         field.init()
