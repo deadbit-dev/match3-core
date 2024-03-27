@@ -193,10 +193,10 @@ export function View(animator: FluxGroup) {
             EventBus.send('SET_HELPER');
         });
 
-        EventBus.on('ON_WRONG_SWAP_ELEMENTS', (elements) => {
-            if (elements == undefined) return;
+        EventBus.on('ON_WRONG_SWAP_ELEMENTS', (data) => {
+            if (data == undefined) return;
             flow.start(() => {
-                on_wrong_swap_element_animation(elements.element_from, elements.element_to);
+                on_wrong_swap_element_animation(data);
                 EventBus.send('SET_HELPER');
             });
         });
@@ -551,46 +551,55 @@ export function View(animator: FluxGroup) {
     //#region ANIMATIONS
 
     function on_swap_element_animation(message: Messages[MessageId]) {
-        const elements = message as SwapElementsMessage;
-        const element_from = elements.element_from;
-        const element_to = elements.element_to;
+        const data = message as SwapElementsMessage;
+        
+        const from_world_pos = get_world_pos(data.from.x, data.from.y);
+        const to_world_pos = get_world_pos(data.to.x, data.to.y);
 
-        const from_world_pos = get_world_pos(element_from.x, element_from.y);
-        const to_world_pos = get_world_pos(element_to.x, element_to.y);
+        const element_from = data.element_from;
+        const element_to = data.element_to;
 
         const item_from = get_first_view_item_by_game_id(element_from.uid);
-        if (item_from == undefined) return 0;
-
-        const item_to = get_first_view_item_by_game_id(element_to.uid);
-        if (item_to == undefined) return 0;
-
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+        if (item_from != undefined) {
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+        }
+        
+        if(element_to != NullElement) {
+            const item_to = get_first_view_item_by_game_id(element_to.uid);
+            if (item_to != undefined) {
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
+            }
+        }
 
         return swap_element_time + 0.1;
     }
 
-    function on_wrong_swap_element_animation(element_from: ItemInfo, element_to: ItemInfo) {
-        const from_world_pos = get_world_pos(element_from.x, element_from.y);
-        const to_world_pos = get_world_pos(element_to.x, element_to.y);
+    function on_wrong_swap_element_animation(data: SwapElementsMessage) {
+        const from_world_pos = get_world_pos(data.from.x, data.from.y);
+        const to_world_pos = get_world_pos(data.to.x, data.to.y);
 
-        const item_from = get_first_view_item_by_game_id(element_from.uid);
-        if (item_from == undefined) return;
-
-        const item_to = get_first_view_item_by_game_id(element_to.uid);
-        if (item_to == undefined) return;
+        const element_from = data.element_from;
+        const element_to = data.element_to;
 
         is_processing = true;
 
-        // FORWARD
-        go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-        go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
-            // BACK
-            go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
-                is_processing = false;
+        const item_from = get_first_view_item_by_game_id(element_from.uid);
+        if (item_from != undefined) {
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
+                go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
+                    is_processing = false;            
+                });
             });
-        });
+        }
+
+        if(element_to != NullElement) {
+            const item_to = get_first_view_item_by_game_id(element_to.uid);
+            if (item_to != undefined) {
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
+                    go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
+                });
+            }
+        }
 
         return spawn_element_time * 2;
     }

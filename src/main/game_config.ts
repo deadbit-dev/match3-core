@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo } from "../game/match3_core";
+import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
 import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
 
 export const IS_DEBUG_MODE = true;
@@ -619,9 +619,9 @@ export const _GAME_CONFIG = {
                     [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
-                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
-                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
+                    [NullElement, NullElement, NullElement, ElementId.Emerald, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
+                    [NullElement, NullElement, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
+                    [NullElement, NullElement, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
                 ]
             },
             
@@ -756,7 +756,7 @@ export type MovedElementsMessage = MovedInfo[];
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
-export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
+export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, elements: ItemInfo[] }
 
@@ -772,7 +772,7 @@ export interface SwapedDiskosphereActivationMessage extends SwapedActivationMess
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
-export type SpinningActivationMessage = SwapElementsMessage[];
+export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {

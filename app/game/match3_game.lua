@@ -1062,7 +1062,7 @@ function ____exports.Game()
         end
         local element_from = field.get_element(from_x, from_y)
         local element_to = field.get_element(to_x, to_y)
-        if element_from == NullElement or element_to == NullElement then
+        if element_from == NullElement then
             return false
         end
         EventBus.send(
@@ -1071,10 +1071,10 @@ function ____exports.Game()
         )
         selected_element = nil
         if not field.try_move(from_x, from_y, to_x, to_y) then
-            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {element_from = {x = from_x, y = from_y, uid = element_from.uid}, element_to = {x = to_x, y = to_y, uid = element_to.uid}})
+            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
             return false
         end
-        write_game_step_event("ON_SWAP_ELEMENTS", {element_from = {x = to_x, y = to_y, uid = element_to.uid}, element_to = {x = from_x, y = from_y, uid = element_from.uid}})
+        write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
         return true
     end
     function set_random(seed)

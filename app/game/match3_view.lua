@@ -48,12 +48,12 @@ function ____exports.View(animator)
         )
         EventBus.on(
             "ON_WRONG_SWAP_ELEMENTS",
-            function(elements)
-                if elements == nil then
+            function(data)
+                if data == nil then
                     return
                 end
                 flow.start(function()
-                    on_wrong_swap_element_animation(elements.element_from, elements.element_to)
+                    on_wrong_swap_element_animation(data)
                     EventBus.send("SET_HELPER")
                 end)
             end
@@ -510,76 +510,74 @@ function ____exports.View(animator)
         return index
     end
     function on_swap_element_animation(message)
-        local elements = message
-        local element_from = elements.element_from
-        local element_to = elements.element_to
-        local from_world_pos = get_world_pos(element_from.x, element_from.y)
-        local to_world_pos = get_world_pos(element_to.x, element_to.y)
+        local data = message
+        local from_world_pos = get_world_pos(data.from.x, data.from.y)
+        local to_world_pos = get_world_pos(data.to.x, data.to.y)
+        local element_from = data.element_from
+        local element_to = data.element_to
         local item_from = get_first_view_item_by_game_id(element_from.uid)
-        if item_from == nil then
-            return 0
+        if item_from ~= nil then
+            go.animate(
+                item_from._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                to_world_pos,
+                swap_element_easing,
+                swap_element_time
+            )
         end
-        local item_to = get_first_view_item_by_game_id(element_to.uid)
-        if item_to == nil then
-            return 0
-        end
-        go.animate(
-            item_from._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            to_world_pos,
-            swap_element_easing,
-            swap_element_time
-        )
-        go.animate(
-            item_to._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            from_world_pos,
-            swap_element_easing,
-            swap_element_time
-        )
-        return swap_element_time + 0.1
-    end
-    function on_wrong_swap_element_animation(element_from, element_to)
-        local from_world_pos = get_world_pos(element_from.x, element_from.y)
-        local to_world_pos = get_world_pos(element_to.x, element_to.y)
-        local item_from = get_first_view_item_by_game_id(element_from.uid)
-        if item_from == nil then
-            return
-        end
-        local item_to = get_first_view_item_by_game_id(element_to.uid)
-        if item_to == nil then
-            return
-        end
-        is_processing = true
-        go.animate(
-            item_from._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            to_world_pos,
-            swap_element_easing,
-            swap_element_time
-        )
-        go.animate(
-            item_to._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            from_world_pos,
-            swap_element_easing,
-            swap_element_time,
-            0,
-            function()
+        if element_to ~= NullElement then
+            local item_to = get_first_view_item_by_game_id(element_to.uid)
+            if item_to ~= nil then
                 go.animate(
                     item_to._hash,
                     "position",
                     go.PLAYBACK_ONCE_FORWARD,
-                    to_world_pos,
+                    from_world_pos,
                     swap_element_easing,
                     swap_element_time
                 )
+            end
+        end
+        return swap_element_time + 0.1
+    end
+    function on_wrong_swap_element_animation(data)
+        local from_world_pos = get_world_pos(data.from.x, data.from.y)
+        local to_world_pos = get_world_pos(data.to.x, data.to.y)
+        local element_from = data.element_from
+        local element_to = data.element_to
+        is_processing = true
+        local item_from = get_first_view_item_by_game_id(element_from.uid)
+        if item_from ~= nil then
+            go.animate(
+                item_from._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                to_world_pos,
+                swap_element_easing,
+                swap_element_time,
+                0,
+                function()
+                    go.animate(
+                        item_from._hash,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        from_world_pos,
+                        swap_element_easing,
+                        swap_element_time,
+                        0,
+                        function()
+                            is_processing = false
+                        end
+                    )
+                end
+            )
+        end
+        if element_to ~= NullElement then
+            local item_to = get_first_view_item_by_game_id(element_to.uid)
+            if item_to ~= nil then
                 go.animate(
-                    item_from._hash,
+                    item_to._hash,
                     "position",
                     go.PLAYBACK_ONCE_FORWARD,
                     from_world_pos,
@@ -587,11 +585,18 @@ function ____exports.View(animator)
                     swap_element_time,
                     0,
                     function()
-                        is_processing = false
+                        go.animate(
+                            item_to._hash,
+                            "position",
+                            go.PLAYBACK_ONCE_FORWARD,
+                            to_world_pos,
+                            swap_element_easing,
+                            swap_element_time
+                        )
                     end
                 )
             end
-        )
+        end
         return spawn_element_time * 2
     end
     function on_combined_animation(message)

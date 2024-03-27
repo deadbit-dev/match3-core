@@ -577,7 +577,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
 
     function swap_elements(from_x: number, from_y: number, to_x: number, to_y: number) {
-        const elements_from = get_element(from_x, from_y); 
+        const elements_from = get_element(from_x, from_y);
         set_element(from_x, from_y, get_element(to_x, to_y));
         set_element(to_x, to_y, elements_from);
     }

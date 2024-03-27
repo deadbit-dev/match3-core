@@ -1044,23 +1044,27 @@ export function Game() {
         const element_from = field.get_element(from_x, from_y);
         const element_to = field.get_element(to_x, to_y);
         
-        if((element_from == NullElement) || (element_to == NullElement)) return false;
+        if(element_from == NullElement) return false;
 
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;
         
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
-                element_from: {x: from_x, y: from_y, uid: element_from.uid},
-                element_to: {x: to_x, y: to_y, uid: element_to.uid}
+                from: {x: from_x, y: from_y},
+                to: {x: to_x, y: to_y},
+                element_from: element_from,
+                element_to: element_to
             });
 
             return false;
         }
         
         write_game_step_event('ON_SWAP_ELEMENTS', {
-            element_from: {x: to_x, y: to_y, uid: element_to.uid},
-            element_to: {x: from_x, y: from_y, uid: element_from.uid}
+            from: {x: from_x, y: from_y},
+            to: {x: to_x, y: to_y},
+            element_from: element_from,
+            element_to: element_to
         });
 
         return true;
