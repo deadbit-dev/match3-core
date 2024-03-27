@@ -78,6 +78,26 @@ ____exports.ElementId.Dynamite = 9
 ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 10
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
+____exports.ElementId.Custom1 = 11
+____exports.ElementId[____exports.ElementId.Custom1] = "Custom1"
+____exports.ElementId.Custom2 = 12
+____exports.ElementId[____exports.ElementId.Custom2] = "Custom2"
+____exports.ElementId.Custom3 = 13
+____exports.ElementId[____exports.ElementId.Custom3] = "Custom3"
+____exports.ElementId.Custom4 = 14
+____exports.ElementId[____exports.ElementId.Custom4] = "Custom4"
+____exports.ElementId.Custom5 = 15
+____exports.ElementId[____exports.ElementId.Custom5] = "Custom5"
+____exports.ElementId.Custom6 = 16
+____exports.ElementId[____exports.ElementId.Custom6] = "Custom6"
+____exports.ElementId.Custom7 = 17
+____exports.ElementId[____exports.ElementId.Custom7] = "Custom7"
+____exports.ElementId.Custom8 = 18
+____exports.ElementId[____exports.ElementId.Custom8] = "Custom8"
+____exports.ElementId.Custom9 = 19
+____exports.ElementId[____exports.ElementId.Custom9] = "Custom9"
+____exports.ElementId.Custom10 = 20
+____exports.ElementId[____exports.ElementId.Custom10] = "Custom10"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
@@ -189,7 +209,17 @@ ____exports._GAME_CONFIG = {
         [____exports.ElementId.AxisRocket] = {type = {is_movable = true, is_clickable = true}, percentage = 0, view = "axis_rocket_buster"},
         [____exports.ElementId.Helicopter] = {type = {is_movable = true, is_clickable = true}, percentage = 0, view = "helicopter_buster"},
         [____exports.ElementId.Dynamite] = {type = {is_movable = true, is_clickable = true}, percentage = 0, view = "dynamite_buster"},
-        [____exports.ElementId.Diskosphere] = {type = {is_movable = true, is_clickable = true}, percentage = 0, view = "diskosphere_buster"}
+        [____exports.ElementId.Diskosphere] = {type = {is_movable = true, is_clickable = true}, percentage = 0, view = "diskosphere_buster"},
+        [____exports.ElementId.Custom1] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_1"},
+        [____exports.ElementId.Custom2] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_2"},
+        [____exports.ElementId.Custom3] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_3"},
+        [____exports.ElementId.Custom4] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_4"},
+        [____exports.ElementId.Custom5] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_5"},
+        [____exports.ElementId.Custom6] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_6"},
+        [____exports.ElementId.Custom7] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_7"},
+        [____exports.ElementId.Custom8] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_8"},
+        [____exports.ElementId.Custom9] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_9"},
+        [____exports.ElementId.Custom10] = {type = {is_movable = true, is_clickable = false}, percentage = 0, view = "custom_10"}
     },
     base_elements = {
         ____exports.ElementId.Dimonde,

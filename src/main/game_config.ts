@@ -62,7 +62,17 @@ export enum ElementId {
     AxisRocket,
     Helicopter,
     Dynamite,
-    Diskosphere
+    Diskosphere,
+    Custom1,
+    Custom2,
+    Custom3,
+    Custom4,
+    Custom5,
+    Custom6,
+    Custom7,
+    Custom8,
+    Custom9,
+    Custom10
 }
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
@@ -265,7 +275,97 @@ export const _GAME_CONFIG = {
             },
             percentage: 0,
             view: 'diskosphere_buster'
-        }
+        },
+        
+        [ElementId.Custom1]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_1'
+        },
+
+        [ElementId.Custom2]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_2'
+        },
+
+        [ElementId.Custom3]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_3'
+        },
+
+        [ElementId.Custom4]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_4'
+        },
+
+        [ElementId.Custom5]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_5'
+        },
+
+        [ElementId.Custom6]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_6'
+        },
+
+        [ElementId.Custom7]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_7'
+        },
+
+        [ElementId.Custom8]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_8'
+        },
+
+        [ElementId.Custom9]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_9'
+        },
+
+        [ElementId.Custom10]: {
+            type: {
+                is_movable: true,
+                is_clickable: false
+            },
+            percentage: 0,
+            view: 'custom_10'
+        },
     } as { [key in ElementId]: { type: { is_movable: boolean, is_clickable: boolean }, percentage: number, view: string } },
 
     base_elements: [

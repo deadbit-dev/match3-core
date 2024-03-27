@@ -74,9 +74,10 @@ export function Game() {
     let helper_timer: hash;
     let randomseed: number;
     let coroutines: Coroutine[] = [];
-    let step_counter = level_config.steps;
     let is_simulating = false;
+    let step_counter = 0;
     let is_step = false;
+    let is_block_input = false;
 
     function init() {
         field.init();
@@ -91,8 +92,8 @@ export function Game() {
         set_element_types();
         set_busters();
         set_events();
-
         set_random();
+        set_targets();
     }
     
     //#endregion MAIN
@@ -131,7 +132,7 @@ export function Game() {
         EventBus.on('SET_HELPER', set_helper);
 
         EventBus.on('SWAP_ELEMENTS', (elements) => {
-            if(elements == undefined) return;
+            if(is_block_input || elements == undefined) return;
 
             stop_helper();
             
@@ -146,7 +147,7 @@ export function Game() {
 
         // TODO: refactoring
         EventBus.on('CLICK_ACTIVATION', (pos) => {
-            if(pos == undefined) return;
+            if(is_block_input || pos == undefined) return;
 
             stop_helper();
 
@@ -196,12 +197,23 @@ export function Game() {
             if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
             else if(step_counter <= 0) EventBus.send('ON_GAME_OVER');
 
+            is_block_input = true;
             search_all_available_steps((steps) => {
-                if(steps.length != 0) return;
+                if(steps.length != 0) {
+                    is_block_input = false;
+                    return;
+                }
+                
                 stop_helper();
                 shuffle_field();
             });
         });
+    }
+
+    function set_targets() {
+        step_counter = level_config.steps;
+        for(const target of level_config.targets)
+            target.uids = [] as number[];
     }
 
     function load_field() {
@@ -902,6 +914,8 @@ export function Game() {
     }
 
     function shuffle_field() {
+        let state = field.save_state();
+
         const event_data: SpinningActivationMessage = [];
         write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
@@ -922,7 +936,15 @@ export function Game() {
             }
         }
 
-        process_game_step(false);
+        is_block_input = true;
+        search_all_available_steps((steps) => {
+            if(steps.length != 0) process_game_step(false);
+            else {
+                game_step_events = {} as GameStepEventBuffer;
+                field.load_state(state);
+                shuffle_field();
+            }
+        });
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -1127,6 +1149,7 @@ export function Game() {
 
     function is_level_completed() {
         for(const target of level_config.targets) {
+            print(target.uids.length, target.count, target.type);
             if(target.uids.length < target.count) return false;
         }
 
@@ -1189,6 +1212,7 @@ export function Game() {
 
         for(const target of level_config.targets) {
             if(target.type == element.type) {
+                print('damage: ', target.type, element.uid);
                 target.uids.push(element.uid);
             }
         }
