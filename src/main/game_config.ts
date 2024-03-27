@@ -309,9 +309,26 @@ export const _GAME_CONFIG = {
                     [NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Topaz, NullElement]
                 ]
             },
+            
+            steps: 15,
+            targets: [
+                {
+                    type: ElementId.Topaz,
+                    count: 7,
+                    uids: [] as number []
+                },
+                {
+                    type: ElementId.Dimonde,
+                    count: 5,
+                    uids: [] as number []
+                }
+            ],
 
             busters: {
-                hammer_active: false
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         },
 
@@ -348,8 +365,20 @@ export const _GAME_CONFIG = {
                 ]
             },
 
+            steps: 10,
+            targets: [
+                {
+                    type: ElementId.Emerald,
+                    count: 5,
+                    uids: [] as number []
+                }
+            ],
+
             busters: {
-                hammer_active: false
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         },
 
@@ -385,9 +414,26 @@ export const _GAME_CONFIG = {
                     [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Helicopter, ElementId.Helicopter, ElementId.Gold, NullElement]
                 ]
             },
-
+            
+            steps: 20,
+            targets: [
+                {
+                    type: ElementId.Gold,
+                    count: 10,
+                    uids: [] as number []
+                },
+                {
+                    type: ElementId.Ruby,
+                    count: 5,
+                    uids: [] as number []
+                }
+            ],
+            
             busters: {
-                hammer_active: false
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         },
 
@@ -423,6 +469,20 @@ export const _GAME_CONFIG = {
                     [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
                 ]
             },
+
+            steps: 15,
+            targets: [
+                {
+                    type: ElementId.Gold,
+                    count: 7,
+                    uids: [] as number []
+                },
+                {
+                    type: ElementId.Topaz,
+                    count: 7,
+                    uids: [] as number []
+                }
+            ],
 
             busters: {
                 spinning_active: false,
@@ -464,9 +524,21 @@ export const _GAME_CONFIG = {
                     [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
                 ]
             },
-
+            
+            steps: 5,
+            targets: [
+                {
+                    type: ElementId.Dimonde,
+                    count: 7,
+                    uids: [] as number []
+                }
+            ],
+            
             busters: {
-                hammer_active: false
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         },
 
@@ -498,9 +570,72 @@ export const _GAME_CONFIG = {
                     [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
                 ]
             },
-
+            
+            steps: 10,
+            targets: [
+                {
+                    type: ElementId.Emerald,
+                    count: 5,
+                    uids: [] as number []
+                },
+                {
+                    type: ElementId.Gold,
+                    count: 5,
+                    uids: [] as number []
+                }
+            ],
+            
             busters: {
-                hammer_active: false
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
+            }
+        },
+        
+        {
+            // LEVEL 6
+            field: {
+                width: 6,
+                height: 6,
+                max_width: 8,
+                max_height: 8,
+                cell_size: 128,
+                offset_border: 20,
+
+                cells: [
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base],
+                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base],
+                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base],
+                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
+                ],
+
+                elements: [
+                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
+                    [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz],
+                    [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
+                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Dimonde],
+                    [ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde],
+                    [NullElement, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
+                ]
+            },
+
+            steps: 5,
+            targets: [
+                {
+                    type: ElementId.Ruby,
+                    count: 5,
+                    uids: [] as number [],
+                }
+            ],
+            
+            busters: {
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
             }
         }
     ]
@@ -523,7 +658,7 @@ export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
 export interface SwapElementsMessage { element_from: ItemInfo, element_to: ItemInfo }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
-export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, combination: CombinationInfo }
+export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, elements: ItemInfo[] }
 
 export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[] }
 export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
@@ -584,6 +719,7 @@ export type _UserMessages = {
 
     ON_MOVED_ELEMENTS: MovedElementsMessage,
     ON_GAME_STEP: GameStepEventBuffer,
+    ON_GAME_STEP_ANIMATION_END: VoidMessage,
 
     TRY_REVERT_STEP: VoidMessage,
     REVERT_STEP: VoidMessage,
@@ -591,5 +727,11 @@ export type _UserMessages = {
 
     ON_ELEMENT_ACTIVATED: ElementActivationMessage,
 
-    UPDATED_BUTTONS: VoidMessage
+    UPDATED_BUTTONS: VoidMessage,
+    UPDATED_STEP_COUNTER: number,
+    UPDATED_FIRST_TARGET: number,
+    UPDATED_SECOND_TARGET: number,
+
+    ON_LEVEL_COMPLETED: VoidMessage,
+    ON_GAME_OVER: VoidMessage
 };

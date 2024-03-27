@@ -46,7 +46,8 @@ import {
     ItemInfo,
     GameState,
     CellType,
-    MovedInfo
+    MovedInfo,
+    StepInfo
 } from './match3_core';
 
 export function Game() {
@@ -64,12 +65,18 @@ export function Game() {
 
     let game_item_counter = 0;
     let previous_states: GameState[] = [];
+    let previous_randomseeds: number[] = [];
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
     let selected_element: ItemInfo | null = null;
     let previous_helper_data: StepHelperMessage | null = null;
     let helper_data: StepHelperMessage | null = null;
     let helper_timer: hash;
+    let randomseed: number;
+    let coroutines: Coroutine[] = [];
+    let step_counter = level_config.steps;
+    let is_simulating = false;
+    let is_step = false;
 
     function init() {
         field.init();
@@ -84,6 +91,8 @@ export function Game() {
         set_element_types();
         set_busters();
         set_events();
+
+        set_random();
     }
     
     //#endregion MAIN
@@ -119,36 +128,27 @@ export function Game() {
     function set_events() {
         EventBus.on('LOAD_FIELD', load_field);
 
-        EventBus.on('SET_HELPER', set_helper_timer);
+        EventBus.on('SET_HELPER', set_helper);
 
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(elements == undefined) return;
 
-            stop_helper_timer();
+            stop_helper();
             
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
-            const is_from_buster = is_buster(elements.to_x, elements.to_y);
-            const is_to_buster = is_buster(elements.from_x, elements.from_y);
-            const is_procesed = field.process_state(ProcessMode.Combinate);
+            const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
 
-            let is_activated = false;
-            if((is_from_buster || is_to_buster)) {
-                if(is_procesed) {
-                    write_game_step_event('ON_BUSTER_ACTIVATION', {});
-                    if(is_from_buster) is_activated = try_activate_buster_element(elements.to_x, elements.to_y);
-                    if(is_to_buster) is_activated = try_activate_buster_element(elements.from_x, elements.from_y);
-                } else is_activated = try_activate_swaped_busters(elements.to_x, elements.to_y, elements.from_x, elements.from_y);
-            }
-            
-            process_game_step(is_procesed || is_activated);
+            is_step = true;
+
+            process_game_step(is_procesed);
         });
 
         // TODO: refactoring
         EventBus.on('CLICK_ACTIVATION', (pos) => {
             if(pos == undefined) return;
 
-            stop_helper_timer();
+            stop_helper();
 
             if(try_click_activation(pos.x, pos.y)) process_game_step(true);
             else {
@@ -186,11 +186,22 @@ export function Game() {
         });
 
         EventBus.on('ACTIVATE_SPINNING', () => {
-            stop_helper_timer();
+            stop_helper();
             try_spinning_activation();
         });
         
         EventBus.on('REVERT_STEP', revert_step);
+
+        EventBus.on('ON_GAME_STEP_ANIMATION_END', () => {
+            if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
+            else if(step_counter <= 0) EventBus.send('ON_GAME_OVER');
+
+            search_all_available_steps((steps) => {
+                if(steps.length != 0) return;
+                stop_helper();
+                shuffle_field();
+            });
+        });
     }
 
     function load_field() {
@@ -260,58 +271,168 @@ export function Game() {
     //#endregion SETUP
     //#region ACTIONS
     
-    function set_helper_timer() {
-        const t0 = socket.gettime();
-        flow.start(() => search_helper_combination(), {parallel: true});
-        print("time: ", (socket.gettime() - t0) * 1000);
-        helper_timer = timer.delay(5, false, set_helper);
+    function set_helper() {
+        search_helper_combination();
+        
+        helper_timer = timer.delay(5, false, () => {
+            if(helper_data != null) {
+                print("[GAME]: set helper");
+
+                reset_helper();
+
+                previous_helper_data = Object.assign({}, helper_data);
+                EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
+            }
+        });
     }
     
-    function stop_helper_timer() {
+    function stop_helper() {
         if(helper_timer == undefined) return;
+
+        print("[GAME]: stop helper");
+    
+        for(const coroutine of coroutines) {
+            flow.stop(coroutine);
+        }
+        
         timer.cancel(helper_timer);
         reset_helper();
     }
 
-    function search_helper_combination() {
-        const steps = field.get_all_available_steps();
-        if(steps.length == 0) return;
-
-        const random_picked_step = steps[math.random(0, steps.length - 1)];
-        const combination = field.get_step_combination(random_picked_step);
-        if(combination != undefined) {
-            for(const element of combination.elements) {
-                const is_from = (element.x == random_picked_step.from_x && element.y == random_picked_step.from_y);
-                const is_to = (element.x == random_picked_step.to_x && element.y == random_picked_step.to_y);
-                if(is_from || is_to) {
-                    helper_data = {
-                        step: random_picked_step,
-                        combination: combination,
-                        combined_element: element
-                    };
-
-                    return;
-                }
-            }
-        }
-    }
-    
-    function set_helper() {
-        if(helper_data != null) {
-            reset_helper();
-
-            previous_helper_data = Object.assign({}, helper_data);
-            EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
-        }
-
-        set_helper_timer();
-    }
-
     function reset_helper() {
         if(previous_helper_data == null) return;
+
+        print("[GAME]: reset helper");
         
         EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, previous_helper_data));
         previous_helper_data = null;
+    }
+
+    function search_helper_combination() {
+        print("[GAME]: search combination");
+
+        search_all_available_steps((steps: StepInfo[]) => {
+            search_best_step(steps, (best_step) => {
+                const combination = get_step_combination(best_step);
+                if(combination != undefined) {
+                    for(const element of combination.elements) {
+                        const is_from = (element.x == best_step.from_x && element.y == best_step.from_y);
+                        const is_to = (element.x == best_step.to_x && element.y == best_step.to_y);
+                        if(is_from || is_to) {
+                            helper_data = {
+                                step: best_step,
+                                elements: combination.elements,
+                                combined_element: element
+                            };
+
+                            print("[GAME]: set helper combination");
+
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+    }
+    
+    function search_all_available_steps(on_end: (steps: StepInfo[]) => void) {
+        const coroutine = flow.start(() => {
+            print("[GAME]: search available steps");
+
+            const steps: StepInfo[] = [];
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+                    if(is_buster(x, y)) steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
+                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y))
+                        steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
+                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1))
+                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+
+                    flow.frames(1);
+                }
+            }
+            
+            print("[GAME]: found ", steps.length, " steps");
+            on_end(steps);
+        });
+
+        coroutines.push(coroutine);
+    }
+
+    function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
+        const coroutine = flow.start(() => {
+            let best_step = {} as StepInfo;
+            let max_damaged_elements = 0;
+            for(const step of steps) {
+                const count_damaged_elements = get_count_damaged_elements_of_step(step);
+                if(count_damaged_elements > max_damaged_elements) {
+                    max_damaged_elements = count_damaged_elements;
+                    best_step = step;
+                }
+
+                flow.frames(1);
+            }
+
+            print("[GAME]: found best step (", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y, ")");
+            on_end(best_step);
+        });
+
+        coroutines.push(coroutine);
+    }
+
+    function get_count_damaged_elements_of_step(step: StepInfo) {
+        let count_damaged_elements = 0;
+        field.set_callback_on_damaged_element((item: ItemInfo) => {
+            on_damaged_element(item);
+            count_damaged_elements++;
+        });
+
+        simulate_game_step(step);
+        
+        field.set_callback_on_damaged_element(on_damaged_element);
+
+        return count_damaged_elements;
+    }
+    
+    function get_step_combination(step: StepInfo): CombinationInfo | undefined {
+        field.swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
+        const combinations = field.get_all_combinations();
+        field.swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
+        
+        for(const combination of combinations) {
+            for(const element of combination.elements) {
+                const is_x = element.x == step.from_x || element.x == step.to_x;
+                const is_y = element.y == step.from_y || element.y == step.to_y;
+                if(is_x && is_y) return combination;
+            }
+        }
+
+        const element_from = field.get_element(step.from_x, step.from_y);
+        const element_to = field.get_element(step.to_x, step.to_y);
+        if(element_from != NullElement && element_to != NullElement) {
+            const combination = {} as CombinationInfo;
+            combination.elements = [{x: step.from_x, y: step.from_y, uid: element_to.uid}, {x: step.to_x, y: step.to_y, uid: element_from.uid}];
+            return combination;
+        }
+
+        return undefined;
+    }
+
+    function try_combinate_before_buster_activation(from_x: number, from_y: number, to_x: number, to_y: number) {
+        const is_from_buster = is_buster(to_x, to_y);
+        const is_to_buster = is_buster(from_x, from_y);
+        const is_procesed = field.process_state(ProcessMode.Combinate);
+
+        let is_activated = false;
+        if((is_from_buster || is_to_buster)) {
+            if(is_procesed) {
+                write_game_step_event('ON_BUSTER_ACTIVATION', {});
+                if(is_from_buster) is_activated = try_activate_buster_element(to_x, to_y);
+                if(is_to_buster) is_activated = try_activate_buster_element(from_x, from_y);
+            } else is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y);
+        }
+
+        return is_procesed || is_activated;
     }
     
     function try_click_activation(x: number, y: number) {
@@ -319,7 +440,10 @@ export function Game() {
         if(try_horizontal_rocket_activation(x, y)) return true;
         if(try_vertical_rocket_activation(x, y)) return true;
 
-        if(field.try_click(x, y) && try_activate_buster_element(x, y)) return true;
+        if(field.try_click(x, y) && try_activate_buster_element(x, y)) {
+            is_step = true;
+            return true;
+        }
         return false;
     }
 
@@ -767,6 +891,17 @@ export function Game() {
     function try_spinning_activation() {
         if(!busters.spinning_active || GameStorage.get('spinning_counts') <= 0) return false;
         
+        shuffle_field();
+        
+        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
+        busters.spinning_active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+
+        return true;
+    }
+
+    function shuffle_field() {
         const event_data: SpinningActivationMessage = [];
         write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
@@ -786,20 +921,13 @@ export function Game() {
                 }
             }
         }
-        
-        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
-        busters.spinning_active = false;
-
-        EventBus.send('UPDATED_BUTTONS');
 
         process_game_step(false);
-
-        return true;
     }
     
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
-        
+
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;       
 
@@ -886,6 +1014,8 @@ export function Game() {
         const cell_to = field.get_cell(to_x, to_y);
 
         if(cell_from == NotActiveCell || cell_to == NotActiveCell) return false;
+
+        // TODO: remove because this check will be in try_move below
         if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return false;
 
         const element_from = field.get_element(from_x, from_y);
@@ -913,6 +1043,40 @@ export function Game() {
         return true;
     }
 
+    function set_random(seed?: number) {
+        randomseed = seed != undefined ? seed : os.time();
+        previous_randomseeds.push(randomseed);
+        print("set_random: ", randomseed);
+        math.randomseed(randomseed);
+    }
+
+    function simulate_game_step(step: StepInfo) {
+        const previous_state = field.save_state();
+
+        is_simulating = true;
+        
+        let after_activation = false;
+
+        if(step.from_x == step.to_x && step.from_y == step.to_y) {
+            after_activation = try_click_activation(step.from_x, step.from_y);
+            if(!after_activation) return;
+        } else {
+            if(!field.try_move(step.from_x, step.from_y, step.to_x, step.to_y)) return;
+            after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y);
+        }
+        
+        if(after_activation) field.process_state(ProcessMode.MoveElements);
+
+        while(field.process_state(ProcessMode.Combinate))
+            field.process_state(ProcessMode.MoveElements);
+        
+        field.load_state(previous_state);
+
+        is_simulating = false;
+
+        math.randomseed(randomseed);
+    }
+
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
@@ -921,7 +1085,13 @@ export function Game() {
 
         previous_states.push(field.save_state());
 
+        if(is_step) step_counter--;
+        is_step = false;
+    
+        EventBus.send('UPDATED_STEP_COUNTER', step_counter);
+
         send_game_step();
+        set_random();
     }
     
     function revert_step(): boolean {
@@ -944,7 +1114,21 @@ export function Game() {
         previous_state = field.save_state();
         previous_states.push(previous_state);
 
+
+        previous_randomseeds.pop();
+        const previous_seed = previous_randomseeds.pop();
+        print("previous_seed: ", previous_seed);
+        set_random(previous_seed);
+
         EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
+
+        return true;
+    }
+
+    function is_level_completed() {
+        for(const target of level_config.targets) {
+            if(target.uids.length < target.count) return false;
+        }
 
         return true;
     }
@@ -980,7 +1164,7 @@ export function Game() {
             break;
         }
 
-        if(element != NullElement) {
+        if(element != NullElement && !is_simulating) {
             (game_step_events[game_step_events.length - 1].value as CombinedMessage).maked_element = {
                 x: combined_element.x,
                 y: combined_element.y,
@@ -997,6 +1181,17 @@ export function Game() {
     function on_damaged_element(item: ItemInfo) {
         const index = activated_elements.indexOf(item.uid);
         if(index != -1) activated_elements.splice(index, 1);
+
+        if(is_simulating) return;
+
+        const element = field.get_element(item.x, item.y);
+        if(element == NullElement) return;
+
+        for(const target of level_config.targets) {
+            if(target.type == element.type) {
+                target.uids.push(element.uid);
+            }
+        }
     }
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
@@ -1049,7 +1244,7 @@ export function Game() {
             
         }
 
-        if(new_cell != NotActiveCell) {
+        if(new_cell != NotActiveCell && !is_simulating) {
             for(const [key, value] of Object.entries(game_step_events[game_step_events.length - 1].value)) {
                 if(key == 'activated_cells') {
                     (value as ActivatedCellMessage[]).push({
@@ -1138,10 +1333,14 @@ export function Game() {
     }
 
     function write_game_step_event<T extends MessageId>(message_id: T, message: Messages[T]) {
+        if(is_simulating) return;
+
         game_step_events.push({key: message_id, value: message});
     }
 
     function send_game_step() {
+        if(is_simulating) return;
+
         EventBus.send('ON_GAME_STEP', game_step_events);
         game_step_events = {} as GameStepEventBuffer;
     }

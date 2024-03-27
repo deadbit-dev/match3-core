@@ -20,18 +20,30 @@ export function init(this: props): void {
     this.busters = GAME_CONFIG.levels[GameStorage.get('current_level')]['busters'];
 
     set_text('current_level', GameStorage.get('current_level'));
+    set_text('step_counts', GAME_CONFIG.levels[GameStorage.get('current_level')]['steps']);
+    
+    const targets = GAME_CONFIG.levels[GameStorage.get('current_level')]['targets'];
+    if(targets[0] != undefined) {
+        gui.set_enabled(gui.get_node('first_target'), true);
+        gui.play_flipbook(gui.get_node('first_target_icon'), GAME_CONFIG.element_database[targets[0].type].view);
+        set_text('first_target_counts', targets[0].count);
+    }
 
+    if(targets[1] != undefined) {
+        gui.set_enabled(gui.get_node('second_target'), true);
+        gui.play_flipbook(gui.get_node('second_target_icon'), GAME_CONFIG.element_database[targets[1].type].view);
+        set_text('second_target_counts', targets[1].count);
+    }
+    
     this.druid.new_button('previous_level_button', () => {
-        let previous_level = GameStorage.get('current_level') - 1;
-        if(previous_level < 0) return;
+        let previous_level = (GameStorage.get('current_level') - 1) % GAME_CONFIG.levels.length;
         
         GameStorage.set('current_level', previous_level);
         Scene.restart();
     });
 
     this.druid.new_button('next_level_button', () => {
-        let next_level = GameStorage.get('current_level') + 1;
-        if(next_level >= GAME_CONFIG.levels.length) return;
+        let next_level = (GameStorage.get('current_level') + 1) % GAME_CONFIG.levels.length;
         
         GameStorage.set('current_level', next_level);
         Scene.restart();
@@ -77,9 +89,24 @@ export function init(this: props): void {
 
         EventBus.send('UPDATED_BUTTONS');
     });
+
+    EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
+        if(steps == undefined) return;
+        set_text('step_counts', steps);
+    });
+
+    EventBus.on('UPDATED_FIRST_TARGET', (count) => {
+        if(count == undefined) return;
+        set_text('first_target_counts', count);
+    });
+
+    EventBus.on('UPDATED_SECOND_TARGET', (count) => {
+        if(count == undefined) return;
+        set_text('second_target_counts', count);
+    });
     
     EventBus.on('UPDATED_BUTTONS', () => {
-        set_text_colors(['spinning_button'], '#fff', this.busters.spinning_active_active ? 0.5 : 1);
+        set_text_colors(['spinning_button'], '#fff', this.busters.spinning_active ? 0.5 : 1);
         set_text('spinning_counts', GameStorage.get('spinning_counts'));
         
         set_text_colors(['hammer_button'], '#fff', this.busters.hammer_active ? 0.5 : 1);

@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 
-import * as flow from 'ludobits.m.flow';
-import { is_valid_pos, rotate_matrix_90 } from "../utils/math_utils";
+import { rotate_matrix_90 } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
@@ -896,44 +895,11 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             }
         }
     }
-    
-    // возвращает массив всех возможных ходов(для подсказок например)
-    function get_all_available_steps(): StepInfo[] {
-        const steps: StepInfo[] = [];
-        for(let y = 0; y < size_y; y++) {
-            for(let x = 0; x < size_x; x++) {
-                if(is_valid_pos(x + 1, y, size_x, size_y) && is_can_move_base(x, y, x + 1, y))
-                    steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
-                if(is_valid_pos(x, y + 1, size_x, size_y) && is_can_move_base(x, y, x, y + 1))
-                    steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
-
-                flow.frames(1);
-            }
-        }
-
-        return steps;
-    }
-
-    function get_step_combination(step: StepInfo): CombinationInfo | undefined {
-        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
-        const combinations = get_all_combinations();
-        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
-        
-        for(const combination of combinations) {
-            for(const element of combination.elements) {
-                const is_x = element.x == step.from_x || element.x == step.to_x;
-                const is_y = element.y == step.from_y || element.y == step.to_y;
-                if(is_x && is_y) return combination;
-            }
-        }
-
-        return undefined;
-    }
-
+  
     return {
         init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
         get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
-        get_all_combinations, get_step_combination, get_all_available_steps, get_free_cells, get_all_elements_by_type, try_damage_element,
+        get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,

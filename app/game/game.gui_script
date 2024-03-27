@@ -11,13 +11,37 @@ function ____exports.init(self)
         "current_level",
         GameStorage.get("current_level")
     )
+    set_text(
+        "step_counts",
+        GAME_CONFIG.levels[GameStorage.get("current_level") + 1].steps
+    )
+    local targets = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].targets
+    if targets[1] ~= nil then
+        gui.set_enabled(
+            gui.get_node("first_target"),
+            true
+        )
+        gui.play_flipbook(
+            gui.get_node("first_target_icon"),
+            GAME_CONFIG.element_database[targets[1].type].view
+        )
+        set_text("first_target_counts", targets[1].count)
+    end
+    if targets[2] ~= nil then
+        gui.set_enabled(
+            gui.get_node("second_target"),
+            true
+        )
+        gui.play_flipbook(
+            gui.get_node("second_target_icon"),
+            GAME_CONFIG.element_database[targets[2].type].view
+        )
+        set_text("second_target_counts", targets[2].count)
+    end
     self.druid:new_button(
         "previous_level_button",
         function()
-            local previous_level = GameStorage.get("current_level") - 1
-            if previous_level < 0 then
-                return
-            end
+            local previous_level = (GameStorage.get("current_level") - 1) % #GAME_CONFIG.levels
             GameStorage.set("current_level", previous_level)
             Scene.restart()
         end
@@ -25,10 +49,7 @@ function ____exports.init(self)
     self.druid:new_button(
         "next_level_button",
         function()
-            local next_level = GameStorage.get("current_level") + 1
-            if next_level >= #GAME_CONFIG.levels then
-                return
-            end
+            local next_level = (GameStorage.get("current_level") + 1) % #GAME_CONFIG.levels
             GameStorage.set("current_level", next_level)
             Scene.restart()
         end
@@ -88,9 +109,36 @@ function ____exports.init(self)
         end
     )
     EventBus.on(
+        "UPDATED_STEP_COUNTER",
+        function(steps)
+            if steps == nil then
+                return
+            end
+            set_text("step_counts", steps)
+        end
+    )
+    EventBus.on(
+        "UPDATED_FIRST_TARGET",
+        function(count)
+            if count == nil then
+                return
+            end
+            set_text("first_target_counts", count)
+        end
+    )
+    EventBus.on(
+        "UPDATED_SECOND_TARGET",
+        function(count)
+            if count == nil then
+                return
+            end
+            set_text("second_target_counts", count)
+        end
+    )
+    EventBus.on(
         "UPDATED_BUTTONS",
         function()
-            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active_active and 0.5 or 1)
+            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active and 0.5 or 1)
             set_text(
                 "spinning_counts",
                 GameStorage.get("spinning_counts")

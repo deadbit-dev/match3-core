@@ -5,9 +5,7 @@ local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
-local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
-local is_valid_pos = ____math_utils.is_valid_pos
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
@@ -880,44 +878,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             end
         end
     end
-    local function get_all_available_steps()
-        local steps = {}
-        do
-            local y = 0
-            while y < size_y do
-                do
-                    local x = 0
-                    while x < size_x do
-                        if is_valid_pos(x + 1, y, size_x, size_y) and is_can_move_base(x, y, x + 1, y) then
-                            steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
-                        end
-                        if is_valid_pos(x, y + 1, size_x, size_y) and is_can_move_base(x, y, x, y + 1) then
-                            steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
-                        end
-                        flow.frames(1)
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
-        return steps
-    end
-    local function get_step_combination(step)
-        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y)
-        local combinations = get_all_combinations()
-        swap_elements(step.from_x, step.from_y, step.to_x, step.to_y)
-        for ____, combination in ipairs(combinations) do
-            for ____, element in ipairs(combination.elements) do
-                local is_x = element.x == step.from_x or element.x == step.to_x
-                local is_y = element.y == step.from_y or element.y == step.to_y
-                if is_x and is_y then
-                    return combination
-                end
-            end
-        end
-        return nil
-    end
     return {
         init = init,
         set_element_type = set_element_type,
@@ -936,8 +896,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         save_state = save_state,
         load_state = load_state,
         get_all_combinations = get_all_combinations,
-        get_step_combination = get_step_combination,
-        get_all_available_steps = get_all_available_steps,
         get_free_cells = get_free_cells,
         get_all_elements_by_type = get_all_elements_by_type,
         try_damage_element = try_damage_element,

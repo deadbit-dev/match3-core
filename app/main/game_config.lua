@@ -370,7 +370,7 @@ ____exports._GAME_CONFIG = {
                     NullElement
                 }
             }
-        }, busters = {hammer_active = false}},
+        }, steps = 15, targets = {{type = ____exports.ElementId.Topaz, count = 7, uids = {}}, {type = ____exports.ElementId.Dimonde, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 8,
             height = 8,
@@ -542,7 +542,7 @@ ____exports._GAME_CONFIG = {
                     NullElement
                 }
             }
-        }, busters = {hammer_active = false}},
+        }, steps = 10, targets = {{type = ____exports.ElementId.Emerald, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 8,
             height = 8,
@@ -714,7 +714,7 @@ ____exports._GAME_CONFIG = {
                     NullElement
                 }
             }
-        }, busters = {hammer_active = false}},
+        }, steps = 20, targets = {{type = ____exports.ElementId.Gold, count = 10, uids = {}}, {type = ____exports.ElementId.Ruby, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 8,
             height = 8,
@@ -886,7 +886,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Ruby
                 }
             }
-        }, busters = {spinning_active = false, hammer_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
+        }, steps = 15, targets = {{type = ____exports.ElementId.Gold, count = 7, uids = {}}, {type = ____exports.ElementId.Topaz, count = 7, uids = {}}}, busters = {spinning_active = false, hammer_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 8,
             height = 8,
@@ -1064,7 +1064,7 @@ ____exports._GAME_CONFIG = {
                     ____exports.ElementId.Ruby
                 }
             }
-        }, busters = {hammer_active = false}},
+        }, steps = 5, targets = {{type = ____exports.ElementId.Dimonde, count = 7, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
         {field = {
             width = 6,
             height = 6,
@@ -1172,7 +1172,115 @@ ____exports._GAME_CONFIG = {
                     NullElement
                 }
             }
-        }, busters = {hammer_active = false}}
+        }, steps = 10, targets = {{type = ____exports.ElementId.Emerald, count = 5, uids = {}}, {type = ____exports.ElementId.Gold, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
+        {field = {
+            width = 6,
+            height = 6,
+            max_width = 8,
+            max_height = 8,
+            cell_size = 128,
+            offset_border = 20,
+            cells = {
+                {
+                    NotActiveCell,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    NotActiveCell
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    ____exports.CellId.Base
+                },
+                {
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    {____exports.CellId.Base, ____exports.CellId.Box},
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base
+                },
+                {
+                    NotActiveCell,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    ____exports.CellId.Base,
+                    NotActiveCell
+                }
+            },
+            elements = {
+                {
+                    NullElement,
+                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
+                    NullElement
+                },
+                {
+                    ____exports.ElementId.Ruby,
+                    ____exports.ElementId.Topaz,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Topaz
+                },
+                {
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold
+                },
+                {
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Dimonde
+                },
+                {
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Dimonde
+                },
+                {
+                    NullElement,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Emerald,
+                    ____exports.ElementId.Emerald,
+                    NullElement
+                }
+            }
+        }, steps = 5, targets = {{type = ____exports.ElementId.Ruby, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}}
     }
 }
 ____exports._STORAGE_CONFIG = {

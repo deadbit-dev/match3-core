@@ -175,6 +175,9 @@ export function View(animator: FluxGroup) {
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
+    
+    // let first_target_counter = level_config.first_target?.count;
+    // let second_target_counter = level_config.second_target?.count;
 
     function init() {
         set_events();
@@ -182,6 +185,7 @@ export function View(animator: FluxGroup) {
         input_listener();
     }
 
+    // TODO: function on each event
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             if (state == undefined) return;
@@ -226,18 +230,20 @@ export function View(animator: FluxGroup) {
             EventBus.send('SET_HELPER');
         });
 
-        EventBus.on('ON_SET_STEP_HELPER', (combination_info) => {
-            if(combination_info == undefined) return;
+        EventBus.on('ON_SET_STEP_HELPER', (data) => {
+            if(data == undefined) return;
 
-            const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
+            print("[VIEW]: set helper");
+
+            const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if(combined_item != undefined) {
                 const from_pos = go.get_position(combined_item._hash);
-                const to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index);
+                const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
             }
 
-            for(const element of combination_info.combination.elements) {
+            for(const element of data.elements) {
                 const item = get_first_view_item_by_game_id(element.uid);
                 if(item != undefined) {
                     go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
@@ -245,20 +251,22 @@ export function View(animator: FluxGroup) {
             }
         });
  
-        EventBus.on('ON_RESET_STEP_HELPER', (combination_info) => {
-            if(combination_info == undefined) return;
+        EventBus.on('ON_RESET_STEP_HELPER', (data) => {
+            if(data == undefined) return;
 
-            const combined_item = get_first_view_item_by_game_id(combination_info.combined_element.uid);
+            print("[VIEW]: reset helper");
+
+            const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if(combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
-                const to_pos = get_world_pos(combination_info.combined_element.x, combination_info.combined_element.y, GAME_CONFIG.default_element_z_index);
-                let from_pos = get_world_pos(combination_info.step.from_x, combination_info.step.from_y, GAME_CONFIG.default_element_z_index);
+                const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
+                let from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index);
                 if(from_pos.x == to_pos.x && from_pos.y == to_pos.y)
-                    from_pos = get_world_pos(combination_info.step.to_x, combination_info.step.to_y, GAME_CONFIG.default_element_z_index);
+                    from_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index);
                 go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.5);
             }
 
-            for(const element of combination_info.combination.elements) {
+            for(const element of data.elements) {
                 const item = get_first_view_item_by_game_id(element.uid);
                 if(item != undefined) {
                     go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
@@ -280,6 +288,28 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_REVERT_STEP', (states) => {
             if (states == undefined) return;
             flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
+            EventBus.send('SET_HELPER');
+        });
+
+        EventBus.on('ON_LEVEL_COMPLETED', () => {
+            flow.start(() => {
+                let next_level = (GameStorage.get('current_level') + 1) % GAME_CONFIG.levels.length;
+
+                is_processing = true;
+
+                flow.delay(0.5);
+                
+                GameStorage.set('current_level', next_level);
+                Scene.restart();
+            });
+        });
+
+        EventBus.on('ON_GAME_OVER', () => {
+            flow.start(() => {
+                print("[VIEW]: GAME_OVER");
+                flow.delay(0.5);
+                Scene.restart();
+            });
         });
     }
 
@@ -287,6 +317,9 @@ export function View(animator: FluxGroup) {
         is_processing = true;
 
         for (const event of events) {
+
+            print("[VIEW]: ", event.key);
+
             switch (event.key) {
                 case 'ON_SWAP_ELEMENTS':
                     flow.delay(event_to_animation[event.key](event.value));
@@ -308,6 +341,7 @@ export function View(animator: FluxGroup) {
 
         is_processing = false;
         EventBus.send('SET_HELPER');
+        EventBus.send('ON_GAME_STEP_ANIMATION_END');
     }
 
     //#endregion MAIN
@@ -1036,6 +1070,7 @@ export function View(animator: FluxGroup) {
         return helicopter_fly_duration + damaged_element_time;
     }
 
+    // TODO: refactoring
     function damage_element_animation(data: Messages[MessageId], x: number, y: number, element_id: number, on_complite?: () => void) {
         const element_view_item = get_first_view_item_by_game_id(element_id);
         if (element_view_item != undefined) {
@@ -1057,7 +1092,9 @@ export function View(animator: FluxGroup) {
                             if (found) break;
                         }
                     }
-
+                    
+                   
+                    
                     if (on_complite != undefined) on_complite();
                 });
         }
@@ -1152,6 +1189,15 @@ export function View(animator: FluxGroup) {
         if (item == undefined) {
             delete game_id_to_view_index[id];
             return false;
+        }
+    
+        for(let i = 0; i < level_config.targets.length; i++) {
+            const target = level_config.targets[i];
+            if(target.uids.indexOf(id) != -1) {
+                if(i > 1) break;
+                const event_key = i == 0 ? 'UPDATED_FIRST_TARGET' : 'UPDATED_SECOND_TARGET';
+                EventBus.send(event_key, math.max(0, target.count - target.uids.length));
+            }
         }
 
         gm.delete_item(item, true);
