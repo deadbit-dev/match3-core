@@ -112,6 +112,9 @@ function ____exports.Game()
         EventBus.on(
             "ACTIVATE_SPINNING",
             function()
+                if is_block_input then
+                    return
+                end
                 stop_helper()
                 try_spinning_activation()
             end
@@ -1181,29 +1184,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch269 = combination.type
-            local ____cond269 = ____switch269 == CombinationType.Comb4
-            if ____cond269 then
+            local ____switch270 = combination.type
+            local ____cond270 = ____switch270 == CombinationType.Comb4
+            if ____cond270 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond269 = ____cond269 or ____switch269 == CombinationType.Comb5
-            if ____cond269 then
+            ____cond270 = ____cond270 or ____switch270 == CombinationType.Comb5
+            if ____cond270 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond269 = ____cond269 or ____switch269 == CombinationType.Comb2x2
-            if ____cond269 then
+            ____cond270 = ____cond270 or ____switch270 == CombinationType.Comb2x2
+            if ____cond270 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond269 = ____cond269 or (____switch269 == CombinationType.Comb3x3a or ____switch269 == CombinationType.Comb3x3b)
-            if ____cond269 then
+            ____cond270 = ____cond270 or (____switch270 == CombinationType.Comb3x3a or ____switch270 == CombinationType.Comb3x3b)
+            if ____cond270 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond269 = ____cond269 or (____switch269 == CombinationType.Comb3x4 or ____switch269 == CombinationType.Comb3x5)
-            if ____cond269 then
+            ____cond270 = ____cond270 or (____switch270 == CombinationType.Comb3x4 or ____switch270 == CombinationType.Comb3x5)
+            if ____cond270 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end

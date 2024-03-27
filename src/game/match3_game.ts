@@ -187,6 +187,7 @@ export function Game() {
         });
 
         EventBus.on('ACTIVATE_SPINNING', () => {
+            if(is_block_input) return;
             stop_helper();
             try_spinning_activation();
         });
