@@ -24,7 +24,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, reset_helper, search_helper_combination, search_all_available_steps, search_best_step, get_count_damaged_elements_of_step, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, simulate_game_step, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input
+    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, search_helper_combination, search_all_available_steps, search_best_step, get_count_damaged_elements_of_step, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, simulate_game_step, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -128,12 +128,15 @@ function ____exports.Game()
                 elseif step_counter <= 0 then
                     EventBus.send("ON_GAME_OVER")
                 end
+                print("[GAME]: end step")
                 is_block_input = true
                 search_all_available_steps(function(steps)
                     if #steps ~= 0 then
+                        print("[GAME]: end check of available steps after end game step")
                         is_block_input = false
                         return
                     end
+                    print("[GAME]: shuffle field after end game step")
                     stop_helper()
                     shuffle_field()
                 end)
@@ -237,11 +240,14 @@ function ____exports.Game()
             return
         end
         print("[GAME]: stop helper")
+        stop_all_coroutines()
+        timer.cancel(helper_timer)
+        reset_helper()
+    end
+    function stop_all_coroutines()
         for ____, ____coroutine in ipairs(coroutines) do
             flow.stop(____coroutine)
         end
-        timer.cancel(helper_timer)
-        reset_helper()
     end
     function reset_helper()
         if previous_helper_data == nil then
@@ -257,9 +263,11 @@ function ____exports.Game()
     function search_helper_combination()
         print("[GAME]: search combination")
         search_all_available_steps(function(steps)
+            print("[GAME]: end search available steps in search helper combination")
             search_best_step(
                 steps,
                 function(best_step)
+                    print("[GAME]: end search best step after search available steps")
                     local combination = get_step_combination(best_step)
                     if combination ~= nil then
                         for ____, element in ipairs(combination.elements) do
@@ -309,9 +317,11 @@ function ____exports.Game()
     end
     function search_best_step(steps, on_end)
         local ____coroutine = flow.start(function()
+            print("[GAME]: search best step")
             local best_step = {}
             local max_damaged_elements = 0
             for ____, step in ipairs(steps) do
+                print("[GAME]: call get_count_damaged_elements_of_step")
                 local count_damaged_elements = get_count_damaged_elements_of_step(step)
                 if count_damaged_elements > max_damaged_elements then
                     max_damaged_elements = count_damaged_elements
@@ -339,6 +349,7 @@ function ____exports.Game()
         end)
         simulate_game_step(step)
         field.set_callback_on_damaged_element(on_damaged_element)
+        print("[GAME]: damaged elements by step: ", count_damaged_elements)
         return count_damaged_elements
     end
     function get_step_combination(step)
@@ -427,6 +438,9 @@ function ____exports.Game()
             activated = true
         elseif try_activate_diskosphere(x, y) then
             activated = true
+        end
+        if activated then
+            print("[GAME]: try activate buster element: ", x, y)
         end
         if not activated and with_check then
             __TS__ArraySplice(activated_elements, #activated_elements - 1, 1)
@@ -910,6 +924,7 @@ function ____exports.Game()
     end
     function shuffle_field()
         local state = field.save_state()
+        print("[GAME]: shuffle field")
         local event_data = {}
         write_game_step_event("ON_SPINNING_ACTIVATED", event_data)
         local base_elements = {}
@@ -939,6 +954,7 @@ function ____exports.Game()
         is_block_input = true
         search_all_available_steps(function(steps)
             if #steps ~= 0 then
+                print("[GAME]: end search available steps after shuffle field")
                 process_game_step(false)
             else
                 game_step_events = {}
@@ -1085,6 +1101,21 @@ function ____exports.Game()
     end
     function simulate_game_step(step)
         local previous_state = field.save_state()
+        print(
+            "[GAME]: simulating game step: ",
+            step.from_x,
+            step.from_y,
+            step.to_x,
+            step.to_y
+        )
+        local element_from = field.get_element(step.from_x, step.from_y)
+        local element_to = field.get_element(step.to_x, step.to_y)
+        if element_from ~= NullElement then
+            print(element_from.type)
+        end
+        if element_to ~= NullElement then
+            print(element_to.type)
+        end
         is_simulating = true
         local after_activation = false
         if step.from_x == step.to_x and step.from_y == step.to_y then
@@ -1101,12 +1132,29 @@ function ____exports.Game()
         if after_activation then
             field.process_state(ProcessMode.MoveElements)
         end
-        while field.process_state(ProcessMode.Combinate) do
+        local iterations = 0
+        while field.process_state(ProcessMode.Combinate) and iterations < GAME_CONFIG.max_iteration_by_step do
+            print("[GAME]: after combinate in simulating")
             field.process_state(ProcessMode.MoveElements)
+            print("[GAME]: after movements in simulating")
+            iterations = iterations + 1
         end
         field.load_state(previous_state)
         is_simulating = false
         math.randomseed(randomseed)
+        if iterations >= GAME_CONFIG.max_iteration_by_step then
+            print("OVER")
+            set_random()
+            stop_helper()
+            set_helper()
+        end
+        print(
+            "[GAME]: simulating game step end: ",
+            step.from_x,
+            step.from_y,
+            step.to_x,
+            step.to_y
+        )
     end
     function process_game_step(after_activation)
         if after_activation == nil then
@@ -1116,7 +1164,9 @@ function ____exports.Game()
             field.process_state(ProcessMode.MoveElements)
         end
         while field.process_state(ProcessMode.Combinate) do
+            print("[GAME]: after combination in game")
             field.process_state(ProcessMode.MoveElements)
+            print("[GAME]: after movements in game")
         end
         previous_states[#previous_states + 1] = field.save_state()
         if is_step then
@@ -1168,7 +1218,6 @@ function ____exports.Game()
     end
     function is_level_completed()
         for ____, target in ipairs(level_config.targets) do
-            print(#target.uids, target.count, target.type)
             if #target.uids < target.count then
                 return false
             end
@@ -1184,29 +1233,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch270 = combination.type
-            local ____cond270 = ____switch270 == CombinationType.Comb4
-            if ____cond270 then
+            local ____switch275 = combination.type
+            local ____cond275 = ____switch275 == CombinationType.Comb4
+            if ____cond275 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond270 = ____cond270 or ____switch270 == CombinationType.Comb5
-            if ____cond270 then
+            ____cond275 = ____cond275 or ____switch275 == CombinationType.Comb5
+            if ____cond275 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond270 = ____cond270 or ____switch270 == CombinationType.Comb2x2
-            if ____cond270 then
+            ____cond275 = ____cond275 or ____switch275 == CombinationType.Comb2x2
+            if ____cond275 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond270 = ____cond270 or (____switch270 == CombinationType.Comb3x3a or ____switch270 == CombinationType.Comb3x3b)
-            if ____cond270 then
+            ____cond275 = ____cond275 or (____switch275 == CombinationType.Comb3x3a or ____switch275 == CombinationType.Comb3x3b)
+            if ____cond275 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond270 = ____cond270 or (____switch270 == CombinationType.Comb3x4 or ____switch270 == CombinationType.Comb3x5)
-            if ____cond270 then
+            ____cond275 = ____cond275 or (____switch275 == CombinationType.Comb3x4 or ____switch275 == CombinationType.Comb3x5)
+            if ____cond275 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1222,6 +1271,11 @@ function ____exports.Game()
         if index ~= -1 then
             __TS__ArraySplice(activated_elements, index, 1)
         end
+        print("[GAME]: damage: ", item.x, item.y)
+        local e = field.get_element(item.x, item.y)
+        if e ~= NullElement then
+            print(e.type)
+        end
         if is_simulating then
             return
         end
@@ -1231,7 +1285,6 @@ function ____exports.Game()
         end
         for ____, target in ipairs(level_config.targets) do
             if target.type == element.type then
-                print("damage: ", target.type, element.uid)
                 local ____target_uids_18 = target.uids
                 ____target_uids_18[#____target_uids_18 + 1] = element.uid
             end
@@ -1242,6 +1295,7 @@ function ____exports.Game()
             return
         end
         write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination, activated_cells = {}})
+        print("[GAME]: combined")
         field.on_combined_base(combined_element, combination)
         try_combo(combined_element, combination)
     end

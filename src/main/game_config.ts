@@ -78,6 +78,7 @@ export enum ElementId {
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    max_iteration_by_step: 5,
     min_swipe_distance: 32,
 
     swap_element_easing: go.EASING_LINEAR,

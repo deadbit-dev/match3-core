@@ -198,12 +198,17 @@ export function Game() {
             if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
             else if(step_counter <= 0) EventBus.send('ON_GAME_OVER');
 
+            print("[GAME]: end step");
+
             is_block_input = true;
             search_all_available_steps((steps) => {
                 if(steps.length != 0) {
+                    print("[GAME]: end check of available steps after end game step");
                     is_block_input = false;
                     return;
                 }
+
+                print("[GAME]: shuffle field after end game step");
                 
                 stop_helper();
                 shuffle_field();
@@ -303,13 +308,17 @@ export function Game() {
         if(helper_timer == undefined) return;
 
         print("[GAME]: stop helper");
-    
-        for(const coroutine of coroutines) {
-            flow.stop(coroutine);
-        }
+
+        stop_all_coroutines();
         
         timer.cancel(helper_timer);
         reset_helper();
+    }
+
+    function stop_all_coroutines() {
+        for(const coroutine of coroutines) {
+            flow.stop(coroutine);
+        }
     }
 
     function reset_helper() {
@@ -325,7 +334,9 @@ export function Game() {
         print("[GAME]: search combination");
 
         search_all_available_steps((steps: StepInfo[]) => {
+            print("[GAME]: end search available steps in search helper combination");
             search_best_step(steps, (best_step) => {
+                print("[GAME]: end search best step after search available steps");
                 const combination = get_step_combination(best_step);
                 if(combination != undefined) {
                     for(const element of combination.elements) {
@@ -374,9 +385,14 @@ export function Game() {
 
     function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
         const coroutine = flow.start(() => {
+            print("[GAME]: search best step");
+
             let best_step = {} as StepInfo;
             let max_damaged_elements = 0;
             for(const step of steps) {
+
+                print("[GAME]: call get_count_damaged_elements_of_step");
+
                 const count_damaged_elements = get_count_damaged_elements_of_step(step);
                 if(count_damaged_elements > max_damaged_elements) {
                     max_damaged_elements = count_damaged_elements;
@@ -403,6 +419,8 @@ export function Game() {
         simulate_game_step(step);
         
         field.set_callback_on_damaged_element(on_damaged_element);
+
+        print("[GAME]: damaged elements by step: ", count_damaged_elements);
 
         return count_damaged_elements;
     }
@@ -477,6 +495,8 @@ export function Game() {
         else if(try_activate_helicopter(x, y)) activated = true;
         else if(try_activate_dynamite(x, y)) activated = true;
         else if(try_activate_diskosphere(x, y)) activated = true;
+        
+        if(activated) print("[GAME]: try activate buster element: ", x, y);
 
         if(!activated && with_check) activated_elements.splice(activated_elements.length - 1, 1);
 
@@ -917,6 +937,8 @@ export function Game() {
     function shuffle_field() {
         let state = field.save_state();
 
+        print("[GAME]: shuffle field");
+
         const event_data: SpinningActivationMessage = [];
         write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
@@ -939,8 +961,10 @@ export function Game() {
 
         is_block_input = true;
         search_all_available_steps((steps) => {
-            if(steps.length != 0) process_game_step(false);
-            else {
+            if(steps.length != 0) {
+                print("[GAME]: end search available steps after shuffle field");
+                process_game_step(false);
+            } else {
                 game_step_events = {} as GameStepEventBuffer;
                 field.load_state(state);
                 shuffle_field();
@@ -1080,6 +1104,14 @@ export function Game() {
     function simulate_game_step(step: StepInfo) {
         const previous_state = field.save_state();
 
+        print("[GAME]: simulating game step: ", step.from_x, step.from_y, step.to_x, step.to_y);
+        
+        const element_from = field.get_element(step.from_x, step.from_y);
+        const element_to = field.get_element(step.to_x, step.to_y);
+
+        if(element_from != NullElement) print(element_from.type);
+        if(element_to != NullElement) print(element_to.type);
+
         is_simulating = true;
         
         let after_activation = false;
@@ -1094,21 +1126,38 @@ export function Game() {
         
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        while(field.process_state(ProcessMode.Combinate))
+        let iterations = 0;
+        while(field.process_state(ProcessMode.Combinate) && iterations < GAME_CONFIG.max_iteration_by_step) {
+            print("[GAME]: after combinate in simulating");
             field.process_state(ProcessMode.MoveElements);
-        
+            print("[GAME]: after movements in simulating");
+            iterations++;
+        }
+
         field.load_state(previous_state);
 
         is_simulating = false;
 
         math.randomseed(randomseed);
+
+        if(iterations >= GAME_CONFIG.max_iteration_by_step) {
+            print("OVER");
+            set_random();
+            stop_helper();
+            set_helper();
+        }
+
+        print("[GAME]: simulating game step end: ", step.from_x, step.from_y, step.to_x, step.to_y);
     }
 
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        while(field.process_state(ProcessMode.Combinate))
+        while(field.process_state(ProcessMode.Combinate)) {
+            print("[GAME]: after combination in game");
             field.process_state(ProcessMode.MoveElements);
+            print("[GAME]: after movements in game");
+        }
 
         previous_states.push(field.save_state());
 
@@ -1154,7 +1203,6 @@ export function Game() {
 
     function is_level_completed() {
         for(const target of level_config.targets) {
-            print(target.uids.length, target.count, target.type);
             if(target.uids.length < target.count) return false;
         }
 
@@ -1210,6 +1258,10 @@ export function Game() {
         const index = activated_elements.indexOf(item.uid);
         if(index != -1) activated_elements.splice(index, 1);
 
+        print('[GAME]: damage: ', item.x, item.y);
+        const e = field.get_element(item.x, item.y);
+        if(e != NullElement) print(e.type);
+
         if(is_simulating) return;
 
         const element = field.get_element(item.x, item.y);
@@ -1217,7 +1269,6 @@ export function Game() {
 
         for(const target of level_config.targets) {
             if(target.type == element.type) {
-                print('damage: ', target.type, element.uid);
                 target.uids.push(element.uid);
             }
         }
@@ -1227,6 +1278,8 @@ export function Game() {
         if(is_buster(combined_element.x, combined_element.y)) return;
 
         write_game_step_event('ON_COMBINED', {combined_element, combination, activated_cells: []});
+
+        print("[GAME]: combined");
 
         field.on_combined_base(combined_element, combination);
         try_combo(combined_element, combination);
@@ -1270,7 +1323,6 @@ export function Game() {
                     if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
                 }
             }
-            
         }
 
         if(new_cell != NotActiveCell && !is_simulating) {

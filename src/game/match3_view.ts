@@ -175,9 +175,6 @@ export function View(animator: FluxGroup) {
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
-    
-    // let first_target_counter = level_config.first_target?.count;
-    // let second_target_counter = level_config.second_target?.count;
 
     function init() {
         set_events();
