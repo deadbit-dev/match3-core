@@ -1,11 +1,11 @@
 script: "/game/game.gui_script"
 fonts {
   name: "32"
-  font: "/assets/myFont32.font"
+  font: "/assets/font32.font"
 }
 fonts {
   name: "64"
-  font: "/assets/myFont64_copy.font"
+  font: "/assets/font64.font"
 }
 textures {
   name: "ui"
