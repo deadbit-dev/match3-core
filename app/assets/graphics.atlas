@@ -1,97 +1,97 @@
 images {
-  image: "/assets/cell_base.png"
+  image: "/assets/cells/cell_base.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_grass.png"
+  image: "/assets/cells/cell_grass.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/element_diamond.png"
+  image: "/assets/elements/element_diamond.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/element_topaz.png"
+  image: "/assets/elements/element_topaz.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/element_gold.png"
+  image: "/assets/elements/element_gold.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/element_ruby.png"
+  image: "/assets/elements/element_ruby.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/element_emerald.png"
+  image: "/assets/elements/element_emerald.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/horizontal_rocket_buster.png"
+  image: "/assets/elements/horizontal_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/vertical_rocket_buster.png"
+  image: "/assets/elements/vertical_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/axis_rocket_buster.png"
+  image: "/assets/elements/axis_rocket_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/helicopter_buster.png"
+  image: "/assets/elements/helicopter_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/dynamite_buster.png"
+  image: "/assets/elements/dynamite_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/diskosphere_buster.png"
+  image: "/assets/elements/diskosphere_buster.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_box.png"
+  image: "/assets/cells/cell_box.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/full.png"
+  image: "/assets/substrates/full.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/left_right_strip.png"
+  image: "/assets/substrates/left_right_strip.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/left_strip_bottom_inside_angle.png"
+  image: "/assets/substrates/left_strip_bottom_inside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/left_strip_top_inside_angle.png"
+  image: "/assets/substrates/left_strip_top_inside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/outside_arc.png"
+  image: "/assets/substrates/outside_arc.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/outside_angle.png"
+  image: "/assets/substrates/outside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/left_strip.png"
+  image: "/assets/substrates/left_strip.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/left_strip_top_bottom_inside_angle.png"
+  image: "/assets/substrates/left_strip_top_bottom_inside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/top_bottom_inside_angle.png"
+  image: "/assets/substrates/top_bottom_inside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/inside_angle.png"
+  image: "/assets/substrates/inside_angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -99,67 +99,67 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_web.png"
+  image: "/assets/cells/cell_web.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_white.png"
+  image: "/assets/cells/cell_white.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_stone_0.png"
+  image: "/assets/cells/cell_stone_0.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_stone_1.png"
+  image: "/assets/cells/cell_stone_1.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cell_stone_2.png"
+  image: "/assets/cells/cell_stone_2.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/angle.png"
+  image: "/assets/substrates/angle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_1.png"
+  image: "/assets/elements/custom_1.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_2.png"
+  image: "/assets/elements/custom_2.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_3.png"
+  image: "/assets/elements/custom_3.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_4.png"
+  image: "/assets/elements/custom_4.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_5.png"
+  image: "/assets/elements/custom_5.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_6.png"
+  image: "/assets/elements/custom_6.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_7.png"
+  image: "/assets/elements/custom_7.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_8.png"
+  image: "/assets/elements/custom_8.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_9.png"
+  image: "/assets/elements/custom_9.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/custom_10.png"
+  image: "/assets/elements/custom_10.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

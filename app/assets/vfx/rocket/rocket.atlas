@@ -1,21 +1,25 @@
 images {
-  image: "/assets/effect/element_crush/e_crush_pt1.png"
+  image: "/assets/vfx/rocket/images/rocket_lower.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/effect/element_crush/e_crush_pt2.png"
+  image: "/assets/vfx/rocket/images/rocket_main.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/effect/element_crush/e_crush_pt3.png"
+  image: "/assets/vfx/rocket/images/rocket_tail.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/effect/element_crush/e_crush_pt4.png"
+  image: "/assets/vfx/rocket/images/sparkle.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/effect/element_crush/e_crush_pt5.png"
+  image: "/assets/vfx/rocket/images/steam.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/vfx/rocket/images/steam_2.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

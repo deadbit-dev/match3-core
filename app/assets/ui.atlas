@@ -1,37 +1,37 @@
 images {
-  image: "/assets/lable.png"
+  image: "/assets/ui/lable.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/hammer.png"
+  image: "/assets/ui/hammer.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/arrow_icon.png"
+  image: "/assets/ui/arrow_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/restart_icon.png"
+  image: "/assets/ui/restart_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/goal_substrate.png"
+  image: "/assets/ui/goal_substrate.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/rocket_icon.png"
+  image: "/assets/ui/rocket_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/step_substrate.png"
+  image: "/assets/ui/step_substrate.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/substrate.png"
+  image: "/assets/ui/substrate.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/spinning_icon.png"
+  image: "/assets/ui/spinning_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

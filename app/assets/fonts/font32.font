@@ -1,4 +1,4 @@
-font: "/assets/ShantellSans-Light.ttf"
+font: "/assets/fonts/ShantellSans-Light.ttf"
 material: "/builtins/fonts/font-df.material"
 size: 32
 antialias: 1

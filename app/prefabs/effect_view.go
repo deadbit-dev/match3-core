@@ -1,8 +1,8 @@
 embedded_components {
   id: "spinemodel"
   type: "spinemodel"
-  data: "spine_scene: \"/assets/rocket/rocket.spinescene\"\n"
-  "default_animation: \"\"\n"
+  data: "spine_scene: \"/assets/vfx/dynamite/dynamite.spinescene\"\n"
+  "default_animation: \"action\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   "material: \"/defold-spine/assets/spine.material\"\n"
