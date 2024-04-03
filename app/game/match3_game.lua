@@ -12,6 +12,7 @@ local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
 local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
+local Axis = ____math_utils.Axis
 local is_valid_pos = ____math_utils.is_valid_pos
 local ____game_config = require("main.game_config")
 local CellId = ____game_config.CellId
@@ -395,14 +396,16 @@ function ____exports.Game()
         return is_procesed or is_activated
     end
     function try_click_activation(x, y)
-        if try_hammer_activation(x, y) then
-            return true
-        end
-        if try_horizontal_rocket_activation(x, y) then
-            return true
-        end
-        if try_vertical_rocket_activation(x, y) then
-            return true
+        if not is_simulating then
+            if try_hammer_activation(x, y) then
+                return true
+            end
+            if try_horizontal_rocket_activation(x, y) then
+                return true
+            end
+            if try_vertical_rocket_activation(x, y) then
+                return true
+            end
         end
         if field.try_click(x, y) and try_activate_buster_element(x, y) then
             is_step = true
@@ -653,6 +656,7 @@ function ____exports.Game()
         event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
         event_data.activated_cells = {}
+        event_data.axis = rocket.type == ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal
         if rocket.type == ElementId.VerticalRocket or rocket.type == ElementId.AxisRocket then
             do
                 local i = 0
@@ -1004,9 +1008,10 @@ function ____exports.Game()
         selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {}
+        event_data.element = {x = x, y = y, uid = -1}
         event_data.damaged_elements = {}
         event_data.activated_cells = {}
+        event_data.axis = Axis.Horizontal
         do
             local i = 0
             while i < field_width do
@@ -1041,9 +1046,10 @@ function ____exports.Game()
         selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {}
+        event_data.element = {x = x, y = y, uid = -1}
         event_data.damaged_elements = {}
         event_data.activated_cells = {}
+        event_data.axis = Axis.Vertical
         do
             local i = 0
             while i < field_height do
@@ -1233,29 +1239,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch275 = combination.type
-            local ____cond275 = ____switch275 == CombinationType.Comb4
-            if ____cond275 then
+            local ____switch276 = combination.type
+            local ____cond276 = ____switch276 == CombinationType.Comb4
+            if ____cond276 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond275 = ____cond275 or ____switch275 == CombinationType.Comb5
-            if ____cond275 then
+            ____cond276 = ____cond276 or ____switch276 == CombinationType.Comb5
+            if ____cond276 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond275 = ____cond275 or ____switch275 == CombinationType.Comb2x2
-            if ____cond275 then
+            ____cond276 = ____cond276 or ____switch276 == CombinationType.Comb2x2
+            if ____cond276 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond275 = ____cond275 or (____switch275 == CombinationType.Comb3x3a or ____switch275 == CombinationType.Comb3x3b)
-            if ____cond275 then
+            ____cond276 = ____cond276 or (____switch276 == CombinationType.Comb3x3a or ____switch276 == CombinationType.Comb3x3b)
+            if ____cond276 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond275 = ____cond275 or (____switch275 == CombinationType.Comb3x4 or ____switch275 == CombinationType.Comb3x5)
-            if ____cond275 then
+            ____cond276 = ____cond276 or (____switch276 == CombinationType.Comb3x4 or ____switch276 == CombinationType.Comb3x5)
+            if ____cond276 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end

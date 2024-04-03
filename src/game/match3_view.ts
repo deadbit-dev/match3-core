@@ -15,10 +15,10 @@
 import * as flow from 'ludobits.m.flow';
 import * as camera from '../utils/camera';
 
-import { Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
+import { Axis, Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage, ElementActivationMessage } from "../main/game_config";
+import { CellId, CombinedMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage } from "../main/game_config";
 
 import {
     GameState,
@@ -137,6 +137,7 @@ export function View(animator: FluxGroup) {
 
         'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
         'ON_SPINNING_ACTIVATED': on_spinning_activated_animation,
+        'ON_ROCKET_ACTIVATED': on_rocket_activated_animation,
 
         'ON_BUSTER_ACTIVATION': on_buster_activation_begin,
 
@@ -228,44 +229,44 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('ON_SET_STEP_HELPER', (data) => {
-            if(data == undefined) return;
+            if (data == undefined) return;
 
             print("[VIEW]: set helper");
 
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
-            if(combined_item != undefined) {
+            if (combined_item != undefined) {
                 const from_pos = go.get_position(combined_item._hash);
                 const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
             }
 
-            for(const element of data.elements) {
+            for (const element of data.elements) {
                 const item = get_first_view_item_by_game_id(element.uid);
-                if(item != undefined) {
+                if (item != undefined) {
                     go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
                 }
             }
         });
- 
+
         EventBus.on('ON_RESET_STEP_HELPER', (data) => {
-            if(data == undefined) return;
+            if (data == undefined) return;
 
             print("[VIEW]: reset helper");
 
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
-            if(combined_item != undefined) {
+            if (combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
                 const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
                 let from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index);
-                if(from_pos.x == to_pos.x && from_pos.y == to_pos.y)
+                if (from_pos.x == to_pos.x && from_pos.y == to_pos.y)
                     from_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index);
                 go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.5);
             }
 
-            for(const element of data.elements) {
+            for (const element of data.elements) {
                 const item = get_first_view_item_by_game_id(element.uid);
-                if(item != undefined) {
+                if (item != undefined) {
                     go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
                     go.set(msg.url(undefined, item._hash, 'sprite'), 'tint', vmath.vector4(1, 1, 1, 1));
                 }
@@ -295,7 +296,7 @@ export function View(animator: FluxGroup) {
                 is_processing = true;
 
                 flow.delay(0.5);
-                
+
                 GameStorage.set('current_level', next_level);
                 Scene.restart();
             });
@@ -549,7 +550,7 @@ export function View(animator: FluxGroup) {
 
     function on_swap_element_animation(message: Messages[MessageId]) {
         const data = message as SwapElementsMessage;
-        
+
         const from_world_pos = get_world_pos(data.from.x, data.from.y);
         const to_world_pos = get_world_pos(data.to.x, data.to.y);
 
@@ -560,8 +561,8 @@ export function View(animator: FluxGroup) {
         if (item_from != undefined) {
             go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
         }
-        
-        if(element_to != NullElement) {
+
+        if (element_to != NullElement) {
             const item_to = get_first_view_item_by_game_id(element_to.uid);
             if (item_to != undefined) {
                 go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
@@ -584,12 +585,12 @@ export function View(animator: FluxGroup) {
         if (item_from != undefined) {
             go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
                 go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
-                    is_processing = false;            
+                    is_processing = false;
                 });
             });
         }
 
-        if(element_to != NullElement) {
+        if (element_to != NullElement) {
             const item_to = get_first_view_item_by_game_id(element_to.uid);
             if (item_to != undefined) {
                 go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
@@ -661,106 +662,7 @@ export function View(animator: FluxGroup) {
 
     function on_diskisphere_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-        for (const element of activation.damaged_elements)
-            damage_element_animation(message, element.x, element.y, element.uid);
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        return damaged_element_time;
-    }
-
-    function on_swaped_diskosphere_with_buster_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedDiskosphereActivationMessage;
-
-        damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-
-        for (const element of activation.damaged_elements)
-            damage_element_animation(message, element.x, element.y, element.uid);
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        flow.delay(damaged_element_time);
-
-        for (const element of activation.maked_elements)
-            make_element_view(element.x, element.y, element.type, element.uid, true);
-
-        flow.delay(spawn_element_time);
-
-        return damaged_element_time + spawn_element_time;
-    }
-
-    function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedActivationMessage;
-        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-            damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
-            for (const element of activation.damaged_elements)
-                damage_element_animation(message, element.x, element.y, element.uid);
-        });
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        return squash_duration + damaged_element_time;
-    }
-
-    function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedActivationMessage;
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-        for (const element of activation.damaged_elements)
-            damage_element_animation(message, element.x, element.y, element.uid);
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        return damaged_element_time;
-    }
-
-    function on_rocket_activated_animation(message: Messages[MessageId]) {
-        const activation = message as ActivationMessage;
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-        for (const element of activation.damaged_elements)
-            damage_element_animation(message, element.x, element.y, element.uid);
-
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        return damaged_element_time;
-    }
-
-    function on_swaped_rockets_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedActivationMessage;
-        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            delete_view_item_by_game_id(activation.element.uid);
-            delete_view_item_by_game_id(activation.other_element.uid);
-            make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid);
-            damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
-            for (const element of activation.damaged_elements)
-                damage_element_animation(message, element.x, element.y, element.uid);
+        const activated_duration = activate_diskosphere_animation(activation, () => {
             for (const cell of activation.activated_cells) {
                 let skip = false;
                 for (const element of activation.damaged_elements)
@@ -769,7 +671,247 @@ export function View(animator: FluxGroup) {
             }
         });
 
+        return activated_duration;
+    }
+    
+    function on_swaped_diskosphere_with_buster_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedDiskosphereActivationMessage;
+
+        damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
+        const activated_duration = activate_diskosphere_animation(activation, () => {
+            for (const cell of activation.activated_cells) {
+                let skip = false;
+                for (const element of activation.damaged_elements)
+                    if (cell.x == element.x && cell.y == element.y) skip = true;
+                if (!skip) activate_cell_animation(cell);
+            }
+
+            for (const element of activation.maked_elements)
+                make_element_view(element.x, element.y, element.type, element.uid, true);
+        });
+
+        const delay = activated_duration + spawn_element_time; 
+        flow.delay(delay);
+        
+        return 0;
+    }
+
+    function on_swaped_diskospheres_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedActivationMessage;
+        let activate_duration = 0;
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
+            damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
+            activate_duration = activate_diskosphere_animation(activation, () => {
+                for (const cell of activation.activated_cells) {
+                    let skip = false;
+                    for (const element of activation.damaged_elements)
+                        if (cell.x == element.x && cell.y == element.y) skip = true;
+                    if (!skip) activate_cell_animation(cell);
+                }
+            });
+        });
+
+        return squash_duration + (0.3 * activation.damaged_elements.length);
+    }
+
+    function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedActivationMessage;
+        const activate_duration = activate_diskosphere_animation(activation, () => {
+            for (const cell of activation.activated_cells) {
+                let skip = false;
+                for (const element of activation.damaged_elements)
+                    if (cell.x == element.x && cell.y == element.y) skip = true;
+                if (!skip) activate_cell_animation(cell);
+            }
+        });
+
+        return activate_duration;
+    }
+    
+    function activate_diskosphere_animation(activation: ActivationMessage, on_complete: () => void) {
+        delete_view_item_by_game_id(activation.element.uid);
+        
+        const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1);
+        const _go = gm.make_go('effect_view', pos);
+
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+
+        msg.post(msg.url(undefined, _go, undefined), 'disable');
+        msg.post(msg.url(undefined, _go, 'diskosphere'), 'enable');
+        msg.post(msg.url(undefined, _go, 'diskosphere_light'), 'enable');
+
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        spine.play_anim(msg.url(undefined, _go, 'diskosphere'), 'light_ball_intro', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
+            if (message_id == hash("spine_animation_done")) {
+                const anim_props = { blend_duration: 0, playback_rate: 1 };
+                if (message.animation_id == hash('light_ball_intro')) {
+                    trace(activation, _go, pos, activation.damaged_elements.length, () => {
+                        spine.play_anim(msg.url(undefined, _go, 'diskosphere_light'), 'light_ball_explosion', go.PLAYBACK_ONCE_FORWARD, anim_props);
+                        msg.post(msg.url(undefined, _go, 'diskosphere'), 'disable');
+                        on_complete();
+                    });
+                }
+            }
+        });
+        
+        return 0.3 * activation.damaged_elements.length;
+    }
+
+    function trace(activation: ActivationMessage, diskosphere: hash, pos: vmath.vector3, counter: number, on_complete: () => void) {
+        const anim_props = { blend_duration: 0, playback_rate: 3 };
+        spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere'), 'light_ball_action', go.PLAYBACK_ONCE_FORWARD, anim_props);
+        spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere_light'), 'light_ball_action_light', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
+            if (message_id == hash("spine_animation_done")) {
+                if(message.animation_id == hash('light_ball_action_light')) {
+                    if(counter == 0) return on_complete();
+                    trace(activation, diskosphere, pos, counter - 1, on_complete);
+                }
+            }
+        });
+
+        const projectile = gm.make_go('effect_view', pos);
+
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), projectile);
+        
+        msg.post(msg.url(undefined, projectile, undefined), 'disable');
+        msg.post(msg.url(undefined, projectile, 'diskosphere_projectile'), 'enable');
+
+        let element = activation.damaged_elements[counter];
+        while(element == null || get_first_view_item_by_game_id(element.uid)?._hash == diskosphere)
+            element = activation.damaged_elements[--counter];
+
+        const target_pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1);
+        spine.set_ik_target_position(msg.url(undefined, projectile, 'diskosphere_projectile'), 'ik_projectile_target', target_pos);
+        spine.play_anim(msg.url(undefined, projectile, 'diskosphere_projectile'), "light_ball_projectile", go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
+            if (message_id == hash("spine_animation_done")) {
+                go.delete(projectile);
+
+                const part = gm.make_go('effect_view', target_pos);
+                
+                go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), part);
+                
+                msg.post(msg.url(undefined, part, undefined), 'disable');
+                msg.post(msg.url(undefined, part, 'part'), 'enable');
+
+                delete_view_item_by_game_id(element.uid);
+
+                const anim_props = { blend_duration: 0, playback_rate: 1 };
+                spine.play_anim(msg.url(undefined, part, 'part'), "elements_crush", go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
+                    go.delete(part);
+                });
+            }
+        });
+    }
+    
+    function on_rocket_activated_animation(message: Messages[MessageId]) {
+        const activation = message as RocketActivationMessage;
+        const activate_duration = activate_rocket_animation(activation, activation.axis, () => {
+            for (const element of activation.damaged_elements)
+                damage_element_animation(message, element.x, element.y, element.uid);
+
+            for (const cell of activation.activated_cells) {
+                let skip = false;
+                for (const element of activation.damaged_elements)
+                    if (cell.x == element.x && cell.y == element.y) skip = true;
+                if (!skip) activate_cell_animation(cell);
+            }
+        });
+
+        return activate_duration + damaged_element_time;
+    }
+
+    function on_swaped_rockets_animation(message: Messages[MessageId]) {
+        const activation = message as SwapedActivationMessage;
+        let activate_duration = 0;
+        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
+            delete_view_item_by_game_id(activation.element.uid);
+            delete_view_item_by_game_id(activation.other_element.uid);
+
+            make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid);
+
+            activate_duration = activate_rocket_animation(activation, Axis.All, () => {
+                for (const element of activation.damaged_elements)
+                    damage_element_animation(message, element.x, element.y, element.uid);
+
+                for (const cell of activation.activated_cells) {
+                    let skip = false;
+                    for (const element of activation.damaged_elements)
+                        if (cell.x == element.x && cell.y == element.y) skip = true;
+                    if (!skip) activate_cell_animation(cell);
+                }
+            });
+        });
+
         return squash_duration + damaged_element_time;
+    }
+
+    function activate_rocket_animation(activation: ActivationMessage, dir: Axis, on_fly_end: () => void) {
+        if(activation.element.uid != -1) delete_view_item_by_game_id(activation.element.uid);
+
+        const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1);
+        rocket_effect(pos, dir);
+        
+        timer.delay(0.3, false, on_fly_end);
+
+        return 0.5;
+    }
+
+    function rocket_effect(pos: vmath.vector3, dir: Axis) {
+        if(dir == Axis.All) {
+            rocket_effect(pos, Axis.Vertical);
+            rocket_effect(pos, Axis.Horizontal);
+            return;
+        }
+
+        const part0 = gm.make_go('effect_view', pos);
+        const part1 = gm.make_go('effect_view', pos);
+
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), part0);
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), part1);
+
+        switch (dir) {
+            case Axis.Vertical:
+                gm.set_rotation_hash(part1, 180);
+                break;
+            case Axis.Horizontal:
+                gm.set_rotation_hash(part0, 90);
+                gm.set_rotation_hash(part1, -90);
+                break;
+        }
+
+        msg.post(msg.url(undefined, part0, undefined), 'disable');
+        msg.post(msg.url(undefined, part1, undefined), 'disable');
+
+        msg.post(msg.url(undefined, part0, 'rocket'), 'enable');
+        msg.post(msg.url(undefined, part1, 'rocket'), 'enable');
+
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
+
+        spine.play_anim(msg.url(undefined, part0, 'rocket'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props);
+        spine.play_anim(msg.url(undefined, part1, 'rocket'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props);
+
+        const part0_to_world_pos = vmath.vector3(pos);
+        const part1_to_world_pos = vmath.vector3(pos);
+
+        if(dir == Axis.Vertical) {
+            const distance = field_height * cell_size;
+            part0_to_world_pos.y += distance;
+            part1_to_world_pos.y += -distance;
+        }
+
+        if(dir == Axis.Horizontal) {
+            const distance = field_width * cell_size;
+            part0_to_world_pos.x += -distance;
+            part1_to_world_pos.x += distance;
+        }
+    
+        go.animate(part0, 'position', go.PLAYBACK_ONCE_FORWARD, part0_to_world_pos, go.EASING_INCUBIC, 0.5, 0, () => {
+            go.delete(part0);
+        });
+        
+        go.animate(part1, 'position', go.PLAYBACK_ONCE_FORWARD, part1_to_world_pos, go.EASING_INCUBIC, 0.5, 0, () => {
+            go.delete(part1);
+        });
     }
 
     function on_helicopter_activated_animation(message: Messages[MessageId]) {
@@ -851,39 +993,62 @@ export function View(animator: FluxGroup) {
 
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        const activation_duration = activate_buster_animation(activation.element.uid, () => {
+        const activate_duration = activate_dynamite_animation(activation, 1, () => {
             for (const element of activation.damaged_elements)
                 damage_element_animation(message, element.x, element.y, element.uid);
+
+            dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements);
         });
 
-        for (const cell of activation.activated_cells) {
-            let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (!skip) activate_cell_animation(cell);
-        }
-
-        return activation_duration + damaged_element_time;
+        return activate_duration + damaged_element_time;
     }
 
     function on_swaped_dynamites_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
+        let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             delete_view_item_by_game_id(activation.other_element.uid);
-            activate_buster_animation(activation.element.uid, () => {
+            activate_duration = activate_dynamite_animation(activation, 1.5, () => {
                 for (const element of activation.damaged_elements)
                     damage_element_animation(message, element.x, element.y, element.uid);
+
+                dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements);
             });
         });
 
-        for (const cell of activation.activated_cells) {
+        return squash_duration + activate_duration + damaged_element_time;
+    }
+
+    function activate_dynamite_animation(activation: ActivationMessage, range: number, on_explode: () => void) {
+        const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 0.1);
+        const _go = gm.make_go('effect_view', pos);
+
+        go.set_scale(vmath.vector3(scale_ratio * range, scale_ratio * range, 1), _go);
+
+        msg.post(msg.url(undefined, _go, undefined), 'disable');
+        msg.post(msg.url(undefined, _go, 'dynamite'), 'enable');
+
+        delete_view_item_by_game_id(activation.element.uid);
+
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        spine.play_anim(msg.url(undefined, _go, 'dynamite'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any) => {
+            print("MESSAGE: ", message_id);
+            gm.delete_go(_go);
+        });
+
+        const delay = 0.3;
+        timer.delay(delay, false, on_explode);
+
+        return delay;
+    }
+
+    function dynamite_activate_cell_animation(cells: ActivatedCellMessage[], elements: ItemInfo[]) {
+        for (const cell of cells) {
             let skip = false;
-            for (const element of activation.damaged_elements)
+            for (const element of elements)
                 if (cell.x == element.x && cell.y == element.y) skip = true;
             if (!skip) activate_cell_animation(cell);
         }
-
-        return squash_duration + damaged_element_time * 2;
     }
 
     function on_spinning_activated_animation(message: Messages[MessageId]) {
@@ -1098,22 +1263,9 @@ export function View(animator: FluxGroup) {
                             if (found) break;
                         }
                     }
-                    
-                   
-                    
-                    if (on_complite != undefined) on_complite();
-                });
-        }
 
-        return damaged_element_time;
-    }
 
-    function activate_buster_animation(element_id: number, on_complite?: () => void) {
-        const element_view_item = get_first_view_item_by_game_id(element_id);
-        if (element_view_item != undefined) {
-            go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
-                damaged_element_scale, go.EASING_INELASTIC, damaged_element_time, damaged_element_delay, () => {
-                    delete_view_item_by_game_id(element_id);
+
                     if (on_complite != undefined) on_complite();
                 });
         }
@@ -1142,18 +1294,18 @@ export function View(animator: FluxGroup) {
     }
 
     function get_field_pos(world_pos: vmath.vector3): { x: number, y: number } {
-        for(let y = 0; y < field_height; y++) {
-            for(let x = 0; x < field_width; x++) {
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
                 const original_world_pos = get_world_pos(x, y);
                 const in_x = (world_pos.x >= original_world_pos.x - cell_size * 0.5) && (world_pos.x <= original_world_pos.x + cell_size * 0.5);
                 const in_y = (world_pos.y >= original_world_pos.y - cell_size * 0.5) && (world_pos.y <= original_world_pos.y + cell_size * 0.5);
-                if(in_x && in_y) {
-                    return {x, y};
+                if (in_x && in_y) {
+                    return { x, y };
                 }
             }
         }
-       
-        return {x: -1, y: -1};
+
+        return { x: -1, y: -1 };
     }
 
     function get_move_direction(dir: vmath.vector3) {
@@ -1196,11 +1348,11 @@ export function View(animator: FluxGroup) {
             delete game_id_to_view_index[id];
             return false;
         }
-    
-        for(let i = 0; i < level_config.targets.length; i++) {
+
+        for (let i = 0; i < level_config.targets.length; i++) {
             const target = level_config.targets[i];
-            if(target.uids.indexOf(id) != -1) {
-                if(i > 1) break;
+            if (target.uids.indexOf(id) != -1) {
+                if (i > 1) break;
                 const event_key = i == 0 ? 'UPDATED_FIRST_TARGET' : 'UPDATED_SECOND_TARGET';
                 EventBus.send(event_key, math.max(0, target.count - target.uids.length));
             }
@@ -1225,7 +1377,7 @@ export function View(animator: FluxGroup) {
     function try_make_under_cell(x: number, y: number, cell: Cell) {
         if (cell.data != undefined && cell.data.is_render_under_cell && cell.data.under_cells != undefined) {
             let depth = 0.1;
-            for(let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
+            for (let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
                 const cell_id = (cell.data.under_cells as CellId[])[i];
                 if (cell_id != undefined) {
                     make_cell_view(x, y, cell_id, cell.uid, GAME_CONFIG.cell_database[cell_id].z_index - depth);

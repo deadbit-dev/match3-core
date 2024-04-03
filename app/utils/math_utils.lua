@@ -10,6 +10,13 @@ ____exports.Direction.Right = 3
 ____exports.Direction[____exports.Direction.Right] = "Right"
 ____exports.Direction.None = 4
 ____exports.Direction[____exports.Direction.None] = "None"
+____exports.Axis = Axis or ({})
+____exports.Axis.Vertical = 0
+____exports.Axis[____exports.Axis.Vertical] = "Vertical"
+____exports.Axis.Horizontal = 1
+____exports.Axis[____exports.Axis.Horizontal] = "Horizontal"
+____exports.Axis.All = 2
+____exports.Axis[____exports.Axis.All] = "All"
 local function is_point_in_zone(A, B, C, D, E)
     local function side(a, b, p)
         local val = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)

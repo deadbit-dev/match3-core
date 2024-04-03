@@ -7,6 +7,7 @@ local ____exports = {}
 local flow = require("ludobits.m.flow")
 local camera = require("utils.camera")
 local ____math_utils = require("utils.math_utils")
+local Axis = ____math_utils.Axis
 local Direction = ____math_utils.Direction
 local is_valid_pos = ____math_utils.is_valid_pos
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
@@ -34,7 +35,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, activate_buster_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -672,128 +673,264 @@ function ____exports.View(animator)
     end
     function on_diskisphere_activated_animation(message)
         local activation = message
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(message, element.x, element.y, element.uid)
-        end
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
+        local activated_duration = activate_diskosphere_animation(
+            activation,
+            function()
+                for ____, cell in ipairs(activation.activated_cells) do
+                    local skip = false
+                    for ____, element in ipairs(activation.damaged_elements) do
+                        if cell.x == element.x and cell.y == element.y then
+                            skip = true
+                        end
+                    end
+                    if not skip then
+                        activate_cell_animation(cell)
+                    end
                 end
             end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        return damaged_element_time
+        )
+        return activated_duration
     end
     function on_swaped_diskosphere_with_buster_animation(message)
         local activation = message
         damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(message, element.x, element.y, element.uid)
-        end
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
-                end
-            end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        flow.delay(damaged_element_time)
-        for ____, element in ipairs(activation.maked_elements) do
-            make_element_view(
-                element.x,
-                element.y,
-                element.type,
-                element.uid,
-                true
-            )
-        end
-        flow.delay(spawn_element_time)
-        return damaged_element_time + spawn_element_time
-    end
-    function on_swaped_diskospheres_animation(message)
-        local activation = message
-        local squash_duration = squash_element_animation(
-            activation.other_element,
-            activation.element,
+        local activated_duration = activate_diskosphere_animation(
+            activation,
             function()
-                damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
-                damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
-                for ____, element in ipairs(activation.damaged_elements) do
-                    damage_element_animation(message, element.x, element.y, element.uid)
+                for ____, cell in ipairs(activation.activated_cells) do
+                    local skip = false
+                    for ____, element in ipairs(activation.damaged_elements) do
+                        if cell.x == element.x and cell.y == element.y then
+                            skip = true
+                        end
+                    end
+                    if not skip then
+                        activate_cell_animation(cell)
+                    end
+                end
+                for ____, element in ipairs(activation.maked_elements) do
+                    make_element_view(
+                        element.x,
+                        element.y,
+                        element.type,
+                        element.uid,
+                        true
+                    )
                 end
             end
         )
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
-                end
-            end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        return squash_duration + damaged_element_time
+        local delay = activated_duration + spawn_element_time
+        flow.delay(delay)
+        return 0
     end
-    function on_swaped_diskosphere_with_element_animation(message)
+    function on_swaped_diskospheres_animation(message)
         local activation = message
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(message, element.x, element.y, element.uid)
-        end
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
-                end
-            end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        return damaged_element_time
-    end
-    function on_rocket_activated_animation(message)
-        local activation = message
-        damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
-        for ____, element in ipairs(activation.damaged_elements) do
-            damage_element_animation(message, element.x, element.y, element.uid)
-        end
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
-                end
-            end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        return damaged_element_time
-    end
-    function on_swaped_rockets_animation(message)
-        local activation = message
+        local activate_duration = 0
         local squash_duration = squash_element_animation(
             activation.other_element,
             activation.element,
             function()
-                delete_view_item_by_game_id(activation.element.uid)
-                delete_view_item_by_game_id(activation.other_element.uid)
-                make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid)
-                damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
+                damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
+                activate_duration = activate_diskosphere_animation(
+                    activation,
+                    function()
+                        for ____, cell in ipairs(activation.activated_cells) do
+                            local skip = false
+                            for ____, element in ipairs(activation.damaged_elements) do
+                                if cell.x == element.x and cell.y == element.y then
+                                    skip = true
+                                end
+                            end
+                            if not skip then
+                                activate_cell_animation(cell)
+                            end
+                        end
+                    end
+                )
+            end
+        )
+        return squash_duration + 0.3 * #activation.damaged_elements
+    end
+    function on_swaped_diskosphere_with_element_animation(message)
+        local activation = message
+        local activate_duration = activate_diskosphere_animation(
+            activation,
+            function()
+                for ____, cell in ipairs(activation.activated_cells) do
+                    local skip = false
+                    for ____, element in ipairs(activation.damaged_elements) do
+                        if cell.x == element.x and cell.y == element.y then
+                            skip = true
+                        end
+                    end
+                    if not skip then
+                        activate_cell_animation(cell)
+                    end
+                end
+            end
+        )
+        return activate_duration
+    end
+    function activate_diskosphere_animation(activation, on_complete)
+        delete_view_item_by_game_id(activation.element.uid)
+        local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1)
+        local _go = gm.make_go("effect_view", pos)
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            _go
+        )
+        msg.post(
+            msg.url(nil, _go, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, _go, "diskosphere"),
+            "enable"
+        )
+        msg.post(
+            msg.url(nil, _go, "diskosphere_light"),
+            "enable"
+        )
+        local anim_props = {blend_duration = 0, playback_rate = 1}
+        spine.play_anim(
+            msg.url(nil, _go, "diskosphere"),
+            "light_ball_intro",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function(____self, message_id, message, sender)
+                if message_id == hash("spine_animation_done") then
+                    local anim_props = {blend_duration = 0, playback_rate = 1}
+                    if message.animation_id == hash("light_ball_intro") then
+                        trace(
+                            activation,
+                            _go,
+                            pos,
+                            #activation.damaged_elements,
+                            function()
+                                spine.play_anim(
+                                    msg.url(nil, _go, "diskosphere_light"),
+                                    "light_ball_explosion",
+                                    go.PLAYBACK_ONCE_FORWARD,
+                                    anim_props
+                                )
+                                msg.post(
+                                    msg.url(nil, _go, "diskosphere"),
+                                    "disable"
+                                )
+                                on_complete()
+                            end
+                        )
+                    end
+                end
+            end
+        )
+        return 0.3 * #activation.damaged_elements
+    end
+    function trace(activation, diskosphere, pos, counter, on_complete)
+        local anim_props = {blend_duration = 0, playback_rate = 3}
+        spine.play_anim(
+            msg.url(nil, diskosphere, "diskosphere"),
+            "light_ball_action",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props
+        )
+        spine.play_anim(
+            msg.url(nil, diskosphere, "diskosphere_light"),
+            "light_ball_action_light",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function(____self, message_id, message, sender)
+                if message_id == hash("spine_animation_done") then
+                    if message.animation_id == hash("light_ball_action_light") then
+                        if counter == 0 then
+                            return on_complete()
+                        end
+                        trace(
+                            activation,
+                            diskosphere,
+                            pos,
+                            counter - 1,
+                            on_complete
+                        )
+                    end
+                end
+            end
+        )
+        local projectile = gm.make_go("effect_view", pos)
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            projectile
+        )
+        msg.post(
+            msg.url(nil, projectile, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, projectile, "diskosphere_projectile"),
+            "enable"
+        )
+        local element = activation.damaged_elements[counter + 1]
+        while true do
+            local ____temp_5 = element == nil
+            if not ____temp_5 then
+                local ____opt_3 = get_first_view_item_by_game_id(element.uid)
+                ____temp_5 = (____opt_3 and ____opt_3._hash) == diskosphere
+            end
+            if not ____temp_5 then
+                break
+            end
+            local ____activation_damaged_elements_2 = activation.damaged_elements
+            counter = counter - 1
+            element = ____activation_damaged_elements_2[counter + 1]
+        end
+        local target_pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1)
+        spine.set_ik_target_position(
+            msg.url(nil, projectile, "diskosphere_projectile"),
+            "ik_projectile_target",
+            target_pos
+        )
+        spine.play_anim(
+            msg.url(nil, projectile, "diskosphere_projectile"),
+            "light_ball_projectile",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function(____self, message_id, message, sender)
+                if message_id == hash("spine_animation_done") then
+                    go.delete(projectile)
+                    local part = gm.make_go("effect_view", target_pos)
+                    go.set_scale(
+                        vmath.vector3(scale_ratio, scale_ratio, 1),
+                        part
+                    )
+                    msg.post(
+                        msg.url(nil, part, nil),
+                        "disable"
+                    )
+                    msg.post(
+                        msg.url(nil, part, "part"),
+                        "enable"
+                    )
+                    delete_view_item_by_game_id(element.uid)
+                    local anim_props = {blend_duration = 0, playback_rate = 1}
+                    spine.play_anim(
+                        msg.url(nil, part, "part"),
+                        "elements_crush",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        anim_props,
+                        function()
+                            go.delete(part)
+                        end
+                    )
+                end
+            end
+        )
+    end
+    function on_rocket_activated_animation(message)
+        local activation = message
+        local activate_duration = activate_rocket_animation(
+            activation,
+            activation.axis,
+            function()
                 for ____, element in ipairs(activation.damaged_elements) do
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
@@ -810,7 +947,146 @@ function ____exports.View(animator)
                 end
             end
         )
+        return activate_duration + damaged_element_time
+    end
+    function on_swaped_rockets_animation(message)
+        local activation = message
+        local activate_duration = 0
+        local squash_duration = squash_element_animation(
+            activation.other_element,
+            activation.element,
+            function()
+                delete_view_item_by_game_id(activation.element.uid)
+                delete_view_item_by_game_id(activation.other_element.uid)
+                make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid)
+                activate_duration = activate_rocket_animation(
+                    activation,
+                    Axis.All,
+                    function()
+                        for ____, element in ipairs(activation.damaged_elements) do
+                            damage_element_animation(message, element.x, element.y, element.uid)
+                        end
+                        for ____, cell in ipairs(activation.activated_cells) do
+                            local skip = false
+                            for ____, element in ipairs(activation.damaged_elements) do
+                                if cell.x == element.x and cell.y == element.y then
+                                    skip = true
+                                end
+                            end
+                            if not skip then
+                                activate_cell_animation(cell)
+                            end
+                        end
+                    end
+                )
+            end
+        )
         return squash_duration + damaged_element_time
+    end
+    function activate_rocket_animation(activation, dir, on_fly_end)
+        if activation.element.uid ~= -1 then
+            delete_view_item_by_game_id(activation.element.uid)
+        end
+        local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1)
+        rocket_effect(pos, dir)
+        timer.delay(0.3, false, on_fly_end)
+        return 0.5
+    end
+    function rocket_effect(pos, dir)
+        if dir == Axis.All then
+            rocket_effect(pos, Axis.Vertical)
+            rocket_effect(pos, Axis.Horizontal)
+            return
+        end
+        local part0 = gm.make_go("effect_view", pos)
+        local part1 = gm.make_go("effect_view", pos)
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            part0
+        )
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            part1
+        )
+        repeat
+            local ____switch198 = dir
+            local ____cond198 = ____switch198 == Axis.Vertical
+            if ____cond198 then
+                gm.set_rotation_hash(part1, 180)
+                break
+            end
+            ____cond198 = ____cond198 or ____switch198 == Axis.Horizontal
+            if ____cond198 then
+                gm.set_rotation_hash(part0, 90)
+                gm.set_rotation_hash(part1, -90)
+                break
+            end
+        until true
+        msg.post(
+            msg.url(nil, part0, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, part1, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, part0, "rocket"),
+            "enable"
+        )
+        msg.post(
+            msg.url(nil, part1, "rocket"),
+            "enable"
+        )
+        local anim_props = {blend_duration = 0, playback_rate = 1}
+        spine.play_anim(
+            msg.url(nil, part0, "rocket"),
+            "action",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props
+        )
+        spine.play_anim(
+            msg.url(nil, part1, "rocket"),
+            "action",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props
+        )
+        local part0_to_world_pos = vmath.vector3(pos)
+        local part1_to_world_pos = vmath.vector3(pos)
+        if dir == Axis.Vertical then
+            local distance = field_height * cell_size
+            part0_to_world_pos.y = part0_to_world_pos.y + distance
+            part1_to_world_pos.y = part1_to_world_pos.y + -distance
+        end
+        if dir == Axis.Horizontal then
+            local distance = field_width * cell_size
+            part0_to_world_pos.x = part0_to_world_pos.x + -distance
+            part1_to_world_pos.x = part1_to_world_pos.x + distance
+        end
+        go.animate(
+            part0,
+            "position",
+            go.PLAYBACK_ONCE_FORWARD,
+            part0_to_world_pos,
+            go.EASING_INCUBIC,
+            0.5,
+            0,
+            function()
+                go.delete(part0)
+            end
+        )
+        go.animate(
+            part1,
+            "position",
+            go.PLAYBACK_ONCE_FORWARD,
+            part1_to_world_pos,
+            go.EASING_INCUBIC,
+            0.5,
+            0,
+            function()
+                go.delete(part1)
+            end
+        )
     end
     function on_helicopter_activated_animation(message)
         local activation = message
@@ -911,47 +1187,75 @@ function ____exports.View(animator)
     end
     function on_dynamite_activated_animation(message)
         local activation = message
-        local activation_duration = activate_buster_animation(
-            activation.element.uid,
+        local activate_duration = activate_dynamite_animation(
+            activation,
+            1,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
+                dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements)
             end
         )
-        for ____, cell in ipairs(activation.activated_cells) do
-            local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
-                    skip = true
-                end
-            end
-            if not skip then
-                activate_cell_animation(cell)
-            end
-        end
-        return activation_duration + damaged_element_time
+        return activate_duration + damaged_element_time
     end
     function on_swaped_dynamites_animation(message)
         local activation = message
+        local activate_duration = 0
         local squash_duration = squash_element_animation(
             activation.other_element,
             activation.element,
             function()
                 delete_view_item_by_game_id(activation.other_element.uid)
-                activate_buster_animation(
-                    activation.element.uid,
+                activate_duration = activate_dynamite_animation(
+                    activation,
+                    1.5,
                     function()
                         for ____, element in ipairs(activation.damaged_elements) do
                             damage_element_animation(message, element.x, element.y, element.uid)
                         end
+                        dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements)
                     end
                 )
             end
         )
-        for ____, cell in ipairs(activation.activated_cells) do
+        return squash_duration + activate_duration + damaged_element_time
+    end
+    function activate_dynamite_animation(activation, range, on_explode)
+        local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 0.1)
+        local _go = gm.make_go("effect_view", pos)
+        go.set_scale(
+            vmath.vector3(scale_ratio * range, scale_ratio * range, 1),
+            _go
+        )
+        msg.post(
+            msg.url(nil, _go, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, _go, "dynamite"),
+            "enable"
+        )
+        delete_view_item_by_game_id(activation.element.uid)
+        local anim_props = {blend_duration = 0, playback_rate = 1}
+        spine.play_anim(
+            msg.url(nil, _go, "dynamite"),
+            "action",
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function(____self, message_id)
+                print("MESSAGE: ", message_id)
+                gm.delete_go(_go)
+            end
+        )
+        local delay = 0.3
+        timer.delay(delay, false, on_explode)
+        return delay
+    end
+    function dynamite_activate_cell_animation(cells, elements)
+        for ____, cell in ipairs(cells) do
             local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
+            for ____, element in ipairs(elements) do
                 if cell.x == element.x and cell.y == element.y then
                     skip = true
                 end
@@ -960,7 +1264,6 @@ function ____exports.View(animator)
                 activate_cell_animation(cell)
             end
         end
-        return squash_duration + damaged_element_time * 2
     end
     function on_spinning_activated_animation(message)
         local data = message
@@ -1048,10 +1351,10 @@ function ____exports.View(animator)
                                     if delayed_row_in_column[element.points[1].to_x + 1] == nil then
                                         delayed_row_in_column[element.points[1].to_x + 1] = 0
                                     end
-                                    local ____delayed_row_in_column_2, ____temp_3 = delayed_row_in_column, element.points[1].to_x + 1
-                                    local ____delayed_row_in_column_index_4 = ____delayed_row_in_column_2[____temp_3]
-                                    ____delayed_row_in_column_2[____temp_3] = ____delayed_row_in_column_index_4 + 1
-                                    local delay_factor = ____delayed_row_in_column_index_4
+                                    local ____delayed_row_in_column_6, ____temp_7 = delayed_row_in_column, element.points[1].to_x + 1
+                                    local ____delayed_row_in_column_index_8 = ____delayed_row_in_column_6[____temp_7]
+                                    ____delayed_row_in_column_6[____temp_7] = ____delayed_row_in_column_index_8 + 1
+                                    local delay_factor = ____delayed_row_in_column_index_8
                                     delay = delay_factor * duration_of_movement_between_cells
                                     if delay > max_delay then
                                         max_delay = delay
@@ -1153,13 +1456,13 @@ function ____exports.View(animator)
     end
     function remove_random_element_animation(message, element, target_element, view_index, on_complited)
         local target_world_pos = get_world_pos(target_element.x, target_element.y, 3)
-        local ____temp_5
+        local ____temp_9
         if view_index ~= nil then
-            ____temp_5 = get_view_item_by_game_id_and_index(element.uid, view_index)
+            ____temp_9 = get_view_item_by_game_id_and_index(element.uid, view_index)
         else
-            ____temp_5 = get_first_view_item_by_game_id(element.uid)
+            ____temp_9 = get_first_view_item_by_game_id(element.uid)
         end
-        local item = ____temp_5
+        local item = ____temp_9
         if item == nil then
             return 0
         end
@@ -1218,27 +1521,6 @@ function ____exports.View(animator)
                             end
                         end
                     end
-                    if on_complite ~= nil then
-                        on_complite()
-                    end
-                end
-            )
-        end
-        return damaged_element_time
-    end
-    function activate_buster_animation(element_id, on_complite)
-        local element_view_item = get_first_view_item_by_game_id(element_id)
-        if element_view_item ~= nil then
-            go.animate(
-                element_view_item._hash,
-                "scale",
-                go.PLAYBACK_ONCE_FORWARD,
-                damaged_element_scale,
-                go.EASING_INELASTIC,
-                damaged_element_time,
-                damaged_element_delay,
-                function()
-                    delete_view_item_by_game_id(element_id)
                     if on_complite ~= nil then
                         on_complite()
                     end
@@ -1429,6 +1711,7 @@ function ____exports.View(animator)
         ON_COMBINED = on_combined_animation,
         ON_ELEMENT_ACTIVATED = on_element_activated_animation,
         ON_SPINNING_ACTIVATED = on_spinning_activated_animation,
+        ON_ROCKET_ACTIVATED = on_rocket_activated_animation,
         ON_BUSTER_ACTIVATION = on_buster_activation_begin,
         DISKOSPHERE_ACTIVATED = on_diskisphere_activated_animation,
         SWAPED_DISKOSPHERES_ACTIVATED = on_swaped_diskospheres_animation,

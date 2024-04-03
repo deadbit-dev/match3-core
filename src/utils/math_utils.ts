@@ -6,6 +6,12 @@ export enum Direction {
     None
 }
 
+export enum Axis {
+    Vertical,
+    Horizontal,
+    All
+}
+
 function is_point_in_zone(A: vmath.vector3, B: vmath.vector3, C: vmath.vector3, D: vmath.vector3, E: vmath.vector3) {
     function side(a: vmath.vector3, b: vmath.vector3, p: vmath.vector3) {
         const val = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);

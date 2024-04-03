@@ -17,7 +17,7 @@ import * as flow from 'ludobits.m.flow';
 
 import { MessageId, Messages } from '../modules/modules_const';
 
-import { is_valid_pos } from '../utils/math_utils';
+import { Axis, is_valid_pos } from '../utils/math_utils';
 
 import { CellId, ElementId,
     GameStepEventBuffer,
@@ -32,6 +32,7 @@ import { CellId, ElementId,
     ActivatedCellMessage,
     ElementActivationMessage,
     StepHelperMessage,
+    RocketActivationMessage,
 } from '../main/game_config';
 
 import {
@@ -467,9 +468,11 @@ export function Game() {
     }
     
     function try_click_activation(x: number, y: number) {
-        if(try_hammer_activation(x, y)) return true;
-        if(try_horizontal_rocket_activation(x, y)) return true;
-        if(try_vertical_rocket_activation(x, y)) return true;
+        if(!is_simulating) {
+            if(try_hammer_activation(x, y)) return true;
+            if(try_horizontal_rocket_activation(x, y)) return true;
+            if(try_vertical_rocket_activation(x, y)) return true;
+        }
 
         if(field.try_click(x, y) && try_activate_buster_element(x, y)) {
             is_step = true;
@@ -684,16 +687,18 @@ export function Game() {
         return true;
     }
 
+    // WARNING: message for axis rocket need to be as for swaped
     function try_activate_rocket(x: number, y: number) {
         const rocket = field.get_element(x, y);
         if(rocket == NullElement || ![ElementId.HorizontalRocket, ElementId.VerticalRocket, ElementId.AxisRocket].includes(rocket.type)) return false;
         
-        const event_data = {} as ActivationMessage;
+        const event_data = {} as RocketActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
 
         event_data.element = {x, y, uid: rocket.uid};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
+        event_data.axis = rocket.type == ElementId.VerticalRocket ? Axis.Vertical : Axis.Horizontal;
      
         if(rocket.type == ElementId.VerticalRocket || rocket.type == ElementId.AxisRocket) {
             for(let i = 0; i < field_height; i++) {
@@ -1004,12 +1009,13 @@ export function Game() {
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;
         
-        const event_data = {} as ActivationMessage;
+        const event_data = {} as RocketActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
         
-        event_data.element = {} as ItemInfo;
+        event_data.element = {x, y, uid: -1};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
+        event_data.axis = Axis.Horizontal;
         
         for(let i = 0; i < field_width; i++) {
             if(is_buster(i, y)) try_activate_buster_element(i, y);
@@ -1033,12 +1039,13 @@ export function Game() {
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;
         
-        const event_data = {} as ActivationMessage;
+        const event_data = {} as RocketActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
         
-        event_data.element = {} as ItemInfo;
+        event_data.element = {x, y, uid: -1};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
+        event_data.axis = Axis.Vertical;
         
         for(let i = 0; i < field_height; i++) {
             if(is_buster(x, i)) try_activate_buster_element(x, i);

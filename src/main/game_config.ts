@@ -4,6 +4,7 @@
 
 import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
 import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
+import { Axis } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
 
@@ -764,6 +765,8 @@ export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo,
 export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[] }
 export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
 
+export interface RocketActivationMessage extends ActivationMessage { axis: Axis }
+
 export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
 export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_elements: (ItemInfo | typeof NullElement)[] }
 export interface SwapedHelicopterWithElementMessage extends SwapedActivationMessage { target_element: ItemInfo | typeof NullElement }
@@ -806,7 +809,7 @@ export type _UserMessages = {
     SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereActivationMessage,
     SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedActivationMessage,
 
-    ROCKET_ACTIVATED: ActivationMessage,
+    ROCKET_ACTIVATED: RocketActivationMessage,
     SWAPED_ROCKETS_ACTIVATED: SwapedActivationMessage,
 
     HELICOPTER_ACTIVATED: HelicopterActivationMessage,
