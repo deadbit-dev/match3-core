@@ -29,6 +29,7 @@ import {
     MoveType
 } from "./match3_core";
 import { to } from 'utils.flux';
+import { hex2rgba } from '../utils/utils';
 
 const SubstrateMasks = [
     [
@@ -170,6 +171,7 @@ export function View(animator: FluxGroup) {
 
     const gm = GoManager();
     const game_id_to_view_index: { [key in number]: number[] } = {};
+    const game_id_to_type: { [key in number]: ElementId } = {};
 
     let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
@@ -542,6 +544,8 @@ export function View(animator: FluxGroup) {
         if (game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
         if (id != undefined) game_id_to_view_index[id].push(index);
 
+        game_id_to_type[id] = type;
+
         return index;
     }
 
@@ -758,16 +762,9 @@ export function View(animator: FluxGroup) {
     }
 
     function trace(activation: ActivationMessage, diskosphere: hash, pos: vmath.vector3, counter: number, on_complete: () => void) {
-        const anim_props = { blend_duration: 0, playback_rate: 3 };
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
         spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere'), 'light_ball_action', go.PLAYBACK_ONCE_FORWARD, anim_props);
-        spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere_light'), 'light_ball_action_light', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
-            if (message_id == hash("spine_animation_done")) {
-                if(message.animation_id == hash('light_ball_action_light')) {
-                    if(counter == 0) return on_complete();
-                    trace(activation, diskosphere, pos, counter - 1, on_complete);
-                }
-            }
-        });
+        spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere_light'), 'light_ball_action_light', go.PLAYBACK_ONCE_FORWARD, anim_props);
 
         const projectile = gm.make_go('effect_view', pos);
 
@@ -793,6 +790,8 @@ export function View(animator: FluxGroup) {
                 msg.post(msg.url(undefined, part, undefined), 'disable');
                 msg.post(msg.url(undefined, part, 'part'), 'enable');
 
+                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_database[game_id_to_type[element.uid]].color));
+
                 delete_view_item_by_game_id(element.uid);
 
                 const anim_props = { blend_duration: 0, playback_rate: 1 };
@@ -801,6 +800,9 @@ export function View(animator: FluxGroup) {
                 });
             }
         });
+    
+        if(counter == 0) return on_complete();
+        trace(activation, diskosphere, pos, counter - 1, on_complete);
     }
     
     function on_rocket_activated_animation(message: Messages[MessageId]) {

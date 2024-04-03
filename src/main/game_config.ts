@@ -186,6 +186,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 10,
+            color: '#009de2',
             view: 'element_diamond'
         },
 
@@ -195,6 +196,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 10,
+            color: '#e94165',
             view: 'element_gold'
         },
 
@@ -204,6 +206,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 10,
+            color: '#f5d74d',
             view: 'element_topaz'
         },
 
@@ -213,6 +216,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 10,
+            color: '#9a4ee5',
             view: 'element_ruby'
         },
 
@@ -222,6 +226,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 10,
+            color: '#20af1b',
             view: 'element_emerald'
         },
 
@@ -231,6 +236,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'vertical_rocket_buster'
         },
 
@@ -240,6 +246,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'horizontal_rocket_buster'
         },
 
@@ -249,6 +256,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'axis_rocket_buster'
         },
 
@@ -258,6 +266,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'helicopter_buster'
         },
 
@@ -267,6 +276,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'dynamite_buster'
         },
 
@@ -276,6 +286,7 @@ export const _GAME_CONFIG = {
                 is_clickable: true
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'diskosphere_buster'
         },
         
@@ -285,6 +296,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_1'
         },
 
@@ -294,6 +306,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_2'
         },
 
@@ -303,6 +316,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_3'
         },
 
@@ -312,6 +326,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_4'
         },
 
@@ -321,6 +336,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_5'
         },
 
@@ -330,6 +346,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_6'
         },
 
@@ -339,6 +356,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_7'
         },
 
@@ -348,6 +366,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_8'
         },
 
@@ -357,6 +376,7 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_9'
         },
 
@@ -366,9 +386,10 @@ export const _GAME_CONFIG = {
                 is_clickable: false
             },
             percentage: 0,
+            color: '#ffffff',
             view: 'custom_10'
         },
-    } as { [key in ElementId]: { type: { is_movable: boolean, is_clickable: boolean }, percentage: number, view: string } },
+    } as { [key in ElementId]: { type: { is_movable: boolean, is_clickable: boolean }, percentage: number, color: string, view: string } },
 
     base_elements: [
         ElementId.Dimonde,

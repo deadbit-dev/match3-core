@@ -213,7 +213,7 @@ export function Game() {
                 
                 stop_helper();
                 shuffle_field();
-            });
+            }, true);
         });
     }
 
@@ -301,6 +301,8 @@ export function Game() {
 
                 previous_helper_data = Object.assign({}, helper_data);
                 EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
+
+                set_helper();
             }
         });
     }
@@ -336,8 +338,9 @@ export function Game() {
 
         search_all_available_steps((steps: StepInfo[]) => {
             print("[GAME]: end search available steps in search helper combination");
-            search_best_step(steps, (best_step) => {
-                print("[GAME]: end search best step after search available steps");
+            // search_best_step(steps, (best_step) => {
+                // print("[GAME]: end search best step after search available steps");
+                const best_step = steps[math.random(0, steps.length - 1)];
                 const combination = get_step_combination(best_step);
                 if(combination != undefined) {
                     for(const element of combination.elements) {
@@ -356,22 +359,31 @@ export function Game() {
                         }
                     }
                 }
-            });
+            // });
         });
     }
     
-    function search_all_available_steps(on_end: (steps: StepInfo[]) => void) {
+    function search_all_available_steps(on_end: (steps: StepInfo[]) => void, search_first = false) {
         const coroutine = flow.start(() => {
             print("[GAME]: search available steps");
 
             const steps: StepInfo[] = [];
             for(let y = 0; y < field_height; y++) {
                 for(let x = 0; x < field_width; x++) {
-                    if(is_buster(x, y)) steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
-                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y))
+                    if(is_buster(x, y)) {
+                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
+                        if(search_first) on_end(steps);
+                    }
+                    
+                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
                         steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
-                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1))
+                        if(search_first) on_end(steps);
+                    }
+                    
+                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+                        if(search_first) on_end(steps);
+                    }
 
                     flow.frames(1);
                 }

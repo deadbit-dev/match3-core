@@ -21,6 +21,8 @@ local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
+local ____utils = require("utils.utils")
+local hex2rgba = ____utils.hex2rgba
 local SubstrateMasks = {
     {{0, 1, 0}, {1, 0, 1}, {0, 0, 0}},
     {{0, 1, 0}, {1, 0, 0}, {0, 0, 1}},
@@ -35,7 +37,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, game_id_to_type, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -508,6 +510,7 @@ function ____exports.View(animator)
             local ____game_id_to_view_index_id_1 = game_id_to_view_index[id]
             ____game_id_to_view_index_id_1[#____game_id_to_view_index_id_1 + 1] = index
         end
+        game_id_to_type[id] = ____type
         return index
     end
     function on_swap_element_animation(message)
@@ -827,7 +830,7 @@ function ____exports.View(animator)
         return 0.3 * #activation.damaged_elements
     end
     function trace(activation, diskosphere, pos, counter, on_complete)
-        local anim_props = {blend_duration = 0, playback_rate = 3}
+        local anim_props = {blend_duration = 0, playback_rate = 1}
         spine.play_anim(
             msg.url(nil, diskosphere, "diskosphere"),
             "light_ball_action",
@@ -838,23 +841,7 @@ function ____exports.View(animator)
             msg.url(nil, diskosphere, "diskosphere_light"),
             "light_ball_action_light",
             go.PLAYBACK_ONCE_FORWARD,
-            anim_props,
-            function(____self, message_id, message, sender)
-                if message_id == hash("spine_animation_done") then
-                    if message.animation_id == hash("light_ball_action_light") then
-                        if counter == 0 then
-                            return on_complete()
-                        end
-                        trace(
-                            activation,
-                            diskosphere,
-                            pos,
-                            counter - 1,
-                            on_complete
-                        )
-                    end
-                end
-            end
+            anim_props
         )
         local projectile = gm.make_go("effect_view", pos)
         go.set_scale(
@@ -910,6 +897,11 @@ function ____exports.View(animator)
                         msg.url(nil, part, "part"),
                         "enable"
                     )
+                    go.set(
+                        msg.url(nil, part, "part"),
+                        "tint",
+                        hex2rgba(GAME_CONFIG.element_database[game_id_to_type[element.uid]].color)
+                    )
                     delete_view_item_by_game_id(element.uid)
                     local anim_props = {blend_duration = 0, playback_rate = 1}
                     spine.play_anim(
@@ -923,6 +915,16 @@ function ____exports.View(animator)
                     )
                 end
             end
+        )
+        if counter == 0 then
+            return on_complete()
+        end
+        trace(
+            activation,
+            diskosphere,
+            pos,
+            counter - 1,
+            on_complete
         )
     end
     function on_rocket_activated_animation(message)
@@ -1009,14 +1011,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch198 = dir
-            local ____cond198 = ____switch198 == Axis.Vertical
-            if ____cond198 then
+            local ____switch195 = dir
+            local ____cond195 = ____switch195 == Axis.Vertical
+            if ____cond195 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond198 = ____cond198 or ____switch198 == Axis.Horizontal
-            if ____cond198 then
+            ____cond195 = ____cond195 or ____switch195 == Axis.Horizontal
+            if ____cond195 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1729,6 +1731,7 @@ function ____exports.View(animator)
     }
     gm = GoManager()
     game_id_to_view_index = {}
+    game_id_to_type = {}
     down_item = nil
     combinate_phase_duration = 0
     move_phase_duration = 0
