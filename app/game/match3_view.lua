@@ -722,8 +722,7 @@ function ____exports.View(animator)
                 end
             end
         )
-        local delay = activated_duration + spawn_element_time
-        flow.delay(delay)
+        flow.delay(activated_duration + spawn_element_time)
         return 0
     end
     function on_swaped_diskospheres_animation(message)
@@ -733,7 +732,7 @@ function ____exports.View(animator)
             activation.other_element,
             activation.element,
             function()
-                damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid)
+                delete_view_item_by_game_id(activation.other_element.uid)
                 activate_duration = activate_diskosphere_animation(
                     activation,
                     function()
@@ -752,7 +751,7 @@ function ____exports.View(animator)
                 )
             end
         )
-        return squash_duration + 0.3 * #activation.damaged_elements
+        return squash_duration + 0.7
     end
     function on_swaped_diskosphere_with_element_animation(message)
         local activation = message
@@ -827,7 +826,7 @@ function ____exports.View(animator)
                 end
             end
         )
-        return 0.3 * #activation.damaged_elements
+        return 0.7
     end
     function trace(activation, diskosphere, pos, counter, on_complete)
         local anim_props = {blend_duration = 0, playback_rate = 1}
@@ -843,6 +842,9 @@ function ____exports.View(animator)
             go.PLAYBACK_ONCE_FORWARD,
             anim_props
         )
+        if #activation.damaged_elements == 0 then
+            return on_complete()
+        end
         local projectile = gm.make_go("effect_view", pos)
         go.set_scale(
             vmath.vector3(scale_ratio, scale_ratio, 1),
@@ -1011,14 +1013,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch195 = dir
-            local ____cond195 = ____switch195 == Axis.Vertical
-            if ____cond195 then
+            local ____switch196 = dir
+            local ____cond196 = ____switch196 == Axis.Vertical
+            if ____cond196 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond195 = ____cond195 or ____switch195 == Axis.Horizontal
-            if ____cond195 then
+            ____cond196 = ____cond196 or ____switch196 == Axis.Horizontal
+            if ____cond196 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1194,6 +1196,7 @@ function ____exports.View(animator)
             1,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
+                    print("DYNAMITE: ", element.x, element.y)
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
                 dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements)
@@ -1315,10 +1318,12 @@ function ____exports.View(animator)
         return 0
     end
     function on_move_phase_begin()
+        print("[VIEW]: MOVE BEGIN")
         flow.delay(combinate_phase_duration + 0.2)
         combinate_phase_duration = 0
     end
     function on_moved_elements_animation(message)
+        print("[VIEW]: MOVE")
         local elements = message
         local delayed_row_in_column = {}
         local max_delay = 0

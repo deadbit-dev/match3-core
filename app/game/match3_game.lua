@@ -25,7 +25,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, search_helper_combination, search_all_available_steps, get_count_damaged_elements_of_step, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, simulate_game_step, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input
+    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, search_helper_combination, search_all_available_steps, search_best_step, get_count_damaged_elements_of_step, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, simulate_game_step, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -235,7 +235,6 @@ function ____exports.Game()
                         "ON_SET_STEP_HELPER",
                         __TS__ObjectAssign({}, helper_data)
                     )
-                    set_helper()
                 end
             end
         )
@@ -269,19 +268,24 @@ function ____exports.Game()
         print("[GAME]: search combination")
         search_all_available_steps(function(steps)
             print("[GAME]: end search available steps in search helper combination")
-            local best_step = steps[math.random(0, #steps - 1) + 1]
-            local combination = get_step_combination(best_step)
-            if combination ~= nil then
-                for ____, element in ipairs(combination.elements) do
-                    local is_from = element.x == best_step.from_x and element.y == best_step.from_y
-                    local is_to = element.x == best_step.to_x and element.y == best_step.to_y
-                    if is_from or is_to then
-                        helper_data = {step = best_step, elements = combination.elements, combined_element = element}
-                        print("[GAME]: set helper combination")
-                        return
+            search_best_step(
+                steps,
+                function(best_step)
+                    print("[GAME]: end search best step after search available steps")
+                    local combination = get_step_combination(best_step)
+                    if combination ~= nil then
+                        for ____, element in ipairs(combination.elements) do
+                            local is_from = element.x == best_step.from_x and element.y == best_step.from_y
+                            local is_to = element.x == best_step.to_x and element.y == best_step.to_y
+                            if is_from or is_to then
+                                helper_data = {step = best_step, elements = combination.elements, combined_element = element}
+                                print("[GAME]: set helper combination")
+                                return
+                            end
+                        end
                     end
                 end
-            end
+            )
         end)
     end
     function search_all_available_steps(on_end, search_first)
@@ -324,6 +328,31 @@ function ____exports.Game()
             end
             print("[GAME]: found ", #steps, " steps")
             on_end(steps)
+        end)
+        coroutines[#coroutines + 1] = ____coroutine
+    end
+    function search_best_step(steps, on_end)
+        local ____coroutine = flow.start(function()
+            print("[GAME]: search best step")
+            local best_step = {}
+            local max_damaged_elements = 0
+            for ____, step in ipairs(steps) do
+                print("[GAME]: call get_count_damaged_elements_of_step")
+                local count_damaged_elements = get_count_damaged_elements_of_step(step)
+                if count_damaged_elements > max_damaged_elements then
+                    max_damaged_elements = count_damaged_elements
+                    best_step = step
+                end
+                flow.frames(1)
+            end
+            print(
+                "[GAME]: found best step: ",
+                best_step.from_x,
+                best_step.from_y,
+                best_step.to_x,
+                best_step.to_y
+            )
+            on_end(best_step)
         end)
         coroutines[#coroutines + 1] = ____coroutine
     end
@@ -1123,22 +1152,14 @@ function ____exports.Game()
         if after_activation then
             field.process_state(ProcessMode.MoveElements)
         end
-        local iterations = 0
-        while field.process_state(ProcessMode.Combinate) and iterations < GAME_CONFIG.max_iteration_by_step do
+        while field.process_state(ProcessMode.Combinate) do
             print("[GAME]: after combinate in simulating")
             field.process_state(ProcessMode.MoveElements)
             print("[GAME]: after movements in simulating")
-            iterations = iterations + 1
         end
         field.load_state(previous_state)
         is_simulating = false
         math.randomseed(randomseed)
-        if iterations >= GAME_CONFIG.max_iteration_by_step then
-            print("OVER")
-            set_random()
-            stop_helper()
-            set_helper()
-        end
         print(
             "[GAME]: simulating game step end: ",
             step.from_x,
@@ -1280,6 +1301,14 @@ function ____exports.Game()
                 ____target_uids_18[#____target_uids_18 + 1] = element.uid
             end
         end
+    end
+    function is_combined_elements(e1, e2)
+        local e1_pos = field.get_pos_by_uid(e1.uid)
+        local e2_pos = field.get_pos_by_uid(e2.uid)
+        if is_buster(e1_pos.x, e1_pos.y) or is_buster(e2_pos.x, e2_pos.y) then
+            return false
+        end
+        return field.is_combined_elements_base(e1, e2)
     end
     function on_combined(combined_element, combination)
         if is_buster(combined_element.x, combined_element.y) then
@@ -1498,6 +1527,7 @@ function ____exports.Game()
         field.init()
         field.set_callback_is_can_move(is_can_move)
         field.set_callback_on_moved_elements(on_moved_elements)
+        field.set_callback_is_combined_elements(is_combined_elements)
         field.set_callback_on_combinated(on_combined)
         field.set_callback_on_damaged_element(on_damaged_element)
         field.set_callback_on_request_element(on_request_element)
@@ -1507,32 +1537,6 @@ function ____exports.Game()
         set_events()
         set_random()
         set_targets()
-    end
-    local function search_best_step(steps, on_end)
-        local ____coroutine = flow.start(function()
-            print("[GAME]: search best step")
-            local best_step = {}
-            local max_damaged_elements = 0
-            for ____, step in ipairs(steps) do
-                print("[GAME]: call get_count_damaged_elements_of_step")
-                local count_damaged_elements = get_count_damaged_elements_of_step(step)
-                if count_damaged_elements > max_damaged_elements then
-                    max_damaged_elements = count_damaged_elements
-                    best_step = step
-                end
-                flow.frames(1)
-            end
-            print(
-                "[GAME]: found best step (",
-                best_step.from_x,
-                best_step.from_y,
-                best_step.to_x,
-                best_step.to_y,
-                ")"
-            )
-            on_end(best_step)
-        end)
-        coroutines[#coroutines + 1] = ____coroutine
     end
     return init()
 end

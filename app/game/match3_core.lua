@@ -550,6 +550,25 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return target_elements
     end
+    local function get_pos_by_uid(uid)
+        do
+            local y = 0
+            while y < size_y do
+                do
+                    local x = 0
+                    while x < size_x do
+                        local element = get_element(x, y)
+                        if element ~= ____exports.NullElement and element.uid == uid then
+                            return {x = x, y = y}
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        return {x = -1, y = -1}
+    end
     local function set_cell(x, y, cell)
         state.cells[y + 1][x + 1] = cell
     end
@@ -848,13 +867,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch187 = mode
-            local ____cond187 = ____switch187 == ____exports.ProcessMode.Combinate
-            if ____cond187 then
+            local ____switch191 = mode
+            local ____cond191 = ____switch191 == ____exports.ProcessMode.Combinate
+            if ____cond191 then
                 return process_combinate()
             end
-            ____cond187 = ____cond187 or ____switch187 == ____exports.ProcessMode.MoveElements
-            if ____cond187 then
+            ____cond191 = ____cond191 or ____switch191 == ____exports.ProcessMode.MoveElements
+            if ____cond191 then
                 return process_move()
             end
         until true
@@ -887,6 +906,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         get_element = get_element,
         remove_element = remove_element,
         swap_elements = swap_elements,
+        get_pos_by_uid = get_pos_by_uid,
         get_neighbor_cells = get_neighbor_cells,
         get_neighbor_elements = get_neighbor_elements,
         is_available_cell_type_for_move = is_available_cell_type_for_move,

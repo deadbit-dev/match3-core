@@ -694,8 +694,7 @@ export function View(animator: FluxGroup) {
                 make_element_view(element.x, element.y, element.type, element.uid, true);
         });
 
-        const delay = activated_duration + spawn_element_time; 
-        flow.delay(delay);
+        flow.delay(activated_duration + spawn_element_time);
         
         return 0;
     }
@@ -704,7 +703,7 @@ export function View(animator: FluxGroup) {
         const activation = message as SwapedActivationMessage;
         let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
+            delete_view_item_by_game_id(activation.other_element.uid);
             activate_duration = activate_diskosphere_animation(activation, () => {
                 for (const cell of activation.activated_cells) {
                     let skip = false;
@@ -715,7 +714,7 @@ export function View(animator: FluxGroup) {
             });
         });
 
-        return squash_duration + (0.3 * activation.damaged_elements.length);
+        return squash_duration + 0.7;
     }
 
     function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
@@ -758,13 +757,15 @@ export function View(animator: FluxGroup) {
             }
         });
         
-        return 0.3 * activation.damaged_elements.length;
+        return 0.7;
     }
 
     function trace(activation: ActivationMessage, diskosphere: hash, pos: vmath.vector3, counter: number, on_complete: () => void) {
         const anim_props = { blend_duration: 0, playback_rate: 1 };
         spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere'), 'light_ball_action', go.PLAYBACK_ONCE_FORWARD, anim_props);
         spine.play_anim(msg.url(undefined, diskosphere, 'diskosphere_light'), 'light_ball_action_light', go.PLAYBACK_ONCE_FORWARD, anim_props);
+
+        if(activation.damaged_elements.length == 0) return on_complete();
 
         const projectile = gm.make_go('effect_view', pos);
 
@@ -996,8 +997,10 @@ export function View(animator: FluxGroup) {
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
         const activate_duration = activate_dynamite_animation(activation, 1, () => {
-            for (const element of activation.damaged_elements)
+            for (const element of activation.damaged_elements) {
+                print("DYNAMITE: ", element.x, element.y);
                 damage_element_animation(message, element.x, element.y, element.uid);
+            }
 
             dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements);
         });
@@ -1093,12 +1096,18 @@ export function View(animator: FluxGroup) {
     }
 
     function on_move_phase_begin() {
+    
+        print("[VIEW]: MOVE BEGIN");
+    
         flow.delay(combinate_phase_duration + 0.2);
         combinate_phase_duration = 0;
     }
 
     // TODO: refactoring
     function on_moved_elements_animation(message: Messages[MessageId]) {
+
+        print("[VIEW]: MOVE");
+
         const elements = message as MovedElementsMessage;
         const delayed_row_in_column: number[] = [];
 

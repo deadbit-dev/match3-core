@@ -553,6 +553,19 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
         return target_elements;
     }
+
+    function get_pos_by_uid(uid: number) {
+        for(let y = 0; y < size_y; y++) {
+            for(let x = 0; x < size_x; x++) {
+                const element = get_element(x, y);
+                if(element != NullElement && element.uid == uid) {
+                    return {x, y};
+                }
+            }
+        }
+
+        return {x: -1, y: -1};
+    }
     
     // задает клетку
     function set_cell(x: number, y: number, cell: Cell | typeof NotActiveCell) {
@@ -897,7 +910,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
   
     return {
-        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements,
+        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
         get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,

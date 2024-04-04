@@ -79,7 +79,6 @@ export enum ElementId {
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
-    max_iteration_by_step: 5,
     min_swipe_distance: 32,
 
     swap_element_easing: go.EASING_LINEAR,
@@ -527,7 +526,7 @@ export const _GAME_CONFIG = {
                 ],
 
                 elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, NullElement],
+                    [NullElement, ElementId.Diskosphere, ElementId.Dynamite, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, NullElement],
                     [ElementId.Dimonde, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Topaz],
                     [ElementId.Dimonde, ElementId.Gold, NullElement, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Gold, ElementId.Topaz],
                     [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Gold],

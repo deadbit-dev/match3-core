@@ -85,6 +85,7 @@ export function Game() {
 
         field.set_callback_is_can_move(is_can_move);
         field.set_callback_on_moved_elements(on_moved_elements);
+        field.set_callback_is_combined_elements(is_combined_elements);
         field.set_callback_on_combinated(on_combined);
         field.set_callback_on_damaged_element(on_damaged_element);
         field.set_callback_on_request_element(on_request_element);
@@ -93,7 +94,7 @@ export function Game() {
         set_element_types();
         set_busters();
         set_events();
-        set_random();
+        set_random(); // set_random(1712164717);
         set_targets();
     }
     
@@ -302,7 +303,7 @@ export function Game() {
                 previous_helper_data = Object.assign({}, helper_data);
                 EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
 
-                set_helper();
+                // set_helper();
             }
         });
     }
@@ -338,9 +339,9 @@ export function Game() {
 
         search_all_available_steps((steps: StepInfo[]) => {
             print("[GAME]: end search available steps in search helper combination");
-            // search_best_step(steps, (best_step) => {
-                // print("[GAME]: end search best step after search available steps");
-                const best_step = steps[math.random(0, steps.length - 1)];
+            search_best_step(steps, (best_step) => {
+                print("[GAME]: end search best step after search available steps");
+                // const best_step = steps[math.random(0, steps.length - 1)];
                 const combination = get_step_combination(best_step);
                 if(combination != undefined) {
                     for(const element of combination.elements) {
@@ -359,7 +360,7 @@ export function Game() {
                         }
                     }
                 }
-            // });
+            });
         });
     }
     
@@ -415,7 +416,7 @@ export function Game() {
                 flow.frames(1);
             }
 
-            print("[GAME]: found best step (", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y, ")");
+            print("[GAME]: found best step: ", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y);
             on_end(best_step);
         });
 
@@ -1145,12 +1146,10 @@ export function Game() {
         
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        let iterations = 0;
-        while(field.process_state(ProcessMode.Combinate) && iterations < GAME_CONFIG.max_iteration_by_step) {
+        while(field.process_state(ProcessMode.Combinate)) {
             print("[GAME]: after combinate in simulating");
             field.process_state(ProcessMode.MoveElements);
             print("[GAME]: after movements in simulating");
-            iterations++;
         }
 
         field.load_state(previous_state);
@@ -1158,13 +1157,6 @@ export function Game() {
         is_simulating = false;
 
         math.randomseed(randomseed);
-
-        if(iterations >= GAME_CONFIG.max_iteration_by_step) {
-            print("OVER");
-            set_random();
-            stop_helper();
-            set_helper();
-        }
 
         print("[GAME]: simulating game step end: ", step.from_x, step.from_y, step.to_x, step.to_y);
     }
@@ -1291,6 +1283,14 @@ export function Game() {
                 target.uids.push(element.uid);
             }
         }
+    }
+
+    function is_combined_elements(e1: Element, e2: Element) {
+        const e1_pos = field.get_pos_by_uid(e1.uid);
+        const e2_pos = field.get_pos_by_uid(e2.uid);
+        if(is_buster(e1_pos.x, e1_pos.y) || is_buster(e2_pos.x, e2_pos.y)) return false;
+        
+        return field.is_combined_elements_base(e1, e2);
     }
 
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {

@@ -109,7 +109,6 @@ else
     ____temp_0 = true
 end
 ____exports._GAME_CONFIG = {
-    max_iteration_by_step = 5,
     min_swipe_distance = 32,
     swap_element_easing = ____go_EASING_LINEAR_1,
     swap_element_time = 0.25,
@@ -666,8 +665,8 @@ ____exports._GAME_CONFIG = {
             elements = {
                 {
                     NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
+                    ____exports.ElementId.Diskosphere,
+                    ____exports.ElementId.Dynamite,
                     ____exports.ElementId.Gold,
                     ____exports.ElementId.Emerald,
                     ____exports.ElementId.Gold,
