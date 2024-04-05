@@ -79,6 +79,7 @@ export function Game() {
     let step_counter = 0;
     let is_step = false;
     let is_block_input = false;
+    let all_available_steps: StepInfo[] = [];
 
     function init() {
         field.init();
@@ -196,6 +197,7 @@ export function Game() {
         
         EventBus.on('REVERT_STEP', revert_step);
 
+        // TODO: move in logic game step end
         EventBus.on('ON_GAME_STEP_ANIMATION_END', () => {
             if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
             else if(step_counter <= 0) EventBus.send('ON_GAME_OVER');
@@ -205,6 +207,7 @@ export function Game() {
             is_block_input = true;
             search_all_available_steps((steps) => {
                 if(steps.length != 0) {
+                    all_available_steps = steps;
                     print("[GAME]: end check of available steps after end game step");
                     is_block_input = false;
                     return;
@@ -214,7 +217,7 @@ export function Game() {
                 
                 stop_helper();
                 shuffle_field();
-            }, true);
+            });
         });
     }
 
@@ -292,9 +295,13 @@ export function Game() {
     //#region ACTIONS
     
     function set_helper() {
-        search_helper_combination();
+        // search_helper_combination();
         
         helper_timer = timer.delay(5, false, () => {
+            get_helper_combination(all_available_steps);
+
+            print("[GAME]: try to set helper");
+
             if(helper_data != null) {
                 print("[GAME]: set helper");
 
@@ -303,7 +310,7 @@ export function Game() {
                 previous_helper_data = Object.assign({}, helper_data);
                 EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
 
-                // set_helper();
+                set_helper();
             }
         });
     }
@@ -339,51 +346,72 @@ export function Game() {
 
         search_all_available_steps((steps: StepInfo[]) => {
             print("[GAME]: end search available steps in search helper combination");
-            search_best_step(steps, (best_step) => {
-                print("[GAME]: end search best step after search available steps");
-                // const best_step = steps[math.random(0, steps.length - 1)];
-                const combination = get_step_combination(best_step);
-                if(combination != undefined) {
-                    for(const element of combination.elements) {
-                        const is_from = (element.x == best_step.from_x && element.y == best_step.from_y);
-                        const is_to = (element.x == best_step.to_x && element.y == best_step.to_y);
-                        if(is_from || is_to) {
-                            helper_data = {
-                                step: best_step,
-                                elements: combination.elements,
-                                combined_element: element
-                            };
-
-                            print("[GAME]: set helper combination");
-
-                            return;
-                        }
-                    }
-                }
-            });
+            // search_best_step(steps, (best_step) => {
+                // print("[GAME]: end search best step after search available steps");
+                get_helper_combination(steps);
+            // });
         });
     }
+
+    function get_helper_combination(steps: StepInfo[]) {
+        if(steps.length == 0) return;
+
+        const step = steps[math.random(0, steps.length - 1)];
+        const combination = get_step_combination(step);
+        if(combination == undefined) return;
+        for(const element of combination.elements) {
+            const is_from = (element.x == step.from_x && element.y == step.from_y);
+            const is_to = (element.x == step.to_x && element.y == step.to_y);
+            
+            if(is_from || is_to) {
+                helper_data = {
+                    step: step,
+                    elements: combination.elements,
+                    combined_element: element
+                };
+
+                print("[GAME]: set helper data");
+
+                return;
+            }
+        }
+    }
     
-    function search_all_available_steps(on_end: (steps: StepInfo[]) => void, search_first = false) {
+    function search_all_available_steps(on_end: (steps: StepInfo[]) => void) {
         const coroutine = flow.start(() => {
             print("[GAME]: search available steps");
 
             const steps: StepInfo[] = [];
             for(let y = 0; y < field_height; y++) {
                 for(let x = 0; x < field_width; x++) {
+                    const c0 = socket.gettime();
+
                     if(is_buster(x, y)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
-                        if(search_first) on_end(steps);
                     }
                     
                     if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
                         steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
-                        if(search_first) on_end(steps);
                     }
+
+                    print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
+
+                    if(steps.length > 5) {
+                        return on_end(steps);
+                    }
+
+                    flow.frames(1);
+
+                    const c1 = socket.gettime();
                     
                     if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
-                        if(search_first) on_end(steps);
+                    }
+
+                    print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
+
+                    if(steps.length > 10) {
+                        return on_end(steps);
                     }
 
                     flow.frames(1);
@@ -980,6 +1008,7 @@ export function Game() {
         is_block_input = true;
         search_all_available_steps((steps) => {
             if(steps.length != 0) {
+                all_available_steps = steps;
                 print("[GAME]: end search available steps after shuffle field");
                 process_game_step(false);
             } else {
