@@ -79,7 +79,7 @@ export function Game() {
     let step_counter = 0;
     let is_step = false;
     let is_block_input = false;
-    let all_available_steps: StepInfo[] = [];
+    let available_steps: StepInfo[] = [];
 
     function init() {
         field.init();
@@ -95,7 +95,7 @@ export function Game() {
         set_element_types();
         set_busters();
         set_events();
-        set_random(); // set_random(1712164717);
+        set_random(1712584566); // set_random(1712164717);
         set_targets();
     }
     
@@ -137,6 +137,8 @@ export function Game() {
         EventBus.on('SWAP_ELEMENTS', (elements) => {
             if(is_block_input || elements == undefined) return;
 
+            const c0 = socket.gettime();
+
             stop_helper();
             
             if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
@@ -146,6 +148,8 @@ export function Game() {
             is_step = true;
 
             process_game_step(is_procesed);
+
+            print("SWAP ELEMENTS TIME: ", (socket.gettime() - c0) * 1000, "ms");
         });
 
         // TODO: refactoring
@@ -204,20 +208,19 @@ export function Game() {
 
             print("[GAME]: end step");
 
-            is_block_input = true;
-            search_all_available_steps((steps) => {
-                if(steps.length != 0) {
-                    all_available_steps = steps;
-                    print("[GAME]: end check of available steps after end game step");
-                    is_block_input = false;
-                    return;
-                }
+            // is_block_input = true;
+            // search_available_steps(1, (steps) => {
+            //     if(steps.length != 0) {
+            //         print("[GAME]: end check of available steps after end game step");
+            //         is_block_input = false;
+            //         return;
+            //     }
 
-                print("[GAME]: shuffle field after end game step");
+            //     print("[GAME]: shuffle field after end game step");
                 
-                stop_helper();
-                shuffle_field();
-            });
+            //     stop_helper();
+            //     shuffle_field();
+            // });
         });
     }
 
@@ -237,6 +240,10 @@ export function Game() {
 
         const state = field.save_state();
         previous_states.push(state);
+
+        // search_available_steps(5, (steps) => {
+        //     available_steps = steps;
+        // });
         
         EventBus.send('ON_LOAD_FIELD', state);
     }
@@ -298,7 +305,7 @@ export function Game() {
         // search_helper_combination();
         
         helper_timer = timer.delay(5, false, () => {
-            get_helper_combination(all_available_steps);
+            get_helper_combination(available_steps);
 
             print("[GAME]: try to set helper");
 
@@ -341,17 +348,17 @@ export function Game() {
         previous_helper_data = null;
     }
 
-    function search_helper_combination() {
-        print("[GAME]: search combination");
+    // function search_helper_combination() {
+    //     print("[GAME]: search combination");
 
-        search_all_available_steps((steps: StepInfo[]) => {
-            print("[GAME]: end search available steps in search helper combination");
-            // search_best_step(steps, (best_step) => {
-                // print("[GAME]: end search best step after search available steps");
-                get_helper_combination(steps);
-            // });
-        });
-    }
+    //     search_available_steps(Infinity, (steps: StepInfo[]) => {
+    //         print("[GAME]: end search available steps in search helper combination");
+    //         // search_best_step(steps, (best_step) => {
+    //             // print("[GAME]: end search best step after search available steps");
+    //             get_helper_combination(steps);
+    //         // });
+    //     });
+    // }
 
     function get_helper_combination(steps: StepInfo[]) {
         if(steps.length == 0) return;
@@ -377,95 +384,95 @@ export function Game() {
         }
     }
     
-    function search_all_available_steps(on_end: (steps: StepInfo[]) => void) {
-        const coroutine = flow.start(() => {
-            print("[GAME]: search available steps");
+    // function search_available_steps(count: number, on_end: (steps: StepInfo[]) => void) {
+    //     const coroutine = flow.start(() => {
+    //         print("[GAME]: search available steps");
 
-            const steps: StepInfo[] = [];
-            for(let y = 0; y < field_height; y++) {
-                for(let x = 0; x < field_width; x++) {
-                    const c0 = socket.gettime();
+    //         const steps: StepInfo[] = [];
+    //         for(let y = 0; y < field_height; y++) {
+    //             for(let x = 0; x < field_width; x++) {
+    //                 flow.frames(1);
 
-                    if(is_buster(x, y)) {
-                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
-                    }
+    //                 const c0 = socket.gettime();
+
+    //                 if(is_buster(x, y)) {
+    //                     steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
+    //                 }
                     
-                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
-                        steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
-                    }
+    //                 if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
+    //                     steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
+    //                 }
 
-                    print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
+    //                 print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
 
-                    if(steps.length > 5) {
-                        return on_end(steps);
-                    }
+    //                 if(steps.length > count) {
+    //                     return on_end(steps);
+    //                 }
 
-                    flow.frames(1);
+    //                 flow.frames(1);
 
-                    const c1 = socket.gettime();
+    //                 const c1 = socket.gettime();
                     
-                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
-                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
-                    }
+    //                 if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
+    //                     steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+    //                 }
 
-                    print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
+    //                 print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
 
-                    if(steps.length > 10) {
-                        return on_end(steps);
-                    }
-
-                    flow.frames(1);
-                }
-            }
+    //                 if(steps.length > count) {
+    //                     return on_end(steps);
+    //                 }
+    //             }
+    //         }
             
-            print("[GAME]: found ", steps.length, " steps");
-            on_end(steps);
-        });
+    //         print("[GAME]: found ", steps.length, " steps");
+    //         on_end(steps);
+    //     });
 
-        coroutines.push(coroutine);
-    }
+    //     coroutines.push(coroutine);
+    // }
 
-    function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
-        const coroutine = flow.start(() => {
-            print("[GAME]: search best step");
+    // function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
+    //     const coroutine = flow.start(() => {
+    //         print("[GAME]: search best step");
 
-            let best_step = {} as StepInfo;
-            let max_damaged_elements = 0;
-            for(const step of steps) {
+    //         let best_step = {} as StepInfo;
+    //         let max_damaged_elements = 0;
+    //         for(const step of steps) {
 
-                print("[GAME]: call get_count_damaged_elements_of_step");
+    //             print("[GAME]: call get_count_damaged_elements_of_step");
 
-                const count_damaged_elements = get_count_damaged_elements_of_step(step);
-                if(count_damaged_elements > max_damaged_elements) {
-                    max_damaged_elements = count_damaged_elements;
-                    best_step = step;
-                }
+    //             const count_damaged_elements = get_count_damaged_elements_of_step(step);
+    //             if(count_damaged_elements > max_damaged_elements) {
+    //                 max_damaged_elements = count_damaged_elements;
+    //                 best_step = step;
+    //             }
 
-                flow.frames(1);
-            }
+    //             flow.frames(1);
+    //         }
 
-            print("[GAME]: found best step: ", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y);
-            on_end(best_step);
-        });
+    //         print("[GAME]: found best step: ", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y);
+    //         on_end(best_step);
+    //     });
 
-        coroutines.push(coroutine);
-    }
+    //     coroutines.push(coroutine);
+    // }
 
-    function get_count_damaged_elements_of_step(step: StepInfo) {
-        let count_damaged_elements = 0;
-        field.set_callback_on_damaged_element((item: ItemInfo) => {
-            on_damaged_element(item);
-            count_damaged_elements++;
-        });
+    // function get_count_damaged_elements_of_step(step: StepInfo) {
+    //     let count_damaged_elements = 0;
+    //     field.set_callback_on_damaged_element((item: ItemInfo) => {
+    //         on_damaged_element(item);
+    //         count_damaged_elements++;
+    //     });
 
-        simulate_game_step(step);
+    //     simulate_game_step(step);
         
-        field.set_callback_on_damaged_element(on_damaged_element);
+    //     field.set_callback_on_damaged_element(on_damaged_element);
 
-        print("[GAME]: damaged elements by step: ", count_damaged_elements);
+    //     print("[GAME]: damaged elements by step: ", count_damaged_elements);
 
-        return count_damaged_elements;
-    }
+    //     return count_damaged_elements;
+    // }
     
     function get_step_combination(step: StepInfo): CombinationInfo | undefined {
         field.swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
@@ -494,15 +501,17 @@ export function Game() {
     function try_combinate_before_buster_activation(from_x: number, from_y: number, to_x: number, to_y: number) {
         const is_from_buster = is_buster(to_x, to_y);
         const is_to_buster = is_buster(from_x, from_y);
-        const is_procesed = field.process_state(ProcessMode.Combinate);
+
+        if(!is_from_buster && !is_to_buster) return false;
 
         let is_activated = false;
-        if((is_from_buster || is_to_buster)) {
-            if(is_procesed) {
-                write_game_step_event('ON_BUSTER_ACTIVATION', {});
-                if(is_from_buster) is_activated = try_activate_buster_element(to_x, to_y);
-                if(is_to_buster) is_activated = try_activate_buster_element(from_x, from_y);
-            } else is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y);
+        
+        const is_procesed = field.process_state(ProcessMode.Combinate);
+        if(!is_procesed) is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y);
+        else { 
+            write_game_step_event('ON_BUSTER_ACTIVATION', {});
+            if(is_from_buster) is_activated = try_activate_buster_element(to_x, to_y);
+            if(is_to_buster) is_activated = try_activate_buster_element(from_x, from_y);
         }
 
         return is_procesed || is_activated;
@@ -1005,18 +1014,17 @@ export function Game() {
             }
         }
 
-        is_block_input = true;
-        search_all_available_steps((steps) => {
-            if(steps.length != 0) {
-                all_available_steps = steps;
-                print("[GAME]: end search available steps after shuffle field");
-                process_game_step(false);
-            } else {
-                game_step_events = {} as GameStepEventBuffer;
-                field.load_state(state);
-                shuffle_field();
-            }
-        });
+        // is_block_input = true;
+        // search_available_steps(1, (steps) => {
+        //     if(steps.length != 0) {
+        //         print("[GAME]: end search available steps after shuffle field");
+        //         process_game_step(false);
+        //     } else {
+        //         game_step_events = {} as GameStepEventBuffer;
+        //         field.load_state(state);
+        //         shuffle_field();
+        //     }
+        // });
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -1122,6 +1130,8 @@ export function Game() {
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;
         
+        const c0 = socket.gettime();
+
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 from: {x: from_x, y: from_y},
@@ -1132,6 +1142,8 @@ export function Game() {
 
             return false;
         }
+
+        print("TRY SWAP TIME: ", (socket.gettime() - c0) * 1000, "ms");
         
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
@@ -1193,13 +1205,21 @@ export function Game() {
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
+        const c0 = socket.gettime();
+
         while(field.process_state(ProcessMode.Combinate)) {
             print("[GAME]: after combination in game");
             field.process_state(ProcessMode.MoveElements);
             print("[GAME]: after movements in game");
         }
 
+        print("STEP TIME: ", (socket.gettime() - c0) * 1000, "ms");
+
         previous_states.push(field.save_state());
+
+        // search_available_steps(5, (steps) => {
+        //     available_steps = steps;
+        // });
 
         if(is_step) step_counter--;
         is_step = false;

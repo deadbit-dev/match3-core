@@ -310,8 +310,12 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return true
     end
-    local function get_all_combinations()
+    local function get_all_combinations(check)
+        if check == nil then
+            check = false
+        end
         local combinations = {}
+        local combinations_elements = {}
         do
             local mask_index = #CombinationMasks - 1
             while mask_index >= 0 do
@@ -320,6 +324,17 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     local i = 0
                     while i < #masks do
                         local mask = masks[i + 1]
+                        local is_one_row_mask = false
+                        repeat
+                            local ____switch19 = mask_index
+                            local ____cond19 = ____switch19 == ____exports.CombinationType.Comb3 or ____switch19 == ____exports.CombinationType.Comb4 or ____switch19 == ____exports.CombinationType.Comb5
+                            if ____cond19 then
+                                is_one_row_mask = true
+                                break
+                            end
+                        until true
+                        local is_horizontal_comb = is_one_row_mask and i == 0
+                        local break_x = -1
                         do
                             local y = 0
                             while y + #mask <= size_y do
@@ -340,18 +355,23 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                                         if mask[i + 1][j + 1] == 1 then
                                                             local cell = get_cell(x + j, y + i)
                                                             local element = get_element(x + j, y + i)
-                                                            if cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) or element == ____exports.NullElement then
+                                                            if element == ____exports.NullElement or cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) then
                                                                 is_combined = false
+                                                                break_x = x + j
                                                                 break
                                                             end
-                                                            if not is_unique_element_combination(element, combinations) then
+                                                            if combinations_elements[element.uid] then
                                                                 is_combined = false
+                                                                break_x = x + j + 1
                                                                 break
                                                             end
                                                             local ____combination_elements_2 = combination.elements
                                                             ____combination_elements_2[#____combination_elements_2 + 1] = {x = x + j, y = y + i, uid = element.uid}
                                                             if last_element ~= ____exports.NullElement then
                                                                 is_combined = is_combined_elements(last_element, element)
+                                                                if not is_combined then
+                                                                    break_x = x + j
+                                                                end
                                                             end
                                                             last_element = element
                                                         end
@@ -364,8 +384,23 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                         if is_combined then
                                             combination.type = mask_index
                                             combinations[#combinations + 1] = combination
+                                            for ____, element in ipairs(combination.elements) do
+                                                combinations_elements[element.uid] = true
+                                            end
+                                            break_x = x + #mask[1]
+                                            if check then
+                                                return combinations
+                                            end
                                         end
-                                        x = x + 1
+                                        local ____temp_4
+                                        if is_horizontal_comb and break_x ~= -1 then
+                                            x = break_x
+                                            ____temp_4 = x
+                                        else
+                                            local ____x_3 = x
+                                            x = ____x_3 + 1
+                                            ____temp_4 = ____x_3
+                                        end
                                     end
                                 end
                                 y = y + 1
@@ -408,7 +443,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         swap_elements(from_x, from_y, to_x, to_y)
         local was = false
-        local combinations = get_all_combinations()
+        local combinations = get_all_combinations(true)
         for ____, combination in ipairs(combinations) do
             for ____, element in ipairs(combination.elements) do
                 local is_from = element.uid == element_from.uid
@@ -649,8 +684,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 if index == -1 then
                     moved_elements[#moved_elements + 1] = {points = {{to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}}, data = element_from}
                 else
-                    local ____moved_elements_index_points_3 = moved_elements[index + 1].points
-                    ____moved_elements_index_points_3[#____moved_elements_index_points_3 + 1] = {to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}
+                    local ____moved_elements_index_points_5 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_5[#____moved_elements_index_points_5 + 1] = {to_x = to_x, to_y = to_y, type = ____exports.MoveType.Swaped}
                 end
             end
             local element_to = get_element(to_x, to_y)
@@ -662,8 +697,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 if index == -1 then
                     moved_elements[#moved_elements + 1] = {points = {{to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}}, data = element_to}
                 else
-                    local ____moved_elements_index_points_4 = moved_elements[index + 1].points
-                    ____moved_elements_index_points_4[#____moved_elements_index_points_4 + 1] = {to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}
+                    local ____moved_elements_index_points_6 = moved_elements[index + 1].points
+                    ____moved_elements_index_points_6[#____moved_elements_index_points_6 + 1] = {to_x = from_x, to_y = from_y, type = ____exports.MoveType.Swaped}
                 end
             end
         end
@@ -713,17 +748,17 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         local element = on_request_element(x, y)
         if element ~= ____exports.NullElement then
             local j = GAME_CONFIG.movement_to_point and y - 1 or 0
-            local ____temp_5 = #moved_elements + 1
-            moved_elements[____temp_5] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
-            local index = ____temp_5 - 1
+            local ____temp_7 = #moved_elements + 1
+            moved_elements[____temp_7] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Requested}}, data = element}
+            local index = ____temp_7 - 1
             while true do
-                local ____j_7 = j
-                j = ____j_7 + 1
-                if not (____j_7 < y) then
+                local ____j_9 = j
+                j = ____j_9 + 1
+                if not (____j_9 < y) then
                     break
                 end
-                local ____moved_elements_index_points_6 = moved_elements[index + 1].points
-                ____moved_elements_index_points_6[#____moved_elements_index_points_6 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+                local ____moved_elements_index_points_8 = moved_elements[index + 1].points
+                ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
             end
         end
     end
@@ -749,9 +784,9 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                         )
                         j = GAME_CONFIG.movement_to_point and y - 1 or j
                         while true do
-                            local ____j_9 = j
-                            j = ____j_9 + 1
-                            if not (____j_9 < y) then
+                            local ____j_11 = j
+                            j = ____j_11 + 1
+                            if not (____j_11 < y) then
                                 break
                             end
                             local index = __TS__ArrayFindIndex(
@@ -761,8 +796,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                             if index == -1 then
                                 moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = j, type = ____exports.MoveType.Falled}}, data = element}
                             else
-                                local ____moved_elements_index_points_8 = moved_elements[index + 1].points
-                                ____moved_elements_index_points_8[#____moved_elements_index_points_8 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
+                                local ____moved_elements_index_points_10 = moved_elements[index + 1].points
+                                ____moved_elements_index_points_10[#____moved_elements_index_points_10 + 1] = {to_x = x, to_y = j, type = ____exports.MoveType.Falled}
                             end
                         end
                         return true
@@ -797,8 +832,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     if index == -1 then
                         moved_elements[#moved_elements + 1] = {points = {{to_x = x, to_y = y, type = ____exports.MoveType.Filled}}, data = element}
                     else
-                        local ____moved_elements_index_points_10 = moved_elements[index + 1].points
-                        ____moved_elements_index_points_10[#____moved_elements_index_points_10 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
+                        local ____moved_elements_index_points_12 = moved_elements[index + 1].points
+                        ____moved_elements_index_points_12[#____moved_elements_index_points_12 + 1] = {to_x = x, to_y = y, type = ____exports.MoveType.Filled}
                     end
                     return true
                 end
@@ -867,13 +902,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch191 = mode
-            local ____cond191 = ____switch191 == ____exports.ProcessMode.Combinate
-            if ____cond191 then
+            local ____switch196 = mode
+            local ____cond196 = ____switch196 == ____exports.ProcessMode.Combinate
+            if ____cond196 then
                 return process_combinate()
             end
-            ____cond191 = ____cond191 or ____switch191 == ____exports.ProcessMode.MoveElements
-            if ____cond191 then
+            ____cond196 = ____cond196 or ____switch196 == ____exports.ProcessMode.MoveElements
+            if ____cond196 then
                 return process_move()
             end
         until true

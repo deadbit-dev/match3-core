@@ -25,7 +25,7 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, get_helper_combination, search_all_available_steps, get_count_damaged_elements_of_step, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, simulate_game_step, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input, all_available_steps
+    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, get_helper_combination, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input, available_steps
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
             local key = ____value[1]
@@ -54,6 +54,7 @@ function ____exports.Game()
                 if is_block_input or elements == nil then
                     return
                 end
+                local c0 = socket.gettime()
                 stop_helper()
                 if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
                     return
@@ -61,6 +62,11 @@ function ____exports.Game()
                 local is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y)
                 is_step = true
                 process_game_step(is_procesed)
+                print(
+                    "SWAP ELEMENTS TIME: ",
+                    (socket.gettime() - c0) * 1000,
+                    "ms"
+                )
             end
         )
         EventBus.on(
@@ -130,18 +136,6 @@ function ____exports.Game()
                     EventBus.send("ON_GAME_OVER")
                 end
                 print("[GAME]: end step")
-                is_block_input = true
-                search_all_available_steps(function(steps)
-                    if #steps ~= 0 then
-                        all_available_steps = steps
-                        print("[GAME]: end check of available steps after end game step")
-                        is_block_input = false
-                        return
-                    end
-                    print("[GAME]: shuffle field after end game step")
-                    stop_helper()
-                    shuffle_field()
-                end)
             end
         )
     end
@@ -224,7 +218,7 @@ function ____exports.Game()
             5,
             false,
             function()
-                get_helper_combination(all_available_steps)
+                get_helper_combination(available_steps)
                 print("[GAME]: try to set helper")
                 if helper_data ~= nil then
                     print("[GAME]: set helper")
@@ -283,67 +277,6 @@ function ____exports.Game()
             end
         end
     end
-    function search_all_available_steps(on_end)
-        local ____coroutine = flow.start(function()
-            print("[GAME]: search available steps")
-            local steps = {}
-            do
-                local y = 0
-                while y < field_height do
-                    do
-                        local x = 0
-                        while x < field_width do
-                            local c0 = socket.gettime()
-                            if is_buster(x, y) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y}
-                            end
-                            if is_valid_pos(x + 1, y, field_width, field_height) and is_can_move(x, y, x + 1, y) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
-                            end
-                            print(
-                                "first part time: ",
-                                (socket.gettime() - c0) * 1000,
-                                "ms"
-                            )
-                            if #steps > 5 then
-                                return on_end(steps)
-                            end
-                            flow.frames(1)
-                            local c1 = socket.gettime()
-                            if is_valid_pos(x, y + 1, field_width, field_height) and is_can_move(x, y, x, y + 1) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
-                            end
-                            print(
-                                "second part time: ",
-                                (socket.gettime() - c1) * 1000,
-                                "ms"
-                            )
-                            if #steps > 10 then
-                                return on_end(steps)
-                            end
-                            flow.frames(1)
-                            x = x + 1
-                        end
-                    end
-                    y = y + 1
-                end
-            end
-            print("[GAME]: found ", #steps, " steps")
-            on_end(steps)
-        end)
-        coroutines[#coroutines + 1] = ____coroutine
-    end
-    function get_count_damaged_elements_of_step(step)
-        local count_damaged_elements = 0
-        field.set_callback_on_damaged_element(function(item)
-            on_damaged_element(item)
-            count_damaged_elements = count_damaged_elements + 1
-        end)
-        simulate_game_step(step)
-        field.set_callback_on_damaged_element(on_damaged_element)
-        print("[GAME]: damaged elements by step: ", count_damaged_elements)
-        return count_damaged_elements
-    end
     function get_step_combination(step)
         field.swap_elements(step.from_x, step.from_y, step.to_x, step.to_y)
         local combinations = field.get_all_combinations()
@@ -369,19 +302,20 @@ function ____exports.Game()
     function try_combinate_before_buster_activation(from_x, from_y, to_x, to_y)
         local is_from_buster = is_buster(to_x, to_y)
         local is_to_buster = is_buster(from_x, from_y)
-        local is_procesed = field.process_state(ProcessMode.Combinate)
+        if not is_from_buster and not is_to_buster then
+            return false
+        end
         local is_activated = false
-        if is_from_buster or is_to_buster then
-            if is_procesed then
-                write_game_step_event("ON_BUSTER_ACTIVATION", {})
-                if is_from_buster then
-                    is_activated = try_activate_buster_element(to_x, to_y)
-                end
-                if is_to_buster then
-                    is_activated = try_activate_buster_element(from_x, from_y)
-                end
-            else
-                is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y)
+        local is_procesed = field.process_state(ProcessMode.Combinate)
+        if not is_procesed then
+            is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y)
+        else
+            write_game_step_event("ON_BUSTER_ACTIVATION", {})
+            if is_from_buster then
+                is_activated = try_activate_buster_element(to_x, to_y)
+            end
+            if is_to_buster then
+                is_activated = try_activate_buster_element(from_x, from_y)
             end
         end
         return is_procesed or is_activated
@@ -946,18 +880,6 @@ function ____exports.Game()
                 end
             end
         end
-        is_block_input = true
-        search_all_available_steps(function(steps)
-            if #steps ~= 0 then
-                all_available_steps = steps
-                print("[GAME]: end search available steps after shuffle field")
-                process_game_step(false)
-            else
-                game_step_events = {}
-                field.load_state(state)
-                shuffle_field()
-            end
-        end)
     end
     function try_hammer_activation(x, y)
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
@@ -1084,10 +1006,16 @@ function ____exports.Game()
             __TS__ObjectAssign({}, selected_element)
         )
         selected_element = nil
+        local c0 = socket.gettime()
         if not field.try_move(from_x, from_y, to_x, to_y) then
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
             return false
         end
+        print(
+            "TRY SWAP TIME: ",
+            (socket.gettime() - c0) * 1000,
+            "ms"
+        )
         write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
         return true
     end
@@ -1097,55 +1025,6 @@ function ____exports.Game()
         print("set_random: ", randomseed)
         math.randomseed(randomseed)
     end
-    function simulate_game_step(step)
-        local previous_state = field.save_state()
-        print(
-            "[GAME]: simulating game step: ",
-            step.from_x,
-            step.from_y,
-            step.to_x,
-            step.to_y
-        )
-        local element_from = field.get_element(step.from_x, step.from_y)
-        local element_to = field.get_element(step.to_x, step.to_y)
-        if element_from ~= NullElement then
-            print(element_from.type)
-        end
-        if element_to ~= NullElement then
-            print(element_to.type)
-        end
-        is_simulating = true
-        local after_activation = false
-        if step.from_x == step.to_x and step.from_y == step.to_y then
-            after_activation = try_click_activation(step.from_x, step.from_y)
-            if not after_activation then
-                return
-            end
-        else
-            if not field.try_move(step.from_x, step.from_y, step.to_x, step.to_y) then
-                return
-            end
-            after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y)
-        end
-        if after_activation then
-            field.process_state(ProcessMode.MoveElements)
-        end
-        while field.process_state(ProcessMode.Combinate) do
-            print("[GAME]: after combinate in simulating")
-            field.process_state(ProcessMode.MoveElements)
-            print("[GAME]: after movements in simulating")
-        end
-        field.load_state(previous_state)
-        is_simulating = false
-        math.randomseed(randomseed)
-        print(
-            "[GAME]: simulating game step end: ",
-            step.from_x,
-            step.from_y,
-            step.to_x,
-            step.to_y
-        )
-    end
     function process_game_step(after_activation)
         if after_activation == nil then
             after_activation = false
@@ -1153,11 +1032,17 @@ function ____exports.Game()
         if after_activation then
             field.process_state(ProcessMode.MoveElements)
         end
+        local c0 = socket.gettime()
         while field.process_state(ProcessMode.Combinate) do
             print("[GAME]: after combination in game")
             field.process_state(ProcessMode.MoveElements)
             print("[GAME]: after movements in game")
         end
+        print(
+            "STEP TIME: ",
+            (socket.gettime() - c0) * 1000,
+            "ms"
+        )
         previous_states[#previous_states + 1] = field.save_state()
         if is_step then
             step_counter = step_counter - 1
@@ -1223,29 +1108,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch278 = combination.type
-            local ____cond278 = ____switch278 == CombinationType.Comb4
-            if ____cond278 then
+            local ____switch255 = combination.type
+            local ____cond255 = ____switch255 == CombinationType.Comb4
+            if ____cond255 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond278 = ____cond278 or ____switch278 == CombinationType.Comb5
-            if ____cond278 then
+            ____cond255 = ____cond255 or ____switch255 == CombinationType.Comb5
+            if ____cond255 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond278 = ____cond278 or ____switch278 == CombinationType.Comb2x2
-            if ____cond278 then
+            ____cond255 = ____cond255 or ____switch255 == CombinationType.Comb2x2
+            if ____cond255 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond278 = ____cond278 or (____switch278 == CombinationType.Comb3x3a or ____switch278 == CombinationType.Comb3x3b)
-            if ____cond278 then
+            ____cond255 = ____cond255 or (____switch255 == CombinationType.Comb3x3a or ____switch255 == CombinationType.Comb3x3b)
+            if ____cond255 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond278 = ____cond278 or (____switch278 == CombinationType.Comb3x4 or ____switch278 == CombinationType.Comb3x5)
-            if ____cond278 then
+            ____cond255 = ____cond255 or (____switch255 == CombinationType.Comb3x4 or ____switch255 == CombinationType.Comb3x5)
+            if ____cond255 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1501,7 +1386,7 @@ function ____exports.Game()
     step_counter = 0
     is_step = false
     is_block_input = false
-    all_available_steps = {}
+    available_steps = {}
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)
@@ -1514,40 +1399,57 @@ function ____exports.Game()
         set_element_types()
         set_busters()
         set_events()
-        set_random()
+        set_random(1712584566)
         set_targets()
     end
-    local function search_helper_combination()
-        print("[GAME]: search combination")
-        search_all_available_steps(function(steps)
-            print("[GAME]: end search available steps in search helper combination")
-            get_helper_combination(steps)
-        end)
-    end
-    local function search_best_step(steps, on_end)
-        local ____coroutine = flow.start(function()
-            print("[GAME]: search best step")
-            local best_step = {}
-            local max_damaged_elements = 0
-            for ____, step in ipairs(steps) do
-                print("[GAME]: call get_count_damaged_elements_of_step")
-                local count_damaged_elements = get_count_damaged_elements_of_step(step)
-                if count_damaged_elements > max_damaged_elements then
-                    max_damaged_elements = count_damaged_elements
-                    best_step = step
-                end
-                flow.frames(1)
+    local function simulate_game_step(step)
+        local previous_state = field.save_state()
+        print(
+            "[GAME]: simulating game step: ",
+            step.from_x,
+            step.from_y,
+            step.to_x,
+            step.to_y
+        )
+        local element_from = field.get_element(step.from_x, step.from_y)
+        local element_to = field.get_element(step.to_x, step.to_y)
+        if element_from ~= NullElement then
+            print(element_from.type)
+        end
+        if element_to ~= NullElement then
+            print(element_to.type)
+        end
+        is_simulating = true
+        local after_activation = false
+        if step.from_x == step.to_x and step.from_y == step.to_y then
+            after_activation = try_click_activation(step.from_x, step.from_y)
+            if not after_activation then
+                return
             end
-            print(
-                "[GAME]: found best step: ",
-                best_step.from_x,
-                best_step.from_y,
-                best_step.to_x,
-                best_step.to_y
-            )
-            on_end(best_step)
-        end)
-        coroutines[#coroutines + 1] = ____coroutine
+        else
+            if not field.try_move(step.from_x, step.from_y, step.to_x, step.to_y) then
+                return
+            end
+            after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y)
+        end
+        if after_activation then
+            field.process_state(ProcessMode.MoveElements)
+        end
+        while field.process_state(ProcessMode.Combinate) do
+            print("[GAME]: after combinate in simulating")
+            field.process_state(ProcessMode.MoveElements)
+            print("[GAME]: after movements in simulating")
+        end
+        field.load_state(previous_state)
+        is_simulating = false
+        math.randomseed(randomseed)
+        print(
+            "[GAME]: simulating game step end: ",
+            step.from_x,
+            step.from_y,
+            step.to_x,
+            step.to_y
+        )
     end
     return init()
 end
