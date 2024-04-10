@@ -261,6 +261,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
 
+        // const c0 = socket.gettime();
+
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
@@ -274,19 +276,19 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             for(let i = 0; i < masks.length; i++) {
                 const mask = masks[i];
                 
-               // оптимизация для одноразмерных масок
-                let is_one_row_mask = false;
-                switch(mask_index) {
-                    case CombinationType.Comb3:
-                    case CombinationType.Comb4:
-                    case CombinationType.Comb5:
-                        is_one_row_mask = true;
-                    break;
-                }
+            //    // оптимизация для одноразмерных масок
+            //     let is_one_row_mask = false;
+            //     switch(mask_index) {
+            //         case CombinationType.Comb3:
+            //         case CombinationType.Comb4:
+            //         case CombinationType.Comb5:
+            //             is_one_row_mask = true;
+            //         break;
+            //     }
             
-                const is_horizontal_comb = (is_one_row_mask && (i == 0));
+                // const is_horizontal_comb = (is_one_row_mask && (i == 0));
 
-                let break_x = -1;
+                // let break_x = -1;
 
                 // print("MASK TYPE: ", mask_index);
 
@@ -294,7 +296,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                 // проходимся маской по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
-                    for(let x = 0; x + mask[0].length <= size_x; is_horizontal_comb && (break_x != -1) ? x = break_x : x++) {
+                    for(let x = 0; x + mask[0].length <= size_x; x++) {// } is_horizontal_comb && (break_x != -1) ? x = break_x : x++) {
                         const combination = {} as CombinationInfo;
                         combination.elements = [];
                         combination.angle = i * 90;
@@ -313,7 +315,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     
                                     if(element == NullElement || cell == NotActiveCell || !is_available_cell_type_for_activation(cell)) {
                                         is_combined = false;
-                                        break_x = x + j;
+                                        // break_x = x + j;
                                         break;
                                     }
 
@@ -321,7 +323,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     // if(!is_unique_element_combination(element, combinations)) {
                                     if(combinations_elements[element.uid]) {
                                         is_combined = false;
-                                        break_x = x + j + 1;
+                                        // break_x = x + j + 1;
                                         break;
                                     }
                                     
@@ -333,7 +335,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                                     if(last_element != NullElement) {
                                         is_combined = is_combined_elements(last_element, element);
-                                        if(!is_combined) break_x = x + j;
+                                        // if(!is_combined) break_x = x + j;
                                     }
 
                                     last_element = element;
@@ -350,7 +352,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                             for(const element of combination.elements)
                                 combinations_elements[element.uid] = true;
 
-                            break_x = x + mask[0].length;
+                            // break_x = x + mask[0].length;
 
                             if(check) return combinations;
                         }
@@ -361,9 +363,11 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             }
         }
 
+        // print("C0 TIME: ", (socket.gettime() - c0) * 1000, "ms");
+
         return combinations;
     }
-
+    
     // базовая функция проверки могут ли участвовать в комбинации два элемента 
     function is_combined_elements_base(e1: Element, e2: Element) {
         // как пример грубая проверка что классификатор элементов одинаковый
@@ -626,6 +630,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     
     function set_element_type(id: number, element_type: ElementType) {
         state.element_types[id] = element_type;
+    }
+
+    function get_element_type(id: number) {
+        return state.element_types[id];
     }
     
     // добавляет элемент на поле
@@ -958,7 +966,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
   
     return {
-        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
+        init, set_element_type, get_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
         get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
