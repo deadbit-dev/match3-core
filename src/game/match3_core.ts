@@ -276,19 +276,19 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             for(let i = 0; i < masks.length; i++) {
                 const mask = masks[i];
                 
-               // оптимизация для одноразмерных масок
-                let is_one_row_mask = false;
-                switch(mask_index) {
-                    case CombinationType.Comb3:
-                    case CombinationType.Comb4:
-                    case CombinationType.Comb5:
-                        is_one_row_mask = true;
-                    break;
-                }
+            //    // оптимизация для одноразмерных масок
+            //     let is_one_row_mask = false;
+            //     switch(mask_index) {
+            //         case CombinationType.Comb3:
+            //         case CombinationType.Comb4:
+            //         case CombinationType.Comb5:
+            //             is_one_row_mask = true;
+            //         break;
+            //     }
             
-                const is_horizontal_comb = (is_one_row_mask && (i == 0));
+                // const is_horizontal_comb = (is_one_row_mask && (i == 0));
 
-                let break_x = -1;
+                // let break_x = -1;
 
                 // print("MASK TYPE: ", mask_index);
 
@@ -296,7 +296,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                 // проходимся маской по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
-                    for(let x = 0; x + mask[0].length <= size_x; is_horizontal_comb && (break_x != -1) ? x = break_x : x++) {
+                    for(let x = 0; x + mask[0].length <= size_x; x++) {// } is_horizontal_comb && (break_x != -1) ? x = break_x : x++) {
                         const combination = {} as CombinationInfo;
                         combination.elements = [];
                         combination.angle = i * 90;
@@ -315,7 +315,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     
                                     if(element == NullElement || cell == NotActiveCell || !is_available_cell_type_for_activation(cell)) {
                                         is_combined = false;
-                                        break_x = x + j;
+                                        // break_x = x + j;
                                         break;
                                     }
 
@@ -323,7 +323,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     // if(!is_unique_element_combination(element, combinations)) {
                                     if(combinations_elements[element.uid]) {
                                         is_combined = false;
-                                        break_x = x + j + 1;
+                                        // break_x = x + j + 1;
                                         break;
                                     }
                                     
@@ -335,7 +335,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                                     if(last_element != NullElement) {
                                         is_combined = is_combined_elements(last_element, element);
-                                        if(!is_combined) break_x = x + j;
+                                        // if(!is_combined) break_x = x + j;
                                     }
 
                                     last_element = element;
@@ -352,7 +352,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                             for(const element of combination.elements)
                                 combinations_elements[element.uid] = true;
 
-                            break_x = x + mask[0].length;
+                            // break_x = x + mask[0].length;
 
                             if(check) return combinations;
                         }

@@ -422,6 +422,8 @@ export function Game() {
                     if(steps.length > count) {
                         return on_end(steps);
                     }
+
+                    // flow.frames(1);
                 }
             }
             
