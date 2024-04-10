@@ -190,7 +190,7 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             if (state == undefined) return;
             on_load_field(state);
-            EventBus.send('ON_GAME_STEP_ANIMATION_END');
+            
             EventBus.send('SET_HELPER');
         });
 

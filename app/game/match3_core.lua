@@ -610,6 +610,9 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local function set_element_type(id, element_type)
         state.element_types[id] = element_type
     end
+    local function get_element_type(id)
+        return state.element_types[id]
+    end
     local function get_neighbor_elements(x, y, mask)
         if mask == nil then
             mask = {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}}
@@ -902,13 +905,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch196 = mode
-            local ____cond196 = ____switch196 == ____exports.ProcessMode.Combinate
-            if ____cond196 then
+            local ____switch197 = mode
+            local ____cond197 = ____switch197 == ____exports.ProcessMode.Combinate
+            if ____cond197 then
                 return process_combinate()
             end
-            ____cond196 = ____cond196 or ____switch196 == ____exports.ProcessMode.MoveElements
-            if ____cond196 then
+            ____cond197 = ____cond197 or ____switch197 == ____exports.ProcessMode.MoveElements
+            if ____cond197 then
                 return process_move()
             end
         until true
@@ -935,6 +938,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     return {
         init = init,
         set_element_type = set_element_type,
+        get_element_type = get_element_type,
         set_cell = set_cell,
         get_cell = get_cell,
         set_element = set_element,

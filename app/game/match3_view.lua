@@ -46,7 +46,6 @@ function ____exports.View(animator)
                     return
                 end
                 on_load_field(state)
-                EventBus.send("ON_GAME_STEP_ANIMATION_END")
                 EventBus.send("SET_HELPER")
             end
         )

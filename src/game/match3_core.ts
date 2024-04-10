@@ -261,6 +261,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
 
+        // const c0 = socket.gettime();
+
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
@@ -361,9 +363,11 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             }
         }
 
+        // print("C0 TIME: ", (socket.gettime() - c0) * 1000, "ms");
+
         return combinations;
     }
-
+    
     // базовая функция проверки могут ли участвовать в комбинации два элемента 
     function is_combined_elements_base(e1: Element, e2: Element) {
         // как пример грубая проверка что классификатор элементов одинаковый
@@ -626,6 +630,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     
     function set_element_type(id: number, element_type: ElementType) {
         state.element_types[id] = element_type;
+    }
+
+    function get_element_type(id: number) {
+        return state.element_types[id];
     }
     
     // добавляет элемент на поле
@@ -958,7 +966,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
   
     return {
-        init, set_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
+        init, set_element_type, get_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
         get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
         get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,

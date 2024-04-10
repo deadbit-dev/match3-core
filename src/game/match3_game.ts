@@ -95,7 +95,7 @@ export function Game() {
         set_element_types();
         set_busters();
         set_events();
-        set_random(1712584566); // set_random(1712164717);
+        set_random(); // set_random(1712584566); // set_random(1712164717);
         set_targets();
     }
     
@@ -208,19 +208,19 @@ export function Game() {
 
             print("[GAME]: end step");
 
-            // is_block_input = true;
-            // search_available_steps(1, (steps) => {
-            //     if(steps.length != 0) {
-            //         print("[GAME]: end check of available steps after end game step");
-            //         is_block_input = false;
-            //         return;
-            //     }
+            is_block_input = true;
+            search_available_steps(1, (steps) => {
+                if(steps.length != 0) {
+                    print("[GAME]: end check of available steps after end game step");
+                    is_block_input = false;
+                    return;
+                }
 
-            //     print("[GAME]: shuffle field after end game step");
+                print("[GAME]: shuffle field after end game step");
                 
-            //     stop_helper();
-            //     shuffle_field();
-            // });
+                stop_helper();
+                shuffle_field();
+            });
         });
     }
 
@@ -241,9 +241,9 @@ export function Game() {
         const state = field.save_state();
         previous_states.push(state);
 
-        // search_available_steps(5, (steps) => {
-        //     available_steps = steps;
-        // });
+        search_available_steps(5, (steps) => {
+            available_steps = steps;
+        });
         
         EventBus.send('ON_LOAD_FIELD', state);
     }
@@ -384,53 +384,53 @@ export function Game() {
         }
     }
     
-    // function search_available_steps(count: number, on_end: (steps: StepInfo[]) => void) {
-    //     const coroutine = flow.start(() => {
-    //         print("[GAME]: search available steps");
+    function search_available_steps(count: number, on_end: (steps: StepInfo[]) => void) {
+        const coroutine = flow.start(() => {
+            print("[GAME]: search available steps");
 
-    //         const steps: StepInfo[] = [];
-    //         for(let y = 0; y < field_height; y++) {
-    //             for(let x = 0; x < field_width; x++) {
-    //                 flow.frames(1);
+            const steps: StepInfo[] = [];
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+                    flow.frames(1);
 
-    //                 const c0 = socket.gettime();
+                    const c0 = socket.gettime();
 
-    //                 if(is_buster(x, y)) {
-    //                     steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
-    //                 }
+                    if(is_buster(x, y)) {
+                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
+                    }
                     
-    //                 if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
-    //                     steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
-    //                 }
+                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
+                        steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
+                    }
 
-    //                 print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
+                    print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
 
-    //                 if(steps.length > count) {
-    //                     return on_end(steps);
-    //                 }
+                    if(steps.length > count) {
+                        return on_end(steps);
+                    }
 
-    //                 flow.frames(1);
+                    flow.frames(1);
 
-    //                 const c1 = socket.gettime();
+                    const c1 = socket.gettime();
                     
-    //                 if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
-    //                     steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
-    //                 }
+                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
+                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
+                    }
 
-    //                 print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
+                    print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
 
-    //                 if(steps.length > count) {
-    //                     return on_end(steps);
-    //                 }
-    //             }
-    //         }
+                    if(steps.length > count) {
+                        return on_end(steps);
+                    }
+                }
+            }
             
-    //         print("[GAME]: found ", steps.length, " steps");
-    //         on_end(steps);
-    //     });
+            print("[GAME]: found ", steps.length, " steps");
+            on_end(steps);
+        });
 
-    //     coroutines.push(coroutine);
-    // }
+        coroutines.push(coroutine);
+    }
 
     // function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
     //     const coroutine = flow.start(() => {
@@ -1014,17 +1014,17 @@ export function Game() {
             }
         }
 
-        // is_block_input = true;
-        // search_available_steps(1, (steps) => {
-        //     if(steps.length != 0) {
-        //         print("[GAME]: end search available steps after shuffle field");
-        //         process_game_step(false);
-        //     } else {
-        //         game_step_events = {} as GameStepEventBuffer;
-        //         field.load_state(state);
-        //         shuffle_field();
-        //     }
-        // });
+        is_block_input = true;
+        search_available_steps(1, (steps) => {
+            if(steps.length != 0) {
+                print("[GAME]: end search available steps after shuffle field");
+                process_game_step(false);
+            } else {
+                game_step_events = {} as GameStepEventBuffer;
+                field.load_state(state);
+                shuffle_field();
+            }
+        });
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -1217,9 +1217,9 @@ export function Game() {
 
         previous_states.push(field.save_state());
 
-        // search_available_steps(5, (steps) => {
-        //     available_steps = steps;
-        // });
+        search_available_steps(5, (steps) => {
+            available_steps = steps;
+        });
 
         if(is_step) step_counter--;
         is_step = false;
@@ -1335,9 +1335,11 @@ export function Game() {
     }
 
     function is_combined_elements(e1: Element, e2: Element) {
-        const e1_pos = field.get_pos_by_uid(e1.uid);
-        const e2_pos = field.get_pos_by_uid(e2.uid);
-        if(is_buster(e1_pos.x, e1_pos.y) || is_buster(e2_pos.x, e2_pos.y)) return false;
+        // const e1_pos = field.get_pos_by_uid(e1.uid);
+        // const e2_pos = field.get_pos_by_uid(e2.uid);
+        // if(is_buster(e1_pos.x, e1_pos.y) || is_buster(e2_pos.x, e2_pos.y)) return false;
+
+        if(field.get_element_type(e1.type).is_clickable || field.get_element_type(e2.type).is_clickable) return false;
         
         return field.is_combined_elements_base(e1, e2);
     }
