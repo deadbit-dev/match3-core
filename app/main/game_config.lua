@@ -1,8 +1,4 @@
 local ____exports = {}
-local ____match3_core = require("game.match3_core")
-local CellType = ____match3_core.CellType
-local NotActiveCell = ____match3_core.NotActiveCell
-local NullElement = ____match3_core.NullElement
 ____exports.IS_DEBUG_MODE = true
 ____exports.ADS_CONFIG = {
     is_mediation = true,
@@ -45,16 +41,18 @@ ____exports.CellId.Base = 0
 ____exports.CellId[____exports.CellId.Base] = "Base"
 ____exports.CellId.Grass = 1
 ____exports.CellId[____exports.CellId.Grass] = "Grass"
-____exports.CellId.Box = 2
-____exports.CellId[____exports.CellId.Box] = "Box"
-____exports.CellId.Stone0 = 3
-____exports.CellId[____exports.CellId.Stone0] = "Stone0"
-____exports.CellId.Stone1 = 4
-____exports.CellId[____exports.CellId.Stone1] = "Stone1"
-____exports.CellId.Stone2 = 5
-____exports.CellId[____exports.CellId.Stone2] = "Stone2"
-____exports.CellId.Web = 6
+____exports.CellId.Flowers = 2
+____exports.CellId[____exports.CellId.Flowers] = "Flowers"
+____exports.CellId.Web = 3
 ____exports.CellId[____exports.CellId.Web] = "Web"
+____exports.CellId.Box = 4
+____exports.CellId[____exports.CellId.Box] = "Box"
+____exports.CellId.Stone0 = 5
+____exports.CellId[____exports.CellId.Stone0] = "Stone0"
+____exports.CellId.Stone1 = 6
+____exports.CellId[____exports.CellId.Stone1] = "Stone1"
+____exports.CellId.Stone2 = 7
+____exports.CellId[____exports.CellId.Stone2] = "Stone2"
 ____exports.ElementId = ElementId or ({})
 ____exports.ElementId.Dimonde = 0
 ____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
@@ -66,38 +64,36 @@ ____exports.ElementId.Ruby = 3
 ____exports.ElementId[____exports.ElementId.Ruby] = "Ruby"
 ____exports.ElementId.Emerald = 4
 ____exports.ElementId[____exports.ElementId.Emerald] = "Emerald"
-____exports.ElementId.VerticalRocket = 5
+____exports.ElementId.Cheese = 5
+____exports.ElementId[____exports.ElementId.Cheese] = "Cheese"
+____exports.ElementId.Cabbage = 6
+____exports.ElementId[____exports.ElementId.Cabbage] = "Cabbage"
+____exports.ElementId.Acorn = 7
+____exports.ElementId[____exports.ElementId.Acorn] = "Acorn"
+____exports.ElementId.RareMeat = 8
+____exports.ElementId[____exports.ElementId.RareMeat] = "RareMeat"
+____exports.ElementId.MediumMeat = 9
+____exports.ElementId[____exports.ElementId.MediumMeat] = "MediumMeat"
+____exports.ElementId.Chicken = 10
+____exports.ElementId[____exports.ElementId.Chicken] = "Chicken"
+____exports.ElementId.SunFlower = 11
+____exports.ElementId[____exports.ElementId.SunFlower] = "SunFlower"
+____exports.ElementId.Salad = 12
+____exports.ElementId[____exports.ElementId.Salad] = "Salad"
+____exports.ElementId.Hay = 13
+____exports.ElementId[____exports.ElementId.Hay] = "Hay"
+____exports.ElementId.VerticalRocket = 14
 ____exports.ElementId[____exports.ElementId.VerticalRocket] = "VerticalRocket"
-____exports.ElementId.HorizontalRocket = 6
+____exports.ElementId.HorizontalRocket = 15
 ____exports.ElementId[____exports.ElementId.HorizontalRocket] = "HorizontalRocket"
-____exports.ElementId.AxisRocket = 7
+____exports.ElementId.AxisRocket = 16
 ____exports.ElementId[____exports.ElementId.AxisRocket] = "AxisRocket"
-____exports.ElementId.Helicopter = 8
+____exports.ElementId.Helicopter = 17
 ____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
-____exports.ElementId.Dynamite = 9
+____exports.ElementId.Dynamite = 18
 ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
-____exports.ElementId.Diskosphere = 10
+____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
-____exports.ElementId.Custom1 = 11
-____exports.ElementId[____exports.ElementId.Custom1] = "Custom1"
-____exports.ElementId.Custom2 = 12
-____exports.ElementId[____exports.ElementId.Custom2] = "Custom2"
-____exports.ElementId.Custom3 = 13
-____exports.ElementId[____exports.ElementId.Custom3] = "Custom3"
-____exports.ElementId.Custom4 = 14
-____exports.ElementId[____exports.ElementId.Custom4] = "Custom4"
-____exports.ElementId.Custom5 = 15
-____exports.ElementId[____exports.ElementId.Custom5] = "Custom5"
-____exports.ElementId.Custom6 = 16
-____exports.ElementId[____exports.ElementId.Custom6] = "Custom6"
-____exports.ElementId.Custom7 = 17
-____exports.ElementId[____exports.ElementId.Custom7] = "Custom7"
-____exports.ElementId.Custom8 = 18
-____exports.ElementId[____exports.ElementId.Custom8] = "Custom8"
-____exports.ElementId.Custom9 = 19
-____exports.ElementId[____exports.ElementId.Custom9] = "Custom9"
-____exports.ElementId.Custom10 = 20
-____exports.ElementId[____exports.ElementId.Custom10] = "Custom10"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
@@ -127,7 +123,9 @@ ____exports._GAME_CONFIG = {
     spawn_element_time = 0.5,
     buster_delay = 0.5,
     default_substrate_z_index = -2,
+    default_cell_z_index = -1,
     default_element_z_index = 0,
+    default_top_layer_cell_z_index = 2,
     substrate_database = {
         [____exports.SubstrateId.OutsideArc] = "outside_arc",
         [____exports.SubstrateId.OutsideInsideAngle] = "outside_inside_angle",
@@ -141,85 +139,82 @@ ____exports._GAME_CONFIG = {
         [____exports.SubstrateId.InsideAngle] = "inside_angle",
         [____exports.SubstrateId.Full] = "full"
     },
-    cell_database = {
-        [____exports.CellId.Base] = {type = CellType.Base, view = "cell_white", z_index = -1},
-        [____exports.CellId.Grass] = {
-            type = CellType.ActionLocked,
-            cnt_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_grass",
-            z_index = -1
-        },
-        [____exports.CellId.Box] = {
-            type = bit.bor(
-                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
-                CellType.NotMoved
-            ),
-            cnt_near_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_box",
-            z_index = 2
-        },
-        [____exports.CellId.Stone0] = {
-            type = bit.bor(
-                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
-                CellType.NotMoved
-            ),
-            cnt_near_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_stone_0",
-            z_index = 2
-        },
-        [____exports.CellId.Stone1] = {
-            type = bit.bor(
-                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
-                CellType.NotMoved
-            ),
-            cnt_near_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_stone_1",
-            z_index = 2
-        },
-        [____exports.CellId.Stone2] = {
-            type = bit.bor(
-                bit.bor(CellType.ActionLockedNear, CellType.Disabled),
-                CellType.NotMoved
-            ),
-            cnt_near_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_stone_2",
-            z_index = 2
-        },
-        [____exports.CellId.Web] = {
-            type = bit.bor(CellType.ActionLockedNear, CellType.NotMoved),
-            cnt_near_acts = 0,
-            is_render_under_cell = true,
-            view = "cell_web",
-            z_index = 2
-        }
+    cell_view = {
+        [____exports.CellId.Base] = "cell_white",
+        [____exports.CellId.Grass] = "cell_grass",
+        [____exports.CellId.Flowers] = "cell_flowers",
+        [____exports.CellId.Web] = "cell_web",
+        [____exports.CellId.Box] = "cell_box",
+        [____exports.CellId.Stone0] = "cell_stone_0",
+        [____exports.CellId.Stone1] = "cell_stone_1",
+        [____exports.CellId.Stone2] = "cell_stone_2"
     },
-    element_database = {
-        [____exports.ElementId.Dimonde] = {type = {is_movable = true, is_clickable = false}, percentage = 10, color = "#009de2", view = "element_diamond"},
-        [____exports.ElementId.Gold] = {type = {is_movable = true, is_clickable = false}, percentage = 10, color = "#e94165", view = "element_gold"},
-        [____exports.ElementId.Topaz] = {type = {is_movable = true, is_clickable = false}, percentage = 10, color = "#f5d74d", view = "element_topaz"},
-        [____exports.ElementId.Ruby] = {type = {is_movable = true, is_clickable = false}, percentage = 10, color = "#9a4ee5", view = "element_ruby"},
-        [____exports.ElementId.Emerald] = {type = {is_movable = true, is_clickable = false}, percentage = 10, color = "#20af1b", view = "element_emerald"},
-        [____exports.ElementId.VerticalRocket] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "vertical_rocket_buster"},
-        [____exports.ElementId.HorizontalRocket] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "horizontal_rocket_buster"},
-        [____exports.ElementId.AxisRocket] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "axis_rocket_buster"},
-        [____exports.ElementId.Helicopter] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "helicopter_buster"},
-        [____exports.ElementId.Dynamite] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "dynamite_buster"},
-        [____exports.ElementId.Diskosphere] = {type = {is_movable = true, is_clickable = true}, percentage = 0, color = "#ffffff", view = "diskosphere_buster"},
-        [____exports.ElementId.Custom1] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_1"},
-        [____exports.ElementId.Custom2] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_2"},
-        [____exports.ElementId.Custom3] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_3"},
-        [____exports.ElementId.Custom4] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_4"},
-        [____exports.ElementId.Custom5] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_5"},
-        [____exports.ElementId.Custom6] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_6"},
-        [____exports.ElementId.Custom7] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_7"},
-        [____exports.ElementId.Custom8] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_8"},
-        [____exports.ElementId.Custom9] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_9"},
-        [____exports.ElementId.Custom10] = {type = {is_movable = true, is_clickable = false}, percentage = 0, color = "#ffffff", view = "custom_10"}
+    activation_cells = {____exports.CellId.Grass, ____exports.CellId.Flowers},
+    near_activated_cells = {
+        ____exports.CellId.Box,
+        ____exports.CellId.Stone0,
+        ____exports.CellId.Stone1,
+        ____exports.CellId.Stone2,
+        ____exports.CellId.Web
+    },
+    disabled_cells = {____exports.CellId.Box, ____exports.CellId.Stone0, ____exports.CellId.Stone1, ____exports.CellId.Stone2},
+    not_moved_cells = {
+        ____exports.CellId.Box,
+        ____exports.CellId.Stone0,
+        ____exports.CellId.Stone1,
+        ____exports.CellId.Stone2,
+        ____exports.CellId.Web
+    },
+    top_layer_cells = {
+        ____exports.CellId.Box,
+        ____exports.CellId.Stone0,
+        ____exports.CellId.Stone1,
+        ____exports.CellId.Stone2,
+        ____exports.CellId.Web
+    },
+    element_view = {
+        [____exports.ElementId.Dimonde] = "element_diamond",
+        [____exports.ElementId.Gold] = "element_gold",
+        [____exports.ElementId.Topaz] = "element_topaz",
+        [____exports.ElementId.Ruby] = "element_ruby",
+        [____exports.ElementId.Emerald] = "element_emerald",
+        [____exports.ElementId.VerticalRocket] = "vertical_rocket_buster",
+        [____exports.ElementId.HorizontalRocket] = "horizontal_rocket_buster",
+        [____exports.ElementId.AxisRocket] = "axis_rocket_buster",
+        [____exports.ElementId.Helicopter] = "helicopter_buster",
+        [____exports.ElementId.Dynamite] = "dynamite_buster",
+        [____exports.ElementId.Diskosphere] = "diskosphere_buster",
+        [____exports.ElementId.Cheese] = "element_cheese",
+        [____exports.ElementId.Cabbage] = "element_cabbage",
+        [____exports.ElementId.Acorn] = "element_acorn",
+        [____exports.ElementId.RareMeat] = "element_rare_meat",
+        [____exports.ElementId.MediumMeat] = "element_medium_meat",
+        [____exports.ElementId.Chicken] = "element_chicken",
+        [____exports.ElementId.SunFlower] = "element_sunflower",
+        [____exports.ElementId.Salad] = "element_salad",
+        [____exports.ElementId.Hay] = "element_hay"
+    },
+    element_colors = {
+        [____exports.ElementId.Dimonde] = "#009de2",
+        [____exports.ElementId.Gold] = "#e94165",
+        [____exports.ElementId.Topaz] = "#f5d74d",
+        [____exports.ElementId.Ruby] = "#9a4ee5",
+        [____exports.ElementId.Emerald] = "#20af1b",
+        [____exports.ElementId.VerticalRocket] = "#ffffff",
+        [____exports.ElementId.HorizontalRocket] = "#ffffff",
+        [____exports.ElementId.AxisRocket] = "#ffffff",
+        [____exports.ElementId.Helicopter] = "#ffffff",
+        [____exports.ElementId.Dynamite] = "#ffffff",
+        [____exports.ElementId.Diskosphere] = "#ffffff",
+        [____exports.ElementId.Cheese] = "#ffffff",
+        [____exports.ElementId.Cabbage] = "#ffffff",
+        [____exports.ElementId.Acorn] = "#ffffff",
+        [____exports.ElementId.RareMeat] = "#ffffff",
+        [____exports.ElementId.MediumMeat] = "#ffffff",
+        [____exports.ElementId.Chicken] = "#ffffff",
+        [____exports.ElementId.SunFlower] = "#ffffff",
+        [____exports.ElementId.Salad] = "#ffffff",
+        [____exports.ElementId.Hay] = "#ffffff"
     },
     base_elements = {
         ____exports.ElementId.Dimonde,
@@ -228,1093 +223,18 @@ ____exports._GAME_CONFIG = {
         ____exports.ElementId.Ruby,
         ____exports.ElementId.Emerald
     },
-    levels = {
-        {field = {
-            width = 8,
-            height = 8,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell
-                }
-            },
-            elements = {
-                {
-                    NullElement,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dynamite,
-                    NullElement
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    NullElement,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dynamite,
-                    ____exports.ElementId.Dynamite,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    NullElement
-                }
-            }
-        }, steps = 15, targets = {{type = ____exports.ElementId.Topaz, count = 7, uids = {}}, {type = ____exports.ElementId.Dimonde, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 8,
-            height = 8,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Box,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0},
-                    {____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell
-                }
-            },
-            elements = {
-                {
-                    NullElement,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.AxisRocket,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.VerticalRocket,
-                    NullElement
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    NullElement,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.VerticalRocket,
-                    ____exports.ElementId.HorizontalRocket,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.VerticalRocket,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    NullElement
-                }
-            }
-        }, steps = 10, targets = {{type = ____exports.ElementId.Emerald, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 8,
-            height = 8,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass}
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass}
-                },
-                {
-                    NotActiveCell,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    NotActiveCell
-                }
-            },
-            elements = {
-                {
-                    NullElement,
-                    ____exports.ElementId.Diskosphere,
-                    ____exports.ElementId.Dynamite,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    NullElement
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Helicopter,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Gold,
-                    NullElement
-                }
-            }
-        }, steps = 20, targets = {{type = ____exports.ElementId.Gold, count = 10, uids = {}}, {type = ____exports.ElementId.Ruby, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 8,
-            height = 8,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass}
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass}
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    ____exports.CellId.Base
-                }
-            },
-            elements = {
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.VerticalRocket,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Diskosphere,
-                    ____exports.ElementId.Diskosphere,
-                    ____exports.ElementId.Dynamite
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.HorizontalRocket,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby
-                }
-            }
-        }, steps = 15, targets = {{type = ____exports.ElementId.Gold, count = 7, uids = {}}, {type = ____exports.ElementId.Topaz, count = 7, uids = {}}}, busters = {spinning_active = false, hammer_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 8,
-            height = 8,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {
-                        ____exports.CellId.Base,
-                        ____exports.CellId.Grass,
-                        ____exports.CellId.Stone2,
-                        ____exports.CellId.Stone1,
-                        ____exports.CellId.Stone0
-                    },
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass},
-                    {____exports.CellId.Base, ____exports.CellId.Grass, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                }
-            },
-            elements = {
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.VerticalRocket,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dynamite,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    NullElement,
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Emerald,
-                    NullElement,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Ruby
-                },
-                {
-                    NullElement,
-                    NullElement,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    NullElement,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Ruby
-                }
-            }
-        }, steps = 5, targets = {{type = ____exports.ElementId.Dimonde, count = 7, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 6,
-            height = 6,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Web},
-                    {____exports.CellId.Base, ____exports.CellId.Web},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Web},
-                    {____exports.CellId.Base, ____exports.CellId.Web},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                }
-            },
-            elements = {
-                {
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    NullElement
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Helicopter,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    NullElement
-                }
-            }
-        }, steps = 10, targets = {{type = ____exports.ElementId.Emerald, count = 5, uids = {}}, {type = ____exports.ElementId.Gold, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}},
-        {field = {
-            width = 6,
-            height = 6,
-            max_width = 8,
-            max_height = 8,
-            cell_size = 128,
-            offset_border = 20,
-            cells = {
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base
-                },
-                {
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    {____exports.CellId.Base, ____exports.CellId.Box},
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base
-                },
-                {
-                    NotActiveCell,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    ____exports.CellId.Base,
-                    NotActiveCell
-                }
-            },
-            elements = {
-                {
-                    NullElement,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    NullElement
-                },
-                {
-                    ____exports.ElementId.Ruby,
-                    ____exports.ElementId.Topaz,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Topaz
-                },
-                {
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold
-                },
-                {
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Dimonde
-                },
-                {
-                    NullElement,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Gold,
-                    ____exports.ElementId.Emerald,
-                    ____exports.ElementId.Emerald,
-                    NullElement
-                }
-            }
-        }, steps = 5, targets = {{type = ____exports.ElementId.Ruby, count = 5, uids = {}}}, busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}}
-    }
+    buster_elements = {
+        ____exports.ElementId.VerticalRocket,
+        ____exports.ElementId.HorizontalRocket,
+        ____exports.ElementId.AxisRocket,
+        ____exports.ElementId.Dynamite,
+        ____exports.ElementId.Helicopter,
+        ____exports.ElementId.Diskosphere
+    },
+    levels = {}
 }
 ____exports._STORAGE_CONFIG = {
-    current_level = 4,
+    current_level = 0,
     hammer_counts = 3,
     spinning_counts = 3,
     horizontal_rocket_counts = 3,

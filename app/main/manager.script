@@ -3,6 +3,8 @@ local druid = require("druid.druid")
 local default_style = require("druid.styles.default.style")
 local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
+local ____match3_game = require("game.match3_game")
+local load_config = ____match3_game.load_config
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -16,6 +18,7 @@ function ____exports.init(self)
     default_style.scroll.WHEEL_SCROLL_SPEED = 10
     druid.set_default_style(default_style)
     Camera.set_go_prjection(-1, 1, -3, 3)
+    load_config()
     Scene.load("game", true)
     Scene.set_bg("#88dfeb")
 end

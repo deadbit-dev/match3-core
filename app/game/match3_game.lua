@@ -1,11 +1,11 @@
 local ____lualib = require("lualib_bundle")
+local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayPush = ____lualib.__TS__ArrayPush
-local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
@@ -24,14 +24,38 @@ local NotActiveCell = ____match3_core.NotActiveCell
 local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
+____exports.RandomElement = -2
 function ____exports.Game()
-    local set_element_types, set_busters, set_events, set_targets, load_field, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, get_helper_combination, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, activated_elements, game_step_events, selected_element, previous_helper_data, helper_data, helper_timer, randomseed, coroutines, is_simulating, step_counter, is_step, is_block_input, available_steps
+    local set_element_types, set_element_chances, set_busters, set_events, load_field, on_game_timer_tick, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, randomseed, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, step_counter, start_game_time
     function set_element_types()
-        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
             local key = ____value[1]
-            local value = ____value[2]
             local element_id = tonumber(key)
-            field.set_element_type(element_id, {index = element_id, is_clickable = value.type.is_clickable, is_movable = value.type.is_movable})
+            print(element_id)
+            field.set_element_type(
+                element_id,
+                {
+                    index = element_id,
+                    is_movable = true,
+                    is_clickable = __TS__ArrayIncludes(GAME_CONFIG.buster_elements, element_id)
+                }
+            )
+        end
+    end
+    function set_element_chances()
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
+            local key = ____value[1]
+            local id = tonumber(key)
+            if id ~= nil then
+                if __TS__ArrayIncludes(GAME_CONFIG.base_elements, id) or id == level_config.additional_element then
+                    spawn_element_chances[id] = 10
+                else
+                    spawn_element_chances[id] = 0
+                end
+                if id == level_config.exclude_element then
+                    spawn_element_chances[id] = 0
+                end
+            end
         end
     end
     function set_busters()
@@ -126,13 +150,19 @@ function ____exports.Game()
                 try_spinning_activation()
             end
         )
-        EventBus.on("REVERT_STEP", revert_step)
+        EventBus.on(
+            "REVERT_STEP",
+            function()
+                stop_helper()
+                revert_step()
+            end
+        )
         EventBus.on(
             "ON_GAME_STEP_ANIMATION_END",
             function()
                 if is_level_completed() then
                     EventBus.send("ON_LEVEL_COMPLETED")
-                elseif step_counter <= 0 then
+                elseif not is_have_steps() then
                     EventBus.send("ON_GAME_OVER")
                 end
                 print("[GAME]: end step")
@@ -153,12 +183,6 @@ function ____exports.Game()
             end
         )
     end
-    function set_targets()
-        step_counter = level_config.steps
-        for ____, target in ipairs(level_config.targets) do
-            target.uids = {}
-        end
-    end
     function load_field()
         do
             local y = 0
@@ -174,6 +198,11 @@ function ____exports.Game()
                 y = y + 1
             end
         end
+        if #field.get_all_combinations(true) > 0 then
+            field.init()
+            load_field()
+            return
+        end
         local state = field.save_state()
         previous_states[#previous_states + 1] = state
         search_available_steps(
@@ -183,6 +212,19 @@ function ____exports.Game()
             end
         )
         EventBus.send("ON_LOAD_FIELD", state)
+        if level_config.time ~= nil then
+            start_game_time = System.now()
+            timer.delay(1, true, on_game_timer_tick)
+        end
+    end
+    function on_game_timer_tick()
+        local dt = System.now() - start_game_time
+        local remaining_time = level_config.time - dt
+        if level_config.time >= dt then
+            EventBus.send("GAME_TIMER", remaining_time)
+        else
+            EventBus.send("ON_GAME_OVER")
+        end
     end
     function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
@@ -197,26 +239,47 @@ function ____exports.Game()
         end
     end
     function load_element(x, y)
-        make_element(x, y, level_config.field.elements[y + 1][x + 1])
+        local element = level_config.field.elements[y + 1][x + 1]
+        make_element(
+            x,
+            y,
+            element == ____exports.RandomElement and get_random_element_id() or element
+        )
     end
     function make_cell(x, y, cell_id, data)
         if cell_id == NotActiveCell then
             return NotActiveCell
         end
-        local config = GAME_CONFIG.cell_database[cell_id]
+        local config = GAME_CONFIG.cell_view[cell_id]
+        local ____type
+        if __TS__ArrayIncludes(GAME_CONFIG.activation_cells, cell_id) then
+            ____type = ____type == nil and CellType.ActionLocked or bit.bor(____type, CellType.ActionLocked)
+        end
+        if __TS__ArrayIncludes(GAME_CONFIG.near_activated_cells, cell_id) then
+            ____type = ____type == nil and CellType.ActionLockedNear or bit.bor(____type, CellType.ActionLockedNear)
+        end
+        if __TS__ArrayIncludes(GAME_CONFIG.disabled_cells, cell_id) then
+            ____type = ____type == nil and CellType.Disabled or bit.bor(____type, CellType.Disabled)
+        end
+        if __TS__ArrayIncludes(GAME_CONFIG.not_moved_cells, cell_id) then
+            ____type = ____type == nil and CellType.NotMoved or bit.bor(____type, CellType.NotMoved)
+        end
+        if ____type == nil then
+            ____type = CellType.Base
+        end
         local ____cell_id_1 = cell_id
         local ____game_item_counter_0 = game_item_counter
         game_item_counter = ____game_item_counter_0 + 1
         local cell = {
             id = ____cell_id_1,
             uid = ____game_item_counter_0,
-            type = config.type,
-            cnt_acts = config.cnt_acts,
-            cnt_near_acts = config.cnt_near_acts,
+            type = ____type,
+            cnt_acts = 0,
+            cnt_near_acts = 0,
             data = __TS__ObjectAssign({}, data)
         }
-        cell.data.is_render_under_cell = config.is_render_under_cell
-        cell.data.z_index = config.z_index
+        cell.data.current_id = cell_id
+        cell.data.z_index = __TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, cell_id) and 2 or -1
         field.set_cell(x, y, cell)
         return cell
     end
@@ -238,7 +301,7 @@ function ____exports.Game()
             5,
             false,
             function()
-                get_helper_combination(available_steps)
+                set_combination_for_helper(available_steps)
                 print("[GAME]: try to set helper")
                 if helper_data ~= nil then
                     print("[GAME]: set helper")
@@ -259,6 +322,7 @@ function ____exports.Game()
         end
         print("[GAME]: stop helper")
         stop_all_coroutines()
+        helper_data = nil
         timer.cancel(helper_timer)
         reset_helper()
     end
@@ -278,7 +342,7 @@ function ____exports.Game()
         )
         previous_helper_data = nil
     end
-    function get_helper_combination(steps)
+    function set_combination_for_helper(steps)
         if #steps == 0 then
             return
         end
@@ -1135,10 +1199,12 @@ function ____exports.Game()
             end
         )
         if is_step then
-            step_counter = step_counter - 1
+            step_counter = step_counter + 1
         end
         is_step = false
-        EventBus.send("UPDATED_STEP_COUNTER", step_counter)
+        if level_config.steps ~= nil then
+            EventBus.send("UPDATED_STEP_COUNTER", level_config.steps - step_counter)
+        end
         send_game_step()
         set_random()
     end
@@ -1178,6 +1244,12 @@ function ____exports.Game()
         local previous_seed = table.remove(previous_randomseeds)
         print("previous_seed: ", previous_seed)
         set_random(previous_seed)
+        search_available_steps(
+            5,
+            function(steps)
+                available_steps = steps
+            end
+        )
         EventBus.send("ON_REVERT_STEP", {current_state = current_state, previous_state = previous_state})
         return true
     end
@@ -1186,6 +1258,12 @@ function ____exports.Game()
             if #target.uids < target.count then
                 return false
             end
+        end
+        return true
+    end
+    function is_have_steps()
+        if level_config.steps ~= nil then
+            return step_counter <= level_config.steps
         end
         return true
     end
@@ -1198,29 +1276,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch271 = combination.type
-            local ____cond271 = ____switch271 == CombinationType.Comb4
-            if ____cond271 then
+            local ____switch281 = combination.type
+            local ____cond281 = ____switch281 == CombinationType.Comb4
+            if ____cond281 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond271 = ____cond271 or ____switch271 == CombinationType.Comb5
-            if ____cond271 then
+            ____cond281 = ____cond281 or ____switch281 == CombinationType.Comb5
+            if ____cond281 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond271 = ____cond271 or ____switch271 == CombinationType.Comb2x2
-            if ____cond271 then
+            ____cond281 = ____cond281 or ____switch281 == CombinationType.Comb2x2
+            if ____cond281 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond271 = ____cond271 or (____switch271 == CombinationType.Comb3x3a or ____switch271 == CombinationType.Comb3x3b)
-            if ____cond271 then
+            ____cond281 = ____cond281 or (____switch281 == CombinationType.Comb3x3a or ____switch281 == CombinationType.Comb3x3b)
+            if ____cond281 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond271 = ____cond271 or (____switch271 == CombinationType.Comb3x4 or ____switch271 == CombinationType.Comb3x5)
-            if ____cond271 then
+            ____cond281 = ____cond281 or (____switch281 == CombinationType.Comb3x4 or ____switch281 == CombinationType.Comb3x5)
+            if ____cond281 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1249,7 +1327,7 @@ function ____exports.Game()
             return
         end
         for ____, target in ipairs(level_config.targets) do
-            if target.type == element.type then
+            if not target.is_cell and target.type == element.type then
                 local ____target_uids_18 = target.uids
                 ____target_uids_18[#____target_uids_18 + 1] = element.uid
             end
@@ -1330,6 +1408,14 @@ function ____exports.Game()
                     }
                 end
             end
+            for ____, target in ipairs(level_config.targets) do
+                local check_for_not_stone = target.type ~= CellId.Stone0 and target.type == cell.data.current_id
+                local check_stone_with_last_cell = target.type == CellId.Stone0 and cell.data.current_id == CellId.Stone2
+                if target.is_cell and (check_for_not_stone or check_stone_with_last_cell) then
+                    local ____target_uids_19 = target.uids
+                    ____target_uids_19[#____target_uids_19 + 1] = cell.uid
+                end
+            end
         end
     end
     function is_buster(x, y)
@@ -1337,20 +1423,24 @@ function ____exports.Game()
     end
     function get_random_element_id()
         local sum = 0
-        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
-            local _ = ____value[1]
-            local value = ____value[2]
-            sum = sum + value.percentage
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
+            local key = ____value[1]
+            local id = tonumber(key)
+            if id ~= nil then
+                sum = sum + spawn_element_chances[id]
+            end
         end
         local bins = {}
-        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
-            local _ = ____value[1]
-            local value = ____value[2]
-            local normalized_value = value.percentage / sum
-            if #bins == 0 then
-                bins[#bins + 1] = normalized_value
-            else
-                bins[#bins + 1] = normalized_value + bins[#bins]
+        for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
+            local key = ____value[1]
+            local id = tonumber(key)
+            if id ~= nil then
+                local normalized_value = spawn_element_chances[id] / sum
+                if #bins == 0 then
+                    bins[#bins + 1] = normalized_value
+                else
+                    bins[#bins + 1] = normalized_value + bins[#bins]
+                end
             end
         end
         local rand = math.random()
@@ -1358,12 +1448,12 @@ function ____exports.Game()
             local index = ____value[1]
             local value = ____value[2]
             if value >= rand then
-                for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_database)) do
+                for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_19 = index
-                    index = ____index_19 - 1
-                    if ____index_19 == 0 then
+                    local ____index_20 = index
+                    index = ____index_20 - 1
+                    if ____index_20 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1467,14 +1557,16 @@ function ____exports.Game()
     activated_elements = {}
     game_step_events = {}
     selected_element = nil
+    spawn_element_chances = {}
+    available_steps = {}
+    coroutines = {}
     previous_helper_data = nil
     helper_data = nil
-    coroutines = {}
     is_simulating = false
-    step_counter = 0
     is_step = false
     is_block_input = false
-    available_steps = {}
+    step_counter = 0
+    start_game_time = 0
     local function init()
         field.init()
         field.set_callback_is_can_move(is_can_move)
@@ -1485,60 +1577,102 @@ function ____exports.Game()
         field.set_callback_on_request_element(on_request_element)
         field.set_callback_on_cell_activated(on_cell_activated)
         set_element_types()
+        set_element_chances()
         set_busters()
         set_events()
         set_random()
-        set_targets()
-    end
-    local function simulate_game_step(step)
-        local previous_state = field.save_state()
-        print(
-            "[GAME]: simulating game step: ",
-            step.from_x,
-            step.from_y,
-            step.to_x,
-            step.to_y
-        )
-        local element_from = field.get_element(step.from_x, step.from_y)
-        local element_to = field.get_element(step.to_x, step.to_y)
-        if element_from ~= NullElement then
-            print(element_from.type)
-        end
-        if element_to ~= NullElement then
-            print(element_to.type)
-        end
-        is_simulating = true
-        local after_activation = false
-        if step.from_x == step.to_x and step.from_y == step.to_y then
-            after_activation = try_click_activation(step.from_x, step.from_y)
-            if not after_activation then
-                return
-            end
-        else
-            if not field.try_move(step.from_x, step.from_y, step.to_x, step.to_y) then
-                return
-            end
-            after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y)
-        end
-        if after_activation then
-            field.process_state(ProcessMode.MoveElements)
-        end
-        while field.process_state(ProcessMode.Combinate) do
-            print("[GAME]: after combinate in simulating")
-            field.process_state(ProcessMode.MoveElements)
-            print("[GAME]: after movements in simulating")
-        end
-        field.load_state(previous_state)
-        is_simulating = false
-        math.randomseed(randomseed)
-        print(
-            "[GAME]: simulating game step end: ",
-            step.from_x,
-            step.from_y,
-            step.to_x,
-            step.to_y
-        )
     end
     return init()
+end
+function ____exports.load_config()
+    local data = sys.load_resource("/resources/levels.json")
+    if data == nil then
+        return
+    end
+    local levels = json.decode(data)
+    for ____, level_data in ipairs(levels) do
+        local level = {
+            field = {
+                width = 10,
+                height = 10,
+                max_width = 10,
+                max_height = 10,
+                cell_size = 128,
+                offset_border = 20,
+                cells = {},
+                elements = {}
+            },
+            additional_element = level_data.additional_element,
+            exclude_element = level_data.exclude_element,
+            time = level_data.time,
+            steps = level_data.steps,
+            targets = {},
+            busters = {hammer_active = false, spinning_active = false, horizontal_rocket_active = false, vertical_rocket_active = false}
+        }
+        do
+            local y = 0
+            while y < #level_data.field do
+                level.field.cells[y + 1] = {}
+                level.field.elements[y + 1] = {}
+                do
+                    local x = 0
+                    while x < #level_data.field[y + 1] do
+                        local data = level_data.field[y + 1][x + 1]
+                        if type(data) == "string" then
+                            repeat
+                                local ____switch363 = data
+                                local ____cond363 = ____switch363 == "-"
+                                if ____cond363 then
+                                    level.field.cells[y + 1][x + 1] = NotActiveCell
+                                    level.field.elements[y + 1][x + 1] = NullElement
+                                    break
+                                end
+                                ____cond363 = ____cond363 or ____switch363 == ""
+                                if ____cond363 then
+                                    level.field.cells[y + 1][x + 1] = CellId.Base
+                                    level.field.elements[y + 1][x + 1] = ____exports.RandomElement
+                                    break
+                                end
+                            until true
+                        else
+                            if data.cell ~= nil then
+                                if data.cell == CellId.Stone0 then
+                                    level.field.cells[y + 1][x + 1] = {CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0}
+                                else
+                                    level.field.cells[y + 1][x + 1] = {CellId.Base, data.cell}
+                                end
+                            else
+                                level.field.cells[y + 1][x + 1] = CellId.Base
+                            end
+                            if data.element ~= nil then
+                                level.field.elements[y + 1][x + 1] = data.element
+                            else
+                                level.field.elements[y + 1][x + 1] = ____exports.RandomElement
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        for ____, target_data in ipairs(level_data.targets) do
+            local target
+            if target_data.type.element ~= nil then
+                target = {is_cell = false, type = target_data.type.element, count = 0, uids = {}}
+            end
+            if target_data.type.cell ~= nil then
+                target = {is_cell = true, type = target_data.type.cell, count = 0, uids = {}}
+            end
+            if target ~= nil then
+                local count = tonumber(target_data.count)
+                target.count = count ~= nil and count or target.count
+                local ____level_targets_21 = level.targets
+                ____level_targets_21[#____level_targets_21 + 1] = target
+            end
+        end
+        local ____GAME_CONFIG_levels_22 = GAME_CONFIG.levels
+        ____GAME_CONFIG_levels_22[#____GAME_CONFIG_levels_22 + 1] = level
+    end
 end
 return ____exports

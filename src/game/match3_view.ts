@@ -26,9 +26,8 @@ import {
     NullElement,
     NotActiveCell,
     Cell,
-    MoveType
+    MoveType,
 } from "./match3_core";
-import { to } from 'utils.flux';
 import { hex2rgba } from '../utils/utils';
 
 const SubstrateMasks = [
@@ -515,10 +514,12 @@ export function View(animator: FluxGroup) {
     }
 
     function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
-        const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.cell_database[cell_id].z_index);
+        const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.top_layer_cells.includes(cell_id) ?
+            GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index);
+        
         const _go = gm.make_go('cell_view', pos);
 
-        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_database[cell_id].view);
+        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.cell_view[cell_id]);
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
 
         if (cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
@@ -534,7 +535,7 @@ export function View(animator: FluxGroup) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
 
-        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.element_database[type].view);
+        sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.element_view[type]);
 
         if (spawn_anim) {
             go.set_scale(vmath.vector3(0.01, 0.01, 1), _go);
@@ -792,7 +793,7 @@ export function View(animator: FluxGroup) {
                 msg.post(msg.url(undefined, part, undefined), 'disable');
                 msg.post(msg.url(undefined, part, 'part'), 'enable');
 
-                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_database[game_id_to_type[element.uid]].color));
+                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_colors[game_id_to_type[element.uid]]));
 
                 delete_view_item_by_game_id(element.uid);
 
@@ -1243,6 +1244,10 @@ export function View(animator: FluxGroup) {
         const item = view_index != undefined ? get_view_item_by_game_id_and_index(element.uid, view_index) : get_first_view_item_by_game_id(element.uid);
         if (item == undefined) return 0;
 
+        const current_world_pos = go.get_position(item._hash);
+        current_world_pos.z = 3;
+        go.set_position(current_world_pos);
+
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, helicopter_fly_duration, 0, () => {
             damage_element_animation(message, target_element.x, target_element.y, target_element.uid);
             damage_element_animation(message, element.x, element.y, element.uid, () => {
@@ -1361,14 +1366,7 @@ export function View(animator: FluxGroup) {
             return false;
         }
 
-        for (let i = 0; i < level_config.targets.length; i++) {
-            const target = level_config.targets[i];
-            if (target.uids.indexOf(id) != -1) {
-                if (i > 1) break;
-                const event_key = i == 0 ? 'UPDATED_FIRST_TARGET' : 'UPDATED_SECOND_TARGET';
-                EventBus.send(event_key, math.max(0, target.count - target.uids.length));
-            }
-        }
+        delete_target_by_id(id);
 
         gm.delete_item(item, true);
         game_id_to_view_index[id].splice(0, 1);
@@ -1380,10 +1378,21 @@ export function View(animator: FluxGroup) {
         const items = get_all_view_items_by_game_id(id);
         if (items == undefined) return false;
 
+        delete_target_by_id(id);
+        
         for (const item of items) gm.delete_item(item, true);
         delete game_id_to_view_index[id];
 
         return true;
+    }
+ 
+    function delete_target_by_id(id: number) {
+        for (let i = 0; i < level_config.targets.length; i++) {
+            const target = level_config.targets[i];
+            if (target.uids.indexOf(id) != -1) {
+                EventBus.send('UPDATED_TARGET', {id: i, count: math.max(0, target.count - target.uids.length)});
+            }
+        }
     }
 
     function try_make_under_cell(x: number, y: number, cell: Cell) {
@@ -1392,9 +1401,11 @@ export function View(animator: FluxGroup) {
             for (let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
                 const cell_id = (cell.data.under_cells as CellId[])[i];
                 if (cell_id != undefined) {
-                    make_cell_view(x, y, cell_id, cell.uid, GAME_CONFIG.cell_database[cell_id].z_index - depth);
+                    const z_index = (GAME_CONFIG.top_layer_cells.includes(cell_id) ?
+                        GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) - depth;
+                    make_cell_view(x, y, cell_id, cell.uid, z_index);
                     depth += 0.1;
-                    if (!GAME_CONFIG.cell_database[cell_id].is_render_under_cell) break;
+                    if (cell_id == CellId.Base) break;
                 }
             }
         }

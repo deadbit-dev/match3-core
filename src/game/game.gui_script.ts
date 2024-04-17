@@ -4,12 +4,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { set_text, set_text_colors } from '../utils/utils';
+import { go_animate } from 'ludobits.m.flow';
+import { CellId, ElementId } from '../main/game_config';
+import { parse_time, set_text, set_text_colors } from '../utils/utils';
+import { Target } from './match3_game';
 
 interface props {
     druid: DruidClass;
+    level: any;
     busters: any;
 }
 
@@ -17,23 +22,100 @@ export function init(this: props): void {
     Manager.init_gui();
     
     this.druid = druid.new(this);
-    this.busters = GAME_CONFIG.levels[GameStorage.get('current_level')]['busters'];
+    this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
+    this.busters = this.level['busters'];
 
-    set_text('current_level', GameStorage.get('current_level'));
-    set_text('step_counts', GAME_CONFIG.levels[GameStorage.get('current_level')]['steps']);
-    
-    const targets = GAME_CONFIG.levels[GameStorage.get('current_level')]['targets'];
+    if(this.level['time'] != undefined) {
+        const node = gui.get_node('timer');
+        gui.set_enabled(node, true);
+
+        if(this.level['steps'] == undefined) {
+            gui.set_position(node, vmath.vector3(0, -20, 0));
+            gui.set_scale(node, vmath.vector3(0.6, 0.6, 1));
+        } else {
+            gui.set_position(node, vmath.vector3(0, -5, 0));
+            gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
+        }
+
+        set_text('time', parse_time(this.level['time']));
+    }
+
+    if(this.level['steps'] != undefined) {
+        const node = gui.get_node('step_counter');
+        gui.set_enabled(node, true);
+
+        if(this.level['time'] == undefined) {
+            gui.set_position(node, vmath.vector3(0, -25, 0));
+            gui.set_scale(node, vmath.vector3(0.7, 0.7, 1));
+        } else {
+            gui.set_position(node, vmath.vector3(0, -45, 0));
+            gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
+        }
+
+        set_text('steps', this.level['steps']);
+    }
+
+    const targets = this.level['targets'] as Target[];
     if(targets[0] != undefined) {
-        gui.set_enabled(gui.get_node('first_target'), true);
-        gui.play_flipbook(gui.get_node('first_target_icon'), GAME_CONFIG.element_database[targets[0].type].view);
-        set_text('first_target_counts', targets[0].count);
+        const node = gui.get_node('first_target');
+        gui.set_enabled(node, true);
+        
+        switch(targets.length) {
+            case 1: 
+                gui.set_position(node, vmath.vector3(0, -15, 0));
+                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+            break;
+            case 2:
+                gui.set_position(node, vmath.vector3(-35, -15, 0));
+                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+            break;
+            case 3:
+                gui.set_position(node, vmath.vector3(-45, -5, 0));
+                gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+            break;
+        }
+
+        const target = targets[0];
+        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        gui.play_flipbook(gui.get_node('first_target_icon'), view);
+        set_text('first_target_counts', target.count);
     }
 
     if(targets[1] != undefined) {
-        gui.set_enabled(gui.get_node('second_target'), true);
-        gui.play_flipbook(gui.get_node('second_target_icon'), GAME_CONFIG.element_database[targets[1].type].view);
-        set_text('second_target_counts', targets[1].count);
+        const node = gui.get_node('second_target');
+        gui.set_enabled(node, true);
+        
+        switch(targets.length) {
+            case 2:
+                gui.set_position(node, vmath.vector3(25, -15, 0));
+                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+            break;
+            case 3:
+                gui.set_position(node, vmath.vector3(36, -5, 0));
+                gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+            break;
+        }
+
+        const target = targets[1];
+        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        gui.play_flipbook(gui.get_node('second_target_icon'), view);
+        set_text('second_target_counts', target.count);
     }
+
+    if(targets[2] != undefined) {
+        const node = gui.get_node('third_target');
+        gui.set_enabled(node, true);
+        
+        gui.set_position(node, vmath.vector3(-2, -36, 0));
+        gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+        
+        const target = targets[2];
+        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        gui.play_flipbook(gui.get_node('third_target_icon'), view);
+        set_text('third_target_counts', target.count);
+    }
+
+    set_text('current_level', GameStorage.get('current_level') + 1);
     
     this.druid.new_button('previous_level_button', () => {
         let previous_level = (GameStorage.get('current_level') - 1) % GAME_CONFIG.levels.length;
@@ -92,17 +174,16 @@ export function init(this: props): void {
 
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
         if(steps == undefined) return;
-        set_text('step_counts', steps);
+        set_text('steps', steps);
     });
 
-    EventBus.on('UPDATED_FIRST_TARGET', (count) => {
-        if(count == undefined) return;
-        set_text('first_target_counts', count);
-    });
-
-    EventBus.on('UPDATED_SECOND_TARGET', (count) => {
-        if(count == undefined) return;
-        set_text('second_target_counts', count);
+    EventBus.on('UPDATED_TARGET', (data) => {
+        if(data == undefined) return;
+        switch(data.id) {
+            case 0: set_text('first_target_counts', data.count); break;
+            case 1: set_text('second_target_counts', data.count); break;
+            case 2: set_text('third_target_counts', data.count); break;
+        }
     });
     
     EventBus.on('UPDATED_BUTTONS', () => {
@@ -117,6 +198,12 @@ export function init(this: props): void {
         
         set_text_colors(['vertical_rocket_button'], '#fff', this.busters.vertical_rocket_active ? 0.5 : 1);
         set_text('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts'));
+    });
+    
+    EventBus.on('GAME_TIMER', (time) => {
+        if(time == undefined) return;
+        
+        set_text('time', parse_time(time));
     });
 }
 

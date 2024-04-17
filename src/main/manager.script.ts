@@ -8,6 +8,7 @@
 import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
 import { register_manager } from '../modules/Manager';
+import { load_config } from '../game/match3_game';
 
 
 
@@ -28,6 +29,8 @@ export function init(this: props) {
     druid.set_default_style(default_style);
 
     Camera.set_go_prjection(-1, 1, -3, 3);
+
+    load_config();
     
     Scene.load("game", true);
     Scene.set_bg('#88dfeb');

@@ -209,23 +209,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         }
     }
 
-    function is_unique_element_combination(element: Element, combinations: CombinationInfo[]) {
-        // const c0 = socket.gettime();
-
-        for(const comb of combinations) {
-            for(const elem of comb.elements) {
-                if(elem.uid == element.uid) {
-                    // print("DURATION CHECK UNIQUE ELEMENT: ", (socket.gettime() - c0) * 1000, "ms");
-                    return false;
-                }
-            }
-        }
-
-        // print("DURATION CHECK UNIQUE ELEMENT: ", (socket.gettime() - c0) * 1000, "ms");
-
-        return true;
-    }
-
     function rotate_all_masks() {
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             let mask = CombinationMasks[mask_index];
@@ -261,8 +244,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
 
-        // const c0 = socket.gettime();
-
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
@@ -276,27 +257,9 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             for(let i = 0; i < masks.length; i++) {
                 const mask = masks[i];
                 
-            //    // оптимизация для одноразмерных масок
-            //     let is_one_row_mask = false;
-            //     switch(mask_index) {
-            //         case CombinationType.Comb3:
-            //         case CombinationType.Comb4:
-            //         case CombinationType.Comb5:
-            //             is_one_row_mask = true;
-            //         break;
-            //     }
-            
-                // const is_horizontal_comb = (is_one_row_mask && (i == 0));
-
-                // let break_x = -1;
-
-                // print("MASK TYPE: ", mask_index);
-
-                // const c0 = socket.gettime();
-
                 // проходимся маской по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
-                    for(let x = 0; x + mask[0].length <= size_x; x++) {// } is_horizontal_comb && (break_x != -1) ? x = break_x : x++) {
+                    for(let x = 0; x + mask[0].length <= size_x; x++) {
                         const combination = {} as CombinationInfo;
                         combination.elements = [];
                         combination.angle = i * 90;
@@ -304,8 +267,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                         let is_combined = true;
                         let last_element: Element | typeof NullElement = NullElement;
                         
-                        // const c1 = socket.gettime();
-
                         // проходимся маской по элементам в текущей позиции
                         for(let i = 0; i < mask.length && is_combined; i++) {
                             for(let j = 0; j < mask[0].length && is_combined; j++) {
@@ -315,15 +276,12 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                                     
                                     if(element == NullElement || cell == NotActiveCell || !is_available_cell_type_for_activation(cell)) {
                                         is_combined = false;
-                                        // break_x = x + j;
                                         break;
                                     }
 
                                     // проверка на участие элемента в предыдущих комбинациях
-                                    // if(!is_unique_element_combination(element, combinations)) {
                                     if(combinations_elements[element.uid]) {
                                         is_combined = false;
-                                        // break_x = x + j + 1;
                                         break;
                                     }
                                     
@@ -335,15 +293,12 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                                     if(last_element != NullElement) {
                                         is_combined = is_combined_elements(last_element, element);
-                                        // if(!is_combined) break_x = x + j;
                                     }
 
                                     last_element = element;
                                 }
                             }
                         }
-
-                        // print("DURATION MASK IN POSITION: ", (socket.gettime() - c1) * 1000, "ms");
 
                         if(is_combined) {
                             combination.type = mask_index as CombinationType;
@@ -352,18 +307,12 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                             for(const element of combination.elements)
                                 combinations_elements[element.uid] = true;
 
-                            // break_x = x + mask[0].length;
-
                             if(check) return combinations;
                         }
                     }
                 }
-
-                // print("DURATION ITERATE MASK BY FIELD: ", (socket.gettime() - c0) * 1000, "ms");
             }
         }
-
-        // print("C0 TIME: ", (socket.gettime() - c0) * 1000, "ms");
 
         return combinations;
     }

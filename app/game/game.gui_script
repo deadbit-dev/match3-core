@@ -1,43 +1,177 @@
 local ____exports = {}
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
+local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
 function ____exports.init(self)
     Manager.init_gui()
     self.druid = druid.new(self)
-    self.busters = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].busters
-    set_text(
-        "current_level",
-        GameStorage.get("current_level")
-    )
-    set_text(
-        "step_counts",
-        GAME_CONFIG.levels[GameStorage.get("current_level") + 1].steps
-    )
-    local targets = GAME_CONFIG.levels[GameStorage.get("current_level") + 1].targets
-    if targets[1] ~= nil then
-        gui.set_enabled(
-            gui.get_node("first_target"),
-            true
+    self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
+    self.busters = self.level.busters
+    if self.level.time ~= nil then
+        local node = gui.get_node("timer")
+        gui.set_enabled(node, true)
+        if self.level.steps == nil then
+            gui.set_position(
+                node,
+                vmath.vector3(0, -20, 0)
+            )
+            gui.set_scale(
+                node,
+                vmath.vector3(0.6, 0.6, 1)
+            )
+        else
+            gui.set_position(
+                node,
+                vmath.vector3(0, -5, 0)
+            )
+            gui.set_scale(
+                node,
+                vmath.vector3(0.5, 0.5, 1)
+            )
+        end
+        set_text(
+            "time",
+            parse_time(self.level.time)
         )
+    end
+    if self.level.steps ~= nil then
+        local node = gui.get_node("step_counter")
+        gui.set_enabled(node, true)
+        if self.level.time == nil then
+            gui.set_position(
+                node,
+                vmath.vector3(0, -25, 0)
+            )
+            gui.set_scale(
+                node,
+                vmath.vector3(0.7, 0.7, 1)
+            )
+        else
+            gui.set_position(
+                node,
+                vmath.vector3(0, -45, 0)
+            )
+            gui.set_scale(
+                node,
+                vmath.vector3(0.5, 0.5, 1)
+            )
+        end
+        set_text("steps", self.level.steps)
+    end
+    local targets = self.level.targets
+    if targets[1] ~= nil then
+        local node = gui.get_node("first_target")
+        gui.set_enabled(node, true)
+        repeat
+            local ____switch10 = #targets
+            local ____cond10 = ____switch10 == 1
+            if ____cond10 then
+                gui.set_position(
+                    node,
+                    vmath.vector3(0, -15, 0)
+                )
+                gui.set_scale(
+                    node,
+                    vmath.vector3(0.4, 0.4, 1)
+                )
+                break
+            end
+            ____cond10 = ____cond10 or ____switch10 == 2
+            if ____cond10 then
+                gui.set_position(
+                    node,
+                    vmath.vector3(-35, -15, 0)
+                )
+                gui.set_scale(
+                    node,
+                    vmath.vector3(0.4, 0.4, 1)
+                )
+                break
+            end
+            ____cond10 = ____cond10 or ____switch10 == 3
+            if ____cond10 then
+                gui.set_position(
+                    node,
+                    vmath.vector3(-45, -5, 0)
+                )
+                gui.set_scale(
+                    node,
+                    vmath.vector3(0.3, 0.3, 1)
+                )
+                break
+            end
+        until true
+        local target = targets[1]
+        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
         gui.play_flipbook(
             gui.get_node("first_target_icon"),
-            GAME_CONFIG.element_database[targets[1].type].view
+            view
         )
-        set_text("first_target_counts", targets[1].count)
+        set_text("first_target_counts", target.count)
     end
     if targets[2] ~= nil then
-        gui.set_enabled(
-            gui.get_node("second_target"),
-            true
-        )
+        local node = gui.get_node("second_target")
+        gui.set_enabled(node, true)
+        repeat
+            local ____switch12 = #targets
+            local ____cond12 = ____switch12 == 2
+            if ____cond12 then
+                gui.set_position(
+                    node,
+                    vmath.vector3(25, -15, 0)
+                )
+                gui.set_scale(
+                    node,
+                    vmath.vector3(0.4, 0.4, 1)
+                )
+                break
+            end
+            ____cond12 = ____cond12 or ____switch12 == 3
+            if ____cond12 then
+                gui.set_position(
+                    node,
+                    vmath.vector3(36, -5, 0)
+                )
+                gui.set_scale(
+                    node,
+                    vmath.vector3(0.3, 0.3, 1)
+                )
+                break
+            end
+        until true
+        local target = targets[2]
+        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
         gui.play_flipbook(
             gui.get_node("second_target_icon"),
-            GAME_CONFIG.element_database[targets[2].type].view
+            view
         )
-        set_text("second_target_counts", targets[2].count)
+        set_text("second_target_counts", target.count)
     end
+    if targets[3] ~= nil then
+        local node = gui.get_node("third_target")
+        gui.set_enabled(node, true)
+        gui.set_position(
+            node,
+            vmath.vector3(-2, -36, 0)
+        )
+        gui.set_scale(
+            node,
+            vmath.vector3(0.3, 0.3, 1)
+        )
+        local target = targets[3]
+        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
+        gui.play_flipbook(
+            gui.get_node("third_target_icon"),
+            view
+        )
+        set_text("third_target_counts", target.count)
+    end
+    set_text(
+        "current_level",
+        GameStorage.get("current_level") + 1
+    )
     self.druid:new_button(
         "previous_level_button",
         function()
@@ -114,25 +248,33 @@ function ____exports.init(self)
             if steps == nil then
                 return
             end
-            set_text("step_counts", steps)
+            set_text("steps", steps)
         end
     )
     EventBus.on(
-        "UPDATED_FIRST_TARGET",
-        function(count)
-            if count == nil then
+        "UPDATED_TARGET",
+        function(data)
+            if data == nil then
                 return
             end
-            set_text("first_target_counts", count)
-        end
-    )
-    EventBus.on(
-        "UPDATED_SECOND_TARGET",
-        function(count)
-            if count == nil then
-                return
-            end
-            set_text("second_target_counts", count)
+            repeat
+                local ____switch30 = data.id
+                local ____cond30 = ____switch30 == 0
+                if ____cond30 then
+                    set_text("first_target_counts", data.count)
+                    break
+                end
+                ____cond30 = ____cond30 or ____switch30 == 1
+                if ____cond30 then
+                    set_text("second_target_counts", data.count)
+                    break
+                end
+                ____cond30 = ____cond30 or ____switch30 == 2
+                if ____cond30 then
+                    set_text("third_target_counts", data.count)
+                    break
+                end
+            until true
         end
     )
     EventBus.on(
@@ -157,6 +299,18 @@ function ____exports.init(self)
             set_text(
                 "vertical_rocket_counts",
                 GameStorage.get("vertical_rocket_counts")
+            )
+        end
+    )
+    EventBus.on(
+        "GAME_TIMER",
+        function(time)
+            if time == nil then
+                return
+            end
+            set_text(
+                "time",
+                parse_time(time)
             )
         end
     )

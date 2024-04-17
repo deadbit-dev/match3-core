@@ -100,9 +100,9 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 local mask = CombinationMasks[mask_index + 1]
                 local is_one_row_mask = false
                 repeat
-                    local ____switch14 = mask_index
-                    local ____cond14 = ____switch14 == ____exports.CombinationType.Comb3 or ____switch14 == ____exports.CombinationType.Comb4 or ____switch14 == ____exports.CombinationType.Comb5
-                    if ____cond14 then
+                    local ____switch8 = mask_index
+                    local ____cond8 = ____switch8 == ____exports.CombinationType.Comb3 or ____switch8 == ____exports.CombinationType.Comb4 or ____switch8 == ____exports.CombinationType.Comb5
+                    if ____cond8 then
                         is_one_row_mask = true
                         break
                     end
@@ -299,16 +299,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 y = y + 1
             end
         end
-    end
-    local function is_unique_element_combination(element, combinations)
-        for ____, comb in ipairs(combinations) do
-            for ____, elem in ipairs(comb.elements) do
-                if elem.uid == element.uid then
-                    return false
-                end
-            end
-        end
-        return true
     end
     local function get_all_combinations(check)
         if check == nil then
@@ -880,13 +870,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch195 = mode
-            local ____cond195 = ____switch195 == ____exports.ProcessMode.Combinate
-            if ____cond195 then
+            local ____switch189 = mode
+            local ____cond189 = ____switch189 == ____exports.ProcessMode.Combinate
+            if ____cond189 then
                 return process_combinate()
             end
-            ____cond195 = ____cond195 or ____switch195 == ____exports.ProcessMode.MoveElements
-            if ____cond195 then
+            ____cond189 = ____cond189 or ____switch189 == ____exports.ProcessMode.MoveElements
+            if ____cond189 then
                 return process_move()
             end
         until true

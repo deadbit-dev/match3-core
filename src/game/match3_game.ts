@@ -51,6 +51,16 @@ import {
     StepInfo
 } from './match3_core';
 
+export const RandomElement = -2;
+
+// REFACTORING
+export interface Target {
+    is_cell: boolean,
+    type: number,
+    count: number,
+    uids: number[]
+}
+
 export function Game() {
     //#region CONFIG        
 
@@ -66,20 +76,31 @@ export function Game() {
 
     let game_item_counter = 0;
     let previous_states: GameState[] = [];
+    
     let previous_randomseeds: number[] = [];
+    let randomseed: number;
+    
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
+
     let selected_element: ItemInfo | null = null;
+
+    let spawn_element_chances: {[key in number]: number} = {};
+
+    let available_steps: StepInfo[] = [];
+    let coroutines: Coroutine[] = [];
+    
     let previous_helper_data: StepHelperMessage | null = null;
     let helper_data: StepHelperMessage | null = null;
     let helper_timer: hash;
-    let randomseed: number;
-    let coroutines: Coroutine[] = [];
+    
     let is_simulating = false;
-    let step_counter = 0;
     let is_step = false;
     let is_block_input = false;
-    let available_steps: StepInfo[] = [];
+
+    let step_counter = 0;
+    let start_game_time = 0;
+    
 
     function init() {
         field.init();
@@ -93,23 +114,36 @@ export function Game() {
         field.set_callback_on_cell_activated(on_cell_activated);
 
         set_element_types();
+        set_element_chances();
         set_busters();
         set_events();
-        set_random(); // set_random(1712584566); // set_random(1712164717);
-        set_targets();
+        set_random();
     }
     
     //#endregion MAIN
-    //#region SETUP         
+    //#region SETUP
 
     function set_element_types() {
-        for(const [key, value] of Object.entries(GAME_CONFIG.element_database)) {
+        for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
             const element_id = tonumber(key) as ElementId;
+            print(element_id);
             field.set_element_type(element_id, {
                 index: element_id,
-                is_clickable: value.type.is_clickable,
-                is_movable: value.type.is_movable
+                is_movable: true,
+                is_clickable: GAME_CONFIG.buster_elements.includes(element_id)
             });
+        }
+    }
+
+    function set_element_chances() {
+        for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
+            const id = tonumber(key);
+            if(id != undefined) {
+                if(GAME_CONFIG.base_elements.includes(id) || id == level_config.additional_element) spawn_element_chances[id] = 10;
+                else spawn_element_chances[id] = 0;
+                
+                if(id == level_config.exclude_element) spawn_element_chances[id] = 0;
+            }
         }
     }
     
@@ -199,12 +233,15 @@ export function Game() {
             try_spinning_activation();
         });
         
-        EventBus.on('REVERT_STEP', revert_step);
+        EventBus.on('REVERT_STEP', () => {
+            stop_helper();
+            revert_step();
+        });
 
         // TODO: move in logic game step end
         EventBus.on('ON_GAME_STEP_ANIMATION_END', () => {
             if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
-            else if(step_counter <= 0) EventBus.send('ON_GAME_OVER');
+            else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
 
             print("[GAME]: end step");
 
@@ -224,12 +261,6 @@ export function Game() {
         });
     }
 
-    function set_targets() {
-        step_counter = level_config.steps;
-        for(const target of level_config.targets)
-            target.uids = [] as number[];
-    }
-
     function load_field() {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -238,14 +269,32 @@ export function Game() {
             }
         }
 
+        if(field.get_all_combinations(true).length > 0) {
+            field.init();
+            load_field();
+            return;
+        }
+
         const state = field.save_state();
         previous_states.push(state);
 
         search_available_steps(5, (steps) => {
             available_steps = steps;
         });
-        
+
         EventBus.send('ON_LOAD_FIELD', state);
+
+        if(level_config.time != undefined) {
+            start_game_time = System.now();
+            timer.delay(1, true, on_game_timer_tick);
+        }
+    }
+
+    function on_game_timer_tick() {
+        const dt = System.now() - start_game_time;
+        const remaining_time = level_config.time - dt;
+        if(level_config.time >= dt) EventBus.send('GAME_TIMER', remaining_time);
+        else EventBus.send('ON_GAME_OVER');
     }
 
     function load_cell(x: number, y: number) {
@@ -260,24 +309,37 @@ export function Game() {
 
     function load_element(x: number, y: number) {
         // TODO: load save
-        make_element(x, y, level_config['field']['elements'][y][x]);
+        const element = level_config['field']['elements'][y][x];
+        make_element(x, y, element == RandomElement ? get_random_element_id() : element);
     }
 
     function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell, data?: any): Cell | typeof NotActiveCell {
         if(cell_id == NotActiveCell) return NotActiveCell;
         
-        const config = GAME_CONFIG.cell_database[cell_id];
+        const config = GAME_CONFIG.cell_view[cell_id];
+        
+        let type;
+        if(GAME_CONFIG.activation_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.ActionLocked : bit.bor(type, CellType.ActionLocked);
+        if(GAME_CONFIG.near_activated_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.ActionLockedNear : bit.bor(type, CellType.ActionLockedNear);
+        if(GAME_CONFIG.disabled_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.Disabled : bit.bor(type, CellType.Disabled);
+        if(GAME_CONFIG.not_moved_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.NotMoved : bit.bor(type, CellType.NotMoved);
+        if(type == undefined) type = CellType.Base;
+
         const cell = {
             id: cell_id,
             uid: game_item_counter++,
-            type: config.type,
-            cnt_acts: config.cnt_acts,
-            cnt_near_acts: config.cnt_near_acts,
+            type: type,
+            cnt_acts: 0,
+            cnt_near_acts: 0,
             data: Object.assign({}, data)
         };
 
-        cell.data.is_render_under_cell = config.is_render_under_cell;
-        cell.data.z_index = config.z_index;
+        cell.data.current_id = cell_id;
+        cell.data.z_index = GAME_CONFIG.top_layer_cells.includes(cell_id) ? 2 : -1;
         
         field.set_cell(x, y, cell);
 
@@ -305,7 +367,7 @@ export function Game() {
         // search_helper_combination();
         
         helper_timer = timer.delay(5, false, () => {
-            get_helper_combination(available_steps);
+            set_combination_for_helper(available_steps);
 
             print("[GAME]: try to set helper");
 
@@ -328,6 +390,8 @@ export function Game() {
         print("[GAME]: stop helper");
 
         stop_all_coroutines();
+
+        helper_data = null;
         
         timer.cancel(helper_timer);
         reset_helper();
@@ -360,7 +424,7 @@ export function Game() {
     //     });
     // }
 
-    function get_helper_combination(steps: StepInfo[]) {
+    function set_combination_for_helper(steps: StepInfo[]) {
         if(steps.length == 0) return;
 
         const step = steps[math.random(0, steps.length - 1)];
@@ -1164,45 +1228,45 @@ export function Game() {
         math.randomseed(randomseed);
     }
 
-    function simulate_game_step(step: StepInfo) {
-        const previous_state = field.save_state();
+    // function simulate_game_step(step: StepInfo) {
+    //     const previous_state = field.save_state();
 
-        print("[GAME]: simulating game step: ", step.from_x, step.from_y, step.to_x, step.to_y);
+    //     print("[GAME]: simulating game step: ", step.from_x, step.from_y, step.to_x, step.to_y);
         
-        const element_from = field.get_element(step.from_x, step.from_y);
-        const element_to = field.get_element(step.to_x, step.to_y);
+    //     const element_from = field.get_element(step.from_x, step.from_y);
+    //     const element_to = field.get_element(step.to_x, step.to_y);
 
-        if(element_from != NullElement) print(element_from.type);
-        if(element_to != NullElement) print(element_to.type);
+    //     if(element_from != NullElement) print(element_from.type);
+    //     if(element_to != NullElement) print(element_to.type);
 
-        is_simulating = true;
+    //     is_simulating = true;
         
-        let after_activation = false;
+    //     let after_activation = false;
 
-        if(step.from_x == step.to_x && step.from_y == step.to_y) {
-            after_activation = try_click_activation(step.from_x, step.from_y);
-            if(!after_activation) return;
-        } else {
-            if(!field.try_move(step.from_x, step.from_y, step.to_x, step.to_y)) return;
-            after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y);
-        }
+    //     if(step.from_x == step.to_x && step.from_y == step.to_y) {
+    //         after_activation = try_click_activation(step.from_x, step.from_y);
+    //         if(!after_activation) return;
+    //     } else {
+    //         if(!field.try_move(step.from_x, step.from_y, step.to_x, step.to_y)) return;
+    //         after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y);
+    //     }
         
-        if(after_activation) field.process_state(ProcessMode.MoveElements);
+    //     if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        while(field.process_state(ProcessMode.Combinate)) {
-            print("[GAME]: after combinate in simulating");
-            field.process_state(ProcessMode.MoveElements);
-            print("[GAME]: after movements in simulating");
-        }
+    //     while(field.process_state(ProcessMode.Combinate)) {
+    //         print("[GAME]: after combinate in simulating");
+    //         field.process_state(ProcessMode.MoveElements);
+    //         print("[GAME]: after movements in simulating");
+    //     }
 
-        field.load_state(previous_state);
+    //     field.load_state(previous_state);
 
-        is_simulating = false;
+    //     is_simulating = false;
 
-        math.randomseed(randomseed);
+    //     math.randomseed(randomseed);
 
-        print("[GAME]: simulating game step end: ", step.from_x, step.from_y, step.to_x, step.to_y);
-    }
+    //     print("[GAME]: simulating game step end: ", step.from_x, step.from_y, step.to_x, step.to_y);
+    // }
 
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
@@ -1223,10 +1287,11 @@ export function Game() {
             available_steps = steps;
         });
 
-        if(is_step) step_counter--;
+
+        if(is_step) step_counter++;
         is_step = false;
     
-        EventBus.send('UPDATED_STEP_COUNTER', step_counter);
+        if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', level_config.steps - step_counter);
 
         send_game_step();
         set_random();
@@ -1258,6 +1323,10 @@ export function Game() {
         print("previous_seed: ", previous_seed);
         set_random(previous_seed);
 
+        search_available_steps(5, (steps) => {
+            available_steps = steps;
+        });
+
         EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
 
         return true;
@@ -1268,6 +1337,12 @@ export function Game() {
             if(target.uids.length < target.count) return false;
         }
 
+        return true;
+    }
+
+    function is_have_steps() {
+        if(level_config.steps != undefined)
+            return step_counter <= level_config.steps;
         return true;
     }
 
@@ -1321,6 +1396,7 @@ export function Game() {
         if(index != -1) activated_elements.splice(index, 1);
 
         print('[GAME]: damage: ', item.x, item.y);
+        
         const e = field.get_element(item.x, item.y);
         if(e != NullElement) print(e.type);
 
@@ -1330,7 +1406,7 @@ export function Game() {
         if(element == NullElement) return;
 
         for(const target of level_config.targets) {
-            if(target.type == element.type) {
+            if(!target.is_cell && target.type == element.type) {
                 target.uids.push(element.uid);
             }
         }
@@ -1409,6 +1485,14 @@ export function Game() {
                     });
                 }
             }
+
+            for(const target of level_config.targets) {
+                const check_for_not_stone = (target.type != CellId.Stone0 && target.type ==  cell.data.current_id);
+                const check_stone_with_last_cell = (target.type == CellId.Stone0 && cell.data.current_id == CellId.Stone2);
+                if(target.is_cell && (check_for_not_stone || check_stone_with_last_cell)) {
+                    target.uids.push(cell.uid);
+                }
+            }
         }
     }
 
@@ -1421,21 +1505,28 @@ export function Game() {
 
     function get_random_element_id(): ElementId | typeof NullElement {
         let sum = 0;
-        for(const [_, value] of Object.entries(GAME_CONFIG.element_database))
-            sum += value.percentage;
+        for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
+            const id = tonumber(key);
+            if(id != undefined) {
+                sum += spawn_element_chances[id];
+            }
+        }
 
         let bins: number[] = [];
-        for(const [_, value] of Object.entries(GAME_CONFIG.element_database)) {
-            const normalized_value = value.percentage / sum;
-            if(bins.length == 0) bins.push(normalized_value);
-            else bins.push(normalized_value + bins[bins.length - 1]);
+        for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
+            const id = tonumber(key);
+            if(id != undefined) {
+                const normalized_value = spawn_element_chances[id] / sum;
+                if(bins.length == 0) bins.push(normalized_value);
+                else bins.push(normalized_value + bins[bins.length - 1]);
+            }
         }
 
         const rand = math.random();
     
         for(let [index, value] of bins.entries()) {
             if(value >= rand) {
-                for(const [key, _] of Object.entries(GAME_CONFIG.element_database))
+                for(const [key, _] of Object.entries(GAME_CONFIG.element_view))
                     if(index-- == 0) return tonumber(key) as ElementId;
             }
         }
@@ -1501,4 +1592,117 @@ export function Game() {
     //#endregion HELPERS
 
     return init();
+}
+
+export function load_config() {
+    const data = sys.load_resource('/resources/levels.json')[0];
+    if(data == null) return;
+
+    const levels = json.decode(data) as { 
+        time: number,
+        steps: number,
+        targets: {
+            count: number,
+            type: { cell: CellId | undefined, element: ElementId | undefined }
+        }[],
+        coins: number,
+        additional_element: ElementId,
+        exclude_element: ElementId,
+        field: (string | { cell: CellId | undefined, element: ElementId | undefined })[][]
+    }[];
+    
+    for(const level_data of levels) {
+        const level = {
+            field: { 
+                width: 10,
+                height: 10,
+                max_width: 10,
+                max_height: 10,
+                cell_size: 128,
+                offset_border: 20,
+
+                cells: [] as (typeof NotActiveCell | CellId)[][] | CellId[][][],
+                elements: [] as (typeof NullElement | typeof RandomElement | ElementId)[][]
+            },
+
+            additional_element: level_data.additional_element,
+            exclude_element: level_data.exclude_element,
+
+            time: level_data.time,
+            steps: level_data.steps,
+            targets: [] as {
+                is_cell: boolean,
+                count: number,
+                type: ElementId,
+                uids: number[]
+            }[],
+
+            busters: {
+                hammer_active: false,
+                spinning_active: false,
+                horizontal_rocket_active: false,
+                vertical_rocket_active: false
+            }
+        };
+
+        for(let y = 0; y < level_data.field.length; y++) {
+            level.field.cells[y] = [];
+            level.field.elements[y] = [];
+            for(let x = 0; x < level_data.field[y].length; x++) {
+                const data = level_data.field[y][x];
+                if(typeof data === 'string') {
+                    switch(data) {
+                        case '-':
+                            level.field.cells[y][x] = NotActiveCell;
+                            level.field.elements[y][x] = NullElement;
+                            break;
+                        case '':
+                            level.field.cells[y][x] = CellId.Base;
+                            level.field.elements[y][x] = RandomElement;
+                            break;
+                    }   
+                } else {
+                    if(data.cell != undefined) {
+                        if(data.cell == CellId.Stone0) {
+                            level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
+                        } else level.field.cells[y][x] = [CellId.Base, data.cell];
+                    } else level.field.cells[y][x] = CellId.Base;
+
+                    if(data.element != undefined) {
+                        level.field.elements[y][x] = data.element;
+                    } else level.field.elements[y][x] = RandomElement;
+                }
+            }
+        }
+
+        for(const target_data of level_data.targets) {
+            let target;
+            if(target_data.type.element != undefined) {
+                target = {
+                    is_cell: false,
+                    type: target_data.type.element as number,
+                    count: 0,
+                    uids: []
+                };
+            }
+
+            if(target_data.type.cell != undefined) {
+                target = {
+                    is_cell: true,
+                    type: target_data.type.cell as number,
+                    count: 0,
+                    uids: []
+                };
+            }
+
+            if(target != undefined) {
+                const count = tonumber(target_data.count);
+                target.count = count != undefined ? count : target.count;
+
+                level.targets.push(target);
+            }
+        }
+
+        GAME_CONFIG.levels.push(level);
+    }
 }

@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
+import { RandomElement, Target } from "../game/match3_game";
 import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
@@ -45,11 +46,12 @@ export enum SubstrateId {
 export enum CellId {
     Base,
     Grass,
+    Flowers,
+    Web,
     Box,
     Stone0,
     Stone1,
-    Stone2,
-    Web
+    Stone2
 }
 
 export enum ElementId {
@@ -58,22 +60,21 @@ export enum ElementId {
     Topaz,
     Ruby,
     Emerald,
+    Cheese,
+    Cabbage,
+    Acorn,
+    RareMeat,
+    MediumMeat,
+    Chicken,
+    SunFlower,
+    Salad,
+    Hay,
     VerticalRocket,
     HorizontalRocket,
     AxisRocket,
     Helicopter,
     Dynamite,
-    Diskosphere,
-    Custom1,
-    Custom2,
-    Custom3,
-    Custom4,
-    Custom5,
-    Custom6,
-    Custom7,
-    Custom8,
-    Custom9,
-    Custom10
+    Diskosphere
 }
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
@@ -106,7 +107,9 @@ export const _GAME_CONFIG = {
     buster_delay: 0.5,
 
     default_substrate_z_index: -2,
+    default_cell_z_index: -1,
     default_element_z_index: 0,
+    default_top_layer_cell_z_index: 2,
 
     substrate_database: {
         [SubstrateId.OutsideArc]: 'outside_arc',
@@ -122,273 +125,98 @@ export const _GAME_CONFIG = {
         [SubstrateId.Full]: 'full'
     } as { [key in SubstrateId]: string },
 
-    cell_database: {
-        [CellId.Base]: {
-            type: CellType.Base,
-            view: 'cell_white',
-            z_index: -1,
-        },
+    cell_view: {
+        [CellId.Base]: 'cell_white',
+        [CellId.Grass]: 'cell_grass',
+        [CellId.Flowers]: 'cell_flowers',
+        [CellId.Web]: 'cell_web',
+        [CellId.Box]: 'cell_box',
+        [CellId.Stone0]: 'cell_stone_0',
+        [CellId.Stone1]: 'cell_stone_1',
+        [CellId.Stone2]: 'cell_stone_2'
+    } as { [key in CellId]: string },
+    
+    activation_cells: [
+        CellId.Grass,
+        CellId.Flowers
+    ],
 
-        [CellId.Grass]: {
-            type: CellType.ActionLocked,
-            cnt_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_grass',
-            z_index: -1,
-        },
+    near_activated_cells: [
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web,
+    ],
+    
+    disabled_cells: [
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2
+    ],
 
-        [CellId.Box]: {
-            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
-            cnt_near_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_box',
-            z_index: 2
-        },
+    not_moved_cells: [
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web
+    ],
 
-        [CellId.Stone0]: {
-            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
-            cnt_near_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_stone_0',
-            z_index: 2
-        },
+    top_layer_cells: [
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web
+    ],
 
-        [CellId.Stone1]: {
-            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
-            cnt_near_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_stone_1',
-            z_index: 2
-        },
+    element_view: {
+        [ElementId.Dimonde]: 'element_diamond',
+        [ElementId.Gold]: 'element_gold',
+        [ElementId.Topaz]: 'element_topaz',
+        [ElementId.Ruby]: 'element_ruby',
+        [ElementId.Emerald]: 'element_emerald',
+        [ElementId.VerticalRocket]: 'vertical_rocket_buster',
+        [ElementId.HorizontalRocket]: 'horizontal_rocket_buster',
+        [ElementId.AxisRocket]: 'axis_rocket_buster',
+        [ElementId.Helicopter]: 'helicopter_buster',
+        [ElementId.Dynamite]: 'dynamite_buster',
+        [ElementId.Diskosphere]: 'diskosphere_buster',
+        [ElementId.Cheese]: 'element_cheese',
+        [ElementId.Cabbage]: 'element_cabbage',
+        [ElementId.Acorn]: 'element_acorn',
+        [ElementId.RareMeat]: 'element_rare_meat',
+        [ElementId.MediumMeat]: 'element_medium_meat',
+        [ElementId.Chicken]: 'element_chicken',
+        [ElementId.SunFlower]: 'element_sunflower',
+        [ElementId.Salad]: 'element_salad' ,
+        [ElementId.Hay]: 'element_hay',
+    } as { [key in ElementId]: string },
 
-        [CellId.Stone2]: {
-            type: bit.bor(bit.bor(CellType.ActionLockedNear, CellType.Disabled), CellType.NotMoved),
-            cnt_near_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_stone_2',
-            z_index: 2
-        },
-
-        [CellId.Web]: {
-            type: bit.bor(CellType.ActionLockedNear, CellType.NotMoved),
-            cnt_near_acts: 0,
-            is_render_under_cell: true,
-            view: 'cell_web',
-            z_index: 2
-        },
-    } as { [key in CellId]: { type: number, cnt_acts?: number, cnt_near_acts?: number, is_render_under_cell?: boolean, view: string, z_index: number } },
-
-    element_database: {
-        [ElementId.Dimonde]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 10,
-            color: '#009de2',
-            view: 'element_diamond'
-        },
-
-        [ElementId.Gold]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 10,
-            color: '#e94165',
-            view: 'element_gold'
-        },
-
-        [ElementId.Topaz]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 10,
-            color: '#f5d74d',
-            view: 'element_topaz'
-        },
-
-        [ElementId.Ruby]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 10,
-            color: '#9a4ee5',
-            view: 'element_ruby'
-        },
-
-        [ElementId.Emerald]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 10,
-            color: '#20af1b',
-            view: 'element_emerald'
-        },
-
-        [ElementId.VerticalRocket]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'vertical_rocket_buster'
-        },
-
-        [ElementId.HorizontalRocket]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'horizontal_rocket_buster'
-        },
-
-        [ElementId.AxisRocket]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'axis_rocket_buster'
-        },
-
-        [ElementId.Helicopter]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'helicopter_buster'
-        },
-
-        [ElementId.Dynamite]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'dynamite_buster'
-        },
-
-        [ElementId.Diskosphere]: {
-            type: {
-                is_movable: true,
-                is_clickable: true
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'diskosphere_buster'
-        },
-        
-        [ElementId.Custom1]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_1'
-        },
-
-        [ElementId.Custom2]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_2'
-        },
-
-        [ElementId.Custom3]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_3'
-        },
-
-        [ElementId.Custom4]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_4'
-        },
-
-        [ElementId.Custom5]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_5'
-        },
-
-        [ElementId.Custom6]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_6'
-        },
-
-        [ElementId.Custom7]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_7'
-        },
-
-        [ElementId.Custom8]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_8'
-        },
-
-        [ElementId.Custom9]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_9'
-        },
-
-        [ElementId.Custom10]: {
-            type: {
-                is_movable: true,
-                is_clickable: false
-            },
-            percentage: 0,
-            color: '#ffffff',
-            view: 'custom_10'
-        },
-    } as { [key in ElementId]: { type: { is_movable: boolean, is_clickable: boolean }, percentage: number, color: string, view: string } },
+    element_colors: {
+        [ElementId.Dimonde]: '#009de2',
+        [ElementId.Gold]: '#e94165',
+        [ElementId.Topaz]: '#f5d74d',
+        [ElementId.Ruby]: '#9a4ee5',
+        [ElementId.Emerald]: '#20af1b',
+        [ElementId.VerticalRocket]: '#ffffff',
+        [ElementId.HorizontalRocket]: '#ffffff',
+        [ElementId.AxisRocket]: '#ffffff',
+        [ElementId.Helicopter]: '#ffffff',
+        [ElementId.Dynamite]: '#ffffff',
+        [ElementId.Diskosphere]: '#ffffff',
+        [ElementId.Cheese]: '#ffffff',
+        [ElementId.Cabbage]: '#ffffff',
+        [ElementId.Acorn]: '#ffffff',
+        [ElementId.RareMeat]: '#ffffff',
+        [ElementId.MediumMeat]: '#ffffff',
+        [ElementId.Chicken]: '#ffffff',
+        [ElementId.SunFlower]: '#ffffff',
+        [ElementId.Salad]: '#ffffff' ,
+        [ElementId.Hay]: '#ffffff'
+    },
 
     base_elements: [
         ElementId.Dimonde,
@@ -398,375 +226,48 @@ export const _GAME_CONFIG = {
         ElementId.Emerald
     ],
 
-    levels: [
-        {
-            // LEVEL 0
-            field: {
-                width: 8,
-                height: 8,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
+    buster_elements: [
+        ElementId.VerticalRocket,
+        ElementId.HorizontalRocket,
+        ElementId.AxisRocket,
+        ElementId.Dynamite,
+        ElementId.Helicopter,
+        ElementId.Diskosphere
+    ],
 
-                cells: [
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base, [CellId.Grass, CellId.Box], [CellId.Grass, CellId.Box], CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
-                ],
+    levels: [] as {
+        field: { 
+            width: number,
+            height: number,
+            max_width: number,
+            max_height: number,
+            cell_size: number,
+            offset_border: number,
 
-                elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dynamite, NullElement],
-                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Dynamite, ElementId.Dynamite, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Topaz, NullElement]
-                ]
-            },
-            
-            steps: 15,
-            targets: [
-                {
-                    type: ElementId.Topaz,
-                    count: 7,
-                    uids: [] as number []
-                },
-                {
-                    type: ElementId.Dimonde,
-                    count: 5,
-                    uids: [] as number []
-                }
-            ],
-
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-
-        {
-            // LEVEL 1
-            field: {
-                width: 8,
-                height: 8,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base,CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, CellId.Box, CellId.Box, CellId.Base],
-                    [CellId.Base, CellId.Box, CellId.Box, CellId.Base, CellId.Base, [CellId.Stone2, CellId.Stone1, CellId.Stone0], [CellId.Grass, CellId.Box], CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
-                ],
-
-                elements: [
-                    [NullElement, ElementId.Dimonde, ElementId.AxisRocket, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, NullElement],
-                    [ElementId.Dimonde, ElementId.Ruby, ElementId.Gold, ElementId.Ruby, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, NullElement, NullElement, ElementId.Gold, ElementId.Topaz, NullElement, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.VerticalRocket, ElementId.HorizontalRocket, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Topaz, ElementId.VerticalRocket, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Ruby],
-                    [NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz, ElementId.Emerald, ElementId.Topaz, NullElement]
-                ]
-            },
-
-            steps: 10,
-            targets: [
-                {
-                    type: ElementId.Emerald,
-                    count: 5,
-                    uids: [] as number []
-                }
-            ],
-
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-
-        {
-            // LEVEL 2
-            field: {
-                width: 8,
-                height: 8,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
-                    [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass], CellId.Base],
-                    [[CellId.Base, CellId.Grass], NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell, [CellId.Base, CellId.Grass]],
-                    [NotActiveCell, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], NotActiveCell]
-                ],
-
-                elements: [
-                    [NullElement, ElementId.Diskosphere, ElementId.Dynamite, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, NullElement],
-                    [ElementId.Dimonde, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Topaz],
-                    [ElementId.Dimonde, ElementId.Gold, NullElement, ElementId.Emerald, ElementId.Emerald, NullElement, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, ElementId.Gold, ElementId.Emerald, NullElement, NullElement, ElementId.Topaz, ElementId.Emerald, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Topaz, ElementId.Gold, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, NullElement, ElementId.Topaz, ElementId.Gold, NullElement, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Helicopter, NullElement, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Ruby],
-                    [NullElement, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Helicopter, ElementId.Helicopter, ElementId.Gold, NullElement]
-                ]
-            },
-            
-            steps: 20,
-            targets: [
-                {
-                    type: ElementId.Gold,
-                    count: 10,
-                    uids: [] as number []
-                },
-                {
-                    type: ElementId.Ruby,
-                    count: 5,
-                    uids: [] as number []
-                }
-            ],
-            
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-
-        {
-            // LEVEL 3
-            field: {
-                width: 8,
-                height: 8,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass]],
-                    [CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, ], CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass], CellId.Base],
-                    [[CellId.Base, CellId.Grass], CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, [CellId.Base, CellId.Grass]],
-                    [CellId.Base, [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], CellId.Base]
-                ],
-
-                elements: [
-                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Ruby],
-                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Diskosphere, ElementId.Diskosphere, ElementId.Dynamite],
-                    [ElementId.Dimonde, ElementId.Helicopter, ElementId.Topaz, ElementId.Emerald, ElementId.Emerald, ElementId.Helicopter, ElementId.Gold, ElementId.Topaz],
-                    [ElementId.Ruby, ElementId.HorizontalRocket, ElementId.Helicopter, ElementId.Emerald, ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Helicopter, ElementId.Gold, ElementId.Ruby, ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
-                    [ElementId.Gold, ElementId.Gold, ElementId.Ruby, ElementId.Topaz, ElementId.Gold, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [ElementId.Ruby, ElementId.Ruby, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
-                    [ElementId.Emerald, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Topaz, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
-                ]
-            },
-
-            steps: 15,
-            targets: [
-                {
-                    type: ElementId.Gold,
-                    count: 7,
-                    uids: [] as number []
-                },
-                {
-                    type: ElementId.Topaz,
-                    count: 7,
-                    uids: [] as number []
-                }
-            ],
-
-            busters: {
-                spinning_active: false,
-                hammer_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-
-        {
-            // LEVEL 4
-            field: {
-                width: 8,
-                height: 8,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass, CellId.Stone2, CellId.Stone1, CellId.Stone0], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base],
-                    [[CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass], [CellId.Base, CellId.Grass, CellId.Box], CellId.Base, CellId.Base, CellId.Base]
-                ],
-
-                elements: [
-                    [ElementId.Gold, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Gold, ElementId.VerticalRocket, ElementId.Gold],
-                    [ElementId.Dimonde, ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Topaz, ElementId.Gold, ElementId.Dynamite, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Topaz, ElementId.Emerald, ElementId.Helicopter, ElementId.Ruby, ElementId.Gold, ElementId.Topaz],
-                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Dimonde],
-                    [NullElement, NullElement, NullElement, NullElement, NullElement, ElementId.Topaz, ElementId.Dimonde, ElementId.Topaz],
-                    [NullElement, NullElement, NullElement, ElementId.Emerald, NullElement, ElementId.Ruby, ElementId.Gold, ElementId.Gold],
-                    [NullElement, NullElement, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Gold, ElementId.Ruby, ElementId.Ruby],
-                    [NullElement, NullElement, ElementId.Emerald, ElementId.Gold, NullElement, ElementId.Dimonde, ElementId.Gold, ElementId.Ruby]
-                ]
-            },
-            
-            steps: 5,
-            targets: [
-                {
-                    type: ElementId.Dimonde,
-                    count: 7,
-                    uids: [] as number []
-                }
-            ],
-            
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-
-        {
-            // LEVEL 5
-            field: {
-                width: 6,
-                height: 6,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Web], [CellId.Base, CellId.Web], CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Web], [CellId.Base, CellId.Web], CellId.Base, CellId.Base],
-                    [CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base, CellId.Base],
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
-                ],
-
-                elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
-                    [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Dimonde],
-                    [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Helicopter, ElementId.Dimonde, ElementId.Emerald, ElementId.Helicopter, ElementId.Dimonde],
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
-                ]
-            },
-            
-            steps: 10,
-            targets: [
-                {
-                    type: ElementId.Emerald,
-                    count: 5,
-                    uids: [] as number []
-                },
-                {
-                    type: ElementId.Gold,
-                    count: 5,
-                    uids: [] as number []
-                }
-            ],
-            
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
-        },
-        
-        {
-            // LEVEL 6
-            field: {
-                width: 6,
-                height: 6,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base],
-                    [CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base],
-                    [CellId.Base, CellId.Base, [CellId.Base, CellId.Box], [CellId.Base, CellId.Box], CellId.Base, CellId.Base],
-                    [NotActiveCell, CellId.Base, CellId.Base, CellId.Base, CellId.Base, NotActiveCell]
-                ],
-
-                elements: [
-                    [NullElement, ElementId.Topaz, ElementId.Gold, ElementId.Gold, ElementId.Emerald, NullElement],
-                    [ElementId.Ruby, ElementId.Topaz, ElementId.Dimonde, ElementId.Dimonde, ElementId.Emerald, ElementId.Topaz],
-                    [ElementId.Emerald, ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Gold],
-                    [ElementId.Gold, ElementId.Dimonde, ElementId.Gold, ElementId.Gold, ElementId.Emerald, ElementId.Dimonde],
-                    [ElementId.Dimonde, ElementId.Gold, ElementId.Dimonde, ElementId.Emerald, ElementId.Gold, ElementId.Dimonde],
-                    [NullElement, ElementId.Emerald, ElementId.Gold, ElementId.Emerald, ElementId.Emerald, NullElement]
-                ]
-            },
-
-            steps: 5,
-            targets: [
-                {
-                    type: ElementId.Ruby,
-                    count: 5,
-                    uids: [] as number [],
-                }
-            ],
-            
-            busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
-            }
+            cells: (typeof NotActiveCell | CellId)[][] | CellId[][][],
+            elements: (typeof NullElement | typeof RandomElement | ElementId)[][]
         }
-    ]
+
+        additional_element: ElementId,
+        exclude_element: ElementId,
+
+        time: number,
+        steps: number,
+        targets: Target[],
+
+        busters: {
+            hammer_active: boolean,
+            spinning_active: boolean,
+            horizontal_rocket_active: boolean,
+            vertical_rocket_active: boolean
+        }
+    }[]
 };
 
 
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
-    current_level: 4,
+    current_level: 0,
     hammer_counts: 3,
     spinning_counts: 3,
     horizontal_rocket_counts: 3,
@@ -802,6 +303,8 @@ export type SpinningActivationMessage = { element_from: ItemInfo, element_to: It
 export type _UserMessages = {
     LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
+
+    GAME_TIMER: number,
 
     SET_HELPER: VoidMessage,
 
@@ -853,8 +356,8 @@ export type _UserMessages = {
 
     UPDATED_BUTTONS: VoidMessage,
     UPDATED_STEP_COUNTER: number,
-    UPDATED_FIRST_TARGET: number,
-    UPDATED_SECOND_TARGET: number,
+    UPDATED_TIMER: number,
+    UPDATED_TARGET: { id: number, count: number },
 
     ON_LEVEL_COMPLETED: VoidMessage,
     ON_GAME_OVER: VoidMessage
