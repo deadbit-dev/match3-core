@@ -1,0 +1,29 @@
+local ____exports = {}
+local flow = require("ludobits.m.flow")
+local ____map = require("map.map")
+local Map = ____map.Map
+function ____exports.init(self)
+    msg.post(".", "acquire_input_focus")
+    flow.start(
+        function() return Map() end,
+        {}
+    )
+end
+function ____exports.on_input(self, action_id, action)
+    if action_id == hash("touch") then
+        msg.post(".", action_id, action)
+    end
+end
+function ____exports.on_message(self, message_id, message, sender)
+    flow.on_message(message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+end
+function ____exports.final(self)
+    flow.stop()
+    EventBus.off_all_current_script()
+end
+init = ____exports.init
+on_input = ____exports.on_input
+on_message = ____exports.on_message
+final = ____exports.final
+

@@ -31,6 +31,7 @@ dependencies#5 = https://github.com/defold/extension-review/archive/master.zip
 dependencies#6 = https://github.com/indiesoftby/defold-yametrica/archive/refs/tags/1.0.0.zip
 dependencies#7 = https://github.com/defold/extension-spine/archive/refs/tags/2.14.5.zip
 dependencies#8 = https://github.com/Kyonin/instantgamesbridge/archive/refs/heads/main.zip
+dependencies#9 = https://github.com/indiesoftby/defold-liveupdate-reszip/archive/main.zip
 
 [native_extension]
 app_manifest = /project_settings/generated.appmanifest

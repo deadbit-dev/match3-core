@@ -1,93 +1,93 @@
 platforms:
     armv7-ios:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
-            excludeSymbols: []
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             frameworks: []
             linkFlags: []
     arm64-ios:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
-            excludeSymbols: []
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             frameworks: []
             linkFlags: []
     x86_64-ios:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
-            excludeSymbols: []
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             frameworks: []
             linkFlags: []
     armv7-android:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
             excludeJars: []
-            excludeSymbols: []
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             linkFlags: []
             jetifier: true
     arm64-android:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
             excludeJars: []
-            excludeSymbols: []
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             linkFlags: []
             jetifier: true
     arm64-osx:
         context:
-            excludeLibs: []
-            excludeSymbols: []
-            libs: []
+            excludeLibs: [profilerext]
+            excludeSymbols: [ProfilerExt]
+            libs: [profilerext_null]
     x86_64-osx:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
-            excludeSymbols: []
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             frameworks: []
             linkFlags: []
     x86_64-linux:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
-            excludeSymbols: []
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             linkFlags: []
     x86-win32:
         context:
-            excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, librecord, vpx, libliveupdate]
-            excludeSymbols: []
+            excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, librecord, vpx, libprofilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [libphysics_null.lib, librecord_null.lib, libliveupdate_null.lib]
+            libs: [libphysics_null.lib, librecord_null.lib, libprofilerext_null.lib]
             linkFlags: []
     x86_64-win32:
         context:
-            excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, librecord, vpx, libliveupdate]
-            excludeSymbols: []
+            excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, librecord, vpx, libprofilerext]
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [libphysics_null.lib, librecord_null.lib, libliveupdate_null.lib]
+            libs: [libphysics_null.lib, librecord_null.lib, libprofilerext_null.lib]
             linkFlags: []
     js-web:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
             excludeJsLibs: []
-            excludeSymbols: []
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             linkFlags: []
     wasm-web:
         context:
-            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, liveupdate]
+            excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, record, vpx, profilerext]
             excludeJsLibs: []
-            excludeSymbols: []
+            excludeSymbols: [ProfilerExt]
             symbols: []
-            libs: [physics_null, record_null, liveupdate_null]
+            libs: [physics_null, record_null, profilerext_null]
             linkFlags: []

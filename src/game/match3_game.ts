@@ -118,10 +118,17 @@ export function Game() {
         set_busters();
         set_events();
         set_random();
+
+        set_targets_uids();
     }
     
     //#endregion MAIN
     //#region SETUP
+
+    function set_targets_uids() {
+        for(const target of level_config.targets)
+            target.uids = [];
+    }
 
     function set_element_types() {
         for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
@@ -1616,8 +1623,8 @@ export function load_config() {
             field: { 
                 width: 10,
                 height: 10,
-                max_width: 10,
-                max_height: 10,
+                max_width: 8,
+                max_height: 8,
                 cell_size: 128,
                 offset_border: 20,
 

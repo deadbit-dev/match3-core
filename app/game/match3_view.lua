@@ -38,7 +38,17 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_events, on_game_step, input_listener, on_down, on_move, on_up, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, delete_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, cell_size, scale_ratio, cells_offset, event_to_animation, gm, game_id_to_view_index, game_id_to_type, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local set_targets, set_events, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, on_load_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, game_id_to_view_index, game_id_to_type, targets, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
+    function set_targets()
+        do
+            local i = 0
+            while i < #level_config.targets do
+                local target = level_config.targets[i + 1]
+                targets[i] = target.count
+                i = i + 1
+            end
+        end
+    end
     function set_events()
         EventBus.on(
             "ON_LOAD_FIELD",
@@ -46,6 +56,7 @@ function ____exports.View(animator)
                 if state == nil then
                     return
                 end
+                recalculate_cell_offset(state)
                 on_load_field(state)
                 EventBus.send("SET_HELPER")
             end
@@ -244,20 +255,20 @@ function ____exports.View(animator)
         for ____, event in ipairs(events) do
             print("[VIEW]: ", event.key)
             repeat
-                local ____switch45 = event.key
+                local ____switch47 = event.key
                 local event_duration
-                local ____cond45 = ____switch45 == "ON_SWAP_ELEMENTS"
-                if ____cond45 then
+                local ____cond47 = ____switch47 == "ON_SWAP_ELEMENTS"
+                if ____cond47 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond45 = ____cond45 or ____switch45 == "ON_SPINNING_ACTIVATED"
-                if ____cond45 then
+                ____cond47 = ____cond47 or ____switch47 == "ON_SPINNING_ACTIVATED"
+                if ____cond47 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond45 = ____cond45 or ____switch45 == "ON_MOVED_ELEMENTS"
-                if ____cond45 then
+                ____cond47 = ____cond47 or ____switch47 == "ON_MOVED_ELEMENTS"
+                if ____cond47 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -276,24 +287,24 @@ function ____exports.View(animator)
         EventBus.send("SET_HELPER")
         EventBus.send("ON_GAME_STEP_ANIMATION_END")
     end
-    function input_listener()
+    function dispatch_messages()
         while true do
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
             repeat
-                local ____switch50 = message_id
-                local ____cond50 = ____switch50 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond50 then
+                local ____switch52 = message_id
+                local ____cond52 = ____switch52 == ID_MESSAGES.MSG_ON_DOWN_ITEM
+                if ____cond52 then
                     on_down(_message.item)
                     break
                 end
-                ____cond50 = ____cond50 or ____switch50 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond50 then
+                ____cond52 = ____cond52 or ____switch52 == ID_MESSAGES.MSG_ON_UP_ITEM
+                if ____cond52 then
                     on_up(_message.item)
                     break
                 end
-                ____cond50 = ____cond50 or ____switch50 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond50 then
+                ____cond52 = ____cond52 or ____switch52 == ID_MESSAGES.MSG_ON_MOVE
+                if ____cond52 then
                     on_move(_message)
                     break
                 end
@@ -321,24 +332,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch56 = move_direction
-            local ____cond56 = ____switch56 == Direction.Up
-            if ____cond56 then
+            local ____switch58 = move_direction
+            local ____cond58 = ____switch58 == Direction.Up
+            if ____cond58 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond56 = ____cond56 or ____switch56 == Direction.Down
-            if ____cond56 then
+            ____cond58 = ____cond58 or ____switch58 == Direction.Down
+            if ____cond58 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond56 = ____cond56 or ____switch56 == Direction.Left
-            if ____cond56 then
+            ____cond58 = ____cond58 or ____switch58 == Direction.Left
+            if ____cond58 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond56 = ____cond56 or ____switch56 == Direction.Right
-            if ____cond56 then
+            ____cond58 = ____cond58 or ____switch58 == Direction.Right
+            if ____cond58 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -359,6 +370,34 @@ function ____exports.View(animator)
         local element_pos = get_field_pos(item_world_pos)
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
         down_item = nil
+    end
+    function recalculate_cell_offset(state)
+        local min_y_active_cell = field_height
+        local max_y_active_cell = 0
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        if state.cells[y + 1][x + 1] ~= NotActiveCell then
+                            if y < min_y_active_cell then
+                                min_y_active_cell = y
+                            end
+                            if y > max_y_active_cell then
+                                max_y_active_cell = y
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        print(min_y_active_cell)
+        print(max_y_active_cell)
+        cells_offset.y = cells_offset.y + min_y_active_cell * cell_size * 0.5
+        cells_offset.y = cells_offset.y - math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5
     end
     function on_load_field(state)
         do
@@ -756,7 +795,7 @@ function ____exports.View(animator)
                 )
             end
         )
-        return squash_duration + 0.7
+        return squash_duration + 0.5
     end
     function on_swaped_diskosphere_with_element_animation(message)
         local activation = message
@@ -798,7 +837,7 @@ function ____exports.View(animator)
             msg.url(nil, _go, "diskosphere_light"),
             "enable"
         )
-        local anim_props = {blend_duration = 0, playback_rate = 1}
+        local anim_props = {blend_duration = 0, playback_rate = 1.25}
         spine.play_anim(
             msg.url(nil, _go, "diskosphere"),
             "light_ball_intro",
@@ -806,7 +845,7 @@ function ____exports.View(animator)
             anim_props,
             function(____self, message_id, message, sender)
                 if message_id == hash("spine_animation_done") then
-                    local anim_props = {blend_duration = 0, playback_rate = 1}
+                    local anim_props = {blend_duration = 0, playback_rate = 1.25}
                     if message.animation_id == hash("light_ball_intro") then
                         trace(
                             activation,
@@ -831,7 +870,7 @@ function ____exports.View(animator)
                 end
             end
         )
-        return 0.7
+        return 0.5
     end
     function trace(activation, diskosphere, pos, counter, on_complete)
         local anim_props = {blend_duration = 0, playback_rate = 1}
@@ -999,7 +1038,7 @@ function ____exports.View(animator)
         local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1)
         rocket_effect(pos, dir)
         timer.delay(0.3, false, on_fly_end)
-        return 0.5
+        return 0.3
     end
     function rocket_effect(pos, dir)
         if dir == Axis.All then
@@ -1018,14 +1057,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch196 = dir
-            local ____cond196 = ____switch196 == Axis.Vertical
-            if ____cond196 then
+            local ____switch204 = dir
+            local ____cond204 = ____switch204 == Axis.Vertical
+            if ____cond204 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond196 = ____cond196 or ____switch196 == Axis.Horizontal
-            if ____cond196 then
+            ____cond204 = ____cond204 or ____switch204 == Axis.Horizontal
+            if ____cond204 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1078,7 +1117,7 @@ function ____exports.View(animator)
             go.PLAYBACK_ONCE_FORWARD,
             part0_to_world_pos,
             go.EASING_INCUBIC,
-            0.5,
+            0.3,
             0,
             function()
                 go.delete(part0)
@@ -1090,7 +1129,7 @@ function ____exports.View(animator)
             go.PLAYBACK_ONCE_FORWARD,
             part1_to_world_pos,
             go.EASING_INCUBIC,
-            0.5,
+            0.3,
             0,
             function()
                 go.delete(part1)
@@ -1247,7 +1286,7 @@ function ____exports.View(animator)
             "enable"
         )
         delete_view_item_by_game_id(activation.element.uid)
-        local anim_props = {blend_duration = 0, playback_rate = 1}
+        local anim_props = {blend_duration = 0, playback_rate = 1.25}
         spine.play_anim(
             msg.url(nil, _go, "dynamite"),
             "action",
@@ -1638,7 +1677,7 @@ function ____exports.View(animator)
             __TS__Delete(game_id_to_view_index, id)
             return false
         end
-        delete_target_by_id(id)
+        update_target_by_id(id)
         gm.delete_item(item, true)
         __TS__ArraySplice(game_id_to_view_index[id], 0, 1)
         return true
@@ -1648,26 +1687,21 @@ function ____exports.View(animator)
         if items == nil then
             return false
         end
-        delete_target_by_id(id)
+        update_target_by_id(id)
         for ____, item in ipairs(items) do
             gm.delete_item(item, true)
         end
         __TS__Delete(game_id_to_view_index, id)
         return true
     end
-    function delete_target_by_id(id)
+    function update_target_by_id(id)
         do
             local i = 0
             while i < #level_config.targets do
                 local target = level_config.targets[i + 1]
                 if __TS__ArrayIndexOf(target.uids, id) ~= -1 then
-                    EventBus.send(
-                        "UPDATED_TARGET",
-                        {
-                            id = i,
-                            count = math.max(0, target.count - #target.uids)
-                        }
-                    )
+                    targets[i] = math.max(0, targets[i] - 1)
+                    EventBus.send("UPDATED_TARGET", {id = i, count = targets[i]})
                 end
                 i = i + 1
             end
@@ -1719,12 +1753,11 @@ function ____exports.View(animator)
     field_width = level_config.field.width
     field_height = level_config.field.height
     local max_field_width = level_config.field.max_width
-    local max_field_height = level_config.field.height
+    max_field_height = level_config.field.height
     local offset_border = level_config.field.offset_border
     local origin_cell_size = level_config.field.cell_size
     cell_size = math.floor(math.min((game_width - offset_border * 2) / max_field_width, 100))
     scale_ratio = cell_size / origin_cell_size
-    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     event_to_animation = {
         ON_SWAP_ELEMENTS = on_swap_element_animation,
         ON_COMBINED = on_combined_animation,
@@ -1749,14 +1782,17 @@ function ____exports.View(animator)
     gm = GoManager()
     game_id_to_view_index = {}
     game_id_to_type = {}
+    targets = {}
     down_item = nil
     combinate_phase_duration = 0
     move_phase_duration = 0
     is_processing = false
+    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     local function init()
         set_events()
+        set_targets()
         EventBus.send("LOAD_FIELD")
-        input_listener()
+        dispatch_messages()
     end
     local function make_hole_substrate_view(x, y, cells, z_index)
         if z_index == nil then

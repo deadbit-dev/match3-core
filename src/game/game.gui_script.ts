@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { go_animate } from 'ludobits.m.flow';
 import { CellId, ElementId } from '../main/game_config';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
 import { Target } from './match3_game';

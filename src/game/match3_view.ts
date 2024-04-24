@@ -129,8 +129,7 @@ export function View(animator: FluxGroup) {
 
     const cell_size = math.floor(math.min((game_width - offset_border * 2) / max_field_width, 100));
     const scale_ratio = cell_size / origin_cell_size;
-    const cells_offset = vmath.vector3(game_width / 2 - (field_width / 2 * cell_size), -(game_height / 2 - (max_field_height / 2 * cell_size)) + 50, 0);
-
+    
     const event_to_animation: { [key in string]: (data: Messages[MessageId]) => number } = {
         'ON_SWAP_ELEMENTS': on_swap_element_animation,
         'ON_COMBINED': on_combined_animation,
@@ -171,25 +170,45 @@ export function View(animator: FluxGroup) {
     const gm = GoManager();
     const game_id_to_view_index: { [key in number]: number[] } = {};
     const game_id_to_type: { [key in number]: ElementId } = {};
+    const targets: {[key in number]: number} = {};
 
     let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
+    
+    let cells_offset = vmath.vector3(
+        game_width / 2 - (field_width / 2 * cell_size),
+        -(game_height / 2 - (max_field_height / 2 * cell_size)) + 50,
+        0
+    );
 
     function init() {
         set_events();
+        set_targets();
+
         EventBus.send('LOAD_FIELD');
-        input_listener();
+        
+        dispatch_messages();
+    }
+
+    function set_targets() {
+        for(let i = 0; i < level_config.targets.length; i++) {
+            const target = level_config.targets[i];
+            targets[i] = target.count;
+
+            // TODO: send event to UI
+        }
     }
 
     // TODO: function on each event
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             if (state == undefined) return;
+            recalculate_cell_offset(state);
             on_load_field(state);
-            
+
             EventBus.send('SET_HELPER');
         });
 
@@ -347,22 +366,23 @@ export function View(animator: FluxGroup) {
     //#endregion MAIN
     //#region INPUT         
 
-    function input_listener() {
+    function dispatch_messages() {
         while (true) {
             const [message_id, _message, sender] = flow.until_any_message();
             gm.do_message(message_id, _message, sender);
+            
             switch (message_id) {
                 case ID_MESSAGES.MSG_ON_DOWN_ITEM:
                     on_down((_message as Messages['MSG_ON_DOWN_ITEM']).item);
-                    break;
+                break;
 
                 case ID_MESSAGES.MSG_ON_UP_ITEM:
                     on_up((_message as Messages['MSG_ON_UP_ITEM']).item);
-                    break;
+                break;
 
                 case ID_MESSAGES.MSG_ON_MOVE:
                     on_move((_message as Messages['MSG_ON_MOVE']));
-                    break;
+                break;
             }
         }
     }
@@ -425,6 +445,25 @@ export function View(animator: FluxGroup) {
 
     //#endregion INPUT
     //#region LOGIC         
+    
+    function recalculate_cell_offset(state: GameState) {
+        let min_y_active_cell = field_height;
+        let max_y_active_cell = 0;
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                if(state.cells[y][x] != NotActiveCell) {
+                    if(y < min_y_active_cell) min_y_active_cell = y;
+                    if(y > max_y_active_cell) max_y_active_cell = y;
+                }
+            }
+        }
+
+        print(min_y_active_cell);
+        print(max_y_active_cell);
+
+        cells_offset.y += min_y_active_cell * cell_size * 0.5;
+        cells_offset.y -= math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5;
+    }
 
     function on_load_field(state: GameState) {
         for (let y = 0; y < field_height; y++) {
@@ -716,7 +755,7 @@ export function View(animator: FluxGroup) {
             });
         });
 
-        return squash_duration + 0.7;
+        return squash_duration + 0.5;
     }
 
     function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
@@ -745,10 +784,10 @@ export function View(animator: FluxGroup) {
         msg.post(msg.url(undefined, _go, 'diskosphere'), 'enable');
         msg.post(msg.url(undefined, _go, 'diskosphere_light'), 'enable');
 
-        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'diskosphere'), 'light_ball_intro', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
             if (message_id == hash("spine_animation_done")) {
-                const anim_props = { blend_duration: 0, playback_rate: 1 };
+                const anim_props = { blend_duration: 0, playback_rate: 1.25 };
                 if (message.animation_id == hash('light_ball_intro')) {
                     trace(activation, _go, pos, activation.damaged_elements.length, () => {
                         spine.play_anim(msg.url(undefined, _go, 'diskosphere_light'), 'light_ball_explosion', go.PLAYBACK_ONCE_FORWARD, anim_props);
@@ -759,7 +798,7 @@ export function View(animator: FluxGroup) {
             }
         });
         
-        return 0.7;
+        return 0.5;
     }
 
     function trace(activation: ActivationMessage, diskosphere: hash, pos: vmath.vector3, counter: number, on_complete: () => void) {
@@ -858,7 +897,7 @@ export function View(animator: FluxGroup) {
         
         timer.delay(0.3, false, on_fly_end);
 
-        return 0.5;
+        return 0.3;
     }
 
     function rocket_effect(pos: vmath.vector3, dir: Axis) {
@@ -910,11 +949,11 @@ export function View(animator: FluxGroup) {
             part1_to_world_pos.x += distance;
         }
     
-        go.animate(part0, 'position', go.PLAYBACK_ONCE_FORWARD, part0_to_world_pos, go.EASING_INCUBIC, 0.5, 0, () => {
+        go.animate(part0, 'position', go.PLAYBACK_ONCE_FORWARD, part0_to_world_pos, go.EASING_INCUBIC, 0.3, 0, () => {
             go.delete(part0);
         });
         
-        go.animate(part1, 'position', go.PLAYBACK_ONCE_FORWARD, part1_to_world_pos, go.EASING_INCUBIC, 0.5, 0, () => {
+        go.animate(part1, 'position', go.PLAYBACK_ONCE_FORWARD, part1_to_world_pos, go.EASING_INCUBIC, 0.3, 0, () => {
             go.delete(part1);
         });
     }
@@ -1037,7 +1076,7 @@ export function View(animator: FluxGroup) {
 
         delete_view_item_by_game_id(activation.element.uid);
 
-        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'dynamite'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any) => {
             print("MESSAGE: ", message_id);
             gm.delete_go(_go);
@@ -1366,7 +1405,7 @@ export function View(animator: FluxGroup) {
             return false;
         }
 
-        delete_target_by_id(id);
+        update_target_by_id(id);
 
         gm.delete_item(item, true);
         game_id_to_view_index[id].splice(0, 1);
@@ -1378,7 +1417,7 @@ export function View(animator: FluxGroup) {
         const items = get_all_view_items_by_game_id(id);
         if (items == undefined) return false;
 
-        delete_target_by_id(id);
+        update_target_by_id(id);
         
         for (const item of items) gm.delete_item(item, true);
         delete game_id_to_view_index[id];
@@ -1386,11 +1425,12 @@ export function View(animator: FluxGroup) {
         return true;
     }
  
-    function delete_target_by_id(id: number) {
+    function update_target_by_id(id: number) {
         for (let i = 0; i < level_config.targets.length; i++) {
             const target = level_config.targets[i];
             if (target.uids.indexOf(id) != -1) {
-                EventBus.send('UPDATED_TARGET', {id: i, count: math.max(0, target.count - target.uids.length)});
+                targets[i] = math.max(0, targets[i] - 1);
+                EventBus.send('UPDATED_TARGET', {id: i, count: targets[i]});
             }
         }
     }

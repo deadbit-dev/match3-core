@@ -18,12 +18,16 @@ export function register_scene() {
     (_G as any).Scene = SceneModule();
 }
 
+type OnLoadCallback = (() => void) | undefined;
 
 function SceneModule() {
     let wait_load_scene = '';
     let last_loading_scene = '';
     let last_scene = '';
     let _wait_ready_manager = false;
+    
+    const scene_to_resources: {[key in string]: string[]} = {};
+    const loading_resources: string[] = [];
 
     function init() {
         if (System.platform == 'HTML5')
@@ -37,8 +41,10 @@ function SceneModule() {
     }
 
     // загрузить сцену с именем. wait_ready_manager - ждать ли сначала полной загрузки менеджера
-    function load(name: string, wait_ready_manager = false) {
+    function load(name: string, wait_ready_manager = false, additional_resources: string[] = []) {
         _wait_ready_manager = wait_ready_manager;
+    
+        scene_to_resources[name] = additional_resources;
         Manager.send('LOAD_SCENE', { name });
     }
 
@@ -81,19 +87,31 @@ function SceneModule() {
             }
         }
         if (message_id == hash("proxy_loaded")) {
-            if (last_scene != '' && !is_restarting_scene) {
+            for(const resource of scene_to_resources[last_loading_scene]) {
+                loading_resources.push(resource);
+                Scene.load(resource, true);
+            }
+
+            const is_loaded_resource = loading_resources.includes(last_loading_scene);
+            if (last_scene != '' && !is_restarting_scene && !is_loaded_resource) {
                 const n = Manager.MANAGER_ID + "#" + last_scene;
                 msg.post(n, "disable");
                 msg.post(n, "final");
                 msg.post(n, "unload");
                 last_scene = '';
             }
+
             is_restarting_scene = false;
+
             msg.post(sender, "init");
             msg.post(sender, "enable");
-            last_scene = last_loading_scene;
-            last_loading_scene = '';
-            Manager.send('SCENE_LOADED', { name: last_scene });
+            
+            if(!is_loaded_resource) {
+                last_scene = last_loading_scene;
+                last_loading_scene = '';
+
+                Manager.send('SCENE_LOADED', { name: last_scene });
+            }
         }
     }
 
