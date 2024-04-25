@@ -15,7 +15,7 @@
 
 import * as flow from 'ludobits.m.flow';
 
-import { MessageId, Messages } from '../modules/modules_const';
+import { MessageId, Messages, PosXYMessage } from '../modules/modules_const';
 
 import { Axis, is_valid_pos } from '../utils/math_utils';
 
@@ -133,7 +133,6 @@ export function Game() {
     function set_element_types() {
         for(const [key] of Object.entries(GAME_CONFIG.element_view)) {
             const element_id = tonumber(key) as ElementId;
-            print(element_id);
             field.set_element_type(element_id, {
                 index: element_id,
                 is_movable: true,
@@ -171,117 +170,20 @@ export function Game() {
     }
     
     function set_events() {
-        EventBus.on('LOAD_FIELD', load_field);
-
+        EventBus.on('LOAD_FIELD', on_load_field);
         EventBus.on('SET_HELPER', set_helper);
-
-        EventBus.on('SWAP_ELEMENTS', (elements) => {
-            if(is_block_input || elements == undefined) return;
-
-            const c0 = socket.gettime();
-
-            stop_helper();
-            
-            if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
-
-            const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
-
-            is_step = true;
-
-            process_game_step(is_procesed);
-
-            print("SWAP ELEMENTS TIME: ", (socket.gettime() - c0) * 1000, "ms");
-        });
-
-        // TODO: refactoring
-        EventBus.on('CLICK_ACTIVATION', (pos) => {
-            if(is_block_input || pos == undefined) return;
-
-            stop_helper();
-
-            if(try_click_activation(pos.x, pos.y)) process_game_step(true);
-            else {
-                const element = field.get_element(pos.x, pos.y);
-                if(element != NullElement) {
-                    if(selected_element != null && selected_element.uid == element.uid) {
-                        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
-                        selected_element = null;
-                    } else {
-                        let is_swap = false;
-                        if(selected_element != null) {
-                            EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
-                            const neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, [
-                                [0, 1, 0],
-                                [1, 0, 1],
-                                [0, 1, 0]
-                            ]);
-
-                            for(const neighbor of neighbors) {
-                                if(neighbor.uid == element.uid) {
-                                    is_swap = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(selected_element != null && is_swap) EventBus.send('SWAP_ELEMENTS', {from_x: selected_element.x, from_y: selected_element.y, to_x: pos.x, to_y: pos.y});
-                        else {
-                            selected_element = {x: pos.x, y: pos.y, uid: element.uid};
-                            EventBus.send('ON_ELEMENT_SELECTED', Object.assign({}, selected_element));
-                        }
-                    }
-                }
-            }
-        });
-
-        EventBus.on('ACTIVATE_SPINNING', () => {
-            if(is_block_input) return;
-            stop_helper();
-            try_spinning_activation();
-        });
-        
-        EventBus.on('REVERT_STEP', () => {
-            stop_helper();
-            revert_step();
-        });
-
-        // TODO: move in logic game step end
-        EventBus.on('ON_GAME_STEP_ANIMATION_END', () => {
-            if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
-            else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
-
-            print("[GAME]: end step");
-
-            is_block_input = true;
-            search_available_steps(1, (steps) => {
-                if(steps.length != 0) {
-                    print("[GAME]: end check of available steps after end game step");
-                    is_block_input = false;
-                    return;
-                }
-
-                print("[GAME]: shuffle field after end game step");
-                
-                stop_helper();
-                shuffle_field();
-            });
-        });
+        EventBus.on('SWAP_ELEMENTS', on_swap_elements);
+        EventBus.on('CLICK_ACTIVATION', on_click_activation);
+        EventBus.on('ACTIVATE_SPINNING', on_activate_spinning);
+        EventBus.on('REVERT_STEP', on_revert_step);
+        EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
     }
 
-    function load_field() {
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
-                load_cell(x, y);
-                load_element(x, y);
-            }
-        }
-
-        if(field.get_all_combinations(true).length > 0) {
-            field.init();
-            load_field();
-            return;
-        }
-
+    function on_load_field() {
+        Log.log("Загрузка поля");
+        
+        try_load_field();
+        
         const state = field.save_state();
         previous_states.push(state);
 
@@ -295,6 +197,93 @@ export function Game() {
             start_game_time = System.now();
             timer.delay(1, true, on_game_timer_tick);
         }
+    }
+
+    function try_load_field() {
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                load_cell(x, y);
+                load_element(x, y);
+            }
+        }
+
+        if(field.get_all_combinations(true).length > 0) {
+            field.init();
+            try_load_field();
+            return;
+        }
+    }
+
+    function on_swap_elements(elements: StepInfo | undefined) {
+        if(is_block_input || elements == undefined) return;
+
+        stop_helper();
+        
+        if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
+
+        is_step = true;
+        const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
+        process_game_step(is_procesed);
+    }
+
+    // TODO: refactoring
+    function on_click_activation(pos: PosXYMessage | undefined) {
+        if(is_block_input || pos == undefined) return;
+
+        stop_helper();
+
+        if(try_click_activation(pos.x, pos.y)) process_game_step(true);
+        else {
+            const element = field.get_element(pos.x, pos.y);
+            if(element != NullElement) {
+                if(selected_element != null && selected_element.uid == element.uid) {
+                    EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                    selected_element = null;
+                } else {
+                    let is_swap = false;
+                    if(selected_element != null) {
+                        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                        const neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, [
+                            [0, 1, 0],
+                            [1, 0, 1],
+                            [0, 1, 0]
+                        ]);
+
+                        for(const neighbor of neighbors) {
+                            if(neighbor.uid == element.uid) {
+                                is_swap = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(selected_element != null && is_swap) EventBus.send('SWAP_ELEMENTS', {from_x: selected_element.x, from_y: selected_element.y, to_x: pos.x, to_y: pos.y});
+                    else {
+                        selected_element = {x: pos.x, y: pos.y, uid: element.uid};
+                        EventBus.send('ON_ELEMENT_SELECTED', Object.assign({}, selected_element));
+                    }
+                }
+            }
+        }
+    }
+
+    function on_activate_spinning() {
+        if(is_block_input) return;
+        
+        stop_helper();
+        try_spinning_activation();
+    }
+
+    function on_revert_step() {
+        stop_helper();
+        revert_step();
+    }
+
+    // TODO: move in logic game step end
+    function on_game_step_animation_end() {
+        if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
+        else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
+        Log.log("Закончена анимация хода");
     }
 
     function on_game_timer_tick() {
@@ -376,10 +365,8 @@ export function Game() {
         helper_timer = timer.delay(5, false, () => {
             set_combination_for_helper(available_steps);
 
-            print("[GAME]: try to set helper");
-
             if(helper_data != null) {
-                print("[GAME]: set helper");
+                Log.log("Запуск подсказки");
 
                 reset_helper();
 
@@ -393,8 +380,7 @@ export function Game() {
     
     function stop_helper() {
         if(helper_timer == undefined) return;
-
-        print("[GAME]: stop helper");
+        Log.log("Остановка подсказки");
 
         stop_all_coroutines();
 
@@ -412,8 +398,7 @@ export function Game() {
 
     function reset_helper() {
         if(previous_helper_data == null) return;
-
-        print("[GAME]: reset helper");
+        Log.log("Перезапуск подсказки");
         
         EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, previous_helper_data));
         previous_helper_data = null;
@@ -448,23 +433,19 @@ export function Game() {
                     combined_element: element
                 };
 
-                print("[GAME]: set helper data");
-
-                return;
+                return Log.log("Установлены данные для подсказки");
             }
         }
     }
     
     function search_available_steps(count: number, on_end: (steps: StepInfo[]) => void) {
         const coroutine = flow.start(() => {
-            print("[GAME]: search available steps");
+            Log.log("Поиск возможных ходов");
 
             const steps: StepInfo[] = [];
             for(let y = 0; y < field_height; y++) {
                 for(let x = 0; x < field_width; x++) {
                     flow.frames(1);
-
-                    const c0 = socket.gettime();
 
                     if(is_buster(x, y)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
@@ -474,31 +455,24 @@ export function Game() {
                         steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
                     }
 
-                    print('first part time: ', (socket.gettime() - c0) * 1000, "ms");
-
                     if(steps.length > count) {
                         return on_end(steps);
                     }
 
                     flow.frames(1);
 
-                    const c1 = socket.gettime();
-                    
                     if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
                     }
 
-                    print('second part time: ', (socket.gettime() - c1) * 1000, "ms");
-
                     if(steps.length > count) {
                         return on_end(steps);
                     }
-
-                    // flow.frames(1);
                 }
             }
             
-            print("[GAME]: found ", steps.length, " steps");
+            Log.log("Найдены " + steps.length + " ходов");
+
             on_end(steps);
         });
 
@@ -622,8 +596,6 @@ export function Game() {
         else if(try_activate_dynamite(x, y)) activated = true;
         else if(try_activate_diskosphere(x, y)) activated = true;
         
-        if(activated) print("[GAME]: try activate buster element: ", x, y);
-
         if(!activated && with_check) activated_elements.splice(activated_elements.length - 1, 1);
 
         return activated;
@@ -1063,10 +1035,10 @@ export function Game() {
     }
 
     function shuffle_field() {
+        Log.log("Перемешиваем поле");
+
         let state = field.save_state();
-
-        print("[GAME]: shuffle field");
-
+        
         const event_data: SpinningActivationMessage = [];
         write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
@@ -1089,10 +1061,8 @@ export function Game() {
 
         is_block_input = true;
         search_available_steps(1, (steps) => {
-            if(steps.length != 0) {
-                print("[GAME]: end search available steps after shuffle field");
-                process_game_step(false);
-            } else {
+            if(steps.length != 0) process_game_step(false);
+            else {
                 game_step_events = {} as GameStepEventBuffer;
                 field.load_state(state);
                 shuffle_field();
@@ -1203,8 +1173,6 @@ export function Game() {
         EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
         selected_element = null;
         
-        const c0 = socket.gettime();
-
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 from: {x: from_x, y: from_y},
@@ -1216,8 +1184,6 @@ export function Game() {
             return false;
         }
 
-        print("TRY SWAP TIME: ", (socket.gettime() - c0) * 1000, "ms");
-        
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
             to: {x: to_x, y: to_y},
@@ -1231,7 +1197,6 @@ export function Game() {
     function set_random(seed?: number) {
         randomseed = seed != undefined ? seed : os.time();
         previous_randomseeds.push(randomseed);
-        print("set_random: ", randomseed);
         math.randomseed(randomseed);
     }
 
@@ -1278,22 +1243,23 @@ export function Game() {
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
-        const c0 = socket.gettime();
-
         while(field.process_state(ProcessMode.Combinate)) {
-            print("[GAME]: after combination in game");
             field.process_state(ProcessMode.MoveElements);
-            print("[GAME]: after movements in game");
         }
-
-        print("STEP TIME: ", (socket.gettime() - c0) * 1000, "ms");
 
         previous_states.push(field.save_state());
 
+        is_block_input = true;
         search_available_steps(5, (steps) => {
-            available_steps = steps;
-        });
+            if(steps.length != 0) {
+                available_steps = steps;
+                is_block_input = false;
+                return;
+            }
 
+            stop_helper();
+            shuffle_field();
+        });
 
         if(is_step) step_counter++;
         is_step = false;
@@ -1327,7 +1293,6 @@ export function Game() {
 
         previous_randomseeds.pop();
         const previous_seed = previous_randomseeds.pop();
-        print("previous_seed: ", previous_seed);
         set_random(previous_seed);
 
         search_available_steps(5, (steps) => {
@@ -1402,11 +1367,6 @@ export function Game() {
         const index = activated_elements.indexOf(item.uid);
         if(index != -1) activated_elements.splice(index, 1);
 
-        print('[GAME]: damage: ', item.x, item.y);
-        
-        const e = field.get_element(item.x, item.y);
-        if(e != NullElement) print(e.type);
-
         if(is_simulating) return;
 
         const element = field.get_element(item.x, item.y);
@@ -1433,8 +1393,6 @@ export function Game() {
         if(is_buster(combined_element.x, combined_element.y)) return;
 
         write_game_step_event('ON_COMBINED', {combined_element, combination, activated_cells: []});
-
-        print("[GAME]: combined");
 
         field.on_combined_base(combined_element, combination);
         try_combo(combined_element, combination);

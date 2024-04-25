@@ -26,7 +26,7 @@ local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 ____exports.RandomElement = -2
 function ____exports.Game()
-    local set_targets_uids, set_element_types, set_element_chances, set_busters, set_events, load_field, on_game_timer_tick, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, randomseed, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, step_counter, start_game_time
+    local set_targets_uids, set_element_types, set_element_chances, set_busters, set_events, on_load_field, try_load_field, on_swap_elements, on_click_activation, on_activate_spinning, on_revert_step, on_game_step_animation_end, on_game_timer_tick, load_cell, load_element, make_cell, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, randomseed, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, step_counter, start_game_time
     function set_targets_uids()
         for ____, target in ipairs(level_config.targets) do
             target.uids = {}
@@ -36,7 +36,6 @@ function ____exports.Game()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
             local key = ____value[1]
             local element_id = tonumber(key)
-            print(element_id)
             field.set_element_type(
                 element_id,
                 {
@@ -75,120 +74,32 @@ function ____exports.Game()
         EventBus.send("UPDATED_BUTTONS")
     end
     function set_events()
-        EventBus.on("LOAD_FIELD", load_field)
+        EventBus.on("LOAD_FIELD", on_load_field)
         EventBus.on("SET_HELPER", set_helper)
-        EventBus.on(
-            "SWAP_ELEMENTS",
-            function(elements)
-                if is_block_input or elements == nil then
-                    return
-                end
-                local c0 = socket.gettime()
-                stop_helper()
-                if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
-                    return
-                end
-                local is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y)
-                is_step = true
-                process_game_step(is_procesed)
-                print(
-                    "SWAP ELEMENTS TIME: ",
-                    (socket.gettime() - c0) * 1000,
-                    "ms"
-                )
-            end
-        )
-        EventBus.on(
-            "CLICK_ACTIVATION",
-            function(pos)
-                if is_block_input or pos == nil then
-                    return
-                end
-                stop_helper()
-                if try_click_activation(pos.x, pos.y) then
-                    process_game_step(true)
-                else
-                    local element = field.get_element(pos.x, pos.y)
-                    if element ~= NullElement then
-                        if selected_element ~= nil and selected_element.uid == element.uid then
-                            EventBus.send(
-                                "ON_ELEMENT_UNSELECTED",
-                                __TS__ObjectAssign({}, selected_element)
-                            )
-                            selected_element = nil
-                        else
-                            local is_swap = false
-                            if selected_element ~= nil then
-                                EventBus.send(
-                                    "ON_ELEMENT_UNSELECTED",
-                                    __TS__ObjectAssign({}, selected_element)
-                                )
-                                local neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-                                for ____, neighbor in ipairs(neighbors) do
-                                    if neighbor.uid == element.uid then
-                                        is_swap = true
-                                        break
-                                    end
-                                end
-                            end
-                            if selected_element ~= nil and is_swap then
-                                EventBus.send("SWAP_ELEMENTS", {from_x = selected_element.x, from_y = selected_element.y, to_x = pos.x, to_y = pos.y})
-                            else
-                                selected_element = {x = pos.x, y = pos.y, uid = element.uid}
-                                EventBus.send(
-                                    "ON_ELEMENT_SELECTED",
-                                    __TS__ObjectAssign({}, selected_element)
-                                )
-                            end
-                        end
-                    end
-                end
-            end
-        )
-        EventBus.on(
-            "ACTIVATE_SPINNING",
-            function()
-                if is_block_input then
-                    return
-                end
-                stop_helper()
-                try_spinning_activation()
-            end
-        )
-        EventBus.on(
-            "REVERT_STEP",
-            function()
-                stop_helper()
-                revert_step()
-            end
-        )
-        EventBus.on(
-            "ON_GAME_STEP_ANIMATION_END",
-            function()
-                if is_level_completed() then
-                    EventBus.send("ON_LEVEL_COMPLETED")
-                elseif not is_have_steps() then
-                    EventBus.send("ON_GAME_OVER")
-                end
-                print("[GAME]: end step")
-                is_block_input = true
-                search_available_steps(
-                    1,
-                    function(steps)
-                        if #steps ~= 0 then
-                            print("[GAME]: end check of available steps after end game step")
-                            is_block_input = false
-                            return
-                        end
-                        print("[GAME]: shuffle field after end game step")
-                        stop_helper()
-                        shuffle_field()
-                    end
-                )
-            end
-        )
+        EventBus.on("SWAP_ELEMENTS", on_swap_elements)
+        EventBus.on("CLICK_ACTIVATION", on_click_activation)
+        EventBus.on("ACTIVATE_SPINNING", on_activate_spinning)
+        EventBus.on("REVERT_STEP", on_revert_step)
+        EventBus.on("ON_GAME_STEP_ANIMATION_END", on_game_step_animation_end)
     end
-    function load_field()
+    function on_load_field()
+        Log.log("Загрузка поля")
+        try_load_field()
+        local state = field.save_state()
+        previous_states[#previous_states + 1] = state
+        search_available_steps(
+            5,
+            function(steps)
+                available_steps = steps
+            end
+        )
+        EventBus.send("ON_LOAD_FIELD", state)
+        if level_config.time ~= nil then
+            start_game_time = System.now()
+            timer.delay(1, true, on_game_timer_tick)
+        end
+    end
+    function try_load_field()
         do
             local y = 0
             while y < field_height do
@@ -205,22 +116,84 @@ function ____exports.Game()
         end
         if #field.get_all_combinations(true) > 0 then
             field.init()
-            load_field()
+            try_load_field()
             return
         end
-        local state = field.save_state()
-        previous_states[#previous_states + 1] = state
-        search_available_steps(
-            5,
-            function(steps)
-                available_steps = steps
-            end
-        )
-        EventBus.send("ON_LOAD_FIELD", state)
-        if level_config.time ~= nil then
-            start_game_time = System.now()
-            timer.delay(1, true, on_game_timer_tick)
+    end
+    function on_swap_elements(elements)
+        if is_block_input or elements == nil then
+            return
         end
+        stop_helper()
+        if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
+            return
+        end
+        is_step = true
+        local is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y)
+        process_game_step(is_procesed)
+    end
+    function on_click_activation(pos)
+        if is_block_input or pos == nil then
+            return
+        end
+        stop_helper()
+        if try_click_activation(pos.x, pos.y) then
+            process_game_step(true)
+        else
+            local element = field.get_element(pos.x, pos.y)
+            if element ~= NullElement then
+                if selected_element ~= nil and selected_element.uid == element.uid then
+                    EventBus.send(
+                        "ON_ELEMENT_UNSELECTED",
+                        __TS__ObjectAssign({}, selected_element)
+                    )
+                    selected_element = nil
+                else
+                    local is_swap = false
+                    if selected_element ~= nil then
+                        EventBus.send(
+                            "ON_ELEMENT_UNSELECTED",
+                            __TS__ObjectAssign({}, selected_element)
+                        )
+                        local neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+                        for ____, neighbor in ipairs(neighbors) do
+                            if neighbor.uid == element.uid then
+                                is_swap = true
+                                break
+                            end
+                        end
+                    end
+                    if selected_element ~= nil and is_swap then
+                        EventBus.send("SWAP_ELEMENTS", {from_x = selected_element.x, from_y = selected_element.y, to_x = pos.x, to_y = pos.y})
+                    else
+                        selected_element = {x = pos.x, y = pos.y, uid = element.uid}
+                        EventBus.send(
+                            "ON_ELEMENT_SELECTED",
+                            __TS__ObjectAssign({}, selected_element)
+                        )
+                    end
+                end
+            end
+        end
+    end
+    function on_activate_spinning()
+        if is_block_input then
+            return
+        end
+        stop_helper()
+        try_spinning_activation()
+    end
+    function on_revert_step()
+        stop_helper()
+        revert_step()
+    end
+    function on_game_step_animation_end()
+        if is_level_completed() then
+            EventBus.send("ON_LEVEL_COMPLETED")
+        elseif not is_have_steps() then
+            EventBus.send("ON_GAME_OVER")
+        end
+        Log.log("Закончена анимация хода")
     end
     function on_game_timer_tick()
         local dt = System.now() - start_game_time
@@ -307,9 +280,8 @@ function ____exports.Game()
             false,
             function()
                 set_combination_for_helper(available_steps)
-                print("[GAME]: try to set helper")
                 if helper_data ~= nil then
-                    print("[GAME]: set helper")
+                    Log.log("Запуск подсказки")
                     reset_helper()
                     previous_helper_data = __TS__ObjectAssign({}, helper_data)
                     EventBus.send(
@@ -325,7 +297,7 @@ function ____exports.Game()
         if helper_timer == nil then
             return
         end
-        print("[GAME]: stop helper")
+        Log.log("Остановка подсказки")
         stop_all_coroutines()
         helper_data = nil
         timer.cancel(helper_timer)
@@ -340,7 +312,7 @@ function ____exports.Game()
         if previous_helper_data == nil then
             return
         end
-        print("[GAME]: reset helper")
+        Log.log("Перезапуск подсказки")
         EventBus.send(
             "ON_RESET_STEP_HELPER",
             __TS__ObjectAssign({}, previous_helper_data)
@@ -361,14 +333,13 @@ function ____exports.Game()
             local is_to = element.x == step.to_x and element.y == step.to_y
             if is_from or is_to then
                 helper_data = {step = step, elements = combination.elements, combined_element = element}
-                print("[GAME]: set helper data")
-                return
+                return Log.log("Установлены данные для подсказки")
             end
         end
     end
     function search_available_steps(count, on_end)
         local ____coroutine = flow.start(function()
-            print("[GAME]: search available steps")
+            Log.log("Поиск возможных ходов")
             local steps = {}
             do
                 local y = 0
@@ -377,31 +348,19 @@ function ____exports.Game()
                         local x = 0
                         while x < field_width do
                             flow.frames(1)
-                            local c0 = socket.gettime()
                             if is_buster(x, y) then
                                 steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y}
                             end
                             if is_valid_pos(x + 1, y, field_width, field_height) and is_can_move(x, y, x + 1, y) then
                                 steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
                             end
-                            print(
-                                "first part time: ",
-                                (socket.gettime() - c0) * 1000,
-                                "ms"
-                            )
                             if #steps > count then
                                 return on_end(steps)
                             end
                             flow.frames(1)
-                            local c1 = socket.gettime()
                             if is_valid_pos(x, y + 1, field_width, field_height) and is_can_move(x, y, x, y + 1) then
                                 steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
                             end
-                            print(
-                                "second part time: ",
-                                (socket.gettime() - c1) * 1000,
-                                "ms"
-                            )
                             if #steps > count then
                                 return on_end(steps)
                             end
@@ -411,7 +370,7 @@ function ____exports.Game()
                     y = y + 1
                 end
             end
-            print("[GAME]: found ", #steps, " steps")
+            Log.log(("Найдены " .. tostring(#steps)) .. " ходов")
             on_end(steps)
         end)
         coroutines[#coroutines + 1] = ____coroutine
@@ -505,9 +464,6 @@ function ____exports.Game()
             activated = true
         elseif try_activate_diskosphere(x, y) then
             activated = true
-        end
-        if activated then
-            print("[GAME]: try activate buster element: ", x, y)
         end
         if not activated and with_check then
             __TS__ArraySplice(activated_elements, #activated_elements - 1, 1)
@@ -991,8 +947,8 @@ function ____exports.Game()
         return true
     end
     function shuffle_field()
+        Log.log("Перемешиваем поле")
         local state = field.save_state()
-        print("[GAME]: shuffle field")
         local event_data = {}
         write_game_step_event("ON_SPINNING_ACTIVATED", event_data)
         local base_elements = {}
@@ -1024,7 +980,6 @@ function ____exports.Game()
             1,
             function(steps)
                 if #steps ~= 0 then
-                    print("[GAME]: end search available steps after shuffle field")
                     process_game_step(false)
                 else
                     game_step_events = {}
@@ -1159,23 +1114,16 @@ function ____exports.Game()
             __TS__ObjectAssign({}, selected_element)
         )
         selected_element = nil
-        local c0 = socket.gettime()
         if not field.try_move(from_x, from_y, to_x, to_y) then
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
             return false
         end
-        print(
-            "TRY SWAP TIME: ",
-            (socket.gettime() - c0) * 1000,
-            "ms"
-        )
         write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
         return true
     end
     function set_random(seed)
         randomseed = seed ~= nil and seed or os.time()
         previous_randomseeds[#previous_randomseeds + 1] = randomseed
-        print("set_random: ", randomseed)
         math.randomseed(randomseed)
     end
     function process_game_step(after_activation)
@@ -1185,22 +1133,21 @@ function ____exports.Game()
         if after_activation then
             field.process_state(ProcessMode.MoveElements)
         end
-        local c0 = socket.gettime()
         while field.process_state(ProcessMode.Combinate) do
-            print("[GAME]: after combination in game")
             field.process_state(ProcessMode.MoveElements)
-            print("[GAME]: after movements in game")
         end
-        print(
-            "STEP TIME: ",
-            (socket.gettime() - c0) * 1000,
-            "ms"
-        )
         previous_states[#previous_states + 1] = field.save_state()
+        is_block_input = true
         search_available_steps(
             5,
             function(steps)
-                available_steps = steps
+                if #steps ~= 0 then
+                    available_steps = steps
+                    is_block_input = false
+                    return
+                end
+                stop_helper()
+                shuffle_field()
             end
         )
         if is_step then
@@ -1247,7 +1194,6 @@ function ____exports.Game()
         previous_states[#previous_states + 1] = previous_state
         table.remove(previous_randomseeds)
         local previous_seed = table.remove(previous_randomseeds)
-        print("previous_seed: ", previous_seed)
         set_random(previous_seed)
         search_available_steps(
             5,
@@ -1281,29 +1227,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch284 = combination.type
-            local ____cond284 = ____switch284 == CombinationType.Comb4
-            if ____cond284 then
+            local ____switch283 = combination.type
+            local ____cond283 = ____switch283 == CombinationType.Comb4
+            if ____cond283 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond284 = ____cond284 or ____switch284 == CombinationType.Comb5
-            if ____cond284 then
+            ____cond283 = ____cond283 or ____switch283 == CombinationType.Comb5
+            if ____cond283 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond284 = ____cond284 or ____switch284 == CombinationType.Comb2x2
-            if ____cond284 then
+            ____cond283 = ____cond283 or ____switch283 == CombinationType.Comb2x2
+            if ____cond283 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond284 = ____cond284 or (____switch284 == CombinationType.Comb3x3a or ____switch284 == CombinationType.Comb3x3b)
-            if ____cond284 then
+            ____cond283 = ____cond283 or (____switch283 == CombinationType.Comb3x3a or ____switch283 == CombinationType.Comb3x3b)
+            if ____cond283 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond284 = ____cond284 or (____switch284 == CombinationType.Comb3x4 or ____switch284 == CombinationType.Comb3x5)
-            if ____cond284 then
+            ____cond283 = ____cond283 or (____switch283 == CombinationType.Comb3x4 or ____switch283 == CombinationType.Comb3x5)
+            if ____cond283 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1318,11 +1264,6 @@ function ____exports.Game()
         local index = __TS__ArrayIndexOf(activated_elements, item.uid)
         if index ~= -1 then
             __TS__ArraySplice(activated_elements, index, 1)
-        end
-        print("[GAME]: damage: ", item.x, item.y)
-        local e = field.get_element(item.x, item.y)
-        if e ~= NullElement then
-            print(e.type)
         end
         if is_simulating then
             return
@@ -1349,7 +1290,6 @@ function ____exports.Game()
             return
         end
         write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination, activated_cells = {}})
-        print("[GAME]: combined")
         field.on_combined_base(combined_element, combination)
         try_combo(combined_element, combination)
     end
@@ -1626,15 +1566,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch366 = data
-                                local ____cond366 = ____switch366 == "-"
-                                if ____cond366 then
+                                local ____switch364 = data
+                                local ____cond364 = ____switch364 == "-"
+                                if ____cond364 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond366 = ____cond366 or ____switch366 == ""
-                                if ____cond366 then
+                                ____cond364 = ____cond364 or ____switch364 == ""
+                                if ____cond364 then
                                     level.field.cells[y + 1][x + 1] = CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

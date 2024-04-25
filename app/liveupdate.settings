@@ -1,4 +1,7 @@
 [liveupdate]
 mode = Zip
 zip-filepath = build/resources
+supported-versions = "0.0.0"
+publickey = E:\Dev\Defold\math3-core\app\manifest.public.der
+privatekey = E:\Dev\Defold\math3-core\app\manifest.private.der
 

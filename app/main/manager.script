@@ -1,37 +1,10 @@
 local ____exports = {}
-local try_load
 local druid = require("druid.druid")
 local default_style = require("druid.styles.default.style")
-local reszip = require("liveupdate_reszip.reszip")
 local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
 local ____match3_game = require("game.match3_game")
 local load_config = ____match3_game.load_config
-function try_load(name)
-    local resource_file = sys.get_config("liveupdate_reszip.filename", "resources.zip")
-    local missing_resources = collectionproxy.missing_resources("#" .. name)
-    if liveupdate and (reszip.version_match(resource_file) or missing_resources ~= nil) then
-        print("START_LOAD_RESOURCES")
-        reszip.load_and_mount_zip(
-            resource_file,
-            {
-                filename = resource_file,
-                delete_old_file = true,
-                on_finish = function(____self, err)
-                    print("FINISH_LOAD_RESOURCES")
-                    if not err then
-                        Scene.load(name, true)
-                    else
-                        print("ERROR: ", err)
-                        Scene.load("game", true, {"background"})
-                    end
-                end
-            }
-        )
-    else
-        Scene.load(name, true)
-    end
-end
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -47,7 +20,7 @@ function ____exports.init(self)
     Camera.set_go_prjection(-1, 1, -3, 3)
     Scene.set_bg("#88dfeb")
     load_config()
-    try_load("map")
+    Scene.load("map")
 end
 function ____exports.update(self, dt)
     Manager.update(dt)

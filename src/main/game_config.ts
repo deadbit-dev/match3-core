@@ -4,7 +4,7 @@
 
 import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
 import { RandomElement, Target } from "../game/match3_game";
-import { MessageId, Messages, PosXYMessage, VoidMessage } from "../modules/modules_const";
+import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
@@ -28,6 +28,8 @@ export const ID_YANDEX_METRICA = "";
 export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
+
+export const MAIN_BUNDLE_SCENES = ['game'];
 
 export enum SubstrateId {
     OutsideArc,
@@ -301,6 +303,9 @@ export type SpinningActivationMessage = { element_from: ItemInfo, element_to: It
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
+    LOAD_RESOURCE: NameMessage,
+    UNLOAD_RESOURCE: NameMessage,
+
     LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
 

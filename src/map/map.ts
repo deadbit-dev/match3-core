@@ -32,7 +32,7 @@ export function Map() {
     }
 
     function load_level() {
-        Scene.load('game', true, ['background']);
+        Scene.load('game', true);
     }
 
     return init();

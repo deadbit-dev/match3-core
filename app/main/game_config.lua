@@ -13,6 +13,7 @@ ____exports.VK_SHARE_URL = ""
 ____exports.ID_YANDEX_METRICA = ""
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
+____exports.MAIN_BUNDLE_SCENES = {"game"}
 ____exports.SubstrateId = SubstrateId or ({})
 ____exports.SubstrateId.OutsideArc = 0
 ____exports.SubstrateId[____exports.SubstrateId.OutsideArc] = "OutsideArc"

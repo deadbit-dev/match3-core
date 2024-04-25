@@ -185,6 +185,8 @@ export function View(animator: FluxGroup) {
     );
 
     function init() {
+        Scene.load_resource(Scene.get_current_name(), 'background');
+
         set_events();
         set_targets();
 
@@ -252,8 +254,6 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_SET_STEP_HELPER', (data) => {
             if (data == undefined) return;
 
-            print("[VIEW]: set helper");
-
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if (combined_item != undefined) {
                 const from_pos = go.get_position(combined_item._hash);
@@ -272,8 +272,6 @@ export function View(animator: FluxGroup) {
 
         EventBus.on('ON_RESET_STEP_HELPER', (data) => {
             if (data == undefined) return;
-
-            print("[VIEW]: reset helper");
 
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if (combined_item != undefined) {
@@ -325,7 +323,6 @@ export function View(animator: FluxGroup) {
 
         EventBus.on('ON_GAME_OVER', () => {
             flow.start(() => {
-                print("[VIEW]: GAME_OVER");
                 flow.delay(0.5);
                 Scene.restart();
             });
@@ -336,9 +333,6 @@ export function View(animator: FluxGroup) {
         is_processing = true;
 
         for (const event of events) {
-
-            print("[VIEW]: ", event.key);
-
             switch (event.key) {
                 case 'ON_SWAP_ELEMENTS':
                     flow.delay(event_to_animation[event.key](event.value));
@@ -457,9 +451,6 @@ export function View(animator: FluxGroup) {
                 }
             }
         }
-
-        print(min_y_active_cell);
-        print(max_y_active_cell);
 
         cells_offset.y += min_y_active_cell * cell_size * 0.5;
         cells_offset.y -= math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5;
@@ -1039,7 +1030,6 @@ export function View(animator: FluxGroup) {
         const activation = message as ActivationMessage;
         const activate_duration = activate_dynamite_animation(activation, 1, () => {
             for (const element of activation.damaged_elements) {
-                print("DYNAMITE: ", element.x, element.y);
                 damage_element_animation(message, element.x, element.y, element.uid);
             }
 
@@ -1078,7 +1068,6 @@ export function View(animator: FluxGroup) {
 
         const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'dynamite'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any) => {
-            print("MESSAGE: ", message_id);
             gm.delete_go(_go);
         });
 
@@ -1137,18 +1126,12 @@ export function View(animator: FluxGroup) {
     }
 
     function on_move_phase_begin() {
-    
-        print("[VIEW]: MOVE BEGIN");
-    
         flow.delay(combinate_phase_duration + 0.2);
         combinate_phase_duration = 0;
     }
 
     // TODO: refactoring
     function on_moved_elements_animation(message: Messages[MessageId]) {
-
-        print("[VIEW]: MOVE");
-
         const elements = message as MovedElementsMessage;
         const delayed_row_in_column: number[] = [];
 

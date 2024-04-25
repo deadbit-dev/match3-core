@@ -19,7 +19,7 @@ function ____exports.Map()
         load_level()
     end
     function load_level()
-        Scene.load("game", true, {"background"})
+        Scene.load("game", true)
     end
     local function init()
         input_listener()

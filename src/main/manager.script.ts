@@ -5,16 +5,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
-import * as reszip from 'liveupdate_reszip.reszip';
+
 import { register_manager } from '../modules/Manager';
 import { load_config } from '../game/match3_game';
 
 
 interface props {
 }
+
 
 export function init(this: props) {
     msg.post('.', 'acquire_input_focus');
@@ -33,27 +35,7 @@ export function init(this: props) {
     Scene.set_bg('#88dfeb');
 
     load_config();
-    try_load('map');
-}
-
-function try_load(name: string) {
-    const resource_file = sys.get_config("liveupdate_reszip.filename", "resources.zip");
-    const missing_resources = collectionproxy.missing_resources('#' + name);
-    if(liveupdate && (reszip.version_match(resource_file) || missing_resources != null)) {
-        print("START_LOAD_RESOURCES");
-        reszip.load_and_mount_zip(resource_file, {
-            filename: resource_file,
-            delete_old_file: true,
-            on_finish: (self: any, err: any) => {
-                print("FINISH_LOAD_RESOURCES");
-                if(!err) Scene.load(name, true);
-                else {
-                    print("ERROR: ", err);
-                    Scene.load('game', true, ['background']);
-                }
-            },
-        });
-    } else Scene.load(name, true);
+    Scene.load('map');
 }
 
 export function update(this: props, dt: number): void {

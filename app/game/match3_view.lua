@@ -125,7 +125,6 @@ function ____exports.View(animator)
                 if data == nil then
                     return
                 end
-                print("[VIEW]: set helper")
                 local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
                 if combined_item ~= nil then
                     local from_pos = go.get_position(combined_item._hash)
@@ -168,7 +167,6 @@ function ____exports.View(animator)
                 if data == nil then
                     return
                 end
-                print("[VIEW]: reset helper")
                 local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
                 if combined_item ~= nil then
                     go.cancel_animations(combined_item._hash)
@@ -243,7 +241,6 @@ function ____exports.View(animator)
             "ON_GAME_OVER",
             function()
                 flow.start(function()
-                    print("[VIEW]: GAME_OVER")
                     flow.delay(0.5)
                     Scene.restart()
                 end)
@@ -253,7 +250,6 @@ function ____exports.View(animator)
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
-            print("[VIEW]: ", event.key)
             repeat
                 local ____switch47 = event.key
                 local event_duration
@@ -394,8 +390,6 @@ function ____exports.View(animator)
                 y = y + 1
             end
         end
-        print(min_y_active_cell)
-        print(max_y_active_cell)
         cells_offset.y = cells_offset.y + min_y_active_cell * cell_size * 0.5
         cells_offset.y = cells_offset.y - math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5
     end
@@ -1240,7 +1234,6 @@ function ____exports.View(animator)
             1,
             function()
                 for ____, element in ipairs(activation.damaged_elements) do
-                    print("DYNAMITE: ", element.x, element.y)
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
                 dynamite_activate_cell_animation(activation.activated_cells, activation.damaged_elements)
@@ -1293,7 +1286,6 @@ function ____exports.View(animator)
             go.PLAYBACK_ONCE_FORWARD,
             anim_props,
             function(____self, message_id)
-                print("MESSAGE: ", message_id)
                 gm.delete_go(_go)
             end
         )
@@ -1362,12 +1354,10 @@ function ____exports.View(animator)
         return 0
     end
     function on_move_phase_begin()
-        print("[VIEW]: MOVE BEGIN")
         flow.delay(combinate_phase_duration + 0.2)
         combinate_phase_duration = 0
     end
     function on_moved_elements_animation(message)
-        print("[VIEW]: MOVE")
         local elements = message
         local delayed_row_in_column = {}
         local max_delay = 0
@@ -1789,6 +1779,10 @@ function ____exports.View(animator)
     is_processing = false
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     local function init()
+        Scene.load_resource(
+            Scene.get_current_name(),
+            "background"
+        )
         set_events()
         set_targets()
         EventBus.send("LOAD_FIELD")
