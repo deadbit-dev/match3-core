@@ -232,6 +232,15 @@ ____exports._GAME_CONFIG = {
         ____exports.ElementId.Helicopter,
         ____exports.ElementId.Diskosphere
     },
+    red_levels = {
+        4,
+        11,
+        18,
+        25,
+        32,
+        39,
+        47
+    },
     levels = {}
 }
 ____exports._STORAGE_CONFIG = {
@@ -239,6 +248,7 @@ ____exports._STORAGE_CONFIG = {
     hammer_counts = 3,
     spinning_counts = 3,
     horizontal_rocket_counts = 3,
-    vertical_rocket_counts = 3
+    vertical_rocket_counts = 3,
+    completed_levels = {}
 }
 return ____exports

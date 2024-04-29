@@ -189,6 +189,9 @@ function ____exports.Game()
     end
     function on_game_step_animation_end()
         if is_level_completed() then
+            local completed_levels = GameStorage.get("completed_levels")
+            completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
+            GameStorage.set("completed_levels", completed_levels)
             EventBus.send("ON_LEVEL_COMPLETED")
         elseif not is_have_steps() then
             EventBus.send("ON_GAME_OVER")
@@ -348,17 +351,14 @@ function ____exports.Game()
                         local x = 0
                         while x < field_width do
                             flow.frames(1)
-                            if is_buster(x, y) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y}
-                            end
-                            if is_valid_pos(x + 1, y, field_width, field_height) and is_can_move(x, y, x + 1, y) then
+                            if is_valid_pos(x + 1, y, field_width, field_height) and field.is_can_move_base(x, y, x + 1, y) then
                                 steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
                             end
                             if #steps > count then
                                 return on_end(steps)
                             end
                             flow.frames(1)
-                            if is_valid_pos(x, y + 1, field_width, field_height) and is_can_move(x, y, x, y + 1) then
+                            if is_valid_pos(x, y + 1, field_width, field_height) and field.is_can_move_base(x, y, x, y + 1) then
                                 steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
                             end
                             if #steps > count then
@@ -1227,29 +1227,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch283 = combination.type
-            local ____cond283 = ____switch283 == CombinationType.Comb4
-            if ____cond283 then
+            local ____switch282 = combination.type
+            local ____cond282 = ____switch282 == CombinationType.Comb4
+            if ____cond282 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
                 break
             end
-            ____cond283 = ____cond283 or ____switch283 == CombinationType.Comb5
-            if ____cond283 then
+            ____cond282 = ____cond282 or ____switch282 == CombinationType.Comb5
+            if ____cond282 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
                 break
             end
-            ____cond283 = ____cond283 or ____switch283 == CombinationType.Comb2x2
-            if ____cond283 then
+            ____cond282 = ____cond282 or ____switch282 == CombinationType.Comb2x2
+            if ____cond282 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
                 break
             end
-            ____cond283 = ____cond283 or (____switch283 == CombinationType.Comb3x3a or ____switch283 == CombinationType.Comb3x3b)
-            if ____cond283 then
+            ____cond282 = ____cond282 or (____switch282 == CombinationType.Comb3x3a or ____switch282 == CombinationType.Comb3x3b)
+            if ____cond282 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
                 break
             end
-            ____cond283 = ____cond283 or (____switch283 == CombinationType.Comb3x4 or ____switch283 == CombinationType.Comb3x5)
-            if ____cond283 then
+            ____cond282 = ____cond282 or (____switch282 == CombinationType.Comb3x4 or ____switch282 == CombinationType.Comb3x5)
+            if ____cond282 then
                 element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
                 break
             end
@@ -1566,15 +1566,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch364 = data
-                                local ____cond364 = ____switch364 == "-"
-                                if ____cond364 then
+                                local ____switch363 = data
+                                local ____cond363 = ____switch363 == "-"
+                                if ____cond363 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond364 = ____cond364 or ____switch364 == ""
-                                if ____cond364 then
+                                ____cond363 = ____cond363 or ____switch363 == ""
+                                if ____cond363 then
                                     level.field.cells[y + 1][x + 1] = CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

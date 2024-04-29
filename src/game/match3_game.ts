@@ -281,8 +281,12 @@ export function Game() {
 
     // TODO: move in logic game step end
     function on_game_step_animation_end() {
-        if(is_level_completed()) EventBus.send('ON_LEVEL_COMPLETED');
-        else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
+        if(is_level_completed()) {
+            const completed_levels = GameStorage.get('completed_levels');
+            completed_levels.push(GameStorage.get('current_level'));
+            GameStorage.set('completed_levels', completed_levels);
+            EventBus.send('ON_LEVEL_COMPLETED');
+        } else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
         Log.log("Закончена анимация хода");
     }
 
@@ -447,11 +451,11 @@ export function Game() {
                 for(let x = 0; x < field_width; x++) {
                     flow.frames(1);
 
-                    if(is_buster(x, y)) {
-                        steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
-                    }
+                    // if(is_buster(x, y)) {
+                    //     steps.push({from_x: x, from_y: y, to_x: x, to_y: y});
+                    // }
                     
-                    if(is_valid_pos(x + 1, y, field_width, field_height) && is_can_move(x, y, x + 1, y)) {
+                    if(is_valid_pos(x + 1, y, field_width, field_height) && field.is_can_move_base(x, y, x + 1, y)) {
                         steps.push({from_x: x, from_y: y, to_x: x + 1, to_y: y});
                     }
 
@@ -461,7 +465,7 @@ export function Game() {
 
                     flow.frames(1);
 
-                    if(is_valid_pos(x, y + 1, field_width, field_height) && is_can_move(x, y, x, y + 1)) {
+                    if(is_valid_pos(x, y + 1, field_width, field_height) && field.is_can_move_base(x, y, x, y + 1)) {
                         steps.push({from_x: x, from_y: y, to_x: x, to_y: y + 1});
                     }
 

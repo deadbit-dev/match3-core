@@ -237,6 +237,8 @@ export const _GAME_CONFIG = {
         ElementId.Diskosphere
     ],
 
+    red_levels: [4, 11, 18, 25, 32, 39, 47],
+
     levels: [] as {
         field: { 
             width: number,
@@ -273,7 +275,8 @@ export const _STORAGE_CONFIG = {
     hammer_counts: 3,
     spinning_counts: 3,
     horizontal_rocket_counts: 3,
-    vertical_rocket_counts: 3
+    vertical_rocket_counts: 3,
+    completed_levels: [] as number[]
 };
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];

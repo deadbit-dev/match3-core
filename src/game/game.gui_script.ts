@@ -116,18 +116,8 @@ export function init(this: props): void {
 
     set_text('current_level', GameStorage.get('current_level') + 1);
     
-    this.druid.new_button('previous_level_button', () => {
-        let previous_level = (GameStorage.get('current_level') - 1) % GAME_CONFIG.levels.length;
-        
-        GameStorage.set('current_level', previous_level);
-        Scene.restart();
-    });
-
-    this.druid.new_button('next_level_button', () => {
-        let next_level = (GameStorage.get('current_level') + 1) % GAME_CONFIG.levels.length;
-        
-        GameStorage.set('current_level', next_level);
-        Scene.restart();
+    this.druid.new_button('back_button', () => {
+        Scene.load('map');
     });
     
     this.druid.new_button('restart_button', () => Scene.restart());

@@ -173,19 +173,9 @@ function ____exports.init(self)
         GameStorage.get("current_level") + 1
     )
     self.druid:new_button(
-        "previous_level_button",
+        "back_button",
         function()
-            local previous_level = (GameStorage.get("current_level") - 1) % #GAME_CONFIG.levels
-            GameStorage.set("current_level", previous_level)
-            Scene.restart()
-        end
-    )
-    self.druid:new_button(
-        "next_level_button",
-        function()
-            local next_level = (GameStorage.get("current_level") + 1) % #GAME_CONFIG.levels
-            GameStorage.set("current_level", next_level)
-            Scene.restart()
+            Scene.load("map")
         end
     )
     self.druid:new_button(
@@ -258,19 +248,19 @@ function ____exports.init(self)
                 return
             end
             repeat
-                local ____switch30 = data.id
-                local ____cond30 = ____switch30 == 0
-                if ____cond30 then
+                local ____switch29 = data.id
+                local ____cond29 = ____switch29 == 0
+                if ____cond29 then
                     set_text("first_target_counts", data.count)
                     break
                 end
-                ____cond30 = ____cond30 or ____switch30 == 1
-                if ____cond30 then
+                ____cond29 = ____cond29 or ____switch29 == 1
+                if ____cond29 then
                     set_text("second_target_counts", data.count)
                     break
                 end
-                ____cond30 = ____cond30 or ____switch30 == 2
-                if ____cond30 then
+                ____cond29 = ____cond29 or ____switch29 == 2
+                if ____cond29 then
                     set_text("third_target_counts", data.count)
                     break
                 end

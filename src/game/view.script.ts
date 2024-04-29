@@ -37,5 +37,5 @@ export function on_input(this: props, action_id: string | hash, action: any): vo
 export function final(this: props): void {
     flow.stop();
     EventBus.off_all_current_script();
-    Scene.unload_all_resources();
+    Scene.unload_all_resources('game');
 }

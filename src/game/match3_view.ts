@@ -280,7 +280,7 @@ export function View(animator: FluxGroup) {
                 let from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index);
                 if (from_pos.x == to_pos.x && from_pos.y == to_pos.y)
                     from_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index);
-                go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.5);
+                go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.25);
             }
 
             for (const element of data.elements) {

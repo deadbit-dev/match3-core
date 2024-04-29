@@ -1,0 +1,28 @@
+local ____exports = {}
+local check_click, load_level
+function check_click(obj, action_id, action)
+    if action_id == ID_MESSAGES.MSG_TOUCH and action.released then
+        local game_height = 960
+        action.y = action.y - game_height
+        local pos = go.get_world_position()
+        local is_x = action.x < pos.x + obj.click_radius and action.x > pos.x - obj.click_radius
+        local is_y = action.y < pos.y + obj.click_radius and action.y > pos.y - obj.click_radius
+        if is_x and is_y then
+            load_level(obj.number - 1)
+        end
+    end
+end
+function load_level(level)
+    GameStorage.set("current_level", level)
+    Scene.load("game")
+end
+go.property("number", 1)
+go.property("click_radius", 25)
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+    if message_id == ID_MESSAGES.MSG_TOUCH then
+        check_click(self, message_id, message)
+    end
+end
+on_message = ____exports.on_message
+

@@ -29,4 +29,5 @@ export function on_message(this: props, message_id: hash, message: any, sender: 
 export function final(this: props): void {
     flow.stop();
     EventBus.off_all_current_script();
+    Scene.unload_all_resources('map');
 }

@@ -1,0 +1,8 @@
+{
+    "graph_path": "./app/build/default/game.graph.json",
+    "build_path": "./app/build/js-web/Math3 Core",
+    "resources": [
+        "/map/map.collectionc",
+        "/game/background.collectionc"
+    ]
+}

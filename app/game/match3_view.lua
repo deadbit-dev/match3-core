@@ -181,7 +181,7 @@ function ____exports.View(animator)
                         go.PLAYBACK_ONCE_FORWARD,
                         from_pos,
                         go.EASING_INCUBIC,
-                        0.5
+                        0.25
                     )
                 end
                 for ____, element in ipairs(data.elements) do

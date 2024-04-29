@@ -67,9 +67,12 @@ function SceneModule() {
         Manager.send('UNLOAD_RESOURCE', { name: resource });
     }
 
-    function unload_all_resources() {
-        const scene = get_current_name();
-        for(const resource of scene_resources[scene])
+    function unload_all_resources(scene: string) {
+        // const scene = get_current_name();
+        const resources = scene_resources[scene];
+        if(resources == null) return;
+
+        for(const resource of resources)
             unload_resource(scene, resource);
     }
 
