@@ -185,13 +185,15 @@ export function View(animator: FluxGroup) {
     );
 
     function init() {
-        Scene.load_resource(Scene.get_current_name(), 'background');
+        const scene_name = Scene.get_current_name();
+        Scene.load_resource(scene_name, 'background');
+        // Scene.load_resource(scene_name, 'cock');
 
         set_events();
         set_targets();
 
         EventBus.send('LOAD_FIELD');
-        
+
         dispatch_messages();
     }
 

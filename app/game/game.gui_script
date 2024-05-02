@@ -145,7 +145,7 @@ function ____exports.init(self)
         local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
         gui.play_flipbook(
             gui.get_node("second_target_icon"),
-            view
+            view == "cell_web" and view .. "_ui" or view
         )
         set_text("second_target_counts", target.count)
     end

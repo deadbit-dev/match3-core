@@ -1,0 +1,7 @@
+local ____exports = {}
+function ____exports.init(self)
+    local anim_props = {blend_duration = 0, playback_rate = 1}
+    spine.play_anim("#spinemodel", "idle", go.PLAYBACK_LOOP_FORWARD, anim_props)
+end
+init = ____exports.init
+

@@ -97,7 +97,7 @@ export function init(this: props): void {
 
         const target = targets[1];
         const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
-        gui.play_flipbook(gui.get_node('second_target_icon'), view);
+        gui.play_flipbook(gui.get_node('second_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('second_target_counts', target.count);
     }
 

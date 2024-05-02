@@ -33,7 +33,7 @@ export function Map() {
             const [message_id, message, sender] = flow.until_any_message();
             switch(message_id) {
                 case ID_MESSAGES.MSG_TOUCH:
-                    for(let i = 1; i <= GAME_CONFIG.levels.length; i++)
+                    for(let i = 1; i <= GAME_CONFIG.levels.length /* && i <= GameStorage.get('completed_levels').length + 1 */; i++)
                         msg.post(msg.url(undefined, hash('/level_' + tostring(i)), 'level'), message_id, message);
                     if(!message.pressed && !message.released) on_drag(message);
                 break;

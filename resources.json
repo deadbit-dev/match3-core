@@ -3,6 +3,13 @@
     "build_path": "./app/build/js-web/Math3 Core",
     "resources": [
         "/map/map.collectionc",
-        "/game/background.collectionc"
+        "/game/background.collectionc",
+        "/game/animals/bull.collectionc",
+        "/game/animals/cat.collectionc",
+        "/game/animals/cock.collectionc",
+        "/game/animals/goose.collectionc",
+        "/game/animals/kaban.collectionc",
+        "/game/animals/kozel.collectionc",
+        "/game/animals/rats.collectionc"
     ]
 }

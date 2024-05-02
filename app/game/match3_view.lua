@@ -1779,10 +1779,8 @@ function ____exports.View(animator)
     is_processing = false
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     local function init()
-        Scene.load_resource(
-            Scene.get_current_name(),
-            "background"
-        )
+        local scene_name = Scene.get_current_name()
+        Scene.load_resource(scene_name, "background")
         set_events()
         set_targets()
         EventBus.send("LOAD_FIELD")

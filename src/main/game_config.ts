@@ -50,6 +50,7 @@ export enum CellId {
     Grass,
     Flowers,
     Web,
+    WebUI,
     Box,
     Stone0,
     Stone1,
