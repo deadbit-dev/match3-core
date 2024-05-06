@@ -25,14 +25,14 @@ interface KeyVal {
     [key: string]: any;
 }
 
-type GameKeys = keyof typeof _STORAGE_CONFIG;
+export type GameKeys = keyof typeof _STORAGE_CONFIG;
 type TGameConfig = typeof _STORAGE_CONFIG;
 
 function GameStorageModule() {
     const default_list: KeyVal = _STORAGE_CONFIG;
 
     function get_key(key: GameKeys, _type = '') {
-        const data = Storage.get_data('settings-' + key);
+        const data = Storage.get('settings-' + key);
         if (data == null) {
             if (default_list[key] == undefined) {
                 Log.error('Ключ не зарегистрирован:', key);
@@ -44,7 +44,7 @@ function GameStorageModule() {
             }
             return val;
         }
-        return data.value;
+        return data;
     }
 
     function set<T extends GameKeys>(key: T, val: TGameConfig[T]) {

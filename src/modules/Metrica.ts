@@ -22,11 +22,9 @@ function MetricaModule() {
             if (yametrica != null)
                 yametrica.not_bounce();
         }
-        else if (System.platform == 'Android') {
-            if (appmetrica != null && id_metrica_android != '') {
-                appmetrica.set_callback(() => log('app metrica init ok'));
-                appmetrica.initialize(id_metrica_android);
-            }
+        else if (appmetrica != null) {
+            appmetrica.set_callback(() => log('app metrica init ok'));
+            appmetrica.initialize(id_metrica_android);
         }
     }
 

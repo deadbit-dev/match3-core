@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -21,6 +23,13 @@ export function register_storage(_use_custom_storage_key: boolean) {
 }
 
 function StorageModule(file_key = 'sys_save_load') {
+    const _is_html5_storage = System.platform == 'HTML5';
+    let is_platform_storage = true;
+
+
+    function set_platform_storage(val: boolean) {
+        is_platform_storage = val;
+    }
 
     // Очень важно чтобы использовалось только если в проекте уже был такой способ хранения
     function apply_custom_key() {
@@ -28,11 +37,18 @@ function StorageModule(file_key = 'sys_save_load') {
     }
 
     function set_data(key: string, tab: any) {
+        if (_is_html5_storage && is_platform_storage)
+            return HtmlBridge.set_data_to_storage({ key, value: tab }, () => { });
         const filename = sys.get_save_file(file_key, key);
         sys.save(filename, tab);
     }
 
     function get_data(key: string) {
+        if (_is_html5_storage && is_platform_storage) {
+            const v = HtmlBridge.get_cached_key(key);
+            return v;
+        }
+
         const filename = sys.get_save_file(file_key, key);
         const data = sys.load(filename);
         const [nx] = next(data);
@@ -71,12 +87,12 @@ function StorageModule(file_key = 'sys_save_load') {
         const data = get_data(key);
         if (data == null)
             return def;
-        return data.value || '';
+        return tostring(data.value) || '';
     }
 
     if (use_custom_storage_key)
         apply_custom_key();
 
-    return { set_data, get_data, get, set, get_int, get_bool, get_string };
+    return { set_data, get_data, get, set, get_int, get_bool, get_string, set_platform_storage };
 
 }

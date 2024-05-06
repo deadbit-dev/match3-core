@@ -2,8 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import { IS_HUAWEI } from "../main/game_config";
+
 /*
-    Модуль для вызова окна оценки приложения и проверки показано ли оно 
+    Модуль для вызова окна оценки приложения и проверки показано ли оно
 */
 
 declare global {
@@ -19,8 +21,8 @@ function RateModule() {
     let _is_shown = false;
 
     function show() {
-        if (System.platform == 'Windows' || System.platform == 'Android' || (System.platform == 'HTML5' && Ads.get_social_platform() == 'yandex'))
-            msg.post('main:/rate#rate', to_hash('SHOW_RATE'));
+        if ((System.platform == 'Android' && !IS_HUAWEI) || System.platform == 'iPhone OS' || (System.platform == 'HTML5' && Ads.get_social_platform() == 'yandex') || System.platform == 'Windows')
+            msg.post('main:/rate#rate', to_hash('SYS_SHOW_RATE'));
     }
 
     function _mark_shown() {
@@ -34,9 +36,8 @@ function RateModule() {
     }
 
     function _on_message(_this: any, message_id: hash, _message: any, sender: hash) {
-        if (message_id == to_hash('MANAGER_READY')) {
+        if (message_id == to_hash('MANAGER_READY'))
             msg.post('main:/rate#rate', to_hash('MANAGER_READY'));
-        }
     }
 
     return { show, is_shown, _mark_shown, _on_message };

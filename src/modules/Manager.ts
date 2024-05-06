@@ -1,22 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import * as broadcast from 'ludobits.m.broadcast';
-
 import { MessageId, Messages, VoidCallback, _SystemMessages, _ID_MESSAGES } from "./modules_const";
-import { ID_YANDEX_METRICA, VK_SHARE_URL, _UserMessages } from "../main/game_config";
-
-import { register_log, update_debug_log } from "./Log";
+import { ID_YANDEX_METRICA, _UserMessages } from "../main/game_config";
+import { register_system } from "./System";
+import { register_log } from "./Log";
+import { register_event_bus } from "./EventBus";
 import { register_storage } from "./Storage";
 import { register_game_storage } from "./GameStorage";
 import { register_sound } from "./Sound";
 import { register_lang } from "./Lang";
 import { register_scene } from "./Scene";
 import { register_ads } from "./Ads";
-import { register_system } from "./System";
 import { register_rate } from "./Rate";
 import { register_metrica } from "./Metrica";
 import { register_camera } from "./Camera";
-import { register_event_bus } from './EventBus';
+import { register_html_bridge } from './HtmlBridge';
+
 
 
 /*
@@ -33,8 +33,12 @@ declare global {
     const ID_MESSAGES: typeof _ID_MESSAGES;
 }
 
+const hashed_keys: { [key: string]: hash } = {};
 function _to_hash<T extends MessageId>(key: T) {
-    return hash(key);
+    if (hashed_keys[key] != undefined)
+        return hashed_keys[key];
+    hashed_keys[key] = hash(key);
+    return hashed_keys[key];
 }
 
 export function register_manager() {
@@ -45,13 +49,11 @@ export function register_manager() {
 
 
 function ManagerModule() {
+    let _is_ready = false;
     const MANAGER_ID = 'main:/manager';
     const UI_ID = '/ui#game';
     const LOGIC_ID = '/game_logic#game';
     const VIEW_ID = '/game_view#view';
-    
-    let _is_ready = false;
-    let broadcast_messages: (string | hash)[] = [];
 
     function init(callback_ready?: VoidCallback, use_custom_storage_key = false) {
         math.randomseed(socket.gettime());
@@ -59,6 +61,16 @@ function ManagerModule() {
         register_log();
         register_storage(use_custom_storage_key);
         register_game_storage();
+        register_event_bus();
+        if (System.platform == 'HTML5') {
+            register_html_bridge();
+            HtmlBridge.init(() => register_modules(callback_ready));
+        }
+        else
+            register_modules(callback_ready);
+    }
+
+    function register_modules(callback_ready?: VoidCallback) {
         register_metrica();
         register_sound();
         register_lang();
@@ -66,12 +78,10 @@ function ManagerModule() {
         register_camera();
         register_ads();
         register_rate();
-        register_event_bus();
-
         Metrica.init(ID_YANDEX_METRICA);
-        Ads.set_social_share_params(VK_SHARE_URL);
         check_ready(callback_ready);
     }
+
 
     function check_ready(callback_ready?: VoidCallback) {
         const id_timer = timer.delay(0.1, true, () => {
@@ -79,8 +89,8 @@ function ManagerModule() {
             if (Ads.is_ready()) {
                 timer.cancel(id_timer);
                 _is_ready = true;
-                send('MANAGER_READY');
                 log('All Managers ready ver: ' + sys.get_config("project.version"));
+                send('MANAGER_READY');
                 if (callback_ready)
                     callback_ready();
             }
@@ -121,53 +131,30 @@ function ManagerModule() {
     }
 
     function on_message(_this: any, message_id: hash, message: any, sender: hash) {
+        EventBus.on_message(_this, message_id, message, sender);
+    }
+
+    function on_message_main(_this: any, message_id: hash, message: any, sender: hash) {
         Scene._on_message(_this, message_id, message, sender);
         Sound._on_message(_this, message_id, message, sender);
-        Ads._on_message(_this, message_id, message, sender);
         Rate._on_message(_this, message_id, message, sender);
-        EventBus._on_message(_this, message_id, message, sender);
     }
 
-    function update(dt: number) {
-        update_debug_log(dt);
-    }
-
-    // можно вызывать в каждом init всех gui чтобы применялись нужные методы
-    function init_gui() {
+    // можно вызывать в каждом init всех gui/go чтобы применялись языки например
+    function init_script() {
         Lang.apply();
+        EventBus.on('ON_APPLY_CUSTOM_LANG', () => Lang.apply());
     }
 
-    // можно вызывать в каждом on_message всех gui чтобы применялись нужные методы
-    function on_message_gui(_this: any, message_id: hash, message: any, sender: hash) {
-        broadcast.on_message(message_id, message, sender);
-        EventBus._on_message(_this, message_id, message, sender);
-        if (message_id == to_hash('APPLY_CUSTOM_LANG')) {
-            Lang.apply();
-        }
-    }
-
-    function final() {
-        for (let i = 0; i < broadcast_messages.length; i++) {
-            const message_id = broadcast_messages[i];
-            broadcast.unregister(message_id);
-        }
-        broadcast_messages = [];
-    }
-
-    // регистрирует слушателя на сообщение
-    function register_message(message_id: string | hash, cb: MessageCallback, auto_clear = true) {
-        broadcast.register(message_id, cb);
-        if (auto_clear)
-            broadcast_messages.push(message_id);
-    }
-
-    // посылает сообщение всем зарегистрированным слушателям
-    function trigger_message(message_id: string | hash, message?: any) {
-        broadcast.send(message_id, message);
+    function final_script() {
+        EventBus.off_all_current_script();
     }
 
 
-    return { init, on_message, send, send_raw, send_game, send_raw_game, send_view, send_raw_view, send_raw_ui, is_ready, init_gui, on_message_gui, update, final, register_message, trigger_message, MANAGER_ID };
+    return {
+        init, on_message_main, on_message, is_ready, init_script, final_script, send, send_raw, send_game, send_raw_game, send_view, send_raw_view, send_raw_ui,
+        MANAGER_ID, UI_ID, LOGIC_ID, VIEW_ID
+    };
 }
 
 

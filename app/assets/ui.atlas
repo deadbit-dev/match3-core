@@ -38,6 +38,54 @@ images {
   image: "/assets/ui/time_substrate.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+images {
+  image: "/assets/ui/btn_b.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/cir_b.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/circle_2l.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/close.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/exit.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/home.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/setings.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/share.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/snd_0.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/snd_1.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/star_0.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/star_1.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
 margin: 0
 extrude_borders: 2
 inner_padding: 0

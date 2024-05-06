@@ -26,7 +26,7 @@ end
 function ____exports.final(self)
     flow.stop()
     EventBus.off_all_current_script()
-    Scene.unload_all_resources("game")
+    Scene:unload_all_resources("game")
 end
 init = ____exports.init
 update = ____exports.update

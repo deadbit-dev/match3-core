@@ -30,13 +30,12 @@ function SoundModule() {
     }
 
     function _on_message(_this: any, message_id: hash, _message: any, sender: hash) {
-        if (message_id == to_hash('STOP_SND')) {
-            const message = _message as Messages['STOP_SND'];
+        if (message_id == to_hash('SYS_STOP_SND')) {
+            const message = _message as Messages['SYS_STOP_SND'];
             sound.stop('/sounds#' + message.name);
         }
-        if (message_id == to_hash('PLAY_SND')) {
-            const message = _message as Messages['PLAY_SND'];
-            //sound.stop('/sounds#' + message.name);
+        if (message_id == to_hash('SYS_PLAY_SND')) {
+            const message = _message as Messages['SYS_PLAY_SND'];
             sound.play('/sounds#' + message.name, { speed: message.speed, gain: message.volume });
         }
     }
@@ -51,22 +50,21 @@ function SoundModule() {
     }
 
     function play(name: string, speed = 1, volume = 1) {
-        Manager.send('PLAY_SND', { name, speed, volume });
+        Manager.send('SYS_PLAY_SND', { name, speed, volume });
     }
 
     function stop(name: string) {
-        Manager.send('STOP_SND', { name });
+        Manager.send('SYS_STOP_SND', { name });
     }
 
     function set_pause(val: boolean) {
         const scene_name = Scene.get_current_name();
         if (scene_name != '')
-            Manager.send('ON_SOUND_PAUSE', { val }, scene_name + ':/ui#' + scene_name);
+            EventBus.trigger('ON_SOUND_PAUSE', { val }, false);
         if (!is_active())
             return;
         sound.set_group_gain('master', val ? 0 : 1);
     }
-
 
 
     init();

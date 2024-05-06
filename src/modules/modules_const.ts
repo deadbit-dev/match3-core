@@ -1,38 +1,46 @@
 /* eslint-disable @typescript-eslint/ban-types */
+
+import { BannerPos } from "./Ads";
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export type VoidCallback = () => void;
 export type Messages = UserMessages & SystemMessages;
 export type MessageId = keyof Messages;
 
+export interface VoidMessage { }
+
+export interface NameMessage extends VoidMessage { name: string; }
+export interface InterMessage extends VoidMessage { is_check: boolean; }
+export interface ValMessage extends VoidMessage { val: boolean; }
+export interface SndMessage extends NameMessage { volume: number; speed: number }
 export interface IGameItem {
     _hash: hash;
     is_clickable?: boolean;
     is_dragable?: boolean;
 }
-
-export interface VoidMessage { }
-export interface NameMessage extends VoidMessage { name: string; }
-export interface InterMessage extends VoidMessage { is_check: boolean; }
-export interface ValMessage extends VoidMessage { val: boolean; }
-export interface SndMessage extends NameMessage { volume: number; speed: number }
 export interface PosXYMessage extends VoidMessage { x: number; y: number }
 export interface HashesMessage extends VoidMessage { hashes: hash[] }
 export interface ItemMessage extends VoidMessage { item: IGameItem }
+export interface AdsResult { result: boolean }
+export interface ShowBannerData { pos: BannerPos }
 
 export type _SystemMessages = {
-    PLAY_SND: SndMessage,
-    STOP_SND: NameMessage,
-    ON_SOUND_PAUSE: ValMessage,
-    RESTART_SCENE: VoidMessage,
-    LOAD_SCENE: NameMessage,
-    SHOW_RATE: VoidMessage,
-    APPLY_CUSTOM_LANG: VoidMessage,
-    SCENE_LOADED: NameMessage,
     MANAGER_READY: VoidMessage,
-    SHOW_REWARD: VoidMessage,
-    SHOW_INTER: InterMessage,
-    SHOW_BANNER: VoidMessage,
-    HIDE_BANNER: VoidMessage,
+    SYS_PLAY_SND: SndMessage,
+    SYS_STOP_SND: NameMessage,
+    ON_SOUND_PAUSE: ValMessage,
+    SYS_LOAD_SCENE: NameMessage,
+    SYS_RESTART_SCENE: VoidMessage,
+    SYS_SHOW_RATE: VoidMessage,
+    ON_APPLY_CUSTOM_LANG: VoidMessage,
+    ON_SCENE_LOADED: NameMessage,
+    SYS_SHOW_REWARD: VoidMessage,
+    SYS_SHOW_INTER: InterMessage,
+    SYS_SHOW_BANNER: ShowBannerData,
+    SYS_HIDE_BANNER: VoidMessage,
+
+    ON_INTER_SHOWN: AdsResult,
+    ON_REWARDED_SHOWN: AdsResult,
     MSG_ON_MOVE: PosXYMessage,
     MSG_ON_DOWN: PosXYMessage,
     MSG_ON_UP: PosXYMessage,
@@ -41,6 +49,7 @@ export type _SystemMessages = {
     MSG_ON_DOWN_ITEM: ItemMessage,
     MSG_ON_UP_ITEM: ItemMessage,
     MSG_ON_MOVE_ITEM: ItemMessage,
+
 };
 
 export const _ID_MESSAGES = {
@@ -53,6 +62,4 @@ export const _ID_MESSAGES = {
     MSG_ON_DOWN_ITEM: hash('MSG_ON_DOWN_ITEM'),
     MSG_ON_UP_ITEM: hash('MSG_ON_UP_ITEM'),
     MSG_ON_MOVE_ITEM: hash('MSG_ON_MOVE_ITEM'),
-    MSG_ON_REWARDED: hash('MSG_ON_REWARDED'),
-    MSG_ON_INTER_SHOWN: hash('MSG_ON_INTER_SHOWN')
 };

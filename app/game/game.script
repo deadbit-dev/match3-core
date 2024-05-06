@@ -3,6 +3,7 @@ local flow = require("ludobits.m.flow")
 local ____match3_game = require("game.match3_game")
 local Game = ____match3_game.Game
 function ____exports.init(self)
+    Manager.init_script()
     flow.start(
         function() return Game() end,
         {}
@@ -13,8 +14,8 @@ function ____exports.on_message(self, message_id, message, sender)
     Manager.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
+    Manager.final_script()
     flow.stop()
-    EventBus.off_all_current_script()
 end
 init = ____exports.init
 on_message = ____exports.on_message

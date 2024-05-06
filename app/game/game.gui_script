@@ -5,7 +5,7 @@ local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
 function ____exports.init(self)
-    Manager.init_gui()
+    Manager.init_script()
     self.druid = druid.new(self)
     self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     self.busters = self.level.busters
@@ -312,7 +312,6 @@ function ____exports.update(self, dt)
     self.druid:update(dt)
 end
 function ____exports.on_message(self, message_id, message, sender)
-    Manager.on_message_gui(self, message_id, message, sender)
     self.druid:on_message(message_id, message, sender)
 end
 function ____exports.final(self)

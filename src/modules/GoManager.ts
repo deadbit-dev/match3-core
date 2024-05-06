@@ -8,7 +8,6 @@
 
 import * as flow from 'ludobits.m.flow';
 import { hex2rgba } from '../utils/utils';
-import * as camera from '../utils/camera';
 import { get_debug_intersect_points, is_intersect_zone } from '../utils/math_utils';
 import { IGameItem } from './modules_const';
 
@@ -25,9 +24,9 @@ export function GoManager() {
 
     let go_list: hash[] = [];
     let game_items: IGameItem[] = [];
-    
+
     let index = 0;
-    let index2GameItem: {[key in number]: IGameItem} = {};
+    let index2GameItem: { [key in number]: IGameItem } = {};
 
     function make_go(name = 'cell', pos: vmath.vector3, is_add_list = false) {
         const item = factory.create("/prefabs#" + name, pos);
@@ -81,8 +80,8 @@ export function GoManager() {
         return go.get(msg.url(undefined, _go, "sprite"), "animation") as hash;
     }
 
-    function set_sprite_hash(_go: hash, id_anim: string) {
-        sprite.play_flipbook(msg.url(undefined, _go, "sprite"), hash(id_anim));
+    function set_sprite_hash(_go: hash, id_anim: string, name_sprite = "sprite") {
+        sprite.play_flipbook(msg.url(undefined, _go, name_sprite), hash(id_anim));
     }
 
     function set_color_hash(_go: hash, color: string, alpha = 1, name = 'sprite') {
@@ -183,7 +182,7 @@ export function GoManager() {
     }
 
     function get_item_from_pos(x: number, y: number): null | [IGameItem, IGameItem[]] {
-        const tp = camera.screen_to_world(x, y);
+        const tp = Camera.screen_to_world(x, y);
         const results = [];
         const zlist = [];
 
@@ -214,16 +213,16 @@ export function GoManager() {
 
     function on_click(x: number, y: number, isDown: boolean, isMove = false) {
         if (isMove) {
-            Manager.send_view('MSG_ON_MOVE', { x, y });
+            EventBus.trigger('MSG_ON_MOVE', { x, y }, false);
             return on_move(x, y);
         }
         if (isDown) {
-            Manager.send_view('MSG_ON_DOWN', { x, y });
+            EventBus.trigger('MSG_ON_DOWN', { x, y }), false;
             return on_down(x, y);
         }
         else {
             on_up(x, y);
-            Manager.send_view('MSG_ON_UP', { x, y });
+            EventBus.trigger('MSG_ON_UP', { x, y }, false);
         }
     }
 
@@ -233,7 +232,7 @@ export function GoManager() {
     let cur_x = 0; let cur_y = 0;
     function on_down(x: number, y: number) {
         // todo debug
-        //const tmp = camera.screen_to_world(x, y);
+        //const tmp = Camera.screen_to_world(x, y);
         //set_position_xy_hash('point', tmp.x, tmp.y);
         cur_x = x;
         cur_y = y;
@@ -243,15 +242,15 @@ export function GoManager() {
             return;
         const [item, items] = result;
         down_item = item;
-        cp = camera.screen_to_world(x, y);
+        cp = Camera.screen_to_world(x, y);
         sp = go.get_position(item._hash);
         const hashes: hash[] = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             hashes.push(item._hash);
         }
-        Manager.send_view('MSG_ON_DOWN_HASHES', { hashes });
-        Manager.send_view('MSG_ON_DOWN_ITEM', { item });
+        EventBus.trigger('MSG_ON_DOWN_HASHES', { hashes }, false);
+        EventBus.trigger('MSG_ON_DOWN_ITEM', { item }, false);
     }
 
     function on_move(x: number, y: number) {
@@ -264,11 +263,11 @@ export function GoManager() {
             return;
         const _hash = down_item._hash;
         const src = go.get_position(_hash);
-        const dp = ((camera.screen_to_world(x, y) - cp)) as vmath.vector3;
+        const dp = ((Camera.screen_to_world(x, y) - cp)) as vmath.vector3;
         const np = (sp + dp) as vmath.vector3;
         np.z = src.z;
         go.set_position(np, _hash);
-        Manager.send_view('MSG_ON_MOVE_ITEM', { item: down_item });
+        EventBus.trigger('MSG_ON_MOVE_ITEM', { item: down_item }, false);
     }
 
     function on_up(x: number, y: number) {
@@ -283,19 +282,19 @@ export function GoManager() {
                 hashes.push(item._hash);
 
             }
-            Manager.send_view('MSG_ON_UP_HASHES', { hashes });
+            EventBus.trigger('MSG_ON_UP_HASHES', { hashes }, false);
         }
 
         if (!down_item)
             return;
         const item = down_item;
-        Manager.send_view('MSG_ON_UP_ITEM', { item });
+        EventBus.trigger('MSG_ON_UP_ITEM', { item }, false);
         down_item = null;
     }
 
     function get_item_by_index(index: number) {
         // game_items[index];
-        return index2GameItem[index]; 
+        return index2GameItem[index];
     }
 
     function add_game_item<T extends IGameItem>(gi: T, add_go_list = true): number {
@@ -320,14 +319,14 @@ export function GoManager() {
     }
 
     function delete_item(item: IGameItem, remove_from_scene = true, recursive = false) {
-        for(const [key, value] of Object.entries(index2GameItem)) {
+        for (const [key, value] of Object.entries(index2GameItem)) {
             const index = tonumber(key);
-            if(index != undefined && value == item) {
+            if (index != undefined && value == item) {
                 delete index2GameItem[index];
                 break;
             }
         }
-        
+
         for (let i = game_items.length - 1; i >= 0; i--) {
             const it = game_items[i];
             if (it._hash == item._hash) {
@@ -353,7 +352,7 @@ export function GoManager() {
     let drag_list: DragData[] = [];
     function start_dragging_list(list: hash[], inc_z_index = 0) {
         stop_dragging_list(list, true);
-        const click_pos = camera.screen_to_world(cur_x, cur_y);
+        const click_pos = Camera.screen_to_world(cur_x, cur_y);
         for (let i = 0; i < list.length; i++) {
             const h = list[i];
             const z_index = get_render_order_hash(h);
@@ -363,7 +362,7 @@ export function GoManager() {
     }
 
     function process_dragging_list(x: number, y: number) {
-        const wp = camera.screen_to_world(x, y);
+        const wp = Camera.screen_to_world(x, y);
         for (let i = 0; i < drag_list.length; i++) {
             const dl = drag_list[i];
             const _hash = dl._hash;
@@ -414,7 +413,7 @@ export function GoManager() {
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // 
+    //
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     function do_message(message_id: hash, message: any, sender: hash) {
@@ -435,7 +434,8 @@ export function GoManager() {
         do_message, on_click, make_go, set_render_order, get_render_order, do_move_anim, do_scale_anim, do_fade_anim, do_move_anim_hash, do_fade_anim_hash, do_scale_anim_hash,
         get_item_by_go, get_go_by_item, clear_and_remove_items, get_item_by_index, set_sprite_hash, set_color_hash, set_rotation_hash, add_game_item,
         move_to_with_speed_hash, move_to_with_speed, set_position_xy, set_position_xy_hash, is_intersect, is_intersect_hash, delete_item, delete_go, draw_debug_intersect, set_render_order_hash, get_render_order_hash,
-        move_to_with_time_hash, get_sprite_hash, start_dragging_list, stop_all_dragging, stop_dragging_list, reset_dragging_list
+        move_to_with_time_hash, get_sprite_hash, start_dragging_list, stop_all_dragging, stop_dragging_list, reset_dragging_list,
+        get_item_from_pos
     };
 }
 

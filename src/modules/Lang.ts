@@ -102,7 +102,7 @@ function LangModule() {
         const name = Scene.get_current_name();
 
         if (name != "")
-            Manager.send('APPLY_CUSTOM_LANG', {}, name + ':/ui#' + name);
+            EventBus.trigger('ON_APPLY_CUSTOM_LANG');
     }
 
 

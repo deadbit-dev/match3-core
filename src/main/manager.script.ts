@@ -9,7 +9,7 @@
 
 import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
-
+import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
 import { load_config } from '../game/match3_game';
 
@@ -23,25 +23,31 @@ export function init(this: props) {
     register_manager();
     
     Manager.init(() => {
-        log('All ready');
+        EventBus.on('SYS_LOAD_SCENE', (message) => {
+            const name = message.name;
+            window.set_dim_mode(name.includes('game') ? window.DIMMING_OFF : window.DIMMING_ON);
+            if (message.name == 'game')
+                Ads.show_banner(BannerPos.POS_BOTTOM_CENTER);
+            else
+                Ads.hide_banner();
+        });
+        
+        // если это одноклассники
+        if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')
+            HtmlBridge.start_resize_monitor();
+
+        default_style.scroll.WHEEL_SCROLL_SPEED = 10;
+        druid.set_default_style(default_style);
+        Sound.attach_druid_click('sel');
+        Camera.set_go_prjection(-1, 1, -3, 3);
+
+        Scene.load('movie');
+        Scene.set_bg('#88dfeb');
+
+        load_config();
     }, true);
-    
-    Sound.attach_druid_click('sel');
-
-    default_style.scroll.WHEEL_SCROLL_SPEED = 10;
-    druid.set_default_style(default_style);
-
-    Camera.set_go_prjection(-1, 1, -3, 3);
-    Scene.set_bg('#88dfeb');
-
-    load_config();
-    Scene.load('movie');
-}
-
-export function update(this: props, dt: number): void {
-    Manager.update(dt);
 }
 
 export function on_message(this: props, message_id: hash, _message: any, sender: hash): void {
-    Manager.on_message(this, message_id, _message, sender);
+    Manager.on_message_main(this, message_id, _message, sender);
 }

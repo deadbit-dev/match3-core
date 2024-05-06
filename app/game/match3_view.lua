@@ -326,7 +326,7 @@ function ____exports.View(animator)
         if down_item == nil then
             return
         end
-        local world_pos = camera.screen_to_world(pos.x, pos.y)
+        local world_pos = camera:screen_to_world(pos.x, pos.y)
         local selected_element_world_pos = go.get_world_position(down_item._hash)
         local delta = world_pos - selected_element_world_pos
         if vmath.length(delta) < min_swipe_distance then
@@ -1809,7 +1809,7 @@ function ____exports.View(animator)
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     local function init()
         local scene_name = Scene.get_current_name()
-        Scene.load_resource(scene_name, "background")
+        Scene:load_resource(scene_name, "background")
         set_events()
         set_targets()
         EventBus.send("REQUEST_LOAD_FIELD")

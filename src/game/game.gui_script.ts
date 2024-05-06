@@ -18,7 +18,7 @@ interface props {
 }
 
 export function init(this: props): void {
-    Manager.init_gui();
+    Manager.init_script();
     
     this.druid = druid.new(this);
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
@@ -205,7 +205,6 @@ export function update(this: props, dt: number): void {
 }
 
 export function on_message(this: props, message_id: string | hash, message: any, sender: string | hash | url): void {
-    Manager.on_message_gui(this, message_id, message, sender);
     this.druid.on_message(message_id, message, sender);
 }
 
