@@ -50,11 +50,11 @@ export enum CellId {
     Grass,
     Flowers,
     Web,
-    WebUI,
     Box,
     Stone0,
     Stone1,
-    Stone2
+    Stone2,
+    Lock
 }
 
 export enum ElementId {
@@ -136,7 +136,8 @@ export const _GAME_CONFIG = {
         [CellId.Box]: 'cell_box',
         [CellId.Stone0]: 'cell_stone_0',
         [CellId.Stone1]: 'cell_stone_1',
-        [CellId.Stone2]: 'cell_stone_2'
+        [CellId.Stone2]: 'cell_stone_2',
+        [CellId.Lock]: 'cell_lock'
     } as { [key in CellId]: string },
     
     activation_cells: [
@@ -156,7 +157,8 @@ export const _GAME_CONFIG = {
         CellId.Box,
         CellId.Stone0,
         CellId.Stone1,
-        CellId.Stone2
+        CellId.Stone2,
+        CellId.Lock
     ],
 
     not_moved_cells: [
@@ -172,7 +174,8 @@ export const _GAME_CONFIG = {
         CellId.Stone0,
         CellId.Stone1,
         CellId.Stone2,
-        CellId.Web
+        CellId.Web,
+        CellId.Lock
     ],
 
     element_view: {
@@ -310,8 +313,10 @@ export type _UserMessages = {
     LOAD_RESOURCE: NameMessage,
     UNLOAD_RESOURCE: NameMessage,
 
-    LOAD_FIELD: VoidMessage,
+    REQUEST_LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
+
+    UPDATED_STATE: GameState
 
     GAME_TIMER: number,
 

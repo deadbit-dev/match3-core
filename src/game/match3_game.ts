@@ -170,7 +170,7 @@ export function Game() {
     }
     
     function set_events() {
-        EventBus.on('LOAD_FIELD', on_load_field);
+        EventBus.on('REQUEST_LOAD_FIELD', on_load_field);
         EventBus.on('SET_HELPER', set_helper);
         EventBus.on('SWAP_ELEMENTS', on_swap_elements);
         EventBus.on('CLICK_ACTIVATION', on_click_activation);
@@ -183,6 +183,13 @@ export function Game() {
         Log.log("Загрузка поля");
         
         try_load_field();
+
+        // TUTORIAL
+        // lock_cells_except([{x: 3, y: 3}, {x: 4, y: 3}]);
+        // timer.delay(5, false, () => {
+        //     unlock_cells();
+        //     EventBus.send('UPDATED_STATE', field.save_state());
+        // });
         
         const state = field.save_state();
         previous_states.push(state);
@@ -196,6 +203,37 @@ export function Game() {
         if(level_config.time != undefined) {
             start_game_time = System.now();
             timer.delay(1, true, on_game_timer_tick);
+        }
+    }
+
+    function lock_cells_except(cells: {x: number, y: number}[]) {
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                if(!cells.find((cell) => (cell.x == x) && (cell.y == y))) {
+                    const cell = field.get_cell(x, y);
+                    if(cell != NotActiveCell) {
+                        if(cell.data == undefined || cell.data.under_cells == undefined) cell.data.under_cells = [];
+                        (cell.data.under_cells as CellId[]).push(cell.id);
+                        cell.id = CellId.Lock;
+                        cell.type = CellId.Lock;
+                        field.set_cell(x, y, cell);
+                    }
+                }
+            }
+        }
+    }
+
+    function unlock_cells() {
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                const cell = field.get_cell(x, y);
+                if(cell != NotActiveCell && cell.type == CellId.Lock) {
+                    const id = (cell.data.under_cells as CellId[]).pop();
+                    cell.id = (id == undefined) ? CellId.Base : id;
+                    cell.type = generate_cell_type_by_cell_id(cell.id);
+                    field.set_cell(x, y, cell);
+                }
+            }
         }
     }
 
@@ -218,7 +256,7 @@ export function Game() {
         if(is_block_input || elements == undefined) return;
 
         stop_helper();
-        
+
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
         is_step = true;
@@ -316,23 +354,10 @@ export function Game() {
     function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell, data?: any): Cell | typeof NotActiveCell {
         if(cell_id == NotActiveCell) return NotActiveCell;
         
-        const config = GAME_CONFIG.cell_view[cell_id];
-        
-        let type;
-        if(GAME_CONFIG.activation_cells.includes(cell_id))
-            type = (type == undefined) ? CellType.ActionLocked : bit.bor(type, CellType.ActionLocked);
-        if(GAME_CONFIG.near_activated_cells.includes(cell_id))
-            type = (type == undefined) ? CellType.ActionLockedNear : bit.bor(type, CellType.ActionLockedNear);
-        if(GAME_CONFIG.disabled_cells.includes(cell_id))
-            type = (type == undefined) ? CellType.Disabled : bit.bor(type, CellType.Disabled);
-        if(GAME_CONFIG.not_moved_cells.includes(cell_id))
-            type = (type == undefined) ? CellType.NotMoved : bit.bor(type, CellType.NotMoved);
-        if(type == undefined) type = CellType.Base;
-
         const cell = {
             id: cell_id,
             uid: game_item_counter++,
-            type: type,
+            type: generate_cell_type_by_cell_id(cell_id),
             cnt_acts: 0,
             cnt_near_acts: 0,
             data: Object.assign({}, data)
@@ -346,10 +371,26 @@ export function Game() {
         return cell;
     }
 
+    function generate_cell_type_by_cell_id(cell_id: CellId) {
+        let type;
+        if(GAME_CONFIG.activation_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.ActionLocked : bit.bor(type, CellType.ActionLocked);
+        if(GAME_CONFIG.near_activated_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.ActionLockedNear : bit.bor(type, CellType.ActionLockedNear);
+        if(GAME_CONFIG.disabled_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.Disabled : bit.bor(type, CellType.Disabled);
+        if(GAME_CONFIG.not_moved_cells.includes(cell_id))
+            type = (type == undefined) ? CellType.NotMoved : bit.bor(type, CellType.NotMoved);
+        if(type == undefined) type = CellType.Base;
+
+        return type;
+    }
+
     function make_element(x: number, y: number, element_id: ElementId | typeof NullElement, data: any = null): Element | typeof NullElement {
         if(element_id == NullElement) return NullElement;
         
         const element: Element = {
+            id: element_id,
             uid: game_item_counter++,
             type: element_id,
             data: data
@@ -1667,7 +1708,6 @@ export function load_config() {
             if(target != undefined) {
                 const count = tonumber(target_data.count);
                 target.count = count != undefined ? count : target.count;
-
                 level.targets.push(target);
             }
         }

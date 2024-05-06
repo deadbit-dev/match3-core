@@ -111,6 +111,7 @@ export const NullElement = -1;
 
 // непосредственно элемент
 export interface Element {
+    id: number;
     uid: number;
     type: number;
     data?: any;

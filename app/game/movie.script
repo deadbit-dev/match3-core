@@ -1,0 +1,20 @@
+local ____exports = {}
+function ____exports.init(self)
+    msg.post(".", "acquire_input_focus")
+    local anim_props = {blend_duration = 0, playback_rate = 1}
+    spine.play_anim(
+        "#spinemodel",
+        "start",
+        go.PLAYBACK_ONCE_FORWARD,
+        anim_props,
+        function() return Scene.load("map") end
+    )
+end
+function ____exports.on_input(self, action_id, action)
+    if action_id == hash("touch") then
+        Scene.load("map")
+    end
+end
+init = ____exports.init
+on_input = ____exports.on_input
+

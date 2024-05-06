@@ -20,7 +20,7 @@ function ____exports.init(self)
     Camera.set_go_prjection(-1, 1, -3, 3)
     Scene.set_bg("#88dfeb")
     load_config()
-    Scene.load("map")
+    Scene.load("movie")
 end
 function ____exports.update(self, dt)
     Manager.update(dt)

@@ -4,6 +4,7 @@
     "resources": [
         "/map/map.collectionc",
         "/game/background.collectionc",
+        "/game/movie.collectionc",
         "/game/animals/bull.collectionc",
         "/game/animals/cat.collectionc",
         "/game/animals/cock.collectionc",

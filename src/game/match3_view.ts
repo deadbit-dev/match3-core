@@ -27,6 +27,7 @@ import {
     NotActiveCell,
     Cell,
     MoveType,
+    Element,
 } from "./match3_core";
 import { hex2rgba } from '../utils/utils';
 
@@ -98,6 +99,11 @@ const SubstrateMasks = [
     ]
 ];
 
+interface ViewState {
+    game_state: GameState,
+    game_id_to_view_index: { [key in number]: number[] }
+}
+
 export function View(animator: FluxGroup) {
     //#region CONFIG        
 
@@ -168,9 +174,12 @@ export function View(animator: FluxGroup) {
     //#region MAIN          
 
     const gm = GoManager();
-    const game_id_to_view_index: { [key in number]: number[] } = {};
-    const game_id_to_type: { [key in number]: ElementId } = {};
     const targets: {[key in number]: number} = {};
+    
+    let state: ViewState = {
+        game_state: {} as GameState,
+        game_id_to_view_index: {}
+    };
 
     let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
@@ -192,7 +201,7 @@ export function View(animator: FluxGroup) {
         set_events();
         set_targets();
 
-        EventBus.send('LOAD_FIELD');
+        EventBus.send('REQUEST_LOAD_FIELD');
 
         dispatch_messages();
     }
@@ -329,6 +338,11 @@ export function View(animator: FluxGroup) {
                 Scene.restart();
             });
         });
+
+        EventBus.on('UPDATED_STATE', (state) => {
+            if(state == undefined) return;
+            reset_feild(state);
+        });
     }
 
     function on_game_step(events: GameStepEventBuffer) {
@@ -458,20 +472,35 @@ export function View(animator: FluxGroup) {
         cells_offset.y -= math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5;
     }
 
-    function on_load_field(state: GameState) {
+    function on_load_field(game_state: GameState, with_anim = true) {
+        state.game_state = game_state;
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
-                const cell = state.cells[y][x];
+                const cell = state.game_state.cells[y][x];
                 if (cell != NotActiveCell) {
-                    make_substrate_view(x, y, state.cells);
+                    make_substrate_view(x, y, state.game_state.cells);
                     try_make_under_cell(x, y, cell);
                     make_cell_view(x, y, cell.id, cell.uid);
                 } //else make_hole_substrate_view(x, y, state.cells);
 
-                const element = state.elements[y][x];
-                if (element != NullElement) make_element_view(x, y, element.type, element.uid, true);
+                const element = state.game_state.elements[y][x];
+                if (element != NullElement) make_element_view(x, y, element.type, element.uid, with_anim);
             }
         }
+    }
+
+    function reset_feild(game_state: GameState) {
+        for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
+            const id = tonumber(sid);
+            if(id != undefined) {
+                const items = get_all_view_items_by_game_id(id);
+                if(items != undefined) for (const item of items) gm.delete_item(item, true);
+            }
+        }
+
+        state = {} as ViewState;
+
+        on_load_field(game_state, false);
     }
 
     function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
@@ -557,8 +586,8 @@ export function View(animator: FluxGroup) {
         if (cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
 
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
-        if (game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
-        if (id != undefined) game_id_to_view_index[id].push(index);
+        if (state.game_id_to_view_index[id] == undefined) state.game_id_to_view_index[id] = [];
+        if (id != undefined) state.game_id_to_view_index[id].push(index);
 
         return index;
     }
@@ -575,10 +604,8 @@ export function View(animator: FluxGroup) {
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
 
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
-        if (game_id_to_view_index[id] == undefined) game_id_to_view_index[id] = [];
-        if (id != undefined) game_id_to_view_index[id].push(index);
-
-        game_id_to_type[id] = type;
+        if (state.game_id_to_view_index[id] == undefined) state.game_id_to_view_index[id] = [];
+        if (id != undefined) state.game_id_to_view_index[id].push(index);
 
         return index;
     }
@@ -824,8 +851,9 @@ export function View(animator: FluxGroup) {
                 
                 msg.post(msg.url(undefined, part, undefined), 'disable');
                 msg.post(msg.url(undefined, part, 'part'), 'enable');
-
-                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_colors[game_id_to_type[element.uid]]));
+                
+                const type = (state.game_state.elements[element.y][element.x] as Element).id as ElementId;
+                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_colors[type]));
 
                 delete_view_item_by_game_id(element.uid);
 
@@ -1359,21 +1387,21 @@ export function View(animator: FluxGroup) {
     }
 
     function get_first_view_item_by_game_id(id: number) {
-        const indices = game_id_to_view_index[id];
+        const indices = state.game_id_to_view_index[id];
         if (indices == undefined) return;
 
         return gm.get_item_by_index(indices[0]);
     }
 
     function get_view_item_by_game_id_and_index(id: number, index: number) {
-        const indices = game_id_to_view_index[id];
+        const indices = state.game_id_to_view_index[id];
         if (indices == undefined) return;
 
         return gm.get_item_by_index(indices[index]);
     }
 
     function get_all_view_items_by_game_id(id: number) {
-        const indices = game_id_to_view_index[id];
+        const indices = state.game_id_to_view_index[id];
         if (indices == undefined) return;
 
         const items = [];
@@ -1386,14 +1414,14 @@ export function View(animator: FluxGroup) {
     function delete_view_item_by_game_id(id: number) {
         const item = get_first_view_item_by_game_id(id);
         if (item == undefined) {
-            delete game_id_to_view_index[id];
+            delete state.game_id_to_view_index[id];
             return false;
         }
 
         update_target_by_id(id);
 
         gm.delete_item(item, true);
-        game_id_to_view_index[id].splice(0, 1);
+        state.game_id_to_view_index[id].splice(0, 1);
 
         return true;
     }
@@ -1405,7 +1433,9 @@ export function View(animator: FluxGroup) {
         update_target_by_id(id);
         
         for (const item of items) gm.delete_item(item, true);
-        delete game_id_to_view_index[id];
+        delete state.game_id_to_view_index[id];
+
+
 
         return true;
     }

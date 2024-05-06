@@ -46,16 +46,16 @@ ____exports.CellId.Flowers = 2
 ____exports.CellId[____exports.CellId.Flowers] = "Flowers"
 ____exports.CellId.Web = 3
 ____exports.CellId[____exports.CellId.Web] = "Web"
-____exports.CellId.WebUI = 4
-____exports.CellId[____exports.CellId.WebUI] = "WebUI"
-____exports.CellId.Box = 5
+____exports.CellId.Box = 4
 ____exports.CellId[____exports.CellId.Box] = "Box"
-____exports.CellId.Stone0 = 6
+____exports.CellId.Stone0 = 5
 ____exports.CellId[____exports.CellId.Stone0] = "Stone0"
-____exports.CellId.Stone1 = 7
+____exports.CellId.Stone1 = 6
 ____exports.CellId[____exports.CellId.Stone1] = "Stone1"
-____exports.CellId.Stone2 = 8
+____exports.CellId.Stone2 = 7
 ____exports.CellId[____exports.CellId.Stone2] = "Stone2"
+____exports.CellId.Lock = 8
+____exports.CellId[____exports.CellId.Lock] = "Lock"
 ____exports.ElementId = ElementId or ({})
 ____exports.ElementId.Dimonde = 0
 ____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
@@ -150,7 +150,8 @@ ____exports._GAME_CONFIG = {
         [____exports.CellId.Box] = "cell_box",
         [____exports.CellId.Stone0] = "cell_stone_0",
         [____exports.CellId.Stone1] = "cell_stone_1",
-        [____exports.CellId.Stone2] = "cell_stone_2"
+        [____exports.CellId.Stone2] = "cell_stone_2",
+        [____exports.CellId.Lock] = "cell_lock"
     },
     activation_cells = {____exports.CellId.Grass, ____exports.CellId.Flowers},
     near_activated_cells = {
@@ -160,7 +161,13 @@ ____exports._GAME_CONFIG = {
         ____exports.CellId.Stone2,
         ____exports.CellId.Web
     },
-    disabled_cells = {____exports.CellId.Box, ____exports.CellId.Stone0, ____exports.CellId.Stone1, ____exports.CellId.Stone2},
+    disabled_cells = {
+        ____exports.CellId.Box,
+        ____exports.CellId.Stone0,
+        ____exports.CellId.Stone1,
+        ____exports.CellId.Stone2,
+        ____exports.CellId.Lock
+    },
     not_moved_cells = {
         ____exports.CellId.Box,
         ____exports.CellId.Stone0,
@@ -173,7 +180,8 @@ ____exports._GAME_CONFIG = {
         ____exports.CellId.Stone0,
         ____exports.CellId.Stone1,
         ____exports.CellId.Stone2,
-        ____exports.CellId.Web
+        ____exports.CellId.Web,
+        ____exports.CellId.Lock
     },
     element_view = {
         [____exports.ElementId.Dimonde] = "element_diamond",

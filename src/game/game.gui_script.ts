@@ -76,7 +76,7 @@ export function init(this: props): void {
 
         const target = targets[0];
         const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
-        gui.play_flipbook(gui.get_node('first_target_icon'), view);
+        gui.play_flipbook(gui.get_node('first_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('first_target_counts', target.count);
     }
 
@@ -110,7 +110,7 @@ export function init(this: props): void {
         
         const target = targets[2];
         const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
-        gui.play_flipbook(gui.get_node('third_target_icon'), view);
+        gui.play_flipbook(gui.get_node('third_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('third_target_counts', target.count);
     }
 

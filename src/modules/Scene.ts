@@ -28,11 +28,11 @@ function SceneModule() {
     let last_loading_scene = '';
     let last_scene = '';
     let is_restarting_scene = false;
-    let is_resource = false;
     let _wait_ready_manager = false;
     
 
     const scene_resources: { [key in string]: string[] } = {};
+    const sender_to_name: { [key in string]: hash } = {};
     
     function init() {
         if (System.platform == 'HTML5')
@@ -45,17 +45,26 @@ function SceneModule() {
             html5.run(`set_light('` + color + `')`);
     }
 
+    function is_resource(name: string) {
+        return !Object.keys(scene_resources).includes(name);
+    }
+
+    function get_name_by_hash(h: hash) {
+        let name = '';
+        for(const [key, value] of Object.entries(sender_to_name))
+            if(value == h) name = key;
+        return name;
+    }
+
     // загрузить сцену с именем. wait_ready_manager - ждать ли сначала полной загрузки менеджера
-    function load(name: string, wait_ready_manager = false) {
+    function load(scene: string, wait_ready_manager = false) {
         _wait_ready_manager = wait_ready_manager;
-    
-        Manager.send('LOAD_SCENE', { name });
+        scene_resources[scene] = [];
+        Manager.send('LOAD_SCENE', { name: scene });
     }
 
     function load_resource(scene: string, resource: string) {
-        if(scene_resources[scene] == null) scene_resources[scene] = [];
         scene_resources[scene].push(resource);
-
         Manager.send('LOAD_RESOURCE', { name: resource });
     }
 
@@ -146,32 +155,35 @@ function SceneModule() {
             last_loading_scene = message.name;
 
             try_load(message.name, () => {
-                msg.post(Manager.MANAGER_ID + "#" + message.name, "load");
+                const receiver = Manager.MANAGER_ID + "#" + message.name;
+                sender_to_name[message.name] = msg.url(receiver);
+                msg.post(receiver, "load");
             });
         }
         if (message_id == hash('LOAD_RESOURCE')) {
             const message = _message as Messages['LOAD_RESOURCE'];
 
             try_load(message.name, () => {
-                is_resource = true;
-                msg.post(Manager.MANAGER_ID + "#" + message.name, "load");
+                const receiver = Manager.MANAGER_ID + "#" + message.name;
+                sender_to_name[message.name] = msg.url(receiver);
+                msg.post(receiver, "load");
             });
         }
         if (message_id == hash('UNLOAD_RESOURCE')) {
             const message = _message as Messages['UNLOAD_RESOURCE'];
-            is_resource = true;
             msg.post(Manager.MANAGER_ID + "#" + message.name, "unload");
         } 
         if (message_id == hash("proxy_loaded")) {
-            if(!is_resource) on_loaded_scene(sender);
+            const name = get_name_by_hash(sender);
+            const is_r = is_resource(name);
+            print(name, is_r);
+            if(!is_r) on_loaded_scene(sender);
             else on_loaded_resource(sender);        
         }
         if (message_id == hash("proxy_unloaded")) {
-            if (!is_resource && is_restarting_scene && last_scene != '') {
+            if (!is_resource(get_name_by_hash(sender)) && is_restarting_scene && last_scene != '') {
                 Manager.send('LOAD_SCENE', { name: last_scene });
             }
-
-            is_resource = false;
         }
     }
 
@@ -181,11 +193,15 @@ function SceneModule() {
             msg.post(scene, "disable");
             msg.post(scene, "final");
             msg.post(scene, "unload");
+
+            print("UNLOAD SCENE: ", last_scene);
             
             last_scene = '';
         }
 
         is_restarting_scene = false;
+
+        print("LOADED SCENE: ", sender);
 
         msg.post(sender, "init");
         msg.post(sender, "enable");
@@ -197,7 +213,7 @@ function SceneModule() {
     }
 
     function on_loaded_resource(sender: hash) {
-        is_resource = false;
+        print("LOADED RESOURCE: ", sender);
         
         msg.post(sender, "init");
         msg.post(sender, "enable");

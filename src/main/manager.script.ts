@@ -35,7 +35,7 @@ export function init(this: props) {
     Scene.set_bg('#88dfeb');
 
     load_config();
-    Scene.load('map');
+    Scene.load('movie');
 }
 
 export function update(this: props, dt: number): void {
