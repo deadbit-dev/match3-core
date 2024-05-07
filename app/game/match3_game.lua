@@ -15,9 +15,6 @@ local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
 local Axis = ____math_utils.Axis
 local is_valid_pos = ____math_utils.is_valid_pos
-local ____game_config = require("main.game_config")
-local CellId = ____game_config.CellId
-local ElementId = ____game_config.ElementId
 local ____match3_core = require("game.match3_core")
 local Field = ____match3_core.Field
 local NullElement = ____match3_core.NullElement
@@ -26,6 +23,89 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 ____exports.RandomElement = -2
+____exports.SubstrateId = SubstrateId or ({})
+____exports.SubstrateId.OutsideArc = 0
+____exports.SubstrateId[____exports.SubstrateId.OutsideArc] = "OutsideArc"
+____exports.SubstrateId.OutsideInsideAngle = 1
+____exports.SubstrateId[____exports.SubstrateId.OutsideInsideAngle] = "OutsideInsideAngle"
+____exports.SubstrateId.OutsideAngle = 2
+____exports.SubstrateId[____exports.SubstrateId.OutsideAngle] = "OutsideAngle"
+____exports.SubstrateId.LeftRightStrip = 3
+____exports.SubstrateId[____exports.SubstrateId.LeftRightStrip] = "LeftRightStrip"
+____exports.SubstrateId.LeftStripTopBottomInsideAngle = 4
+____exports.SubstrateId[____exports.SubstrateId.LeftStripTopBottomInsideAngle] = "LeftStripTopBottomInsideAngle"
+____exports.SubstrateId.LeftStripTopInsideAngle = 5
+____exports.SubstrateId[____exports.SubstrateId.LeftStripTopInsideAngle] = "LeftStripTopInsideAngle"
+____exports.SubstrateId.LeftStripBottomInsideAngle = 6
+____exports.SubstrateId[____exports.SubstrateId.LeftStripBottomInsideAngle] = "LeftStripBottomInsideAngle"
+____exports.SubstrateId.LeftStrip = 7
+____exports.SubstrateId[____exports.SubstrateId.LeftStrip] = "LeftStrip"
+____exports.SubstrateId.TopBottomInsideAngle = 8
+____exports.SubstrateId[____exports.SubstrateId.TopBottomInsideAngle] = "TopBottomInsideAngle"
+____exports.SubstrateId.InsideAngle = 9
+____exports.SubstrateId[____exports.SubstrateId.InsideAngle] = "InsideAngle"
+____exports.SubstrateId.Full = 10
+____exports.SubstrateId[____exports.SubstrateId.Full] = "Full"
+____exports.CellId = CellId or ({})
+____exports.CellId.Base = 0
+____exports.CellId[____exports.CellId.Base] = "Base"
+____exports.CellId.Grass = 1
+____exports.CellId[____exports.CellId.Grass] = "Grass"
+____exports.CellId.Flowers = 2
+____exports.CellId[____exports.CellId.Flowers] = "Flowers"
+____exports.CellId.Web = 3
+____exports.CellId[____exports.CellId.Web] = "Web"
+____exports.CellId.Box = 4
+____exports.CellId[____exports.CellId.Box] = "Box"
+____exports.CellId.Stone0 = 5
+____exports.CellId[____exports.CellId.Stone0] = "Stone0"
+____exports.CellId.Stone1 = 6
+____exports.CellId[____exports.CellId.Stone1] = "Stone1"
+____exports.CellId.Stone2 = 7
+____exports.CellId[____exports.CellId.Stone2] = "Stone2"
+____exports.CellId.Lock = 8
+____exports.CellId[____exports.CellId.Lock] = "Lock"
+____exports.ElementId = ElementId or ({})
+____exports.ElementId.Dimonde = 0
+____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
+____exports.ElementId.Gold = 1
+____exports.ElementId[____exports.ElementId.Gold] = "Gold"
+____exports.ElementId.Topaz = 2
+____exports.ElementId[____exports.ElementId.Topaz] = "Topaz"
+____exports.ElementId.Ruby = 3
+____exports.ElementId[____exports.ElementId.Ruby] = "Ruby"
+____exports.ElementId.Emerald = 4
+____exports.ElementId[____exports.ElementId.Emerald] = "Emerald"
+____exports.ElementId.Cheese = 5
+____exports.ElementId[____exports.ElementId.Cheese] = "Cheese"
+____exports.ElementId.Cabbage = 6
+____exports.ElementId[____exports.ElementId.Cabbage] = "Cabbage"
+____exports.ElementId.Acorn = 7
+____exports.ElementId[____exports.ElementId.Acorn] = "Acorn"
+____exports.ElementId.RareMeat = 8
+____exports.ElementId[____exports.ElementId.RareMeat] = "RareMeat"
+____exports.ElementId.MediumMeat = 9
+____exports.ElementId[____exports.ElementId.MediumMeat] = "MediumMeat"
+____exports.ElementId.Chicken = 10
+____exports.ElementId[____exports.ElementId.Chicken] = "Chicken"
+____exports.ElementId.SunFlower = 11
+____exports.ElementId[____exports.ElementId.SunFlower] = "SunFlower"
+____exports.ElementId.Salad = 12
+____exports.ElementId[____exports.ElementId.Salad] = "Salad"
+____exports.ElementId.Hay = 13
+____exports.ElementId[____exports.ElementId.Hay] = "Hay"
+____exports.ElementId.VerticalRocket = 14
+____exports.ElementId[____exports.ElementId.VerticalRocket] = "VerticalRocket"
+____exports.ElementId.HorizontalRocket = 15
+____exports.ElementId[____exports.ElementId.HorizontalRocket] = "HorizontalRocket"
+____exports.ElementId.AxisRocket = 16
+____exports.ElementId[____exports.ElementId.AxisRocket] = "AxisRocket"
+____exports.ElementId.Helicopter = 17
+____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
+____exports.ElementId.Dynamite = 18
+____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
+____exports.ElementId.Diskosphere = 19
+____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
     local set_targets_uids, set_element_types, set_element_chances, set_busters, set_events, on_load_field, try_load_field, on_swap_elements, on_click_activation, on_activate_spinning, on_revert_step, on_game_step_animation_end, on_game_timer_tick, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, level_config, field_width, field_height, busters, field, game_item_counter, previous_states, previous_randomseeds, randomseed, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, step_counter, start_game_time
     function set_targets_uids()
@@ -523,7 +603,7 @@ function ____exports.Game()
     end
     function try_activate_diskosphere(x, y)
         local diskosphere = field.get_element(x, y)
-        if diskosphere == NullElement or diskosphere.type ~= ElementId.Diskosphere then
+        if diskosphere == NullElement or diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local element_id = get_random_element_id()
@@ -544,11 +624,11 @@ function ____exports.Game()
     end
     function try_activate_swaped_diskospheres(x, y, other_x, other_y)
         local diskosphere = field.get_element(x, y)
-        if diskosphere == NullElement or diskosphere.type ~= ElementId.Diskosphere then
+        if diskosphere == NullElement or diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local other_diskosphere = field.get_element(other_x, other_y)
-        if other_diskosphere == NullElement or other_diskosphere.type ~= ElementId.Diskosphere then
+        if other_diskosphere == NullElement or other_diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local event_data = {}
@@ -571,11 +651,11 @@ function ____exports.Game()
     end
     function try_activate_swaped_diskosphere_with_buster(x, y, other_x, other_y)
         local diskosphere = field.get_element(x, y)
-        if diskosphere == NullElement or diskosphere.type ~= ElementId.Diskosphere then
+        if diskosphere == NullElement or diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local other_buster = field.get_element(other_x, other_y)
-        if other_buster == NullElement or not __TS__ArrayIncludes({ElementId.Helicopter, ElementId.Dynamite, ElementId.HorizontalRocket, ElementId.VerticalRocket}, other_buster.type) then
+        if other_buster == NullElement or not __TS__ArrayIncludes({____exports.ElementId.Helicopter, ____exports.ElementId.Dynamite, ____exports.ElementId.HorizontalRocket, ____exports.ElementId.VerticalRocket}, other_buster.type) then
             return false
         end
         local event_data = {}
@@ -613,7 +693,7 @@ function ____exports.Game()
             return false
         end
         local diskosphere = field.get_element(other_x, other_y)
-        if diskosphere == NullElement or diskosphere.type ~= ElementId.Diskosphere then
+        if diskosphere == NullElement or diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local event_data = {}
@@ -647,7 +727,7 @@ function ____exports.Game()
     end
     function try_activate_swaped_diskosphere_with_element(x, y, other_x, other_y)
         local diskosphere = field.get_element(x, y)
-        if diskosphere == NullElement or diskosphere.type ~= ElementId.Diskosphere then
+        if diskosphere == NullElement or diskosphere.type ~= ____exports.ElementId.Diskosphere then
             return false
         end
         local other_element = field.get_element(other_x, other_y)
@@ -672,7 +752,7 @@ function ____exports.Game()
     end
     function try_activate_rocket(x, y)
         local rocket = field.get_element(x, y)
-        if rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket, ElementId.AxisRocket}, rocket.type) then
+        if rocket == NullElement or not __TS__ArrayIncludes({____exports.ElementId.HorizontalRocket, ____exports.ElementId.VerticalRocket, ____exports.ElementId.AxisRocket}, rocket.type) then
             return false
         end
         local event_data = {}
@@ -680,8 +760,8 @@ function ____exports.Game()
         event_data.element = {x = x, y = y, uid = rocket.uid}
         event_data.damaged_elements = {}
         event_data.activated_cells = {}
-        event_data.axis = rocket.type == ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal
-        if rocket.type == ElementId.VerticalRocket or rocket.type == ElementId.AxisRocket then
+        event_data.axis = rocket.type == ____exports.ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal
+        if rocket.type == ____exports.ElementId.VerticalRocket or rocket.type == ____exports.ElementId.AxisRocket then
             do
                 local i = 0
                 while i < field_height do
@@ -700,7 +780,7 @@ function ____exports.Game()
                 end
             end
         end
-        if rocket.type == ElementId.HorizontalRocket or rocket.type == ElementId.AxisRocket then
+        if rocket.type == ____exports.ElementId.HorizontalRocket or rocket.type == ____exports.ElementId.AxisRocket then
             do
                 local i = 0
                 while i < field_width do
@@ -724,11 +804,11 @@ function ____exports.Game()
     end
     function try_activate_swaped_rockets(x, y, other_x, other_y)
         local rocket = field.get_element(x, y)
-        if rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket}, rocket.type) then
+        if rocket == NullElement or not __TS__ArrayIncludes({____exports.ElementId.HorizontalRocket, ____exports.ElementId.VerticalRocket}, rocket.type) then
             return false
         end
         local other_rocket = field.get_element(other_x, other_y)
-        if other_rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket}, other_rocket.type) then
+        if other_rocket == NullElement or not __TS__ArrayIncludes({____exports.ElementId.HorizontalRocket, ____exports.ElementId.VerticalRocket}, other_rocket.type) then
             return false
         end
         local event_data = {}
@@ -777,7 +857,7 @@ function ____exports.Game()
     end
     function try_activate_swaped_rocket_with_element(x, y, other_x, other_y)
         local rocket = field.get_element(x, y)
-        if rocket == NullElement or not __TS__ArrayIncludes({ElementId.HorizontalRocket, ElementId.VerticalRocket, ElementId.AxisRocket}, rocket.type) then
+        if rocket == NullElement or not __TS__ArrayIncludes({____exports.ElementId.HorizontalRocket, ____exports.ElementId.VerticalRocket, ____exports.ElementId.AxisRocket}, rocket.type) then
             return false
         end
         local other_element = field.get_element(other_x, other_y)
@@ -791,7 +871,7 @@ function ____exports.Game()
     end
     function try_activate_helicopter(x, y)
         local helicopter = field.get_element(x, y)
-        if helicopter == NullElement or helicopter.type ~= ElementId.Helicopter then
+        if helicopter == NullElement or helicopter.type ~= ____exports.ElementId.Helicopter then
             return false
         end
         local event_data = {}
@@ -805,11 +885,11 @@ function ____exports.Game()
     end
     function try_activate_swaped_helicopters(x, y, other_x, other_y)
         local helicopter = field.get_element(x, y)
-        if helicopter == NullElement or helicopter.type ~= ElementId.Helicopter then
+        if helicopter == NullElement or helicopter.type ~= ____exports.ElementId.Helicopter then
             return false
         end
         local other_helicopter = field.get_element(other_x, other_y)
-        if other_helicopter == NullElement or other_helicopter.type ~= ElementId.Helicopter then
+        if other_helicopter == NullElement or other_helicopter.type ~= ____exports.ElementId.Helicopter then
             return false
         end
         local event_data = {}
@@ -833,7 +913,7 @@ function ____exports.Game()
     end
     function try_activate_swaped_helicopter_with_element(x, y, other_x, other_y)
         local helicopter = field.get_element(x, y)
-        if helicopter == NullElement or helicopter.type ~= ElementId.Helicopter then
+        if helicopter == NullElement or helicopter.type ~= ____exports.ElementId.Helicopter then
             return false
         end
         local other_element = field.get_element(other_x, other_y)
@@ -853,7 +933,7 @@ function ____exports.Game()
     end
     function try_activate_dynamite(x, y)
         local dynamite = field.get_element(x, y)
-        if dynamite == NullElement or dynamite.type ~= ElementId.Dynamite then
+        if dynamite == NullElement or dynamite.type ~= ____exports.ElementId.Dynamite then
             return false
         end
         local event_data = {}
@@ -866,11 +946,11 @@ function ____exports.Game()
     end
     function try_activate_swaped_dynamites(x, y, other_x, other_y)
         local dynamite = field.get_element(x, y)
-        if dynamite == NullElement or dynamite.type ~= ElementId.Dynamite then
+        if dynamite == NullElement or dynamite.type ~= ____exports.ElementId.Dynamite then
             return false
         end
         local other_dynamite = field.get_element(other_x, other_y)
-        if other_dynamite == NullElement or other_dynamite.type ~= ElementId.Dynamite then
+        if other_dynamite == NullElement or other_dynamite.type ~= ____exports.ElementId.Dynamite then
             return false
         end
         local event_data = {}
@@ -921,7 +1001,7 @@ function ____exports.Game()
     end
     function try_activate_swaped_dynamite_with_element(x, y, other_x, other_y)
         local dynamite = field.get_element(x, y)
-        if dynamite == NullElement or dynamite.type ~= ElementId.Dynamite then
+        if dynamite == NullElement or dynamite.type ~= ____exports.ElementId.Dynamite then
             return false
         end
         local other_element = field.get_element(other_x, other_y)
@@ -1234,27 +1314,27 @@ function ____exports.Game()
             local ____switch294 = combination.type
             local ____cond294 = ____switch294 == CombinationType.Comb4
             if ____cond294 then
-                element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ElementId.HorizontalRocket or ElementId.VerticalRocket)
+                element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
             ____cond294 = ____cond294 or ____switch294 == CombinationType.Comb5
             if ____cond294 then
-                element = make_element(combined_element.x, combined_element.y, ElementId.Diskosphere)
+                element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
             ____cond294 = ____cond294 or ____switch294 == CombinationType.Comb2x2
             if ____cond294 then
-                element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter)
+                element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
             ____cond294 = ____cond294 or (____switch294 == CombinationType.Comb3x3a or ____switch294 == CombinationType.Comb3x3b)
             if ____cond294 then
-                element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite)
+                element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
             ____cond294 = ____cond294 or (____switch294 == CombinationType.Comb3x4 or ____switch294 == CombinationType.Comb3x5)
             if ____cond294 then
-                element = make_element(combined_element.x, combined_element.y, ElementId.AxisRocket)
+                element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
         until true
@@ -1323,7 +1403,7 @@ function ____exports.Game()
                         end
                     end
                     if new_cell == NotActiveCell then
-                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
+                        new_cell = make_cell(item_info.x, item_info.y, ____exports.CellId.Base)
                     end
                 end
             end
@@ -1338,7 +1418,7 @@ function ____exports.Game()
                         end
                     end
                     if new_cell == NotActiveCell then
-                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base)
+                        new_cell = make_cell(item_info.x, item_info.y, ____exports.CellId.Base)
                     end
                 end
             end
@@ -1358,8 +1438,8 @@ function ____exports.Game()
                 end
             end
             for ____, target in ipairs(level_config.targets) do
-                local check_for_not_stone = target.type ~= CellId.Stone0 and target.type == cell.data.current_id
-                local check_stone_with_last_cell = target.type == CellId.Stone0 and cell.data.current_id == CellId.Stone2
+                local check_for_not_stone = target.type ~= ____exports.CellId.Stone0 and target.type == cell.data.current_id
+                local check_stone_with_last_cell = target.type == ____exports.CellId.Stone0 and cell.data.current_id == ____exports.CellId.Stone2
                 if target.is_cell and (check_for_not_stone or check_stone_with_last_cell) then
                     local ____target_uids_21 = target.uids
                     ____target_uids_21[#____target_uids_21 + 1] = cell.uid
@@ -1550,8 +1630,8 @@ function ____exports.Game()
                                 end
                                 local ____cell_data_under_cells_0 = cell.data.under_cells
                                 ____cell_data_under_cells_0[#____cell_data_under_cells_0 + 1] = cell.id
-                                cell.id = CellId.Lock
-                                cell.type = CellId.Lock
+                                cell.id = ____exports.CellId.Lock
+                                cell.type = ____exports.CellId.Lock
                                 field.set_cell(x, y, cell)
                             end
                         end
@@ -1570,9 +1650,9 @@ function ____exports.Game()
                     local x = 0
                     while x < field_width do
                         local cell = field.get_cell(x, y)
-                        if cell ~= NotActiveCell and cell.type == CellId.Lock then
+                        if cell ~= NotActiveCell and cell.type == ____exports.CellId.Lock then
                             local id = table.remove(cell.data.under_cells)
-                            cell.id = id == nil and CellId.Base or id
+                            cell.id = id == nil and ____exports.CellId.Base or id
                             cell.type = generate_cell_type_by_cell_id(cell.id)
                             field.set_cell(x, y, cell)
                         end
@@ -1630,20 +1710,20 @@ function ____exports.load_config()
                                 end
                                 ____cond375 = ____cond375 or ____switch375 == ""
                                 if ____cond375 then
-                                    level.field.cells[y + 1][x + 1] = CellId.Base
+                                    level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
                                 end
                             until true
                         else
                             if data.cell ~= nil then
-                                if data.cell == CellId.Stone0 then
-                                    level.field.cells[y + 1][x + 1] = {CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0}
+                                if data.cell == ____exports.CellId.Stone0 then
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                 else
-                                    level.field.cells[y + 1][x + 1] = {CellId.Base, data.cell}
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
                                 end
                             else
-                                level.field.cells[y + 1][x + 1] = CellId.Base
+                                level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                             end
                             if data.element ~= nil then
                                 level.field.elements[y + 1][x + 1] = data.element

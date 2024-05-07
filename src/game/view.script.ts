@@ -4,18 +4,20 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as flow from 'ludobits.m.flow';
 import * as flux from 'utils.flux';
-
 import { View } from './match3_view';
 
 interface props {
-    animator: FluxGroup
+    animator: FluxGroup,
 }
 
 export function init(this: props) {
     this.animator = flux.group();
+    Manager.init_script();
+    
     msg.post('.', 'acquire_input_focus');
     flow.start(() => View(this.animator), {});
 }
@@ -36,6 +38,6 @@ export function on_input(this: props, action_id: string | hash, action: any): vo
 
 export function final(this: props): void {
     flow.stop();
-    EventBus.off_all_current_script();
     Scene.unload_all_resources('game');
+    Manager.final_script();
 }

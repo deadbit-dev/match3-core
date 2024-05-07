@@ -24,6 +24,8 @@ export interface ItemMessage extends VoidMessage { item: IGameItem }
 export interface AdsResult { result: boolean }
 export interface ShowBannerData { pos: BannerPos }
 
+export interface InputMessage { pressed: boolean, released: boolean, x: number, y: number }
+
 export type _SystemMessages = {
     MANAGER_READY: VoidMessage,
     SYS_PLAY_SND: SndMessage,

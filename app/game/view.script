@@ -5,6 +5,7 @@ local ____match3_view = require("game.match3_view")
 local View = ____match3_view.View
 function ____exports.init(self)
     self.animator = flux.group()
+    Manager.init_script()
     msg.post(".", "acquire_input_focus")
     flow.start(
         function() return View(self.animator) end,
@@ -25,8 +26,8 @@ function ____exports.on_input(self, action_id, action)
 end
 function ____exports.final(self)
     flow.stop()
-    EventBus.off_all_current_script()
-    Scene:unload_all_resources("game")
+    Scene.unload_all_resources("game")
+    Manager.final_script()
 end
 init = ____exports.init
 update = ____exports.update

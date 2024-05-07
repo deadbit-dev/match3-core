@@ -13,12 +13,10 @@
 
 
 import * as flow from 'ludobits.m.flow';
-import * as camera from '../utils/camera';
-
 import { Axis, Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CellId, CombinedMessage, ElementId, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SubstrateId, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage } from "../main/game_config";
+import { CombinedMessage, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage } from "../main/game_config";
 
 import {
     GameState,
@@ -30,6 +28,7 @@ import {
     Element,
 } from "./match3_core";
 import { hex2rgba } from '../utils/utils';
+import { SubstrateId, CellId, ElementId } from './match3_game';
 
 const SubstrateMasks = [
     [
@@ -202,7 +201,7 @@ export function View(animator: FluxGroup) {
         set_targets();
 
         EventBus.send('REQUEST_LOAD_FIELD');
-
+        
         dispatch_messages();
     }
 
@@ -343,6 +342,10 @@ export function View(animator: FluxGroup) {
             if(state == undefined) return;
             reset_feild(state);
         });
+
+        EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item));
+        EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item));
+        EventBus.on('MSG_ON_MOVE', (data) => on_move(data));
     }
 
     function on_game_step(events: GameStepEventBuffer) {
@@ -380,20 +383,6 @@ export function View(animator: FluxGroup) {
         while (true) {
             const [message_id, _message, sender] = flow.until_any_message();
             gm.do_message(message_id, _message, sender);
-            
-            switch (message_id) {
-                case ID_MESSAGES.MSG_ON_DOWN_ITEM:
-                    on_down((_message as Messages['MSG_ON_DOWN_ITEM']).item);
-                break;
-
-                case ID_MESSAGES.MSG_ON_UP_ITEM:
-                    on_up((_message as Messages['MSG_ON_UP_ITEM']).item);
-                break;
-
-                case ID_MESSAGES.MSG_ON_MOVE:
-                    on_move((_message as Messages['MSG_ON_MOVE']));
-                break;
-            }
         }
     }
 
@@ -406,8 +395,7 @@ export function View(animator: FluxGroup) {
     function on_move(pos: PosXYMessage) {
         if (down_item == null) return;
 
-
-        const world_pos = camera.screen_to_world(pos.x, pos.y);
+        const world_pos = Camera.screen_to_world(pos.x, pos.y);
         const selected_element_world_pos = go.get_world_position(down_item._hash);
         const delta = (world_pos - selected_element_world_pos) as vmath.vector3;
 

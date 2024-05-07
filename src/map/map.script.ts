@@ -13,6 +13,9 @@ interface props {}
 
 export function init(this: props) {
     msg.post('.', 'acquire_input_focus');
+
+    Manager.init_script();
+
     flow.start(() => Map(), {});
 }
 
@@ -30,4 +33,5 @@ export function final(this: props): void {
     flow.stop();
     EventBus.off_all_current_script();
     Scene.unload_all_resources('map');
+    Manager.final_script();
 }

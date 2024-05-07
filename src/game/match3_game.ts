@@ -19,7 +19,7 @@ import { MessageId, Messages, PosXYMessage } from '../modules/modules_const';
 
 import { Axis, is_valid_pos } from '../utils/math_utils';
 
-import { CellId, ElementId,
+import {
     GameStepEventBuffer,
     ActivationMessage,
     SwapedActivationMessage,
@@ -59,6 +59,85 @@ export interface Target {
     type: number,
     count: number,
     uids: number[]
+}
+
+export enum SubstrateId {
+    OutsideArc,
+    OutsideInsideAngle,
+    OutsideAngle,
+    LeftRightStrip,
+    LeftStripTopBottomInsideAngle,
+    LeftStripTopInsideAngle,
+    LeftStripBottomInsideAngle,
+    LeftStrip,
+    TopBottomInsideAngle,
+    InsideAngle,
+    Full
+}
+
+export enum CellId {
+    Base,
+    Grass,
+    Flowers,
+    Web,
+    Box,
+    Stone0,
+    Stone1,
+    Stone2,
+    Lock
+}
+
+export enum ElementId {
+    Dimonde,
+    Gold,
+    Topaz,
+    Ruby,
+    Emerald,
+    Cheese,
+    Cabbage,
+    Acorn,
+    RareMeat,
+    MediumMeat,
+    Chicken,
+    SunFlower,
+    Salad,
+    Hay,
+    VerticalRocket,
+    HorizontalRocket,
+    AxisRocket,
+    Helicopter,
+    Dynamite,
+    Diskosphere
+}
+
+export interface ActivatedBusters {
+    hammer_active: boolean,
+    spinning_active: boolean,
+    horizontal_rocket_active: boolean,
+    vertical_rocket_active: boolean
+}
+
+export interface Level {
+    field: { 
+        width: number,
+        height: number,
+        max_width: number,
+        max_height: number,
+        cell_size: number,
+        offset_border: number,
+
+        cells: (typeof NotActiveCell | CellId)[][] | CellId[][][],
+        elements: (typeof NullElement | typeof RandomElement | ElementId)[][]
+    }
+
+    additional_element: ElementId,
+    exclude_element: ElementId,
+
+    time: number,
+    steps: number,
+    targets: Target[],
+
+    busters: ActivatedBusters
 }
 
 export function Game() {

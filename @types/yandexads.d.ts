@@ -10,6 +10,10 @@ declare namespace yandexads {
     export let EVENT_REWARDED: number;
     export let EVENT_ERROR_LOAD: number;
     export let EVENT_DISMISSED: number;
+    export let EVENT_CLICKED: number;
+    export let EVENT_IMPRESSION: number;
+    export let EVENT_NOT_LOADED: number;
+    export let EVENT_DESTROYED: number;
 
     export let POS_NONE: number;
     export let POS_TOP_LEFT: number;

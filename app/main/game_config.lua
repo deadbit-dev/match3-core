@@ -1,5 +1,15 @@
+local ____lualib = require("lualib_bundle")
+local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
+local ____match3_game = require("game.match3_game")
+local CellId = ____match3_game.CellId
+local ElementId = ____match3_game.ElementId
+local SubstrateId = ____match3_game.SubstrateId
 ____exports.IS_DEBUG_MODE = true
+____exports.IS_HUAWEI = sys.get_sys_info().system_name == "Android" and __TS__StringIncludes(
+    sys.get_config("android.package"),
+    "huawei"
+)
 ____exports.ADS_CONFIG = {
     is_mediation = true,
     id_banners = {},
@@ -10,93 +20,11 @@ ____exports.ADS_CONFIG = {
     ads_delay = 30
 }
 ____exports.VK_SHARE_URL = ""
+____exports.OK_SHARE_TEXT = ""
 ____exports.ID_YANDEX_METRICA = ""
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.MAIN_BUNDLE_SCENES = {"game"}
-____exports.SubstrateId = SubstrateId or ({})
-____exports.SubstrateId.OutsideArc = 0
-____exports.SubstrateId[____exports.SubstrateId.OutsideArc] = "OutsideArc"
-____exports.SubstrateId.OutsideInsideAngle = 1
-____exports.SubstrateId[____exports.SubstrateId.OutsideInsideAngle] = "OutsideInsideAngle"
-____exports.SubstrateId.OutsideAngle = 2
-____exports.SubstrateId[____exports.SubstrateId.OutsideAngle] = "OutsideAngle"
-____exports.SubstrateId.LeftRightStrip = 3
-____exports.SubstrateId[____exports.SubstrateId.LeftRightStrip] = "LeftRightStrip"
-____exports.SubstrateId.LeftStripTopBottomInsideAngle = 4
-____exports.SubstrateId[____exports.SubstrateId.LeftStripTopBottomInsideAngle] = "LeftStripTopBottomInsideAngle"
-____exports.SubstrateId.LeftStripTopInsideAngle = 5
-____exports.SubstrateId[____exports.SubstrateId.LeftStripTopInsideAngle] = "LeftStripTopInsideAngle"
-____exports.SubstrateId.LeftStripBottomInsideAngle = 6
-____exports.SubstrateId[____exports.SubstrateId.LeftStripBottomInsideAngle] = "LeftStripBottomInsideAngle"
-____exports.SubstrateId.LeftStrip = 7
-____exports.SubstrateId[____exports.SubstrateId.LeftStrip] = "LeftStrip"
-____exports.SubstrateId.TopBottomInsideAngle = 8
-____exports.SubstrateId[____exports.SubstrateId.TopBottomInsideAngle] = "TopBottomInsideAngle"
-____exports.SubstrateId.InsideAngle = 9
-____exports.SubstrateId[____exports.SubstrateId.InsideAngle] = "InsideAngle"
-____exports.SubstrateId.Full = 10
-____exports.SubstrateId[____exports.SubstrateId.Full] = "Full"
-____exports.CellId = CellId or ({})
-____exports.CellId.Base = 0
-____exports.CellId[____exports.CellId.Base] = "Base"
-____exports.CellId.Grass = 1
-____exports.CellId[____exports.CellId.Grass] = "Grass"
-____exports.CellId.Flowers = 2
-____exports.CellId[____exports.CellId.Flowers] = "Flowers"
-____exports.CellId.Web = 3
-____exports.CellId[____exports.CellId.Web] = "Web"
-____exports.CellId.Box = 4
-____exports.CellId[____exports.CellId.Box] = "Box"
-____exports.CellId.Stone0 = 5
-____exports.CellId[____exports.CellId.Stone0] = "Stone0"
-____exports.CellId.Stone1 = 6
-____exports.CellId[____exports.CellId.Stone1] = "Stone1"
-____exports.CellId.Stone2 = 7
-____exports.CellId[____exports.CellId.Stone2] = "Stone2"
-____exports.CellId.Lock = 8
-____exports.CellId[____exports.CellId.Lock] = "Lock"
-____exports.ElementId = ElementId or ({})
-____exports.ElementId.Dimonde = 0
-____exports.ElementId[____exports.ElementId.Dimonde] = "Dimonde"
-____exports.ElementId.Gold = 1
-____exports.ElementId[____exports.ElementId.Gold] = "Gold"
-____exports.ElementId.Topaz = 2
-____exports.ElementId[____exports.ElementId.Topaz] = "Topaz"
-____exports.ElementId.Ruby = 3
-____exports.ElementId[____exports.ElementId.Ruby] = "Ruby"
-____exports.ElementId.Emerald = 4
-____exports.ElementId[____exports.ElementId.Emerald] = "Emerald"
-____exports.ElementId.Cheese = 5
-____exports.ElementId[____exports.ElementId.Cheese] = "Cheese"
-____exports.ElementId.Cabbage = 6
-____exports.ElementId[____exports.ElementId.Cabbage] = "Cabbage"
-____exports.ElementId.Acorn = 7
-____exports.ElementId[____exports.ElementId.Acorn] = "Acorn"
-____exports.ElementId.RareMeat = 8
-____exports.ElementId[____exports.ElementId.RareMeat] = "RareMeat"
-____exports.ElementId.MediumMeat = 9
-____exports.ElementId[____exports.ElementId.MediumMeat] = "MediumMeat"
-____exports.ElementId.Chicken = 10
-____exports.ElementId[____exports.ElementId.Chicken] = "Chicken"
-____exports.ElementId.SunFlower = 11
-____exports.ElementId[____exports.ElementId.SunFlower] = "SunFlower"
-____exports.ElementId.Salad = 12
-____exports.ElementId[____exports.ElementId.Salad] = "Salad"
-____exports.ElementId.Hay = 13
-____exports.ElementId[____exports.ElementId.Hay] = "Hay"
-____exports.ElementId.VerticalRocket = 14
-____exports.ElementId[____exports.ElementId.VerticalRocket] = "VerticalRocket"
-____exports.ElementId.HorizontalRocket = 15
-____exports.ElementId[____exports.ElementId.HorizontalRocket] = "HorizontalRocket"
-____exports.ElementId.AxisRocket = 16
-____exports.ElementId[____exports.ElementId.AxisRocket] = "AxisRocket"
-____exports.ElementId.Helicopter = 17
-____exports.ElementId[____exports.ElementId.Helicopter] = "Helicopter"
-____exports.ElementId.Dynamite = 18
-____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
-____exports.ElementId.Diskosphere = 19
-____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
 local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
 local ____go_EASING_INOUTBACK_3 = go.EASING_INOUTBACK
@@ -130,117 +58,117 @@ ____exports._GAME_CONFIG = {
     default_element_z_index = 0,
     default_top_layer_cell_z_index = 2,
     substrate_database = {
-        [____exports.SubstrateId.OutsideArc] = "outside_arc",
-        [____exports.SubstrateId.OutsideInsideAngle] = "outside_inside_angle",
-        [____exports.SubstrateId.OutsideAngle] = "outside_angle",
-        [____exports.SubstrateId.LeftRightStrip] = "left_right_strip",
-        [____exports.SubstrateId.LeftStripTopBottomInsideAngle] = "left_strip_top_inside_angle",
-        [____exports.SubstrateId.LeftStripTopInsideAngle] = "left_strip_top_inside_angle",
-        [____exports.SubstrateId.LeftStripBottomInsideAngle] = "left_strip_bottom_inside_angle",
-        [____exports.SubstrateId.LeftStrip] = "left_strip",
-        [____exports.SubstrateId.TopBottomInsideAngle] = "top_bottom_inside_angle",
-        [____exports.SubstrateId.InsideAngle] = "inside_angle",
-        [____exports.SubstrateId.Full] = "full"
+        [SubstrateId.OutsideArc] = "outside_arc",
+        [SubstrateId.OutsideInsideAngle] = "outside_inside_angle",
+        [SubstrateId.OutsideAngle] = "outside_angle",
+        [SubstrateId.LeftRightStrip] = "left_right_strip",
+        [SubstrateId.LeftStripTopBottomInsideAngle] = "left_strip_top_inside_angle",
+        [SubstrateId.LeftStripTopInsideAngle] = "left_strip_top_inside_angle",
+        [SubstrateId.LeftStripBottomInsideAngle] = "left_strip_bottom_inside_angle",
+        [SubstrateId.LeftStrip] = "left_strip",
+        [SubstrateId.TopBottomInsideAngle] = "top_bottom_inside_angle",
+        [SubstrateId.InsideAngle] = "inside_angle",
+        [SubstrateId.Full] = "full"
     },
     cell_view = {
-        [____exports.CellId.Base] = "cell_white",
-        [____exports.CellId.Grass] = "cell_grass",
-        [____exports.CellId.Flowers] = "cell_flowers",
-        [____exports.CellId.Web] = "cell_web",
-        [____exports.CellId.Box] = "cell_box",
-        [____exports.CellId.Stone0] = "cell_stone_0",
-        [____exports.CellId.Stone1] = "cell_stone_1",
-        [____exports.CellId.Stone2] = "cell_stone_2",
-        [____exports.CellId.Lock] = "cell_lock"
+        [CellId.Base] = "cell_white",
+        [CellId.Grass] = "cell_grass",
+        [CellId.Flowers] = "cell_flowers",
+        [CellId.Web] = "cell_web",
+        [CellId.Box] = "cell_box",
+        [CellId.Stone0] = "cell_stone_0",
+        [CellId.Stone1] = "cell_stone_1",
+        [CellId.Stone2] = "cell_stone_2",
+        [CellId.Lock] = "cell_lock"
     },
-    activation_cells = {____exports.CellId.Grass, ____exports.CellId.Flowers},
+    activation_cells = {CellId.Grass, CellId.Flowers},
     near_activated_cells = {
-        ____exports.CellId.Box,
-        ____exports.CellId.Stone0,
-        ____exports.CellId.Stone1,
-        ____exports.CellId.Stone2,
-        ____exports.CellId.Web
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web
     },
     disabled_cells = {
-        ____exports.CellId.Box,
-        ____exports.CellId.Stone0,
-        ____exports.CellId.Stone1,
-        ____exports.CellId.Stone2,
-        ____exports.CellId.Lock
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Lock
     },
     not_moved_cells = {
-        ____exports.CellId.Box,
-        ____exports.CellId.Stone0,
-        ____exports.CellId.Stone1,
-        ____exports.CellId.Stone2,
-        ____exports.CellId.Web
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web
     },
     top_layer_cells = {
-        ____exports.CellId.Box,
-        ____exports.CellId.Stone0,
-        ____exports.CellId.Stone1,
-        ____exports.CellId.Stone2,
-        ____exports.CellId.Web,
-        ____exports.CellId.Lock
+        CellId.Box,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2,
+        CellId.Web,
+        CellId.Lock
     },
     element_view = {
-        [____exports.ElementId.Dimonde] = "element_diamond",
-        [____exports.ElementId.Gold] = "element_gold",
-        [____exports.ElementId.Topaz] = "element_topaz",
-        [____exports.ElementId.Ruby] = "element_ruby",
-        [____exports.ElementId.Emerald] = "element_emerald",
-        [____exports.ElementId.VerticalRocket] = "vertical_rocket_buster",
-        [____exports.ElementId.HorizontalRocket] = "horizontal_rocket_buster",
-        [____exports.ElementId.AxisRocket] = "axis_rocket_buster",
-        [____exports.ElementId.Helicopter] = "helicopter_buster",
-        [____exports.ElementId.Dynamite] = "dynamite_buster",
-        [____exports.ElementId.Diskosphere] = "diskosphere_buster",
-        [____exports.ElementId.Cheese] = "element_cheese",
-        [____exports.ElementId.Cabbage] = "element_cabbage",
-        [____exports.ElementId.Acorn] = "element_acorn",
-        [____exports.ElementId.RareMeat] = "element_rare_meat",
-        [____exports.ElementId.MediumMeat] = "element_medium_meat",
-        [____exports.ElementId.Chicken] = "element_chicken",
-        [____exports.ElementId.SunFlower] = "element_sunflower",
-        [____exports.ElementId.Salad] = "element_salad",
-        [____exports.ElementId.Hay] = "element_hay"
+        [ElementId.Dimonde] = "element_diamond",
+        [ElementId.Gold] = "element_gold",
+        [ElementId.Topaz] = "element_topaz",
+        [ElementId.Ruby] = "element_ruby",
+        [ElementId.Emerald] = "element_emerald",
+        [ElementId.VerticalRocket] = "vertical_rocket_buster",
+        [ElementId.HorizontalRocket] = "horizontal_rocket_buster",
+        [ElementId.AxisRocket] = "axis_rocket_buster",
+        [ElementId.Helicopter] = "helicopter_buster",
+        [ElementId.Dynamite] = "dynamite_buster",
+        [ElementId.Diskosphere] = "diskosphere_buster",
+        [ElementId.Cheese] = "element_cheese",
+        [ElementId.Cabbage] = "element_cabbage",
+        [ElementId.Acorn] = "element_acorn",
+        [ElementId.RareMeat] = "element_rare_meat",
+        [ElementId.MediumMeat] = "element_medium_meat",
+        [ElementId.Chicken] = "element_chicken",
+        [ElementId.SunFlower] = "element_sunflower",
+        [ElementId.Salad] = "element_salad",
+        [ElementId.Hay] = "element_hay"
     },
     element_colors = {
-        [____exports.ElementId.Dimonde] = "#009de2",
-        [____exports.ElementId.Gold] = "#e94165",
-        [____exports.ElementId.Topaz] = "#f5d74d",
-        [____exports.ElementId.Ruby] = "#9a4ee5",
-        [____exports.ElementId.Emerald] = "#20af1b",
-        [____exports.ElementId.VerticalRocket] = "#ffffff",
-        [____exports.ElementId.HorizontalRocket] = "#ffffff",
-        [____exports.ElementId.AxisRocket] = "#ffffff",
-        [____exports.ElementId.Helicopter] = "#ffffff",
-        [____exports.ElementId.Dynamite] = "#ffffff",
-        [____exports.ElementId.Diskosphere] = "#ffffff",
-        [____exports.ElementId.Cheese] = "#ffffff",
-        [____exports.ElementId.Cabbage] = "#ffffff",
-        [____exports.ElementId.Acorn] = "#ffffff",
-        [____exports.ElementId.RareMeat] = "#ffffff",
-        [____exports.ElementId.MediumMeat] = "#ffffff",
-        [____exports.ElementId.Chicken] = "#ffffff",
-        [____exports.ElementId.SunFlower] = "#ffffff",
-        [____exports.ElementId.Salad] = "#ffffff",
-        [____exports.ElementId.Hay] = "#ffffff"
+        [ElementId.Dimonde] = "#009de2",
+        [ElementId.Gold] = "#e94165",
+        [ElementId.Topaz] = "#f5d74d",
+        [ElementId.Ruby] = "#9a4ee5",
+        [ElementId.Emerald] = "#20af1b",
+        [ElementId.VerticalRocket] = "#ffffff",
+        [ElementId.HorizontalRocket] = "#ffffff",
+        [ElementId.AxisRocket] = "#ffffff",
+        [ElementId.Helicopter] = "#ffffff",
+        [ElementId.Dynamite] = "#ffffff",
+        [ElementId.Diskosphere] = "#ffffff",
+        [ElementId.Cheese] = "#ffffff",
+        [ElementId.Cabbage] = "#ffffff",
+        [ElementId.Acorn] = "#ffffff",
+        [ElementId.RareMeat] = "#ffffff",
+        [ElementId.MediumMeat] = "#ffffff",
+        [ElementId.Chicken] = "#ffffff",
+        [ElementId.SunFlower] = "#ffffff",
+        [ElementId.Salad] = "#ffffff",
+        [ElementId.Hay] = "#ffffff"
     },
     base_elements = {
-        ____exports.ElementId.Dimonde,
-        ____exports.ElementId.Gold,
-        ____exports.ElementId.Topaz,
-        ____exports.ElementId.Ruby,
-        ____exports.ElementId.Emerald
+        ElementId.Dimonde,
+        ElementId.Gold,
+        ElementId.Topaz,
+        ElementId.Ruby,
+        ElementId.Emerald
     },
     buster_elements = {
-        ____exports.ElementId.VerticalRocket,
-        ____exports.ElementId.HorizontalRocket,
-        ____exports.ElementId.AxisRocket,
-        ____exports.ElementId.Dynamite,
-        ____exports.ElementId.Helicopter,
-        ____exports.ElementId.Diskosphere
+        ElementId.VerticalRocket,
+        ElementId.HorizontalRocket,
+        ElementId.AxisRocket,
+        ElementId.Dynamite,
+        ElementId.Helicopter,
+        ElementId.Diskosphere
     },
     red_levels = {
         4,

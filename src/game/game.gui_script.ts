@@ -7,14 +7,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { CellId, ElementId } from '../main/game_config';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { Target } from './match3_game';
+import { ActivatedBusters, CellId, ElementId, Level, Target } from './match3_game';
 
 interface props {
     druid: DruidClass;
-    level: any;
-    busters: any;
+    level: Level;
+    busters: ActivatedBusters;
 }
 
 export function init(this: props): void {
@@ -54,7 +53,7 @@ export function init(this: props): void {
         set_text('steps', this.level['steps']);
     }
 
-    const targets = this.level['targets'] as Target[];
+    const targets = this.level['targets'];
     if(targets[0] != undefined) {
         const node = gui.get_node('first_target');
         gui.set_enabled(node, true);

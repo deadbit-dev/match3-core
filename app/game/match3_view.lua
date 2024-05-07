@@ -6,7 +6,6 @@ local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local ____exports = {}
 local flow = require("ludobits.m.flow")
-local camera = require("utils.camera")
 local ____math_utils = require("utils.math_utils")
 local Axis = ____math_utils.Axis
 local Direction = ____math_utils.Direction
@@ -14,16 +13,16 @@ local is_valid_pos = ____math_utils.is_valid_pos
 local rotate_matrix_90 = ____math_utils.rotate_matrix_90
 local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
-local ____game_config = require("main.game_config")
-local CellId = ____game_config.CellId
-local ElementId = ____game_config.ElementId
-local SubstrateId = ____game_config.SubstrateId
 local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
 local ____utils = require("utils.utils")
 local hex2rgba = ____utils.hex2rgba
+local ____match3_game = require("game.match3_game")
+local SubstrateId = ____match3_game.SubstrateId
+local CellId = ____match3_game.CellId
+local ElementId = ____match3_game.ElementId
 local SubstrateMasks = {
     {{0, 1, 0}, {1, 0, 1}, {0, 0, 0}},
     {{0, 1, 0}, {1, 0, 0}, {0, 0, 1}},
@@ -255,25 +254,37 @@ function ____exports.View(animator)
                 reset_feild(state)
             end
         )
+        EventBus.on(
+            "MSG_ON_DOWN_ITEM",
+            function(data) return on_down(data.item) end
+        )
+        EventBus.on(
+            "MSG_ON_UP_ITEM",
+            function(data) return on_up(data.item) end
+        )
+        EventBus.on(
+            "MSG_ON_MOVE",
+            function(data) return on_move(data) end
+        )
     end
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
             repeat
-                local ____switch49 = event.key
+                local ____switch52 = event.key
                 local event_duration
-                local ____cond49 = ____switch49 == "ON_SWAP_ELEMENTS"
-                if ____cond49 then
+                local ____cond52 = ____switch52 == "ON_SWAP_ELEMENTS"
+                if ____cond52 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond49 = ____cond49 or ____switch49 == "ON_SPINNING_ACTIVATED"
-                if ____cond49 then
+                ____cond52 = ____cond52 or ____switch52 == "ON_SPINNING_ACTIVATED"
+                if ____cond52 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond49 = ____cond49 or ____switch49 == "ON_MOVED_ELEMENTS"
-                if ____cond49 then
+                ____cond52 = ____cond52 or ____switch52 == "ON_MOVED_ELEMENTS"
+                if ____cond52 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -296,24 +307,6 @@ function ____exports.View(animator)
         while true do
             local message_id, _message, sender = flow.until_any_message()
             gm.do_message(message_id, _message, sender)
-            repeat
-                local ____switch54 = message_id
-                local ____cond54 = ____switch54 == ID_MESSAGES.MSG_ON_DOWN_ITEM
-                if ____cond54 then
-                    on_down(_message.item)
-                    break
-                end
-                ____cond54 = ____cond54 or ____switch54 == ID_MESSAGES.MSG_ON_UP_ITEM
-                if ____cond54 then
-                    on_up(_message.item)
-                    break
-                end
-                ____cond54 = ____cond54 or ____switch54 == ID_MESSAGES.MSG_ON_MOVE
-                if ____cond54 then
-                    on_move(_message)
-                    break
-                end
-            until true
         end
     end
     function on_down(item)
@@ -326,7 +319,7 @@ function ____exports.View(animator)
         if down_item == nil then
             return
         end
-        local world_pos = camera:screen_to_world(pos.x, pos.y)
+        local world_pos = Camera.screen_to_world(pos.x, pos.y)
         local selected_element_world_pos = go.get_world_position(down_item._hash)
         local delta = world_pos - selected_element_world_pos
         if vmath.length(delta) < min_swipe_distance then
@@ -337,24 +330,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch60 = move_direction
-            local ____cond60 = ____switch60 == Direction.Up
-            if ____cond60 then
+            local ____switch62 = move_direction
+            local ____cond62 = ____switch62 == Direction.Up
+            if ____cond62 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond60 = ____cond60 or ____switch60 == Direction.Down
-            if ____cond60 then
+            ____cond62 = ____cond62 or ____switch62 == Direction.Down
+            if ____cond62 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond60 = ____cond60 or ____switch60 == Direction.Left
-            if ____cond60 then
+            ____cond62 = ____cond62 or ____switch62 == Direction.Left
+            if ____cond62 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond60 = ____cond60 or ____switch60 == Direction.Right
-            if ____cond60 then
+            ____cond62 = ____cond62 or ____switch62 == Direction.Right
+            if ____cond62 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1081,14 +1074,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch213 = dir
-            local ____cond213 = ____switch213 == Axis.Vertical
-            if ____cond213 then
+            local ____switch215 = dir
+            local ____cond215 = ____switch215 == Axis.Vertical
+            if ____cond215 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == Axis.Horizontal
-            if ____cond213 then
+            ____cond215 = ____cond215 or ____switch215 == Axis.Horizontal
+            if ____cond215 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1809,7 +1802,7 @@ function ____exports.View(animator)
     cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
     local function init()
         local scene_name = Scene.get_current_name()
-        Scene:load_resource(scene_name, "background")
+        Scene.load_resource(scene_name, "background")
         set_events()
         set_targets()
         EventBus.send("REQUEST_LOAD_FIELD")

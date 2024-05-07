@@ -4,6 +4,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 import { ADS_CONFIG, IS_HUAWEI, OK_SHARE_TEXT, VK_SHARE_URL } from "../main/game_config";
 import * as ads_android from "./ads_yandex";
 import { CbLeaderboardList, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./HtmlBridgeTypes";

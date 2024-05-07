@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as flow from 'ludobits.m.flow';
 import { hex2rgba } from '../utils/utils';
@@ -217,7 +218,7 @@ export function GoManager() {
             return on_move(x, y);
         }
         if (isDown) {
-            EventBus.trigger('MSG_ON_DOWN', { x, y }), false;
+            EventBus.trigger('MSG_ON_DOWN', { x, y }, false);
             return on_down(x, y);
         }
         else {
@@ -418,8 +419,9 @@ export function GoManager() {
 
     function do_message(message_id: hash, message: any, sender: hash) {
         if (message_id == ID_MESSAGES.MSG_TOUCH) {
-            if (message.pressed)
+            if (message.pressed) {
                 on_click(message.x, message.y, true);
+            }
             else if (message.released)
                 on_click(message.x, message.y, false);
             else

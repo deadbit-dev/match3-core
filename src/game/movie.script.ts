@@ -8,6 +8,8 @@
 interface props {}
 
 export function init(this: props) {
+    Manager.init_script();
+
     msg.post('.', 'acquire_input_focus');
     
     const anim_props = { blend_duration: 0, playback_rate: 1 };
@@ -16,4 +18,9 @@ export function init(this: props) {
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
     if (action_id == hash('touch')) Scene.load("map");
+}
+
+export function final(this: props): void {
+    Scene.unload_all_resources('movie');
+    Manager.final_script();
 }

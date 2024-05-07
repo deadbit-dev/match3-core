@@ -2,12 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { CellType, NotActiveCell, NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
-import { RandomElement, Target } from "../game/match3_game";
+import { NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
+import { CellId, ElementId, Level, RandomElement, SubstrateId, Target } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
+export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_config("android.package").includes('huawei');
 
 // параметры инициализации для ADS
 export const ADS_CONFIG = {
@@ -22,6 +23,7 @@ export const ADS_CONFIG = {
 
 // для вк
 export const VK_SHARE_URL = '';
+export const OK_SHARE_TEXT = '';
 // для андроида метрика
 export const ID_YANDEX_METRICA = "";
 // через сколько показать первое окно оценки
@@ -30,55 +32,6 @@ export const RATE_FIRST_SHOW = 24 * 60 * 60;
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
 export const MAIN_BUNDLE_SCENES = ['game'];
-
-export enum SubstrateId {
-    OutsideArc,
-    OutsideInsideAngle,
-    OutsideAngle,
-    LeftRightStrip,
-    LeftStripTopBottomInsideAngle,
-    LeftStripTopInsideAngle,
-    LeftStripBottomInsideAngle,
-    LeftStrip,
-    TopBottomInsideAngle,
-    InsideAngle,
-    Full
-}
-
-export enum CellId {
-    Base,
-    Grass,
-    Flowers,
-    Web,
-    Box,
-    Stone0,
-    Stone1,
-    Stone2,
-    Lock
-}
-
-export enum ElementId {
-    Dimonde,
-    Gold,
-    Topaz,
-    Ruby,
-    Emerald,
-    Cheese,
-    Cabbage,
-    Acorn,
-    RareMeat,
-    MediumMeat,
-    Chicken,
-    SunFlower,
-    Salad,
-    Hay,
-    VerticalRocket,
-    HorizontalRocket,
-    AxisRocket,
-    Helicopter,
-    Dynamite,
-    Diskosphere
-}
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
@@ -243,33 +196,7 @@ export const _GAME_CONFIG = {
 
     red_levels: [4, 11, 18, 25, 32, 39, 47],
 
-    levels: [] as {
-        field: { 
-            width: number,
-            height: number,
-            max_width: number,
-            max_height: number,
-            cell_size: number,
-            offset_border: number,
-
-            cells: (typeof NotActiveCell | CellId)[][] | CellId[][][],
-            elements: (typeof NullElement | typeof RandomElement | ElementId)[][]
-        }
-
-        additional_element: ElementId,
-        exclude_element: ElementId,
-
-        time: number,
-        steps: number,
-        targets: Target[],
-
-        busters: {
-            hammer_active: boolean,
-            spinning_active: boolean,
-            horizontal_rocket_active: boolean,
-            vertical_rocket_active: boolean
-        }
-    }[]
+    levels: [] as Level[]
 };
 
 
@@ -310,8 +237,8 @@ export type SpinningActivationMessage = { element_from: ItemInfo, element_to: It
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
-    LOAD_RESOURCE: NameMessage,
-    UNLOAD_RESOURCE: NameMessage,
+    SYS_LOAD_RESOURCE: NameMessage,
+    SYS_UNLOAD_RESOURCE: NameMessage,
 
     REQUEST_LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,

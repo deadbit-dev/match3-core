@@ -4,6 +4,7 @@ local ____map = require("map.map")
 local Map = ____map.Map
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
+    Manager.init_script()
     flow.start(
         function() return Map() end,
         {}
@@ -21,7 +22,8 @@ end
 function ____exports.final(self)
     flow.stop()
     EventBus.off_all_current_script()
-    Scene:unload_all_resources("map")
+    Scene.unload_all_resources("map")
+    Manager.final_script()
 end
 init = ____exports.init
 on_input = ____exports.on_input
