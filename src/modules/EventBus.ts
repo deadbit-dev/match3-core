@@ -144,7 +144,7 @@ function EventBusModule() {
         }
     }
 
-    function trigger<T extends MessageId>(id_message: T, message_data?: Messages[T], show_warning = true, is_copy_data = true) {
+    function trigger<T extends MessageId>(id_message: T, message_data?: Messages[T], show_warning = true, is_copy_data = false) {
         const key_message = ensure_hash(id_message);
         if (!listeners[key_message]) {
             if (show_warning)

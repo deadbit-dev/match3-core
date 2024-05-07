@@ -277,7 +277,7 @@ export function Game() {
             available_steps = steps;
         });
 
-        EventBus.send('ON_LOAD_FIELD', state);
+        EventBus.trigger('ON_LOAD_FIELD', state, true, true);
 
         if(level_config.time != undefined) {
             start_game_time = System.now();
@@ -354,12 +354,12 @@ export function Game() {
             const element = field.get_element(pos.x, pos.y);
             if(element != NullElement) {
                 if(selected_element != null && selected_element.uid == element.uid) {
-                    EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                    EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
                     selected_element = null;
                 } else {
                     let is_swap = false;
                     if(selected_element != null) {
-                        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+                        EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
                         const neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, [
                             [0, 1, 0],
                             [1, 0, 1],
@@ -377,7 +377,7 @@ export function Game() {
                     if(selected_element != null && is_swap) EventBus.send('SWAP_ELEMENTS', {from_x: selected_element.x, from_y: selected_element.y, to_x: pos.x, to_y: pos.y});
                     else {
                         selected_element = {x: pos.x, y: pos.y, uid: element.uid};
-                        EventBus.send('ON_ELEMENT_SELECTED', Object.assign({}, selected_element));
+                        EventBus.trigger('ON_ELEMENT_SELECTED', selected_element, true, true);
                     }
                 }
             }
@@ -495,7 +495,7 @@ export function Game() {
                 reset_helper();
 
                 previous_helper_data = Object.assign({}, helper_data);
-                EventBus.send('ON_SET_STEP_HELPER', Object.assign({}, helper_data));
+                EventBus.trigger('ON_SET_STEP_HELPER', helper_data, true, true);
 
                 set_helper();
             }
@@ -518,13 +518,15 @@ export function Game() {
         for(const coroutine of coroutines) {
             flow.stop(coroutine);
         }
+
+        coroutines = [];
     }
 
     function reset_helper() {
         if(previous_helper_data == null) return;
         Log.log("Перезапуск подсказки");
         
-        EventBus.send('ON_RESET_STEP_HELPER', Object.assign({}, previous_helper_data));
+        EventBus.trigger('ON_RESET_STEP_HELPER', previous_helper_data, true, true);
         previous_helper_data = null;
     }
 
@@ -598,7 +600,7 @@ export function Game() {
             Log.log("Найдены " + steps.length + " ходов");
 
             on_end(steps);
-        });
+        }, {parallel: true});
 
         coroutines.push(coroutine);
     }
@@ -711,7 +713,7 @@ export function Game() {
             activated_elements.push(element.uid);
         }
 
-        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
 
         let activated = false;
@@ -1197,7 +1199,7 @@ export function Game() {
     function try_hammer_activation(x: number, y: number) {
         if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
 
-        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;       
 
         // FIXME: for buster under wall
@@ -1223,7 +1225,7 @@ export function Game() {
     function try_horizontal_rocket_activation(x: number, y: number) {
         if(!busters.horizontal_rocket_active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
 
-        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
         
         const event_data = {} as RocketActivationMessage;
@@ -1253,7 +1255,7 @@ export function Game() {
     function try_vertical_rocket_activation(x: number, y: number) {
         if(!busters.vertical_rocket_active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
     
-        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
         
         const event_data = {} as RocketActivationMessage;
@@ -1294,7 +1296,7 @@ export function Game() {
         
         if(element_from == NullElement) return false;
 
-        EventBus.send('ON_ELEMENT_UNSELECTED', Object.assign({}, selected_element));
+        if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
         
         if(!field.try_move(from_x, from_y, to_x, to_y)) {

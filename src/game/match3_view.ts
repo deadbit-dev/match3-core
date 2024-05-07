@@ -396,7 +396,7 @@ export function View(animator: FluxGroup) {
         if (down_item == null) return;
 
         const world_pos = Camera.screen_to_world(pos.x, pos.y);
-        const selected_element_world_pos = go.get_world_position(down_item._hash);
+        const selected_element_world_pos = go.get_position(down_item._hash);
         const delta = (world_pos - selected_element_world_pos) as vmath.vector3;
 
         if (vmath.length(delta) < min_swipe_distance) return;
@@ -430,7 +430,7 @@ export function View(animator: FluxGroup) {
     function on_up(item: IGameItem) {
         if (down_item == null) return;
 
-        const item_world_pos = go.get_world_position(item._hash);
+        const item_world_pos = go.get_position(item._hash);
         const element_pos = get_field_pos(item_world_pos);
 
         EventBus.send('CLICK_ACTIVATION', {

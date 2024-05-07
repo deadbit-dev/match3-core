@@ -2,8 +2,8 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
-local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayPush = ____lualib.__TS__ArrayPush
@@ -174,7 +174,7 @@ function ____exports.Game()
                 available_steps = steps
             end
         )
-        EventBus.send("ON_LOAD_FIELD", state)
+        EventBus.trigger("ON_LOAD_FIELD", state, true, true)
         if level_config.time ~= nil then
             start_game_time = System.now()
             timer.delay(1, true, on_game_timer_tick)
@@ -224,18 +224,12 @@ function ____exports.Game()
             local element = field.get_element(pos.x, pos.y)
             if element ~= NullElement then
                 if selected_element ~= nil and selected_element.uid == element.uid then
-                    EventBus.send(
-                        "ON_ELEMENT_UNSELECTED",
-                        __TS__ObjectAssign({}, selected_element)
-                    )
+                    EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
                     selected_element = nil
                 else
                     local is_swap = false
                     if selected_element ~= nil then
-                        EventBus.send(
-                            "ON_ELEMENT_UNSELECTED",
-                            __TS__ObjectAssign({}, selected_element)
-                        )
+                        EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
                         local neighbors = field.get_neighbor_elements(selected_element.x, selected_element.y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
                         for ____, neighbor in ipairs(neighbors) do
                             if neighbor.uid == element.uid then
@@ -248,10 +242,7 @@ function ____exports.Game()
                         EventBus.send("SWAP_ELEMENTS", {from_x = selected_element.x, from_y = selected_element.y, to_x = pos.x, to_y = pos.y})
                     else
                         selected_element = {x = pos.x, y = pos.y, uid = element.uid}
-                        EventBus.send(
-                            "ON_ELEMENT_SELECTED",
-                            __TS__ObjectAssign({}, selected_element)
-                        )
+                        EventBus.trigger("ON_ELEMENT_SELECTED", selected_element, true, true)
                     end
                 end
             end
@@ -371,10 +362,7 @@ function ____exports.Game()
                     Log.log("Запуск подсказки")
                     reset_helper()
                     previous_helper_data = __TS__ObjectAssign({}, helper_data)
-                    EventBus.send(
-                        "ON_SET_STEP_HELPER",
-                        __TS__ObjectAssign({}, helper_data)
-                    )
+                    EventBus.trigger("ON_SET_STEP_HELPER", helper_data, true, true)
                     set_helper()
                 end
             end
@@ -394,16 +382,14 @@ function ____exports.Game()
         for ____, ____coroutine in ipairs(coroutines) do
             flow.stop(____coroutine)
         end
+        coroutines = {}
     end
     function reset_helper()
         if previous_helper_data == nil then
             return
         end
         Log.log("Перезапуск подсказки")
-        EventBus.send(
-            "ON_RESET_STEP_HELPER",
-            __TS__ObjectAssign({}, previous_helper_data)
-        )
+        EventBus.trigger("ON_RESET_STEP_HELPER", previous_helper_data, true, true)
         previous_helper_data = nil
     end
     function set_combination_for_helper(steps)
@@ -425,38 +411,41 @@ function ____exports.Game()
         end
     end
     function search_available_steps(count, on_end)
-        local ____coroutine = flow.start(function()
-            Log.log("Поиск возможных ходов")
-            local steps = {}
-            do
-                local y = 0
-                while y < field_height do
-                    do
-                        local x = 0
-                        while x < field_width do
-                            flow.frames(1)
-                            if is_valid_pos(x + 1, y, field_width, field_height) and field.is_can_move_base(x, y, x + 1, y) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
+        local ____coroutine = flow.start(
+            function()
+                Log.log("Поиск возможных ходов")
+                local steps = {}
+                do
+                    local y = 0
+                    while y < field_height do
+                        do
+                            local x = 0
+                            while x < field_width do
+                                flow.frames(1)
+                                if is_valid_pos(x + 1, y, field_width, field_height) and field.is_can_move_base(x, y, x + 1, y) then
+                                    steps[#steps + 1] = {from_x = x, from_y = y, to_x = x + 1, to_y = y}
+                                end
+                                if #steps > count then
+                                    return on_end(steps)
+                                end
+                                flow.frames(1)
+                                if is_valid_pos(x, y + 1, field_width, field_height) and field.is_can_move_base(x, y, x, y + 1) then
+                                    steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
+                                end
+                                if #steps > count then
+                                    return on_end(steps)
+                                end
+                                x = x + 1
                             end
-                            if #steps > count then
-                                return on_end(steps)
-                            end
-                            flow.frames(1)
-                            if is_valid_pos(x, y + 1, field_width, field_height) and field.is_can_move_base(x, y, x, y + 1) then
-                                steps[#steps + 1] = {from_x = x, from_y = y, to_x = x, to_y = y + 1}
-                            end
-                            if #steps > count then
-                                return on_end(steps)
-                            end
-                            x = x + 1
                         end
+                        y = y + 1
                     end
-                    y = y + 1
                 end
-            end
-            Log.log(("Найдены " .. tostring(#steps)) .. " ходов")
-            on_end(steps)
-        end)
+                Log.log(("Найдены " .. tostring(#steps)) .. " ходов")
+                on_end(steps)
+            end,
+            {parallel = true}
+        )
         coroutines[#coroutines + 1] = ____coroutine
     end
     function get_step_combination(step)
@@ -534,10 +523,9 @@ function ____exports.Game()
             end
             activated_elements[#activated_elements + 1] = element.uid
         end
-        EventBus.send(
-            "ON_ELEMENT_UNSELECTED",
-            __TS__ObjectAssign({}, selected_element)
-        )
+        if selected_element ~= nil then
+            EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
+        end
         selected_element = nil
         local activated = false
         if try_activate_rocket(x, y) then
@@ -1077,10 +1065,9 @@ function ____exports.Game()
         if not busters.hammer_active or GameStorage.get("hammer_counts") <= 0 then
             return false
         end
-        EventBus.send(
-            "ON_ELEMENT_UNSELECTED",
-            __TS__ObjectAssign({}, selected_element)
-        )
+        if selected_element ~= nil then
+            EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
+        end
         selected_element = nil
         if is_buster(x, y) then
             try_activate_buster_element(x, y)
@@ -1107,10 +1094,9 @@ function ____exports.Game()
         if not busters.horizontal_rocket_active or GameStorage.get("horizontal_rocket_counts") <= 0 then
             return false
         end
-        EventBus.send(
-            "ON_ELEMENT_UNSELECTED",
-            __TS__ObjectAssign({}, selected_element)
-        )
+        if selected_element ~= nil then
+            EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
+        end
         selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
@@ -1145,10 +1131,9 @@ function ____exports.Game()
         if not busters.vertical_rocket_active or GameStorage.get("vertical_rocket_counts") <= 0 then
             return false
         end
-        EventBus.send(
-            "ON_ELEMENT_UNSELECTED",
-            __TS__ObjectAssign({}, selected_element)
-        )
+        if selected_element ~= nil then
+            EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
+        end
         selected_element = nil
         local event_data = {}
         write_game_step_event("ROCKET_ACTIVATED", event_data)
@@ -1193,10 +1178,9 @@ function ____exports.Game()
         if element_from == NullElement then
             return false
         end
-        EventBus.send(
-            "ON_ELEMENT_UNSELECTED",
-            __TS__ObjectAssign({}, selected_element)
-        )
+        if selected_element ~= nil then
+            EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
+        end
         selected_element = nil
         if not field.try_move(from_x, from_y, to_x, to_y) then
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
@@ -1311,29 +1295,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch294 = combination.type
-            local ____cond294 = ____switch294 == CombinationType.Comb4
-            if ____cond294 then
+            local ____switch299 = combination.type
+            local ____cond299 = ____switch299 == CombinationType.Comb4
+            if ____cond299 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond294 = ____cond294 or ____switch294 == CombinationType.Comb5
-            if ____cond294 then
+            ____cond299 = ____cond299 or ____switch299 == CombinationType.Comb5
+            if ____cond299 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond294 = ____cond294 or ____switch294 == CombinationType.Comb2x2
-            if ____cond294 then
+            ____cond299 = ____cond299 or ____switch299 == CombinationType.Comb2x2
+            if ____cond299 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond294 = ____cond294 or (____switch294 == CombinationType.Comb3x3a or ____switch294 == CombinationType.Comb3x3b)
-            if ____cond294 then
+            ____cond299 = ____cond299 or (____switch299 == CombinationType.Comb3x3a or ____switch299 == CombinationType.Comb3x3b)
+            if ____cond299 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond294 = ____cond294 or (____switch294 == CombinationType.Comb3x4 or ____switch294 == CombinationType.Comb3x5)
-            if ____cond294 then
+            ____cond299 = ____cond299 or (____switch299 == CombinationType.Comb3x4 or ____switch299 == CombinationType.Comb3x5)
+            if ____cond299 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -1701,15 +1685,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch375 = data
-                                local ____cond375 = ____switch375 == "-"
-                                if ____cond375 then
+                                local ____switch380 = data
+                                local ____cond380 = ____switch380 == "-"
+                                if ____cond380 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond375 = ____cond375 or ____switch375 == ""
-                                if ____cond375 then
+                                ____cond380 = ____cond380 or ____switch380 == ""
+                                if ____cond380 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

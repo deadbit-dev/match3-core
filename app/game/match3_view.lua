@@ -320,7 +320,7 @@ function ____exports.View(animator)
             return
         end
         local world_pos = Camera.screen_to_world(pos.x, pos.y)
-        local selected_element_world_pos = go.get_world_position(down_item._hash)
+        local selected_element_world_pos = go.get_position(down_item._hash)
         local delta = world_pos - selected_element_world_pos
         if vmath.length(delta) < min_swipe_distance then
             return
@@ -364,7 +364,7 @@ function ____exports.View(animator)
         if down_item == nil then
             return
         end
-        local item_world_pos = go.get_world_position(item._hash)
+        local item_world_pos = go.get_position(item._hash)
         local element_pos = get_field_pos(item_world_pos)
         EventBus.send("CLICK_ACTIVATION", {x = element_pos.x, y = element_pos.y})
         down_item = nil

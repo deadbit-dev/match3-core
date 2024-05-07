@@ -419,9 +419,8 @@ export function GoManager() {
 
     function do_message(message_id: hash, message: any, sender: hash) {
         if (message_id == ID_MESSAGES.MSG_TOUCH) {
-            if (message.pressed) {
+            if (message.pressed)
                 on_click(message.x, message.y, true);
-            }
             else if (message.released)
                 on_click(message.x, message.y, false);
             else
