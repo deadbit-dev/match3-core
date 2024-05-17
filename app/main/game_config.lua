@@ -37,6 +37,7 @@ else
 end
 ____exports._GAME_CONFIG = {
     min_swipe_distance = 32,
+    animal_offset = true,
     swap_element_easing = ____go_EASING_LINEAR_1,
     swap_element_time = 0.25,
     squash_element_easing = ____go_EASING_INCUBIC_2,
@@ -170,7 +171,7 @@ ____exports._GAME_CONFIG = {
         ElementId.Helicopter,
         ElementId.Diskosphere
     },
-    red_levels = {
+    animal_levels = {
         4,
         11,
         18,
@@ -179,14 +180,29 @@ ____exports._GAME_CONFIG = {
         39,
         47
     },
+    level_to_animal = {
+        [4] = "cock",
+        [11] = "rats",
+        [18] = "goose",
+        [25] = "kozel",
+        [32] = "kaban",
+        [39] = "cock",
+        [47] = "bull"
+    },
     levels = {}
 }
 ____exports._STORAGE_CONFIG = {
     current_level = 0,
+    completed_levels = {},
+    move_showed = false,
+    map_last_pos_y = 0,
+    hammer_opened = false,
+    spinning_opened = false,
+    horizontal_rocket_opened = false,
+    vertical_rocket_opened = false,
     hammer_counts = 3,
     spinning_counts = 3,
     horizontal_rocket_counts = 3,
-    vertical_rocket_counts = 3,
-    completed_levels = {}
+    vertical_rocket_counts = 3
 }
 return ____exports

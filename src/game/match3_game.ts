@@ -45,21 +45,14 @@ import {
     CombinationInfo,
     ProcessMode,
     ItemInfo,
-    GameState,
+    CoreState,
     CellType,
     MovedInfo,
     StepInfo
 } from './match3_core';
 
-export const RandomElement = -2;
 
-// REFACTORING
-export interface Target {
-    is_cell: boolean,
-    type: number,
-    count: number,
-    uids: number[]
-}
+export const RandomElement = -2;
 
 export enum SubstrateId {
     OutsideArc,
@@ -110,11 +103,24 @@ export enum ElementId {
     Diskosphere
 }
 
-export interface ActivatedBusters {
-    hammer_active: boolean,
-    spinning_active: boolean,
-    horizontal_rocket_active: boolean,
-    vertical_rocket_active: boolean
+// REFACTORING
+export interface Target {
+    is_cell: boolean,
+    type: number,
+    count: number,
+    uids: number[]
+}
+
+export interface Buster {
+    counts: number,
+    active: boolean
+}
+
+export interface Busters {
+    hammer: Buster,
+    spinning: Buster,
+    horizontal_rocket: Buster,
+    vertical_rocket: Buster
 }
 
 export interface Level {
@@ -137,7 +143,15 @@ export interface Level {
     steps: number,
     targets: Target[],
 
-    busters: ActivatedBusters
+    busters: Busters
+}
+
+// TODO: maybe add busters to the GameState
+export interface GameState extends CoreState {
+    randomseed: number,
+    targets: Target[],
+    steps: number,
+    remaining_time: number
 }
 
 export function Game() {
@@ -153,11 +167,9 @@ export function Game() {
 
     const field = Field(field_width, field_height, GAME_CONFIG.complex_move);
 
+    let start_game_time = 0;
     let game_item_counter = 0;
-    let previous_states: GameState[] = [];
-    
-    let previous_randomseeds: number[] = [];
-    let randomseed: number;
+    let states: GameState[] = [];
     
     let activated_elements: number[] = [];
     let game_step_events: GameStepEventBuffer = [];
@@ -177,9 +189,6 @@ export function Game() {
     let is_step = false;
     let is_block_input = false;
 
-    let step_counter = 0;
-    let start_game_time = 0;
-    
 
     function init() {
         field.init();
@@ -196,17 +205,28 @@ export function Game() {
         set_element_chances();
         set_busters();
         set_events();
-        set_random();
-
-        set_targets_uids();
     }
     
     //#endregion MAIN
     //#region SETUP
-
-    function set_targets_uids() {
+    
+    function set_targets() {
+        const last_state = get_last_state();
+        last_state.targets = [];
         for(const target of level_config.targets)
-            target.uids = [];
+            last_state.targets.push(Object.assign({}, target));
+    }
+
+    function set_timer() {
+        if(level_config.time == undefined) return;
+        
+        start_game_time = System.now();
+        timer.delay(1, true, on_game_timer_tick);
+    }
+
+    function set_steps(steps = 0) {
+        if(level_config.steps == undefined) return;
+        get_last_state().steps = steps;
     }
 
     function set_element_types() {
@@ -233,17 +253,26 @@ export function Game() {
     }
     
     function set_busters() {
+        // DEBUG
         GameStorage.set('spinning_counts', 5);
-        busters.spinning_active = (GameStorage.get('spinning_counts') <= 0);
-        
         GameStorage.set('hammer_counts', 5);
-        busters.hammer_active = (GameStorage.get('hammer_counts') <= 0);
-        
         GameStorage.set('horizontal_rocket_counts', 5);
-        busters.horizontal_rocket_active = (GameStorage.get('horizontal_rocket_counts') <= 0);
-
         GameStorage.set('vertical_rocket_counts', 5);
-        busters.vertical_rocket_active = (GameStorage.get('vertical_rocket_counts') <= 0);
+
+        if(!GameStorage.get('spinning_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('spinning_opened', true);
+        if(!GameStorage.get('hammer_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('hammer_opened', true);
+        if(!GameStorage.get('horizontal_rocket_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('horizontal_rocket_opened', true);
+        if(!GameStorage.get('vertical_rocket_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('vertical_rocket_opened', true);
+
+        if(GameStorage.get('spinning_counts') <= 0) level_config.busters.spinning.counts;
+        if(GameStorage.get('hammer_counts') <= 0) level_config.busters.hammer.counts;
+        if(GameStorage.get('horizontal_rocket_counts') <= 0) level_config.busters.horizontal_rocket.counts;
+        if(GameStorage.get('vertical_rocket_counts') <= 0) level_config.busters.vertical_rocket.counts;
+        
+        busters.spinning.active = (GameStorage.get('spinning_counts') <= 0);
+        busters.hammer.active = (GameStorage.get('hammer_counts') <= 0);
+        busters.horizontal_rocket.active = (GameStorage.get('horizontal_rocket_counts') <= 0);
+        busters.vertical_rocket.active = (GameStorage.get('vertical_rocket_counts') <= 0);
 
         EventBus.send('UPDATED_BUTTONS');
     }
@@ -270,19 +299,19 @@ export function Game() {
         //     EventBus.send('UPDATED_STATE', field.save_state());
         // });
         
-        const state = field.save_state();
-        previous_states.push(state);
+        const state = field.save_state() as GameState;
+        states.push(state);
 
         search_available_steps(5, (steps) => {
             available_steps = steps;
         });
+        
+        set_steps();
+        set_timer();
+        set_targets();
+        set_random();
 
         EventBus.trigger('ON_LOAD_FIELD', state, true, true);
-
-        if(level_config.time != undefined) {
-            start_game_time = System.now();
-            timer.delay(1, true, on_game_timer_tick);
-        }
     }
 
     function lock_cells_except(cells: {x: number, y: number}[]) {
@@ -410,8 +439,10 @@ export function Game() {
     function on_game_timer_tick() {
         const dt = System.now() - start_game_time;
         const remaining_time = level_config.time - dt;
-        if(level_config.time >= dt) EventBus.send('GAME_TIMER', remaining_time);
-        else EventBus.send('ON_GAME_OVER');
+        if(level_config.time >= dt) {
+            get_last_state().remaining_time = remaining_time;
+            EventBus.send('GAME_TIMER', remaining_time);
+        } else EventBus.send('ON_GAME_OVER');
     }
 
     function load_cell(x: number, y: number) {
@@ -1148,12 +1179,12 @@ export function Game() {
     }
     
     function try_spinning_activation() {
-        if(!busters.spinning_active || GameStorage.get('spinning_counts') <= 0) return false;
+        if(!busters.spinning.active || GameStorage.get('spinning_counts') <= 0) return false;
         
         shuffle_field();
         
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
-        busters.spinning_active = false;
+        busters.spinning.active = false;
 
         EventBus.send('UPDATED_BUTTONS');
 
@@ -1197,7 +1228,7 @@ export function Game() {
     }
     
     function try_hammer_activation(x: number, y: number) {
-        if(!busters.hammer_active || GameStorage.get('hammer_counts') <= 0) return false;
+        if(!busters.hammer.active || GameStorage.get('hammer_counts') <= 0) return false;
 
         if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;       
@@ -1215,7 +1246,7 @@ export function Game() {
         }
 
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
-        busters.hammer_active = false;
+        busters.hammer.active = false;
 
         EventBus.send('UPDATED_BUTTONS');
 
@@ -1223,7 +1254,7 @@ export function Game() {
     }
 
     function try_horizontal_rocket_activation(x: number, y: number) {
-        if(!busters.horizontal_rocket_active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
+        if(!busters.horizontal_rocket.active || GameStorage.get('horizontal_rocket_counts') <= 0) return false;
 
         if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
@@ -1245,7 +1276,7 @@ export function Game() {
         }
 
         GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') - 1);
-        busters.horizontal_rocket_active = false;
+        busters.horizontal_rocket.active = false;
 
         EventBus.send('UPDATED_BUTTONS');
 
@@ -1253,7 +1284,7 @@ export function Game() {
     }
     
     function try_vertical_rocket_activation(x: number, y: number) {
-        if(!busters.vertical_rocket_active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
+        if(!busters.vertical_rocket.active || GameStorage.get('vertical_rocket_counts') <= 0) return false;
     
         if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
@@ -1275,7 +1306,7 @@ export function Game() {
         }
 
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') - 1);
-        busters.vertical_rocket_active = false;
+        busters.vertical_rocket.active = false;
 
         EventBus.send('UPDATED_BUTTONS');
 
@@ -1321,9 +1352,9 @@ export function Game() {
     }
 
     function set_random(seed?: number) {
-        randomseed = seed != undefined ? seed : os.time();
-        previous_randomseeds.push(randomseed);
+        const randomseed = seed != undefined ? seed : os.time();
         math.randomseed(randomseed);
+        get_last_state().randomseed = randomseed;
     }
 
     // function simulate_game_step(step: StepInfo) {
@@ -1373,7 +1404,10 @@ export function Game() {
             field.process_state(ProcessMode.MoveElements);
         }
 
-        previous_states.push(field.save_state());
+        const state = field.save_state(); 
+        const last_state = get_last_state();
+        last_state.cells = state.cells;
+        last_state.elements = state.elements;
 
         is_block_input = true;
         search_available_steps(5, (steps) => {
@@ -1387,18 +1421,22 @@ export function Game() {
             shuffle_field();
         });
 
-        if(is_step) step_counter++;
+        if(level_config.steps != undefined && is_step) last_state.steps++;
         is_step = false;
     
-        if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', level_config.steps - step_counter);
+        if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', level_config.steps - last_state.steps);
 
         send_game_step();
+
+        states.push({} as GameState);
+    
+        set_steps(last_state.steps);
         set_random();
     }
     
     function revert_step(): boolean {
-        const current_state = previous_states.pop();
-        let previous_state = previous_states.pop();
+        const current_state = states.pop();
+        let previous_state = states.pop();
         if(current_state == undefined || previous_state == undefined) return false;
 
         for (let y = 0; y < field_height; y++) {
@@ -1413,13 +1451,12 @@ export function Game() {
             }
         }
 
-        previous_state = field.save_state();
-        previous_states.push(previous_state);
+        const state = field.save_state(); 
+        previous_state.cells = state.cells;
+        previous_state.elements = state.elements;
+        states.push(previous_state);
 
-
-        previous_randomseeds.pop();
-        const previous_seed = previous_randomseeds.pop();
-        set_random(previous_seed);
+        set_random(previous_state.randomseed);
 
         search_available_steps(5, (steps) => {
             available_steps = steps;
@@ -1439,8 +1476,9 @@ export function Game() {
     }
 
     function is_have_steps() {
+        print(get_last_state(2).steps, level_config.steps);
         if(level_config.steps != undefined)
-            return step_counter <= level_config.steps;
+            return get_last_state(2).steps <= level_config.steps;
         return true;
     }
 
@@ -1588,7 +1626,12 @@ export function Game() {
     }
 
     //#endregion CALLBACKS
-    //#region HELPERS    
+    //#region HELPERS
+    
+    function get_last_state(offset = 1) {
+        assert(states.length - offset >= 0);
+        return states[states.length - offset];
+    }
 
     function is_buster(x: number, y: number) {
         return field.try_click(x, y);
@@ -1696,6 +1739,12 @@ export function load_config() {
             count: number,
             type: { cell: CellId | undefined, element: ElementId | undefined }
         }[],
+        busters: {
+            hammer: number,
+            spinning: number,
+            horizontal_rocket: number,
+            vertical_rocket: number
+        },
         coins: number,
         additional_element: ElementId,
         exclude_element: ElementId,
@@ -1703,7 +1752,7 @@ export function load_config() {
     }[];
     
     for(const level_data of levels) {
-        const level = {
+        const level: Level = {
             field: { 
                 width: 10,
                 height: 10,
@@ -1721,18 +1770,25 @@ export function load_config() {
 
             time: level_data.time,
             steps: level_data.steps,
-            targets: [] as {
-                is_cell: boolean,
-                count: number,
-                type: ElementId,
-                uids: number[]
-            }[],
+            targets: [] as Target[],
 
             busters: {
-                hammer_active: false,
-                spinning_active: false,
-                horizontal_rocket_active: false,
-                vertical_rocket_active: false
+                hammer: {
+                    counts: level_data.busters.hammer,
+                    active: false
+                },
+                spinning: {
+                    counts: level_data.busters.spinning,
+                    active: false
+                },
+                horizontal_rocket: {
+                    counts: level_data.busters.horizontal_rocket,
+                    active: false
+                },
+                vertical_rocket: {
+                    counts: level_data. busters.vertical_rocket,
+                    active: false
+                }
             }
         };
 

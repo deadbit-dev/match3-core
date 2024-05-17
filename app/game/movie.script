@@ -1,4 +1,9 @@
 local ____exports = {}
+local on_end
+function on_end()
+    GameStorage.set("move_showed", true)
+    Scene.load("map")
+end
 function ____exports.init(self)
     Manager.init_script()
     msg.post(".", "acquire_input_focus")
@@ -8,12 +13,17 @@ function ____exports.init(self)
         "start",
         go.PLAYBACK_ONCE_FORWARD,
         anim_props,
-        function() return Scene.load("map") end
+        function(____self, message_id, message, sender)
+            if message_id ~= hash("spine_animation_done") then
+                return
+            end
+            on_end()
+        end
     )
 end
 function ____exports.on_input(self, action_id, action)
-    if action_id == hash("touch") then
-        Scene.load("map")
+    if action_id == hash("touch") and action.released then
+        on_end()
     end
 end
 function ____exports.final(self)

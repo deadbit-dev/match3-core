@@ -3,7 +3,7 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/ui/hammer.png"
+  image: "/assets/ui/hammer_icon.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -84,6 +84,10 @@ images {
 }
 images {
   image: "/assets/ui/star_1.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/ui/lock.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

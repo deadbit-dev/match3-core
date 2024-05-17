@@ -3,7 +3,7 @@ scale_along_z: 0
 embedded_instances {
   id: "kozel"
   data: "components {\n"
-  "  id: \"animal\"\n"
+  "  id: \"logic\"\n"
   "  component: \"/game/animals/animal.script\"\n"
   "  position {\n"
   "    x: 0.0\n"
@@ -23,7 +23,7 @@ embedded_instances {
   "  id: \"spinemodel\"\n"
   "  type: \"spinemodel\"\n"
   "  data: \"spine_scene: \\\"/assets/kozel/kozel.spinescene\\\"\\n"
-  "default_animation: \\\"\\\"\\n"
+  "default_animation: \\\"idle\\\"\\n"
   "skin: \\\"\\\"\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "material: \\\"/defold-spine/assets/spine.material\\\"\\n"
@@ -43,8 +43,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 0.0
-    y: 0.0
+    x: 400.0
+    y: -920.0
     z: 0.0
   }
   rotation {
@@ -54,8 +54,8 @@ embedded_instances {
     w: 1.0
   }
   scale3 {
-    x: 0.25
-    y: 0.25
+    x: 0.3
+    y: 0.3
     z: 1.0
   }
 }

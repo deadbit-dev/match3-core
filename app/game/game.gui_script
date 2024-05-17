@@ -1,3 +1,5 @@
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local ____exports = {}
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -168,10 +170,6 @@ function ____exports.init(self)
         )
         set_text("third_target_counts", target.count)
     end
-    set_text(
-        "current_level",
-        GameStorage.get("current_level") + 1
-    )
     self.druid:new_button(
         "back_button",
         function()
@@ -186,123 +184,167 @@ function ____exports.init(self)
         "revert_step_button",
         function() return EventBus.send("TRY_REVERT_STEP") end
     )
-    self.druid:new_button(
-        "spinning_button",
-        function()
-            if GameStorage.get("spinning_counts") > 0 then
-                self.busters.spinning_active = not self.busters.spinning_active
+    if GameStorage.get("spinning_opened") then
+        self.druid:new_button(
+            "spinning/button",
+            function()
+                if GameStorage.get("spinning_counts") > 0 then
+                    self.busters.spinning.active = not self.busters.spinning.active
+                end
+                self.busters.hammer.active = false
+                self.busters.horizontal_rocket.active = false
+                self.busters.vertical_rocket.active = false
+                EventBus.send("TRY_ACTIVATE_SPINNING")
+                EventBus.send("UPDATED_BUTTONS")
             end
-            self.busters.hammer_active = false
-            self.busters.horizontal_rocket_active = false
-            self.busters.vertical_rocket_active = false
-            EventBus.send("TRY_ACTIVATE_SPINNING")
-            EventBus.send("UPDATED_BUTTONS")
-        end
-    )
-    self.druid:new_button(
-        "hammer_button",
-        function()
-            if GameStorage.get("hammer_counts") > 0 then
-                self.busters.hammer_active = not self.busters.hammer_active
+        )
+        gui.set_enabled(
+            gui.get_node("spinning/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("spinning/icon"),
+            true
+        )
+    end
+    if GameStorage.get("hammer_opened") then
+        self.druid:new_button(
+            "hammer/button",
+            function()
+                if GameStorage.get("hammer_counts") > 0 then
+                    self.busters.hammer.active = not self.busters.hammer.active
+                end
+                self.busters.horizontal_rocket.active = false
+                self.busters.vertical_rocket.active = false
+                EventBus.send("UPDATED_BUTTONS")
             end
-            self.busters.horizontal_rocket_active = false
-            self.busters.vertical_rocket_active = false
-            EventBus.send("UPDATED_BUTTONS")
-        end
-    )
-    self.druid:new_button(
-        "horizontal_rocket_button",
-        function()
-            if GameStorage.get("horizontal_rocket_counts") > 0 then
-                self.busters.horizontal_rocket_active = not self.busters.horizontal_rocket_active
+        )
+        gui.set_enabled(
+            gui.get_node("hammer/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("hammer/icon"),
+            true
+        )
+    end
+    if GameStorage.get("horizontal_rocket_opened") then
+        self.druid:new_button(
+            "horizontal_rocket/button",
+            function()
+                if GameStorage.get("horizontal_rocket_counts") > 0 then
+                    self.busters.horizontal_rocket.active = not self.busters.horizontal_rocket.active
+                end
+                self.busters.hammer.active = false
+                self.busters.vertical_rocket.active = false
+                EventBus.send("UPDATED_BUTTONS")
             end
-            self.busters.hammer_active = false
-            self.busters.vertical_rocket_active = false
-            EventBus.send("UPDATED_BUTTONS")
-        end
-    )
-    self.druid:new_button(
-        "vertical_rocket_button",
-        function()
-            if GameStorage.get("vertical_rocket_counts") > 0 then
-                self.busters.vertical_rocket_active = not self.busters.vertical_rocket_active
+        )
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/icon"),
+            true
+        )
+    end
+    if GameStorage.get("vertical_rocket_opened") then
+        self.druid:new_button(
+            "vertical_rocket/button",
+            function()
+                if GameStorage.get("vertical_rocket_counts") > 0 then
+                    self.busters.vertical_rocket.active = not self.busters.vertical_rocket.active
+                end
+                self.busters.hammer.active = false
+                self.busters.horizontal_rocket.active = false
+                EventBus.send("UPDATED_BUTTONS")
             end
-            self.busters.hammer_active = false
-            self.busters.horizontal_rocket_active = false
-            EventBus.send("UPDATED_BUTTONS")
-        end
-    )
+        )
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/icon"),
+            true
+        )
+    end
+    if not __TS__ArrayIncludes(
+        GAME_CONFIG.animal_levels,
+        GameStorage.get("current_level") + 1
+    ) then
+        gui.set_enabled(
+            gui.get_node("buster_buttons"),
+            true
+        )
+    end
     EventBus.on(
         "UPDATED_STEP_COUNTER",
         function(steps)
-            if steps == nil then
-                return
-            end
             set_text("steps", steps)
-        end
+        end,
+        true
     )
     EventBus.on(
         "UPDATED_TARGET",
         function(data)
-            if data == nil then
-                return
-            end
             repeat
-                local ____switch29 = data.id
-                local ____cond29 = ____switch29 == 0
-                if ____cond29 then
+                local ____switch32 = data.id
+                local ____cond32 = ____switch32 == 0
+                if ____cond32 then
                     set_text("first_target_counts", data.count)
                     break
                 end
-                ____cond29 = ____cond29 or ____switch29 == 1
-                if ____cond29 then
+                ____cond32 = ____cond32 or ____switch32 == 1
+                if ____cond32 then
                     set_text("second_target_counts", data.count)
                     break
                 end
-                ____cond29 = ____cond29 or ____switch29 == 2
-                if ____cond29 then
+                ____cond32 = ____cond32 or ____switch32 == 2
+                if ____cond32 then
                     set_text("third_target_counts", data.count)
                     break
                 end
             until true
-        end
+        end,
+        true
     )
     EventBus.on(
         "UPDATED_BUTTONS",
         function()
-            set_text_colors({"spinning_button"}, "#fff", self.busters.spinning_active and 0.5 or 1)
+            set_text_colors({"spinning/button"}, "#fff", self.busters.spinning.active and 0.5 or 1)
             set_text(
-                "spinning_counts",
+                "spinning/counts",
                 GameStorage.get("spinning_counts")
             )
-            set_text_colors({"hammer_button"}, "#fff", self.busters.hammer_active and 0.5 or 1)
+            set_text_colors({"hammer/button"}, "#fff", self.busters.hammer.active and 0.5 or 1)
             set_text(
-                "hammer_counts",
+                "hammer/counts",
                 GameStorage.get("hammer_counts")
             )
-            set_text_colors({"horizontal_rocket_button"}, "#fff", self.busters.horizontal_rocket_active and 0.5 or 1)
+            set_text_colors({"horizontal_rocket/button"}, "#fff", self.busters.horizontal_rocket.active and 0.5 or 1)
             set_text(
-                "horizontal_rocket_counts",
+                "horizontal_rocket/counts",
                 GameStorage.get("horizontal_rocket_counts")
             )
-            set_text_colors({"vertical_rocket_button"}, "#fff", self.busters.vertical_rocket_active and 0.5 or 1)
+            set_text_colors({"vertical_rocket/button"}, "#fff", self.busters.vertical_rocket.active and 0.5 or 1)
             set_text(
-                "vertical_rocket_counts",
+                "vertical_rocket/counts",
                 GameStorage.get("vertical_rocket_counts")
             )
-        end
+        end,
+        true
     )
     EventBus.on(
         "GAME_TIMER",
         function(time)
-            if time == nil then
-                return
-            end
             set_text(
                 "time",
                 parse_time(time)
             )
-        end
+        end,
+        true
     )
 end
 function ____exports.on_input(self, action_id, action)
@@ -312,6 +354,7 @@ function ____exports.update(self, dt)
     self.druid:update(dt)
 end
 function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
     self.druid:on_message(message_id, message, sender)
 end
 function ____exports.final(self)

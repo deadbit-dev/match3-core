@@ -8,12 +8,14 @@
 
 import * as druid from 'druid.druid';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { ActivatedBusters, CellId, ElementId, Level, Target } from './match3_game';
+import { Busters, CellId, ElementId, Level, Target } from './match3_game';
+
+
 
 interface props {
     druid: DruidClass;
     level: Level;
-    busters: ActivatedBusters;
+    busters: Busters;
 }
 
 export function init(this: props): void {
@@ -113,8 +115,6 @@ export function init(this: props): void {
         set_text('third_target_counts', target.count);
     }
 
-    set_text('current_level', GameStorage.get('current_level') + 1);
-    
     this.druid.new_button('back_button', () => {
         Scene.load('map');
     });
@@ -122,77 +122,96 @@ export function init(this: props): void {
     this.druid.new_button('restart_button', () => Scene.restart());
     this.druid.new_button('revert_step_button', () => EventBus.send('TRY_REVERT_STEP'));
     
-    this.druid.new_button('spinning_button', () => {
-        if(GameStorage.get('spinning_counts') > 0) this.busters.spinning_active = !this.busters.spinning_active;
-    
-        this.busters.hammer_active = false;
-        this.busters.horizontal_rocket_active = false;
-        this.busters.vertical_rocket_active = false;
-
-        EventBus.send('TRY_ACTIVATE_SPINNING');
-        EventBus.send('UPDATED_BUTTONS');
-    });
-
-    this.druid.new_button('hammer_button', () => {
-        if(GameStorage.get('hammer_counts') > 0) this.busters.hammer_active = !this.busters.hammer_active;
- 
-        this.busters.horizontal_rocket_active = false;
-        this.busters.vertical_rocket_active = false;
-
-        EventBus.send('UPDATED_BUTTONS');
-    });
-    
-    this.druid.new_button('horizontal_rocket_button', () => {
-        if(GameStorage.get('horizontal_rocket_counts') > 0) this.busters.horizontal_rocket_active = !this.busters.horizontal_rocket_active;
+    if(GameStorage.get('spinning_opened')) {
+        this.druid.new_button('spinning/button', () => {
+            if(GameStorage.get('spinning_counts') > 0) this.busters.spinning.active = !this.busters.spinning.active;
         
-        this.busters.hammer_active = false;
-        this.busters.vertical_rocket_active = false;
+            this.busters.hammer.active = false;
+            this.busters.horizontal_rocket.active = false;
+            this.busters.vertical_rocket.active = false;
 
-        EventBus.send('UPDATED_BUTTONS');
-    });
+            EventBus.send('TRY_ACTIVATE_SPINNING');
+            EventBus.send('UPDATED_BUTTONS');
+        });
 
-    this.druid.new_button('vertical_rocket_button', () => {
-        if(GameStorage.get('vertical_rocket_counts') > 0) this.busters.vertical_rocket_active = !this.busters.vertical_rocket_active;
+        gui.set_enabled(gui.get_node('spinning/lock'), false);
+        gui.set_enabled(gui.get_node('spinning/icon'), true);
+    }
+
+    if(GameStorage.get('hammer_opened')) {
+        this.druid.new_button('hammer/button', () => {
+            if(GameStorage.get('hammer_counts') > 0) this.busters.hammer.active = !this.busters.hammer.active;
+    
+            this.busters.horizontal_rocket.active = false;
+            this.busters.vertical_rocket.active = false;
+
+            EventBus.send('UPDATED_BUTTONS');
+        });
         
-        this.busters.hammer_active = false;
-        this.busters.horizontal_rocket_active = false;
+        gui.set_enabled(gui.get_node('hammer/lock'), false);
+        gui.set_enabled(gui.get_node('hammer/icon'), true);
+    }
+     
+    if(GameStorage.get('horizontal_rocket_opened')) {
+        this.druid.new_button('horizontal_rocket/button', () => {
+            if(GameStorage.get('horizontal_rocket_counts') > 0) this.busters.horizontal_rocket.active = !this.busters.horizontal_rocket.active;
+            
+            this.busters.hammer.active = false;
+            this.busters.vertical_rocket.active = false;
 
-        EventBus.send('UPDATED_BUTTONS');
-    });
+            EventBus.send('UPDATED_BUTTONS');
+        });
+        
+        gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
+        gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
+    }
+
+    if(GameStorage.get('vertical_rocket_opened')) {
+        this.druid.new_button('vertical_rocket/button', () => {
+            if(GameStorage.get('vertical_rocket_counts') > 0) this.busters.vertical_rocket.active = !this.busters.vertical_rocket.active;
+            
+            this.busters.hammer.active = false;
+            this.busters.horizontal_rocket.active = false;
+
+            EventBus.send('UPDATED_BUTTONS');
+        });
+        
+        gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
+        gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
+    }
+
+    if(!GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1))
+        gui.set_enabled(gui.get_node('buster_buttons'), true);
 
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
-        if(steps == undefined) return;
         set_text('steps', steps);
-    });
+    }, true);
 
     EventBus.on('UPDATED_TARGET', (data) => {
-        if(data == undefined) return;
         switch(data.id) {
             case 0: set_text('first_target_counts', data.count); break;
             case 1: set_text('second_target_counts', data.count); break;
             case 2: set_text('third_target_counts', data.count); break;
         }
-    });
+    }, true);
     
     EventBus.on('UPDATED_BUTTONS', () => {
-        set_text_colors(['spinning_button'], '#fff', this.busters.spinning_active ? 0.5 : 1);
-        set_text('spinning_counts', GameStorage.get('spinning_counts'));
+        set_text_colors(['spinning/button'], '#fff', this.busters.spinning.active ? 0.5 : 1);
+        set_text('spinning/counts', GameStorage.get('spinning_counts'));
         
-        set_text_colors(['hammer_button'], '#fff', this.busters.hammer_active ? 0.5 : 1);
-        set_text('hammer_counts', GameStorage.get('hammer_counts'));
+        set_text_colors(['hammer/button'], '#fff', this.busters.hammer.active ? 0.5 : 1);
+        set_text('hammer/counts', GameStorage.get('hammer_counts'));
         
-        set_text_colors(['horizontal_rocket_button'], '#fff', this.busters.horizontal_rocket_active ? 0.5 : 1);
-        set_text('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts'));
+        set_text_colors(['horizontal_rocket/button'], '#fff', this.busters.horizontal_rocket.active ? 0.5 : 1);
+        set_text('horizontal_rocket/counts', GameStorage.get('horizontal_rocket_counts'));
         
-        set_text_colors(['vertical_rocket_button'], '#fff', this.busters.vertical_rocket_active ? 0.5 : 1);
-        set_text('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts'));
-    });
+        set_text_colors(['vertical_rocket/button'], '#fff', this.busters.vertical_rocket.active ? 0.5 : 1);
+        set_text('vertical_rocket/counts', GameStorage.get('vertical_rocket_counts'));
+    }, true);
     
     EventBus.on('GAME_TIMER', (time) => {
-        if(time == undefined) return;
-        
         set_text('time', parse_time(time));
-    });
+    }, true);
 }
 
 export function on_input(this: props, action_id: string | hash, action: unknown): void {
@@ -204,6 +223,7 @@ export function update(this: props, dt: number): void {
 }
 
 export function on_message(this: props, message_id: string | hash, message: any, sender: string | hash | url): void {
+    Manager.on_message(this, message_id, message, sender);
     this.druid.on_message(message_id, message, sender);
 }
 

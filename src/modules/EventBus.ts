@@ -76,7 +76,7 @@ function EventBusModule() {
         listeners[key_message].push({ callback, callback_context, once, is_message_mode, url: msg.url(), id_script: get_id_script() });
     }
 
-    function on<T extends MessageId>(id_message: T, callback: FncOnCallback<Messages[T]>, is_message_mode = false, callback_context?: any) {
+    function on<T extends MessageId>(id_message: T, callback: FncOnCallback<Messages[T]>, is_message_mode = true, callback_context?: any) {
         _on(id_message, callback, is_message_mode, callback_context, false);
     }
 

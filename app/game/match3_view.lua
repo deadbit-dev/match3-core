@@ -1,6 +1,6 @@
 local ____lualib = require("lualib_bundle")
-local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
@@ -63,9 +63,6 @@ function ____exports.View(animator)
         EventBus.on(
             "ON_WRONG_SWAP_ELEMENTS",
             function(data)
-                if data == nil then
-                    return
-                end
                 flow.start(function()
                     on_wrong_swap_element_animation(data)
                     EventBus.send("SET_HELPER")
@@ -121,9 +118,6 @@ function ____exports.View(animator)
         EventBus.on(
             "ON_SET_STEP_HELPER",
             function(data)
-                if data == nil then
-                    return
-                end
                 local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
                 if combined_item ~= nil then
                     local from_pos = go.get_position(combined_item._hash)
@@ -163,9 +157,6 @@ function ____exports.View(animator)
         EventBus.on(
             "ON_RESET_STEP_HELPER",
             function(data)
-                if data == nil then
-                    return
-                end
                 local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
                 if combined_item ~= nil then
                     go.cancel_animations(combined_item._hash)
@@ -256,35 +247,38 @@ function ____exports.View(animator)
         )
         EventBus.on(
             "MSG_ON_DOWN_ITEM",
-            function(data) return on_down(data.item) end
+            function(data) return on_down(data.item) end,
+            true
         )
         EventBus.on(
             "MSG_ON_UP_ITEM",
-            function(data) return on_up(data.item) end
+            function(data) return on_up(data.item) end,
+            true
         )
         EventBus.on(
             "MSG_ON_MOVE",
-            function(data) return on_move(data) end
+            function(data) return on_move(data) end,
+            true
         )
     end
     function on_game_step(events)
         is_processing = true
         for ____, event in ipairs(events) do
             repeat
-                local ____switch52 = event.key
+                local ____switch50 = event.key
                 local event_duration
-                local ____cond52 = ____switch52 == "ON_SWAP_ELEMENTS"
-                if ____cond52 then
+                local ____cond50 = ____switch50 == "ON_SWAP_ELEMENTS"
+                if ____cond50 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond52 = ____cond52 or ____switch52 == "ON_SPINNING_ACTIVATED"
-                if ____cond52 then
+                ____cond50 = ____cond50 or ____switch50 == "ON_SPINNING_ACTIVATED"
+                if ____cond50 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond52 = ____cond52 or ____switch52 == "ON_MOVED_ELEMENTS"
-                if ____cond52 then
+                ____cond50 = ____cond50 or ____switch50 == "ON_MOVED_ELEMENTS"
+                if ____cond50 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -330,24 +324,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch62 = move_direction
-            local ____cond62 = ____switch62 == Direction.Up
-            if ____cond62 then
+            local ____switch60 = move_direction
+            local ____cond60 = ____switch60 == Direction.Up
+            if ____cond60 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond62 = ____cond62 or ____switch62 == Direction.Down
-            if ____cond62 then
+            ____cond60 = ____cond60 or ____switch60 == Direction.Down
+            if ____cond60 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond62 = ____cond62 or ____switch62 == Direction.Left
-            if ____cond62 then
+            ____cond60 = ____cond60 or ____switch60 == Direction.Left
+            if ____cond60 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond62 = ____cond62 or ____switch62 == Direction.Right
-            if ____cond62 then
+            ____cond60 = ____cond60 or ____switch60 == Direction.Right
+            if ____cond60 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1074,14 +1068,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch215 = dir
-            local ____cond215 = ____switch215 == Axis.Vertical
-            if ____cond215 then
+            local ____switch213 = dir
+            local ____cond213 = ____switch213 == Axis.Vertical
+            if ____cond213 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond215 = ____cond215 or ____switch215 == Axis.Horizontal
-            if ____cond215 then
+            ____cond213 = ____cond213 or ____switch213 == Axis.Horizontal
+            if ____cond213 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1762,7 +1756,8 @@ function ____exports.View(animator)
     duration_of_movement_between_cells = GAME_CONFIG.duration_of_movement_bettween_cells
     spawn_element_easing = GAME_CONFIG.spawn_element_easing
     spawn_element_time = GAME_CONFIG.spawn_element_time
-    level_config = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
+    local current_level = GameStorage.get("current_level")
+    level_config = GAME_CONFIG.levels[current_level + 1]
     field_width = level_config.field.width
     field_height = level_config.field.height
     local max_field_width = level_config.field.max_width
@@ -1799,10 +1794,13 @@ function ____exports.View(animator)
     combinate_phase_duration = 0
     move_phase_duration = 0
     is_processing = false
-    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 50, 0)
+    cells_offset = vmath.vector3(game_width / 2 - field_width / 2 * cell_size, -(game_height / 2 - max_field_height / 2 * cell_size) + 100, 0)
     local function init()
         local scene_name = Scene.get_current_name()
         Scene.load_resource(scene_name, "background")
+        if __TS__ArrayIncludes(GAME_CONFIG.animal_levels, current_level + 1) then
+            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1])
+        end
         set_events()
         set_targets()
         EventBus.send("REQUEST_LOAD_FIELD")

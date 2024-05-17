@@ -61,15 +61,32 @@ function SceneModule() {
         Manager.send('SYS_LOAD_SCENE', { name });
     }
     function load_resource(scene: string, resource: string) {
+
+        print("LOAD: ", resource);
+
         scene_resources[scene].push(resource);
+
+        for(const resource of scene_resources[scene])
+            print("SCENE RESOURCE: ", resource);
+
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }
 
     function unload_resource(scene: string, resource: string) {
+
+        print("UNLOAD: ", resource);
+
         const index = scene_resources[scene].indexOf(resource);
         if(index == -1) return;
 
-        scene_resources[scene].splice(index, 1);
+        for(const resource of scene_resources[scene])
+            print("SCENE RESOURCE BEFORE: ", resource);
+
+        // scene_resources[scene].splice(index, 1);
+
+        for(const resource of scene_resources[scene])
+            print("SCENE RESOURCE AFTER: ", resource);
+        
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
 
@@ -77,9 +94,25 @@ function SceneModule() {
         // const scene = get_current_name();
         const resources = scene_resources[scene];
         if(resources == null) return;
+        
+        print("--------------------------------------");
+
+        for(const resource of scene_resources[scene])
+            print("SCENE RESOURCE: ", resource);
+
+        print("--------------------------------------");
 
         for(const resource of resources)
+            print("SCENE RESOURCE: ", resource);
+
+        print("--------------------------------------");
+
+        for(const resource of resources) {
+            print(resource);
             unload_resource(scene, resource);
+        }
+
+        scene_resources[scene] = [];
     }
 
     function restart() {
@@ -93,8 +126,8 @@ function SceneModule() {
 
         let is_missing = false;
         for(const [key, value] of Object.entries(missing_resources)) {
-            Log.warn("Ненайден ресурс: " + key + " " + value);
             if(value != null) {
+                Log.warn("Ненайден ресурс: " + key + " " + value);
                 is_missing = true;
                 break;
             }
@@ -103,13 +136,15 @@ function SceneModule() {
         const resource_file = name + ".zip";
 
         // FIXME: why 'reszip.version_match' allways return false ?
-        const miss_match_version = false; //!reszip.version_match(resource_file);
-        if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
+        // const miss_match_version = !reszip.version_match(resource_file);
+        // if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
 
-        if(liveupdate && (miss_match_version || is_missing) && !MAIN_BUNDLE_SCENES.includes(name)) {
+        // if(liveupdate && (miss_match_version || is_missing) && !MAIN_BUNDLE_SCENES.includes(name)) {
+        if(liveupdate && is_missing && !MAIN_BUNDLE_SCENES.includes(name)) {
             Log.log("Загрузка ресурсов для сцены: " + name);
             reszip.load_and_mount_zip(resource_file, {
                 filename: resource_file,
+                mount_name: resource_file,
                 delete_old_file: true,
                 on_finish: (self: any, err: any) => {
                     if(!err) {

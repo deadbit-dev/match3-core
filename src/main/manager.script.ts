@@ -41,7 +41,7 @@ export function init(this: props) {
         Sound.attach_druid_click('sel');
         Camera.set_go_prjection(-1, 1, -3, 3);
 
-        Scene.load('movie');
+        Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 
         load_config();

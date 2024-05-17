@@ -19,7 +19,7 @@ import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules
 import { CombinedMessage, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage } from "../main/game_config";
 
 import {
-    GameState,
+    CoreState,
     ItemInfo,
     NullElement,
     NotActiveCell,
@@ -28,7 +28,7 @@ import {
     Element,
 } from "./match3_core";
 import { hex2rgba } from '../utils/utils';
-import { SubstrateId, CellId, ElementId } from './match3_game';
+import { SubstrateId, CellId, ElementId, GameState } from './match3_game';
 
 const SubstrateMasks = [
     [
@@ -124,7 +124,8 @@ export function View(animator: FluxGroup) {
     const spawn_element_easing = GAME_CONFIG.spawn_element_easing;
     const spawn_element_time = GAME_CONFIG.spawn_element_time;
 
-    const level_config = GAME_CONFIG.levels[GameStorage.get('current_level')];
+    const current_level = GameStorage.get('current_level');
+    const level_config = GAME_CONFIG.levels[current_level];
     const field_width = level_config['field']['width'];
     const field_height = level_config['field']['height'];
     const max_field_width = level_config['field']['max_width'];
@@ -188,14 +189,18 @@ export function View(animator: FluxGroup) {
     
     let cells_offset = vmath.vector3(
         game_width / 2 - (field_width / 2 * cell_size),
-        -(game_height / 2 - (max_field_height / 2 * cell_size)) + 50,
+        -(game_height / 2 - (max_field_height / 2 * cell_size)) + 100,
         0
     );
 
     function init() {
         const scene_name = Scene.get_current_name();
         Scene.load_resource(scene_name, 'background');
-        // Scene.load_resource(scene_name, 'cock');
+        
+        if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
+            // Scene.load_resource(scene_name, 'cat');
+            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
+        }
 
         set_events();
         set_targets();
@@ -225,7 +230,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', (data) => {
-            if (data == undefined) return;
             flow.start(() => {
                 on_wrong_swap_element_animation(data);
                 EventBus.send('SET_HELPER');
@@ -262,8 +266,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('ON_SET_STEP_HELPER', (data) => {
-            if (data == undefined) return;
-
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if (combined_item != undefined) {
                 const from_pos = go.get_position(combined_item._hash);
@@ -281,8 +283,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('ON_RESET_STEP_HELPER', (data) => {
-            if (data == undefined) return;
-
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if (combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
@@ -343,9 +343,9 @@ export function View(animator: FluxGroup) {
             reset_feild(state);
         });
 
-        EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item));
-        EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item));
-        EventBus.on('MSG_ON_MOVE', (data) => on_move(data));
+        EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item), true);
+        EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item), true);
+        EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
     }
 
     function on_game_step(events: GameStepEventBuffer) {
@@ -444,7 +444,7 @@ export function View(animator: FluxGroup) {
     //#endregion INPUT
     //#region LOGIC         
     
-    function recalculate_cell_offset(state: GameState) {
+    function recalculate_cell_offset(state: CoreState) {
         let min_y_active_cell = field_height;
         let max_y_active_cell = 0;
         for(let y = 0; y < field_height; y++) {
@@ -1256,7 +1256,7 @@ export function View(animator: FluxGroup) {
         move_phase_duration = 0;
     }
 
-    function on_revert_step_animation(current_state: GameState, previous_state: GameState) {
+    function on_revert_step_animation(current_state: CoreState, previous_state: CoreState) {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const current_cell = current_state.cells[y][x];

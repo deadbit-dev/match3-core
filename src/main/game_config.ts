@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { NullElement, GameState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
-import { CellId, ElementId, Level, RandomElement, SubstrateId, Target } from "../game/match3_game";
+import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
+import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
@@ -37,6 +37,8 @@ export const MAIN_BUNDLE_SCENES = ['game'];
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
     min_swipe_distance: 32,
+
+    animal_offset: true,
 
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
@@ -194,7 +196,16 @@ export const _GAME_CONFIG = {
         ElementId.Diskosphere
     ],
 
-    red_levels: [4, 11, 18, 25, 32, 39, 47],
+    animal_levels: [4, 11, 18, 25, 32, 39, 47],
+    level_to_animal: {
+        4: 'cock',
+        11: 'rats',
+        18: 'goose',
+        25: 'kozel',
+        32: 'kaban',
+        39: 'cock',
+        47: 'bull'
+    } as {[key in number]: string},
 
     levels: [] as Level[]
 };
@@ -203,11 +214,21 @@ export const _GAME_CONFIG = {
 // конфиг с хранилищем  (отсюда не читаем/не пишем, все запрашивается/меняется через GameStorage)
 export const _STORAGE_CONFIG = {
     current_level: 0,
+    completed_levels: [] as number[],
+    
+    move_showed: false,
+    
+    map_last_pos_y: 0,
+    
+    hammer_opened: false,
+    spinning_opened: false,
+    horizontal_rocket_opened: false,
+    vertical_rocket_opened: false,
+
     hammer_counts: 3,
     spinning_counts: 3,
     horizontal_rocket_counts: 3,
-    vertical_rocket_counts: 3,
-    completed_levels: [] as number[]
+    vertical_rocket_counts: 3
 };
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
@@ -243,7 +264,7 @@ export type _UserMessages = {
     REQUEST_LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
 
-    UPDATED_STATE: GameState
+    UPDATED_STATE: GameState,
 
     GAME_TIMER: number,
 

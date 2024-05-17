@@ -1,7 +1,95 @@
 local ____exports = {}
-function ____exports.init(self)
-    local anim_props = {blend_duration = 0, playback_rate = 1}
+local animal_init, walk, idle, walk_to, action, walk_back
+function animal_init(options)
+    if GAME_CONFIG.animal_offset then
+        local pos = go.get_position()
+        pos.y = pos.y + 100
+        go.set_position(pos)
+    end
+    idle()
+    timer.delay(
+        math.random(5, 10),
+        true,
+        function()
+            if options.walkable then
+                walk()
+            else
+                action(idle)
+            end
+        end
+    )
+end
+function walk()
+    local to_pos = go.get_position()
+    to_pos.x = to_pos.x - 100
+    walk_to(
+        to_pos,
+        function()
+            action(function()
+                local back_pos = go.get_position()
+                back_pos.x = back_pos.x + 100
+                walk_back(back_pos, idle)
+            end)
+        end
+    )
+end
+function idle()
+    local anim_props = {blend_duration = 0.1, playback_rate = 1}
     spine.play_anim("#spinemodel", "idle", go.PLAYBACK_LOOP_FORWARD, anim_props)
+end
+function walk_to(pos, callback)
+    local anim_props = {blend_duration = 0.5, playback_rate = 1}
+    spine.play_anim("#spinemodel", "walk", go.PLAYBACK_ONCE_FORWARD, anim_props)
+    go.animate(
+        go.get_id(),
+        "position",
+        go.PLAYBACK_ONCE_FORWARD,
+        pos,
+        go.EASING_LINEAR,
+        1,
+        0,
+        function()
+            if callback ~= nil then
+                callback()
+            end
+        end
+    )
+end
+function action(callback)
+    local anim_props = {blend_duration = 0.3, playback_rate = 1}
+    spine.play_anim(
+        "#spinemodel",
+        "action",
+        go.PLAYBACK_ONCE_FORWARD,
+        anim_props,
+        function(____self, message_id, message, sender)
+            if message_id == hash("spine_animation_done") and callback ~= nil then
+                callback()
+            end
+        end
+    )
+end
+function walk_back(pos, callback)
+    local anim_props = {blend_duration = 0.5, playback_rate = 1}
+    spine.play_anim("#spinemodel", "walk_back", go.PLAYBACK_ONCE_FORWARD, anim_props)
+    go.animate(
+        go.get_id(),
+        "position",
+        go.PLAYBACK_ONCE_FORWARD,
+        pos,
+        go.EASING_LINEAR,
+        1,
+        0,
+        function()
+            if callback ~= nil then
+                callback()
+            end
+        end
+    )
+end
+go.property("walkable", true)
+function ____exports.init(self)
+    animal_init({walkable = self.walkable})
 end
 init = ____exports.init
 

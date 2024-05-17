@@ -31,10 +31,9 @@ dependencies#5 = https://github.com/defold/extension-review/archive/master.zip
 dependencies#6 = https://github.com/indiesoftby/defold-yametrica/archive/refs/tags/1.0.0.zip
 dependencies#7 = https://github.com/defold/extension-spine/archive/refs/tags/3.0.0.zip
 dependencies#8 = https://github.com/osov/defold-js/archive/master.zip
-dependencies#9 = https://github.com/indiesoftby/defold-liveupdate-reszip/archive/refs/tags/1.5.0.zip
+dependencies#9 = https://github.com/indiesoftby/defold-liveupdate-reszip/archive/refs/tags/1.6.0.zip
 dependencies#10 = https://github.com/defold/extension-safearea/archive/master.zip
 dependencies#11 = https://github.com/Insality/defold-event/archive/refs/tags/1.zip
-
 
 [native_extension]
 app_manifest = /project_settings/generated.appmanifest

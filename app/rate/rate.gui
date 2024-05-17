@@ -1,7 +1,7 @@
 script: "/rate/rate.gui_script"
 fonts {
   name: "myFont"
-  font: "/assets/fonts/font32.font"
+  font: "/assets/fonts/32.font"
 }
 textures {
   name: "UI"

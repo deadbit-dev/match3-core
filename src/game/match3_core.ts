@@ -146,7 +146,7 @@ export interface MovedInfo {
 }
 
 // описание игровых данных для импорта/экспорта
-export interface GameState {
+export interface CoreState {
     cells: (Cell | typeof NotActiveCell)[][]; // наши все клетки, полностью заполненная прямоугольная/квадратная структура
     element_types: {[id: number]: ElementType}; // классификаторы элементов
     elements: (Element | typeof NullElement)[][]; // непосредственно игровые элементы
@@ -165,14 +165,14 @@ type FncOnCellActivated = (cell: ItemInfo) => void;
 type FncIsCombined = (e1: Element, e2: Element) => boolean;
 type FncOnDamagedElement = (item: ItemInfo) => void;
 type FncOnMoveElement = (from_x: number, from_y: number, to_x: number, to_y: number, element: Element) => void;
-type FncOnMovedElements = (elements: MovedInfo[], state: GameState) => void;
+type FncOnMovedElements = (elements: MovedInfo[], state: CoreState) => void;
 type FncOnRequestElement = (x: number, y: number) => Element | typeof NullElement;
 
 
 export function Field(size_x: number, size_y: number, complex_process_move = true) {
     // откуда идет сложение ячеек, т.е. при образовании пустоты будут падать сверху вниз
     
-    let state: GameState = {
+    let state: CoreState = {
         cells: [],
         element_types: {},
         elements: []
@@ -403,7 +403,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         cb_on_move_element = fnc;
     }
 
-    function on_moved_elements(elements: MovedInfo[], state: GameState) {
+    function on_moved_elements(elements: MovedInfo[], state: CoreState) {
         if(cb_on_moved_elements != null) return cb_on_moved_elements(elements, state);
     }
 
@@ -874,8 +874,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
 
     // сохранение состояния игры
-    function save_state(): GameState {
-        const st: GameState = {
+    function save_state(): CoreState {
+        const st: CoreState = {
             cells: [],
             element_types: state.element_types,
             elements: []
@@ -891,7 +891,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             }
         }
 
-        const copy_state = json.decode(json.encode(st)) as GameState;
+        const copy_state = json.decode(json.encode(st)) as CoreState;
         for(const [key, value] of Object.entries(copy_state.element_types)) {
             const id = tonumber(key);
             if(id != undefined) copy_state.element_types[id] = value;
@@ -901,7 +901,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
 
     // загрузить состояние игры
-    function load_state(st: GameState) {
+    function load_state(st: CoreState) {
         state.element_types = st.element_types;
 
         for(let y = 0; y < size_y; y++) {
