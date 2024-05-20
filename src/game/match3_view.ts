@@ -16,7 +16,7 @@ import * as flow from 'ludobits.m.flow';
 import { Axis, Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CombinedMessage, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage } from "../main/game_config";
+import { CombinedMessage, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage, GameStepMessage } from "../main/game_config";
 
 import {
     CoreState,
@@ -198,7 +198,7 @@ export function View(animator: FluxGroup) {
         Scene.load_resource(scene_name, 'background');
         
         if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
-            // Scene.load_resource(scene_name, 'cat');
+            Scene.load_resource(scene_name, 'cat');
             Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
         }
 
@@ -313,7 +313,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('ON_REVERT_STEP', (states) => {
-            if (states == undefined) return;
             flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
             EventBus.send('SET_HELPER');
         });
@@ -339,7 +338,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('UPDATED_STATE', (state) => {
-            if(state == undefined) return;
             reset_feild(state);
         });
 
@@ -348,10 +346,12 @@ export function View(animator: FluxGroup) {
         EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
     }
 
-    function on_game_step(events: GameStepEventBuffer) {
+    function on_game_step(data: GameStepMessage) {
         is_processing = true;
 
-        for (const event of events) {
+        state.game_state = data.state;
+
+        for (const event of data.events) {
             switch (event.key) {
                 case 'ON_SWAP_ELEMENTS':
                     flow.delay(event_to_animation[event.key](event.value));
@@ -1429,8 +1429,8 @@ export function View(animator: FluxGroup) {
     }
  
     function update_target_by_id(id: number) {
-        for (let i = 0; i < level_config.targets.length; i++) {
-            const target = level_config.targets[i];
+        for (let i = 0; i < state.game_state.targets.length; i++) {
+            const target = state.game_state.targets[i];
             if (target.uids.indexOf(id) != -1) {
                 targets[i] = math.max(0, targets[i] - 1);
                 EventBus.send('UPDATED_TARGET', {id: i, count: targets[i]});

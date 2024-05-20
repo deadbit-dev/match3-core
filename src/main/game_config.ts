@@ -43,26 +43,24 @@ export const _GAME_CONFIG = {
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
     squash_element_easing: go.EASING_INCUBIC,
-    squash_element_time: 0.3,
+    squash_element_time: 0.25,
 
     helicopter_fly_duration: 0.75,
 
     damaged_element_easing: go.EASING_INOUTBACK,
-    damaged_element_time: 0.3,
-    damaged_element_delay: 0.1,
+    damaged_element_time: 0.25,
+    damaged_element_delay: 0,
     damaged_element_scale: 0.3,
 
     base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#c29754'`) : '#c29754',
 
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
-    duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.07`))! : 0.07,
+    duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.05`))! : 0.05,
 
     complex_move: true,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
-
-    buster_delay: 0.5,
 
     default_substrate_z_index: -2,
     default_cell_z_index: -1,
@@ -199,13 +197,51 @@ export const _GAME_CONFIG = {
     animal_levels: [4, 11, 18, 25, 32, 39, 47],
     level_to_animal: {
         4: 'cock',
-        11: 'rats',
-        18: 'goose',
-        25: 'kozel',
-        32: 'kaban',
+        11: 'kozel',
+        18: 'kaban',
+        25: 'goose',
+        32: 'rats',
         39: 'cock',
         47: 'bull'
     } as {[key in number]: string},
+
+    tutorial_levels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    tutorial_cells_by_level: {
+        1: [
+            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4},
+            {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
+        ],
+        2: [
+            {x: 3, y: 3}, {x: 4, y: 3},
+            {x: 3, y: 4}, {x: 4, y: 4},
+            {x: 3, y: 5}, {x: 4, y: 5},
+            {x: 3, y: 6}, {x: 4, y: 6}
+        ],
+        3: [
+            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
+            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
+        ],
+        4: [
+            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3},
+            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
+        ],
+        5: [
+            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
+            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
+        ],
+        7: [
+            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
+            {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
+        ],
+        8: [
+            {x: 6, y: 2}, {x: 7, y: 2},
+            {x: 6, y: 3}, {x: 7, y: 3},
+            {x: 6, y: 4}, {x: 7, y: 4}, {x: 8, y: 4},
+            {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
+            {x: 6, y: 6}, {x: 7, y: 6},
+            {x: 6, y: 7}, {x: 7, y: 7}
+        ]
+    },
 
     levels: [] as Level[]
 };
@@ -233,6 +269,8 @@ export const _STORAGE_CONFIG = {
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
 export type MovedElementsMessage = MovedInfo[];
+
+export interface GameStepMessage { events: GameStepEventBuffer, state: GameState }
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
@@ -307,7 +345,7 @@ export type _UserMessages = {
     ON_COMBINED: CombinedMessage,
 
     ON_MOVED_ELEMENTS: MovedElementsMessage,
-    ON_GAME_STEP: GameStepEventBuffer,
+    ON_GAME_STEP: GameStepMessage,
     ON_GAME_STEP_ANIMATION_END: VoidMessage,
 
     TRY_REVERT_STEP: VoidMessage,

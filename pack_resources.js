@@ -48,7 +48,10 @@ function find_resource(resources_graph, resource_path, resources) {
     const resource_data = resources_graph.find((resource) => resource.path == resource_path);
     if(resource_data == undefined || resource_data.isInMainBundle) return;
 
-    resources.push(resource_data.hexDigest);
+    if(!resources.includes(resource_data.hexDigest)) {
+        resources.push(resource_data.hexDigest);
+    }
+    
     for(const dependency of resource_data.children)
         find_resource(resources_graph, dependency, resources);
 }

@@ -5,8 +5,8 @@ embedded_instances {
   data: "embedded_components {\n"
   "  id: \"spinemodel\"\n"
   "  type: \"spinemodel\"\n"
-  "  data: \"spine_scene: \\\"/assets/cat/cat.spinescene\\\"\\n"
-  "default_animation: \\\"idle\\\"\\n"
+  "  data: \"spine_scene: \\\"/assets/avatar/avatar.spinescene\\\"\\n"
+  "default_animation: \\\"IDLE_TEST\\\"\\n"
   "skin: \\\"\\\"\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "material: \\\"/defold-spine/assets/spine.material\\\"\\n"
@@ -26,8 +26,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 150.0
-    y: -800.0
+    x: 0.0
+    y: 0.0
     z: 0.0
   }
   rotation {

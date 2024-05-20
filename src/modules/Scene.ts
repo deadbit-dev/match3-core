@@ -61,31 +61,15 @@ function SceneModule() {
         Manager.send('SYS_LOAD_SCENE', { name });
     }
     function load_resource(scene: string, resource: string) {
-
-        print("LOAD: ", resource);
-
         scene_resources[scene].push(resource);
-
-        for(const resource of scene_resources[scene])
-            print("SCENE RESOURCE: ", resource);
-
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }
 
     function unload_resource(scene: string, resource: string) {
-
-        print("UNLOAD: ", resource);
-
         const index = scene_resources[scene].indexOf(resource);
         if(index == -1) return;
 
-        for(const resource of scene_resources[scene])
-            print("SCENE RESOURCE BEFORE: ", resource);
-
         // scene_resources[scene].splice(index, 1);
-
-        for(const resource of scene_resources[scene])
-            print("SCENE RESOURCE AFTER: ", resource);
         
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
@@ -95,20 +79,7 @@ function SceneModule() {
         const resources = scene_resources[scene];
         if(resources == null) return;
         
-        print("--------------------------------------");
-
-        for(const resource of scene_resources[scene])
-            print("SCENE RESOURCE: ", resource);
-
-        print("--------------------------------------");
-
-        for(const resource of resources)
-            print("SCENE RESOURCE: ", resource);
-
-        print("--------------------------------------");
-
         for(const resource of resources) {
-            print(resource);
             unload_resource(scene, resource);
         }
 

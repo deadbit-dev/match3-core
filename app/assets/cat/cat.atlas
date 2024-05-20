@@ -1,41 +1,33 @@
 images {
-  image: "/assets/cat/images/bantik.png"
+  image: "/assets/cat/images/body.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/body with collar.png"
+  image: "/assets/cat/images/ear_l.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/haed above.png"
+  image: "/assets/cat/images/ear_r.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/haed.png"
+  image: "/assets/cat/images/eye_l.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/hair.png"
+  image: "/assets/cat/images/eye_lc.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/left brow.png"
+  image: "/assets/cat/images/eye_r.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/left ear.png"
+  image: "/assets/cat/images/eye_rc.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/left eye.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/left eyelid and lash.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/left eyelid closed.png"
+  image: "/assets/cat/images/head.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -43,31 +35,7 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/right brow.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/right ear.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/right eye.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/right eyelid and lash.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/right eyelid closed.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/wool in left ear.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/wool in right ear.png"
+  image: "/assets/cat/images/tail.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0
