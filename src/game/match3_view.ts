@@ -222,9 +222,8 @@ export function View(animator: FluxGroup) {
     // TODO: function on each event
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
-            if (state == undefined) return;
             recalculate_cell_offset(state);
-            on_load_field(state);
+            load_field(state);
 
             EventBus.send('SET_HELPER');
         });
@@ -339,6 +338,7 @@ export function View(animator: FluxGroup) {
 
         EventBus.on('UPDATED_STATE', (state) => {
             reset_feild(state);
+            EventBus.send('SET_HELPER');
         });
 
         EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item), true);
@@ -444,7 +444,7 @@ export function View(animator: FluxGroup) {
     //#endregion INPUT
     //#region LOGIC         
     
-    function recalculate_cell_offset(state: CoreState) {
+    function recalculate_cell_offset(state: GameState) {
         let min_y_active_cell = field_height;
         let max_y_active_cell = 0;
         for(let y = 0; y < field_height; y++) {
@@ -460,7 +460,7 @@ export function View(animator: FluxGroup) {
         cells_offset.y -= math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5;
     }
 
-    function on_load_field(game_state: GameState, with_anim = true) {
+    function load_field(game_state: GameState, with_anim = true) {
         state.game_state = game_state;
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -487,8 +487,9 @@ export function View(animator: FluxGroup) {
         }
 
         state = {} as ViewState;
+        state.game_id_to_view_index = {};
 
-        on_load_field(game_state, false);
+        load_field(game_state, false);
     }
 
     function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
@@ -1439,7 +1440,7 @@ export function View(animator: FluxGroup) {
     }
 
     function try_make_under_cell(x: number, y: number, cell: Cell) {
-        if (cell.data != undefined && cell.data.is_render_under_cell && cell.data.under_cells != undefined) {
+        if (cell.data != undefined && cell.data.under_cells != undefined) {
             let depth = 0.1;
             for (let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
                 const cell_id = (cell.data.under_cells as CellId[])[i];

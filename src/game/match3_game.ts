@@ -157,7 +157,8 @@ export interface GameState extends CoreState {
 export function Game() {
     //#region CONFIG        
 
-    const level_config = GAME_CONFIG.levels[GameStorage.get('current_level')];
+    const current_level = GameStorage.get('current_level');
+    const level_config = GAME_CONFIG.levels[current_level];
     const field_width = level_config['field']['width'];
     const field_height = level_config['field']['height'];
     const busters = level_config['busters'];
@@ -191,12 +192,6 @@ export function Game() {
 
 
     function init() {
-        print("INIT", states.length);
-        
-        states = [];
-        
-        print("AFTER", states.length);
-
         field.init();
 
         field.set_callback_is_can_move(is_can_move);
@@ -216,14 +211,19 @@ export function Game() {
     //#endregion MAIN
     //#region SETUP
     
-    function set_targets() {
-        const last_state = get_last_state();
+    function init_targets() {
+        const last_state = get_state();
         last_state.targets = [];
         for(const target of level_config.targets) {
             const copy = Object.assign({}, target);
             copy.uids = Object.assign([], target.uids);
             last_state.targets.push(copy);
         }
+    }
+    
+    function set_targets(targets: Target[]) {
+        const last_state = get_state();
+        last_state.targets = targets;
     }
 
     function set_timer() {
@@ -235,7 +235,8 @@ export function Game() {
 
     function set_steps(steps = 0) {
         if(level_config.steps == undefined) return;
-        get_last_state().steps = steps;
+        const last_state = get_state();
+        last_state.steps = steps;
     }
 
     function set_element_types() {
@@ -299,32 +300,45 @@ export function Game() {
     function on_load_field() {
         Log.log("Загрузка поля");
         
-        try_load_field();
-        set_tutorial();
-        
-        const state = field.save_state() as GameState;
-        states.push(state);
+        states.push({} as GameState);
 
-        search_available_steps(5, (steps) => {
-            available_steps = steps;
-        });
+        try_load_field();
         
+        // const is_tutorial = try_set_tutorial();
+        // if(!is_tutorial) {
+            search_available_steps(5, (steps) => {
+                available_steps = steps;
+            });
+        // }
+
+        init_targets();
+
+        set_state();
         set_steps();
         set_timer();
-        set_targets();
         set_random();
 
-        EventBus.trigger('ON_LOAD_FIELD', state, true, true);
+        EventBus.send('ON_LOAD_FIELD', get_state());
     }
-    
-    function set_tutorial() {
-        // lock_cells_except([
-        //     GAME_CONFIG.ti
-        // ]);
-        // timer.delay(5, false, () => {
-        //     unlock_cells();
-        //     EventBus.send('UPDATED_STATE', field.save_state());
-        // });
+
+    function try_set_tutorial() {
+        if(!GAME_CONFIG.tutorial_levels.includes(current_level + 1)) return false;
+
+        const except_cells = GAME_CONFIG.tutorials[current_level + 1].cells;
+        if(except_cells != undefined) lock_cells_except(except_cells);
+
+        return true;
+    }
+
+    function try_remove_tutorial() {
+        if(!GAME_CONFIG.tutorial_levels.includes(current_level)) return false;
+
+        unlock_cells();
+        
+        set_state();
+        EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+
+        return true;
     }
 
     function lock_cells_except(cells: {x: number, y: number}[]) {
@@ -377,7 +391,7 @@ export function Game() {
         if(is_block_input || elements == undefined) return;
 
         stop_helper();
-
+        
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
         is_step = true;
@@ -453,7 +467,7 @@ export function Game() {
         const dt = System.now() - start_game_time;
         const remaining_time = level_config.time - dt;
         if(level_config.time >= dt) {
-            get_last_state().remaining_time = remaining_time;
+            get_state().remaining_time = remaining_time;
             EventBus.send('GAME_TIMER', remaining_time);
         } else EventBus.send('ON_GAME_OVER');
     }
@@ -1367,7 +1381,7 @@ export function Game() {
     function set_random(seed?: number) {
         const randomseed = seed != undefined ? seed : os.time();
         math.randomseed(randomseed);
-        get_last_state().randomseed = randomseed;
+        get_state().randomseed = randomseed;
     }
 
     // function simulate_game_step(step: StepInfo) {
@@ -1417,10 +1431,9 @@ export function Game() {
             field.process_state(ProcessMode.MoveElements);
         }
 
-        const state = field.save_state(); 
-        const last_state = get_last_state();
-        last_state.cells = state.cells;
-        last_state.elements = state.elements;
+        set_state();
+
+        const last_state = get_state();
 
         is_block_input = true;
         search_available_steps(5, (steps) => {
@@ -1434,7 +1447,7 @@ export function Game() {
             shuffle_field();
         });
 
-        if(level_config.steps != undefined && is_step) last_state.steps++;
+        if(level_config.steps != undefined && is_step) get_state().steps++;
         is_step = false;
     
         if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', level_config.steps - last_state.steps);
@@ -1442,8 +1455,8 @@ export function Game() {
         send_game_step();
 
         states.push({} as GameState);
-    
-        get_last_state().targets = Object.assign([], last_state.targets);
+
+        set_targets(last_state.targets);
         set_steps(last_state.steps);
         set_random();
     }
@@ -1482,7 +1495,7 @@ export function Game() {
     }
 
     function is_level_completed() {
-        for(const target of get_last_state(2).targets) {
+        for(const target of get_state(2).targets) {
             print(target.uids.length, target.count);
             if(target.uids.length < target.count) return false;
         }
@@ -1494,7 +1507,7 @@ export function Game() {
 
     function is_have_steps() {
         if(level_config.steps != undefined)
-            return get_last_state(2).steps <= level_config.steps;
+            return get_state(2).steps <= level_config.steps;
         return true;
     }
 
@@ -1552,7 +1565,7 @@ export function Game() {
         const element = field.get_element(item.x, item.y);
         if(element == NullElement) return;
 
-        for(const target of get_last_state().targets) {
+        for(const target of get_state().targets) {
             if(!target.is_cell && target.type == element.type) {
                 target.uids.push(element.uid);
             }
@@ -1631,7 +1644,7 @@ export function Game() {
                 }
             }
 
-            for(const target of get_last_state().targets) {
+            for(const target of get_state().targets) {
                 const check_for_not_stone = (target.type != CellId.Stone0 && target.type ==  cell.data.current_id);
                 const check_stone_with_last_cell = (target.type == CellId.Stone0 && cell.data.current_id == CellId.Stone2);
                 if(target.is_cell && (check_for_not_stone || check_stone_with_last_cell)) {
@@ -1643,8 +1656,18 @@ export function Game() {
 
     //#endregion CALLBACKS
     //#region HELPERS
+
+    function set_state() {
+        const last_state = get_state();
+        const field_state = field.save_state();
+        last_state.cells = field_state.cells;
+        last_state.element_types = field_state.element_types;
+        last_state.elements = field_state.elements;
+
+        return last_state;
+    }
     
-    function get_last_state(offset = 1) {
+    function get_state(offset = 1) {
         assert(states.length - offset >= 0);
         return states[states.length - offset];
     }
@@ -1735,7 +1758,7 @@ export function Game() {
     function send_game_step() {
         if(is_simulating) return;
 
-        EventBus.send('ON_GAME_STEP', { events: game_step_events, state: get_last_state()});
+        EventBus.send('ON_GAME_STEP', { events: game_step_events, state: get_state()});
         game_step_events = {} as GameStepEventBuffer;
     }
 

@@ -37,7 +37,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_targets, set_events, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, on_load_field, reset_feild, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
+    local set_targets, set_events, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_feild, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
     function set_targets()
         do
             local i = 0
@@ -52,11 +52,8 @@ function ____exports.View(animator)
         EventBus.on(
             "ON_LOAD_FIELD",
             function(state)
-                if state == nil then
-                    return
-                end
                 recalculate_cell_offset(state)
-                on_load_field(state)
+                load_field(state)
                 EventBus.send("SET_HELPER")
             end
         )
@@ -237,6 +234,7 @@ function ____exports.View(animator)
             "UPDATED_STATE",
             function(state)
                 reset_feild(state)
+                EventBus.send("SET_HELPER")
             end
         )
         EventBus.on(
@@ -260,20 +258,20 @@ function ____exports.View(animator)
         state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch48 = event.key
+                local ____switch47 = event.key
                 local event_duration
-                local ____cond48 = ____switch48 == "ON_SWAP_ELEMENTS"
-                if ____cond48 then
+                local ____cond47 = ____switch47 == "ON_SWAP_ELEMENTS"
+                if ____cond47 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond48 = ____cond48 or ____switch48 == "ON_SPINNING_ACTIVATED"
-                if ____cond48 then
+                ____cond47 = ____cond47 or ____switch47 == "ON_SPINNING_ACTIVATED"
+                if ____cond47 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond48 = ____cond48 or ____switch48 == "ON_MOVED_ELEMENTS"
-                if ____cond48 then
+                ____cond47 = ____cond47 or ____switch47 == "ON_MOVED_ELEMENTS"
+                if ____cond47 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -319,24 +317,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch58 = move_direction
-            local ____cond58 = ____switch58 == Direction.Up
-            if ____cond58 then
+            local ____switch57 = move_direction
+            local ____cond57 = ____switch57 == Direction.Up
+            if ____cond57 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond58 = ____cond58 or ____switch58 == Direction.Down
-            if ____cond58 then
+            ____cond57 = ____cond57 or ____switch57 == Direction.Down
+            if ____cond57 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond58 = ____cond58 or ____switch58 == Direction.Left
-            if ____cond58 then
+            ____cond57 = ____cond57 or ____switch57 == Direction.Left
+            if ____cond57 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond58 = ____cond58 or ____switch58 == Direction.Right
-            if ____cond58 then
+            ____cond57 = ____cond57 or ____switch57 == Direction.Right
+            if ____cond57 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -384,7 +382,7 @@ function ____exports.View(animator)
         cells_offset.y = cells_offset.y + min_y_active_cell * cell_size * 0.5
         cells_offset.y = cells_offset.y - math.abs(max_field_height - max_y_active_cell) * cell_size * 0.5
     end
-    function on_load_field(game_state, with_anim)
+    function load_field(game_state, with_anim)
         if with_anim == nil then
             with_anim = true
         end
@@ -433,7 +431,8 @@ function ____exports.View(animator)
             end
         end
         state = {}
-        on_load_field(game_state, false)
+        state.game_id_to_view_index = {}
+        load_field(game_state, false)
     end
     function make_substrate_view(x, y, cells, z_index)
         if z_index == nil then
@@ -1063,14 +1062,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch211 = dir
-            local ____cond211 = ____switch211 == Axis.Vertical
-            if ____cond211 then
+            local ____switch210 = dir
+            local ____cond210 = ____switch210 == Axis.Vertical
+            if ____cond210 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond211 = ____cond211 or ____switch211 == Axis.Horizontal
-            if ____cond211 then
+            ____cond210 = ____cond210 or ____switch210 == Axis.Horizontal
+            if ____cond210 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1710,7 +1709,7 @@ function ____exports.View(animator)
         end
     end
     function try_make_under_cell(x, y, cell)
-        if cell.data ~= nil and cell.data.is_render_under_cell and cell.data.under_cells ~= nil then
+        if cell.data ~= nil and cell.data.under_cells ~= nil then
             local depth = 0.1
             do
                 local i = #cell.data.under_cells - 1

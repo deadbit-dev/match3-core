@@ -176,6 +176,10 @@ function ____exports.init(self)
             Scene.load("map")
         end
     )
+    set_text(
+        "current_level",
+        GameStorage.get("current_level") + 1
+    )
     self.druid:new_button(
         "restart_button",
         function() return Scene.restart() end

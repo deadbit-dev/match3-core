@@ -205,43 +205,75 @@ export const _GAME_CONFIG = {
         47: 'bull'
     } as {[key in number]: string},
 
-    tutorial_levels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    tutorial_cells_by_level: {
-        1: [
-            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4},
-            {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
-        ],
-        2: [
-            {x: 3, y: 3}, {x: 4, y: 3},
-            {x: 3, y: 4}, {x: 4, y: 4},
-            {x: 3, y: 5}, {x: 4, y: 5},
-            {x: 3, y: 6}, {x: 4, y: 6}
-        ],
-        3: [
-            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
-            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
-        ],
-        4: [
-            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3},
-            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
-        ],
-        5: [
-            {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
-            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
-        ],
-        7: [
-            {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
-            {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
-        ],
-        8: [
-            {x: 6, y: 2}, {x: 7, y: 2},
-            {x: 6, y: 3}, {x: 7, y: 3},
-            {x: 6, y: 4}, {x: 7, y: 4}, {x: 8, y: 4},
-            {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
-            {x: 6, y: 6}, {x: 7, y: 6},
-            {x: 6, y: 7}, {x: 7, y: 7}
-        ]
-    },
+    tutorial_levels: [1, 2, 3, 4, 5, 6, 10, 11, 13, 18],
+    tutorials: {
+        1: {
+            cells: 
+            [
+                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4},
+                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
+            ],
+            action: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
+        },
+        2: {
+            cells: [
+                {x: 3, y: 3}, {x: 4, y: 3},
+                {x: 3, y: 4}, {x: 4, y: 4},
+                {x: 3, y: 5}, {x: 4, y: 5},
+                {x: 3, y: 6}, {x: 4, y: 6}
+            ],
+            action: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
+        },
+        3: {
+            cells: [
+                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
+                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
+            ],
+            action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+        },
+        4: {
+            cells: [
+                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3},
+                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
+            ],
+            action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+        },
+        5: {
+            cells: [
+                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
+                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
+                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}, {x: 7, y: 5}
+            ],
+            action: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
+        },
+        6: {
+            busters: ['hammer']
+        },
+        9: {
+            busters: ['spinning']
+        },
+        10: {
+            cells: [
+                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
+                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
+            ],
+            action: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
+        },
+        13: {
+            cells: [
+                {x: 6, y: 2}, {x: 7, y: 2},
+                {x: 6, y: 3}, {x: 7, y: 3},
+                {x: 6, y: 4}, {x: 7, y: 4}, {x: 8, y: 4},
+                {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
+                {x: 6, y: 6}, {x: 7, y: 6},
+                {x: 6, y: 7}, {x: 7, y: 7}
+            ],
+            action: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
+        },
+        18: {
+            busters: ['horizontal_rocket', 'vertical_rocket']
+        }
+    } as { [key in number]: {cells: {x: number, y: number}[], action: StepInfo} | {busters: string[]}},
 
     levels: [] as Level[]
 };
