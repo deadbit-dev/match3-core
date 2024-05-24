@@ -221,6 +221,15 @@ function ____exports.View(animator)
             end
         )
         EventBus.on(
+            "TRY_REVERT_STEP",
+            function()
+                if is_processing then
+                    return
+                end
+                EventBus.send("REVERT_STEP")
+            end
+        )
+        EventBus.on(
             "ON_LEVEL_COMPLETED",
             function()
                 flow.start(function()
@@ -244,6 +253,7 @@ function ____exports.View(animator)
         EventBus.on(
             "UPDATED_STATE",
             function(state)
+                print("UPDATE STATE")
                 reset_feild(state)
                 EventBus.send("SET_HELPER")
             end
@@ -269,20 +279,20 @@ function ____exports.View(animator)
         state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch49 = event.key
+                local ____switch51 = event.key
                 local event_duration
-                local ____cond49 = ____switch49 == "ON_SWAP_ELEMENTS"
-                if ____cond49 then
+                local ____cond51 = ____switch51 == "ON_SWAP_ELEMENTS"
+                if ____cond51 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond49 = ____cond49 or ____switch49 == "ON_SPINNING_ACTIVATED"
-                if ____cond49 then
+                ____cond51 = ____cond51 or ____switch51 == "ON_SPINNING_ACTIVATED"
+                if ____cond51 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond49 = ____cond49 or ____switch49 == "ON_MOVED_ELEMENTS"
-                if ____cond49 then
+                ____cond51 = ____cond51 or ____switch51 == "ON_MOVED_ELEMENTS"
+                if ____cond51 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -328,24 +338,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch59 = move_direction
-            local ____cond59 = ____switch59 == Direction.Up
-            if ____cond59 then
+            local ____switch61 = move_direction
+            local ____cond61 = ____switch61 == Direction.Up
+            if ____cond61 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond59 = ____cond59 or ____switch59 == Direction.Down
-            if ____cond59 then
+            ____cond61 = ____cond61 or ____switch61 == Direction.Down
+            if ____cond61 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond59 = ____cond59 or ____switch59 == Direction.Left
-            if ____cond59 then
+            ____cond61 = ____cond61 or ____switch61 == Direction.Left
+            if ____cond61 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond59 = ____cond59 or ____switch59 == Direction.Right
-            if ____cond59 then
+            ____cond61 = ____cond61 or ____switch61 == Direction.Right
+            if ____cond61 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -397,6 +407,7 @@ function ____exports.View(animator)
         if with_anim == nil then
             with_anim = true
         end
+        print("LOAD FIELD")
         state.game_state = game_state
         do
             local y = 0
@@ -428,6 +439,7 @@ function ____exports.View(animator)
         end
     end
     function reset_feild(game_state)
+        print("RESET FIELD")
         for ____, ____value in ipairs(__TS__ObjectEntries(state.game_id_to_view_index)) do
             local sid = ____value[1]
             local index = ____value[2]
@@ -1073,14 +1085,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch212 = dir
-            local ____cond212 = ____switch212 == Axis.Vertical
-            if ____cond212 then
+            local ____switch214 = dir
+            local ____cond214 = ____switch214 == Axis.Vertical
+            if ____cond214 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond212 = ____cond212 or ____switch212 == Axis.Horizontal
-            if ____cond212 then
+            ____cond214 = ____cond214 or ____switch214 == Axis.Horizontal
+            if ____cond214 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1286,7 +1298,7 @@ function ____exports.View(animator)
         return squash_duration + activate_duration + damaged_element_time
     end
     function activate_dynamite_animation(activation, range, on_explode)
-        local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 0.1)
+        local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_vfx_z_index + 0.1)
         local _go = gm.make_go("effect_view", pos)
         go.set_scale(
             vmath.vector3(scale_ratio * range, scale_ratio * range, 1),

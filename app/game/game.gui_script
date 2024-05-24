@@ -178,6 +178,10 @@ function ____exports.init(self)
         "restart/button",
         function() return Scene.restart() end
     )
+    self.druid:new_button(
+        "revert_step/button",
+        function() return EventBus.send("TRY_REVERT_STEP") end
+    )
     set_text(
         "current_level_text",
         GameStorage.get("current_level") + 1
@@ -282,19 +286,19 @@ function ____exports.init(self)
         "UPDATED_TARGET",
         function(data)
             repeat
-                local ____switch27 = data.id
-                local ____cond27 = ____switch27 == 0
-                if ____cond27 then
+                local ____switch28 = data.id
+                local ____cond28 = ____switch28 == 0
+                if ____cond28 then
                     set_text("first_target_counts", data.count)
                     break
                 end
-                ____cond27 = ____cond27 or ____switch27 == 1
-                if ____cond27 then
+                ____cond28 = ____cond28 or ____switch28 == 1
+                if ____cond28 then
                     set_text("second_target_counts", data.count)
                     break
                 end
-                ____cond27 = ____cond27 or ____switch27 == 2
-                if ____cond27 then
+                ____cond28 = ____cond28 or ____switch28 == 2
+                if ____cond28 then
                     set_text("third_target_counts", data.count)
                     break
                 end

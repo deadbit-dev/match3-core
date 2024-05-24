@@ -66,6 +66,7 @@ export const _GAME_CONFIG = {
     default_cell_z_index: -1,
     default_element_z_index: 0,
     default_top_layer_cell_z_index: 2,
+    default_vfx_z_index: 2.5,
 
     substrate_database: {
         [SubstrateId.OutsideArc]: 'outside_arc',

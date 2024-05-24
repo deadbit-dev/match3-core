@@ -321,10 +321,10 @@ export function View(animator: FluxGroup) {
             EventBus.send('ACTIVATE_VERTICAL_ROCKET');
         });
 
-        // EventBus.on('TRY_REVERT_STEP', () => {
-        //     if (is_processing) return;
-        //     EventBus.send('REVERT_STEP');
-        // });
+        EventBus.on('TRY_REVERT_STEP', () => {
+            if (is_processing) return;
+            EventBus.send('REVERT_STEP');
+        });
 
         // EventBus.on('ON_REVERT_STEP', (states) => {
         //     flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
@@ -352,6 +352,7 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('UPDATED_STATE', (state) => {
+            print("UPDATE STATE");
             reset_feild(state);
             EventBus.send('SET_HELPER');
         });
@@ -476,6 +477,8 @@ export function View(animator: FluxGroup) {
     }
 
     function load_field(game_state: GameState, with_anim = true) {
+        print("LOAD FIELD");
+
         state.game_state = game_state;
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -493,6 +496,8 @@ export function View(animator: FluxGroup) {
     }
 
     function reset_feild(game_state: GameState) {
+        print("RESET FIELD");
+
         for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
             const id = tonumber(sid);
             if(id != undefined) {
@@ -1090,7 +1095,7 @@ export function View(animator: FluxGroup) {
     }
 
     function activate_dynamite_animation(activation: ActivationMessage, range: number, on_explode: () => void) {
-        const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 0.1);
+        const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_vfx_z_index + 0.1);
         const _go = gm.make_go('effect_view', pos);
 
         go.set_scale(vmath.vector3(scale_ratio * range, scale_ratio * range, 1), _go);

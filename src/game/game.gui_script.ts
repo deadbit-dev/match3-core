@@ -117,7 +117,7 @@ export function init(this: props): void {
 
     this.druid.new_button('back/button', () => Scene.load('map'));
     this.druid.new_button('restart/button', () => Scene.restart());
-    // this.druid.new_button('revert_step_button', () => EventBus.send('TRY_REVERT_STEP'));
+    this.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
 
     set_text('current_level_text', GameStorage.get('current_level') + 1);
     

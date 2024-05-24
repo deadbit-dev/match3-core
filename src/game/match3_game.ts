@@ -302,7 +302,7 @@ export function Game() {
         EventBus.on('ACTIVATE_HAMMER', on_activate_hammer);
         EventBus.on('ACTIVATE_VERTICAL_ROCKET', on_activate_vertical_rocket);
         EventBus.on('ACTIVATE_HORIZONTAL_ROCKET', on_activate_horizontal_rocket);
-        // EventBus.on('REVERT_STEP', on_revert_step);
+        EventBus.on('REVERT_STEP', on_revert_step);
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
     }
 
@@ -321,12 +321,18 @@ export function Game() {
 
         init_targets();
 
-        set_state();
+        const last_state = set_state();
         set_steps();
         set_timer();
         set_random();
 
-        EventBus.send('ON_LOAD_FIELD', get_state());
+        EventBus.send('ON_LOAD_FIELD', last_state);
+
+        states.push({} as GameState);
+    
+        set_targets(last_state.targets);
+        set_steps(last_state.steps);
+        set_random();
     }
 
     function is_tutorial() {
@@ -590,10 +596,10 @@ export function Game() {
         }
     }
 
-    // function on_revert_step() {
-    //     stop_helper();
-    //     revert_step();
-    // }
+    function on_revert_step() {
+        stop_helper();
+        revert_step();
+    }
 
     // TODO: move in logic game step end
     function on_game_step_animation_end() {
@@ -1574,9 +1580,7 @@ export function Game() {
             field.process_state(ProcessMode.MoveElements);
         }
 
-        set_state();
-
-        const last_state = get_state();
+        const last_state = set_state();
 
         is_block_input = true;
         search_available_steps(5, (steps) => {
@@ -1604,40 +1608,50 @@ export function Game() {
         set_random();
     }
     
-    // function revert_step(): boolean {
-    //     const current_state = states.pop();
-    //     let previous_state = states.pop();
-    //     if(current_state == undefined || previous_state == undefined) return false;
+    function revert_step(): boolean {
+        print("REVERT STEP");
 
-    //     for (let y = 0; y < field_height; y++) {
-    //         for (let x = 0; x < field_width; x++) {
-    //             const cell = previous_state.cells[y][x];
-    //             if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
-    //             else field.set_cell(x, y, NotActiveCell);
+        for(const state of states) print(state);
+        
+        states.pop(); // delete new state after game step
+        states.pop(); // delete current state
+        
+        let previous_state = states.pop();
+        if(previous_state == undefined) return false;
 
-    //             const element = previous_state.elements[y][x];
-    //             if(element != NullElement) make_element(x, y, element.type, element.data);
-    //             else field.set_element(x, y, NullElement);
-    //         }
-    //     }
+        for (let y = 0; y < field_height; y++) {
+            for (let x = 0; x < field_width; x++) {
+                const cell = previous_state.cells[y][x];
+                if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
+                else field.set_cell(x, y, NotActiveCell);
 
-    //     const state = field.save_state(); 
-    //     previous_state.cells = state.cells;
-    //     previous_state.elements = state.elements;
-    //     states.push(previous_state);
+                const element = previous_state.elements[y][x];
+                if(element != NullElement) make_element(x, y, element.type, element.data);
+                else field.set_element(x, y, NullElement);
+            }
+        }
 
-    //     set_random(previous_state.randomseed);
+        const state = field.save_state(); 
+        previous_state.cells = state.cells;
+        previous_state.elements = state.elements;
+        states.push(previous_state);
 
-    //     search_available_steps(5, (steps) => {
-    //         available_steps = steps;
-    //     });
+        set_random(previous_state.randomseed);
 
-    //     // EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
+        search_available_steps(5, (steps) => {
+            available_steps = steps;
+        });
 
-    //     // EventBus.send('UPDATED_STATE', previous_state);
+        EventBus.send('UPDATED_STATE', previous_state);
 
-    //     return true;
-    // }
+        states.push({} as GameState);
+    
+        set_targets(previous_state.targets);
+        set_steps(previous_state.steps);
+        set_random();
+
+        return true;
+    }
 
     function is_level_completed() {
         for(const target of get_state(2).targets) {
