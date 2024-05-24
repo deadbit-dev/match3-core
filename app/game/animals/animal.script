@@ -21,13 +21,13 @@ function animal_init(options)
 end
 function walk()
     local to_pos = go.get_position()
-    to_pos.x = to_pos.x - 100
+    to_pos.x = to_pos.x - 70
     walk_to(
         to_pos,
         function()
             action(function()
                 local back_pos = go.get_position()
-                back_pos.x = back_pos.x + 100
+                back_pos.x = back_pos.x + 70
                 walk_back(back_pos, idle)
             end)
         end

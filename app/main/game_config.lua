@@ -81,14 +81,8 @@ ____exports._GAME_CONFIG = {
         [CellId.Stone2] = "cell_stone_2",
         [CellId.Lock] = "cell_lock"
     },
-    activation_cells = {CellId.Grass, CellId.Flowers},
-    near_activated_cells = {
-        CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
-        CellId.Web
-    },
+    activation_cells = {CellId.Web, CellId.Grass, CellId.Flowers},
+    near_activated_cells = {CellId.Box, CellId.Stone0, CellId.Stone1, CellId.Stone2},
     disabled_cells = {
         CellId.Box,
         CellId.Stone0,
@@ -195,10 +189,10 @@ ____exports._GAME_CONFIG = {
         4,
         5,
         6,
+        9,
         10,
-        11,
         13,
-        18
+        17
     },
     tutorials = {
         [1] = {cells = {
@@ -256,8 +250,8 @@ ____exports._GAME_CONFIG = {
             {x = 6, y = 5},
             {x = 7, y = 5}
         }, action = {from_x = 7, from_y = 3, to_x = 7, to_y = 4}},
-        [6] = {busters = {"hammer"}},
-        [9] = {busters = {"spinning"}},
+        [6] = {action = {"hammer"}},
+        [9] = {action = {"spinning"}},
         [10] = {cells = {
             {x = 3, y = 4},
             {x = 4, y = 4},
@@ -284,7 +278,7 @@ ____exports._GAME_CONFIG = {
             {x = 6, y = 7},
             {x = 7, y = 7}
         }, action = {from_x = 6, from_y = 4, to_x = 6, to_y = 5}},
-        [18] = {busters = {"horizontal_rocket", "vertical_rocket"}}
+        [17] = {action = {"horizontal_rocket", "vertical_rocket"}}
     },
     levels = {}
 }
@@ -300,6 +294,7 @@ ____exports._STORAGE_CONFIG = {
     hammer_counts = 3,
     spinning_counts = 3,
     horizontal_rocket_counts = 3,
-    vertical_rocket_counts = 3
+    vertical_rocket_counts = 3,
+    completed_tutorials = {}
 }
 return ____exports

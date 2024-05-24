@@ -94,6 +94,7 @@ export const _GAME_CONFIG = {
     } as { [key in CellId]: string },
     
     activation_cells: [
+        CellId.Web,
         CellId.Grass,
         CellId.Flowers
     ],
@@ -102,8 +103,7 @@ export const _GAME_CONFIG = {
         CellId.Box,
         CellId.Stone0,
         CellId.Stone1,
-        CellId.Stone2,
-        CellId.Web,
+        CellId.Stone2
     ],
     
     disabled_cells: [
@@ -205,7 +205,7 @@ export const _GAME_CONFIG = {
         47: 'bull'
     } as {[key in number]: string},
 
-    tutorial_levels: [1, 2, 3, 4, 5, 6, 10, 11, 13, 18],
+    tutorial_levels: [1, 2, 3, 4, 5, 6, 9, 10, 13, 17],
     tutorials: {
         1: {
             cells: 
@@ -247,10 +247,10 @@ export const _GAME_CONFIG = {
             action: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
         },
         6: {
-            busters: ['hammer']
+            action: ['hammer']
         },
         9: {
-            busters: ['spinning']
+            action: ['spinning']
         },
         10: {
             cells: [
@@ -270,10 +270,10 @@ export const _GAME_CONFIG = {
             ],
             action: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
         },
-        18: {
-            busters: ['horizontal_rocket', 'vertical_rocket']
+        17: {
+            action: ['horizontal_rocket', 'vertical_rocket']
         }
-    } as { [key in number]: {cells: {x: number, y: number}[], action: StepInfo} | {busters: string[]}},
+    } as { [key in number]: {cells?: {x: number, y: number}[], action?: StepInfo | string[]}},
 
     levels: [] as Level[]
 };
@@ -296,7 +296,9 @@ export const _STORAGE_CONFIG = {
     hammer_counts: 3,
     spinning_counts: 3,
     horizontal_rocket_counts: 3,
-    vertical_rocket_counts: 3
+    vertical_rocket_counts: 3,
+
+    completed_tutorials: [] as number[]
 };
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
@@ -346,7 +348,14 @@ export type _UserMessages = {
     CLICK_ACTIVATION: PosXYMessage,
 
     TRY_ACTIVATE_SPINNING: VoidMessage,
+    TRY_ACTIVATE_HAMMER: VoidMessage,
+    TRY_ACTIVATE_HORIZONTAL_ROCKET: VoidMessage,
+    TRY_ACTIVATE_VERTICAL_ROCKET: VoidMessage,
     ACTIVATE_SPINNING: VoidMessage,
+    ACTIVATE_HAMMER: VoidMessage,
+    ACTIVATE_VERTICAL_ROCKET: VoidMessage,
+    ACTIVATE_HORIZONTAL_ROCKET: VoidMessage,
+    
     ON_SPINNING_ACTIVATED: SpinningActivationMessage,
 
     ON_ELEMENT_SELECTED: ItemInfo,
@@ -392,5 +401,8 @@ export type _UserMessages = {
     UPDATED_TARGET: { id: number, count: number },
 
     ON_LEVEL_COMPLETED: VoidMessage,
-    ON_GAME_OVER: VoidMessage
+    ON_GAME_OVER: VoidMessage,
+
+    SET_TUTORIAL: VoidMessage,
+    REMOVE_TUTORIAL: VoidMessage
 };

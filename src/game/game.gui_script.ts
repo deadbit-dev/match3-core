@@ -115,71 +115,50 @@ export function init(this: props): void {
         set_text('third_target_counts', target.count);
     }
 
-    this.druid.new_button('back_button', () => {
-        Scene.load('map');
-    });
-    
-    set_text('current_level', GameStorage.get('current_level') + 1);
+    this.druid.new_button('back/button', () => Scene.load('map'));
+    this.druid.new_button('restart/button', () => Scene.restart());
+    // this.druid.new_button('revert_step_button', () => EventBus.send('TRY_REVERT_STEP'));
 
-    this.druid.new_button('restart_button', () => Scene.restart());
-    this.druid.new_button('revert_step_button', () => EventBus.send('TRY_REVERT_STEP'));
+    set_text('current_level_text', GameStorage.get('current_level') + 1);
     
     if(GameStorage.get('spinning_opened')) {
         this.druid.new_button('spinning/button', () => {
-            if(GameStorage.get('spinning_counts') > 0) this.busters.spinning.active = !this.busters.spinning.active;
-        
-            this.busters.hammer.active = false;
-            this.busters.horizontal_rocket.active = false;
-            this.busters.vertical_rocket.active = false;
-
             EventBus.send('TRY_ACTIVATE_SPINNING');
-            EventBus.send('UPDATED_BUTTONS');
         });
 
         gui.set_enabled(gui.get_node('spinning/lock'), false);
         gui.set_enabled(gui.get_node('spinning/icon'), true);
+        gui.set_enabled(gui.get_node('spinning/counts'), true);
     }
 
     if(GameStorage.get('hammer_opened')) {
         this.druid.new_button('hammer/button', () => {
-            if(GameStorage.get('hammer_counts') > 0) this.busters.hammer.active = !this.busters.hammer.active;
-    
-            this.busters.horizontal_rocket.active = false;
-            this.busters.vertical_rocket.active = false;
-
-            EventBus.send('UPDATED_BUTTONS');
+            EventBus.send('TRY_ACTIVATE_HAMMER');
         });
         
         gui.set_enabled(gui.get_node('hammer/lock'), false);
         gui.set_enabled(gui.get_node('hammer/icon'), true);
+        gui.set_enabled(gui.get_node('hammer/counts'), true);
     }
      
     if(GameStorage.get('horizontal_rocket_opened')) {
         this.druid.new_button('horizontal_rocket/button', () => {
-            if(GameStorage.get('horizontal_rocket_counts') > 0) this.busters.horizontal_rocket.active = !this.busters.horizontal_rocket.active;
-            
-            this.busters.hammer.active = false;
-            this.busters.vertical_rocket.active = false;
-
-            EventBus.send('UPDATED_BUTTONS');
+            EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
         });
         
         gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
         gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
+        gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
     }
 
     if(GameStorage.get('vertical_rocket_opened')) {
         this.druid.new_button('vertical_rocket/button', () => {
-            if(GameStorage.get('vertical_rocket_counts') > 0) this.busters.vertical_rocket.active = !this.busters.vertical_rocket.active;
-            
-            this.busters.hammer.active = false;
-            this.busters.horizontal_rocket.active = false;
-
-            EventBus.send('UPDATED_BUTTONS');
+            EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
         });
         
         gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
         gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
+        gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
     }
 
     if(!GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1))
@@ -213,6 +192,15 @@ export function init(this: props): void {
     
     EventBus.on('GAME_TIMER', (time) => {
         set_text('time', parse_time(time));
+    }, true);
+
+    EventBus.on('SET_TUTORIAL', () => {
+        gui.set_enabled(gui.get_node('tutorial'), true);
+        gui.set_text(gui.get_node('tutorial_text'), 'TUTORIAL');
+    }, true);
+
+    EventBus.on('REMOVE_TUTORIAL', () => {
+        gui.set_enabled(gui.get_node('tutorial'), false);
     }, true);
 }
 

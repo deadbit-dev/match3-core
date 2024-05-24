@@ -112,6 +112,7 @@ export interface Target {
 }
 
 export interface Buster {
+    name: string,
     counts: number,
     active: boolean
 }
@@ -188,7 +189,12 @@ export function Game() {
     
     let is_simulating = false;
     let is_step = false;
+    
     let is_block_input = false;
+    let is_block_spinning = false;
+    let is_block_hammer = false;
+    let is_block_vertical_rocket = false;
+    let is_block_horizontal_rocket = false;
 
 
     function init() {
@@ -293,7 +299,10 @@ export function Game() {
         EventBus.on('SWAP_ELEMENTS', on_swap_elements);
         EventBus.on('CLICK_ACTIVATION', on_click_activation);
         EventBus.on('ACTIVATE_SPINNING', on_activate_spinning);
-        EventBus.on('REVERT_STEP', on_revert_step);
+        EventBus.on('ACTIVATE_HAMMER', on_activate_hammer);
+        EventBus.on('ACTIVATE_VERTICAL_ROCKET', on_activate_vertical_rocket);
+        EventBus.on('ACTIVATE_HORIZONTAL_ROCKET', on_activate_horizontal_rocket);
+        // EventBus.on('REVERT_STEP', on_revert_step);
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
     }
 
@@ -304,12 +313,11 @@ export function Game() {
 
         try_load_field();
         
-        // const is_tutorial = try_set_tutorial();
-        // if(!is_tutorial) {
-            search_available_steps(5, (steps) => {
-                available_steps = steps;
-            });
-        // }
+        // if(is_tutorial()) set_tutorial();
+            
+        search_available_steps(5, (steps) => {
+            available_steps = steps;
+        });
 
         init_targets();
 
@@ -321,34 +329,54 @@ export function Game() {
         EventBus.send('ON_LOAD_FIELD', get_state());
     }
 
-    function try_set_tutorial() {
-        if(!GAME_CONFIG.tutorial_levels.includes(current_level + 1)) return false;
-
-        const except_cells = GAME_CONFIG.tutorials[current_level + 1].cells;
-        if(except_cells != undefined) lock_cells_except(except_cells);
-
-        return true;
+    function is_tutorial() {
+        const is_tutorial_level = GAME_CONFIG.tutorial_levels.includes(current_level + 1);
+        const is_not_completed = !GameStorage.get('completed_tutorials').includes(current_level + 1);
+        return (is_tutorial_level && is_not_completed);
     }
 
-    function try_remove_tutorial() {
-        if(!GAME_CONFIG.tutorial_levels.includes(current_level)) return false;
+    function set_tutorial() {        
+        const tutorial_data = GAME_CONFIG.tutorials[current_level + 1];
+        const except_cells = tutorial_data.cells != undefined ? tutorial_data.cells : [];
+        lock_cells(except_cells);
+        
+        const except_busters = Array.isArray(tutorial_data.action) ? tutorial_data.action : [];
+        lock_buters(except_busters);
+
+        EventBus.send('SET_TUTORIAL');
+    }
+
+    function try_unlock_cells(step: StepInfo) {
+        const tutorial_data = GAME_CONFIG.tutorials[current_level + 1];
+        if(Array.isArray(tutorial_data.action)) return false;
+
+        const is_from = step.from_x == tutorial_data.action?.from_x && step.from_y == tutorial_data.action.from_y;
+        const is_to = step.to_x == tutorial_data.action?.to_x && step.to_y == tutorial_data.action.to_y; 
+        if(!is_from || !is_to) return false;
 
         unlock_cells();
         
         set_state();
         EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-
+        
         return true;
     }
 
-    function lock_cells_except(cells: {x: number, y: number}[]) {
+    function lock_cells(except_cells: {x: number, y: number}[]) {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
-                if(!cells.find((cell) => (cell.x == x) && (cell.y == y))) {
+
+                const c = field.get_cell(x,y);
+                if(c != NotActiveCell) print("LOCK: ", x, y, c.id);
+                
+                if(!except_cells.find((cell) => (cell.x == x) && (cell.y == y))) {
                     const cell = field.get_cell(x, y);
                     if(cell != NotActiveCell) {
                         if(cell.data == undefined || cell.data.under_cells == undefined) cell.data.under_cells = [];
                         (cell.data.under_cells as CellId[]).push(cell.id);
+
+                        for(const uc in cell.data.under_cells) print(x, y, uc);
+
                         cell.id = CellId.Lock;
                         cell.type = CellId.Lock;
                         field.set_cell(x, y, cell);
@@ -363,13 +391,31 @@ export function Game() {
             for (let x = 0; x < field_width; x++) {
                 const cell = field.get_cell(x, y);
                 if(cell != NotActiveCell && cell.type == CellId.Lock) {
+                
+                    print(x, y, cell.type, CellId.Lock);
+                
                     const id = (cell.data.under_cells as CellId[]).pop();
+                    print("UNLOCK: ", x, y, id);
                     cell.id = (id == undefined) ? CellId.Base : id;
                     cell.type = generate_cell_type_by_cell_id(cell.id);
                     field.set_cell(x, y, cell);
                 }
             }
         }
+    }
+
+    function lock_buters(except_busters: string[]) {
+        is_block_spinning = !except_busters.includes('spinning');
+        is_block_hammer = !except_busters.includes('hammer');
+        is_block_vertical_rocket = !except_busters.includes('vertical_rocket');
+        is_block_horizontal_rocket = !except_busters.includes('horizontal_rocket');
+    }
+
+    function unlock_busters() {
+        is_block_spinning = false;
+        is_block_hammer = false;
+        is_block_vertical_rocket = false;
+        is_block_horizontal_rocket = false;
     }
 
     function try_load_field() {
@@ -387,10 +433,23 @@ export function Game() {
         }
     }
 
+    function complete_tutorial() {
+        EventBus.send("REMOVE_TUTORIAL");
+        
+        const completed_tutorials = GameStorage.get('completed_tutorials');
+        completed_tutorials.push(current_level + 1);
+        GameStorage.set('completed_tutorials', completed_tutorials);
+    }
+
     function on_swap_elements(elements: StepInfo | undefined) {
         if(is_block_input || elements == undefined) return;
 
         stop_helper();
+        
+        if(is_tutorial() && try_unlock_cells(elements)) {
+            unlock_busters();
+            complete_tutorial();
+        }
         
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
 
@@ -441,16 +500,100 @@ export function Game() {
     }
 
     function on_activate_spinning() {
-        if(is_block_input) return;
+        if(GameStorage.get('spinning_counts') <= 0 || is_block_input || is_block_spinning) return;
         
+        busters.spinning.active = !busters.spinning.active;
+
+        busters.hammer.active = false;
+        busters.horizontal_rocket.active = false;
+        busters.vertical_rocket.active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+
+        if(is_tutorial()) {
+            unlock_cells();
+            
+            set_state();
+            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+
+            unlock_busters();
+            complete_tutorial();
+        }
+
         stop_helper();
         try_spinning_activation();
     }
 
-    function on_revert_step() {
-        stop_helper();
-        revert_step();
+    function on_activate_hammer() {
+        if(GameStorage.get('hammer_counts') <= 0 || is_block_input || is_block_hammer) return;
+        
+        busters.hammer.active = !busters.hammer.active;
+
+        busters.spinning.active = false;
+        busters.horizontal_rocket.active = false;
+        busters.vertical_rocket.active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+
+        if(is_tutorial()) {
+            unlock_cells();
+
+            set_state();
+            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+
+            unlock_busters();
+            complete_tutorial();
+        }
     }
+    
+    function on_activate_vertical_rocket() {
+        if(GameStorage.get('vertical_rocket_counts') <= 0 || is_block_input || is_block_vertical_rocket) return;
+        
+        busters.vertical_rocket.active = !busters.vertical_rocket.active;
+
+        busters.hammer.active = false;
+        busters.spinning.active = false;
+        busters.horizontal_rocket.active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+    
+        if(is_tutorial()) {
+            unlock_cells();
+
+            set_state();
+            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+
+            unlock_busters();
+            complete_tutorial();
+        }
+    }
+
+    function on_activate_horizontal_rocket() {
+        if(GameStorage.get('horizontal_rocket_counts') <= 0 || is_block_input || is_block_horizontal_rocket) return;
+        
+        busters.horizontal_rocket.active = !busters.horizontal_rocket.active;
+
+        busters.hammer.active = false;
+        busters.spinning.active = false;
+        busters.vertical_rocket.active = false;
+
+        EventBus.send('UPDATED_BUTTONS');
+    
+        if(is_tutorial()) {
+            unlock_cells();
+
+            set_state();
+            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+
+            unlock_busters();
+            complete_tutorial();
+        }
+    }
+
+    // function on_revert_step() {
+    //     stop_helper();
+    //     revert_step();
+    // }
 
     // TODO: move in logic game step end
     function on_game_step_animation_end() {
@@ -1461,38 +1604,40 @@ export function Game() {
         set_random();
     }
     
-    function revert_step(): boolean {
-        const current_state = states.pop();
-        let previous_state = states.pop();
-        if(current_state == undefined || previous_state == undefined) return false;
+    // function revert_step(): boolean {
+    //     const current_state = states.pop();
+    //     let previous_state = states.pop();
+    //     if(current_state == undefined || previous_state == undefined) return false;
 
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
-                const cell = previous_state.cells[y][x];
-                if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
-                else field.set_cell(x, y, NotActiveCell);
+    //     for (let y = 0; y < field_height; y++) {
+    //         for (let x = 0; x < field_width; x++) {
+    //             const cell = previous_state.cells[y][x];
+    //             if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
+    //             else field.set_cell(x, y, NotActiveCell);
 
-                const element = previous_state.elements[y][x];
-                if(element != NullElement) make_element(x, y, element.type, element.data);
-                else field.set_element(x, y, NullElement);
-            }
-        }
+    //             const element = previous_state.elements[y][x];
+    //             if(element != NullElement) make_element(x, y, element.type, element.data);
+    //             else field.set_element(x, y, NullElement);
+    //         }
+    //     }
 
-        const state = field.save_state(); 
-        previous_state.cells = state.cells;
-        previous_state.elements = state.elements;
-        states.push(previous_state);
+    //     const state = field.save_state(); 
+    //     previous_state.cells = state.cells;
+    //     previous_state.elements = state.elements;
+    //     states.push(previous_state);
 
-        set_random(previous_state.randomseed);
+    //     set_random(previous_state.randomseed);
 
-        search_available_steps(5, (steps) => {
-            available_steps = steps;
-        });
+    //     search_available_steps(5, (steps) => {
+    //         available_steps = steps;
+    //     });
 
-        EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
+    //     // EventBus.send('ON_REVERT_STEP', {current_state, previous_state});
 
-        return true;
-    }
+    //     // EventBus.send('UPDATED_STATE', previous_state);
+
+    //     return true;
+    // }
 
     function is_level_completed() {
         for(const target of get_state(2).targets) {
@@ -1507,7 +1652,7 @@ export function Game() {
 
     function is_have_steps() {
         if(level_config.steps != undefined)
-            return get_state(2).steps <= level_config.steps;
+            return get_state(2).steps < level_config.steps;
         return true;
     }
 
@@ -1813,18 +1958,22 @@ export function load_config() {
 
             busters: {
                 hammer: {
+                    name: 'hammer',
                     counts: level_data.busters.hammer,
                     active: false
                 },
                 spinning: {
+                    name: 'spinning',
                     counts: level_data.busters.spinning,
                     active: false
                 },
                 horizontal_rocket: {
+                    name: 'horizontal_rocket',
                     counts: level_data.busters.horizontal_rocket,
                     active: false
                 },
                 vertical_rocket: {
+                    name: 'vertical_rocket',
                     counts: level_data. busters.vertical_rocket,
                     active: false
                 }
@@ -1849,9 +1998,15 @@ export function load_config() {
                     }   
                 } else {
                     if(data.cell != undefined) {
-                        if(data.cell == CellId.Stone0) {
-                            level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
-                        } else level.field.cells[y][x] = [CellId.Base, data.cell];
+                        switch(data.cell) {
+                            case CellId.Stone0:
+                                level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
+                                break;
+                            case CellId.Grass:
+                                level.field.cells[y][x] = [CellId.Base, CellId.Flowers, CellId.Grass];
+                                break;
+                            default: level.field.cells[y][x] = [CellId.Base, data.cell];
+                        }
                     } else level.field.cells[y][x] = CellId.Base;
 
                     if(data.element != undefined) {

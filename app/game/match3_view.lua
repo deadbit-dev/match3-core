@@ -37,7 +37,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_targets, set_events, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_feild, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, on_revert_step_animation, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
+    local set_targets, set_events, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_feild, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
     function set_targets()
         do
             local i = 0
@@ -194,19 +194,30 @@ function ____exports.View(animator)
             end
         )
         EventBus.on(
-            "TRY_REVERT_STEP",
+            "TRY_ACTIVATE_HAMMER",
             function()
                 if is_processing then
                     return
                 end
-                EventBus.send("REVERT_STEP")
+                EventBus.send("ACTIVATE_HAMMER")
             end
         )
         EventBus.on(
-            "ON_REVERT_STEP",
-            function(states)
-                flow.start(function() return on_revert_step_animation(states.current_state, states.previous_state) end)
-                EventBus.send("SET_HELPER")
+            "TRY_ACTIVATE_HORIZONTAL_ROCKET",
+            function()
+                if is_processing then
+                    return
+                end
+                EventBus.send("ACTIVATE_HORIZONTAL_ROCKET")
+            end
+        )
+        EventBus.on(
+            "TRY_ACTIVATE_VERTICAL_ROCKET",
+            function()
+                if is_processing then
+                    return
+                end
+                EventBus.send("ACTIVATE_VERTICAL_ROCKET")
             end
         )
         EventBus.on(
@@ -258,20 +269,20 @@ function ____exports.View(animator)
         state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch47 = event.key
+                local ____switch49 = event.key
                 local event_duration
-                local ____cond47 = ____switch47 == "ON_SWAP_ELEMENTS"
-                if ____cond47 then
+                local ____cond49 = ____switch49 == "ON_SWAP_ELEMENTS"
+                if ____cond49 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond47 = ____cond47 or ____switch47 == "ON_SPINNING_ACTIVATED"
-                if ____cond47 then
+                ____cond49 = ____cond49 or ____switch49 == "ON_SPINNING_ACTIVATED"
+                if ____cond49 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond47 = ____cond47 or ____switch47 == "ON_MOVED_ELEMENTS"
-                if ____cond47 then
+                ____cond49 = ____cond49 or ____switch49 == "ON_MOVED_ELEMENTS"
+                if ____cond49 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -317,24 +328,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch57 = move_direction
-            local ____cond57 = ____switch57 == Direction.Up
-            if ____cond57 then
+            local ____switch59 = move_direction
+            local ____cond59 = ____switch59 == Direction.Up
+            if ____cond59 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond57 = ____cond57 or ____switch57 == Direction.Down
-            if ____cond57 then
+            ____cond59 = ____cond59 or ____switch59 == Direction.Down
+            if ____cond59 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond57 = ____cond57 or ____switch57 == Direction.Left
-            if ____cond57 then
+            ____cond59 = ____cond59 or ____switch59 == Direction.Left
+            if ____cond59 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond57 = ____cond57 or ____switch57 == Direction.Right
-            if ____cond57 then
+            ____cond59 = ____cond59 or ____switch59 == Direction.Right
+            if ____cond59 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1062,14 +1073,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch210 = dir
-            local ____cond210 = ____switch210 == Axis.Vertical
-            if ____cond210 then
+            local ____switch212 = dir
+            local ____cond212 = ____switch212 == Axis.Vertical
+            if ____cond212 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == Axis.Horizontal
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == Axis.Horizontal
+            if ____cond212 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1468,43 +1479,6 @@ function ____exports.View(animator)
     function on_move_phase_end()
         flow.delay(move_phase_duration)
         move_phase_duration = 0
-    end
-    function on_revert_step_animation(current_state, previous_state)
-        do
-            local y = 0
-            while y < field_height do
-                do
-                    local x = 0
-                    while x < field_width do
-                        local current_cell = current_state.cells[y + 1][x + 1]
-                        if current_cell ~= NotActiveCell then
-                            delete_all_view_items_by_game_id(current_cell.uid)
-                            local previous_cell = previous_state.cells[y + 1][x + 1]
-                            if previous_cell ~= NotActiveCell then
-                                try_make_under_cell(x, y, previous_cell)
-                                make_cell_view(x, y, previous_cell.id, previous_cell.uid)
-                            end
-                        end
-                        local current_element = current_state.elements[y + 1][x + 1]
-                        if current_element ~= NullElement then
-                            delete_view_item_by_game_id(current_element.uid)
-                        end
-                        local previous_element = previous_state.elements[y + 1][x + 1]
-                        if previous_element ~= NullElement then
-                            make_element_view(
-                                x,
-                                y,
-                                previous_element.type,
-                                previous_element.uid,
-                                true
-                            )
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
     end
     function remove_random_element_animation(message, element, target_element, view_index, on_complited)
         local target_world_pos = get_world_pos(target_element.x, target_element.y, 3)

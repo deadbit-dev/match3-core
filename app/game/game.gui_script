@@ -171,35 +171,22 @@ function ____exports.init(self)
         set_text("third_target_counts", target.count)
     end
     self.druid:new_button(
-        "back_button",
-        function()
-            Scene.load("map")
-        end
-    )
-    set_text(
-        "current_level",
-        GameStorage.get("current_level") + 1
+        "back/button",
+        function() return Scene.load("map") end
     )
     self.druid:new_button(
-        "restart_button",
+        "restart/button",
         function() return Scene.restart() end
     )
-    self.druid:new_button(
-        "revert_step_button",
-        function() return EventBus.send("TRY_REVERT_STEP") end
+    set_text(
+        "current_level_text",
+        GameStorage.get("current_level") + 1
     )
     if GameStorage.get("spinning_opened") then
         self.druid:new_button(
             "spinning/button",
             function()
-                if GameStorage.get("spinning_counts") > 0 then
-                    self.busters.spinning.active = not self.busters.spinning.active
-                end
-                self.busters.hammer.active = false
-                self.busters.horizontal_rocket.active = false
-                self.busters.vertical_rocket.active = false
                 EventBus.send("TRY_ACTIVATE_SPINNING")
-                EventBus.send("UPDATED_BUTTONS")
             end
         )
         gui.set_enabled(
@@ -210,17 +197,16 @@ function ____exports.init(self)
             gui.get_node("spinning/icon"),
             true
         )
+        gui.set_enabled(
+            gui.get_node("spinning/counts"),
+            true
+        )
     end
     if GameStorage.get("hammer_opened") then
         self.druid:new_button(
             "hammer/button",
             function()
-                if GameStorage.get("hammer_counts") > 0 then
-                    self.busters.hammer.active = not self.busters.hammer.active
-                end
-                self.busters.horizontal_rocket.active = false
-                self.busters.vertical_rocket.active = false
-                EventBus.send("UPDATED_BUTTONS")
+                EventBus.send("TRY_ACTIVATE_HAMMER")
             end
         )
         gui.set_enabled(
@@ -231,17 +217,16 @@ function ____exports.init(self)
             gui.get_node("hammer/icon"),
             true
         )
+        gui.set_enabled(
+            gui.get_node("hammer/counts"),
+            true
+        )
     end
     if GameStorage.get("horizontal_rocket_opened") then
         self.druid:new_button(
             "horizontal_rocket/button",
             function()
-                if GameStorage.get("horizontal_rocket_counts") > 0 then
-                    self.busters.horizontal_rocket.active = not self.busters.horizontal_rocket.active
-                end
-                self.busters.hammer.active = false
-                self.busters.vertical_rocket.active = false
-                EventBus.send("UPDATED_BUTTONS")
+                EventBus.send("TRY_ACTIVATE_HORIZONTAL_ROCKET")
             end
         )
         gui.set_enabled(
@@ -252,17 +237,16 @@ function ____exports.init(self)
             gui.get_node("horizontal_rocket/icon"),
             true
         )
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/counts"),
+            true
+        )
     end
     if GameStorage.get("vertical_rocket_opened") then
         self.druid:new_button(
             "vertical_rocket/button",
             function()
-                if GameStorage.get("vertical_rocket_counts") > 0 then
-                    self.busters.vertical_rocket.active = not self.busters.vertical_rocket.active
-                end
-                self.busters.hammer.active = false
-                self.busters.horizontal_rocket.active = false
-                EventBus.send("UPDATED_BUTTONS")
+                EventBus.send("TRY_ACTIVATE_VERTICAL_ROCKET")
             end
         )
         gui.set_enabled(
@@ -271,6 +255,10 @@ function ____exports.init(self)
         )
         gui.set_enabled(
             gui.get_node("vertical_rocket/icon"),
+            true
+        )
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/counts"),
             true
         )
     end
@@ -294,19 +282,19 @@ function ____exports.init(self)
         "UPDATED_TARGET",
         function(data)
             repeat
-                local ____switch32 = data.id
-                local ____cond32 = ____switch32 == 0
-                if ____cond32 then
+                local ____switch27 = data.id
+                local ____cond27 = ____switch27 == 0
+                if ____cond27 then
                     set_text("first_target_counts", data.count)
                     break
                 end
-                ____cond32 = ____cond32 or ____switch32 == 1
-                if ____cond32 then
+                ____cond27 = ____cond27 or ____switch27 == 1
+                if ____cond27 then
                     set_text("second_target_counts", data.count)
                     break
                 end
-                ____cond32 = ____cond32 or ____switch32 == 2
-                if ____cond32 then
+                ____cond27 = ____cond27 or ____switch27 == 2
+                if ____cond27 then
                     set_text("third_target_counts", data.count)
                     break
                 end
@@ -346,6 +334,30 @@ function ____exports.init(self)
             set_text(
                 "time",
                 parse_time(time)
+            )
+        end,
+        true
+    )
+    EventBus.on(
+        "SET_TUTORIAL",
+        function()
+            gui.set_enabled(
+                gui.get_node("tutorial"),
+                true
+            )
+            gui.set_text(
+                gui.get_node("tutorial_text"),
+                "TUTORIAL"
+            )
+        end,
+        true
+    )
+    EventBus.on(
+        "REMOVE_TUTORIAL",
+        function()
+            gui.set_enabled(
+                gui.get_node("tutorial"),
+                false
             )
         end,
         true

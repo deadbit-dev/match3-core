@@ -37,11 +37,11 @@ function animal_init(options: AnimalOptions) {
 
 function walk() {
     const to_pos = go.get_position();
-    to_pos.x -= 100;
+    to_pos.x -= 70;
     walk_to(to_pos, () => {
         action(() => {
             const back_pos = go.get_position();
-            back_pos.x += 100;
+            back_pos.x += 70;
             walk_back(back_pos, idle);
         });
     });

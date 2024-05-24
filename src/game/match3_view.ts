@@ -306,15 +306,30 @@ export function View(animator: FluxGroup) {
             EventBus.send('ACTIVATE_SPINNING');
         });
 
-        EventBus.on('TRY_REVERT_STEP', () => {
+        EventBus.on('TRY_ACTIVATE_HAMMER', () => {
             if (is_processing) return;
-            EventBus.send('REVERT_STEP');
+            EventBus.send('ACTIVATE_HAMMER');
+        });
+    
+        EventBus.on('TRY_ACTIVATE_HORIZONTAL_ROCKET', () => {
+            if (is_processing) return;
+            EventBus.send('ACTIVATE_HORIZONTAL_ROCKET');
+        });
+    
+        EventBus.on('TRY_ACTIVATE_VERTICAL_ROCKET', () => {
+            if (is_processing) return;
+            EventBus.send('ACTIVATE_VERTICAL_ROCKET');
         });
 
-        EventBus.on('ON_REVERT_STEP', (states) => {
-            flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
-            EventBus.send('SET_HELPER');
-        });
+        // EventBus.on('TRY_REVERT_STEP', () => {
+        //     if (is_processing) return;
+        //     EventBus.send('REVERT_STEP');
+        // });
+
+        // EventBus.on('ON_REVERT_STEP', (states) => {
+        //     flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
+        //     EventBus.send('SET_HELPER');
+        // });
 
         EventBus.on('ON_LEVEL_COMPLETED', () => {
             flow.start(() => {
@@ -1257,28 +1272,28 @@ export function View(animator: FluxGroup) {
         move_phase_duration = 0;
     }
 
-    function on_revert_step_animation(current_state: CoreState, previous_state: CoreState) {
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
-                const current_cell = current_state.cells[y][x];
-                if (current_cell != NotActiveCell) {
-                    delete_all_view_items_by_game_id(current_cell.uid);
+    // function on_revert_step_animation(current_state: GameState, previous_state: GameState) {
+    //     for (let y = 0; y < field_height; y++) {
+    //         for (let x = 0; x < field_width; x++) {
+    //             const current_cell = current_state.cells[y][x];
+    //             if (current_cell != NotActiveCell) {
+    //                 delete_all_view_items_by_game_id(current_cell.uid);
 
-                    const previous_cell = previous_state.cells[y][x];
-                    if (previous_cell != NotActiveCell) {
-                        try_make_under_cell(x, y, previous_cell);
-                        make_cell_view(x, y, previous_cell.id, previous_cell.uid);
-                    }
-                }
+    //                 const previous_cell = previous_state.cells[y][x];
+    //                 if (previous_cell != NotActiveCell) {
+    //                     try_make_under_cell(x, y, previous_cell);
+    //                     make_cell_view(x, y, previous_cell.id, previous_cell.uid);
+    //                 }
+    //             }
 
-                const current_element = current_state.elements[y][x];
-                if (current_element != NullElement) delete_view_item_by_game_id(current_element.uid);
+    //             const current_element = current_state.elements[y][x];
+    //             if (current_element != NullElement) delete_view_item_by_game_id(current_element.uid);
 
-                const previous_element = previous_state.elements[y][x];
-                if (previous_element != NullElement) make_element_view(x, y, previous_element.type, previous_element.uid, true);
-            }
-        }
-    }
+    //             const previous_element = previous_state.elements[y][x];
+    //             if (previous_element != NullElement) make_element_view(x, y, previous_element.type, previous_element.uid, true);
+    //         }
+    //     }
+    // }
 
     function remove_random_element_animation(message: Messages[MessageId], element: ItemInfo, target_element: ItemInfo, view_index?: number, on_complited?: () => void) {
         const target_world_pos = get_world_pos(target_element.x, target_element.y, 3);
