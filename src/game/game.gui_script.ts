@@ -25,11 +25,15 @@ export function init(this: props): void {
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
     this.busters = this.level['busters'];
 
-    if(this.level['time'] != undefined) {
+    set_events(this);
+}
+
+function setup(data: props) {
+    if(data.level['time'] != undefined) {
         const node = gui.get_node('timer');
         gui.set_enabled(node, true);
 
-        if(this.level['steps'] == undefined) {
+        if(data.level['steps'] == undefined) {
             gui.set_position(node, vmath.vector3(0, -20, 0));
             gui.set_scale(node, vmath.vector3(0.6, 0.6, 1));
         } else {
@@ -37,14 +41,14 @@ export function init(this: props): void {
             gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
         }
 
-        set_text('time', parse_time(this.level['time']));
+        set_text('time', parse_time(data.level['time']));
     }
 
-    if(this.level['steps'] != undefined) {
+    if(data.level['steps'] != undefined) {
         const node = gui.get_node('step_counter');
         gui.set_enabled(node, true);
 
-        if(this.level['time'] == undefined) {
+        if(data.level['time'] == undefined) {
             gui.set_position(node, vmath.vector3(0, -25, 0));
             gui.set_scale(node, vmath.vector3(0.7, 0.7, 1));
         } else {
@@ -52,10 +56,10 @@ export function init(this: props): void {
             gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
         }
 
-        set_text('steps', this.level['steps']);
+        set_text('steps', data.level['steps']);
     }
 
-    const targets = this.level['targets'];
+    const targets = data.level['targets'];
     if(targets[0] != undefined) {
         const node = gui.get_node('first_target');
         gui.set_enabled(node, true);
@@ -115,14 +119,14 @@ export function init(this: props): void {
         set_text('third_target_counts', target.count);
     }
 
-    this.druid.new_button('back/button', () => Scene.load('map'));
-    this.druid.new_button('restart/button', () => Scene.restart());
-    this.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
+    data.druid.new_button('back/button', () => Scene.load('map'));
+    data.druid.new_button('restart/button', () => Scene.restart());
+    data.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
 
     set_text('current_level_text', GameStorage.get('current_level') + 1);
     
     if(GameStorage.get('spinning_opened')) {
-        this.druid.new_button('spinning/button', () => {
+        data.druid.new_button('spinning/button', () => {
             EventBus.send('TRY_ACTIVATE_SPINNING');
         });
 
@@ -132,7 +136,7 @@ export function init(this: props): void {
     }
 
     if(GameStorage.get('hammer_opened')) {
-        this.druid.new_button('hammer/button', () => {
+        data.druid.new_button('hammer/button', () => {
             EventBus.send('TRY_ACTIVATE_HAMMER');
         });
         
@@ -142,7 +146,7 @@ export function init(this: props): void {
     }
      
     if(GameStorage.get('horizontal_rocket_opened')) {
-        this.druid.new_button('horizontal_rocket/button', () => {
+        data.druid.new_button('horizontal_rocket/button', () => {
             EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
         });
         
@@ -152,7 +156,7 @@ export function init(this: props): void {
     }
 
     if(GameStorage.get('vertical_rocket_opened')) {
-        this.druid.new_button('vertical_rocket/button', () => {
+        data.druid.new_button('vertical_rocket/button', () => {
             EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
         });
         
@@ -163,6 +167,10 @@ export function init(this: props): void {
 
     if(!GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1))
         gui.set_enabled(gui.get_node('buster_buttons'), true);
+}
+
+function set_events(data: props) {
+    EventBus.on('INIT_UI', () => setup(data));
 
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
         set_text('steps', steps);
@@ -177,16 +185,16 @@ export function init(this: props): void {
     }, true);
     
     EventBus.on('UPDATED_BUTTONS', () => {
-        set_text_colors(['spinning/button'], '#fff', this.busters.spinning.active ? 0.5 : 1);
+        set_text_colors(['spinning/button'], '#fff', data.busters.spinning.active ? 0.5 : 1);
         set_text('spinning/counts', GameStorage.get('spinning_counts'));
         
-        set_text_colors(['hammer/button'], '#fff', this.busters.hammer.active ? 0.5 : 1);
+        set_text_colors(['hammer/button'], '#fff', data.busters.hammer.active ? 0.5 : 1);
         set_text('hammer/counts', GameStorage.get('hammer_counts'));
         
-        set_text_colors(['horizontal_rocket/button'], '#fff', this.busters.horizontal_rocket.active ? 0.5 : 1);
+        set_text_colors(['horizontal_rocket/button'], '#fff', data.busters.horizontal_rocket.active ? 0.5 : 1);
         set_text('horizontal_rocket/counts', GameStorage.get('horizontal_rocket_counts'));
         
-        set_text_colors(['vertical_rocket/button'], '#fff', this.busters.vertical_rocket.active ? 0.5 : 1);
+        set_text_colors(['vertical_rocket/button'], '#fff', data.busters.vertical_rocket.active ? 0.5 : 1);
         set_text('vertical_rocket/counts', GameStorage.get('vertical_rocket_counts'));
     }, true);
     
@@ -195,8 +203,11 @@ export function init(this: props): void {
     }, true);
 
     EventBus.on('SET_TUTORIAL', () => {
-        gui.set_enabled(gui.get_node('tutorial'), true);
-        gui.set_text(gui.get_node('tutorial_text'), 'TUTORIAL');
+        const tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1];
+        const tutorial = gui.get_node('tutorial');
+        gui.set_position(tutorial, tutorial_data.position);
+        gui.set_enabled(tutorial, true);
+        gui.set_text(gui.get_node('tutorial_text'), Lang.get_text(tutorial_data.text));
     }, true);
 
     EventBus.on('REMOVE_TUTORIAL', () => {

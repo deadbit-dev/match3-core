@@ -6,6 +6,7 @@ import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo,
 import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
+import { lang_data } from "./langs";
 
 export const IS_DEBUG_MODE = true;
 export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_config("android.package").includes('huawei');
@@ -207,7 +208,7 @@ export const _GAME_CONFIG = {
     } as {[key in number]: string},
 
     tutorial_levels: [1, 2, 3, 4, 5, 6, 9, 10, 13, 17],
-    tutorials: {
+    tutorials_data: {
         1: {
             cells: 
             [
@@ -215,6 +216,8 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
             ],
             action: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
+            text: "tutorial_collect",
+            position: vmath.vector3(270, 750, 0)
         },
         2: {
             cells: [
@@ -224,6 +227,8 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 6}, {x: 4, y: 6}
             ],
             action: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
+            text: "tutorial_collect_rocket",
+            position: vmath.vector3(270, 750, 0)
         },
         3: {
             cells: [
@@ -231,6 +236,8 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
             ],
             action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            text: "tutorial_collect_diskosphere",
+            position: vmath.vector3(270, 750, 0)
         },
         4: {
             cells: [
@@ -238,6 +245,8 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
             ],
             action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            text: "tutorial_timer",
+            position: vmath.vector3(270, 750, 0)
         },
         5: {
             cells: [
@@ -246,12 +255,19 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}, {x: 7, y: 5}
             ],
             action: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
+            text: "tutorial_grass",
+            position: vmath.vector3(270, 750, 0)
+
         },
         6: {
-            action: ['hammer']
+            action: ['hammer'],
+            text: "tutorial_hammer",
+            position: vmath.vector3(270, 750, 0)
         },
         9: {
-            action: ['spinning']
+            action: ['spinning'],
+            text: "tutorial_spinning",
+            position: vmath.vector3(270, 750, 0)
         },
         10: {
             cells: [
@@ -259,6 +275,8 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
             ],
             action: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
+            text: "tutorial_box",
+            position: vmath.vector3(270, 750, 0)
         },
         13: {
             cells: [
@@ -270,11 +288,15 @@ export const _GAME_CONFIG = {
                 {x: 6, y: 7}, {x: 7, y: 7}
             ],
             action: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
+            text: "tutorial_web",
+            position: vmath.vector3(270, 750, 0)
         },
         17: {
-            action: ['horizontal_rocket', 'vertical_rocket']
+            action: ['horizontal_rocket', 'vertical_rocket'],
+            text: "tutorial_rockets",
+            position: vmath.vector3(270, 750, 0)
         }
-    } as { [key in number]: {cells?: {x: number, y: number}[], action?: StepInfo | string[]}},
+    } as { [key in number]: {cells?: {x: number, y: number}[], action?: StepInfo | string[], text: keyof typeof lang_data, position: vmath.vector3}},
 
     levels: [] as Level[]
 };
@@ -336,6 +358,8 @@ export type _UserMessages = {
 
     REQUEST_LOAD_FIELD: VoidMessage,
     ON_LOAD_FIELD: GameState,
+
+    INIT_UI: VoidMessage,
 
     UPDATED_STATE: GameState,
 

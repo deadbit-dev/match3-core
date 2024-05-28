@@ -195,91 +195,138 @@ ____exports._GAME_CONFIG = {
         13,
         17
     },
-    tutorials = {
-        [1] = {cells = {
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 5, y = 4},
-            {x = 3, y = 5},
-            {x = 4, y = 5},
-            {x = 5, y = 5}
-        }, action = {from_x = 5, from_y = 4, to_x = 5, to_y = 5}},
-        [2] = {cells = {
-            {x = 3, y = 3},
-            {x = 4, y = 3},
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 3, y = 5},
-            {x = 4, y = 5},
-            {x = 3, y = 6},
-            {x = 4, y = 6}
-        }, action = {from_x = 4, from_y = 4, to_x = 3, to_y = 4}},
-        [3] = {cells = {
-            {x = 3, y = 3},
-            {x = 4, y = 3},
-            {x = 5, y = 3},
-            {x = 6, y = 3},
-            {x = 7, y = 3},
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 5, y = 4},
-            {x = 6, y = 4},
-            {x = 7, y = 4}
-        }, action = {from_x = 5, from_y = 3, to_x = 5, to_y = 4}},
-        [4] = {cells = {
-            {x = 3, y = 3},
-            {x = 4, y = 3},
-            {x = 5, y = 3},
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 5, y = 4}
-        }, action = {from_x = 5, from_y = 3, to_x = 5, to_y = 4}},
-        [5] = {cells = {
-            {x = 3, y = 3},
-            {x = 4, y = 3},
-            {x = 5, y = 3},
-            {x = 6, y = 3},
-            {x = 7, y = 3},
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 5, y = 4},
-            {x = 6, y = 4},
-            {x = 7, y = 4},
-            {x = 3, y = 5},
-            {x = 4, y = 5},
-            {x = 5, y = 5},
-            {x = 6, y = 5},
-            {x = 7, y = 5}
-        }, action = {from_x = 7, from_y = 3, to_x = 7, to_y = 4}},
-        [6] = {action = {"hammer"}},
-        [9] = {action = {"spinning"}},
-        [10] = {cells = {
-            {x = 3, y = 4},
-            {x = 4, y = 4},
-            {x = 5, y = 4},
-            {x = 6, y = 4},
-            {x = 3, y = 5},
-            {x = 4, y = 5},
-            {x = 5, y = 5},
-            {x = 6, y = 5}
-        }, action = {from_x = 3, from_y = 4, to_x = 4, to_y = 4}},
-        [13] = {cells = {
-            {x = 6, y = 2},
-            {x = 7, y = 2},
-            {x = 6, y = 3},
-            {x = 7, y = 3},
-            {x = 6, y = 4},
-            {x = 7, y = 4},
-            {x = 8, y = 4},
-            {x = 6, y = 5},
-            {x = 7, y = 5},
-            {x = 8, y = 5},
-            {x = 6, y = 6},
-            {x = 7, y = 6},
-            {x = 6, y = 7},
-            {x = 7, y = 7}
-        }, action = {from_x = 6, from_y = 4, to_x = 6, to_y = 5}},
-        [17] = {action = {"horizontal_rocket", "vertical_rocket"}}
+    tutorials_data = {
+        [1] = {
+            cells = {
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 5, y = 4},
+                {x = 3, y = 5},
+                {x = 4, y = 5},
+                {x = 5, y = 5}
+            },
+            action = {from_x = 5, from_y = 4, to_x = 5, to_y = 5},
+            text = "tutorial_collect",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [2] = {
+            cells = {
+                {x = 3, y = 3},
+                {x = 4, y = 3},
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 3, y = 5},
+                {x = 4, y = 5},
+                {x = 3, y = 6},
+                {x = 4, y = 6}
+            },
+            action = {from_x = 4, from_y = 4, to_x = 3, to_y = 4},
+            text = "tutorial_collect_rocket",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [3] = {
+            cells = {
+                {x = 3, y = 3},
+                {x = 4, y = 3},
+                {x = 5, y = 3},
+                {x = 6, y = 3},
+                {x = 7, y = 3},
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 5, y = 4},
+                {x = 6, y = 4},
+                {x = 7, y = 4}
+            },
+            action = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
+            text = "tutorial_collect_diskosphere",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [4] = {
+            cells = {
+                {x = 3, y = 3},
+                {x = 4, y = 3},
+                {x = 5, y = 3},
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 5, y = 4}
+            },
+            action = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
+            text = "tutorial_timer",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [5] = {
+            cells = {
+                {x = 3, y = 3},
+                {x = 4, y = 3},
+                {x = 5, y = 3},
+                {x = 6, y = 3},
+                {x = 7, y = 3},
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 5, y = 4},
+                {x = 6, y = 4},
+                {x = 7, y = 4},
+                {x = 3, y = 5},
+                {x = 4, y = 5},
+                {x = 5, y = 5},
+                {x = 6, y = 5},
+                {x = 7, y = 5}
+            },
+            action = {from_x = 7, from_y = 3, to_x = 7, to_y = 4},
+            text = "tutorial_grass",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [6] = {
+            action = {"hammer"},
+            text = "tutorial_hammer",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [9] = {
+            action = {"spinning"},
+            text = "tutorial_spinning",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [10] = {
+            cells = {
+                {x = 3, y = 4},
+                {x = 4, y = 4},
+                {x = 5, y = 4},
+                {x = 6, y = 4},
+                {x = 3, y = 5},
+                {x = 4, y = 5},
+                {x = 5, y = 5},
+                {x = 6, y = 5}
+            },
+            action = {from_x = 3, from_y = 4, to_x = 4, to_y = 4},
+            text = "tutorial_box",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [13] = {
+            cells = {
+                {x = 6, y = 2},
+                {x = 7, y = 2},
+                {x = 6, y = 3},
+                {x = 7, y = 3},
+                {x = 6, y = 4},
+                {x = 7, y = 4},
+                {x = 8, y = 4},
+                {x = 6, y = 5},
+                {x = 7, y = 5},
+                {x = 8, y = 5},
+                {x = 6, y = 6},
+                {x = 7, y = 6},
+                {x = 6, y = 7},
+                {x = 7, y = 7}
+            },
+            action = {from_x = 6, from_y = 4, to_x = 6, to_y = 5},
+            text = "tutorial_web",
+            position = vmath.vector3(270, 750, 0)
+        },
+        [17] = {
+            action = {"horizontal_rocket", "vertical_rocket"},
+            text = "tutorial_rockets",
+            position = vmath.vector3(270, 750, 0)
+        }
     },
     levels = {}
 }

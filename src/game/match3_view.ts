@@ -225,6 +225,7 @@ export function View(animator: FluxGroup) {
             recalculate_cell_offset(state);
             load_field(state);
 
+            EventBus.send('INIT_UI');
             EventBus.send('SET_HELPER');
         });
 
@@ -352,7 +353,6 @@ export function View(animator: FluxGroup) {
         });
 
         EventBus.on('UPDATED_STATE', (state) => {
-            print("UPDATE STATE");
             reset_feild(state);
             EventBus.send('SET_HELPER');
         });
@@ -477,8 +477,7 @@ export function View(animator: FluxGroup) {
     }
 
     function load_field(game_state: GameState, with_anim = true) {
-        print("LOAD FIELD");
-
+        Log.log("LOAD FIELD");
         state.game_state = game_state;
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -496,7 +495,7 @@ export function View(animator: FluxGroup) {
     }
 
     function reset_feild(game_state: GameState) {
-        print("RESET FIELD");
+        Log.log("RESET FIELD");
 
         for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
             const id = tonumber(sid);

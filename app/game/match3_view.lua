@@ -54,6 +54,7 @@ function ____exports.View(animator)
             function(state)
                 recalculate_cell_offset(state)
                 load_field(state)
+                EventBus.send("INIT_UI")
                 EventBus.send("SET_HELPER")
             end
         )
@@ -253,7 +254,6 @@ function ____exports.View(animator)
         EventBus.on(
             "UPDATED_STATE",
             function(state)
-                print("UPDATE STATE")
                 reset_feild(state)
                 EventBus.send("SET_HELPER")
             end
@@ -407,7 +407,7 @@ function ____exports.View(animator)
         if with_anim == nil then
             with_anim = true
         end
-        print("LOAD FIELD")
+        Log.log("LOAD FIELD")
         state.game_state = game_state
         do
             local y = 0
@@ -439,7 +439,7 @@ function ____exports.View(animator)
         end
     end
     function reset_feild(game_state)
-        print("RESET FIELD")
+        Log.log("RESET FIELD")
         for ____, ____value in ipairs(__TS__ObjectEntries(state.game_id_to_view_index)) do
             local sid = ____value[1]
             local index = ____value[2]

@@ -73,6 +73,7 @@ function LangModule() {
             Log.warn('нет языкового набора:', cur_lang);
             return '';
         }
+
         if (data[code] == undefined) {
             Log.warn('код не найден:', code);
             return '';
