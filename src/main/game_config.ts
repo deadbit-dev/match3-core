@@ -349,6 +349,8 @@ export interface SwapedDiskosphereActivationMessage extends SwapedActivationMess
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
+export interface TargetMessage { id: number, count: number }
+
 export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
@@ -423,9 +425,9 @@ export type _UserMessages = {
     UPDATED_BUTTONS: VoidMessage,
     UPDATED_STEP_COUNTER: number,
     UPDATED_TIMER: number,
-    UPDATED_TARGET: { id: number, count: number },
+    UPDATED_TARGET: TargetMessage,
 
-    ON_LEVEL_COMPLETED: VoidMessage,
+    ON_WIN: VoidMessage,
     ON_GAME_OVER: VoidMessage,
 
     SET_TUTORIAL: VoidMessage,

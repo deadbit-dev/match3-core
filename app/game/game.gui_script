@@ -1,13 +1,24 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local ____exports = {}
-local setup, set_events
+local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, restart_level, set_events, update_targets, update_buttons, set_tutorial, set_win, set_gameover, disable_game_ui
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
 function setup(data)
+    setup_info_ui(data)
+    setup_busters(data)
+    setup_sustem_ui(data)
+    setup_win_ui(data)
+    setup_gameover_ui(data)
+end
+function setup_info_ui(data)
+    setup_step_or_time(data)
+    setup_targets(data)
+end
+function setup_step_or_time(data)
     if data.level.time ~= nil then
         local node = gui.get_node("timer")
         gui.set_enabled(node, true)
@@ -59,14 +70,16 @@ function setup(data)
         end
         set_text("steps", data.level.steps)
     end
+end
+function setup_targets(data)
     local targets = data.level.targets
     if targets[1] ~= nil then
         local node = gui.get_node("first_target")
         gui.set_enabled(node, true)
         repeat
-            local ____switch11 = #targets
-            local ____cond11 = ____switch11 == 1
-            if ____cond11 then
+            local ____switch18 = #targets
+            local ____cond18 = ____switch18 == 1
+            if ____cond18 then
                 gui.set_position(
                     node,
                     vmath.vector3(0, -15, 0)
@@ -77,8 +90,8 @@ function setup(data)
                 )
                 break
             end
-            ____cond11 = ____cond11 or ____switch11 == 2
-            if ____cond11 then
+            ____cond18 = ____cond18 or ____switch18 == 2
+            if ____cond18 then
                 gui.set_position(
                     node,
                     vmath.vector3(-35, -15, 0)
@@ -89,8 +102,8 @@ function setup(data)
                 )
                 break
             end
-            ____cond11 = ____cond11 or ____switch11 == 3
-            if ____cond11 then
+            ____cond18 = ____cond18 or ____switch18 == 3
+            if ____cond18 then
                 gui.set_position(
                     node,
                     vmath.vector3(-45, -5, 0)
@@ -114,9 +127,9 @@ function setup(data)
         local node = gui.get_node("second_target")
         gui.set_enabled(node, true)
         repeat
-            local ____switch13 = #targets
-            local ____cond13 = ____switch13 == 2
-            if ____cond13 then
+            local ____switch20 = #targets
+            local ____cond20 = ____switch20 == 2
+            if ____cond20 then
                 gui.set_position(
                     node,
                     vmath.vector3(25, -15, 0)
@@ -127,8 +140,8 @@ function setup(data)
                 )
                 break
             end
-            ____cond13 = ____cond13 or ____switch13 == 3
-            if ____cond13 then
+            ____cond20 = ____cond20 or ____switch20 == 3
+            if ____cond20 then
                 gui.set_position(
                     node,
                     vmath.vector3(36, -5, 0)
@@ -167,21 +180,17 @@ function setup(data)
         )
         set_text("third_target_counts", target.count)
     end
-    data.druid:new_button(
-        "back/button",
-        function() return Scene.load("map") end
-    )
-    data.druid:new_button(
-        "restart/button",
-        function() return Scene.restart() end
-    )
-    data.druid:new_button(
-        "revert_step/button",
-        function() return EventBus.send("TRY_REVERT_STEP") end
-    )
-    set_text(
-        "current_level_text",
+end
+function setup_busters(data)
+    if __TS__ArrayIncludes(
+        GAME_CONFIG.animal_levels,
         GameStorage.get("current_level") + 1
+    ) then
+        return
+    end
+    gui.set_enabled(
+        gui.get_node("buster_buttons"),
+        true
     )
     if GameStorage.get("spinning_opened") then
         data.druid:new_button(
@@ -263,15 +272,52 @@ function setup(data)
             true
         )
     end
-    if not __TS__ArrayIncludes(
-        GAME_CONFIG.animal_levels,
+end
+function setup_sustem_ui(data)
+    data.druid:new_button(
+        "back/button",
+        function() return Scene.load("map") end
+    )
+    data.druid:new_button(
+        "restart/button",
+        function() return Scene.restart() end
+    )
+    data.druid:new_button(
+        "revert_step/button",
+        function() return EventBus.send("TRY_REVERT_STEP") end
+    )
+    set_text(
+        "current_level_text",
         GameStorage.get("current_level") + 1
-    ) then
-        gui.set_enabled(
-            gui.get_node("buster_buttons"),
-            true
-        )
-    end
+    )
+end
+function setup_win_ui(data)
+    data.druid:new_button("continue_button", next_level)
+    gui.set_enabled(
+        gui.get_node("win"),
+        false
+    )
+end
+function next_level()
+    GameStorage.set(
+        "current_level",
+        GameStorage.get("current_level") + 1
+    )
+    Scene.restart()
+end
+function setup_gameover_ui(data)
+    data.druid:new_button("restart_button", restart_level)
+    data.druid:new_button(
+        "map_button",
+        function() return Scene.load("map") end
+    )
+    gui.set_enabled(
+        gui.get_node("gameover"),
+        false
+    )
+end
+function restart_level()
+    Scene.restart()
 end
 function set_events(data)
     EventBus.on(
@@ -280,94 +326,121 @@ function set_events(data)
     )
     EventBus.on(
         "UPDATED_STEP_COUNTER",
-        function(steps)
-            set_text("steps", steps)
-        end,
+        function(steps) return set_text("steps", steps) end,
         true
     )
     EventBus.on(
         "UPDATED_TARGET",
-        function(data)
-            repeat
-                local ____switch31 = data.id
-                local ____cond31 = ____switch31 == 0
-                if ____cond31 then
-                    set_text("first_target_counts", data.count)
-                    break
-                end
-                ____cond31 = ____cond31 or ____switch31 == 1
-                if ____cond31 then
-                    set_text("second_target_counts", data.count)
-                    break
-                end
-                ____cond31 = ____cond31 or ____switch31 == 2
-                if ____cond31 then
-                    set_text("third_target_counts", data.count)
-                    break
-                end
-            until true
-        end,
+        function(data) return update_targets(data) end,
         true
     )
     EventBus.on(
         "UPDATED_BUTTONS",
-        function()
-            set_text_colors({"spinning/button"}, "#fff", data.busters.spinning.active and 0.5 or 1)
-            set_text(
-                "spinning/counts",
-                GameStorage.get("spinning_counts")
-            )
-            set_text_colors({"hammer/button"}, "#fff", data.busters.hammer.active and 0.5 or 1)
-            set_text(
-                "hammer/counts",
-                GameStorage.get("hammer_counts")
-            )
-            set_text_colors({"horizontal_rocket/button"}, "#fff", data.busters.horizontal_rocket.active and 0.5 or 1)
-            set_text(
-                "horizontal_rocket/counts",
-                GameStorage.get("horizontal_rocket_counts")
-            )
-            set_text_colors({"vertical_rocket/button"}, "#fff", data.busters.vertical_rocket.active and 0.5 or 1)
-            set_text(
-                "vertical_rocket/counts",
-                GameStorage.get("vertical_rocket_counts")
-            )
-        end,
+        function() return update_buttons(data) end,
         true
     )
     EventBus.on(
         "GAME_TIMER",
-        function(time)
-            set_text(
-                "time",
-                parse_time(time)
-            )
-        end,
+        function(time) return set_text(
+            "time",
+            parse_time(time)
+        ) end,
         true
     )
     EventBus.on(
         "SET_TUTORIAL",
-        function()
-            local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
-            local tutorial = gui.get_node("tutorial")
-            gui.set_position(tutorial, tutorial_data.position)
-            gui.set_enabled(tutorial, true)
-            gui.set_text(
-                gui.get_node("tutorial_text"),
-                Lang.get_text(tutorial_data.text)
-            )
-        end,
+        function() return set_tutorial() end,
         true
     )
     EventBus.on(
         "REMOVE_TUTORIAL",
-        function()
-            gui.set_enabled(
-                gui.get_node("tutorial"),
-                false
-            )
-        end,
+        function() return gui.set_enabled(
+            gui.get_node("tutorial"),
+            false
+        ) end,
         true
+    )
+    EventBus.on("ON_WIN", set_win, true)
+    EventBus.on("ON_GAME_OVER", set_gameover, true)
+end
+function update_targets(data)
+    repeat
+        local ____switch50 = data.id
+        local ____cond50 = ____switch50 == 0
+        if ____cond50 then
+            set_text("first_target_counts", data.count)
+            break
+        end
+        ____cond50 = ____cond50 or ____switch50 == 1
+        if ____cond50 then
+            set_text("second_target_counts", data.count)
+            break
+        end
+        ____cond50 = ____cond50 or ____switch50 == 2
+        if ____cond50 then
+            set_text("third_target_counts", data.count)
+            break
+        end
+    until true
+end
+function update_buttons(data)
+    set_text_colors({"spinning/button"}, "#fff", data.busters.spinning.active and 0.5 or 1)
+    set_text(
+        "spinning/counts",
+        GameStorage.get("spinning_counts")
+    )
+    set_text_colors({"hammer/button"}, "#fff", data.busters.hammer.active and 0.5 or 1)
+    set_text(
+        "hammer/counts",
+        GameStorage.get("hammer_counts")
+    )
+    set_text_colors({"horizontal_rocket/button"}, "#fff", data.busters.horizontal_rocket.active and 0.5 or 1)
+    set_text(
+        "horizontal_rocket/counts",
+        GameStorage.get("horizontal_rocket_counts")
+    )
+    set_text_colors({"vertical_rocket/button"}, "#fff", data.busters.vertical_rocket.active and 0.5 or 1)
+    set_text(
+        "vertical_rocket/counts",
+        GameStorage.get("vertical_rocket_counts")
+    )
+end
+function set_tutorial()
+    local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
+    local tutorial = gui.get_node("tutorial")
+    gui.set_position(tutorial, tutorial_data.position)
+    gui.set_enabled(tutorial, true)
+    gui.set_text(
+        gui.get_node("tutorial_text"),
+        Lang.get_text(tutorial_data.text)
+    )
+end
+function set_win()
+    disable_game_ui()
+    gui.set_enabled(
+        gui.get_node("win"),
+        true
+    )
+end
+function set_gameover()
+    disable_game_ui()
+    gui.set_enabled(
+        gui.get_node("gameover"),
+        true
+    )
+end
+function disable_game_ui()
+    gui.set_enabled(
+        gui.get_node("substrate"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("buster_buttons"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("system_buttons"),
+        false
     )
 end
 function ____exports.init(self)

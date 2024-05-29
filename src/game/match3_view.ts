@@ -181,6 +181,8 @@ export function View(animator: FluxGroup) {
         game_id_to_view_index: {}
     };
 
+    let substrates: hash[] = [];
+
     let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
@@ -332,34 +334,36 @@ export function View(animator: FluxGroup) {
         //     EventBus.send('SET_HELPER');
         // });
 
-        EventBus.on('ON_LEVEL_COMPLETED', () => {
-            flow.start(() => {
-                let next_level = (GameStorage.get('current_level') + 1) % GAME_CONFIG.levels.length;
-
-                is_processing = true;
-
-                flow.delay(0.5);
-
-                GameStorage.set('current_level', next_level);
-                Scene.restart();
-            });
-        });
-
-        EventBus.on('ON_GAME_OVER', () => {
-            flow.start(() => {
-                flow.delay(0.5);
-                Scene.restart();
-            });
-        });
+        EventBus.on('ON_WIN', set_win, true);
+        EventBus.on('ON_GAME_OVER', set_gameover, true);
 
         EventBus.on('UPDATED_STATE', (state) => {
-            reset_feild(state);
+            reset_field();
+            load_field(state, false);
             EventBus.send('SET_HELPER');
         });
 
         EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item), true);
         EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item), true);
         EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
+    }
+
+    function set_win() {
+        reset_field();
+        remove_animals();
+    }
+
+    function set_gameover() {
+        reset_field();
+        remove_animals();
+    }
+
+    function remove_animals() {
+        if(!GAME_CONFIG.animal_levels.includes(current_level + 1)) return;
+
+        const scene_name = Scene.get_current_name();
+        Scene.unload_resource(scene_name, 'cat');
+        Scene.unload_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
     }
 
     function on_game_step(data: GameStepMessage) {
@@ -494,7 +498,7 @@ export function View(animator: FluxGroup) {
         }
     }
 
-    function reset_feild(game_state: GameState) {
+    function reset_field() {
         Log.log("RESET FIELD");
 
         for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
@@ -505,10 +509,13 @@ export function View(animator: FluxGroup) {
             }
         }
 
+        for(const substrate of substrates) {
+            if(substrate != null)
+                go.delete(substrate);
+        }
+
         state = {} as ViewState;
         state.game_id_to_view_index = {};
-
-        load_field(game_state, false);
     }
 
     function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
@@ -539,6 +546,7 @@ export function View(animator: FluxGroup) {
                     gm.set_rotation_hash(_go, -angle);
                     sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+                    substrates.push(_go);
                     return;
                 }
 

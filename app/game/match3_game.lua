@@ -521,7 +521,7 @@ function ____exports.Game()
             local completed_levels = GameStorage.get("completed_levels")
             completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
             GameStorage.set("completed_levels", completed_levels)
-            EventBus.send("ON_LEVEL_COMPLETED")
+            EventBus.send("ON_WIN")
         elseif not is_have_steps() then
             EventBus.send("ON_GAME_OVER")
         end

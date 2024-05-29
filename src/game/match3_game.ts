@@ -598,7 +598,7 @@ export function Game() {
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
-            EventBus.send('ON_LEVEL_COMPLETED');
+            EventBus.send('ON_WIN');
         } else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
         Log.log("Закончена анимация хода");
     }
