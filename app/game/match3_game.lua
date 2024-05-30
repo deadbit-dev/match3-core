@@ -356,6 +356,9 @@ function ____exports.Game()
             "UPDATED_CELLS_STATE",
             get_state().cells
         )
+        local completed_tutorials = GameStorage.get("completed_tutorials")
+        completed_tutorials[#completed_tutorials + 1] = current_level + 1
+        GameStorage.set("completed_tutorials", completed_tutorials)
     end
     function on_swap_elements(elements)
         if is_block_input or elements == nil then

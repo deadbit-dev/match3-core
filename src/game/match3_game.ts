@@ -461,9 +461,9 @@ export function Game() {
         write_game_step_event('REMOVE_TUTORIAL', {});
         write_game_step_event('UPDATED_CELLS_STATE', get_state().cells);
                 
-        // const completed_tutorials = GameStorage.get('completed_tutorials');
-        // completed_tutorials.push(current_level + 1);
-        // GameStorage.set('completed_tutorials', completed_tutorials);
+        const completed_tutorials = GameStorage.get('completed_tutorials');
+        completed_tutorials.push(current_level + 1);
+        GameStorage.set('completed_tutorials', completed_tutorials);
     }
 
     function on_swap_elements(elements: StepInfo | undefined) {
