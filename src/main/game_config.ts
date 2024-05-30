@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element } from "../game/match3_core";
-import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target } from "../game/match3_game";
+import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element, CombinationType, Cell, NotActiveCell, CellState } from "../game/match3_core";
+import { Busters, CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TutorialData } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 import { lang_data } from "./langs";
@@ -33,6 +33,7 @@ export const RATE_FIRST_SHOW = 24 * 60 * 60;
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
 export const MAIN_BUNDLE_SCENES = ['game'];
+
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
@@ -215,7 +216,7 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
             ],
-            action: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
+            combination: CombinationType.Comb3,
             text: "tutorial_collect",
             position: vmath.vector3(270, 750, 0)
         },
@@ -226,7 +227,7 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 5}, {x: 4, y: 5},
                 {x: 3, y: 6}, {x: 4, y: 6}
             ],
-            action: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
+            combination: CombinationType.Comb4,
             text: "tutorial_collect_rocket",
             position: vmath.vector3(270, 750, 0)
         },
@@ -235,7 +236,7 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
             ],
-            action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            combination: CombinationType.Comb5,
             text: "tutorial_collect_diskosphere",
             position: vmath.vector3(270, 750, 0)
         },
@@ -244,7 +245,7 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
             ],
-            action: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            combination: CombinationType.Comb3,
             text: "tutorial_timer",
             position: vmath.vector3(270, 750, 0)
         },
@@ -254,18 +255,18 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}, {x: 7, y: 5}
             ],
-            action: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
+            activation: CellId.Flowers,
             text: "tutorial_grass",
             position: vmath.vector3(270, 750, 0)
 
         },
         6: {
-            action: ['hammer'],
+            busters: 'hammer',
             text: "tutorial_hammer",
             position: vmath.vector3(270, 750, 0)
         },
         9: {
-            action: ['spinning'],
+            busters: 'spinning',
             text: "tutorial_spinning",
             position: vmath.vector3(270, 750, 0)
         },
@@ -274,7 +275,7 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
             ],
-            action: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
+            activation: CellId.Box,
             text: "tutorial_box",
             position: vmath.vector3(270, 750, 0)
         },
@@ -287,16 +288,16 @@ export const _GAME_CONFIG = {
                 {x: 6, y: 6}, {x: 7, y: 6},
                 {x: 6, y: 7}, {x: 7, y: 7}
             ],
-            action: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
+            activation: CellId.Web,
             text: "tutorial_web",
             position: vmath.vector3(270, 750, 0)
         },
         17: {
-            action: ['horizontal_rocket', 'vertical_rocket'],
+            busters: ['horizontal_rocket', 'vertical_rocket'],
             text: "tutorial_rockets",
             position: vmath.vector3(270, 750, 0)
         }
-    } as { [key in number]: {cells?: {x: number, y: number}[], action?: StepInfo | string[], text: keyof typeof lang_data, position: vmath.vector3}},
+    } as TutorialData,
 
     levels: [] as Level[]
 };
@@ -364,6 +365,7 @@ export type _UserMessages = {
     INIT_UI: VoidMessage,
 
     UPDATED_STATE: GameState,
+    UPDATED_CELLS_STATE: CellState,
 
     GAME_TIMER: number,
 
@@ -432,4 +434,5 @@ export type _UserMessages = {
 
     SET_TUTORIAL: VoidMessage,
     REMOVE_TUTORIAL: VoidMessage
+
 };

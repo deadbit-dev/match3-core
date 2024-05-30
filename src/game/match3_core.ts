@@ -145,9 +145,12 @@ export interface MovedInfo {
     data: Element;
 }
 
+// наши все клетки, полностью заполненная прямоугольная/квадратная структура
+export type CellState = (Cell | typeof NotActiveCell)[][]; 
+
 // описание игровых данных для импорта/экспорта
 export interface CoreState {
-    cells: (Cell | typeof NotActiveCell)[][]; // наши все клетки, полностью заполненная прямоугольная/квадратная структура
+    cells: CellState
     element_types: {[id: number]: ElementType}; // классификаторы элементов
     elements: (Element | typeof NullElement)[][]; // непосредственно игровые элементы
 }

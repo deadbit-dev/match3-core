@@ -51,6 +51,8 @@ import {
     StepInfo
 } from './match3_core';
 
+import { lang_data } from '../main/langs';
+
 
 export const RandomElement = -2;
 
@@ -103,11 +105,14 @@ export enum ElementId {
     Diskosphere
 }
 
-// REFACTORING
 export interface Target {
-    is_cell: boolean,
     type: number,
-    count: number,
+    count: number
+}
+
+// REFACTORING
+export interface TargetState extends Target {
+    is_cell: boolean,
     uids: number[]
 }
 
@@ -142,15 +147,27 @@ export interface Level {
 
     time: number,
     steps: number,
-    targets: Target[],
+    targets: TargetState[],
 
     busters: Busters
 }
 
+export type TutorialData = { 
+    [key in number]: {
+        cells?: {x: number, y: number}[],
+        combination?: CombinationType,
+        activation?: CellId,
+        busters?: string | string[],
+
+        text: keyof typeof lang_data,
+        position: vmath.vector3
+    }
+};
+
 // TODO: maybe add busters to the GameState
 export interface GameState extends CoreState {
     randomseed: number,
-    targets: Target[],
+    targets: TargetState[],
     steps: number,
     remaining_time: number
 }
@@ -196,6 +213,8 @@ export function Game() {
     let is_block_vertical_rocket = false;
     let is_block_horizontal_rocket = false;
 
+    let is_complete_tutorial = false;
+
 
     function init() {
         field.init();
@@ -227,7 +246,7 @@ export function Game() {
         }
     }
     
-    function set_targets(targets: Target[]) {
+    function set_targets(targets: TargetState[]) {
         const last_state = get_state();
         last_state.targets = targets;
     }
@@ -322,7 +341,7 @@ export function Game() {
 
         init_targets();
 
-        const last_state = set_state();
+        const last_state = update_state();
         set_steps();
         set_timer();
         set_random();
@@ -347,27 +366,30 @@ export function Game() {
         const except_cells = tutorial_data.cells != undefined ? tutorial_data.cells : [];
         lock_cells(except_cells);
         
-        const except_busters = Array.isArray(tutorial_data.action) ? tutorial_data.action : [];
-        lock_buters(except_busters);
+
+        if(tutorial_data.busters != undefined) {
+            if(Array.isArray(tutorial_data.busters)) lock_buters(tutorial_data.busters);
+            else lock_buters([tutorial_data.busters]);
+        } else lock_buters([]);
 
         EventBus.send('SET_TUTORIAL');
     }
 
-    function try_unlock_cells(step: StepInfo) {
-        const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-        if(Array.isArray(tutorial_data.action)) return false;
+    // function try_unlock_cells(step: StepInfo) {
+    //     const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+    //     if(Array.isArray(tutorial_data.action)) return false;
 
-        const is_from = step.from_x == tutorial_data.action?.from_x && step.from_y == tutorial_data.action.from_y;
-        const is_to = step.to_x == tutorial_data.action?.to_x && step.to_y == tutorial_data.action.to_y; 
-        if(!is_from || !is_to) return false;
+    //     const is_from = step.from_x == tutorial_data.action?.from_x && step.from_y == tutorial_data.action.from_y;
+    //     const is_to = step.to_x == tutorial_data.action?.to_x && step.to_y == tutorial_data.action.to_y; 
+    //     if(!is_from || !is_to) return false;
 
-        unlock_cells();
+    //     unlock_cells();
         
-        set_state();
-        EventBus.trigger('UPDATED_STATE', get_state(), true, true);
+    //     set_state();
+    //     EventBus.trigger('UPDATED_STATE', get_state(), true, true);
         
-        return true;
-    }
+    //     return true;
+    // }
 
     function lock_cells(except_cells: {x: number, y: number}[]) {
         for (let y = 0; y < field_height; y++) {
@@ -400,6 +422,8 @@ export function Game() {
         }
     }
 
+
+    // TODO: rename
     function lock_buters(except_busters: string[]) {
         is_block_spinning = !except_busters.includes('spinning');
         is_block_hammer = !except_busters.includes('hammer');
@@ -430,11 +454,16 @@ export function Game() {
     }
 
     function complete_tutorial() {
-        EventBus.send("REMOVE_TUTORIAL");
-        
-        const completed_tutorials = GameStorage.get('completed_tutorials');
-        completed_tutorials.push(current_level + 1);
-        GameStorage.set('completed_tutorials', completed_tutorials);
+        unlock_busters();
+        unlock_cells();
+        update_cells_state();
+
+        write_game_step_event('REMOVE_TUTORIAL', {});
+        write_game_step_event('UPDATED_CELLS_STATE', get_state().cells);
+                
+        // const completed_tutorials = GameStorage.get('completed_tutorials');
+        // completed_tutorials.push(current_level + 1);
+        // GameStorage.set('completed_tutorials', completed_tutorials);
     }
 
     function on_swap_elements(elements: StepInfo | undefined) {
@@ -442,13 +471,8 @@ export function Game() {
 
         stop_helper();
         
-        if(is_tutorial() && try_unlock_cells(elements)) {
-            unlock_busters();
-            complete_tutorial();
-        }
-        
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
-
+        
         is_step = true;
         const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
         process_game_step(is_procesed);
@@ -505,15 +529,7 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
 
-        if(is_tutorial()) {
-            unlock_cells();
-            
-            set_state();
-            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-
-            unlock_busters();
-            complete_tutorial();
-        }
+        if(is_tutorial()) complete_tutorial();
 
         stop_helper();
         try_spinning_activation();
@@ -530,15 +546,7 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
 
-        if(is_tutorial()) {
-            unlock_cells();
-
-            set_state();
-            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-
-            unlock_busters();
-            complete_tutorial();
-        }
+        if(is_tutorial()) complete_tutorial();
     }
     
     function on_activate_vertical_rocket() {
@@ -552,15 +560,7 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
     
-        if(is_tutorial()) {
-            unlock_cells();
-
-            set_state();
-            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-
-            unlock_busters();
-            complete_tutorial();
-        }
+        if(is_tutorial()) complete_tutorial();
     }
 
     function on_activate_horizontal_rocket() {
@@ -574,15 +574,7 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
     
-        if(is_tutorial()) {
-            unlock_cells();
-
-            set_state();
-            EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-
-            unlock_busters();
-            complete_tutorial();
-        }
+        if(is_tutorial()) complete_tutorial();
     }
 
     function on_revert_step() {
@@ -1507,13 +1499,23 @@ export function Game() {
 
             return false;
         }
-
+    
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
             to: {x: to_x, y: to_y},
             element_from: element_from,
             element_to: element_to
         });
+
+        if(is_tutorial()) {
+            const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+            for(const combination of field.get_all_combinations()) {
+                if(tutorial_data?.combination == combination.type) {
+                    complete_tutorial();
+                    break;
+                }
+            }
+        }
 
         return true;
     }
@@ -1571,7 +1573,9 @@ export function Game() {
             field.process_state(ProcessMode.MoveElements);
         }
 
-        const last_state = set_state();
+        
+
+        const last_state = update_state();
 
         search_available_steps(5, (steps) => {
             if(steps.length != 0) {
@@ -1658,7 +1662,11 @@ export function Game() {
     //#region CALLBACKS     
 
     function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
-        if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
+        if(field.is_can_move_base(from_x, from_y, to_x, to_y)) {
+            
+
+            return true;
+        }
         
         return (is_buster(from_x, from_y) || is_buster(to_x, to_y));
     }
@@ -1728,6 +1736,8 @@ export function Game() {
     function on_combined(combined_element: ItemInfo, combination: CombinationInfo) {
         if(is_buster(combined_element.x, combined_element.y)) return;
 
+        
+
         write_game_step_event('ON_COMBINED', {combined_element, combination, activated_cells: []});
 
         field.on_combined_base(combined_element, combination);
@@ -1787,6 +1797,14 @@ export function Game() {
                 }
             }
 
+            if(is_tutorial()) {
+                const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+                if(tutorial_data.activation != undefined) {
+                    if(cell.id == tutorial_data.activation)
+                        complete_tutorial();
+                }
+            }
+
             for(const target of get_state().targets) {
                 const check_for_not_stone = (target.type != CellId.Stone0 && target.type ==  cell.data.current_id);
                 const check_stone_with_last_cell = (target.type == CellId.Stone0 && cell.data.current_id == CellId.Stone2);
@@ -1799,8 +1817,13 @@ export function Game() {
 
     //#endregion CALLBACKS
     //#region HELPERS
+    
+    function get_state(offset = 1) {
+        assert(states.length - offset >= 0);
+        return states[states.length - offset];
+    }
 
-    function set_state() {
+    function update_state() {
         const last_state = get_state();
         const field_state = field.save_state();
         last_state.cells = field_state.cells;
@@ -1810,9 +1833,12 @@ export function Game() {
         return last_state;
     }
     
-    function get_state(offset = 1) {
-        assert(states.length - offset >= 0);
-        return states[states.length - offset];
+    function update_cells_state() {
+        const last_state = get_state();
+        const field_state = field.save_state();
+        last_state.cells = field_state.cells;
+
+        return last_state;
     }
 
     function is_buster(x: number, y: number) {
@@ -1952,7 +1978,7 @@ export function load_config() {
 
             time: level_data.time,
             steps: level_data.steps,
-            targets: [] as Target[],
+            targets: [] as TargetState[],
 
             busters: {
                 hammer: {

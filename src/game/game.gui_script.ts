@@ -9,7 +9,7 @@
 import * as druid from 'druid.druid';
 import { TargetMessage } from '../main/game_config';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { Busters, CellId, ElementId, Level, Target } from './match3_game';
+import { Busters, CellId, ElementId, Level, TargetState } from './match3_game';
 
 
 interface props {

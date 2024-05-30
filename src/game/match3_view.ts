@@ -26,6 +26,7 @@ import {
     Cell,
     MoveType,
     Element,
+    CellState,
 } from "./match3_core";
 import { hex2rgba } from '../utils/utils';
 import { SubstrateId, CellId, ElementId, GameState } from './match3_game';
@@ -168,6 +169,9 @@ export function View(animator: FluxGroup) {
 
         // MOVE
         'ON_MOVED_ELEMENTS': on_moved_elements_animation,
+
+        'UPDATED_CELLS_STATE': update_cells_state,
+        'REMOVE_TUTORIAL': remove_tutorial
     };
 
     //#endregion FIELDS
@@ -334,18 +338,54 @@ export function View(animator: FluxGroup) {
         //     EventBus.send('SET_HELPER');
         // });
 
+        EventBus.on('UPDATED_STATE', update_state);
+
         EventBus.on('ON_WIN', set_win, true);
         EventBus.on('ON_GAME_OVER', set_gameover, true);
-
-        EventBus.on('UPDATED_STATE', (state) => {
-            reset_field();
-            load_field(state, false);
-            EventBus.send('SET_HELPER');
-        });
-
+        
         EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item), true);
         EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item), true);
         EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
+    }
+
+    function remove_tutorial() {
+        EventBus.send('REMOVE_TUTORIAL');
+        return 0;
+    }
+
+    function update_state(message: Messages[MessageId]) {
+        const state = message as GameState;
+        reset_field();
+        load_field(state, false);
+        EventBus.send('SET_HELPER');
+        return 0;
+    }
+
+    function update_cells_state(message: Messages[MessageId]) {
+        const cells = message as CellState;
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const current_cell = state.game_state.cells[y][x];
+                if (current_cell != NotActiveCell) {
+                    // DELETE ALL CELLS
+                    const items = get_all_view_items_by_game_id(current_cell.uid);
+                    if(items != undefined) {
+                        for(const item of items) {
+                            gm.delete_item(item, true);
+                        }
+                    }
+                    // CREATE NEW CELLS
+                    const cell = cells[y][x];
+                    state.game_state.cells[y][x] = cell;
+                    if(cell != NotActiveCell) {
+                        try_make_under_cell(x, y, cell);
+                        make_cell_view(x, y, cell.id, cell.uid);
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 
     function set_win() {
@@ -482,6 +522,7 @@ export function View(animator: FluxGroup) {
 
     function load_field(game_state: GameState, with_anim = true) {
         Log.log("LOAD FIELD");
+        
         state.game_state = game_state;
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
