@@ -185,6 +185,8 @@ export function Game() {
 
     const field = Field(field_width, field_height, GAME_CONFIG.complex_move);
 
+    let game_timer: hash;
+
     let start_game_time = 0;
     let game_item_counter = 0;
     let states: GameState[] = [];
@@ -211,8 +213,6 @@ export function Game() {
     let is_block_hammer = false;
     let is_block_vertical_rocket = false;
     let is_block_horizontal_rocket = false;
-
-    let is_complete_tutorial = false;
 
 
     function init() {
@@ -254,7 +254,7 @@ export function Game() {
         if(level_config.time == undefined) return;
         
         start_game_time = System.now();
-        timer.delay(1, true, on_game_timer_tick);
+        game_timer = timer.delay(1, true, on_game_timer_tick);
     }
 
     function set_steps(steps = 0) {
@@ -591,6 +591,7 @@ export function Game() {
             GameStorage.set('completed_levels', completed_levels);
             EventBus.send('ON_WIN');
         } else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
+        
         Log.log("Закончена анимация хода");
     }
 
@@ -600,7 +601,10 @@ export function Game() {
         if(level_config.time >= dt) {
             get_state().remaining_time = remaining_time;
             EventBus.send('GAME_TIMER', remaining_time);
-        } else EventBus.send('ON_GAME_OVER');
+        } else {
+            timer.cancel(game_timer);
+            EventBus.send('ON_GAME_OVER');
+        }
     }
 
     function load_cell(x: number, y: number) {
