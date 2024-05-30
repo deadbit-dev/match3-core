@@ -155,8 +155,7 @@ export interface Level {
 export type TutorialData = { 
     [key in number]: {
         cells?: {x: number, y: number}[],
-        combination?: CombinationType,
-        activation?: CellId,
+        step?: StepInfo,
         busters?: string | string[],
 
         text: keyof typeof lang_data,
@@ -1488,7 +1487,19 @@ export function Game() {
 
         if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;
-        
+
+        if(is_tutorial()) {
+            const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+            if(tutorial_data.step != undefined) {
+                const is_from = (tutorial_data.step.from_x == from_x) && (tutorial_data.step.from_y == from_y) && (tutorial_data.step.to_x == to_x) && (tutorial_data.step.to_y == to_y);
+                const is_to = (tutorial_data.step.from_x == to_x) && (tutorial_data.step.from_y == to_y) && (tutorial_data.step.to_x == from_x) && (tutorial_data.step.to_y == from_y);
+
+                if(!is_from && !is_to) return false;
+
+                complete_tutorial();
+            }
+        }
+
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 from: {x: from_x, y: from_y},
@@ -1506,16 +1517,6 @@ export function Game() {
             element_from: element_from,
             element_to: element_to
         });
-
-        if(is_tutorial()) {
-            const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-            for(const combination of field.get_all_combinations()) {
-                if(tutorial_data?.combination == combination.type) {
-                    complete_tutorial();
-                    break;
-                }
-            }
-        }
 
         return true;
     }
@@ -1662,12 +1663,7 @@ export function Game() {
     //#region CALLBACKS     
 
     function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
-        if(field.is_can_move_base(from_x, from_y, to_x, to_y)) {
-            
-
-            return true;
-        }
-        
+        if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
         return (is_buster(from_x, from_y) || is_buster(to_x, to_y));
     }
 
@@ -1794,14 +1790,6 @@ export function Game() {
                         id: new_cell.id,
                         previous_id: item_info.uid 
                     });
-                }
-            }
-
-            if(is_tutorial()) {
-                const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-                if(tutorial_data.activation != undefined) {
-                    if(cell.id == tutorial_data.activation)
-                        complete_tutorial();
                 }
             }
 

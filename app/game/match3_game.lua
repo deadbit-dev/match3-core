@@ -1390,20 +1390,22 @@ function ____exports.Game()
             EventBus.trigger("ON_ELEMENT_UNSELECTED", selected_element, true, true)
         end
         selected_element = nil
+        if is_tutorial() then
+            local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+            if tutorial_data.step ~= nil then
+                local is_from = tutorial_data.step.from_x == from_x and tutorial_data.step.from_y == from_y and tutorial_data.step.to_x == to_x and tutorial_data.step.to_y == to_y
+                local is_to = tutorial_data.step.from_x == to_x and tutorial_data.step.from_y == to_y and tutorial_data.step.to_x == from_x and tutorial_data.step.to_y == from_y
+                if not is_from and not is_to then
+                    return false
+                end
+                complete_tutorial()
+            end
+        end
         if not field.try_move(from_x, from_y, to_x, to_y) then
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
             return false
         end
         write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
-        if is_tutorial() then
-            local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
-            for ____, combination in ipairs(field.get_all_combinations()) do
-                if (tutorial_data and tutorial_data.combination) == combination.type then
-                    complete_tutorial()
-                    break
-                end
-            end
-        end
         return true
     end
     function set_random(seed)
@@ -1434,8 +1436,8 @@ function ____exports.Game()
             end
         )
         if level_config.steps ~= nil and is_step then
-            local ____get_state_result_21, ____steps_22 = get_state(), "steps"
-            ____get_state_result_21[____steps_22] = ____get_state_result_21[____steps_22] + 1
+            local ____get_state_result_19, ____steps_20 = get_state(), "steps"
+            ____get_state_result_19[____steps_20] = ____get_state_result_19[____steps_20] + 1
         end
         is_step = false
         if level_config.steps ~= nil then
@@ -1520,29 +1522,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch335 = combination.type
-            local ____cond335 = ____switch335 == CombinationType.Comb4
-            if ____cond335 then
+            local ____switch334 = combination.type
+            local ____cond334 = ____switch334 == CombinationType.Comb4
+            if ____cond334 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond335 = ____cond335 or ____switch335 == CombinationType.Comb5
-            if ____cond335 then
+            ____cond334 = ____cond334 or ____switch334 == CombinationType.Comb5
+            if ____cond334 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond335 = ____cond335 or ____switch335 == CombinationType.Comb2x2
-            if ____cond335 then
+            ____cond334 = ____cond334 or ____switch334 == CombinationType.Comb2x2
+            if ____cond334 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond335 = ____cond335 or (____switch335 == CombinationType.Comb3x3a or ____switch335 == CombinationType.Comb3x3b)
-            if ____cond335 then
+            ____cond334 = ____cond334 or (____switch334 == CombinationType.Comb3x3a or ____switch334 == CombinationType.Comb3x3b)
+            if ____cond334 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond335 = ____cond335 or (____switch335 == CombinationType.Comb3x4 or ____switch335 == CombinationType.Comb3x5)
-            if ____cond335 then
+            ____cond334 = ____cond334 or (____switch334 == CombinationType.Comb3x4 or ____switch334 == CombinationType.Comb3x5)
+            if ____cond334 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -1567,8 +1569,8 @@ function ____exports.Game()
         end
         for ____, target in ipairs(get_state().targets) do
             if not target.is_cell and target.type == element.type then
-                local ____target_uids_25 = target.uids
-                ____target_uids_25[#____target_uids_25 + 1] = element.uid
+                local ____target_uids_23 = target.uids
+                ____target_uids_23[#____target_uids_23 + 1] = element.uid
             end
         end
     end
@@ -1646,20 +1648,12 @@ function ____exports.Game()
                     }
                 end
             end
-            if is_tutorial() then
-                local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
-                if tutorial_data.activation ~= nil then
-                    if cell.id == tutorial_data.activation then
-                        complete_tutorial()
-                    end
-                end
-            end
             for ____, target in ipairs(get_state().targets) do
                 local check_for_not_stone = target.type ~= ____exports.CellId.Stone0 and target.type == cell.data.current_id
                 local check_stone_with_last_cell = target.type == ____exports.CellId.Stone0 and cell.data.current_id == ____exports.CellId.Stone2
                 if target.is_cell and (check_for_not_stone or check_stone_with_last_cell) then
-                    local ____target_uids_26 = target.uids
-                    ____target_uids_26[#____target_uids_26 + 1] = cell.uid
+                    local ____target_uids_24 = target.uids
+                    ____target_uids_24[#____target_uids_24 + 1] = cell.uid
                 end
             end
         end
@@ -1718,9 +1712,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_27 = index
-                    index = ____index_27 - 1
-                    if ____index_27 == 0 then
+                    local ____index_25 = index
+                    index = ____index_25 - 1
+                    if ____index_25 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1896,15 +1890,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch422 = data
-                                local ____cond422 = ____switch422 == "-"
-                                if ____cond422 then
+                                local ____switch418 = data
+                                local ____cond418 = ____switch418 == "-"
+                                if ____cond418 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond422 = ____cond422 or ____switch422 == ""
-                                if ____cond422 then
+                                ____cond418 = ____cond418 or ____switch418 == ""
+                                if ____cond418 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -1913,14 +1907,14 @@ function ____exports.load_config()
                         else
                             if data.cell ~= nil then
                                 repeat
-                                    local ____switch425 = data.cell
-                                    local ____cond425 = ____switch425 == ____exports.CellId.Stone0
-                                    if ____cond425 then
+                                    local ____switch421 = data.cell
+                                    local ____cond421 = ____switch421 == ____exports.CellId.Stone0
+                                    if ____cond421 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                         break
                                     end
-                                    ____cond425 = ____cond425 or ____switch425 == ____exports.CellId.Grass
-                                    if ____cond425 then
+                                    ____cond421 = ____cond421 or ____switch421 == ____exports.CellId.Grass
+                                    if ____cond421 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Flowers, ____exports.CellId.Grass}
                                         break
                                     end
@@ -1954,12 +1948,12 @@ function ____exports.load_config()
             if target ~= nil then
                 local count = tonumber(target_data.count)
                 target.count = count ~= nil and count or target.count
-                local ____level_targets_28 = level.targets
-                ____level_targets_28[#____level_targets_28 + 1] = target
+                local ____level_targets_26 = level.targets
+                ____level_targets_26[#____level_targets_26 + 1] = target
             end
         end
-        local ____GAME_CONFIG_levels_29 = GAME_CONFIG.levels
-        ____GAME_CONFIG_levels_29[#____GAME_CONFIG_levels_29 + 1] = level
+        local ____GAME_CONFIG_levels_27 = GAME_CONFIG.levels
+        ____GAME_CONFIG_levels_27[#____GAME_CONFIG_levels_27 + 1] = level
     end
 end
 return ____exports

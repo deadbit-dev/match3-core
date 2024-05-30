@@ -213,49 +213,48 @@ export const _GAME_CONFIG = {
         1: {
             cells: 
             [
-                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4},
+                                            {x: 5, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
             ],
-            combination: CombinationType.Comb3,
+            step: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
             text: "tutorial_collect",
             position: vmath.vector3(270, 750, 0)
         },
         2: {
             cells: [
-                {x: 3, y: 3}, {x: 4, y: 3},
+                {x: 3, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4},
-                {x: 3, y: 5}, {x: 4, y: 5},
-                {x: 3, y: 6}, {x: 4, y: 6}
+                {x: 3, y: 5},
+                {x: 3, y: 6},
             ],
-            combination: CombinationType.Comb4,
+            step: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
             text: "tutorial_collect_rocket",
             position: vmath.vector3(270, 750, 0)
         },
         3: {
             cells: [
-                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
+                                            {x: 5, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
             ],
-            combination: CombinationType.Comb5,
+            step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
             text: "tutorial_collect_diskosphere",
             position: vmath.vector3(270, 750, 0)
         },
         4: {
             cells: [
-                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3},
+                                            {x: 5, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
             ],
-            combination: CombinationType.Comb3,
+            step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
             text: "tutorial_timer",
             position: vmath.vector3(270, 750, 0)
         },
         5: {
             cells: [
-                {x: 3, y: 3}, {x: 4, y: 3}, {x: 5, y: 3}, {x: 6, y: 3}, {x: 7, y: 3},
-                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
-                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}, {x: 7, y: 5}
+                                            {x: 7, y: 3},
+                {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
             ],
-            activation: CellId.Flowers,
+            step: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
             text: "tutorial_grass",
             position: vmath.vector3(270, 750, 0)
 
@@ -275,20 +274,16 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
             ],
-            activation: CellId.Box,
+            step: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
             text: "tutorial_box",
             position: vmath.vector3(270, 750, 0)
         },
         13: {
             cells: [
-                {x: 6, y: 2}, {x: 7, y: 2},
-                {x: 6, y: 3}, {x: 7, y: 3},
-                {x: 6, y: 4}, {x: 7, y: 4}, {x: 8, y: 4},
+                {x: 6, y: 4}, 
                 {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
-                {x: 6, y: 6}, {x: 7, y: 6},
-                {x: 6, y: 7}, {x: 7, y: 7}
             ],
-            activation: CellId.Web,
+            step: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
             text: "tutorial_web",
             position: vmath.vector3(270, 750, 0)
         },
