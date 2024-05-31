@@ -46,7 +46,7 @@ export function final(this: props): void {
 }
 
 function set_level_buttons(data: props) {
-    for(let i = 0; i < 4; i++) {
+    for(let i = 0; i < 47; i++) {
         data.druid.new_button(tostring(i + 1) + '/level', (self, params) => {
             load_level(params);
         }, i);

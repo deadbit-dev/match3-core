@@ -305,7 +305,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: 10.0
+    y: 4.0
     z: 0.0
     w: 1.0
   }
@@ -361,6 +361,7 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
+  overridden_fields: 1
   overridden_fields: 8
   template_node_child: true
   text_leading: 1.0
@@ -844,7 +845,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: 10.0
+    y: 6.0
     z: 0.0
     w: 1.0
   }
@@ -900,6 +901,7 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
+  overridden_fields: 1
   overridden_fields: 8
   template_node_child: true
   text_leading: 1.0

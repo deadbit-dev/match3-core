@@ -45,6 +45,10 @@ function setup_step_or_time(data)
             "time",
             parse_time(data.level.time)
         )
+        gui.set_text(
+            gui.get_node("step_time_box/text"),
+            Lang.get_text("time")
+        )
     end
     if data.level.steps ~= nil then
         local node = gui.get_node("step_counter")
@@ -69,6 +73,10 @@ function setup_step_or_time(data)
             )
         end
         set_text("steps", data.level.steps)
+        gui.set_text(
+            gui.get_node("step_time_box/text"),
+            Lang.get_text("steps")
+        )
     end
 end
 function setup_targets(data)
@@ -180,6 +188,10 @@ function setup_targets(data)
         )
         set_text("third_target_counts", target.count)
     end
+    gui.set_text(
+        gui.get_node("targets_box/text"),
+        Lang.get_text("targets")
+    )
 end
 function setup_busters(data)
     if __TS__ArrayIncludes(
@@ -297,6 +309,14 @@ function setup_win_ui(data)
         gui.get_node("win"),
         false
     )
+    gui.set_text(
+        gui.get_node("win_text"),
+        Lang.get_text("win_title")
+    )
+    gui.set_text(
+        gui.get_node("continue_text"),
+        Lang.get_text("continue")
+    )
 end
 function next_level()
     GameStorage.set(
@@ -314,6 +334,18 @@ function setup_gameover_ui(data)
     gui.set_enabled(
         gui.get_node("gameover"),
         false
+    )
+    gui.set_text(
+        gui.get_node("gameover_text"),
+        Lang.get_text("gameover_title")
+    )
+    gui.set_text(
+        gui.get_node("restart_text"),
+        Lang.get_text("restart")
+    )
+    gui.set_text(
+        gui.get_node("map_text"),
+        Lang.get_text("map")
     )
 end
 function restart_level()

@@ -218,7 +218,7 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
             text: "tutorial_collect",
-            position: vmath.vector3(280, 710, 0)
+            position: vmath.vector3(270, 750, 0)
         },
         2: {
             cells: [
@@ -229,7 +229,7 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
             text: "tutorial_collect_rocket",
-            position: vmath.vector3(280, 710, 0)
+            position: vmath.vector3(270, 750, 0)
         },
         3: {
             cells: [
@@ -238,7 +238,7 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
             text: "tutorial_collect_diskosphere",
-            position: vmath.vector3(280, 710, 0)
+            position: vmath.vector3(270, 750, 0)
         },
         4: {
             cells: [
@@ -247,7 +247,7 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
             text: "tutorial_timer",
-            position: vmath.vector3(280, 300, 0)
+            position: vmath.vector3(270, 300, 0)
         },
         5: {
             cells: [
@@ -256,18 +256,18 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
             text: "tutorial_grass",
-            position: vmath.vector3(280, 710, 0)
+            position: vmath.vector3(270, 750, 0)
 
         },
         6: {
             busters: 'hammer',
             text: "tutorial_hammer",
-            position: vmath.vector3(280, 480, 0)
+            position: vmath.vector3(270, 480, 0)
         },
         9: {
             busters: 'spinning',
             text: "tutorial_spinning",
-            position: vmath.vector3(280, 480, 0)
+            position: vmath.vector3(270, 480, 0)
         },
         10: {
             cells: [
@@ -276,7 +276,7 @@ export const _GAME_CONFIG = {
             ],
             step: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
             text: "tutorial_box",
-            position: vmath.vector3(280, 710, 0)
+            position: vmath.vector3(270, 750, 0)
         },
         13: {
             cells: [
@@ -290,7 +290,7 @@ export const _GAME_CONFIG = {
         17: {
             busters: ['horizontal_rocket', 'vertical_rocket'],
             text: "tutorial_rockets",
-            position: vmath.vector3(280, 480, 0)
+            position: vmath.vector3(270, 480, 0)
         }
     } as TutorialData,
 

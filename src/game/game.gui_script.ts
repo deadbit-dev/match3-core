@@ -73,6 +73,8 @@ function setup_step_or_time(data: props) {
         }
 
         set_text('time', parse_time(data.level['time']));
+
+        gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('time'));
     }
 
     if(data.level['steps'] != undefined) {
@@ -88,6 +90,8 @@ function setup_step_or_time(data: props) {
         }
 
         set_text('steps', data.level['steps']);
+
+        gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('steps'));
     }
 }
 
@@ -151,6 +155,8 @@ function setup_targets(data: props) {
         gui.play_flipbook(gui.get_node('third_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('third_target_counts', target.count);
     }
+
+    gui.set_text(gui.get_node('targets_box/text'), Lang.get_text('targets'));
 }
 
 function setup_busters(data: props) {
@@ -210,6 +216,8 @@ function setup_sustem_ui(data: props) {
 function setup_win_ui(data: props) {
     data.druid.new_button('continue_button', next_level);
     gui.set_enabled(gui.get_node('win'), false);
+    gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
+    gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
 }
 
 function next_level() {
@@ -221,6 +229,9 @@ function setup_gameover_ui(data: props) {
     data.druid.new_button('restart_button', restart_level);
     data.druid.new_button('map_button', () => Scene.load('map'));
     gui.set_enabled(gui.get_node('gameover'), false);
+    gui.set_text(gui.get_node('gameover_text'), Lang.get_text('gameover_title'));
+    gui.set_text(gui.get_node('restart_text'), Lang.get_text('restart'));
+    gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
 }
 
 function restart_level() {
