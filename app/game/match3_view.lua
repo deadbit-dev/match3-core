@@ -53,6 +53,11 @@ function ____exports.View(animator)
             "ON_LOAD_FIELD",
             function(state)
                 recalculate_cell_offset(state)
+                timer.delay(
+                    0.1,
+                    true,
+                    function() return print(Camera.get_ltrb()) end
+                )
                 load_field(state)
                 EventBus.send("INIT_UI")
                 EventBus.send("SET_HELPER")
@@ -312,20 +317,20 @@ function ____exports.View(animator)
         state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch60 = event.key
+                local ____switch61 = event.key
                 local event_duration
-                local ____cond60 = ____switch60 == "ON_SWAP_ELEMENTS"
-                if ____cond60 then
+                local ____cond61 = ____switch61 == "ON_SWAP_ELEMENTS"
+                if ____cond61 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond60 = ____cond60 or ____switch60 == "ON_SPINNING_ACTIVATED"
-                if ____cond60 then
+                ____cond61 = ____cond61 or ____switch61 == "ON_SPINNING_ACTIVATED"
+                if ____cond61 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond60 = ____cond60 or ____switch60 == "ON_MOVED_ELEMENTS"
-                if ____cond60 then
+                ____cond61 = ____cond61 or ____switch61 == "ON_MOVED_ELEMENTS"
+                if ____cond61 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -371,24 +376,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch70 = move_direction
-            local ____cond70 = ____switch70 == Direction.Up
-            if ____cond70 then
+            local ____switch71 = move_direction
+            local ____cond71 = ____switch71 == Direction.Up
+            if ____cond71 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond70 = ____cond70 or ____switch70 == Direction.Down
-            if ____cond70 then
+            ____cond71 = ____cond71 or ____switch71 == Direction.Down
+            if ____cond71 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond70 = ____cond70 or ____switch70 == Direction.Left
-            if ____cond70 then
+            ____cond71 = ____cond71 or ____switch71 == Direction.Left
+            if ____cond71 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond70 = ____cond70 or ____switch70 == Direction.Right
-            if ____cond70 then
+            ____cond71 = ____cond71 or ____switch71 == Direction.Right
+            if ____cond71 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1123,14 +1128,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch226 = dir
-            local ____cond226 = ____switch226 == Axis.Vertical
-            if ____cond226 then
+            local ____switch227 = dir
+            local ____cond227 = ____switch227 == Axis.Vertical
+            if ____cond227 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond226 = ____cond226 or ____switch226 == Axis.Horizontal
-            if ____cond226 then
+            ____cond227 = ____cond227 or ____switch227 == Axis.Horizontal
+            if ____cond227 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break

@@ -4070,8 +4070,8 @@ nodes {
 }
 nodes {
   position {
-    x: 270.0
-    y: 750.0
+    x: 280.0
+    y: 480.0
     z: 0.0
     w: 1.0
   }
@@ -4178,7 +4178,7 @@ nodes {
     w: 1.0
   }
   adjust_mode: ADJUST_MODE_FIT
-  line_break: false
+  line_break: true
   parent: "tutorial"
   layer: ""
   inherit_alpha: true

@@ -1,0 +1,79 @@
+local ____exports = {}
+local set_level_buttons, load_level, set_last_map_position, set_completed_levels, on_drag
+local druid = require("druid.druid")
+function set_level_buttons(data)
+    do
+        local i = 0
+        while i < 4 do
+            data.druid:new_button(
+                tostring(i + 1) .. "/level",
+                function(____self, params)
+                    load_level(params)
+                end,
+                i
+            )
+            i = i + 1
+        end
+    end
+end
+function load_level(level)
+    GameStorage.set("current_level", level)
+    Scene.load("game")
+end
+function set_last_map_position()
+    local map = gui.get_node("map")
+    local pos = gui.get_position(map)
+    pos.y = GameStorage.get("map_last_pos_y")
+    gui.set_position(map, pos)
+end
+function set_completed_levels()
+    for ____, level in ipairs(GameStorage.get("completed_levels")) do
+        local level_node = gui.get_node(tostring(level + 1) .. "/level")
+        gui.set_texture(level_node, "map/button_level_green")
+    end
+end
+function on_drag(action)
+    if math.abs(action.dy) == 0 then
+        return
+    end
+    local map = gui.get_node("map")
+    local pos = gui.get_position(map)
+    pos.y = math.max(
+        -2800,
+        math.min(0, pos.y + action.dy)
+    )
+    gui.set_position(map, pos)
+    GameStorage.set("map_last_pos_y", pos.y)
+end
+function ____exports.init(self)
+    Manager.init_script()
+    self.druid = druid.new(self)
+    set_last_map_position()
+    set_completed_levels()
+    set_level_buttons(self)
+end
+function ____exports.on_input(self, action_id, action)
+    self.druid:on_input(action_id, action)
+    if action_id == ID_MESSAGES.MSG_TOUCH and not action.pressed and not action.released then
+        on_drag(action)
+    end
+end
+function ____exports.update(self, dt)
+    self.druid:update(dt)
+end
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+    self.druid:on_message(message_id, message, sender)
+end
+function ____exports.final(self)
+    self.druid:final()
+    EventBus.off_all_current_script()
+    Scene.unload_all_resources("map")
+    Manager.final_script()
+end
+init = ____exports.init
+on_input = ____exports.on_input
+update = ____exports.update
+on_message = ____exports.on_message
+final = ____exports.final
+

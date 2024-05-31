@@ -16,10 +16,9 @@ import * as flow from 'ludobits.m.flow';
 import { Axis, Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
-import { CombinedMessage, GameStepEventBuffer, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage, GameStepMessage } from "../main/game_config";
+import { CombinedMessage, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage, GameStepMessage } from "../main/game_config";
 
 import {
-    CoreState,
     ItemInfo,
     NullElement,
     NotActiveCell,
@@ -229,6 +228,9 @@ export function View(animator: FluxGroup) {
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             recalculate_cell_offset(state);
+
+            timer.delay(0.1, true, () => print(Camera.get_ltrb()));
+
             load_field(state);
 
             EventBus.send('INIT_UI');

@@ -27,7 +27,7 @@ interface DruidClass {
     remove(component: DruidNode): void;
 
     new_blocker: (node: string) => DruidBlocker;
-    new_button: (node: string, cb: BtnCallback) => DruidButton;
+    new_button: (node: string, cb: BtnCallback, params?: any) => DruidButton;
     new_checkbox: (node: string, cb: BtnCallback, click_node?: string, init_state?: boolean) => DruidButton;
     new_scroll(scroll: string, container: string): DruidScroll;
     new_static_grid(parent: string, element: string, in_row: number): DruidGridVertical;
