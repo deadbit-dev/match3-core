@@ -287,10 +287,13 @@ ____exports._STORAGE_CONFIG = {
     spinning_opened = false,
     horizontal_rocket_opened = false,
     vertical_rocket_opened = false,
-    hammer_counts = 3,
-    spinning_counts = 3,
-    horizontal_rocket_counts = 3,
-    vertical_rocket_counts = 3,
+    hammer_counts = 0,
+    spinning_counts = 0,
+    horizontal_rocket_counts = 0,
+    vertical_rocket_counts = 0,
+    coins = 0,
+    lifes = 2,
+    infinit_life_time = 0,
     completed_tutorials = {}
 }
 return ____exports

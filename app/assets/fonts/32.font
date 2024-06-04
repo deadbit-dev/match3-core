@@ -1,9 +1,9 @@
-font: "/assets/fonts/ShantellSans-Light.ttf"
+font: "/assets/fonts/Rubik-Bold.ttf"
 material: "/builtins/fonts/font-df.material"
 size: 32
 antialias: 1
 alpha: 1.0
-outline_alpha: 0.0
+outline_alpha: 1.0
 outline_width: 1.0
 shadow_alpha: 0.0
 shadow_blur: 0

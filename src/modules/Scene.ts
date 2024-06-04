@@ -198,6 +198,8 @@ function SceneModule() {
 
         msg.post(sender, "init");
         msg.post(sender, "enable");
+
+        EventBus.send('ON_SCENE_LOADED', {name: last_loading_scene} );
         
         last_scene = last_loading_scene;
         last_loading_scene = '';

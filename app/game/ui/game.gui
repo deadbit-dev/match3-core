@@ -11,6 +11,14 @@ fonts {
   name: "16"
   font: "/assets/fonts/16.font"
 }
+fonts {
+  name: "18"
+  font: "/assets/fonts/18.font"
+}
+fonts {
+  name: "42"
+  font: "/assets/fonts/42.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"
@@ -236,6 +244,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
@@ -295,6 +304,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
@@ -316,35 +326,35 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
   size {
-    x: 200.0
-    y: 100.0
+    x: 150.0
+    y: 50.0
     z: 0.0
     w: 1.0
   }
   color {
     x: 1.0
-    y: 1.0
-    z: 1.0
+    y: 0.855
+    z: 0.651
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "\321\205\320\276\320\264\321\213"
-  font: "32"
+  font: "42"
   id: "step_time_box/text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -362,7 +372,12 @@ nodes {
   outline_alpha: 1.0
   shadow_alpha: 1.0
   overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 4
+  overridden_fields: 5
   overridden_fields: 8
+  overridden_fields: 10
+  overridden_fields: 15
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -374,7 +389,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: 4.0
+    y: 0.0
     z: 0.0
     w: 1.0
   }
@@ -444,8 +459,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 2.0
+    y: 2.0
     z: 1.0
     w: 1.0
   }
@@ -456,23 +471,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.659
-    y: 0.322
-    z: 0.247
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "64"
+  font: "42"
   id: "steps"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -500,7 +515,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: 4.0
+    y: 0.0
     z: 0.0
     w: 1.0
   }
@@ -570,8 +585,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 2.0
+    y: 2.0
     z: 1.0
     w: 1.0
   }
@@ -582,23 +597,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.659
-    y: 0.322
-    z: 0.247
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "00:00"
-  font: "64"
+  font: "42"
   id: "time"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -856,35 +871,35 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
   size {
-    x: 200.0
-    y: 100.0
+    x: 150.0
+    y: 50.0
     z: 0.0
     w: 1.0
   }
   color {
     x: 1.0
-    y: 1.0
-    z: 1.0
+    y: 0.855
+    z: 0.651
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "\321\206\320\265\320\273\321\214"
-  font: "32"
+  font: "42"
   id: "targets_box/text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -902,7 +917,12 @@ nodes {
   outline_alpha: 1.0
   shadow_alpha: 1.0
   overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 4
+  overridden_fields: 5
   overridden_fields: 8
+  overridden_fields: 10
+  overridden_fields: 15
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -1043,8 +1063,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 2.0
+    y: 2.0
     z: 1.0
     w: 1.0
   }
@@ -1055,23 +1075,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.659
-    y: 0.322
-    z: 0.247
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "5"
-  font: "64"
+  font: "42"
   id: "first_target_counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -1228,8 +1248,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 2.0
+    y: 2.0
     z: 1.0
     w: 1.0
   }
@@ -1240,23 +1260,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.659
-    y: 0.322
-    z: 0.247
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "3"
-  font: "64"
+  font: "42"
   id: "second_target_counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -1413,8 +1433,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 2.0
+    y: 2.0
     z: 1.0
     w: 1.0
   }
@@ -1425,23 +1445,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.659
-    y: 0.322
-    z: 0.247
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "7"
-  font: "64"
+  font: "42"
   id: "third_target_counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -1672,7 +1692,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "hammer"
   parent: "buster_buttons"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/game/ui/button.gui"
@@ -1860,8 +1880,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -1872,8 +1892,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -1884,23 +1904,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "hammer/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -2147,8 +2167,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -2159,8 +2179,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -2171,23 +2191,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "spinning/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -2436,8 +2456,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -2448,8 +2468,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -2460,23 +2480,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "horizontal_rocket/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -2723,8 +2743,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -2735,8 +2755,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -2747,23 +2767,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "vertical_rocket/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -2827,7 +2847,7 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  layer: ""
+  layer: "top"
   inherit_alpha: false
   slice9 {
     x: 0.0
@@ -3071,8 +3091,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -3083,8 +3103,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -3095,23 +3115,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "restart/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -3361,8 +3381,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -3373,8 +3393,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -3385,23 +3405,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "back/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -3672,8 +3692,8 @@ nodes {
   }
   color {
     x: 1.0
-    y: 1.0
-    z: 1.0
+    y: 0.855
+    z: 0.651
     w: 1.0
   }
   type: TYPE_TEXT
@@ -3685,9 +3705,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.612
+    y: 0.384
+    z: 0.169
     w: 1.0
   }
   shadow {
@@ -3704,7 +3724,9 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
+  overridden_fields: 5
   overridden_fields: 8
+  overridden_fields: 15
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -3739,9 +3761,9 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
@@ -3753,9 +3775,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.612
+    y: 0.384
+    z: 0.169
     w: 1.0
   }
   shadow {
@@ -4005,8 +4027,8 @@ nodes {
 }
 nodes {
   position {
-    x: 24.0
-    y: -26.0
+    x: 25.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -4017,8 +4039,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
+    x: 0.7
+    y: 0.7
     z: 1.0
     w: 1.0
   }
@@ -4029,23 +4051,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.302
-    z: 0.0
+    x: 0.988
+    y: 0.922
+    z: 0.851
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "0"
-  font: "32"
+  font: "42"
   id: "revert_step/counts"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.498
+    y: 0.271
+    z: 0.118
     w: 1.0
   }
   shadow {
@@ -4125,13 +4147,13 @@ nodes {
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
   enabled: false
-  visible: true
+  visible: false
   material: ""
 }
 nodes {
   position {
-    x: 0.0
-    y: 0.0
+    x: -150.0
+    y: 50.0
     z: 0.0
     w: 1.0
   }
@@ -4154,23 +4176,23 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.0
-    y: 0.0
-    z: 0.0
+    x: 1.0
+    y: 1.0
+    z: 1.0
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "16"
+  font: "18"
   id: "tutorial_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
-  pivot: PIVOT_CENTER
+  pivot: PIVOT_NW
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.0
+    y: 0.0
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -4182,7 +4204,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: true
   parent: "tutorial"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 1.0
@@ -4286,7 +4308,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/title_substrate"
+  texture: "ui/game_title_substrate"
   id: "title"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -4428,6 +4450,7 @@ nodes {
   size_mode: SIZE_MODE_AUTO
   spine_scene: "avatar"
   spine_default_animation: "Right_Left_01"
+  spine_skin: ""
   custom_type: 405028931
   enabled: true
   visible: true
@@ -4709,7 +4732,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "ui/title_substrate"
+  texture: "ui/game_title_substrate"
   id: "gameover_title"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -4851,6 +4874,7 @@ nodes {
   size_mode: SIZE_MODE_AUTO
   spine_scene: "avatar"
   spine_default_animation: "Right_Left_01"
+  spine_skin: ""
   custom_type: 405028931
   enabled: true
   visible: true
@@ -5164,6 +5188,64 @@ nodes {
   text_tracking: 0.0
   custom_type: 0
   enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 270.0
+    y: 480.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 540.0
+    y: 960.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: ""
+  id: "lock"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  layer: "back"
+  inherit_alpha: true
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 0.7
+  template_node_child: false
+  size_mode: SIZE_MODE_MANUAL
+  custom_type: 0
+  enabled: false
   visible: true
   material: ""
 }

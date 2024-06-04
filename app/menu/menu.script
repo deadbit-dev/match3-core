@@ -1,0 +1,23 @@
+local ____exports = {}
+function ____exports.init(self)
+    Manager.init_script()
+    Scene.load_resource("menu", "background")
+    msg.post(".", "acquire_input_focus")
+end
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+end
+function ____exports.on_input(self, action_id, action)
+    if action_id == ID_MESSAGES.MSG_TOUCH and action.released then
+        Scene.load("map")
+    end
+end
+function ____exports.final(self)
+    Scene.unload_all_resources("menu")
+    Manager.final_script()
+end
+init = ____exports.init
+on_message = ____exports.on_message
+on_input = ____exports.on_input
+final = ____exports.final
+

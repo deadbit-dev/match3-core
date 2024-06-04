@@ -1,0 +1,35 @@
+local ____exports = {}
+local set_events, setup
+local druid = require("druid.druid")
+function set_events(data)
+end
+function setup(data)
+end
+function ____exports.init(self)
+    Manager.init_script()
+    self.druid = druid.new(self)
+    print("HERE")
+    setup(self)
+    set_events(self)
+end
+function ____exports.on_input(self, action_id, action)
+    return self.druid:on_input(action_id, action)
+end
+function ____exports.update(self, dt)
+    self.druid:update(dt)
+end
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+    self.druid:on_message(message_id, message, sender)
+end
+function ____exports.final(self)
+    self.druid:final()
+    EventBus.off_all_current_script()
+    Manager.final_script()
+end
+init = ____exports.init
+on_input = ____exports.on_input
+update = ____exports.update
+on_message = ____exports.on_message
+final = ____exports.final
+

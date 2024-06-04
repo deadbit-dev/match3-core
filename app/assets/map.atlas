@@ -1,17 +1,17 @@
 images {
-  image: "/assets/map.png"
+  image: "/assets/map/map.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/button_level_green.png"
+  image: "/assets/map/button_level_green.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/button_level.png"
+  image: "/assets/map/button_level.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/button_level_red.png"
+  image: "/assets/map/button_level_red.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

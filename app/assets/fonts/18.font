@@ -1,10 +1,10 @@
 font: "/assets/fonts/Rubik-Bold.ttf"
 material: "/builtins/fonts/font-df.material"
-size: 16
+size: 18
 antialias: 1
 alpha: 1.0
-outline_alpha: 0.0
-outline_width: 0.0
+outline_alpha: 1.0
+outline_width: 0.3
 shadow_alpha: 0.0
 shadow_blur: 0
 shadow_x: 1.0
