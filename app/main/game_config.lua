@@ -292,8 +292,8 @@ ____exports._STORAGE_CONFIG = {
     horizontal_rocket_counts = 0,
     vertical_rocket_counts = 0,
     coins = 0,
-    lifes = 2,
-    infinit_life_time = 0,
+    life = {start_time = 0, amount = 2},
+    infinit_life = {is_active = false, start_time = 0, duration = 0},
     completed_tutorials = {}
 }
 return ____exports

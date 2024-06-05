@@ -3,10 +3,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element, CombinationType, Cell, NotActiveCell, CellState } from "../game/match3_core";
-import { Busters, CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TutorialData } from "../game/match3_game";
+import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TutorialData } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
-import { lang_data } from "./langs";
 
 export const IS_DEBUG_MODE = true;
 export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_config("android.package").includes('huawei');
@@ -318,9 +317,17 @@ export const _STORAGE_CONFIG = {
     vertical_rocket_counts: 0,
 
     coins: 0,
-    lifes: 2,
+    
+    life: {
+        start_time: 0,
+        amount: 2
+    },
 
-    infinit_life_time: 0,
+    infinit_life: {
+        is_active: false,
+        start_time: 0,
+        duration: 0
+    },
 
     completed_tutorials: [] as number[]
 };
@@ -433,5 +440,11 @@ export type _UserMessages = {
     ON_GAME_OVER: VoidMessage,
 
     SET_TUTORIAL: VoidMessage,
-    REMOVE_TUTORIAL: VoidMessage
+    REMOVE_TUTORIAL: VoidMessage,
+
+    STORE_ACTIVATION: boolean,
+    NOT_ENOUGH_LIFE: VoidMessage,
+
+    ADDED_LIFE: VoidMessage,
+    REMOVED_LIFE: VoidMessage
 };

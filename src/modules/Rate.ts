@@ -36,8 +36,10 @@ function RateModule() {
     }
 
     function _on_message(_this: any, message_id: hash, _message: any, sender: hash) {
-        if (message_id == to_hash('MANAGER_READY'))
+        if (message_id == to_hash('MANAGER_READY')) {
             msg.post('main:/rate#rate', to_hash('MANAGER_READY'));
+            msg.post('main:/ui#main', to_hash('MANAGER_READY'));
+        }
     }
 
     return { show, is_shown, _mark_shown, _on_message };

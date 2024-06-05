@@ -47,25 +47,25 @@ export function final(this: props): void {
     Manager.final_script();
 }
 
-function setup(data: props) {
-    setup_info_ui(data);
-    setup_busters(data);
-    setup_sustem_ui(data);
-    setup_win_ui(data);
-    setup_gameover_ui(data);
+function setup(instance: props) {
+    setup_info_ui(instance);
+    setup_busters(instance);
+    setup_sustem_ui(instance);
+    setup_win_ui(instance);
+    setup_gameover_ui(instance);
 }
 
-function setup_info_ui(data: props) {
-    setup_step_or_time(data);
-    setup_targets(data);
+function setup_info_ui(instance: props) {
+    setup_step_or_time(instance);
+    setup_targets(instance);
 }
 
-function setup_step_or_time(data: props) {
-    if(data.level['time'] != undefined) {
+function setup_step_or_time(instance: props) {
+    if(instance.level['time'] != undefined) {
         const node = gui.get_node('timer');
         gui.set_enabled(node, true);
 
-        if(data.level['steps'] == undefined) {
+        if(instance.level['steps'] == undefined) {
             gui.set_position(node, vmath.vector3(0, -20, 0));
             gui.set_scale(node, vmath.vector3(0.6, 0.6, 1));
         } else {
@@ -73,16 +73,16 @@ function setup_step_or_time(data: props) {
             gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
         }
 
-        set_text('time', parse_time(data.level['time']));
+        set_text('time', parse_time(instance.level['time']));
 
         gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('time'));
     }
 
-    if(data.level['steps'] != undefined) {
+    if(instance.level['steps'] != undefined) {
         const node = gui.get_node('step_counter');
         gui.set_enabled(node, true);
 
-        if(data.level['time'] == undefined) {
+        if(instance.level['time'] == undefined) {
             gui.set_position(node, vmath.vector3(0, -25, 0));
             gui.set_scale(node, vmath.vector3(0.7, 0.7, 1));
         } else {
@@ -90,14 +90,14 @@ function setup_step_or_time(data: props) {
             gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
         }
 
-        set_text('steps', data.level['steps']);
+        set_text('steps', instance.level['steps']);
 
         gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('steps'));
     }
 }
 
-function setup_targets(data: props) {
-    const targets = data.level['targets'];
+function setup_targets(instance: props) {
+    const targets = instance.level['targets'];
     if(targets[0] != undefined) {
         const node = gui.get_node('first_target');
         gui.set_enabled(node, true);
@@ -160,13 +160,13 @@ function setup_targets(data: props) {
     gui.set_text(gui.get_node('targets_box/text'), Lang.get_text('targets'));
 }
 
-function setup_busters(data: props) {
+function setup_busters(instance: props) {
     if(GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) return;
     
     gui.set_enabled(gui.get_node('buster_buttons'), true);
     
     if(GameStorage.get('spinning_opened')) {
-        data.druid.new_button('spinning/button', () => {
+        instance.druid.new_button('spinning/button', () => {
             EventBus.send('TRY_ACTIVATE_SPINNING');
         });
 
@@ -176,7 +176,7 @@ function setup_busters(data: props) {
     }
 
     if(GameStorage.get('hammer_opened')) {
-        data.druid.new_button('hammer/button', () => {
+        instance.druid.new_button('hammer/button', () => {
             EventBus.send('TRY_ACTIVATE_HAMMER');
         });
         
@@ -186,7 +186,7 @@ function setup_busters(data: props) {
     }
     
     if(GameStorage.get('horizontal_rocket_opened')) {
-        data.druid.new_button('horizontal_rocket/button', () => {
+        instance.druid.new_button('horizontal_rocket/button', () => {
             EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
         });
         
@@ -196,7 +196,7 @@ function setup_busters(data: props) {
     }
 
     if(GameStorage.get('vertical_rocket_opened')) {
-        data.druid.new_button('vertical_rocket/button', () => {
+        instance.druid.new_button('vertical_rocket/button', () => {
             EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
         });
         
@@ -204,18 +204,20 @@ function setup_busters(data: props) {
         gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
         gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
     }
+
+    update_buttons(instance);
 }
 
-function setup_sustem_ui(data: props) {
-    data.druid.new_button('back/button', () => Scene.load('map'));
-    data.druid.new_button('restart/button', () => Scene.restart());
-    data.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
+function setup_sustem_ui(instance: props) {
+    instance.druid.new_button('back/button', () => Scene.load('map'));
+    instance.druid.new_button('restart/button', () => Scene.restart());
+    instance.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
 
     set_text('current_level_text', GameStorage.get('current_level') + 1);
 }
 
-function setup_win_ui(data: props) {
-    data.druid.new_button('continue_button', next_level);
+function setup_win_ui(instance: props) {
+    instance.druid.new_button('continue_button', next_level);
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
     gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
@@ -226,9 +228,9 @@ function next_level() {
     Scene.restart();
 }
 
-function setup_gameover_ui(data: props) {
-    data.druid.new_button('restart_button', restart_level);
-    data.druid.new_button('map_button', () => Scene.load('map'));
+function setup_gameover_ui(instance: props) {
+    instance.druid.new_button('restart_button', restart_level);
+    instance.druid.new_button('map_button', () => Scene.load('map'));
     gui.set_enabled(gui.get_node('gameover'), false);
     gui.set_text(gui.get_node('gameover_text'), Lang.get_text('gameover_title'));
     gui.set_text(gui.get_node('restart_text'), Lang.get_text('restart'));
@@ -239,11 +241,11 @@ function restart_level() {
     Scene.restart();
 }
 
-function set_events(data: props) {
-    EventBus.on('INIT_UI', () => setup(data));
+function set_events(instance: props) {
+    EventBus.on('INIT_UI', () => setup(instance));
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
     EventBus.on('UPDATED_TARGET', (data) => update_targets(data), true);
-    EventBus.on('UPDATED_BUTTONS', () => update_buttons(data), true);
+    EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
     EventBus.on('SET_TUTORIAL', () => set_tutorial(), true);
     EventBus.on('REMOVE_TUTORIAL', () => gui.set_enabled(gui.get_node('tutorial'), false), true);
@@ -259,17 +261,17 @@ function update_targets(data: TargetMessage) {
     }
 }
 
-function update_buttons(data: props) {
-    set_text_colors(['spinning/button'], '#fff', data.busters.spinning.active ? 0.5 : 1);
+function update_buttons(instance: props) {
+    set_text_colors(['spinning/button'], '#fff', instance.busters.spinning.active ? 0.5 : 1);
     set_text('spinning/counts', GameStorage.get('spinning_counts'));
     
-    set_text_colors(['hammer/button'], '#fff', data.busters.hammer.active ? 0.5 : 1);
+    set_text_colors(['hammer/button'], '#fff', instance.busters.hammer.active ? 0.5 : 1);
     set_text('hammer/counts', GameStorage.get('hammer_counts'));
     
-    set_text_colors(['horizontal_rocket/button'], '#fff', data.busters.horizontal_rocket.active ? 0.5 : 1);
+    set_text_colors(['horizontal_rocket/button'], '#fff', instance.busters.horizontal_rocket.active ? 0.5 : 1);
     set_text('horizontal_rocket/counts', GameStorage.get('horizontal_rocket_counts'));
     
-    set_text_colors(['vertical_rocket/button'], '#fff', data.busters.vertical_rocket.active ? 0.5 : 1);
+    set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
     set_text('vertical_rocket/counts', GameStorage.get('vertical_rocket_counts'));
 }
 
@@ -289,6 +291,10 @@ function set_win() {
 function set_gameover() {
     disable_game_ui();
     gui.set_enabled(gui.get_node('gameover'), true);
+
+    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+        gui.set_enabled(gui.get_node('restart_button'), false);
+    }
 }
 
 function disable_game_ui() {

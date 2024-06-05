@@ -1,86 +1,70 @@
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, is_enough_coins, set_enabled_coins, set_enabled_lifes, add_coins, remove_coins, add_lifes
+local set_events, setup, setup_coins, setup_life, setup_store, on_life_tick, set_infinit_life, on_infinit_life_tick, setup_life_notification, is_enough_coins, set_enabled_coins, set_enabled_lifes, set_enabled_store, set_enabled_life_notification, add_coins, remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover
 local druid = require("druid.druid")
-function set_events(data)
+local ____utils = require("utils.utils")
+local parse_time = ____utils.parse_time
+local ____life = require("main.life")
+local add_lifes = ____life.add_lifes
+local remove_lifes = ____life.remove_lifes
+function set_events()
+    EventBus.on("ON_SCENE_LOADED", on_scene_loaded, true)
+    EventBus.on("ON_GAME_OVER", on_gameover, true)
+    EventBus.on("ADDED_LIFE", on_add_lifes, true)
+    EventBus.on("REMOVED_LIFE", on_remove_lifes, true)
     EventBus.on(
-        "ON_SCENE_LOADED",
-        function(message)
-            repeat
-                local ____switch9 = message.name
-                local ____cond9 = ____switch9 == "game"
-                if ____cond9 then
-                    set_enabled_coins(false)
-                    set_enabled_lifes(false)
-                    break
-                end
-                ____cond9 = ____cond9 or ____switch9 == "map"
-                if ____cond9 then
-                    set_enabled_coins(true)
-                    set_enabled_lifes(true)
-                    break
-                end
-            until true
-        end,
+        "NOT_ENOUGH_LIFE",
+        function() return set_enabled_life_notification(true) end,
         true
     )
 end
-function setup(data)
-    setup_coins(data)
-    setup_life(data)
-    setup_store(data)
+function setup(instance)
+    setup_coins(instance)
+    setup_life(instance)
+    setup_store(instance)
+    setup_life_notification(instance)
 end
-function setup_coins(data)
-    data.druid:new_button(
+function setup_coins(instance)
+    instance.druid:new_button(
         "coins/button",
-        function()
-            local store = gui.get_node("store/manager")
-            gui.set_enabled(store, true)
-        end
+        function() return set_enabled_store(true) end
     )
     gui.set_text(
         gui.get_node("coins/text"),
         tostring(GameStorage.get("coins"))
     )
 end
-function setup_life(data)
-    data.druid:new_button(
+function setup_life(instance)
+    instance.druid:new_button(
         "lifes/button",
-        function()
-            local store = gui.get_node("store/manager")
-            gui.set_enabled(store, true)
-        end
+        function() return set_enabled_store(true) end
     )
     gui.set_text(
         gui.get_node("lifes/text"),
-        tostring(GameStorage.get("lifes"))
+        tostring(GameStorage.get("life").amount)
     )
 end
-function setup_store(data)
-    gui.set_render_order(1)
-    data.druid:new_button(
+function setup_store(instance)
+    instance.druid:new_button(
         "store/close",
-        function()
-            local store = gui.get_node("store/manager")
-            gui.set_enabled(store, false)
-        end
+        function() return set_enabled_store(false) end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_30_btn",
         function() return add_coins(30) end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_150_btn",
         function() return add_coins(150) end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_300_btn",
         function() return add_coins(300) end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_800_btn",
         function() return add_coins(800) end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_x1_btn",
         function()
             if not is_enough_coins(30) then
@@ -90,7 +74,7 @@ function setup_store(data)
             remove_coins(30)
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_x2_btn",
         function()
             if not is_enough_coins(50) then
@@ -100,7 +84,7 @@ function setup_store(data)
             remove_coins(50)
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_x3_btn",
         function()
             if not is_enough_coins(70) then
@@ -110,7 +94,7 @@ function setup_store(data)
             remove_coins(70)
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/junior_box/buy_button/button",
         function()
             if not is_enough_coins(90) then
@@ -118,6 +102,7 @@ function setup_store(data)
             end
             remove_coins(90)
             add_coins(150)
+            set_infinit_life(1)
             GameStorage.set(
                 "hammer_counts",
                 GameStorage.get("hammer_counts") + 1
@@ -136,14 +121,15 @@ function setup_store(data)
             )
         end
     )
-    data.druid:new_button(
-        "store/junior_box/buy_button/button",
+    instance.druid:new_button(
+        "store/catlover_box/buy_button/button",
         function()
             if not is_enough_coins(180) then
                 return
             end
             remove_coins(180)
             add_coins(300)
+            set_infinit_life(24)
             GameStorage.set(
                 "hammer_counts",
                 GameStorage.get("hammer_counts") + 2
@@ -162,7 +148,7 @@ function setup_store(data)
             )
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_ad_1_btn",
         function()
             if not is_enough_coins(100) then
@@ -171,7 +157,7 @@ function setup_store(data)
             remove_coins(100)
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_ad_7_btn",
         function()
             if not is_enough_coins(250) then
@@ -180,7 +166,7 @@ function setup_store(data)
             remove_coins(250)
         end
     )
-    data.druid:new_button(
+    instance.druid:new_button(
         "store/buy_ad_30_btn",
         function()
             if not is_enough_coins(600) then
@@ -188,6 +174,86 @@ function setup_store(data)
             end
             remove_coins(600)
         end
+    )
+    instance.druid:new_button(
+        "store/reset/button",
+        function()
+            remove_coins(GameStorage.get("coins"))
+            remove_lifes(GameStorage.get("life").amount)
+            local infinit_life = GameStorage.get("infinit_life")
+            infinit_life.start_time = System.now() - infinit_life.duration
+            GameStorage.set("infinit_life", infinit_life)
+            on_infinit_life_tick()
+            GameStorage.set("hammer_counts", 0)
+            GameStorage.set("spinning_counts", 0)
+            GameStorage.set("horizontal_rocket_counts", 0)
+            GameStorage.set("vertical_rocket_counts", 0)
+        end
+    )
+end
+function on_life_tick()
+    local life = GameStorage.get("life")
+    local delta = System.now() - life.start_time
+    gui.set_text(
+        gui.get_node("life_notification/time_text"),
+        parse_time(20 * 60 - delta)
+    )
+    if delta < 20 * 60 then
+        return
+    end
+    add_lifes(1)
+    life.start_time = System.now()
+    GameStorage.set("life", life)
+end
+function set_infinit_life(duration)
+    local life = GameStorage.get("infinit_life")
+    life.is_active = true
+    life.duration = duration * 60 * 60
+    life.start_time = System.now()
+    GameStorage.set("infinit_life", life)
+end
+function on_infinit_life_tick()
+    local life = GameStorage.get("infinit_life")
+    if not life.is_active then
+        return
+    end
+    local delta = System.now() - life.start_time
+    gui.play_flipbook(
+        gui.get_node("lifes/icon"),
+        "infinite_life_icon"
+    )
+    gui.set_text(
+        gui.get_node("lifes/text"),
+        parse_time(life.duration - delta)
+    )
+    if delta >= life.duration then
+        life.is_active = false
+        GameStorage.set("infinit_life", life)
+        gui.play_flipbook(
+            gui.get_node("lifes/icon"),
+            "life_icon"
+        )
+        gui.set_text(
+            gui.get_node("lifes/text"),
+            tostring(GameStorage.get("life").amount)
+        )
+    end
+end
+function setup_life_notification(instance)
+    instance.druid:new_button(
+        "life_notification/buy_button",
+        function()
+            if not is_enough_coins(30) then
+                return
+            end
+            set_enabled_life_notification(false)
+            remove_coins(30)
+            add_lifes(1)
+        end
+    )
+    instance.druid:new_button(
+        "life_notification/close",
+        function() return set_enabled_life_notification(false) end
     )
 end
 function is_enough_coins(amount)
@@ -201,9 +267,18 @@ function set_enabled_lifes(state)
     local coins = gui.get_node("lifes/button")
     gui.set_enabled(coins, state)
 end
+function set_enabled_store(state)
+    local store = gui.get_node("store/manager")
+    gui.set_enabled(store, state)
+    EventBus.send("STORE_ACTIVATION", state)
+end
+function set_enabled_life_notification(state)
+    local life = gui.get_node("life_notification/manager")
+    gui.set_enabled(life, state)
+end
 function add_coins(amount)
     local coins = GameStorage.get("coins")
-    coins = math.max(coins + amount, 10000)
+    coins = math.min(coins + amount, 10000)
     local coins_text = gui.get_node("coins/text")
     gui.set_text(
         coins_text,
@@ -221,48 +296,89 @@ function remove_coins(amount)
     )
     GameStorage.set("coins", coins)
 end
-function add_lifes(amount)
-    local lifes = GameStorage.get("lifes")
-    lifes = lifes + amount
+function on_add_lifes()
     local lifes_text = gui.get_node("lifes/text")
     gui.set_text(
         lifes_text,
-        tostring(lifes)
+        tostring(GameStorage.get("life").amount)
     )
-    GameStorage.set("lifes", lifes)
 end
-function ____exports.init(self)
+function on_remove_lifes()
+    local lifes_text = gui.get_node("lifes/text")
+    gui.set_text(
+        lifes_text,
+        tostring(GameStorage.get("life").amount)
+    )
+end
+function on_scene_loaded(scene)
+    repeat
+        local ____switch59 = scene.name
+        local ____cond59 = ____switch59 == "game"
+        if ____cond59 then
+            set_enabled_coins(false)
+            set_enabled_lifes(false)
+            break
+        end
+        ____cond59 = ____cond59 or ____switch59 == "map"
+        if ____cond59 then
+            set_enabled_coins(true)
+            set_enabled_lifes(true)
+            break
+        end
+    until true
+end
+function on_gameover()
+    set_enabled_coins(true)
+    set_enabled_lifes(true)
+    if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
+        timer.delay(
+            5,
+            false,
+            function() return set_enabled_life_notification(true) end
+        )
+    end
+end
+local function init_gui(instance)
     Manager.init_script()
-    self.druid = druid.new(self)
-    setup(self)
-    set_events(self)
+    instance.druid = druid.new(instance)
+    gui.set_render_order(10)
+    setup(instance)
+    set_events()
+    timer.delay(
+        1200,
+        true,
+        function() return add_lifes(1) end
+    )
+    on_life_tick()
+    timer.delay(1, true, on_life_tick)
+    on_infinit_life_tick()
+    timer.delay(1, true, on_infinit_life_tick)
 end
 function ____exports.on_input(self, action_id, action)
-    return self.druid:on_input(action_id, action)
+    local ____opt_0 = self.druid
+    return ____opt_0 and ____opt_0:on_input(action_id, action)
 end
 function ____exports.update(self, dt)
-    self.druid:update(dt)
+    local ____opt_2 = self.druid
+    if ____opt_2 ~= nil then
+        ____opt_2:update(dt)
+    end
 end
 function ____exports.on_message(self, message_id, message, sender)
+    if message_id == to_hash("MANAGER_READY") then
+        init_gui(self)
+    end
     Manager.on_message(self, message_id, message, sender)
-    self.druid:on_message(message_id, message, sender)
+    local ____opt_4 = self.druid
+    if ____opt_4 ~= nil then
+        ____opt_4:on_message(message_id, message, sender)
+    end
 end
 function ____exports.final(self)
     self.druid:final()
     EventBus.off_all_current_script()
     Manager.final_script()
 end
-local function remove_lifes(amount)
-    local lifes = GameStorage.get("lifes")
-    lifes = lifes - amount
-    local lifes_text = gui.get_node("lifes/text")
-    gui.set_text(
-        lifes_text,
-        tostring(lifes)
-    )
-    GameStorage.set("lifes", lifes)
-end
-init = ____exports.init
 on_input = ____exports.on_input
 update = ____exports.update
 on_message = ____exports.on_message

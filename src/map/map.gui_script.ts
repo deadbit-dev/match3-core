@@ -11,6 +11,7 @@ import * as druid from 'druid.druid';
 
 interface props {
     druid: DruidClass;
+    block_input: boolean
 }
 
 export function init(this: props): void {
@@ -22,9 +23,13 @@ export function init(this: props): void {
     set_completed_levels();
     
     set_level_buttons(this);
+
+    set_events(this);
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
+    if(this.block_input) return;
+
     this.druid.on_input(action_id, action);
     if(action_id == ID_MESSAGES.MSG_TOUCH && !action.pressed && !action.released) on_drag(action);
 }
@@ -54,6 +59,9 @@ function set_level_buttons(data: props) {
 }
 
 function load_level(level: number) {
+    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+        return EventBus.send('NOT_ENOUGH_LIFE');
+    }
     GameStorage.set('current_level', level);
     Scene.load('game');
 }
@@ -82,4 +90,10 @@ function on_drag(action: any) {
     gui.set_position(map, pos);
 
     GameStorage.set('map_last_pos_y', pos.y);
+}
+
+function set_events(instace: props) {
+    EventBus.on('STORE_ACTIVATION', (state) => {
+        instace.block_input = state;
+    });
 }

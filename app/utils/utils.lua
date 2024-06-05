@@ -161,11 +161,17 @@ function ____exports.is_intersect_sprite(item, checkPos, name, offset, mul_scale
 end
 function ____exports.parse_time(t)
     local d = math.floor(t)
-    local m = math.floor(d / 60)
-    local s = d - m * 60
+    local h = math.floor(d / 60 / 60)
+    local m = math.floor(d / 60 % 60)
+    local s = d - math.floor(d / 60) * 60
+    local res = ""
+    if h > 0 then
+        local hh = h < 10 and "0" .. tostring(h) or tostring(h) .. ""
+        res = hh .. ":"
+    end
     local mm = m < 10 and "0" .. tostring(m) or tostring(m) .. ""
     local ss = s < 10 and "0" .. tostring(s) or tostring(s) .. ""
-    return (mm .. ":") .. ss
+    return ((res .. mm) .. ":") .. ss
 end
 function ____exports.set_position_xy(item, x, y)
     local pos = go.get_position(item)

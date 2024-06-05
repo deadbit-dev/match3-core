@@ -52,6 +52,7 @@ import {
 } from './match3_core';
 
 import { lang_data } from '../main/langs';
+import { remove_lifes } from '../main/life';
 
 
 export const RandomElement = -2;
@@ -288,10 +289,10 @@ export function Game() {
     
     function set_busters() {
         // ------------ DEBUG -----------
-        GameStorage.set('spinning_counts', 5);
-        GameStorage.set('hammer_counts', 5);
-        GameStorage.set('horizontal_rocket_counts', 5);
-        GameStorage.set('vertical_rocket_counts', 5);
+        // GameStorage.set('spinning_counts', 5);
+        // GameStorage.set('hammer_counts', 5);
+        // GameStorage.set('horizontal_rocket_counts', 5);
+        // GameStorage.set('vertical_rocket_counts', 5);
         // ------------------------------
 
         if(!GameStorage.get('spinning_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('spinning_opened', true);
@@ -299,15 +300,22 @@ export function Game() {
         if(!GameStorage.get('horizontal_rocket_opened') && level_config.busters.horizontal_rocket.counts != 0) GameStorage.set('horizontal_rocket_opened', true);
         if(!GameStorage.get('vertical_rocket_opened') && level_config.busters.vertical_rocket.counts != 0) GameStorage.set('vertical_rocket_opened', true);
 
-        if(GameStorage.get('spinning_counts') <= 0) level_config.busters.spinning.counts;
-        if(GameStorage.get('hammer_counts') <= 0) level_config.busters.hammer.counts;
-        if(GameStorage.get('horizontal_rocket_counts') <= 0) level_config.busters.horizontal_rocket.counts;
-        if(GameStorage.get('vertical_rocket_counts') <= 0) level_config.busters.vertical_rocket.counts;
+        const spinning_counts = tonumber(level_config.busters.spinning.counts);
+        if(GameStorage.get('spinning_counts') <= 0 && spinning_counts != undefined) GameStorage.set('spinning_counts', spinning_counts);
+
+        const hammer_counts = tonumber(level_config.busters.hammer.counts);
+        if(GameStorage.get('hammer_counts') <= 0 && hammer_counts != undefined) GameStorage.set('hammer_counts', hammer_counts);
+
+        const horizontal_rocket_counts = tonumber(level_config.busters.horizontal_rocket.counts);
+        if(GameStorage.get('horizontal_rocket_counts') <= 0 && horizontal_rocket_counts != undefined) GameStorage.set('horizontal_rocket_counts', horizontal_rocket_counts);
+
+        const vertical_rocket_counts = tonumber(level_config.busters.vertical_rocket.counts);
+        if(GameStorage.get('vertical_rocket_counts') <= 0 && vertical_rocket_counts != undefined) GameStorage.set('vertical_rocket_counts', vertical_rocket_counts);
         
-        busters.spinning.active = (GameStorage.get('spinning_counts') <= 0);
-        busters.hammer.active = (GameStorage.get('hammer_counts') <= 0);
-        busters.horizontal_rocket.active = (GameStorage.get('horizontal_rocket_counts') <= 0);
-        busters.vertical_rocket.active = (GameStorage.get('vertical_rocket_counts') <= 0);
+        // busters.spinning.active = (GameStorage.get('spinning_counts') <= 0);
+        // busters.hammer.active = (GameStorage.get('hammer_counts') <= 0);
+        // busters.horizontal_rocket.active = (GameStorage.get('horizontal_rocket_counts') <= 0);
+        // busters.vertical_rocket.active = (GameStorage.get('vertical_rocket_counts') <= 0);
 
         EventBus.send('UPDATED_BUTTONS');
     }
@@ -334,9 +342,14 @@ export function Game() {
         
         if(is_tutorial()) set_tutorial();
             
-        search_available_steps(5, (steps) => {
-            available_steps = steps;
-        });
+        if(!is_tutorial()) {
+                search_available_steps(4, (steps) => {
+                available_steps = steps;
+            });
+        } else {
+            const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
+            if(step != undefined) available_steps = [step];
+        }
 
         init_targets();
 
@@ -590,7 +603,7 @@ export function Game() {
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
             EventBus.send('ON_WIN');
-        } else if(!is_have_steps()) EventBus.send('ON_GAME_OVER');
+        } else if(!is_have_steps()) gameover();
         
         Log.log("Закончена анимация хода");
     }
@@ -603,8 +616,13 @@ export function Game() {
             EventBus.send('GAME_TIMER', remaining_time);
         } else {
             timer.cancel(game_timer);
-            EventBus.send('ON_GAME_OVER');
+            gameover();
         }
+    }
+
+    function gameover() {
+        remove_lifes(1);
+        EventBus.send('ON_GAME_OVER');
     }
 
     function load_cell(x: number, y: number) {
@@ -679,7 +697,8 @@ export function Game() {
     function set_helper() {
         // search_helper_combination();
         
-        helper_timer = timer.delay(5, false, () => {
+        const delay = is_tutorial() ? 1 : 5;
+        helper_timer = timer.delay(delay, false, () => {
             set_combination_for_helper(available_steps);
 
             if(helper_data != null) {
@@ -687,10 +706,14 @@ export function Game() {
 
                 reset_helper();
 
-                previous_helper_data = Object.assign({}, helper_data);
-                EventBus.trigger('ON_SET_STEP_HELPER', helper_data, true, true);
+                timer.delay(1, false, () => {
+                    if(helper_data == null) return;
+                    
+                    previous_helper_data = Object.assign({}, helper_data);
+                    EventBus.trigger('ON_SET_STEP_HELPER', helper_data, true, true);
 
-                set_helper();
+                    if(!is_tutorial()) set_helper();
+                });
             }
         });
     }

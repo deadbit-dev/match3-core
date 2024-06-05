@@ -120,11 +120,21 @@ export function is_intersect_sprite(item: hash, checkPos: vmath.vector3, name = 
 
 export function parse_time(t: number) {
     const d = math.floor(t);
-    const m = math.floor(d / 60);
-    const s = d - m * 60;
+    const h = math.floor(d / 60 / 60);
+    const m = math.floor((d / 60) % 60);
+    const s = d - math.floor(d / 60) * 60;
+    
+    let res = "";
+
+    if(h > 0) {
+        const hh = h < 10 ? "0" + h : h + "";
+        res = hh + ":";
+    }
+    
     const mm = m < 10 ? "0" + m : m + "";
     const ss = s < 10 ? "0" + s : s + "";
-    return mm + ":" + ss;
+    
+    return res + mm + ":" + ss;
 }
 
 export function set_position_xy(item: hash, x: number, y: number) {

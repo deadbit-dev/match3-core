@@ -53,11 +53,6 @@ function ____exports.View(animator)
             "ON_LOAD_FIELD",
             function(state)
                 recalculate_cell_offset(state)
-                timer.delay(
-                    0.1,
-                    true,
-                    function() return print(Camera.get_ltrb()) end
-                )
                 load_field(state)
                 EventBus.send("INIT_UI")
                 EventBus.send("SET_HELPER")
@@ -123,8 +118,14 @@ function ____exports.View(animator)
             function(data)
                 local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
                 if combined_item ~= nil then
-                    local from_pos = go.get_position(combined_item._hash)
-                    local to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index)
+                    local from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index)
+                    local to_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index)
+                    if data.combined_element.x == data.step.from_x and data.combined_element.y == data.step.from_y then
+                        local buffer = from_pos
+                        from_pos = to_pos
+                        to_pos = buffer
+                    end
+                    go.set_position(from_pos, combined_item._hash)
                     go.animate(
                         combined_item._hash,
                         "position.x",

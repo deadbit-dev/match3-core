@@ -229,7 +229,7 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_LOAD_FIELD', (state) => {
             recalculate_cell_offset(state);
 
-            timer.delay(0.1, true, () => print(Camera.get_ltrb()));
+            // timer.delay(0.1, true, () => print(Camera.get_ltrb()));
 
             load_field(state);
 
@@ -276,8 +276,16 @@ export function View(animator: FluxGroup) {
         EventBus.on('ON_SET_STEP_HELPER', (data) => {
             const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
             if (combined_item != undefined) {
-                const from_pos = go.get_position(combined_item._hash);
-                const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
+                let from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index);
+                let to_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index);
+                
+                if(data.combined_element.x == data.step.from_x && data.combined_element.y == data.step.from_y) {
+                    const buffer = from_pos;
+                    from_pos = to_pos;
+                    to_pos = buffer;
+                }
+                    
+                go.set_position(from_pos, combined_item._hash);
                 go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
                 go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
             }

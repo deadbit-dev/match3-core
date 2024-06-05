@@ -7,31 +7,50 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { NameMessage } from '../../modules/modules_const';
+import { parse_time } from '../../utils/utils';
+import { add_lifes, remove_lifes } from '../life';
 
 
 interface props {
     druid: DruidClass;
 }
 
-export function init(this: props): void {
-    Manager.init_script();
-    this.druid = druid.new(this);
+// export function init(this: props): void {
+//     EventBus.on('MANAGER_READY', () => init_gui(this), true);
+// }
 
-    setup(this);
-    set_events(this);
+function init_gui(instance: props): void {
+    Manager.init_script();
+    instance.druid = druid.new(instance);
+
+    gui.set_render_order(10);
+
+    setup(instance);
+    set_events();
+
+    timer.delay(1200, true, () => add_lifes(1));
+    
+    on_life_tick();
+    timer.delay(1, true, on_life_tick);
+
+    on_infinit_life_tick();
+    timer.delay(1, true, on_infinit_life_tick);
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
-    return this.druid.on_input(action_id, action);
+    return this.druid?.on_input(action_id, action);
 }
 
 export function update(this: props, dt: number): void {
-    this.druid.update(dt);
+    this.druid?.update(dt);
 }
 
 export function on_message(this: props, message_id: string | hash, message: any, sender: string | hash | url): void {
+    if(message_id == to_hash('MANAGER_READY')) init_gui(this);
+    
     Manager.on_message(this, message_id, message, sender);
-    this.druid.on_message(message_id, message, sender);
+    this.druid?.on_message(message_id, message, sender);
 }
 
 export function final(this: props): void {
@@ -40,85 +59,67 @@ export function final(this: props): void {
     Manager.final_script();
 }
 
-function set_events(data: props) {
-    EventBus.on('ON_SCENE_LOADED', (message) => {
-        switch(message.name) {
-            case 'game':
-                set_enabled_coins(false);
-                set_enabled_lifes(false);
-            break;
-            case 'map':
-                set_enabled_coins(true);
-                set_enabled_lifes(true);
-            break;
-        }
-    }, true);
+function set_events() {
+    EventBus.on('ON_SCENE_LOADED', on_scene_loaded, true);
+    EventBus.on('ON_GAME_OVER', on_gameover, true);
+    EventBus.on('ADDED_LIFE', on_add_lifes, true);
+    EventBus.on('REMOVED_LIFE', on_remove_lifes, true);
+    EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
 }
 
-function setup(data: props) {
-    setup_coins(data);
-    setup_life(data);
-    setup_store(data);
+function setup(instance: props) {
+    setup_coins(instance);
+    setup_life(instance);
+    setup_store(instance);
+    setup_life_notification(instance);
 }
 
-function setup_coins(data: props) {
-    data.druid.new_button('coins/button', () => {
-        const store = gui.get_node('store/manager');
-        gui.set_enabled(store, true);
-    });
-
+function setup_coins(instance: props) {
+    instance.druid.new_button('coins/button', () => set_enabled_store(true));
     gui.set_text(gui.get_node('coins/text'), tostring(GameStorage.get('coins')));
 }
 
-function setup_life(data: props) {
-    data.druid.new_button('lifes/button', () => {
-        const store = gui.get_node('store/manager');
-        gui.set_enabled(store, true);
-    });
-
-    gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('lifes')));
+function setup_life(instance: props) {
+    instance.druid.new_button('lifes/button', () => set_enabled_store(true));
+    gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
 }
 
-function setup_store(data: props) {
-    gui.set_render_order(1);
+function setup_store(instance: props) {
+    instance.druid.new_button('store/close', () => set_enabled_store(false));
+    
+    instance.druid.new_button('store/buy_30_btn', () => add_coins(30));
+    instance.druid.new_button('store/buy_150_btn', () => add_coins(150));
+    instance.druid.new_button('store/buy_300_btn', () => add_coins(300));
+    instance.druid.new_button('store/buy_800_btn', () => add_coins(800));
 
-    data.druid.new_button('store/close', () => {
-        const store = gui.get_node('store/manager');
-        gui.set_enabled(store, false);
-    });
-
-    data.druid.new_button('store/buy_30_btn', () => add_coins(30));
-    data.druid.new_button('store/buy_150_btn', () => add_coins(150));
-    data.druid.new_button('store/buy_300_btn', () => add_coins(300));
-    data.druid.new_button('store/buy_800_btn', () => add_coins(800));
-
-    data.druid.new_button('store/buy_x1_btn', () => {
+    instance.druid.new_button('store/buy_x1_btn', () => {
         if(!is_enough_coins(30)) return;
 
         add_lifes(1);
         remove_coins(30);
     });
 
-    data.druid.new_button('store/buy_x2_btn', () => {
+    instance.druid.new_button('store/buy_x2_btn', () => {
         if(!is_enough_coins(50)) return;
 
         add_lifes(2);
         remove_coins(50);
     });
 
-    data.druid.new_button('store/buy_x3_btn', () => {
+    instance.druid.new_button('store/buy_x3_btn', () => {
         if(!is_enough_coins(70)) return;
 
         add_lifes(3);
         remove_coins(70);
     });
 
-    data.druid.new_button('store/junior_box/buy_button/button', () => {
+    instance.druid.new_button('store/junior_box/buy_button/button', () => {
         if(!is_enough_coins(90)) return;
 
         remove_coins(90);
         add_coins(150);
-        // update_lifes(Infinity);
+        
+        set_infinit_life(1);
         
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 1);
@@ -126,12 +127,13 @@ function setup_store(data: props) {
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
     });
     
-    data.druid.new_button('store/junior_box/buy_button/button', () => {
+    instance.druid.new_button('store/catlover_box/buy_button/button', () => {
         if(!is_enough_coins(180)) return;
 
         remove_coins(180);
         add_coins(300);
-        // update_lifes(Infinity);
+
+        set_infinit_life(24);
         
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 2);
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 2);
@@ -139,20 +141,89 @@ function setup_store(data: props) {
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 2);
     });
 
-    data.druid.new_button('store/buy_ad_1_btn', () => {
+    instance.druid.new_button('store/buy_ad_1_btn', () => {
         if(!is_enough_coins(100)) return;
         remove_coins(100);
     });
 
-    data.druid.new_button('store/buy_ad_7_btn', () => {
+    instance.druid.new_button('store/buy_ad_7_btn', () => {
         if(!is_enough_coins(250)) return;
         remove_coins(250);
     });
 
-    data.druid.new_button('store/buy_ad_30_btn', () => {
+    instance.druid.new_button('store/buy_ad_30_btn', () => {
         if(!is_enough_coins(600)) return;
         remove_coins(600);
     });
+
+    instance.druid.new_button('store/reset/button', () => {
+        remove_coins(GameStorage.get('coins'));
+        remove_lifes(GameStorage.get('life').amount);
+
+        const infinit_life = GameStorage.get('infinit_life');
+        infinit_life.start_time = System.now() - infinit_life.duration;
+        GameStorage.set('infinit_life', infinit_life);
+        on_infinit_life_tick();
+
+        GameStorage.set('hammer_counts', 0);
+        GameStorage.set('spinning_counts', 0);
+        GameStorage.set('horizontal_rocket_counts', 0);
+        GameStorage.set('vertical_rocket_counts', 0);
+    });
+}
+
+function on_life_tick() {
+    const life = GameStorage.get('life');
+    const delta = System.now() - life.start_time;
+
+    gui.set_text(gui.get_node('life_notification/time_text'), parse_time(20 * 60 - delta));
+
+    if(delta < 20 * 60) return;
+
+    add_lifes(1);
+    
+    life.start_time = System.now();
+    GameStorage.set('life', life);
+
+}
+
+function set_infinit_life(duration: number) {
+    const life = GameStorage.get('infinit_life');
+    life.is_active = true;
+    life.duration = duration * 60 * 60;
+    life.start_time = System.now();
+
+    GameStorage.set('infinit_life', life);
+}
+
+function on_infinit_life_tick() {
+    const life = GameStorage.get('infinit_life'); 
+    if(!life.is_active) return;
+
+    const delta = System.now() - life.start_time;
+    
+    gui.play_flipbook(gui.get_node('lifes/icon'), 'infinite_life_icon');
+
+    gui.set_text(gui.get_node('lifes/text'), parse_time(life.duration - delta));
+    
+    if(delta >= life.duration) {
+        life.is_active = false;
+        GameStorage.set('infinit_life', life);
+        gui.play_flipbook(gui.get_node('lifes/icon'), 'life_icon');
+        gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
+    }
+}
+
+function setup_life_notification(instance: props) {
+    instance.druid.new_button('life_notification/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+
+        set_enabled_life_notification(false);
+        remove_coins(30);
+        add_lifes(1);
+    });
+
+    instance.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
 }
 
 function is_enough_coins(amount: number) {
@@ -169,9 +240,21 @@ function set_enabled_lifes(state: boolean) {
     gui.set_enabled(coins, state);
 }
 
+function set_enabled_store(state: boolean) {
+    const store = gui.get_node('store/manager');
+    gui.set_enabled(store, state);
+
+    EventBus.send('STORE_ACTIVATION', state);
+}
+
+function set_enabled_life_notification(state: boolean) {
+    const life = gui.get_node('life_notification/manager');
+    gui.set_enabled(life, state);
+}
+
 function add_coins(amount: number) {
     let coins = GameStorage.get('coins');
-    coins = math.max(coins + amount, 10000);
+    coins = math.min(coins + amount, 10000);
     
     const coins_text = gui.get_node('coins/text');
     gui.set_text(coins_text, tostring(coins));
@@ -189,20 +272,35 @@ function remove_coins(amount: number) {
     GameStorage.set('coins', coins);
 }
 
-function add_lifes(amount: number) {
-    let lifes = GameStorage.get('lifes');
-    lifes += amount;
-
+function on_add_lifes() {
     const lifes_text = gui.get_node('lifes/text');
-    gui.set_text(lifes_text, tostring(lifes));
-    GameStorage.set('lifes', lifes);
+    gui.set_text(lifes_text, tostring(GameStorage.get('life').amount));
 }
 
-function remove_lifes(amount: number) {
-    let lifes = GameStorage.get('lifes');
-    lifes -= amount;
-
+function on_remove_lifes() {
     const lifes_text = gui.get_node('lifes/text');
-    gui.set_text(lifes_text, tostring(lifes));
-    GameStorage.set('lifes', lifes);
+    gui.set_text(lifes_text, tostring(GameStorage.get('life').amount));
+
+}
+
+function on_scene_loaded(scene: NameMessage) {
+    switch(scene.name) {
+        case 'game':
+            set_enabled_coins(false);
+            set_enabled_lifes(false);
+        break;
+        case 'map':
+            set_enabled_coins(true);
+            set_enabled_lifes(true);
+        break;
+    }
+}
+
+function on_gameover() {
+    set_enabled_coins(true);
+    set_enabled_lifes(true);
+
+    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+        timer.delay(5, false, () => set_enabled_life_notification(true));
+    }
 }
