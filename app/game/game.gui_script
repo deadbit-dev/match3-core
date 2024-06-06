@@ -208,6 +208,9 @@ function setup_busters(instance)
         instance.druid:new_button(
             "spinning/button",
             function()
+                if GameStorage.get("spinning_counts") == 0 then
+                    return EventBus.send("TRY_BUY_SPINNING")
+                end
                 EventBus.send("TRY_ACTIVATE_SPINNING")
             end
         )
@@ -228,6 +231,9 @@ function setup_busters(instance)
         instance.druid:new_button(
             "hammer/button",
             function()
+                if GameStorage.get("hammer_counts") == 0 then
+                    return EventBus.send("TRY_BUY_HAMMER")
+                end
                 EventBus.send("TRY_ACTIVATE_HAMMER")
             end
         )
@@ -248,6 +254,9 @@ function setup_busters(instance)
         instance.druid:new_button(
             "horizontal_rocket/button",
             function()
+                if GameStorage.get("horizontal_rocket_counts") == 0 then
+                    return EventBus.send("TRY_BUY_HORIZONTAL_ROCKET")
+                end
                 EventBus.send("TRY_ACTIVATE_HORIZONTAL_ROCKET")
             end
         )
@@ -268,6 +277,9 @@ function setup_busters(instance)
         instance.druid:new_button(
             "vertical_rocket/button",
             function()
+                if GameStorage.get("vertical_rocket_counts") == 0 then
+                    return EventBus.send("TRY_BUY_VERTICAL_ROCKET")
+                end
                 EventBus.send("TRY_ACTIVATE_VERTICAL_ROCKET")
             end
         )
@@ -398,45 +410,37 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch50 = data.id
-        local ____cond50 = ____switch50 == 0
-        if ____cond50 then
+        local ____switch54 = data.id
+        local ____cond54 = ____switch54 == 0
+        if ____cond54 then
             set_text("first_target_counts", data.count)
             break
         end
-        ____cond50 = ____cond50 or ____switch50 == 1
-        if ____cond50 then
+        ____cond54 = ____cond54 or ____switch54 == 1
+        if ____cond54 then
             set_text("second_target_counts", data.count)
             break
         end
-        ____cond50 = ____cond50 or ____switch50 == 2
-        if ____cond50 then
+        ____cond54 = ____cond54 or ____switch54 == 2
+        if ____cond54 then
             set_text("third_target_counts", data.count)
             break
         end
     until true
 end
 function update_buttons(instance)
+    local spinning = GameStorage.get("spinning_counts")
+    set_text("spinning/counts", spinning == 0 and "+" or spinning)
     set_text_colors({"spinning/button"}, "#fff", instance.busters.spinning.active and 0.5 or 1)
-    set_text(
-        "spinning/counts",
-        GameStorage.get("spinning_counts")
-    )
+    local hammer = GameStorage.get("hammer_counts")
+    set_text("hammer/counts", hammer == 0 and "+" or hammer)
     set_text_colors({"hammer/button"}, "#fff", instance.busters.hammer.active and 0.5 or 1)
-    set_text(
-        "hammer/counts",
-        GameStorage.get("hammer_counts")
-    )
+    local horizontal_rocket = GameStorage.get("horizontal_rocket_counts")
+    set_text("horizontal_rocket/counts", horizontal_rocket == 0 and "+" or horizontal_rocket)
     set_text_colors({"horizontal_rocket/button"}, "#fff", instance.busters.horizontal_rocket.active and 0.5 or 1)
-    set_text(
-        "horizontal_rocket/counts",
-        GameStorage.get("horizontal_rocket_counts")
-    )
+    local vertical_rocket = GameStorage.get("vertical_rocket_counts")
+    set_text("vertical_rocket/counts", vertical_rocket == 0 and "+" or vertical_rocket)
     set_text_colors({"vertical_rocket/button"}, "#fff", instance.busters.vertical_rocket.active and 0.5 or 1)
-    set_text(
-        "vertical_rocket/counts",
-        GameStorage.get("vertical_rocket_counts")
-    )
 end
 function set_tutorial()
     local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
@@ -501,7 +505,6 @@ function ____exports.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
     self.druid:final()
-    EventBus.off_all_current_script()
     Manager.final_script()
 end
 init = ____exports.init

@@ -43,7 +43,6 @@ export function on_message(this: props, message_id: string | hash, message: any,
 
 export function final(this: props): void {
     this.druid.final();
-    EventBus.off_all_current_script();
     Manager.final_script();
 }
 
@@ -167,6 +166,8 @@ function setup_busters(instance: props) {
     
     if(GameStorage.get('spinning_opened')) {
         instance.druid.new_button('spinning/button', () => {
+            if(GameStorage.get('spinning_counts') == 0)
+                return EventBus.send('TRY_BUY_SPINNING');
             EventBus.send('TRY_ACTIVATE_SPINNING');
         });
 
@@ -177,6 +178,8 @@ function setup_busters(instance: props) {
 
     if(GameStorage.get('hammer_opened')) {
         instance.druid.new_button('hammer/button', () => {
+            if(GameStorage.get('hammer_counts') == 0)
+                return EventBus.send('TRY_BUY_HAMMER');
             EventBus.send('TRY_ACTIVATE_HAMMER');
         });
         
@@ -187,6 +190,8 @@ function setup_busters(instance: props) {
     
     if(GameStorage.get('horizontal_rocket_opened')) {
         instance.druid.new_button('horizontal_rocket/button', () => {
+            if(GameStorage.get('horizontal_rocket_counts') == 0)
+                return EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');         
             EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
         });
         
@@ -197,6 +202,8 @@ function setup_busters(instance: props) {
 
     if(GameStorage.get('vertical_rocket_opened')) {
         instance.druid.new_button('vertical_rocket/button', () => {
+            if(GameStorage.get('vertical_rocket_counts') == 0)
+                return EventBus.send('TRY_BUY_VERTICAL_ROCKET');
             EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
         });
         
@@ -262,17 +269,21 @@ function update_targets(data: TargetMessage) {
 }
 
 function update_buttons(instance: props) {
+    const spinning = GameStorage.get('spinning_counts');
+    set_text('spinning/counts', (spinning == 0) ? "+" : spinning);
     set_text_colors(['spinning/button'], '#fff', instance.busters.spinning.active ? 0.5 : 1);
-    set_text('spinning/counts', GameStorage.get('spinning_counts'));
     
+    const hammer = GameStorage.get('hammer_counts');
+    set_text('hammer/counts', (hammer == 0) ? "+" : hammer);
     set_text_colors(['hammer/button'], '#fff', instance.busters.hammer.active ? 0.5 : 1);
-    set_text('hammer/counts', GameStorage.get('hammer_counts'));
     
+    const horizontal_rocket = GameStorage.get('horizontal_rocket_counts');
+    set_text('horizontal_rocket/counts', (horizontal_rocket == 0) ? "+" : horizontal_rocket);
     set_text_colors(['horizontal_rocket/button'], '#fff', instance.busters.horizontal_rocket.active ? 0.5 : 1);
-    set_text('horizontal_rocket/counts', GameStorage.get('horizontal_rocket_counts'));
     
+    const vertical_rocket = GameStorage.get('vertical_rocket_counts');
+    set_text('vertical_rocket/counts', (vertical_rocket == 0) ? "+" : vertical_rocket);
     set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
-    set_text('vertical_rocket/counts', GameStorage.get('vertical_rocket_counts'));
 }
 
 function set_tutorial() {

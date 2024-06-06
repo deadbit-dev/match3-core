@@ -50,5 +50,4 @@ export function init(this: props) {
 
 export function on_message(this: props, message_id: hash, _message: any, sender: hash): void {
     Manager.on_message_main(this, message_id, _message, sender);
-    // if (message_id == to_hash('MANAGER_READY')) EventBus.send('MANAGER_READY');
 }

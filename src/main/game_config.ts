@@ -446,5 +446,10 @@ export type _UserMessages = {
     NOT_ENOUGH_LIFE: VoidMessage,
 
     ADDED_LIFE: VoidMessage,
-    REMOVED_LIFE: VoidMessage
+    REMOVED_LIFE: VoidMessage,
+
+    TRY_BUY_HAMMER: VoidMessage,
+    TRY_BUY_SPINNING: VoidMessage,
+    TRY_BUY_HORIZONTAL_ROCKET: VoidMessage,
+    TRY_BUY_VERTICAL_ROCKET: VoidMessage
 };

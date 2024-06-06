@@ -13,20 +13,18 @@ import { add_lifes, remove_lifes } from '../life';
 
 
 interface props {
-    druid: DruidClass;
+    druid: DruidClass,
+    // is_ready: boolean
 }
 
-// export function init(this: props): void {
-//     EventBus.on('MANAGER_READY', () => init_gui(this), true);
-// }
-
-function init_gui(instance: props): void {
+export function init(this: props): void {
     Manager.init_script();
-    instance.druid = druid.new(instance);
+
+    this.druid = druid.new(this);
 
     gui.set_render_order(10);
 
-    setup(instance);
+    setup(this);
     set_events();
 
     timer.delay(1200, true, () => add_lifes(1));
@@ -39,7 +37,7 @@ function init_gui(instance: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
-    return this.druid?.on_input(action_id, action);
+    this.druid?.on_input(action_id, action);
 }
 
 export function update(this: props, dt: number): void {
@@ -47,15 +45,12 @@ export function update(this: props, dt: number): void {
 }
 
 export function on_message(this: props, message_id: string | hash, message: any, sender: string | hash | url): void {
-    if(message_id == to_hash('MANAGER_READY')) init_gui(this);
-    
     Manager.on_message(this, message_id, message, sender);
     this.druid?.on_message(message_id, message, sender);
 }
 
 export function final(this: props): void {
     this.druid.final();
-    EventBus.off_all_current_script();
     Manager.final_script();
 }
 
@@ -65,6 +60,10 @@ function set_events() {
     EventBus.on('ADDED_LIFE', on_add_lifes, true);
     EventBus.on('REMOVED_LIFE', on_remove_lifes, true);
     EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
+    EventBus.on('TRY_BUY_HAMMER', () => set_enabled_hammer(true), true);
+    EventBus.on('TRY_BUY_SPINNING', () => set_enabled_spinning(true), true);
+    EventBus.on('TRY_BUY_HORIZONTAL_ROCKET', () => set_enabled_horizontall_rocket(true), true);
+    EventBus.on('TRY_BUY_VERTICAL_ROCKET', () => set_enabled_vertical_rocket(true), true);
 }
 
 function setup(instance: props) {
@@ -72,6 +71,7 @@ function setup(instance: props) {
     setup_life(instance);
     setup_store(instance);
     setup_life_notification(instance);
+    setup_busters(instance);
 }
 
 function setup_coins(instance: props) {
@@ -172,6 +172,60 @@ function setup_store(instance: props) {
     });
 }
 
+function setup_busters(instance: props) {
+    instance.druid.new_button('hammer/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+        remove_coins(30);
+        GameStorage.set('hammer_counts', 1);
+        EventBus.send('UPDATED_BUTTONS');
+        set_enabled_hammer(false);
+    });
+
+    instance.druid.new_button('hammer/close', () => set_enabled_hammer(false));
+
+    instance.druid.new_button('spinning/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+        remove_coins(30);
+        GameStorage.set('spinning_counts', 1);
+        EventBus.send('UPDATED_BUTTONS');
+        set_enabled_spinning(false);
+    });
+
+    instance.druid.new_button('spinning/close', () => set_enabled_spinning(false));
+
+    instance.druid.new_button('horizontal_rocket/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+        remove_coins(30);
+        GameStorage.set('horizontal_rocket_counts', 1);
+        EventBus.send('UPDATED_BUTTONS');
+        set_enabled_horizontall_rocket(false);
+    });
+
+    instance.druid.new_button('horizontal_rocket/close', () => set_enabled_horizontall_rocket(false));
+
+    instance.druid.new_button('vertical_rocket/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+        remove_coins(30);
+        GameStorage.set('vertical_rocket_counts', 1);
+        EventBus.send('UPDATED_BUTTONS');
+        set_enabled_vertical_rocket(false);
+    });
+
+    instance.druid.new_button('vertical_rocket/close', () => set_enabled_vertical_rocket(false));
+}
+
+function setup_life_notification(instance: props) {
+    instance.druid.new_button('life_notification/buy_button', () => {
+        if(!is_enough_coins(30)) return;
+
+        set_enabled_life_notification(false);
+        remove_coins(30);
+        add_lifes(1);
+    });
+
+    instance.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
+}
+
 function on_life_tick() {
     const life = GameStorage.get('life');
     const delta = System.now() - life.start_time;
@@ -212,18 +266,6 @@ function on_infinit_life_tick() {
         gui.play_flipbook(gui.get_node('lifes/icon'), 'life_icon');
         gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
     }
-}
-
-function setup_life_notification(instance: props) {
-    instance.druid.new_button('life_notification/buy_button', () => {
-        if(!is_enough_coins(30)) return;
-
-        set_enabled_life_notification(false);
-        remove_coins(30);
-        add_lifes(1);
-    });
-
-    instance.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
 }
 
 function is_enough_coins(amount: number) {
@@ -303,4 +345,24 @@ function on_gameover() {
     if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
         timer.delay(5, false, () => set_enabled_life_notification(true));
     }
+}
+
+function set_enabled_hammer(state: boolean) {
+    const hammer = gui.get_node('hammer/manager');
+    gui.set_enabled(hammer, state);
+}
+
+function set_enabled_spinning(state: boolean) {
+    const spinning = gui.get_node('spinning/manager');
+    gui.set_enabled(spinning, state);
+}
+
+function set_enabled_horizontall_rocket(state: boolean) {
+    const horizontal_rocket = gui.get_node('horizontal_rocket');
+    gui.set_enabled(horizontal_rocket, state);
+}
+
+function set_enabled_vertical_rocket(state: boolean) {
+    const vertical_rocket = gui.get_node('vertical_rocket');
+    gui.set_enabled(vertical_rocket, state);
 }

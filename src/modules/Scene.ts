@@ -74,13 +74,14 @@ function SceneModule() {
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
 
-    function unload_all_resources(scene: string) {
+    function unload_all_resources(scene: string, except?: string[]) {
         // const scene = get_current_name();
         const resources = scene_resources[scene];
         if(resources == null) return;
         
         for(const resource of resources) {
-            unload_resource(scene, resource);
+            if(!except?.includes(resource))
+                unload_resource(scene, resource);
         }
 
         scene_resources[scene] = [];

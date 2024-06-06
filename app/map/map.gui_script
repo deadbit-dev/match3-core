@@ -63,6 +63,7 @@ function ____exports.init(self)
     set_completed_levels()
     set_level_buttons(self)
     set_events(self)
+    Scene.load_resource("map", "shared_gui")
 end
 function ____exports.on_input(self, action_id, action)
     if self.block_input then
@@ -82,8 +83,7 @@ function ____exports.on_message(self, message_id, message, sender)
 end
 function ____exports.final(self)
     self.druid:final()
-    EventBus.off_all_current_script()
-    Scene.unload_all_resources("map")
+    Scene.unload_all_resources("map", {"shared_gui"})
     Manager.final_script()
 end
 init = ____exports.init
