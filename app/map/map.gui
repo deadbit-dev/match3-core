@@ -107,7 +107,7 @@ nodes {
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
   parent: "map"
-  layer: ""
+  layer: "back"
   inherit_alpha: true
   slice9 {
     x: 0.0
@@ -166,7 +166,7 @@ nodes {
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
   parent: "map"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   slice9 {
     x: 0.0
@@ -8175,6 +8175,12 @@ nodes {
   enabled: true
   visible: true
   material: ""
+}
+layers {
+  name: "back"
+}
+layers {
+  name: "top"
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

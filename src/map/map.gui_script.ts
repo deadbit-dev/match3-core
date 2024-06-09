@@ -77,7 +77,8 @@ function set_last_map_position() {
 function set_completed_levels() {
     for(const level of GameStorage.get('completed_levels')) {
         const level_node = gui.get_node(tostring(level + 1) + '/level');
-        gui.set_texture(level_node, 'map/button_level_green');
+        gui.set_texture(level_node, "map");
+        gui.play_flipbook(level_node, 'button_level_green');
     }
 }
 
@@ -95,6 +96,10 @@ function on_drag(action: any) {
 
 function set_events(instace: props) {
     EventBus.on('STORE_ACTIVATION', (state) => {
+        instace.block_input = state;
+    });
+
+    EventBus.on('LIFE_NOTIFICATION', (state) => {
         instace.block_input = state;
     });
 }

@@ -642,6 +642,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local function try_move(from_x, from_y, to_x, to_y)
         local is_can = is_can_move(from_x, from_y, to_x, to_y)
         if is_can then
+            print("IS CAN")
             swap_elements(from_x, from_y, to_x, to_y)
             local element_from = get_element(from_x, from_y)
             if element_from ~= ____exports.NullElement then

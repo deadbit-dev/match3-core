@@ -20,6 +20,21 @@ ____exports.lang_data = {
     gameover_title = {["Русский-ru"] = "Уровень не пройден", ["Английский-en"] = "Gameover"},
     continue = {["Русский-ru"] = "Продолжить", ["Английский-en"] = "Continue"},
     restart = {["Русский-ru"] = "Повторить", ["Английский-en"] = "Restart"},
-    map = {["Русский-ru"] = "На карту", ["Английский-en"] = "Go to map"}
+    map = {["Русский-ru"] = "На карту", ["Английский-en"] = "Go to map"},
+    hammer = {["Русский-ru"] = "", ["Английский-en"] = "Hammer"},
+    spinning = {["Русский-ru"] = "Юла", ["Английский-en"] = "Spinning"},
+    horizontal_rocket = {["Русский-ru"] = "Горизонтальная рокета", ["Английский-en"] = "Horizontal Rocket"},
+    vertical_rocket = {["Русский-ru"] = "Вертикальная рокета", ["Английский-en"] = "Vertical Rocket"},
+    hammer_description = {["Русский-ru"] = "Разбивает один любой предмет", ["Английский-en"] = "Hammer description"},
+    spinning_description = {["Русский-ru"] = "Перемешивает предметы", ["Английский-en"] = "Spinning description"},
+    horizontal_rocket_description = {["Русский-ru"] = "Разрушает все предметы по горизонтали", ["Английский-en"] = "Hammer description"},
+    vertical_rocket_description = {["Русский-ru"] = "Разрушает все предметы по вертикали", ["Английский-en"] = "Vertical Rocket description"},
+    buy = {["Русский-ru"] = "Купить", ["Английский-en"] = "Buy"},
+    store_title = {["Русский-ru"] = "Лавка", ["Английский-en"] = "Store"},
+    lifes = {["Русский-ru"] = "Жизни", ["Английский-en"] = "Lifes"},
+    junior_box = {["Русский-ru"] = "Набор новичкка", ["Английский-en"] = "Junior box"},
+    catlover_box = {["Русский-ru"] = "Набор кошатника", ["Английский-en"] = "Catlover box"},
+    remove_ad = {["Русский-ru"] = "Отключить рекламу", ["Английский-en"] = "Remove ad"},
+    next_life = {["Русский-ru"] = "Следующая жизнь через", ["Английский-en"] = "Next life through"}
 }
 return ____exports

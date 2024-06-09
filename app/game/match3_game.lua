@@ -22,8 +22,6 @@ local NotActiveCell = ____match3_core.NotActiveCell
 local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
-local ____life = require("main.life")
-local remove_lifes = ____life.remove_lifes
 ____exports.RandomElement = -2
 ____exports.SubstrateId = SubstrateId or ({})
 ____exports.SubstrateId.OutsideArc = 0
@@ -109,7 +107,7 @@ ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, on_load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_buters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, get_state, update_state, update_cells_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, on_load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_buters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_helper, set_combination_for_helper, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, update_cells_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -138,8 +136,7 @@ function ____exports.Game()
         if level_config.steps == nil then
             return
         end
-        local last_state = get_state()
-        last_state.steps = steps
+        get_state().steps = steps
     end
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -213,6 +210,7 @@ function ____exports.Game()
         EventBus.on("ACTIVATE_HORIZONTAL_ROCKET", on_activate_horizontal_rocket)
         EventBus.on("REVERT_STEP", on_revert_step)
         EventBus.on("ON_GAME_STEP_ANIMATION_END", on_game_step_animation_end)
+        EventBus.on("REVIVE", on_revive)
     end
     function on_load_field()
         Log.log("Загрузка поля")
@@ -235,15 +233,39 @@ function ____exports.Game()
             end
         end
         init_targets()
-        local last_state = update_state()
         set_steps()
         set_timer()
         set_random()
+        if GAME_CONFIG.is_revive then
+            GAME_CONFIG.is_revive = false
+            print("push_revive_state")
+            do
+                local y = 0
+                while y < field_height do
+                    do
+                        local x = 0
+                        while x < field_width do
+                            field.set_cell(x, y, GAME_CONFIG.revive_state.cells[y + 1][x + 1])
+                            field.set_element(x, y, GAME_CONFIG.revive_state.elements[y + 1][x + 1])
+                            x = x + 1
+                        end
+                    end
+                    y = y + 1
+                end
+            end
+            states[#states + 1] = GAME_CONFIG.revive_state
+        end
+        local last_state = update_state()
         EventBus.send("ON_LOAD_FIELD", last_state)
         states[#states + 1] = {}
         set_targets(last_state.targets)
         set_steps(last_state.steps)
         set_random()
+        if level_config.steps ~= nil then
+            local s = math.abs(level_config.steps - last_state.steps)
+            print("SEND STEPS: ", s, level_config.steps, last_state.steps)
+            EventBus.send("UPDATED_STEP_COUNTER", s)
+        end
     end
     function is_tutorial()
         local is_tutorial_level = __TS__ArrayIncludes(GAME_CONFIG.tutorial_levels, current_level + 1)
@@ -370,9 +392,11 @@ function ____exports.Game()
             return
         end
         stop_helper()
+        print("TRY")
         if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
             return
         end
+        print("YES")
         is_step = true
         local is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y)
         process_game_step(is_procesed)
@@ -478,7 +502,7 @@ function ____exports.Game()
             GameStorage.set("completed_levels", completed_levels)
             EventBus.send("ON_WIN")
         elseif not is_have_steps() then
-            gameover()
+            timer.delay(1, false, gameover)
         end
         Log.log("Закончена анимация хода")
     end
@@ -490,12 +514,16 @@ function ____exports.Game()
             EventBus.send("GAME_TIMER", remaining_time)
         else
             timer.cancel(game_timer)
-            gameover()
+            timer.delay(1, false, gameover)
         end
     end
     function gameover()
-        remove_lifes(1)
-        EventBus.send("ON_GAME_OVER")
+        GAME_CONFIG.is_revive = false
+        GAME_CONFIG.revive_state = copy_state(2)
+        EventBus.send(
+            "ON_GAME_OVER",
+            get_state()
+        )
     end
     function load_cell(x, y)
         local cell_config = level_config.field.cells[y + 1][x + 1]
@@ -1397,14 +1425,17 @@ function ____exports.Game()
     function try_swap_elements(from_x, from_y, to_x, to_y)
         local cell_from = field.get_cell(from_x, from_y)
         local cell_to = field.get_cell(to_x, to_y)
+        print("CHECK NOT ACTIVE CELLS")
         if cell_from == NotActiveCell or cell_to == NotActiveCell then
             return false
         end
+        print("CHECK AVAILABLE FOR MOVE")
         if not field.is_available_cell_type_for_move(cell_from) or not field.is_available_cell_type_for_move(cell_to) then
             return false
         end
         local element_from = field.get_element(from_x, from_y)
         local element_to = field.get_element(to_x, to_y)
+        print("CHECK NULL ELEMENT")
         if element_from == NullElement then
             return false
         end
@@ -1427,6 +1458,7 @@ function ____exports.Game()
             EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
             return false
         end
+        print("SEND SWAP")
         write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
         return true
     end
@@ -1544,29 +1576,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch341 = combination.type
-            local ____cond341 = ____switch341 == CombinationType.Comb4
-            if ____cond341 then
+            local ____switch345 = combination.type
+            local ____cond345 = ____switch345 == CombinationType.Comb4
+            if ____cond345 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond341 = ____cond341 or ____switch341 == CombinationType.Comb5
-            if ____cond341 then
+            ____cond345 = ____cond345 or ____switch345 == CombinationType.Comb5
+            if ____cond345 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond341 = ____cond341 or ____switch341 == CombinationType.Comb2x2
-            if ____cond341 then
+            ____cond345 = ____cond345 or ____switch345 == CombinationType.Comb2x2
+            if ____cond345 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond341 = ____cond341 or (____switch341 == CombinationType.Comb3x3a or ____switch341 == CombinationType.Comb3x3b)
-            if ____cond341 then
+            ____cond345 = ____cond345 or (____switch345 == CombinationType.Comb3x3a or ____switch345 == CombinationType.Comb3x3b)
+            if ____cond345 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond341 = ____cond341 or (____switch341 == CombinationType.Comb3x4 or ____switch341 == CombinationType.Comb3x5)
-            if ____cond341 then
+            ____cond345 = ____cond345 or (____switch345 == CombinationType.Comb3x4 or ____switch345 == CombinationType.Comb3x5)
+            if ____cond345 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -1680,6 +1712,14 @@ function ____exports.Game()
             end
         end
     end
+    function on_revive(steps)
+        print(GAME_CONFIG.revive_state.steps)
+        local ____GAME_CONFIG_revive_state_25, ____steps_26 = GAME_CONFIG.revive_state, "steps"
+        ____GAME_CONFIG_revive_state_25[____steps_26] = ____GAME_CONFIG_revive_state_25[____steps_26] + steps
+        print(GAME_CONFIG.revive_state.steps)
+        GAME_CONFIG.is_revive = true
+        Scene.restart()
+    end
     function get_state(offset)
         if offset == nil then
             offset = 1
@@ -1700,6 +1740,34 @@ function ____exports.Game()
         local field_state = field.save_state()
         last_state.cells = field_state.cells
         return last_state
+    end
+    function copy_state(offset)
+        if offset == nil then
+            offset = 1
+        end
+        local last_state = get_state(offset)
+        print(last_state.cells[3][3])
+        local copy_state = __TS__ObjectAssign({}, last_state)
+        copy_state.cells = {}
+        copy_state.elements = {}
+        do
+            local y = 0
+            while y < field_height do
+                copy_state.cells[y + 1] = {}
+                copy_state.elements[y + 1] = {}
+                do
+                    local x = 0
+                    while x < field_width do
+                        copy_state.cells[y + 1][x + 1] = last_state.cells[y + 1][x + 1]
+                        copy_state.elements[y + 1][x + 1] = last_state.elements[y + 1][x + 1]
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        copy_state.targets = __TS__ObjectAssign({}, last_state.targets)
+        return copy_state
     end
     function is_buster(x, y)
         return field.try_click(x, y)
@@ -1734,9 +1802,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_25 = index
-                    index = ____index_25 - 1
-                    if ____index_25 == 0 then
+                    local ____index_27 = index
+                    index = ____index_27 - 1
+                    if ____index_27 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1911,15 +1979,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch425 = data
-                                local ____cond425 = ____switch425 == "-"
-                                if ____cond425 then
+                                local ____switch433 = data
+                                local ____cond433 = ____switch433 == "-"
+                                if ____cond433 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond425 = ____cond425 or ____switch425 == ""
-                                if ____cond425 then
+                                ____cond433 = ____cond433 or ____switch433 == ""
+                                if ____cond433 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -1928,14 +1996,14 @@ function ____exports.load_config()
                         else
                             if data.cell ~= nil then
                                 repeat
-                                    local ____switch428 = data.cell
-                                    local ____cond428 = ____switch428 == ____exports.CellId.Stone0
-                                    if ____cond428 then
+                                    local ____switch436 = data.cell
+                                    local ____cond436 = ____switch436 == ____exports.CellId.Stone0
+                                    if ____cond436 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                         break
                                     end
-                                    ____cond428 = ____cond428 or ____switch428 == ____exports.CellId.Grass
-                                    if ____cond428 then
+                                    ____cond436 = ____cond436 or ____switch436 == ____exports.CellId.Grass
+                                    if ____cond436 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Flowers, ____exports.CellId.Grass}
                                         break
                                     end
@@ -1969,12 +2037,12 @@ function ____exports.load_config()
             if target ~= nil then
                 local count = tonumber(target_data.count)
                 target.count = count ~= nil and count or target.count
-                local ____level_targets_26 = level.targets
-                ____level_targets_26[#____level_targets_26 + 1] = target
+                local ____level_targets_28 = level.targets
+                ____level_targets_28[#____level_targets_28 + 1] = target
             end
         end
-        local ____GAME_CONFIG_levels_27 = GAME_CONFIG.levels
-        ____GAME_CONFIG_levels_27[#____GAME_CONFIG_levels_27 + 1] = level
+        local ____GAME_CONFIG_levels_29 = GAME_CONFIG.levels
+        ____GAME_CONFIG_levels_29[#____GAME_CONFIG_levels_29 + 1] = level
     end
 end
 return ____exports

@@ -276,7 +276,9 @@ ____exports._GAME_CONFIG = {
             position = vmath.vector3(270, 480, 0)
         }
     },
-    levels = {}
+    levels = {},
+    is_revive = false,
+    revive_state = {}
 }
 ____exports._STORAGE_CONFIG = {
     current_level = 0,

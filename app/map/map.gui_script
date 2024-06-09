@@ -32,7 +32,8 @@ end
 function set_completed_levels()
     for ____, level in ipairs(GameStorage.get("completed_levels")) do
         local level_node = gui.get_node(tostring(level + 1) .. "/level")
-        gui.set_texture(level_node, "map/button_level_green")
+        gui.set_texture(level_node, "map")
+        gui.play_flipbook(level_node, "button_level_green")
     end
 end
 function on_drag(action)
@@ -51,6 +52,12 @@ end
 function set_events(instace)
     EventBus.on(
         "STORE_ACTIVATION",
+        function(state)
+            instace.block_input = state
+        end
+    )
+    EventBus.on(
+        "LIFE_NOTIFICATION",
         function(state)
             instace.block_input = state
         end

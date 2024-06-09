@@ -689,6 +689,8 @@ export function View(animator: FluxGroup) {
         const element_from = data.element_from;
         const element_to = data.element_to;
 
+        print("SWAP ANIMATION");
+
         const item_from = get_first_view_item_by_game_id(element_from.uid);
         if (item_from != undefined) {
             go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);

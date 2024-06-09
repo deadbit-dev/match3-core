@@ -1,8 +1,13 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local ____exports = {}
-local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, restart_level, set_events, update_targets, update_buttons, set_tutorial, set_win, set_gameover, disable_game_ui
+local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_events, update_targets, update_buttons, set_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui
 local druid = require("druid.druid")
+local ____coins = require("main.coins")
+local is_enough_coins = ____coins.is_enough_coins
+local remove_coins = ____coins.remove_coins
+local ____life = require("main.life")
+local remove_lifes = ____life.remove_lifes
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
@@ -339,15 +344,6 @@ function next_level()
     Scene.restart()
 end
 function setup_gameover_ui(instance)
-    instance.druid:new_button("restart_button", restart_level)
-    instance.druid:new_button(
-        "map_button",
-        function() return Scene.load("map") end
-    )
-    gui.set_enabled(
-        gui.get_node("gameover"),
-        false
-    )
     gui.set_text(
         gui.get_node("gameover_text"),
         Lang.get_text("gameover_title")
@@ -356,13 +352,51 @@ function setup_gameover_ui(instance)
         gui.get_node("restart_text"),
         Lang.get_text("restart")
     )
+    instance.druid:new_button(
+        "restart_button",
+        function()
+            if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
+                EventBus.send("SET_LIFE_NOTIFICATION")
+                return
+            end
+            Scene.restart()
+        end
+    )
     gui.set_text(
         gui.get_node("map_text"),
         Lang.get_text("map")
     )
-end
-function restart_level()
-    Scene.restart()
+    instance.druid:new_button(
+        "map_button",
+        function() return Scene.load("map") end
+    )
+    instance.druid:new_button(
+        "gameover_close",
+        function() return Scene.load("map") end
+    )
+    instance.druid:new_button("gameover_offer_close", disabled_gameover_offer)
+    gui.set_text(
+        gui.get_node("steps_by_ad/text"),
+        "+3 хода"
+    )
+    instance.druid:new_button(
+        "steps_by_ad/button",
+        function() return EventBus.send("REVIVE", 3) end
+    )
+    gui.set_text(
+        gui.get_node("steps_by_coins/text"),
+        "+5 ходов    500"
+    )
+    instance.druid:new_button(
+        "steps_by_coins/button",
+        function()
+            if not is_enough_coins(500) then
+                return
+            end
+            remove_coins(500)
+            EventBus.send("REVIVE", 5)
+        end
+    )
 end
 function set_events(instance)
     EventBus.on(
@@ -371,7 +405,10 @@ function set_events(instance)
     )
     EventBus.on(
         "UPDATED_STEP_COUNTER",
-        function(steps) return set_text("steps", steps) end,
+        function(steps)
+            print("RECIVE STEPS: ", steps)
+            set_text("steps", steps)
+        end,
         true
     )
     EventBus.on(
@@ -410,19 +447,19 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch54 = data.id
-        local ____cond54 = ____switch54 == 0
-        if ____cond54 then
+        local ____switch59 = data.id
+        local ____cond59 = ____switch59 == 0
+        if ____cond59 then
             set_text("first_target_counts", data.count)
             break
         end
-        ____cond54 = ____cond54 or ____switch54 == 1
-        if ____cond54 then
+        ____cond59 = ____cond59 or ____switch59 == 1
+        if ____cond59 then
             set_text("second_target_counts", data.count)
             break
         end
-        ____cond54 = ____cond54 or ____switch54 == 2
-        if ____cond54 then
+        ____cond59 = ____cond59 or ____switch59 == 2
+        if ____cond59 then
             set_text("third_target_counts", data.count)
             break
         end
@@ -459,18 +496,183 @@ function set_win()
         true
     )
 end
-function set_gameover()
+function set_gameover(state)
     disable_game_ui()
     gui.set_enabled(
         gui.get_node("gameover"),
         true
     )
-    if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
-        gui.set_enabled(
-            gui.get_node("restart_button"),
-            false
+    gui.set_enabled(
+        gui.get_node("missing_targets"),
+        true
+    )
+    local target_1 = gui.get_node("target_1")
+    local target_2 = gui.get_node("target_2")
+    local target_3 = gui.get_node("target_3")
+    if #state.targets == 1 then
+        local target1 = state.targets[1]
+        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        gui.play_flipbook(
+            gui.get_node("target_1"),
+            view1 == "cell_web" and view1 .. "_ui" or view1
         )
+        gui.set_text(
+            gui.get_node("target_1_text"),
+            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_1_fail_icon"),
+            #target1.uids < target1.count
+        )
+        gui.set_position(
+            target_1,
+            vmath.vector3(0, 0, 0)
+        )
+        gui.set_enabled(target_1, true)
+    elseif #state.targets == 2 then
+        local target1 = state.targets[1]
+        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        gui.play_flipbook(
+            gui.get_node("target_1"),
+            view1 == "cell_web" and view1 .. "_ui" or view1
+        )
+        gui.set_text(
+            gui.get_node("target_1_text"),
+            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_1_fail_icon"),
+            #target1.uids < target1.count
+        )
+        gui.set_position(
+            target_1,
+            vmath.vector3(-70, 0, 0)
+        )
+        gui.set_enabled(target_1, true)
+        local target2 = state.targets[2]
+        local view2 = target2.is_cell and GAME_CONFIG.cell_view[target2.type] or GAME_CONFIG.element_view[target2.type]
+        gui.play_flipbook(
+            gui.get_node("target_2"),
+            view2 == "cell_web" and view2 .. "_ui" or view2
+        )
+        gui.set_text(
+            gui.get_node("target_2_text"),
+            tostring((tostring(#target2.uids) .. "/") .. tostring(target2.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_2_fail_icon"),
+            #target2.uids < target2.count
+        )
+        gui.set_position(
+            target_2,
+            vmath.vector3(70, 0, 0)
+        )
+        gui.set_enabled(target_2, true)
+    elseif #state.targets == 3 then
+        local target1 = state.targets[1]
+        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        gui.play_flipbook(
+            gui.get_node("target_1"),
+            view1 == "cell_web" and view1 .. "_ui" or view1
+        )
+        gui.set_text(
+            gui.get_node("target_1_text"),
+            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_1_fail_icon"),
+            #target1.uids < target1.count
+        )
+        gui.set_position(
+            target_1,
+            vmath.vector3(-125, 0, 0)
+        )
+        gui.set_enabled(target_1, true)
+        local target2 = state.targets[2]
+        local view2 = target2.is_cell and GAME_CONFIG.cell_view[target2.type] or GAME_CONFIG.element_view[target2.type]
+        gui.play_flipbook(
+            gui.get_node("target_2"),
+            view2 == "cell_web" and view2 .. "_ui" or view2
+        )
+        gui.set_text(
+            gui.get_node("target_2_text"),
+            tostring((tostring(#target2.uids) .. "/") .. tostring(target2.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_2_fail_icon"),
+            #target2.uids < target2.count
+        )
+        gui.set_position(
+            target_2,
+            vmath.vector3(0, 0, 0)
+        )
+        gui.set_enabled(target_2, true)
+        local target3 = state.targets[3]
+        local view3 = target3.is_cell and GAME_CONFIG.cell_view[target3.type] or GAME_CONFIG.element_view[target3.type]
+        gui.play_flipbook(
+            gui.get_node("target_3"),
+            view3 == "cell_web" and view3 .. "_ui" or view3
+        )
+        gui.set_text(
+            gui.get_node("target_3_text"),
+            tostring((tostring(#target3.uids) .. "/") .. tostring(target3.count))
+        )
+        gui.set_enabled(
+            gui.get_node("target_3_fail_icon"),
+            #target3.uids < target3.count
+        )
+        gui.set_position(
+            target_3,
+            vmath.vector3(125, 0, 0)
+        )
+        gui.set_enabled(target_3, true)
     end
+    set_gameover_offer()
+end
+function set_gameover_offer()
+    gui.set_enabled(
+        gui.get_node("gameover_offer_close"),
+        true
+    )
+    gui.set_enabled(
+        gui.get_node("steps_by_ad/button"),
+        true
+    )
+    gui.set_enabled(
+        gui.get_node("steps_by_coins/button"),
+        true
+    )
+end
+function disabled_gameover_offer()
+    remove_lifes(1)
+    gui.set_enabled(
+        gui.get_node("damage"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("gameover_offer_close"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("steps_by_ad/button"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("steps_by_coins/button"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("gameover_close"),
+        true
+    )
+    gui.set_enabled(
+        gui.get_node("restart_button"),
+        true
+    )
+    gui.set_enabled(
+        gui.get_node("map_button"),
+        true
+    )
 end
 function disable_game_ui()
     gui.set_enabled(

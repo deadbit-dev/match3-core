@@ -52,7 +52,6 @@ import {
 } from './match3_core';
 
 import { lang_data } from '../main/langs';
-import { remove_lifes } from '../main/life';
 
 
 export const RandomElement = -2;
@@ -260,8 +259,7 @@ export function Game() {
 
     function set_steps(steps = 0) {
         if(level_config.steps == undefined) return;
-        const last_state = get_state();
-        last_state.steps = steps;
+        get_state().steps = steps;
     }
 
     function set_element_types() {
@@ -331,6 +329,7 @@ export function Game() {
         EventBus.on('ACTIVATE_HORIZONTAL_ROCKET', on_activate_horizontal_rocket);
         EventBus.on('REVERT_STEP', on_revert_step);
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
+        EventBus.on('REVIVE', on_revive);
     }
 
     function on_load_field() {
@@ -353,10 +352,32 @@ export function Game() {
 
         init_targets();
 
-        const last_state = update_state();
+        // let last_state = update_state();
+
+        // print(GAME_CONFIG.revive_state.steps);
+        
         set_steps();
         set_timer();
         set_random();
+
+        if(GAME_CONFIG.is_revive) {
+            GAME_CONFIG.is_revive = false;
+            print("push_revive_state");
+            
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+                    field.set_cell(x, y, GAME_CONFIG.revive_state.cells[y][x]);
+                    field.set_element(x, y, GAME_CONFIG.revive_state.elements[y][x]);
+                }
+            }
+
+            states[states.length] = GAME_CONFIG.revive_state;
+        }
+
+        // print(last_state.steps);
+
+        let last_state = update_state();
+
 
         EventBus.send('ON_LOAD_FIELD', last_state);
 
@@ -365,6 +386,12 @@ export function Game() {
         set_targets(last_state.targets);
         set_steps(last_state.steps);
         set_random();
+    
+        if(level_config.steps != undefined) {
+            const s = math.abs(level_config.steps - last_state.steps);
+            print("SEND STEPS: ", s, level_config.steps, last_state.steps);
+            EventBus.send('UPDATED_STEP_COUNTER', s);
+        }
     }
 
     function is_tutorial() {
@@ -386,22 +413,6 @@ export function Game() {
 
         EventBus.send('SET_TUTORIAL');
     }
-
-    // function try_unlock_cells(step: StepInfo) {
-    //     const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-    //     if(Array.isArray(tutorial_data.action)) return false;
-
-    //     const is_from = step.from_x == tutorial_data.action?.from_x && step.from_y == tutorial_data.action.from_y;
-    //     const is_to = step.to_x == tutorial_data.action?.to_x && step.to_y == tutorial_data.action.to_y; 
-    //     if(!is_from || !is_to) return false;
-
-    //     unlock_cells();
-        
-    //     set_state();
-    //     EventBus.trigger('UPDATED_STATE', get_state(), true, true);
-        
-    //     return true;
-    // }
 
     function lock_cells(except_cells: {x: number, y: number}[]) {
         for (let y = 0; y < field_height; y++) {
@@ -482,8 +493,12 @@ export function Game() {
         if(is_block_input || elements == undefined) return;
 
         stop_helper();
+
+        print("TRY");
         
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
+
+        print("YES");
         
         is_step = true;
         const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
@@ -603,7 +618,7 @@ export function Game() {
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
             EventBus.send('ON_WIN');
-        } else if(!is_have_steps()) gameover();
+        } else if(!is_have_steps()) timer.delay(1, false, gameover);
         
         Log.log("Закончена анимация хода");
     }
@@ -616,13 +631,14 @@ export function Game() {
             EventBus.send('GAME_TIMER', remaining_time);
         } else {
             timer.cancel(game_timer);
-            gameover();
+            timer.delay(1, false, gameover);
         }
     }
 
     function gameover() {
-        remove_lifes(1);
-        EventBus.send('ON_GAME_OVER');
+        GAME_CONFIG.is_revive = false;
+        GAME_CONFIG.revive_state = copy_state(2);
+        EventBus.send('ON_GAME_OVER', get_state());
     }
 
     function load_cell(x: number, y: number) {
@@ -1502,13 +1518,19 @@ export function Game() {
         const cell_from = field.get_cell(from_x, from_y);
         const cell_to = field.get_cell(to_x, to_y);
 
+        print("CHECK NOT ACTIVE CELLS");
+
         if(cell_from == NotActiveCell || cell_to == NotActiveCell) return false;
+
+        print("CHECK AVAILABLE FOR MOVE");
 
         // TODO: remove because this check will be in try_move below
         if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return false;
 
         const element_from = field.get_element(from_x, from_y);
         const element_to = field.get_element(to_x, to_y);
+
+        print("CHECK NULL ELEMENT");
         
         if(element_from == NullElement) return false;
 
@@ -1537,6 +1559,8 @@ export function Game() {
 
             return false;
         }
+
+        print("SEND SWAP");
     
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
@@ -1830,6 +1854,14 @@ export function Game() {
         }
     }
 
+    function on_revive(steps: number) {
+        print(GAME_CONFIG.revive_state.steps);
+        GAME_CONFIG.revive_state.steps += steps;
+        print(GAME_CONFIG.revive_state.steps);
+        GAME_CONFIG.is_revive = true;
+        Scene.restart();
+    }
+
     //#endregion CALLBACKS
     //#region HELPERS
     
@@ -1854,6 +1886,30 @@ export function Game() {
         last_state.cells = field_state.cells;
 
         return last_state;
+    }
+
+    function copy_state(offset = 1) {
+        const last_state = get_state(offset);
+
+        print(last_state.cells[2][2]);
+
+        const copy_state = Object.assign({}, last_state);
+
+        copy_state.cells = [];
+        copy_state.elements = [];
+
+        for(let y = 0; y < field_height; y++) {
+            copy_state.cells[y] = [];
+            copy_state.elements[y] = [];
+            
+            for(let x = 0; x < field_width; x++) {
+                copy_state.cells[y][x] = last_state.cells[y][x];
+                copy_state.elements[y][x] = last_state.elements[y][x];
+            }
+        }
+        
+        copy_state.targets = Object.assign([], last_state.targets);
+        return copy_state;
     }
 
     function is_buster(x: number, y: number) {

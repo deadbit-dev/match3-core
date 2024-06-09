@@ -1,4 +1,4 @@
-script: "/menu/menui.gui_script"
+script: "/menu/menu.gui_script"
 background_color {
   x: 0.0
   y: 0.0

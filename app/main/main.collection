@@ -257,7 +257,7 @@ embedded_instances {
   "  id: \"shared_gui\"\n"
   "  type: \"collectionproxy\"\n"
   "  data: \"collection: \\\"/main/shared.collection\\\"\\n"
-  "exclude: true\\n"
+  "exclude: false\\n"
   "\"\n"
   "  position {\n"
   "    x: 0.0\n"

@@ -1,16 +1,27 @@
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_life_notification, on_life_tick, set_infinit_life, on_infinit_life_tick, is_enough_coins, set_enabled_coins, set_enabled_lifes, set_enabled_store, set_enabled_life_notification, add_coins, remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store, set_enabled_life_notification, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
+local ____coins = require("main.coins")
+local add_coins = ____coins.add_coins
+local is_enough_coins = ____coins.is_enough_coins
+local remove_coins = ____coins.remove_coins
 local ____life = require("main.life")
 local add_lifes = ____life.add_lifes
 local remove_lifes = ____life.remove_lifes
 function set_events()
     EventBus.on("ON_SCENE_LOADED", on_scene_loaded, true)
     EventBus.on("ON_GAME_OVER", on_gameover, true)
+    EventBus.on(
+        "SET_LIFE_NOTIFICATION",
+        function() return set_enabled_life_notification(true) end,
+        true
+    )
     EventBus.on("ADDED_LIFE", on_add_lifes, true)
     EventBus.on("REMOVED_LIFE", on_remove_lifes, true)
+    EventBus.on("ADDED_COIN", on_add_coins, true)
+    EventBus.on("REMOVED_COIN", on_remove_coins, true)
     EventBus.on(
         "NOT_ENOUGH_LIFE",
         function() return set_enabled_life_notification(true) end,
@@ -69,6 +80,10 @@ function setup_store(instance)
         "store/close",
         function() return set_enabled_store(false) end
     )
+    gui.set_text(
+        gui.get_node("store/store_title_text"),
+        Lang.get_text("store_title")
+    )
     instance.druid:new_button(
         "store/buy_30_btn",
         function() return add_coins(30) end
@@ -84,6 +99,10 @@ function setup_store(instance)
     instance.druid:new_button(
         "store/buy_800_btn",
         function() return add_coins(800) end
+    )
+    gui.set_text(
+        gui.get_node("store/life_title_text"),
+        Lang.get_text("lifes")
     )
     instance.druid:new_button(
         "store/buy_x1_btn",
@@ -115,6 +134,10 @@ function setup_store(instance)
             remove_coins(70)
         end
     )
+    gui.set_text(
+        gui.get_node("store/junior_box/text"),
+        Lang.get_text("junior_box")
+    )
     instance.druid:new_button(
         "store/junior_box/buy_button/button",
         function()
@@ -142,6 +165,10 @@ function setup_store(instance)
             )
         end
     )
+    gui.set_text(
+        gui.get_node("store/catlover_box/text"),
+        Lang.get_text("catlover_box")
+    )
     instance.druid:new_button(
         "store/catlover_box/buy_button/button",
         function()
@@ -168,6 +195,10 @@ function setup_store(instance)
                 GameStorage.get("vertical_rocket_counts") + 2
             )
         end
+    )
+    gui.set_text(
+        gui.get_node("store/ad_title_text"),
+        Lang.get_text("remove_ad")
     )
     instance.druid:new_button(
         "store/buy_ad_1_btn",
@@ -213,6 +244,24 @@ function setup_store(instance)
     )
 end
 function setup_busters(instance)
+    setup_hammer(instance)
+    setup_spinning(instance)
+    setup_horizontal_rocket(instance)
+    setup_vertical_rocket(instance)
+end
+function setup_hammer(instance)
+    gui.set_text(
+        gui.get_node("hammer/title_text"),
+        Lang.get_text("hammer")
+    )
+    gui.set_text(
+        gui.get_node("hammer/description"),
+        Lang.get_text("hammer_description")
+    )
+    gui.set_text(
+        gui.get_node("hammer/buy_button_text"),
+        Lang.get_text("buy") .. " 30"
+    )
     instance.druid:new_button(
         "hammer/buy_button",
         function()
@@ -228,6 +277,20 @@ function setup_busters(instance)
     instance.druid:new_button(
         "hammer/close",
         function() return set_enabled_hammer(false) end
+    )
+end
+function setup_spinning(instance)
+    gui.set_text(
+        gui.get_node("spinning/title_text"),
+        Lang.get_text("spinning")
+    )
+    gui.set_text(
+        gui.get_node("spinning/description"),
+        Lang.get_text("spinning_description")
+    )
+    gui.set_text(
+        gui.get_node("spinning/buy_button_text"),
+        Lang.get_text("buy") .. " 30"
     )
     instance.druid:new_button(
         "spinning/buy_button",
@@ -245,6 +308,20 @@ function setup_busters(instance)
         "spinning/close",
         function() return set_enabled_spinning(false) end
     )
+end
+function setup_horizontal_rocket(instance)
+    gui.set_text(
+        gui.get_node("horizontal_rocket/title_text"),
+        Lang.get_text("horizontal_rocket")
+    )
+    gui.set_text(
+        gui.get_node("horizontal_rocket/description"),
+        Lang.get_text("horizontal_rocket_description")
+    )
+    gui.set_text(
+        gui.get_node("horizontal_rocket/buy_button_text"),
+        Lang.get_text("buy") .. " 30"
+    )
     instance.druid:new_button(
         "horizontal_rocket/buy_button",
         function()
@@ -260,6 +337,20 @@ function setup_busters(instance)
     instance.druid:new_button(
         "horizontal_rocket/close",
         function() return set_enabled_horizontall_rocket(false) end
+    )
+end
+function setup_vertical_rocket(instance)
+    gui.set_text(
+        gui.get_node("vertical_rocket/title_text"),
+        Lang.get_text("vertical_rocket")
+    )
+    gui.set_text(
+        gui.get_node("vertical_rocket/description"),
+        Lang.get_text("vertical_rocket_description")
+    )
+    gui.set_text(
+        gui.get_node("vertical_rocket/buy_button_text"),
+        Lang.get_text("buy") .. " 30"
     )
     instance.druid:new_button(
         "vertical_rocket/buy_button",
@@ -343,9 +434,6 @@ function on_infinit_life_tick()
         )
     end
 end
-function is_enough_coins(amount)
-    return GameStorage.get("coins") >= amount
-end
 function set_enabled_coins(state)
     local coins = gui.get_node("coins/button")
     gui.set_enabled(coins, state)
@@ -362,26 +450,21 @@ end
 function set_enabled_life_notification(state)
     local life = gui.get_node("life_notification/manager")
     gui.set_enabled(life, state)
+    EventBus.send("LIFE_NOTIFICATION", state)
 end
-function add_coins(amount)
-    local coins = GameStorage.get("coins")
-    coins = math.min(coins + amount, 10000)
+function on_add_coins()
     local coins_text = gui.get_node("coins/text")
     gui.set_text(
         coins_text,
-        tostring(coins)
+        tostring(GameStorage.get("coins"))
     )
-    GameStorage.set("coins", coins)
 end
-function remove_coins(amount)
-    local coins = GameStorage.get("coins")
-    coins = coins - amount
+function on_remove_coins()
     local coins_text = gui.get_node("coins/text")
     gui.set_text(
         coins_text,
-        tostring(coins)
+        tostring(GameStorage.get("coins"))
     )
-    GameStorage.set("coins", coins)
 end
 function on_add_lifes()
     local lifes_text = gui.get_node("lifes/text")
@@ -399,15 +482,15 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch75 = scene.name
-        local ____cond75 = ____switch75 == "game"
-        if ____cond75 then
+        local ____switch79 = scene.name
+        local ____cond79 = ____switch79 == "game"
+        if ____cond79 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             break
         end
-        ____cond75 = ____cond75 or ____switch75 == "map"
-        if ____cond75 then
+        ____cond79 = ____cond79 or ____switch79 == "map"
+        if ____cond79 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             break
@@ -417,13 +500,6 @@ end
 function on_gameover()
     set_enabled_coins(true)
     set_enabled_lifes(true)
-    if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
-        timer.delay(
-            5,
-            false,
-            function() return set_enabled_life_notification(true) end
-        )
-    end
 end
 function set_enabled_hammer(state)
     local hammer = gui.get_node("hammer/manager")
@@ -479,6 +555,15 @@ end
 function ____exports.final(self)
     self.druid:final()
     Manager.final_script()
+end
+local function on_gameover_offer_close()
+    if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
+        timer.delay(
+            5,
+            false,
+            function() return set_enabled_life_notification(true) end
+        )
+    end
 end
 init = ____exports.init
 on_input = ____exports.on_input

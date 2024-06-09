@@ -5,17 +5,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable no-case-declarations */
 
 import * as druid from 'druid.druid';
+import { is_enough_coins, remove_coins } from '../main/coins';
 import { TargetMessage } from '../main/game_config';
+import { remove_lifes } from '../main/life';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { Busters, CellId, ElementId, Level } from './match3_game';
+import { Busters, CellId, ElementId, GameState, Level } from './match3_game';
 
 
 interface props {
-    druid: DruidClass;
-    level: Level;
-    busters: Busters;
+    druid: DruidClass,
+    level: Level,
+    busters: Busters
 }
 
 export function init(this: props): void {
@@ -236,21 +239,41 @@ function next_level() {
 }
 
 function setup_gameover_ui(instance: props) {
-    instance.druid.new_button('restart_button', restart_level);
-    instance.druid.new_button('map_button', () => Scene.load('map'));
-    gui.set_enabled(gui.get_node('gameover'), false);
     gui.set_text(gui.get_node('gameover_text'), Lang.get_text('gameover_title'));
+    
     gui.set_text(gui.get_node('restart_text'), Lang.get_text('restart'));
+    instance.druid.new_button('restart_button', () => {
+        if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+            EventBus.send("SET_LIFE_NOTIFICATION");
+            return;
+        }
+        
+        Scene.restart();
+    });
+    
     gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
-}
+    instance.druid.new_button('map_button', () => Scene.load('map'));
+    
+    instance.druid.new_button('gameover_close', () => Scene.load('map'));
+    instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
-function restart_level() {
-    Scene.restart();
+    gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
+    instance.druid.new_button('steps_by_ad/button', () => EventBus.send('REVIVE', 3));
+    
+    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов    500");
+    instance.druid.new_button('steps_by_coins/button', () => {
+        if(!is_enough_coins(500)) return;
+        remove_coins(500);
+        EventBus.send('REVIVE', 5);
+    });
 }
 
 function set_events(instance: props) {
     EventBus.on('INIT_UI', () => setup(instance));
-    EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
+    EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
+        print("RECIVE STEPS: ", steps);
+        set_text('steps', steps);
+    }, true);
     EventBus.on('UPDATED_TARGET', (data) => update_targets(data), true);
     EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
@@ -299,13 +322,106 @@ function set_win() {
     gui.set_enabled(gui.get_node('win'), true);
 }
 
-function set_gameover() {
+function set_gameover(state: GameState) {
     disable_game_ui();
+    
     gui.set_enabled(gui.get_node('gameover'), true);
+    gui.set_enabled(gui.get_node('missing_targets'), true);
 
-    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
-        gui.set_enabled(gui.get_node('restart_button'), false);
+    const target_1 = gui.get_node('target_1');
+    const target_2 = gui.get_node('target_2');
+    const target_3 = gui.get_node('target_3');
+    
+    if(state.targets.length == 1) {
+        const target1 = state.targets[0];
+        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
+        
+        gui.set_text(gui.get_node('target_1_text'), tostring(target1.uids.length + "/" + target1.count));
+
+        gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
+        
+        gui.set_position(target_1, vmath.vector3(0, 0, 0));
+        gui.set_enabled(target_1, true);
     }
+    else if(state.targets.length == 2) {
+        const target1 = state.targets[0];
+        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
+        
+        gui.set_text(gui.get_node('target_1_text'), tostring(target1.uids.length + "/" + target1.count));
+        
+        gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
+        
+        gui.set_position(target_1, vmath.vector3(-70, 0, 0));
+        gui.set_enabled(target_1, true);
+        
+        const target2 = state.targets[1];
+        const view2 = target2.is_cell ? GAME_CONFIG.cell_view[target2.type as CellId] : GAME_CONFIG.element_view[target2.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_2'), (view2 == 'cell_web') ? view2 + '_ui' : view2);
+        
+        gui.set_text(gui.get_node('target_2_text'), tostring(target2.uids.length + "/" + target2.count));
+        
+        gui.set_enabled(gui.get_node('target_2_fail_icon'), target2.uids.length < target2.count);
+        
+        gui.set_position(target_2, vmath.vector3(70, 0, 0));
+        gui.set_enabled(target_2, true);
+    }
+    else if(state.targets.length == 3) {
+        const target1 = state.targets[0];
+        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
+        
+        gui.set_text(gui.get_node('target_1_text'), tostring(target1.uids.length + "/" + target1.count));
+
+        gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
+        
+        gui.set_position(target_1, vmath.vector3(-125, 0, 0));
+        gui.set_enabled(target_1, true);
+    
+        const target2 = state.targets[1];
+        const view2 = target2.is_cell ? GAME_CONFIG.cell_view[target2.type as CellId] : GAME_CONFIG.element_view[target2.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_2'), (view2 == 'cell_web') ? view2 + '_ui' : view2);
+
+        gui.set_text(gui.get_node('target_2_text'), tostring(target2.uids.length + "/" + target2.count));
+
+        gui.set_enabled(gui.get_node('target_2_fail_icon'), target2.uids.length < target2.count);
+        
+        gui.set_position(target_2, vmath.vector3(0, 0, 0));
+        gui.set_enabled(target_2, true);
+    
+        const target3 = state.targets[2];
+        const view3 = target3.is_cell ? GAME_CONFIG.cell_view[target3.type as CellId] : GAME_CONFIG.element_view[target3.type as ElementId];
+        gui.play_flipbook(gui.get_node('target_3'), (view3 == 'cell_web') ? view3 + '_ui' : view3);
+
+        gui.set_text(gui.get_node('target_3_text'), tostring(target3.uids.length + "/" + target3.count));
+
+        gui.set_enabled(gui.get_node('target_3_fail_icon'), target3.uids.length < target3.count);
+
+        gui.set_position(target_3, vmath.vector3(125, 0, 0));
+        gui.set_enabled(target_3, true);
+    }
+
+    set_gameover_offer();
+}
+
+function set_gameover_offer() {
+    gui.set_enabled(gui.get_node('gameover_offer_close'), true);
+    gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
+    gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
+}
+
+function disabled_gameover_offer() {
+    remove_lifes(1);
+
+    gui.set_enabled(gui.get_node('damage'), false);
+    gui.set_enabled(gui.get_node('gameover_offer_close'), false);
+    gui.set_enabled(gui.get_node('steps_by_ad/button'), false);
+    gui.set_enabled(gui.get_node('steps_by_coins/button'), false);
+    
+    gui.set_enabled(gui.get_node('gameover_close'), true);
+    gui.set_enabled(gui.get_node('restart_button'), true);
+    gui.set_enabled(gui.get_node('map_button'), true);
 }
 
 function disable_game_ui() {

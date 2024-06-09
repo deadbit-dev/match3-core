@@ -293,7 +293,10 @@ export const _GAME_CONFIG = {
         }
     } as TutorialData,
 
-    levels: [] as Level[]
+    levels: [] as Level[],
+    
+    is_revive: false,
+    revive_state: {} as GameState
 };
 
 
@@ -437,19 +440,26 @@ export type _UserMessages = {
     UPDATED_TARGET: TargetMessage,
 
     ON_WIN: VoidMessage,
-    ON_GAME_OVER: VoidMessage,
+    ON_GAME_OVER: GameState,
 
     SET_TUTORIAL: VoidMessage,
     REMOVE_TUTORIAL: VoidMessage,
 
     STORE_ACTIVATION: boolean,
+    LIFE_NOTIFICATION: boolean,
     NOT_ENOUGH_LIFE: VoidMessage,
 
     ADDED_LIFE: VoidMessage,
     REMOVED_LIFE: VoidMessage,
 
+    ADDED_COIN: VoidMessage,
+    REMOVED_COIN: VoidMessage,
+
     TRY_BUY_HAMMER: VoidMessage,
     TRY_BUY_SPINNING: VoidMessage,
     TRY_BUY_HORIZONTAL_ROCKET: VoidMessage,
-    TRY_BUY_VERTICAL_ROCKET: VoidMessage
+    TRY_BUY_VERTICAL_ROCKET: VoidMessage,
+
+    SET_LIFE_NOTIFICATION: VoidMessage,
+    REVIVE: number,
 };

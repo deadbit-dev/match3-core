@@ -634,6 +634,7 @@ function ____exports.View(animator)
         local to_world_pos = get_world_pos(data.to.x, data.to.y)
         local element_from = data.element_from
         local element_to = data.element_to
+        print("SWAP ANIMATION")
         local item_from = get_first_view_item_by_game_id(element_from.uid)
         if item_from ~= nil then
             go.animate(
