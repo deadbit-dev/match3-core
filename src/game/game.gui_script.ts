@@ -99,6 +99,7 @@ function setup_step_or_time(instance: props) {
 }
 
 function setup_targets(instance: props) {
+    print("setup ui");
     const targets = instance.level['targets'];
     if(targets[0] != undefined) {
         const node = gui.get_node('first_target');
@@ -284,6 +285,7 @@ function set_events(instance: props) {
 }
 
 function update_targets(data: TargetMessage) {
+    print("recive targets: ", data.id, data.count);
     switch(data.id) {
         case 0: set_text('first_target_counts', data.count); break;
         case 1: set_text('second_target_counts', data.count); break;

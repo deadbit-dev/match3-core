@@ -234,6 +234,17 @@ export function View(animator: FluxGroup) {
             load_field(state);
 
             EventBus.send('INIT_UI');
+
+            EventBus.send('UPDATED_STEP_COUNTER', state.steps);
+            
+            for(let i = 0; i < state.targets.length; i++) {
+                const target = state.targets[i];
+                const amount = target.count - target.uids.length;
+                print("send targets: ", i, target.count, target.uids.length, amount);
+                targets[i] = amount;
+                EventBus.send('UPDATED_TARGET', {id: i, count: amount});
+            }
+
             EventBus.send('SET_HELPER');
         });
 
@@ -364,6 +375,7 @@ export function View(animator: FluxGroup) {
     }
 
     function update_state(message: Messages[MessageId]) {
+        Log.log("UPDATE STATE");
         const state = message as GameState;
         reset_field();
         load_field(state, false);

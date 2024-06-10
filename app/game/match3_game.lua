@@ -136,7 +136,9 @@ function ____exports.Game()
         if level_config.steps == nil then
             return
         end
-        get_state().steps = steps
+        local last_state = get_state()
+        last_state.steps = steps
+        EventBus.send("UPDATED_STEP_COUNTER", last_state.steps)
     end
     function set_element_types()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -220,10 +222,16 @@ function ____exports.Game()
             set_tutorial()
         end
         if not is_tutorial() then
+            is_block_input = true
             search_available_steps(
-                4,
+                5,
                 function(steps)
-                    available_steps = steps
+                    if #steps ~= 0 then
+                        is_block_input = false
+                        available_steps = steps
+                        return
+                    end
+                    shuffle_field()
                 end
             )
         else
@@ -233,7 +241,7 @@ function ____exports.Game()
             end
         end
         init_targets()
-        set_steps()
+        set_steps(level_config.steps)
         set_timer()
         set_random()
         if GAME_CONFIG.is_revive then
@@ -261,11 +269,6 @@ function ____exports.Game()
         set_targets(last_state.targets)
         set_steps(last_state.steps)
         set_random()
-        if level_config.steps ~= nil then
-            local s = math.abs(level_config.steps - last_state.steps)
-            print("SEND STEPS: ", s, level_config.steps, last_state.steps)
-            EventBus.send("UPDATED_STEP_COUNTER", s)
-        end
     end
     function is_tutorial()
         local is_tutorial_level = __TS__ArrayIncludes(GAME_CONFIG.tutorial_levels, current_level + 1)
@@ -1478,6 +1481,7 @@ function ____exports.Game()
             field.process_state(ProcessMode.MoveElements)
         end
         local last_state = update_state()
+        print(#last_state.targets[1].uids)
         search_available_steps(
             5,
             function(steps)
@@ -1491,11 +1495,11 @@ function ____exports.Game()
         )
         if level_config.steps ~= nil and is_step then
             local ____get_state_result_19, ____steps_20 = get_state(), "steps"
-            ____get_state_result_19[____steps_20] = ____get_state_result_19[____steps_20] + 1
+            ____get_state_result_19[____steps_20] = ____get_state_result_19[____steps_20] - 1
         end
         is_step = false
         if level_config.steps ~= nil then
-            EventBus.send("UPDATED_STEP_COUNTER", level_config.steps - last_state.steps)
+            EventBus.send("UPDATED_STEP_COUNTER", last_state.steps)
         end
         send_game_step()
         states[#states + 1] = {}
@@ -1563,7 +1567,8 @@ function ____exports.Game()
     end
     function is_have_steps()
         if level_config.steps ~= nil then
-            return get_state(2).steps < level_config.steps
+            print(get_state().steps)
+            return get_state().steps > 0
         end
         return true
     end

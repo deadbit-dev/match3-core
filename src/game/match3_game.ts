@@ -259,7 +259,11 @@ export function Game() {
 
     function set_steps(steps = 0) {
         if(level_config.steps == undefined) return;
-        get_state().steps = steps;
+        
+        const last_state = get_state();
+        last_state.steps = steps;
+
+        EventBus.send('UPDATED_STEP_COUNTER', last_state.steps);
     }
 
     function set_element_types() {
@@ -342,9 +346,17 @@ export function Game() {
         if(is_tutorial()) set_tutorial();
             
         if(!is_tutorial()) {
-                search_available_steps(4, (steps) => {
-                available_steps = steps;
+            is_block_input = true;
+            search_available_steps(5, (steps) => {
+                if(steps.length != 0) {
+                    is_block_input = false;
+                    available_steps = steps;
+                    return;
+                }
+
+                shuffle_field();
             });
+            
         } else {
             const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
             if(step != undefined) available_steps = [step];
@@ -356,7 +368,7 @@ export function Game() {
 
         // print(GAME_CONFIG.revive_state.steps);
         
-        set_steps();
+        set_steps(level_config.steps);
         set_timer();
         set_random();
 
@@ -378,7 +390,6 @@ export function Game() {
 
         let last_state = update_state();
 
-
         EventBus.send('ON_LOAD_FIELD', last_state);
 
         states.push({} as GameState);
@@ -386,12 +397,6 @@ export function Game() {
         set_targets(last_state.targets);
         set_steps(last_state.steps);
         set_random();
-    
-        if(level_config.steps != undefined) {
-            const s = math.abs(level_config.steps - last_state.steps);
-            print("SEND STEPS: ", s, level_config.steps, last_state.steps);
-            EventBus.send('UPDATED_STEP_COUNTER', s);
-        }
     }
 
     function is_tutorial() {
@@ -1625,9 +1630,9 @@ export function Game() {
             field.process_state(ProcessMode.MoveElements);
         }
 
-        
-
         const last_state = update_state();
+
+        print(last_state.targets[0].uids.length);
 
         search_available_steps(5, (steps) => {
             if(steps.length != 0) {
@@ -1639,10 +1644,10 @@ export function Game() {
             shuffle_field();
         });
 
-        if(level_config.steps != undefined && is_step) get_state().steps++;
+        if(level_config.steps != undefined && is_step) get_state().steps--;
         is_step = false;
     
-        if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', level_config.steps - last_state.steps);
+        if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', last_state.steps);
 
         send_game_step();
 
@@ -1705,8 +1710,10 @@ export function Game() {
     }
 
     function is_have_steps() {
-        if(level_config.steps != undefined)
-            return get_state(2).steps < level_config.steps;
+        if(level_config.steps != undefined) {
+            print(get_state().steps);
+            return get_state().steps > 0;
+        }
         return true;
     }
 

@@ -85,6 +85,7 @@ function setup_step_or_time(instance)
     end
 end
 function setup_targets(instance)
+    print("setup ui")
     local targets = instance.level.targets
     if targets[1] ~= nil then
         local node = gui.get_node("first_target")
@@ -446,6 +447,7 @@ function set_events(instance)
     EventBus.on("ON_GAME_OVER", set_gameover, true)
 end
 function update_targets(data)
+    print("recive targets: ", data.id, data.count)
     repeat
         local ____switch59 = data.id
         local ____cond59 = ____switch59 == 0

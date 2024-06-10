@@ -55,6 +55,24 @@ function ____exports.View(animator)
                 recalculate_cell_offset(state)
                 load_field(state)
                 EventBus.send("INIT_UI")
+                EventBus.send("UPDATED_STEP_COUNTER", state.steps)
+                do
+                    local i = 0
+                    while i < #state.targets do
+                        local target = state.targets[i + 1]
+                        local amount = target.count - #target.uids
+                        print(
+                            "send targets: ",
+                            i,
+                            target.count,
+                            #target.uids,
+                            amount
+                        )
+                        targets[i] = amount
+                        EventBus.send("UPDATED_TARGET", {id = i, count = amount})
+                        i = i + 1
+                    end
+                end
                 EventBus.send("SET_HELPER")
             end
         )
@@ -260,6 +278,7 @@ function ____exports.View(animator)
         return 0
     end
     function update_state(message)
+        Log.log("UPDATE STATE")
         local state = message
         reset_field()
         load_field(state, false)
@@ -318,20 +337,20 @@ function ____exports.View(animator)
         state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch61 = event.key
+                local ____switch62 = event.key
                 local event_duration
-                local ____cond61 = ____switch61 == "ON_SWAP_ELEMENTS"
-                if ____cond61 then
+                local ____cond62 = ____switch62 == "ON_SWAP_ELEMENTS"
+                if ____cond62 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond61 = ____cond61 or ____switch61 == "ON_SPINNING_ACTIVATED"
-                if ____cond61 then
+                ____cond62 = ____cond62 or ____switch62 == "ON_SPINNING_ACTIVATED"
+                if ____cond62 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond61 = ____cond61 or ____switch61 == "ON_MOVED_ELEMENTS"
-                if ____cond61 then
+                ____cond62 = ____cond62 or ____switch62 == "ON_MOVED_ELEMENTS"
+                if ____cond62 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -377,24 +396,24 @@ function ____exports.View(animator)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch71 = move_direction
-            local ____cond71 = ____switch71 == Direction.Up
-            if ____cond71 then
+            local ____switch72 = move_direction
+            local ____cond72 = ____switch72 == Direction.Up
+            if ____cond72 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond71 = ____cond71 or ____switch71 == Direction.Down
-            if ____cond71 then
+            ____cond72 = ____cond72 or ____switch72 == Direction.Down
+            if ____cond72 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond71 = ____cond71 or ____switch71 == Direction.Left
-            if ____cond71 then
+            ____cond72 = ____cond72 or ____switch72 == Direction.Left
+            if ____cond72 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond71 = ____cond71 or ____switch71 == Direction.Right
-            if ____cond71 then
+            ____cond72 = ____cond72 or ____switch72 == Direction.Right
+            if ____cond72 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1130,14 +1149,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch227 = dir
-            local ____cond227 = ____switch227 == Axis.Vertical
-            if ____cond227 then
+            local ____switch228 = dir
+            local ____cond228 = ____switch228 == Axis.Vertical
+            if ____cond228 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond227 = ____cond227 or ____switch227 == Axis.Horizontal
-            if ____cond227 then
+            ____cond228 = ____cond228 or ____switch228 == Axis.Horizontal
+            if ____cond228 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
