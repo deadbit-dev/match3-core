@@ -119,10 +119,10 @@ embedded_components {
   }
 }
 embedded_components {
-  id: "part"
+  id: "explode"
   type: "spinemodel"
-  data: "spine_scene: \"/assets/vfx/element/element_crush.spinescene\"\n"
-  "default_animation: \"elements_crush\"\n"
+  data: "spine_scene: \"/assets/vfx/explode/explode.spinescene\"\n"
+  "default_animation: \"blue\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
   "material: \"/defold-spine/assets/spine.material\"\n"
@@ -138,5 +138,10 @@ embedded_components {
     y: 0.0
     z: 0.0
     w: 1.0
+  }
+  scale {
+    x: 0.3
+    y: 0.3
+    z: 1.0
   }
 }

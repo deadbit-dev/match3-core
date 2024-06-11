@@ -17,8 +17,6 @@ local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
-local ____utils = require("utils.utils")
-local hex2rgba = ____utils.hex2rgba
 local ____match3_game = require("game.match3_game")
 local SubstrateId = ____match3_game.SubstrateId
 local CellId = ____match3_game.CellId
@@ -37,7 +35,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator)
-    local set_targets, set_events, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, substrates, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
+    local set_targets, set_events, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_height, cell_size, scale_ratio, event_to_animation, gm, targets, state, substrates, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, cells_offset
     function set_targets()
         do
             local i = 0
@@ -365,6 +363,7 @@ function ____exports.View(animator)
                 end
             until true
         end
+        state.swap_state = state.game_state
         is_processing = false
         EventBus.send("SET_HELPER")
         EventBus.send("ON_GAME_STEP_ANIMATION_END")
@@ -653,7 +652,7 @@ function ____exports.View(animator)
         local to_world_pos = get_world_pos(data.to.x, data.to.y)
         local element_from = data.element_from
         local element_to = data.element_to
-        print("SWAP ANIMATION")
+        state.swap_state = data.swap_state
         local item_from = get_first_view_item_by_game_id(element_from.uid)
         if item_from ~= nil then
             go.animate(
@@ -1021,36 +1020,7 @@ function ____exports.View(animator)
             function(____self, message_id, message, sender)
                 if message_id == hash("spine_animation_done") then
                     go.delete(projectile)
-                    local part = gm.make_go("effect_view", target_pos)
-                    go.set_scale(
-                        vmath.vector3(scale_ratio, scale_ratio, 1),
-                        part
-                    )
-                    msg.post(
-                        msg.url(nil, part, nil),
-                        "disable"
-                    )
-                    msg.post(
-                        msg.url(nil, part, "part"),
-                        "enable"
-                    )
-                    local ____type = state.game_state.elements[element.y + 1][element.x + 1].id
-                    go.set(
-                        msg.url(nil, part, "part"),
-                        "tint",
-                        hex2rgba(GAME_CONFIG.element_colors[____type])
-                    )
-                    delete_view_item_by_game_id(element.uid)
-                    local anim_props = {blend_duration = 0, playback_rate = 1}
-                    spine.play_anim(
-                        msg.url(nil, part, "part"),
-                        "elements_crush",
-                        go.PLAYBACK_ONCE_FORWARD,
-                        anim_props,
-                        function()
-                            go.delete(part)
-                        end
-                    )
+                    explode_element_animation(element)
                 end
             end
         )
@@ -1063,6 +1033,40 @@ function ____exports.View(animator)
             pos,
             counter - 1,
             on_complete
+        )
+    end
+    function explode_element_animation(element)
+        delete_view_item_by_game_id(element.uid)
+        local ____type = state.swap_state.elements[element.y + 1][element.x + 1].id
+        if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
+            return
+        end
+        local pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1)
+        local effect = gm.make_go("effect_view", pos)
+        local effect_name = "explode"
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            effect
+        )
+        msg.post(
+            msg.url(nil, effect, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, effect, effect_name),
+            "enable"
+        )
+        local color = GAME_CONFIG.element_colors[____type]
+        print(color)
+        local anim_props = {blend_duration = 0, playback_rate = 1}
+        spine.play_anim(
+            msg.url(nil, effect, effect_name),
+            color,
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function()
+                go.delete(effect)
+            end
         )
     end
     function on_rocket_activated_animation(message)
@@ -1149,14 +1153,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch228 = dir
-            local ____cond228 = ____switch228 == Axis.Vertical
-            if ____cond228 then
+            local ____switch222 = dir
+            local ____cond222 = ____switch222 == Axis.Vertical
+            if ____cond222 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond228 = ____cond228 or ____switch228 == Axis.Horizontal
-            if ____cond228 then
+            ____cond222 = ____cond222 or ____switch222 == Axis.Horizontal
+            if ____cond222 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1608,7 +1612,7 @@ function ____exports.View(animator)
                 damaged_element_time,
                 damaged_element_delay,
                 function()
-                    delete_view_item_by_game_id(element_id)
+                    explode_element_animation({x = x, y = y, uid = element_id})
                     for ____, ____value in ipairs(__TS__ObjectEntries(data)) do
                         local key = ____value[1]
                         local value = ____value[2]
@@ -1632,7 +1636,7 @@ function ____exports.View(animator)
                 end
             )
         end
-        return damaged_element_time
+        return damaged_element_time + 0.5
     end
     function squash_element_animation(element, target_element, on_complite)
         local to_world_pos = get_world_pos(target_element.x, target_element.y)
@@ -1835,7 +1839,7 @@ function ____exports.View(animator)
     }
     gm = GoManager()
     targets = {}
-    state = {game_state = {}, game_id_to_view_index = {}}
+    state = {swap_state = {}, game_state = {}, game_id_to_view_index = {}}
     substrates = {}
     down_item = nil
     combinate_phase_duration = 0
@@ -1853,51 +1857,6 @@ function ____exports.View(animator)
         set_targets()
         EventBus.send("REQUEST_LOAD_FIELD")
         dispatch_messages()
-    end
-    local function make_hole_substrate_view(x, y, cells, z_index)
-        if z_index == nil then
-            z_index = GAME_CONFIG.default_substrate_z_index
-        end
-        local mask = {{0, 1, 0}, {1, 0, 0}, {0, 0, 0}}
-        local angle = 0
-        while angle <= 270 do
-            local is_valid = true
-            do
-                local i = y - (#mask - 1) / 2
-                while i <= y + (#mask - 1) / 2 and is_valid do
-                    do
-                        local j = x - (#mask[1] - 1) / 2
-                        while j <= x + (#mask[1] - 1) / 2 and is_valid do
-                            if mask[i - (y - (#mask - 1) / 2) + 1][j - (x - (#mask[1] - 1) / 2) + 1] == 1 then
-                                if is_valid_pos(j, i, #cells[1], #cells) then
-                                    local cell = cells[i + 1][j + 1]
-                                    is_valid = cell ~= NotActiveCell
-                                else
-                                    is_valid = false
-                                end
-                            end
-                            j = j + 1
-                        end
-                    end
-                    i = i + 1
-                end
-            end
-            if is_valid then
-                local pos = get_world_pos(x, y, z_index)
-                local _go = gm.make_go("substrate_view", pos)
-                gm.set_rotation_hash(_go, -angle)
-                sprite.play_flipbook(
-                    msg.url(nil, _go, "sprite"),
-                    "angle"
-                )
-                go.set_scale(
-                    vmath.vector3(scale_ratio, scale_ratio, 1),
-                    _go
-                )
-            end
-            mask = rotate_matrix_90(mask)
-            angle = angle + 90
-        end
     end
     return init()
 end

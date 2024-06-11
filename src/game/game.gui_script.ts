@@ -281,7 +281,7 @@ function set_events(instance: props) {
     EventBus.on('SET_TUTORIAL', () => set_tutorial(), true);
     EventBus.on('REMOVE_TUTORIAL', () => gui.set_enabled(gui.get_node('tutorial'), false), true);
     EventBus.on('ON_WIN', set_win, true);
-    EventBus.on('ON_GAME_OVER', set_gameover, true);
+    EventBus.on('ON_GAME_OVER', (state) => set_gameover(instance, state), true);
 }
 
 function update_targets(data: TargetMessage) {
@@ -324,7 +324,7 @@ function set_win() {
     gui.set_enabled(gui.get_node('win'), true);
 }
 
-function set_gameover(state: GameState) {
+function set_gameover(instance: props, state: GameState) {
     disable_game_ui();
     
     gui.set_enabled(gui.get_node('gameover'), true);
@@ -404,7 +404,8 @@ function set_gameover(state: GameState) {
         gui.set_enabled(target_3, true);
     }
 
-    set_gameover_offer();
+    if(instance.level.steps != undefined) set_gameover_offer();
+    else disabled_gameover_offer();
 }
 
 function set_gameover_offer() {

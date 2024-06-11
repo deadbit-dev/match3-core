@@ -4404,7 +4404,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: -200.0
+    y: -169.0
     z: 0.0
     w: 1.0
   }
@@ -4448,8 +4448,8 @@ nodes {
   alpha: 1.0
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
-  spine_scene: "avatar"
-  spine_default_animation: "Right_Left_01"
+  spine_scene: "cat_win"
+  spine_default_animation: "cat_win_idle"
   spine_skin: ""
   custom_type: 405028931
   enabled: true
@@ -4827,8 +4827,8 @@ nodes {
 }
 nodes {
   position {
-    x: 0.0
-    y: -62.0
+    x: 10.0
+    y: -25.0
     z: 0.0
     w: 1.0
   }
@@ -4839,8 +4839,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 0.3
-    y: 0.3
+    x: 0.5
+    y: 0.5
     z: 1.0
     w: 1.0
   }
@@ -4872,8 +4872,8 @@ nodes {
   alpha: 1.0
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
-  spine_scene: "avatar"
-  spine_default_animation: "Right_Left_01"
+  spine_scene: "cat_fail"
+  spine_default_animation: "cat_fail_idle"
   spine_skin: ""
   custom_type: 405028931
   enabled: true
@@ -6715,4 +6715,12 @@ max_nodes: 512
 resources {
   name: "avatar"
   path: "/assets/avatar/avatar.spinescene"
+}
+resources {
+  name: "cat_fail"
+  path: "/assets/cat_fail/cat_fail.spinescene"
+}
+resources {
+  name: "cat_win"
+  path: "/assets/cat_win/cat_win.spinescene"
 }

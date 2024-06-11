@@ -157,26 +157,38 @@ export const _GAME_CONFIG = {
     } as { [key in ElementId]: string },
 
     element_colors: {
-        [ElementId.Dimonde]: '#009de2',
-        [ElementId.Gold]: '#e94165',
-        [ElementId.Topaz]: '#f5d74d',
-        [ElementId.Ruby]: '#9a4ee5',
-        [ElementId.Emerald]: '#20af1b',
-        [ElementId.VerticalRocket]: '#ffffff',
-        [ElementId.HorizontalRocket]: '#ffffff',
-        [ElementId.AxisRocket]: '#ffffff',
-        [ElementId.Helicopter]: '#ffffff',
-        [ElementId.Dynamite]: '#ffffff',
-        [ElementId.Diskosphere]: '#ffffff',
-        [ElementId.Cheese]: '#ffffff',
-        [ElementId.Cabbage]: '#ffffff',
-        [ElementId.Acorn]: '#ffffff',
-        [ElementId.RareMeat]: '#ffffff',
-        [ElementId.MediumMeat]: '#ffffff',
-        [ElementId.Chicken]: '#ffffff',
-        [ElementId.SunFlower]: '#ffffff',
-        [ElementId.Salad]: '#ffffff' ,
-        [ElementId.Hay]: '#ffffff'
+        [ElementId.Dimonde]: 'blue',
+        [ElementId.Gold]: 'yellow',
+        [ElementId.Topaz]: 'purple',
+        [ElementId.Ruby]: 'red',
+        [ElementId.Emerald]: 'green',
+        [ElementId.VerticalRocket]: '',
+        [ElementId.HorizontalRocket]: '',
+        [ElementId.AxisRocket]: '',
+        [ElementId.Helicopter]: '',
+        [ElementId.Dynamite]: '',
+        [ElementId.Diskosphere]: '',
+        [ElementId.Cheese]: '',
+        [ElementId.Cabbage]: '',
+        [ElementId.Acorn]: '',
+        [ElementId.RareMeat]: '',
+        [ElementId.MediumMeat]: '',
+        [ElementId.Chicken]: '',
+        [ElementId.SunFlower]: '',
+        [ElementId.Salad]: '' ,
+        [ElementId.Hay]: ''
+    },
+
+    cell_colors: {
+        [CellId.Base]: '',
+        [CellId.Box]: '',
+        [CellId.Flowers]: '',
+        [CellId.Grass]: '',
+        [CellId.Lock]: '',
+        [CellId.Stone0]: '',
+        [CellId.Stone1]: '',
+        [CellId.Stone2]: '',
+        [CellId.Web]: ''
     },
 
     base_elements: [
@@ -342,7 +354,7 @@ export interface GameStepMessage { events: GameStepEventBuffer, state: GameState
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
-export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement }
+export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement, swap_state: GameState }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, elements: ItemInfo[] }
 

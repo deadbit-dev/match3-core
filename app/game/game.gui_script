@@ -444,24 +444,28 @@ function set_events(instance)
         true
     )
     EventBus.on("ON_WIN", set_win, true)
-    EventBus.on("ON_GAME_OVER", set_gameover, true)
+    EventBus.on(
+        "ON_GAME_OVER",
+        function(state) return set_gameover(instance, state) end,
+        true
+    )
 end
 function update_targets(data)
     print("recive targets: ", data.id, data.count)
     repeat
-        local ____switch59 = data.id
-        local ____cond59 = ____switch59 == 0
-        if ____cond59 then
+        local ____switch60 = data.id
+        local ____cond60 = ____switch60 == 0
+        if ____cond60 then
             set_text("first_target_counts", data.count)
             break
         end
-        ____cond59 = ____cond59 or ____switch59 == 1
-        if ____cond59 then
+        ____cond60 = ____cond60 or ____switch60 == 1
+        if ____cond60 then
             set_text("second_target_counts", data.count)
             break
         end
-        ____cond59 = ____cond59 or ____switch59 == 2
-        if ____cond59 then
+        ____cond60 = ____cond60 or ____switch60 == 2
+        if ____cond60 then
             set_text("third_target_counts", data.count)
             break
         end
@@ -498,7 +502,7 @@ function set_win()
         true
     )
 end
-function set_gameover(state)
+function set_gameover(instance, state)
     disable_game_ui()
     gui.set_enabled(
         gui.get_node("gameover"),
@@ -629,7 +633,11 @@ function set_gameover(state)
         )
         gui.set_enabled(target_3, true)
     end
-    set_gameover_offer()
+    if instance.level.steps ~= nil then
+        set_gameover_offer()
+    else
+        disabled_gameover_offer()
+    end
 end
 function set_gameover_offer()
     gui.set_enabled(

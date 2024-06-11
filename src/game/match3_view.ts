@@ -99,6 +99,7 @@ const SubstrateMasks = [
 ];
 
 interface ViewState {
+    swap_state: GameState,
     game_state: GameState,
     game_id_to_view_index: { [key in number]: number[] }
 }
@@ -180,6 +181,7 @@ export function View(animator: FluxGroup) {
     const targets: {[key in number]: number} = {};
     
     let state: ViewState = {
+        swap_state: {} as GameState,
         game_state: {} as GameState,
         game_id_to_view_index: {}
     };
@@ -453,6 +455,8 @@ export function View(animator: FluxGroup) {
             }
         }
 
+        state.swap_state = state.game_state;
+
         is_processing = false;
         EventBus.send('SET_HELPER');
         EventBus.send('ON_GAME_STEP_ANIMATION_END');
@@ -546,6 +550,7 @@ export function View(animator: FluxGroup) {
         Log.log("LOAD FIELD");
         
         state.game_state = game_state;
+
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const cell = state.game_state.cells[y][x];
@@ -619,39 +624,39 @@ export function View(animator: FluxGroup) {
         }
     }
 
-    function make_hole_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
-        let mask = [
-            [0, 1, 0],
-            [1, 0, 0],
-            [0, 0, 0]
-        ];
+    // function make_hole_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
+    //     let mask = [
+    //         [0, 1, 0],
+    //         [1, 0, 0],
+    //         [0, 0, 0]
+    //     ];
 
-        let angle = 0;
-        while (angle <= 270) {
-            let is_valid = true;
-            for (let i = y - (mask.length - 1) / 2; (i <= y + (mask.length - 1) / 2) && is_valid; i++) {
-                for (let j = x - (mask[0].length - 1) / 2; (j <= x + (mask[0].length - 1) / 2) && is_valid; j++) {
-                    if (mask[i - (y - (mask.length - 1) / 2)][j - (x - (mask[0].length - 1) / 2)] == 1) {
-                        if (is_valid_pos(j, i, cells[0].length, cells.length)) {
-                            const cell = cells[i][j];
-                            is_valid = (cell != NotActiveCell);
-                        } else is_valid = false;
-                    }
-                }
-            }
+    //     let angle = 0;
+    //     while (angle <= 270) {
+    //         let is_valid = true;
+    //         for (let i = y - (mask.length - 1) / 2; (i <= y + (mask.length - 1) / 2) && is_valid; i++) {
+    //             for (let j = x - (mask[0].length - 1) / 2; (j <= x + (mask[0].length - 1) / 2) && is_valid; j++) {
+    //                 if (mask[i - (y - (mask.length - 1) / 2)][j - (x - (mask[0].length - 1) / 2)] == 1) {
+    //                     if (is_valid_pos(j, i, cells[0].length, cells.length)) {
+    //                         const cell = cells[i][j];
+    //                         is_valid = (cell != NotActiveCell);
+    //                     } else is_valid = false;
+    //                 }
+    //             }
+    //         }
 
-            if (is_valid) {
-                const pos = get_world_pos(x, y, z_index);
-                const _go = gm.make_go('substrate_view', pos);
-                gm.set_rotation_hash(_go, -angle);
-                sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), "angle");
-                go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-            }
+    //         if (is_valid) {
+    //             const pos = get_world_pos(x, y, z_index);
+    //             const _go = gm.make_go('substrate_view', pos);
+    //             gm.set_rotation_hash(_go, -angle);
+    //             sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), "angle");
+    //             go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
+    //         }
 
-            mask = rotate_matrix_90(mask);
-            angle += 90;
-        }
-    }
+    //         mask = rotate_matrix_90(mask);
+    //         angle += 90;
+    //     }
+    // }
 
     function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
         const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.top_layer_cells.includes(cell_id) ?
@@ -701,7 +706,7 @@ export function View(animator: FluxGroup) {
         const element_from = data.element_from;
         const element_to = data.element_to;
 
-        print("SWAP ANIMATION");
+        state.swap_state = data.swap_state;
 
         const item_from = get_first_view_item_by_game_id(element_from.uid);
         if (item_from != undefined) {
@@ -925,28 +930,37 @@ export function View(animator: FluxGroup) {
         spine.play_anim(msg.url(undefined, projectile, 'diskosphere_projectile'), "light_ball_projectile", go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
             if (message_id == hash("spine_animation_done")) {
                 go.delete(projectile);
-
-                const part = gm.make_go('effect_view', target_pos);
-                
-                go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), part);
-                
-                msg.post(msg.url(undefined, part, undefined), 'disable');
-                msg.post(msg.url(undefined, part, 'part'), 'enable');
-                
-                const type = (state.game_state.elements[element.y][element.x] as Element).id as ElementId;
-                go.set(msg.url(undefined, part, 'part'), 'tint', hex2rgba(GAME_CONFIG.element_colors[type]));
-
-                delete_view_item_by_game_id(element.uid);
-
-                const anim_props = { blend_duration: 0, playback_rate: 1 };
-                spine.play_anim(msg.url(undefined, part, 'part'), "elements_crush", go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
-                    go.delete(part);
-                });
+                explode_element_animation(element);
             }
         });
     
         if(counter == 0) return on_complete();
         trace(activation, diskosphere, pos, counter - 1, on_complete);
+    }
+
+    function explode_element_animation(element: ItemInfo) {
+        delete_view_item_by_game_id(element.uid);
+
+        const type = (state.swap_state.elements[element.y][element.x] as Element).id as ElementId;
+        if(!GAME_CONFIG.base_elements.includes(type)) return;
+
+        const pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1);
+        const effect = gm.make_go('effect_view', pos);
+        const effect_name = 'explode';
+        
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), effect);
+        
+        msg.post(msg.url(undefined, effect, undefined), 'disable');
+        msg.post(msg.url(undefined, effect, effect_name), 'enable');
+        
+        const color = GAME_CONFIG.element_colors[type];
+
+        print(color);
+
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        spine.play_anim(msg.url(undefined, effect, effect_name), color, go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
+            go.delete(effect);
+        });
     }
     
     function on_rocket_activated_animation(message: Messages[MessageId]) {
@@ -1233,6 +1247,22 @@ export function View(animator: FluxGroup) {
         delete_all_view_items_by_game_id(cell.previous_id);
         make_cell_view(cell.x, cell.y, cell.id, cell.uid);
 
+        // const pos = get_world_pos(cell.x, cell.y, GAME_CONFIG.default_element_z_index + 1.1);
+        // const effect = gm.make_go('effect_view', pos);
+        // const effect_name = 'cell_explode';
+
+        // msg.post(msg.url(undefined, effect, undefined), 'disable');
+        // msg.post(msg.url(undefined, effect, effect_name), 'enable');
+
+        // go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), effect);
+
+        // const type = (state.game_state.cells[cell.y][cell.x] as Cell).id as CellId;
+
+        // const anim_props = { blend_duration: 0, playback_rate: 1 };
+        // spine.play_anim(msg.url(undefined, effect, effect_name), GAME_CONFIG.cell_colors[type], go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
+        //     go.delete(effect);
+        // });
+
         return 0;
     }
 
@@ -1397,7 +1427,7 @@ export function View(animator: FluxGroup) {
         if (element_view_item != undefined) {
             go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                    delete_view_item_by_game_id(element_id);
+                    explode_element_animation({x, y, uid: element_id});
 
                     for (const [key, value] of Object.entries(data)) {
                         if (key == 'activated_cells') {
@@ -1414,13 +1444,11 @@ export function View(animator: FluxGroup) {
                         }
                     }
 
-
-
                     if (on_complite != undefined) on_complite();
                 });
         }
 
-        return damaged_element_time;
+        return damaged_element_time + 0.5;
     }
 
     function squash_element_animation(element: ItemInfo, target_element: ItemInfo, on_complite?: () => void) {

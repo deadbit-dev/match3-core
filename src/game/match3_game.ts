@@ -1523,19 +1523,13 @@ export function Game() {
         const cell_from = field.get_cell(from_x, from_y);
         const cell_to = field.get_cell(to_x, to_y);
 
-        print("CHECK NOT ACTIVE CELLS");
-
         if(cell_from == NotActiveCell || cell_to == NotActiveCell) return false;
-
-        print("CHECK AVAILABLE FOR MOVE");
 
         // TODO: remove because this check will be in try_move below
         if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return false;
 
         const element_from = field.get_element(from_x, from_y);
         const element_to = field.get_element(to_x, to_y);
-
-        print("CHECK NULL ELEMENT");
         
         if(element_from == NullElement) return false;
 
@@ -1559,19 +1553,19 @@ export function Game() {
                 from: {x: from_x, y: from_y},
                 to: {x: to_x, y: to_y},
                 element_from: element_from,
-                element_to: element_to
+                element_to: element_to,
+                swap_state: get_state()
             });
 
             return false;
         }
-
-        print("SEND SWAP");
     
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
             to: {x: to_x, y: to_y},
             element_from: element_from,
-            element_to: element_to
+            element_to: element_to,
+            swap_state: get_state()
         });
 
         return true;

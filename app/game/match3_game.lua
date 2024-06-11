@@ -1428,17 +1428,14 @@ function ____exports.Game()
     function try_swap_elements(from_x, from_y, to_x, to_y)
         local cell_from = field.get_cell(from_x, from_y)
         local cell_to = field.get_cell(to_x, to_y)
-        print("CHECK NOT ACTIVE CELLS")
         if cell_from == NotActiveCell or cell_to == NotActiveCell then
             return false
         end
-        print("CHECK AVAILABLE FOR MOVE")
         if not field.is_available_cell_type_for_move(cell_from) or not field.is_available_cell_type_for_move(cell_to) then
             return false
         end
         local element_from = field.get_element(from_x, from_y)
         local element_to = field.get_element(to_x, to_y)
-        print("CHECK NULL ELEMENT")
         if element_from == NullElement then
             return false
         end
@@ -1458,11 +1455,28 @@ function ____exports.Game()
             end
         end
         if not field.try_move(from_x, from_y, to_x, to_y) then
-            EventBus.send("ON_WRONG_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
+            EventBus.send(
+                "ON_WRONG_SWAP_ELEMENTS",
+                {
+                    from = {x = from_x, y = from_y},
+                    to = {x = to_x, y = to_y},
+                    element_from = element_from,
+                    element_to = element_to,
+                    swap_state = get_state()
+                }
+            )
             return false
         end
-        print("SEND SWAP")
-        write_game_step_event("ON_SWAP_ELEMENTS", {from = {x = from_x, y = from_y}, to = {x = to_x, y = to_y}, element_from = element_from, element_to = element_to})
+        write_game_step_event(
+            "ON_SWAP_ELEMENTS",
+            {
+                from = {x = from_x, y = from_y},
+                to = {x = to_x, y = to_y},
+                element_from = element_from,
+                element_to = element_to,
+                swap_state = get_state()
+            }
+        )
         return true
     end
     function set_random(seed)
