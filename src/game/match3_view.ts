@@ -99,7 +99,6 @@ const SubstrateMasks = [
 ];
 
 interface ViewState {
-    swap_state: GameState,
     game_state: GameState,
     game_id_to_view_index: { [key in number]: number[] }
 }
@@ -181,7 +180,6 @@ export function View(animator: FluxGroup) {
     const targets: {[key in number]: number} = {};
     
     let state: ViewState = {
-        swap_state: {} as GameState,
         game_state: {} as GameState,
         game_id_to_view_index: {}
     };
@@ -433,8 +431,6 @@ export function View(animator: FluxGroup) {
     function on_game_step(data: GameStepMessage) {
         is_processing = true;
 
-        state.game_state = data.state;
-
         for (const event of data.events) {
             switch (event.key) {
                 case 'ON_SWAP_ELEMENTS':
@@ -455,7 +451,7 @@ export function View(animator: FluxGroup) {
             }
         }
 
-        state.swap_state = state.game_state;
+        state.game_state = data.state;
 
         is_processing = false;
         EventBus.send('SET_HELPER');
@@ -578,8 +574,9 @@ export function View(animator: FluxGroup) {
         }
 
         for(const substrate of substrates) {
-            if(substrate != null)
-                go.delete(substrate);
+            if(substrate != null) {
+                try { go.delete(substrate); } catch(any) {}
+            }
         }
 
         state = {} as ViewState;
@@ -706,7 +703,7 @@ export function View(animator: FluxGroup) {
         const element_from = data.element_from;
         const element_to = data.element_to;
 
-        state.swap_state = data.swap_state;
+        state.game_state = data.state;
 
         const item_from = get_first_view_item_by_game_id(element_from.uid);
         if (item_from != undefined) {
@@ -941,7 +938,7 @@ export function View(animator: FluxGroup) {
     function explode_element_animation(element: ItemInfo) {
         delete_view_item_by_game_id(element.uid);
 
-        const type = (state.swap_state.elements[element.y][element.x] as Element).id as ElementId;
+        const type = (state.game_state.elements[element.y][element.x] as Element).id as ElementId;
         if(!GAME_CONFIG.base_elements.includes(type)) return;
 
         const pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1);
@@ -1273,7 +1270,11 @@ export function View(animator: FluxGroup) {
 
     // TODO: refactoring
     function on_moved_elements_animation(message: Messages[MessageId]) {
-        const elements = message as MovedElementsMessage;
+        const data = message as MovedElementsMessage;
+        const elements = data.elements;
+
+        state.game_state = data.state;
+
         const delayed_row_in_column: number[] = [];
 
         let max_delay = 0;

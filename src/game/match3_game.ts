@@ -622,8 +622,8 @@ export function Game() {
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
-            EventBus.send('ON_WIN');
-        } else if(!is_have_steps()) timer.delay(1, false, gameover);
+            timer.delay(0.5, false, () => EventBus.send('ON_WIN'));
+        } else if(!is_have_steps()) timer.delay(0.5, false, gameover);
         
         Log.log("Закончена анимация хода");
     }
@@ -1549,23 +1549,25 @@ export function Game() {
         }
 
         if(!field.try_move(from_x, from_y, to_x, to_y)) {
+            update_state();
             EventBus.send('ON_WRONG_SWAP_ELEMENTS', {
                 from: {x: from_x, y: from_y},
                 to: {x: to_x, y: to_y},
                 element_from: element_from,
                 element_to: element_to,
-                swap_state: get_state()
+                state: copy_state()
             });
 
             return false;
         }
-    
+
+        update_state();
         write_game_step_event('ON_SWAP_ELEMENTS', {
             from: {x: from_x, y: from_y},
             to: {x: to_x, y: to_y},
             element_from: element_from,
             element_to: element_to,
-            swap_state: get_state()
+            state: copy_state()
         });
 
         return true;
@@ -1797,7 +1799,8 @@ export function Game() {
     }
 
     function on_moved_elements(elements: MovedInfo[]) {
-        write_game_step_event('ON_MOVED_ELEMENTS', elements);
+        update_state();
+        write_game_step_event('ON_MOVED_ELEMENTS', {elements, state: copy_state()});
     }
 
     function on_cell_activated(item_info: ItemInfo) {
@@ -1891,9 +1894,6 @@ export function Game() {
 
     function copy_state(offset = 1) {
         const last_state = get_state(offset);
-
-        print(last_state.cells[2][2]);
-
         const copy_state = Object.assign({}, last_state);
 
         copy_state.cells = [];

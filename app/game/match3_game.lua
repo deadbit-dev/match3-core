@@ -503,9 +503,13 @@ function ____exports.Game()
             local completed_levels = GameStorage.get("completed_levels")
             completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
             GameStorage.set("completed_levels", completed_levels)
-            EventBus.send("ON_WIN")
+            timer.delay(
+                0.5,
+                false,
+                function() return EventBus.send("ON_WIN") end
+            )
         elseif not is_have_steps() then
-            timer.delay(1, false, gameover)
+            timer.delay(0.5, false, gameover)
         end
         Log.log("Закончена анимация хода")
     end
@@ -1455,6 +1459,7 @@ function ____exports.Game()
             end
         end
         if not field.try_move(from_x, from_y, to_x, to_y) then
+            update_state()
             EventBus.send(
                 "ON_WRONG_SWAP_ELEMENTS",
                 {
@@ -1462,11 +1467,12 @@ function ____exports.Game()
                     to = {x = to_x, y = to_y},
                     element_from = element_from,
                     element_to = element_to,
-                    swap_state = get_state()
+                    state = copy_state()
                 }
             )
             return false
         end
+        update_state()
         write_game_step_event(
             "ON_SWAP_ELEMENTS",
             {
@@ -1474,7 +1480,7 @@ function ____exports.Game()
                 to = {x = to_x, y = to_y},
                 element_from = element_from,
                 element_to = element_to,
-                swap_state = get_state()
+                state = copy_state()
             }
         )
         return true
@@ -1595,29 +1601,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch345 = combination.type
-            local ____cond345 = ____switch345 == CombinationType.Comb4
-            if ____cond345 then
+            local ____switch346 = combination.type
+            local ____cond346 = ____switch346 == CombinationType.Comb4
+            if ____cond346 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond345 = ____cond345 or ____switch345 == CombinationType.Comb5
-            if ____cond345 then
+            ____cond346 = ____cond346 or ____switch346 == CombinationType.Comb5
+            if ____cond346 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond345 = ____cond345 or ____switch345 == CombinationType.Comb2x2
-            if ____cond345 then
+            ____cond346 = ____cond346 or ____switch346 == CombinationType.Comb2x2
+            if ____cond346 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond345 = ____cond345 or (____switch345 == CombinationType.Comb3x3a or ____switch345 == CombinationType.Comb3x3b)
-            if ____cond345 then
+            ____cond346 = ____cond346 or (____switch346 == CombinationType.Comb3x3a or ____switch346 == CombinationType.Comb3x3b)
+            if ____cond346 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond345 = ____cond345 or (____switch345 == CombinationType.Comb3x4 or ____switch345 == CombinationType.Comb3x5)
-            if ____cond345 then
+            ____cond346 = ____cond346 or (____switch346 == CombinationType.Comb3x4 or ____switch346 == CombinationType.Comb3x5)
+            if ____cond346 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -1669,7 +1675,14 @@ function ____exports.Game()
         )
     end
     function on_moved_elements(elements)
-        write_game_step_event("ON_MOVED_ELEMENTS", elements)
+        update_state()
+        write_game_step_event(
+            "ON_MOVED_ELEMENTS",
+            {
+                elements = elements,
+                state = copy_state()
+            }
+        )
     end
     function on_cell_activated(item_info)
         local cell = field.get_cell(item_info.x, item_info.y)
@@ -1765,7 +1778,6 @@ function ____exports.Game()
             offset = 1
         end
         local last_state = get_state(offset)
-        print(last_state.cells[3][3])
         local copy_state = __TS__ObjectAssign({}, last_state)
         copy_state.cells = {}
         copy_state.elements = {}
@@ -1998,15 +2010,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch433 = data
-                                local ____cond433 = ____switch433 == "-"
-                                if ____cond433 then
+                                local ____switch434 = data
+                                local ____cond434 = ____switch434 == "-"
+                                if ____cond434 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond433 = ____cond433 or ____switch433 == ""
-                                if ____cond433 then
+                                ____cond434 = ____cond434 or ____switch434 == ""
+                                if ____cond434 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -2015,14 +2027,14 @@ function ____exports.load_config()
                         else
                             if data.cell ~= nil then
                                 repeat
-                                    local ____switch436 = data.cell
-                                    local ____cond436 = ____switch436 == ____exports.CellId.Stone0
-                                    if ____cond436 then
+                                    local ____switch437 = data.cell
+                                    local ____cond437 = ____switch437 == ____exports.CellId.Stone0
+                                    if ____cond437 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                         break
                                     end
-                                    ____cond436 = ____cond436 or ____switch436 == ____exports.CellId.Grass
-                                    if ____cond436 then
+                                    ____cond437 = ____cond437 or ____switch437 == ____exports.CellId.Grass
+                                    if ____cond437 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Flowers, ____exports.CellId.Grass}
                                         break
                                     end

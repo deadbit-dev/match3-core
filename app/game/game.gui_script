@@ -386,7 +386,7 @@ function setup_gameover_ui(instance)
     )
     gui.set_text(
         gui.get_node("steps_by_coins/text"),
-        "+5 ходов    500"
+        "+5 ходов         500"
     )
     instance.druid:new_button(
         "steps_by_coins/button",

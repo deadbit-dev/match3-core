@@ -261,7 +261,7 @@ function setup_gameover_ui(instance: props) {
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
     instance.druid.new_button('steps_by_ad/button', () => EventBus.send('REVIVE', 3));
     
-    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов    500");
+    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов         500");
     instance.druid.new_button('steps_by_coins/button', () => {
         if(!is_enough_coins(500)) return;
         remove_coins(500);

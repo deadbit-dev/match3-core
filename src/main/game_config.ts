@@ -348,13 +348,13 @@ export const _STORAGE_CONFIG = {
 };
 
 export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
-export type MovedElementsMessage = MovedInfo[];
+export type MovedElementsMessage = { elements: MovedInfo[], state: GameState };
 
 export interface GameStepMessage { events: GameStepEventBuffer, state: GameState }
 
 export interface ElementMessage extends ItemInfo { type: number }
 export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
-export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement, swap_state: GameState }
+export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement, state: GameState }
 export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
 export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, elements: ItemInfo[] }
 

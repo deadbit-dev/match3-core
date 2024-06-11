@@ -332,7 +332,6 @@ function ____exports.View(animator)
     end
     function on_game_step(data)
         is_processing = true
-        state.game_state = data.state
         for ____, event in ipairs(data.events) do
             repeat
                 local ____switch62 = event.key
@@ -363,7 +362,7 @@ function ____exports.View(animator)
                 end
             until true
         end
-        state.swap_state = state.game_state
+        state.game_state = data.state
         is_processing = false
         EventBus.send("SET_HELPER")
         EventBus.send("ON_GAME_STEP_ANIMATION_END")
@@ -512,7 +511,11 @@ function ____exports.View(animator)
         end
         for ____, substrate in ipairs(substrates) do
             if substrate ~= nil then
-                go.delete(substrate)
+                do
+                    pcall(function()
+                        go.delete(substrate)
+                    end)
+                end
             end
         end
         state = {}
@@ -652,7 +655,7 @@ function ____exports.View(animator)
         local to_world_pos = get_world_pos(data.to.x, data.to.y)
         local element_from = data.element_from
         local element_to = data.element_to
-        state.swap_state = data.swap_state
+        state.game_state = data.state
         local item_from = get_first_view_item_by_game_id(element_from.uid)
         if item_from ~= nil then
             go.animate(
@@ -1037,7 +1040,7 @@ function ____exports.View(animator)
     end
     function explode_element_animation(element)
         delete_view_item_by_game_id(element.uid)
-        local ____type = state.swap_state.elements[element.y + 1][element.x + 1].id
+        local ____type = state.game_state.elements[element.y + 1][element.x + 1].id
         if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
             return
         end
@@ -1153,14 +1156,14 @@ function ____exports.View(animator)
             part1
         )
         repeat
-            local ____switch222 = dir
-            local ____cond222 = ____switch222 == Axis.Vertical
-            if ____cond222 then
+            local ____switch223 = dir
+            local ____cond223 = ____switch223 == Axis.Vertical
+            if ____cond223 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond222 = ____cond222 or ____switch222 == Axis.Horizontal
-            if ____cond222 then
+            ____cond223 = ____cond223 or ____switch223 == Axis.Horizontal
+            if ____cond223 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1460,7 +1463,9 @@ function ____exports.View(animator)
         combinate_phase_duration = 0
     end
     function on_moved_elements_animation(message)
-        local elements = message
+        local data = message
+        local elements = data.elements
+        state.game_state = data.state
         local delayed_row_in_column = {}
         local max_delay = 0
         local max_move_duration = 0
@@ -1839,7 +1844,7 @@ function ____exports.View(animator)
     }
     gm = GoManager()
     targets = {}
-    state = {swap_state = {}, game_state = {}, game_id_to_view_index = {}}
+    state = {game_state = {}, game_id_to_view_index = {}}
     substrates = {}
     down_item = nil
     combinate_phase_duration = 0
