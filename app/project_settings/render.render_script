@@ -81,6 +81,7 @@ end
 function init(self)
   self.tile_pred = render.predicate({ "tile" })
   self.gui_pred = render.predicate({ "gui" })
+  self.field_pred = render.predicate({ "field" })
   self.text_pred = render.predicate({ "text" })
   self.particle_pred = render.predicate({ "particle" })
 
@@ -118,26 +119,55 @@ function update(self)
 
   -- render world (sprites, tilemaps, particles etc)
   --
-  local proj = get_projection(self)
-  local frustum = proj * self.view
+
+  render_in_game(self, window_width, window_height,
+    function(self, frustrum)
+      render.draw(self.tile_pred, { frustum = frustum })
+      render.draw(self.particle_pred, { frustum = frustum })
+      --render.draw_debug3d()
+    end
+  )
+  
+  render_in_gui(self, window_width, window_height,
+    function (self, frustum_gui)
+      render.draw(self.gui_pred, { frustum = frustum_gui })
+    end
+  )
+  
+  render_in_game(self, window_width, window_height,
+    function(self, frustrum)
+      render.draw(self.field_pred, { frustum = frustum })
+    end
+  )
+
+  render_in_gui(self, window_width, window_height,
+    function (self, frustum_gui) 
+      render.draw(self.text_pred, { frustum = frustum_gui })
+    end
+  )
+end
+
+function render_in_game(self, window_width, window_height, draw_callback)
+  local projection = get_projection(self)
+  local frustum = projection * self.view
 
   render.set_viewport(0, 0, window_width, window_height)
   render.set_view(self.view)
-  render.set_projection(proj)
-
+  render.set_projection(projection)
+  
   render.set_depth_mask(false)
   render.disable_state(render.STATE_DEPTH_TEST)
   render.disable_state(render.STATE_STENCIL_TEST)
   render.enable_state(render.STATE_BLEND)
   render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
   render.disable_state(render.STATE_CULL_FACE)
-  render.draw(self.tile_pred, { frustum = frustum })
-  render.draw(self.particle_pred, { frustum = frustum })
-  --render.draw_debug3d()
 
-  -- render GUI
-  --
-  local frustum_gui = frustum
+  draw_callback(self, frustrum)
+end
+
+function render_in_gui(self, window_width, window_height, draw_callback)
+  local projection = get_projection(self)
+  local frustum_gui = projection * self.view
   if not use_only_projection then
     local view_gui = vmath.matrix4()
     local proj_gui = vmath.matrix4_orthographic(0, window_width, 0, window_height, -1, 1)
@@ -150,8 +180,7 @@ function update(self)
   end
 
   render.enable_state(render.STATE_STENCIL_TEST)
-  render.draw(self.gui_pred, { frustum = frustum_gui })
-  render.draw(self.text_pred, { frustum = frustum_gui })
+  draw_callback(self, frustum_gui)
   render.disable_state(render.STATE_STENCIL_TEST)
 end
 

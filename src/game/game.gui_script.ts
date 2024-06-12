@@ -314,9 +314,16 @@ function update_buttons(instance: props) {
 function set_tutorial() {
     const tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1];
     const tutorial = gui.get_node('tutorial');
-    gui.set_position(tutorial, tutorial_data.position);
+    const tutorial_text = gui.get_node('tutorial_text');
+    gui.set_position(tutorial_text, tutorial_data.position);
+    gui.set_text(tutorial_text, Lang.get_text(tutorial_data.text));
     gui.set_enabled(tutorial, true);
-    gui.set_text(gui.get_node('tutorial_text'), Lang.get_text(tutorial_data.text));
+
+    if(tutorial_data.busters != undefined) {
+        const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];        
+        for(const buster of busters)
+            gui.set_layer(gui.get_node(buster + "/button"), "top");
+    }
 }
 
 function set_win() {

@@ -1,10 +1,13 @@
 embedded_components {
   id: "sprite"
   type: "sprite"
-  data: "tile_set: \"/assets/graphics.atlas\"\n"
-  "default_animation: \"element_emerald\"\n"
-  "material: \"/builtins/materials/sprite.material\"\n"
+  data: "default_animation: \"element_emerald\"\n"
+  "material: \"/assets/materials/sprite_field.material\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
+  "textures {\n"
+  "  sampler: \"texture_sampler\"\n"
+  "  texture: \"/assets/graphics.atlas\"\n"
+  "}\n"
   ""
   position {
     x: 0.0

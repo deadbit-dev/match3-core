@@ -1,5 +1,6 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
 local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_events, update_targets, update_buttons, set_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui
 local druid = require("druid.druid")
@@ -488,12 +489,22 @@ end
 function set_tutorial()
     local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
     local tutorial = gui.get_node("tutorial")
-    gui.set_position(tutorial, tutorial_data.position)
-    gui.set_enabled(tutorial, true)
+    local tutorial_text = gui.get_node("tutorial_text")
+    gui.set_position(tutorial_text, tutorial_data.position)
     gui.set_text(
-        gui.get_node("tutorial_text"),
+        tutorial_text,
         Lang.get_text(tutorial_data.text)
     )
+    gui.set_enabled(tutorial, true)
+    if tutorial_data.busters ~= nil then
+        local busters = __TS__ArrayIsArray(tutorial_data.busters) and tutorial_data.busters or ({tutorial_data.busters})
+        for ____, buster in ipairs(busters) do
+            gui.set_layer(
+                gui.get_node(buster .. "/button"),
+                "top"
+            )
+        end
+    end
 end
 function set_win()
     disable_game_ui()
