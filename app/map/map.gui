@@ -219,7 +219,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "1"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -387,7 +387,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "2"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -556,7 +556,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "3"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -725,7 +725,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "4"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -896,7 +896,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "5"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1067,7 +1067,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "6"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1238,7 +1238,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "7"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1409,7 +1409,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "8"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1579,7 +1579,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "9"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1749,7 +1749,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "10"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -1919,7 +1919,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "11"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2089,7 +2089,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "12"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2259,7 +2259,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "13"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2429,7 +2429,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "14"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2599,7 +2599,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "15"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2769,7 +2769,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "16"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -2939,7 +2939,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "17"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3109,7 +3109,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "18"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3279,7 +3279,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "19"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3449,7 +3449,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "20"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3619,7 +3619,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "21"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3789,7 +3789,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "22"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -3959,7 +3959,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "23"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4129,7 +4129,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "24"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4299,7 +4299,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "25"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4469,7 +4469,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "26"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4639,7 +4639,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "27"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4809,7 +4809,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "28"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -4979,7 +4979,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "29"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5149,7 +5149,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "30"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5319,7 +5319,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "31"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5489,7 +5489,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "32"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5659,7 +5659,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "33"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5829,7 +5829,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "34"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -5999,7 +5999,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "35"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -6169,7 +6169,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "36"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -6339,7 +6339,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "37"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -6509,7 +6509,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "38"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -6679,7 +6679,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "39"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -6849,7 +6849,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "40"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7019,7 +7019,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "41"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7189,7 +7189,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "42"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7359,7 +7359,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "43"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7529,7 +7529,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "44"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7699,7 +7699,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "45"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -7869,7 +7869,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "46"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
@@ -8039,7 +8039,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "47"
   parent: "levels"
-  layer: ""
+  layer: "top"
   inherit_alpha: true
   alpha: 1.0
   template: "/map/level.gui"
