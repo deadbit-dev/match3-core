@@ -6725,3 +6725,7 @@ resources {
   name: "cat_win"
   path: "/assets/cat_win/cat_win.spinescene"
 }
+materials {
+  name: "font_top"
+  material: "/assets/materials/font_top.material"
+}

@@ -27,7 +27,7 @@ import {
     Element,
     CellState,
 } from "./match3_core";
-import { hex2rgba } from '../utils/utils';
+
 import { SubstrateId, CellId, ElementId, GameState } from './match3_game';
 
 const SubstrateMasks = [
@@ -100,14 +100,17 @@ const SubstrateMasks = [
 
 interface ViewState {
     game_state: GameState,
-    game_id_to_view_index: { [key in number]: number[] }
+    game_id_to_view_index: { [key in number]: number[] },
+    substrates: hash[],
 }
 
-export function View(animator: FluxGroup) {
-    //#region CONFIG        
+interface ViewResources {
+    default_sprite_material: hash,
+    tutorial_sprite_material: hash
+}
 
-    const game_width = 540;
-    const game_height = 960;
+export function View(animator: FluxGroup, resources: ViewResources) {
+    //#region CONFIG        
 
     const min_swipe_distance = GAME_CONFIG.min_swipe_distance;
     const swap_element_easing = GAME_CONFIG.swap_element_easing;
@@ -124,18 +127,16 @@ export function View(animator: FluxGroup) {
     const spawn_element_easing = GAME_CONFIG.spawn_element_easing;
     const spawn_element_time = GAME_CONFIG.spawn_element_time;
 
+    // TODO: recive data from game instead read config
     const current_level = GameStorage.get('current_level');
     const level_config = GAME_CONFIG.levels[current_level];
     const field_width = level_config['field']['width'];
     const field_height = level_config['field']['height'];
     const max_field_width = level_config['field']['max_width'];
-    const max_field_height = level_config['field']['height'];
+    const max_field_height = level_config['field']['max_height'];
     const offset_border = level_config['field']['offset_border'];
     const origin_cell_size = level_config['field']['cell_size'];
 
-    const cell_size = math.floor(math.min((game_width - offset_border * 2) / max_field_width, 100));
-    const scale_ratio = cell_size / origin_cell_size;
-    
     const event_to_animation: { [key in string]: (data: Messages[MessageId]) => number } = {
         'ON_SWAP_ELEMENTS': on_swap_element_animation,
         'ON_COMBINED': on_combined_animation,
@@ -178,41 +179,90 @@ export function View(animator: FluxGroup) {
 
     const gm = GoManager();
     const targets: {[key in number]: number} = {};
+
+    const original_game_width = 540;
+    const original_game_height = 960;
+    
+    let prev_game_width = original_game_width;
+    let prev_game_height = original_game_height;
+    
+    let cell_size = calculate_cell_size();
+    let scale_ratio = calculate_scale_ratio();
+    let cells_offset = calculate_cell_offset();
     
     let state: ViewState = {
         game_state: {} as GameState,
-        game_id_to_view_index: {}
+        game_id_to_view_index: {},
+        substrates: []
     };
-
-    let substrates: hash[] = [];
 
     let down_item: IGameItem | null = null;
     let selected_element_position: vmath.vector3;
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
-    
-    let cells_offset = vmath.vector3(
-        game_width / 2 - (field_width / 2 * cell_size),
-        -(game_height / 2 - (max_field_height / 2 * cell_size)) + 100,
-        0
-    );
 
     function init() {
-        const scene_name = Scene.get_current_name();
-        Scene.load_resource(scene_name, 'background');
-        
-        if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
-            Scene.load_resource(scene_name, 'cat');
-            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
-        }
+        Log.log("Init view");
 
         set_events();
-        set_targets();
-
-        EventBus.send('REQUEST_LOAD_FIELD');
-        
         dispatch_messages();
+    }
+
+    function recalculate_sizes() {
+        const ltrb = Camera.get_ltrb();
+        if(ltrb.z == prev_game_width && ltrb.w == prev_game_height) return;
+
+        prev_game_width = ltrb.z;
+        prev_game_height = ltrb.w;
+
+        let changes_coff = math.abs(ltrb.w) / original_game_height;
+
+        cell_size = calculate_cell_size() * changes_coff;
+        scale_ratio = calculate_scale_ratio();
+        cells_offset = vmath.vector3(
+            original_game_width / 2 - (field_width / 2 * cell_size),
+            (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
+            0
+        );
+
+        reload_field();
+    }
+
+    function copy_game_state() {
+        const copy_state = Object.assign({}, state.game_state);
+
+        copy_state.cells = [];
+        copy_state.elements = [];
+
+        for(let y = 0; y < field_height; y++) {
+            copy_state.cells[y] = [];
+            copy_state.elements[y] = [];
+            
+            for(let x = 0; x < field_width; x++) {
+                copy_state.cells[y][x] = state.game_state.cells[y][x];
+                copy_state.elements[y][x] = state.game_state.elements[y][x];
+            }
+        }
+        
+        copy_state.targets = Object.assign([], state.game_state.targets);
+        return copy_state;
+    }
+
+    function calculate_cell_size() {
+        return math.floor(math.min((original_game_width - offset_border * 2) / max_field_width, 100));
+    }
+
+    function calculate_scale_ratio() {
+        return cell_size / origin_cell_size;
+    }
+
+    function calculate_cell_offset() {
+        return vmath.vector3(
+            original_game_width / 2 - (field_width / 2 * cell_size),
+            -(original_game_height / 2 - (max_field_height / 2 * cell_size)) + 100,
+            0
+        );
     }
 
     function set_targets() {
@@ -227,9 +277,17 @@ export function View(animator: FluxGroup) {
     // TODO: function on each event
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
-            recalculate_cell_offset(state);
+            const scene_name = Scene.get_current_name();
+            Scene.load_resource(scene_name, 'background');
+            
+            if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
+                Scene.load_resource(scene_name, 'cat');
+                Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
+            }
+            
+            set_targets();
 
-            // timer.delay(0.1, true, () => print(Camera.get_ltrb()));
+            recalculate_cell_offset(state);
 
             load_field(state);
 
@@ -245,7 +303,40 @@ export function View(animator: FluxGroup) {
                 EventBus.send('UPDATED_TARGET', {id: i, count: amount});
             }
 
+            recalculate_sizes();
+            timer.delay(0.1, true, recalculate_sizes);
+
             EventBus.send('SET_HELPER');
+        });
+
+        EventBus.on("SET_TUTORIAL", () => {
+
+            for(const substrate of state.substrates) {
+                const substrate_view = msg.url(undefined, substrate, "sprite");
+                go.set(substrate_view, "material", resources.tutorial_sprite_material);
+            }
+
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+
+                    const cell = state.game_state.cells[y][x];
+                    if(cell != NotActiveCell) {
+                        const cell_views = get_all_view_items_by_game_id(cell.uid);
+                        if(cell_views != undefined) {
+                            for(const cell_view of cell_views) {
+                                const cell_view_url = msg.url(undefined, cell_view._hash, "sprite");
+                                go.set(cell_view_url, "material", resources.tutorial_sprite_material);
+                            }
+                        }
+                    }
+
+                    const element = state.game_state.elements[y][x];
+                    if(element != NullElement) {
+                        const element_view = msg.url(undefined, get_first_view_item_by_game_id(element.uid)?._hash, "sprite");
+                        go.set(element_view, "material", resources.tutorial_sprite_material);
+                    }
+                }
+            }
         });
 
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', (data) => {
@@ -371,6 +462,34 @@ export function View(animator: FluxGroup) {
 
     function remove_tutorial() {
         EventBus.send('REMOVE_TUTORIAL');
+
+        for(const substrate of state.substrates) {
+            const substrate_view = msg.url(undefined, substrate, "sprite");
+            go.set(substrate_view, "material", resources.default_sprite_material);
+        }
+
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+
+                const cell = state.game_state.cells[y][x];
+                if(cell != NotActiveCell) {
+                    const cell_views = get_all_view_items_by_game_id(cell.uid);
+                    if(cell_views != undefined) {
+                        for(const cell_view of cell_views) {
+                            const cell_view_url = msg.url(undefined, cell_view._hash, "sprite");
+                            go.set(cell_view_url, "material", resources.default_sprite_material);
+                        }
+                    }
+                }
+
+                const element = state.game_state.elements[y][x];
+                if(element != NullElement) {
+                    const element_view = msg.url(undefined, get_first_view_item_by_game_id(element.uid)?._hash, "sprite");
+                    go.set(element_view, "material", resources.default_sprite_material);
+                }
+            }
+        }
+
         return 0;
     }
 
@@ -573,7 +692,7 @@ export function View(animator: FluxGroup) {
             }
         }
 
-        for(const substrate of substrates) {
+        for(const substrate of state.substrates) {
             if(substrate != null) {
                 try { go.delete(substrate); } catch(any) {}
             }
@@ -581,6 +700,13 @@ export function View(animator: FluxGroup) {
 
         state = {} as ViewState;
         state.game_id_to_view_index = {};
+        state.substrates = [];
+    }
+
+    function reload_field(with_anim = false) {
+        const state = copy_game_state();
+        reset_field();
+        load_field(state, with_anim);
     }
 
     function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {
@@ -611,7 +737,7 @@ export function View(animator: FluxGroup) {
                     gm.set_rotation_hash(_go, -angle);
                     sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-                    substrates.push(_go);
+                    state.substrates.push(_go);
                     return;
                 }
 

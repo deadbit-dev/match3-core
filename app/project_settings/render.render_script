@@ -141,7 +141,7 @@ function update(self)
   )
 
   render_in_gui(self, window_width, window_height,
-    function (self, frustum_gui) 
+    function (self, frustum_gui)
       render.draw(self.text_pred, { frustum = frustum_gui })
     end
   )

@@ -36,8 +36,8 @@ else
     ____temp_0 = true
 end
 ____exports._GAME_CONFIG = {
-    min_swipe_distance = 32,
     animal_offset = true,
+    min_swipe_distance = 32,
     swap_element_easing = ____go_EASING_LINEAR_1,
     swap_element_time = 0.25,
     squash_element_easing = ____go_EASING_INCUBIC_2,
@@ -48,9 +48,9 @@ ____exports._GAME_CONFIG = {
     damaged_element_delay = 0,
     damaged_element_scale = 0.3,
     base_cell_color = ____temp_4,
+    complex_move = true,
     movement_to_point = ____temp_0,
     duration_of_movement_bettween_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.05")) or 0.05,
-    complex_move = true,
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     default_substrate_z_index = -2,

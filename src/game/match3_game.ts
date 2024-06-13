@@ -230,6 +230,8 @@ export function Game() {
         set_element_chances();
         set_busters();
         set_events();
+
+        timer.delay(0.1, false, load_field);
     }
     
     //#endregion MAIN
@@ -323,7 +325,6 @@ export function Game() {
     }
     
     function set_events() {
-        EventBus.on('REQUEST_LOAD_FIELD', on_load_field);
         EventBus.on('SET_HELPER', set_helper);
         EventBus.on('SWAP_ELEMENTS', on_swap_elements);
         EventBus.on('CLICK_ACTIVATION', on_click_activation);
@@ -336,7 +337,7 @@ export function Game() {
         EventBus.on('REVIVE', on_revive);
     }
 
-    function on_load_field() {
+    function load_field() {
         Log.log("Загрузка поля");
         
         states.push({} as GameState);
@@ -391,6 +392,7 @@ export function Game() {
         let last_state = update_state();
 
         EventBus.send('ON_LOAD_FIELD', last_state);
+        if(is_tutorial()) EventBus.send('SET_TUTORIAL');
 
         states.push({} as GameState);
     
@@ -415,8 +417,6 @@ export function Game() {
             if(Array.isArray(tutorial_data.busters)) lock_buters(tutorial_data.busters);
             else lock_buters([tutorial_data.busters]);
         } else lock_buters([]);
-
-        EventBus.send('SET_TUTORIAL');
     }
 
     function lock_cells(except_cells: {x: number, y: number}[]) {

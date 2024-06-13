@@ -390,11 +390,11 @@ function set_enabled_spinning(state: boolean) {
 }
 
 function set_enabled_horizontall_rocket(state: boolean) {
-    const horizontal_rocket = gui.get_node('horizontal_rocket');
+    const horizontal_rocket = gui.get_node('horizontal_rocket/manager');
     gui.set_enabled(horizontal_rocket, state);
 }
 
 function set_enabled_vertical_rocket(state: boolean) {
-    const vertical_rocket = gui.get_node('vertical_rocket');
+    const vertical_rocket = gui.get_node('vertical_rocket/manager');
     gui.set_enabled(vertical_rocket, state);
 }

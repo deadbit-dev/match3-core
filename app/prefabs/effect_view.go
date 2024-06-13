@@ -5,7 +5,7 @@ embedded_components {
   "default_animation: \"action\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: false\n"
   ""
   position {
@@ -32,7 +32,7 @@ embedded_components {
   "default_animation: \"action\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: false\n"
   ""
   position {
@@ -59,7 +59,7 @@ embedded_components {
   "default_animation: \"light_ball_intro\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: false\n"
   ""
   position {
@@ -81,7 +81,7 @@ embedded_components {
   "default_animation: \"light_ball_intro\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: false\n"
   ""
   position {
@@ -103,7 +103,7 @@ embedded_components {
   "default_animation: \"light_ball_projectile\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: true\n"
   ""
   position {
@@ -125,7 +125,7 @@ embedded_components {
   "default_animation: \"blue\"\n"
   "skin: \"\"\n"
   "blend_mode: BLEND_MODE_ALPHA\n"
-  "material: \"/assets/materials/spine_field.material\"\n"
+  "material: \"/defold-spine/assets/spine.material\"\n"
   "create_go_bones: false\n"
   ""
   position {

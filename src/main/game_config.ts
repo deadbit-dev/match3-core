@@ -37,12 +37,13 @@ export const MAIN_BUNDLE_SCENES = ['game'];
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
-    min_swipe_distance: 32,
-
     animal_offset: true,
 
+    min_swipe_distance: 32,
+    
     swap_element_easing: go.EASING_LINEAR,
     swap_element_time: 0.25,
+
     squash_element_easing: go.EASING_INCUBIC,
     squash_element_time: 0.25,
 
@@ -55,10 +56,10 @@ export const _GAME_CONFIG = {
 
     base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#c29754'`) : '#c29754',
 
+    complex_move: true,
+
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
     duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.05`))! : 0.05,
-
-    complex_move: true,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,

@@ -1,4 +1,4 @@
-name: "sprite_field"
+name: "tutorial_sprite"
 tags: "field"
 vertex_program: "/builtins/materials/sprite.vp"
 fragment_program: "/builtins/materials/sprite.fp"

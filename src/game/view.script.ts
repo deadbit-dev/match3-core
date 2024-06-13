@@ -10,8 +10,13 @@ import * as flow from 'ludobits.m.flow';
 import * as flux from 'utils.flux';
 import { View } from './match3_view';
 
+go.property("default_sprite_material", resource.material("/builtins/materials/sprite.material"));
+go.property("tutorial_sprite_material", resource.material("/assets/materials/tutorial_sprite.material"));
+
 interface props {
-    animator: FluxGroup,
+    animator: FluxGroup
+    default_sprite_material: hash,
+    tutorial_sprite_material: hash
 }
 
 export function init(this: props) {
@@ -19,7 +24,10 @@ export function init(this: props) {
     Manager.init_script();
     
     msg.post('.', 'acquire_input_focus');
-    flow.start(() => View(this.animator), {});
+    flow.start(() => View(this.animator, {
+        default_sprite_material: this.default_sprite_material,
+        tutorial_sprite_material: this.tutorial_sprite_material
+    }), {});
 }
 
 export function update(this: props, dt: number): void {
