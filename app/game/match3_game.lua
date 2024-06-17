@@ -1502,7 +1502,6 @@ function ____exports.Game()
             field.process_state(ProcessMode.MoveElements)
         end
         local last_state = update_state()
-        print(#last_state.targets[1].uids)
         search_available_steps(
             5,
             function(steps)

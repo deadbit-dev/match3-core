@@ -1,6 +1,6 @@
 local ____lualib = require("lualib_bundle")
-local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
@@ -100,12 +100,6 @@ function ____exports.View(animator, resources)
         EventBus.on(
             "ON_LOAD_FIELD",
             function(state)
-                local scene_name = Scene.get_current_name()
-                Scene.load_resource(scene_name, "background")
-                if __TS__ArrayIncludes(GAME_CONFIG.animal_levels, current_level + 1) then
-                    Scene.load_resource(scene_name, "cat")
-                    Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1])
-                end
                 set_targets()
                 recalculate_cell_offset(state)
                 load_field(state)
@@ -656,9 +650,12 @@ function ____exports.View(animator, resources)
         if with_anim == nil then
             with_anim = false
         end
-        local state = copy_game_state()
+        if state.game_state == nil then
+            return
+        end
+        local copy_state = copy_game_state()
         reset_field()
-        load_field(state, with_anim)
+        load_field(copy_state, with_anim)
     end
     function make_substrate_view(x, y, cells, z_index)
         if z_index == nil then
@@ -1296,14 +1293,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch251 = dir
-            local ____cond251 = ____switch251 == Axis.Vertical
-            if ____cond251 then
+            local ____switch252 = dir
+            local ____cond252 = ____switch252 == Axis.Vertical
+            if ____cond252 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond251 = ____cond251 or ____switch251 == Axis.Horizontal
-            if ____cond251 then
+            ____cond252 = ____cond252 or ____switch252 == Axis.Horizontal
+            if ____cond252 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1994,6 +1991,12 @@ function ____exports.View(animator, resources)
     is_processing = false
     local function init()
         Log.log("Init view")
+        local scene_name = Scene.get_current_name()
+        Scene.load_resource(scene_name, "background")
+        if __TS__ArrayIncludes(GAME_CONFIG.animal_levels, current_level + 1) then
+            Scene.load_resource(scene_name, "cat")
+            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1])
+        end
         set_events()
         dispatch_messages()
     end

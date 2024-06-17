@@ -5,7 +5,7 @@ embedded_instances {
   data: "embedded_components {\n"
   "  id: \"spinemodel\"\n"
   "  type: \"spinemodel\"\n"
-  "  data: \"spine_scene: \\\"\\\"\\n"
+  "  data: \"spine_scene: \\\"/assets/cat/fail/fail.spinescene\\\"\\n"
   "default_animation: \\\"\\\"\\n"
   "skin: \\\"\\\"\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"

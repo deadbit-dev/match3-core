@@ -1,41 +1,41 @@
 images {
-  image: "/assets/cat_fail/images/body.png"
+  image: "/assets/cat/images/sad/body.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/bow.png"
+  image: "/assets/cat/images/sad/ear_l.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/eye_c_l.png"
+  image: "/assets/cat/images/sad/ear_r.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/eye_c_r.png"
+  image: "/assets/cat/images/sad/eye_l.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/eye_l.png"
+  image: "/assets/cat/images/sad/eye_lc.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/head.png"
+  image: "/assets/cat/images/sad/eye_r.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/mouthtouch.png"
+  image: "/assets/cat/images/sad/eye_rc.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/pupil_l.png"
+  image: "/assets/cat/images/sad/head.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/pupil_R.png"
+  image: "/assets/cat/images/sad/mouthtouch.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat_fail/images/R_eye.png"
+  image: "/assets/cat/images/sad/tail.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

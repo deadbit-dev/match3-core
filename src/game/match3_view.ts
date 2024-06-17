@@ -205,6 +205,14 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function init() {
         Log.log("Init view");
 
+        const scene_name = Scene.get_current_name();
+        Scene.load_resource(scene_name, 'background');
+        
+        if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
+            Scene.load_resource(scene_name, 'cat');
+            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
+        }
+
         set_events();
         dispatch_messages();
     }
@@ -216,7 +224,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         prev_game_width = ltrb.z;
         prev_game_height = ltrb.w;
 
-        let changes_coff = math.abs(ltrb.w) / original_game_height;
+        const changes_coff = math.abs(ltrb.w) / original_game_height;
 
         cell_size = calculate_cell_size() * changes_coff;
         scale_ratio = calculate_scale_ratio();
@@ -225,6 +233,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
             0
         );
+
+        // const background = msg.url("background", "background", undefined);
+        // const scale = go.get_scale(background);
+        // print(scale);
+        // go.set_scale(vmath.vector3(scale.x * changes_coff, scale.y * changes_coff, scale.z), background);
 
         reload_field();
     }
@@ -277,14 +290,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     // TODO: function on each event
     function set_events() {
         EventBus.on('ON_LOAD_FIELD', (state) => {
-            const scene_name = Scene.get_current_name();
-            Scene.load_resource(scene_name, 'background');
-            
-            if(GAME_CONFIG.animal_levels.includes(current_level + 1)) {
-                Scene.load_resource(scene_name, 'cat');
-                Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
-            }
-            
             set_targets();
 
             recalculate_cell_offset(state);
@@ -704,9 +709,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function reload_field(with_anim = false) {
-        const state = copy_game_state();
+        if(state.game_state == null) return;
+
+        const copy_state = copy_game_state();
         reset_field();
-        load_field(state, with_anim);
+        load_field(copy_state, with_anim);
     }
 
     function make_substrate_view(x: number, y: number, cells: (Cell | typeof NotActiveCell)[][], z_index = GAME_CONFIG.default_substrate_z_index) {

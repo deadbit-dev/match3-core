@@ -99,7 +99,6 @@ function setup_step_or_time(instance: props) {
 }
 
 function setup_targets(instance: props) {
-    print("setup ui");
     const targets = instance.level['targets'];
     if(targets[0] != undefined) {
         const node = gui.get_node('first_target');
@@ -287,9 +286,9 @@ function set_events(instance: props) {
 function update_targets(data: TargetMessage) {
     print("recive targets: ", data.id, data.count);
     switch(data.id) {
-        case 0: set_text('first_target_counts', data.count); break;
-        case 1: set_text('second_target_counts', data.count); break;
-        case 2: set_text('third_target_counts', data.count); break;
+        case 0: set_text('first_target_counts', math.max(0, data.count)); break;
+        case 1: set_text('second_target_counts', math.max(0, data.count)); break;
+        case 2: set_text('third_target_counts', math.max(0, data.count)); break;
     }
 }
 
@@ -329,6 +328,9 @@ function set_tutorial() {
 function set_win() {
     disable_game_ui();
     gui.set_enabled(gui.get_node('win'), true);
+
+    const anim_props = { blend_duration: 0, playback_rate: 1 };
+    gui.play_spine_anim(gui.get_node("firework"), "firework", go.PLAYBACK_ONCE_FORWARD, anim_props, () => print('END'));
 }
 
 function set_gameover(instance: props, state: GameState) {

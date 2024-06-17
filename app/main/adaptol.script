@@ -1,0 +1,38 @@
+local ____exports = {}
+go.property("with_x_position", false)
+go.property("with_y_position", true)
+go.property("with_scale", true)
+local original_game_width = 540
+local original_game_height = 960
+function ____exports.init(self)
+    self.prev_game_width = original_game_width
+    self.prev_game_height = original_game_height
+    self.original_position = go.get_position()
+    self.original_scale = go.get_scale()
+    timer.delay(
+        0.1,
+        true,
+        function()
+            local ltrb = Camera.get_ltrb()
+            if self.prev_game_width == ltrb.z and self.prev_game_height == ltrb.w then
+                return
+            end
+            self.prev_game_width = ltrb.z
+            self.prev_game_height = ltrb.w
+            local changes_coff = math.abs(ltrb.w) / original_game_height
+            local half_of_width = original_game_width * 0.5
+            local delta_x = (half_of_width - self.original_position.x) * changes_coff
+            print(
+                go.get_id(),
+                delta_x,
+                changes_coff
+            )
+            go.set_position(vmath.vector3(self.with_x_position and half_of_width - delta_x or self.original_position.x, self.with_y_position and self.original_position.y * changes_coff or self.original_position.y, self.original_position.z))
+            if self.with_scale then
+                go.set_scale(vmath.vector3(self.original_scale.x * changes_coff, self.original_scale.y * changes_coff, self.original_scale.z))
+            end
+        end
+    )
+end
+init = ____exports.init
+

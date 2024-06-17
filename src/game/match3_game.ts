@@ -1628,8 +1628,6 @@ export function Game() {
 
         const last_state = update_state();
 
-        print(last_state.targets[0].uids.length);
-
         search_available_steps(5, (steps) => {
             if(steps.length != 0) {
                 available_steps = steps;

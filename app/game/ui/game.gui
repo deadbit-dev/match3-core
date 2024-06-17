@@ -19,6 +19,10 @@ fonts {
   name: "42"
   font: "/assets/fonts/42.font"
 }
+fonts {
+  name: "32-top"
+  font: "/assets/fonts/32-top.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"
@@ -4184,7 +4188,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "32"
+  font: "32-top"
   id: "tutorial_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -4696,6 +4700,60 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
+  enabled: true
+  visible: true
+  material: ""
+}
+nodes {
+  position {
+    x: 0.0
+    y: 50.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 1.0
+    y: 1.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_CUSTOM
+  blend_mode: BLEND_MODE_ALPHA
+  id: "firework"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "win"
+  layer: "top"
+  inherit_alpha: true
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: false
+  size_mode: SIZE_MODE_AUTO
+  spine_scene: "firework"
+  spine_default_animation: "firework"
+  custom_type: 405028931
   enabled: true
   visible: true
   material: ""
@@ -6715,15 +6773,19 @@ adjust_reference: ADJUST_REFERENCE_PARENT
 max_nodes: 512
 resources {
   name: "avatar"
-  path: "/assets/avatar/avatar.spinescene"
+  path: "/assets/cat/avatar/avatar.spinescene"
 }
 resources {
   name: "cat_fail"
-  path: "/assets/cat_fail/cat_fail.spinescene"
+  path: "/assets/cat/fail/fail.spinescene"
 }
 resources {
   name: "cat_win"
-  path: "/assets/cat_win/cat_win.spinescene"
+  path: "/assets/cat/win/win.spinescene"
+}
+resources {
+  name: "firework"
+  path: "/assets/firework/firework.spinescene"
 }
 materials {
   name: "font_top"
