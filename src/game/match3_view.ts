@@ -221,6 +221,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const ltrb = Camera.get_ltrb();
         if(ltrb.z == prev_game_width && ltrb.w == prev_game_height) return;
 
+        Log.log("RESIZE VIEW");
+
         prev_game_width = ltrb.z;
         prev_game_height = ltrb.w;
 
@@ -233,11 +235,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
             0
         );
-
-        // const background = msg.url("background", "background", undefined);
-        // const scale = go.get_scale(background);
-        // print(scale);
-        // go.set_scale(vmath.vector3(scale.x * changes_coff, scale.y * changes_coff, scale.z), background);
 
         reload_field();
     }
@@ -303,7 +300,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             for(let i = 0; i < state.targets.length; i++) {
                 const target = state.targets[i];
                 const amount = target.count - target.uids.length;
-                print("send targets: ", i, target.count, target.uids.length, amount);
                 targets[i] = amount;
                 EventBus.send('UPDATED_TARGET', {id: i, count: amount});
             }
@@ -667,7 +663,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function load_field(game_state: GameState, with_anim = true) {
-        Log.log("LOAD FIELD");
+        Log.log("LOAD FIELD_VIEW");
         
         state.game_state = game_state;
 
@@ -687,7 +683,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function reset_field() {
-        Log.log("RESET FIELD");
+        Log.log("RESET FIELD VIEW");
 
         for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
             const id = tonumber(sid);
@@ -1084,8 +1080,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         msg.post(msg.url(undefined, effect, effect_name), 'enable');
         
         const color = GAME_CONFIG.element_colors[type];
-
-        print(color);
 
         const anim_props = { blend_duration: 0, playback_rate: 1 };
         spine.play_anim(msg.url(undefined, effect, effect_name), color, go.PLAYBACK_ONCE_FORWARD, anim_props, () => {

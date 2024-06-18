@@ -406,10 +406,7 @@ function set_events(instance)
     )
     EventBus.on(
         "UPDATED_STEP_COUNTER",
-        function(steps)
-            print("RECIVE STEPS: ", steps)
-            set_text("steps", steps)
-        end,
+        function(steps) return set_text("steps", steps) end,
         true
     )
     EventBus.on(
@@ -451,7 +448,6 @@ function set_events(instance)
     )
 end
 function update_targets(data)
-    print("recive targets: ", data.id, data.count)
     repeat
         local ____switch60 = data.id
         local ____cond60 = ____switch60 == 0
@@ -523,7 +519,7 @@ function set_win()
     local anim_props = {blend_duration = 0, playback_rate = 1}
     gui.play_spine_anim(
         gui.get_node("firework"),
-        "firework",
+        hash("firework"),
         go.PLAYBACK_ONCE_FORWARD,
         anim_props,
         function() return print("END") end

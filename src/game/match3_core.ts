@@ -689,8 +689,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     function try_move(from_x: number, from_y: number, to_x: number, to_y: number) {
         const is_can = is_can_move(from_x, from_y, to_x, to_y);
         if(is_can) {
-            print("IS CAN");
-
             swap_elements(from_x, from_y, to_x, to_y);
             
             const element_from = get_element(from_x, from_y);

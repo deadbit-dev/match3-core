@@ -22,11 +22,6 @@ function ____exports.init(self)
             local changes_coff = math.abs(ltrb.w) / original_game_height
             local half_of_width = original_game_width * 0.5
             local delta_x = (half_of_width - self.original_position.x) * changes_coff
-            print(
-                go.get_id(),
-                delta_x,
-                changes_coff
-            )
             go.set_position(vmath.vector3(self.with_x_position and half_of_width - delta_x or self.original_position.x, self.with_y_position and self.original_position.y * changes_coff or self.original_position.y, self.original_position.z))
             if self.with_scale then
                 go.set_scale(vmath.vector3(self.original_scale.x * changes_coff, self.original_scale.y * changes_coff, self.original_scale.z))

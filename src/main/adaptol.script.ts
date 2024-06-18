@@ -42,7 +42,6 @@ export function init(this: props) {
         
         const half_of_width = original_game_width * 0.5;
         const delta_x = (half_of_width - this.original_position.x) * changes_coff;
-        print(go.get_id(), delta_x, changes_coff);
 
         go.set_position(vmath.vector3(
             this.with_x_position ? half_of_width - delta_x : this.original_position.x,

@@ -270,10 +270,7 @@ function setup_gameover_ui(instance: props) {
 
 function set_events(instance: props) {
     EventBus.on('INIT_UI', () => setup(instance));
-    EventBus.on('UPDATED_STEP_COUNTER', (steps) => {
-        print("RECIVE STEPS: ", steps);
-        set_text('steps', steps);
-    }, true);
+    EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
     EventBus.on('UPDATED_TARGET', (data) => update_targets(data), true);
     EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
@@ -284,7 +281,6 @@ function set_events(instance: props) {
 }
 
 function update_targets(data: TargetMessage) {
-    print("recive targets: ", data.id, data.count);
     switch(data.id) {
         case 0: set_text('first_target_counts', math.max(0, data.count)); break;
         case 1: set_text('second_target_counts', math.max(0, data.count)); break;
@@ -330,7 +326,7 @@ function set_win() {
     gui.set_enabled(gui.get_node('win'), true);
 
     const anim_props = { blend_duration: 0, playback_rate: 1 };
-    gui.play_spine_anim(gui.get_node("firework"), "firework", go.PLAYBACK_ONCE_FORWARD, anim_props, () => print('END'));
+    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), go.PLAYBACK_ONCE_FORWARD, anim_props, () => print('END'));
 }
 
 function set_gameover(instance: props, state: GameState) {

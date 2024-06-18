@@ -42,6 +42,7 @@ function ____exports.View(animator, resources)
         if ltrb.z == prev_game_width and ltrb.w == prev_game_height then
             return
         end
+        Log.log("RESIZE VIEW")
         prev_game_width = ltrb.z
         prev_game_height = ltrb.w
         local changes_coff = math.abs(ltrb.w) / original_game_height
@@ -110,13 +111,6 @@ function ____exports.View(animator, resources)
                     while i < #state.targets do
                         local target = state.targets[i + 1]
                         local amount = target.count - #target.uids
-                        print(
-                            "send targets: ",
-                            i,
-                            target.count,
-                            #target.uids,
-                            amount
-                        )
                         targets[i] = amount
                         EventBus.send("UPDATED_TARGET", {id = i, count = amount})
                         i = i + 1
@@ -587,7 +581,7 @@ function ____exports.View(animator, resources)
         if with_anim == nil then
             with_anim = true
         end
-        Log.log("LOAD FIELD")
+        Log.log("LOAD FIELD_VIEW")
         state.game_state = game_state
         do
             local y = 0
@@ -619,7 +613,7 @@ function ____exports.View(animator, resources)
         end
     end
     function reset_field()
-        Log.log("RESET FIELD")
+        Log.log("RESET FIELD VIEW")
         for ____, ____value in ipairs(__TS__ObjectEntries(state.game_id_to_view_index)) do
             local sid = ____value[1]
             local index = ____value[2]
@@ -1197,7 +1191,6 @@ function ____exports.View(animator, resources)
             "enable"
         )
         local color = GAME_CONFIG.element_colors[____type]
-        print(color)
         local anim_props = {blend_duration = 0, playback_rate = 1}
         spine.play_anim(
             msg.url(nil, effect, effect_name),
