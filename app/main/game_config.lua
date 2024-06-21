@@ -191,7 +191,7 @@ ____exports._GAME_CONFIG = {
         [18] = "kaban",
         [25] = "goose",
         [32] = "rats",
-        [39] = "cock",
+        [39] = "dog",
         [47] = "bull"
     },
     tutorial_levels = {

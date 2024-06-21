@@ -68,11 +68,11 @@ function setup_step_or_time(instance: props) {
         gui.set_enabled(node, true);
 
         if(instance.level['steps'] == undefined) {
-            gui.set_position(node, vmath.vector3(0, -20, 0));
-            gui.set_scale(node, vmath.vector3(0.6, 0.6, 1));
+            gui.set_position(node, vmath.vector3(0, 0, 0));
+            gui.set_scale(node, vmath.vector3(1, 1, 1));
         } else {
-            gui.set_position(node, vmath.vector3(0, -5, 0));
-            gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
+            gui.set_position(node, vmath.vector3(0, 0, 0));
+            gui.set_scale(node, vmath.vector3(1, 1, 1));
         }
 
         set_text('time', parse_time(instance.level['time']));
@@ -85,11 +85,11 @@ function setup_step_or_time(instance: props) {
         gui.set_enabled(node, true);
 
         if(instance.level['time'] == undefined) {
-            gui.set_position(node, vmath.vector3(0, -25, 0));
-            gui.set_scale(node, vmath.vector3(0.7, 0.7, 1));
+            gui.set_position(node, vmath.vector3(0, 0, 0));
+            gui.set_scale(node, vmath.vector3(1, 1, 1));
         } else {
-            gui.set_position(node, vmath.vector3(0, -45, 0));
-            gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
+            gui.set_position(node, vmath.vector3(0, 0, 0));
+            gui.set_scale(node, vmath.vector3(1, 1, 1));
         }
 
         set_text('steps', instance.level['steps']);
@@ -106,16 +106,16 @@ function setup_targets(instance: props) {
         
         switch(targets.length) {
             case 1: 
-                gui.set_position(node, vmath.vector3(0, -15, 0));
-                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+                gui.set_position(node, vmath.vector3(0, 0, 0));
+                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
             break;
             case 2:
-                gui.set_position(node, vmath.vector3(-35, -15, 0));
-                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+                gui.set_position(node, vmath.vector3(-40, 0, 0));
+                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
             break;
             case 3:
-                gui.set_position(node, vmath.vector3(-45, -5, 0));
-                gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+                gui.set_position(node, vmath.vector3(-35, 20, 0));
+                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
             break;
         }
 
@@ -131,12 +131,12 @@ function setup_targets(instance: props) {
         
         switch(targets.length) {
             case 2:
-                gui.set_position(node, vmath.vector3(25, -15, 0));
-                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
+                gui.set_position(node, vmath.vector3(40, 0, 0));
+                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
             break;
             case 3:
-                gui.set_position(node, vmath.vector3(36, -5, 0));
-                gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+                gui.set_position(node, vmath.vector3(35, 20, 0));
+                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
             break;
         }
 
@@ -150,8 +150,8 @@ function setup_targets(instance: props) {
         const node = gui.get_node('third_target');
         gui.set_enabled(node, true);
         
-        gui.set_position(node, vmath.vector3(-2, -36, 0));
-        gui.set_scale(node, vmath.vector3(0.3, 0.3, 1));
+        gui.set_position(node, vmath.vector3(0, -35, 0));
+        gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
         
         const target = targets[2];
         const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
@@ -223,7 +223,7 @@ function setup_sustem_ui(instance: props) {
     instance.druid.new_button('restart/button', () => Scene.restart());
     instance.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
 
-    set_text('current_level_text', GameStorage.get('current_level') + 1);
+    set_text('current_level', 'Уровень ' + GameStorage.get('current_level') + 1);
 }
 
 function setup_win_ui(instance: props) {

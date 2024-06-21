@@ -1,5 +1,5 @@
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store, set_enabled_life_notification, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, setup, setup_coins, setup_life, setup_store, setup_settings, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_settings_button, set_enabled_store, set_enabled_life_notification, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
@@ -52,6 +52,7 @@ function setup(instance)
     setup_coins(instance)
     setup_life(instance)
     setup_store(instance)
+    setup_settings(instance)
     setup_life_notification(instance)
     setup_busters(instance)
 end
@@ -76,6 +77,10 @@ function setup_life(instance)
     )
 end
 function setup_store(instance)
+    instance.druid:new_button(
+        "store_button",
+        function() return set_enabled_store(true) end
+    )
     instance.druid:new_button(
         "store/close",
         function() return set_enabled_store(false) end
@@ -240,6 +245,13 @@ function setup_store(instance)
             GameStorage.set("spinning_counts", 0)
             GameStorage.set("horizontal_rocket_counts", 0)
             GameStorage.set("vertical_rocket_counts", 0)
+        end
+    )
+end
+function setup_settings(instance)
+    instance.druid:new_button(
+        "settings_button",
+        function()
         end
     )
 end
@@ -442,6 +454,14 @@ function set_enabled_lifes(state)
     local coins = gui.get_node("lifes/button")
     gui.set_enabled(coins, state)
 end
+function set_enabled_store_button(state)
+    local store_button = gui.get_node("store_button")
+    gui.set_enabled(store_button, state)
+end
+function set_enabled_settings_button(state)
+    local settings_button = gui.get_node("settings_button")
+    gui.set_enabled(settings_button, state)
+end
 function set_enabled_store(state)
     local store = gui.get_node("store/manager")
     gui.set_enabled(store, state)
@@ -482,17 +502,21 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch79 = scene.name
-        local ____cond79 = ____switch79 == "game"
-        if ____cond79 then
+        local ____switch84 = scene.name
+        local ____cond84 = ____switch84 == "game"
+        if ____cond84 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
+            set_enabled_store_button(false)
+            set_enabled_settings_button(false)
             break
         end
-        ____cond79 = ____cond79 or ____switch79 == "map"
-        if ____cond79 then
+        ____cond84 = ____cond84 or ____switch84 == "map"
+        if ____cond84 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
+            set_enabled_store_button(true)
+            set_enabled_settings_button(true)
             break
         end
     until true

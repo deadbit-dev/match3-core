@@ -31,20 +31,20 @@ function setup_step_or_time(instance)
         if instance.level.steps == nil then
             gui.set_position(
                 node,
-                vmath.vector3(0, -20, 0)
+                vmath.vector3(0, 0, 0)
             )
             gui.set_scale(
                 node,
-                vmath.vector3(0.6, 0.6, 1)
+                vmath.vector3(1, 1, 1)
             )
         else
             gui.set_position(
                 node,
-                vmath.vector3(0, -5, 0)
+                vmath.vector3(0, 0, 0)
             )
             gui.set_scale(
                 node,
-                vmath.vector3(0.5, 0.5, 1)
+                vmath.vector3(1, 1, 1)
             )
         end
         set_text(
@@ -62,20 +62,20 @@ function setup_step_or_time(instance)
         if instance.level.time == nil then
             gui.set_position(
                 node,
-                vmath.vector3(0, -25, 0)
+                vmath.vector3(0, 0, 0)
             )
             gui.set_scale(
                 node,
-                vmath.vector3(0.7, 0.7, 1)
+                vmath.vector3(1, 1, 1)
             )
         else
             gui.set_position(
                 node,
-                vmath.vector3(0, -45, 0)
+                vmath.vector3(0, 0, 0)
             )
             gui.set_scale(
                 node,
-                vmath.vector3(0.5, 0.5, 1)
+                vmath.vector3(1, 1, 1)
             )
         end
         set_text("steps", instance.level.steps)
@@ -96,11 +96,11 @@ function setup_targets(instance)
             if ____cond18 then
                 gui.set_position(
                     node,
-                    vmath.vector3(0, -15, 0)
+                    vmath.vector3(0, 0, 0)
                 )
                 gui.set_scale(
                     node,
-                    vmath.vector3(0.4, 0.4, 1)
+                    vmath.vector3(0.5, 0.5, 1)
                 )
                 break
             end
@@ -108,11 +108,11 @@ function setup_targets(instance)
             if ____cond18 then
                 gui.set_position(
                     node,
-                    vmath.vector3(-35, -15, 0)
+                    vmath.vector3(-40, 0, 0)
                 )
                 gui.set_scale(
                     node,
-                    vmath.vector3(0.4, 0.4, 1)
+                    vmath.vector3(0.5, 0.5, 1)
                 )
                 break
             end
@@ -120,11 +120,11 @@ function setup_targets(instance)
             if ____cond18 then
                 gui.set_position(
                     node,
-                    vmath.vector3(-45, -5, 0)
+                    vmath.vector3(-35, 20, 0)
                 )
                 gui.set_scale(
                     node,
-                    vmath.vector3(0.3, 0.3, 1)
+                    vmath.vector3(0.4, 0.4, 1)
                 )
                 break
             end
@@ -146,11 +146,11 @@ function setup_targets(instance)
             if ____cond20 then
                 gui.set_position(
                     node,
-                    vmath.vector3(25, -15, 0)
+                    vmath.vector3(40, 0, 0)
                 )
                 gui.set_scale(
                     node,
-                    vmath.vector3(0.4, 0.4, 1)
+                    vmath.vector3(0.5, 0.5, 1)
                 )
                 break
             end
@@ -158,11 +158,11 @@ function setup_targets(instance)
             if ____cond20 then
                 gui.set_position(
                     node,
-                    vmath.vector3(36, -5, 0)
+                    vmath.vector3(35, 20, 0)
                 )
                 gui.set_scale(
                     node,
-                    vmath.vector3(0.3, 0.3, 1)
+                    vmath.vector3(0.4, 0.4, 1)
                 )
                 break
             end
@@ -180,11 +180,11 @@ function setup_targets(instance)
         gui.set_enabled(node, true)
         gui.set_position(
             node,
-            vmath.vector3(-2, -36, 0)
+            vmath.vector3(0, -35, 0)
         )
         gui.set_scale(
             node,
-            vmath.vector3(0.3, 0.3, 1)
+            vmath.vector3(0.4, 0.4, 1)
         )
         local target = targets[3]
         local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
@@ -318,8 +318,8 @@ function setup_sustem_ui(instance)
         function() return EventBus.send("TRY_REVERT_STEP") end
     )
     set_text(
-        "current_level_text",
-        GameStorage.get("current_level") + 1
+        "current_level",
+        ("Уровень " .. tostring(GameStorage.get("current_level"))) .. 1
     )
 end
 function setup_win_ui(instance)

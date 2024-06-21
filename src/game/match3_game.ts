@@ -217,6 +217,8 @@ export function Game() {
     let is_block_vertical_rocket = false;
     let is_block_horizontal_rocket = false;
 
+    let is_gameover = false;
+
 
     function init() {
         field.init();
@@ -505,7 +507,7 @@ export function Game() {
     }
 
     function on_swap_elements(elements: StepInfo | undefined) {
-        if(is_block_input || elements == undefined) return;
+        if(is_block_input || is_gameover || elements == undefined) return;
 
         stop_helper();
         
@@ -517,7 +519,7 @@ export function Game() {
     }
 
     function on_click_activation(pos: PosXYMessage | undefined) {
-        if(is_block_input || pos == undefined) return;
+        if(is_block_input || is_gameover || pos == undefined) return;
 
         stop_helper();
 
@@ -630,7 +632,7 @@ export function Game() {
             GameStorage.set('completed_levels', completed_levels);
             add_coins(level_config.coins);
             timer.delay(0.5, false, () => EventBus.send('ON_WIN'));
-        } else if(!is_have_steps()) timer.delay(0.5, false, gameover);
+        } else if(!is_have_steps() || is_gameover) timer.delay(0.5, false, gameover);
         
         Log.log("END STEP ANIMATION");
     }
@@ -643,7 +645,7 @@ export function Game() {
             EventBus.send('GAME_TIMER', remaining_time);
         } else {
             timer.cancel(game_timer);
-            timer.delay(1, false, gameover);
+            is_gameover = true;
         }
     }
 
@@ -681,7 +683,6 @@ export function Game() {
             data: Object.assign({}, data)
         };
 
-        cell.data.current_id = cell_id;
         cell.data.z_index = GAME_CONFIG.top_layer_cells.includes(cell_id) ? 2 : -1;
         
         field.set_cell(x, y, cell);
@@ -1263,7 +1264,7 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        event_data.target_element = remove_random_element(event_data.damaged_elements);
+        event_data.target_element = remove_random_element(event_data.damaged_elements, get_state().targets);
 
         field.remove_element(x, y, true, false);
         
@@ -1291,7 +1292,7 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        for(let i = 0; i < 3; i++) event_data.target_elements.push(remove_random_element(event_data.damaged_elements));
+        for(let i = 0; i < 3; i++) event_data.target_elements.push(remove_random_element(event_data.damaged_elements, get_state().targets));
 
         field.remove_element(x, y, true, false);
         field.remove_element(other_x, other_y, true, false);
@@ -1319,7 +1320,7 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        event_data.target_element = remove_random_element(event_data.damaged_elements);
+        event_data.target_element = remove_random_element(event_data.damaged_elements, get_state().targets);
 
         field.remove_element(x, y, true, false);
         field.remove_element(other_x, other_y, true, false);
@@ -1851,8 +1852,8 @@ export function Game() {
             }
 
             for(const target of get_state().targets) {
-                const check_for_not_stone = (target.type != CellId.Stone0 && target.type ==  cell.data.current_id);
-                const check_stone_with_last_cell = (target.type == CellId.Stone0 && cell.data.current_id == CellId.Stone2);
+                const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
+                const check_stone_with_last_cell = (target.type == CellId.Stone0 && CellId.Stone2 == cell.id);
                 if(target.is_cell && (check_for_not_stone || check_stone_with_last_cell)) {
                     target.uids.push(cell.uid);
                 }
@@ -1948,22 +1949,34 @@ export function Game() {
         return NullElement;
     }
     
-    function remove_random_element(exclude?: ItemInfo[], only_base_elements = true) {
-        const available_elements = [];
+    function remove_random_element(exclude?: ItemInfo[], targets?: TargetState[], only_base_elements = true) {
+        const available_items = [];
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
+                const cell = field.get_cell(x, y);
                 const element = field.get_element(x, y);
-                if(element != NullElement && exclude != undefined && exclude.findIndex((item) => item.uid == element.uid) == -1) {
-                    if(only_base_elements) {
-                        if(GAME_CONFIG.base_elements.includes(element.type)) available_elements.push({x, y, uid: element.uid});
-                    } else available_elements.push({x, y, uid: element.uid});
+
+                const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
+                    const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
+                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && CellId.Stone2 == cell.id);
+                    return (target.is_cell && (check_for_not_stone || check_stone_with_last_cell));
+                }) != -1);
+                
+                const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
+                    return (!target.is_cell && target.type == element.type);
+                }) != -1);
+                
+                 if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
+                 else if(is_valid_element) {
+                    if(only_base_elements && GAME_CONFIG.base_elements.includes(element.type)) available_items.push({x, y, uid: element.uid});
+                    else available_items.push({x, y, uid: element.uid});
                 }
             }
         }
 
-        if(available_elements.length == 0) return NullElement;
+        if(available_items.length == 0) return NullElement;
 
-        const target = available_elements[math.random(0, available_elements.length - 1)];
+        const target = available_items[math.random(0, available_items.length - 1)];
         if(is_buster(target.x, target.y)) try_activate_buster_element(target.x, target.y);
         else field.remove_element(target.x, target.y, true, false);
 
@@ -2101,7 +2114,7 @@ export function load_config() {
                                 level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
                                 break;
                             case CellId.Grass:
-                                level.field.cells[y][x] = [CellId.Base, CellId.Flowers, CellId.Grass];
+                                level.field.cells[y][x] = [CellId.Base, CellId.Grass];
                                 break;
                             default: level.field.cells[y][x] = [CellId.Base, data.cell];
                         }

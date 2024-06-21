@@ -73,6 +73,7 @@ function setup(instance: props) {
     setup_coins(instance);
     setup_life(instance);
     setup_store(instance);
+    setup_settings(instance);
     setup_life_notification(instance);
     setup_busters(instance);
 }
@@ -88,6 +89,8 @@ function setup_life(instance: props) {
 }
 
 function setup_store(instance: props) {
+    instance.druid.new_button('store_button', () => set_enabled_store(true));
+
     instance.druid.new_button('store/close', () => set_enabled_store(false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
@@ -183,6 +186,10 @@ function setup_store(instance: props) {
         GameStorage.set('horizontal_rocket_counts', 0);
         GameStorage.set('vertical_rocket_counts', 0);
     });
+}
+
+function setup_settings(instance: props) {
+    instance.druid.new_button('settings_button', () => {});
 }
 
 function setup_busters(instance: props) {
@@ -310,6 +317,8 @@ function on_infinit_life_tick() {
     }
 }
 
+// TODO: move set_enabled to utils with name and state args
+
 function set_enabled_coins(state: boolean) {
     const coins = gui.get_node('coins/button');
     gui.set_enabled(coins, state);
@@ -318,6 +327,16 @@ function set_enabled_coins(state: boolean) {
 function set_enabled_lifes(state: boolean) {
     const coins = gui.get_node('lifes/button');
     gui.set_enabled(coins, state);
+}
+
+function set_enabled_store_button(state: boolean) {
+    const store_button = gui.get_node('store_button');
+    gui.set_enabled(store_button, state);
+}
+
+function set_enabled_settings_button(state: boolean) {
+    const settings_button = gui.get_node('settings_button');
+    gui.set_enabled(settings_button, state);
 }
 
 function set_enabled_store(state: boolean) {
@@ -360,10 +379,14 @@ function on_scene_loaded(scene: NameMessage) {
         case 'game':
             set_enabled_coins(false);
             set_enabled_lifes(false);
+            set_enabled_store_button(false);
+            set_enabled_settings_button(false);
         break;
         case 'map':
             set_enabled_coins(true);
             set_enabled_lifes(true);
+            set_enabled_store_button(true);
+            set_enabled_settings_button(true);
         break;
     }
 }
