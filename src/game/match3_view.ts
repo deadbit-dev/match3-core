@@ -1128,7 +1128,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function explode_element_animation(element: ItemInfo) {
-        delete_view_item_by_game_id(element.uid);
+        print('EXPLODE: ', element.uid);
+        delete_all_view_items_by_game_id(element.uid);
 
         const type = (state.game_state.elements[element.y][element.x] as Element).id as ElementId;
         if(!GAME_CONFIG.base_elements.includes(type)) return;
@@ -1296,7 +1297,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             target_element = activation.target_elements.pop();
             if (target_element != undefined && target_element != NullElement)
                 remove_random_element_animation(message, activation.other_element, target_element);
-
 
             target_element = activation.target_elements.pop();
             if (target_element != undefined && target_element != NullElement) {
@@ -1604,6 +1604,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, helicopter_fly_duration, 0, () => {
             damage_element_animation(message, target_element.x, target_element.y, target_element.uid);
+            print('REMOVE HELICOPTER: ', element.uid);
             damage_element_animation(message, element.x, element.y, element.uid, () => {
                 if (on_complited != undefined) on_complited();
             });
@@ -1615,6 +1616,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     // TODO: refactoring
     function damage_element_animation(data: Messages[MessageId], x: number, y: number, element_id: number, on_complite?: () => void) {
         const element_view_item = get_first_view_item_by_game_id(element_id);
+        print('DAMAGE: ', element_id, element_view_item?._hash);
         if (element_view_item != undefined) {
             go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
