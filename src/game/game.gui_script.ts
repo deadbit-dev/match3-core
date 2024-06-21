@@ -223,7 +223,7 @@ function setup_sustem_ui(instance: props) {
     instance.druid.new_button('restart/button', () => Scene.restart());
     instance.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
 
-    set_text('current_level', 'Уровень ' + GameStorage.get('current_level') + 1);
+    set_text('current_level', 'Уровень ' + (GameStorage.get('current_level') + 1));
 }
 
 function setup_win_ui(instance: props) {

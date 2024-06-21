@@ -1409,9 +1409,11 @@ export function Game() {
         Log.log("SHUFFLE FIELD");
 
         let state = field.save_state();
+
+        EventBus.send('SHUFFLE_START');
         
-        const event_data: SpinningActivationMessage = [];
-        write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
+        // const event_data: SpinningActivationMessage = [];
+        // write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
         const base_elements = [];
         for(const element_id of GAME_CONFIG.base_elements) {
@@ -1425,14 +1427,17 @@ export function Game() {
                 const other_element = base_elements.splice(math.random(0, base_elements.length - 1), 1).pop();
                 if(element != undefined && other_element != undefined) {       
                     field.swap_elements(element.x, element.y, other_element.x, other_element.y);
-                    event_data.push({element_from: element, element_to: other_element});
+                    //event_data.push({element_from: element, element_to: other_element});
                 }
             }
         }
 
         is_block_input = true;
         search_available_steps(1, (steps) => {
-            if(steps.length != 0) process_game_step(false);
+            if(steps.length != 0) {
+                process_game_step(false);
+                EventBus.send('SHUFFLE_END', copy_state(2));
+            }
             else {
                 game_step_events = {} as GameStepEventBuffer;
                 field.load_state(state);

@@ -142,7 +142,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         'ON_COMBINED': on_combined_animation,
 
         'ON_ELEMENT_ACTIVATED': on_element_activated_animation,
-        'ON_SPINNING_ACTIVATED': on_spinning_activated_animation,
+        // 'ON_SPINNING_ACTIVATED': on_spinning_activated_animation,
         'ON_ROCKET_ACTIVATED': on_rocket_activated_animation,
 
         'ON_BUSTER_ACTIVATION': on_buster_activation_begin,
@@ -201,6 +201,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
+    let is_shuffling = false;
 
     function init() {
         Log.log("Init view");
@@ -421,6 +422,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         });
 
+        EventBus.on('SHUFFLE_START', () => {
+            is_shuffling = true;
+            shuffle_animation();
+        }, true);
+        EventBus.on('SHUFFLE_END', shuffle_end_animation, true);
+
         EventBus.on('TRY_ACTIVATE_SPINNING', () => {
             if (is_processing) return;
             EventBus.send('ACTIVATE_SPINNING');
@@ -459,6 +466,62 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         EventBus.on('MSG_ON_DOWN_ITEM', (data) => on_down(data.item), true);
         EventBus.on('MSG_ON_UP_ITEM', (data) => on_up(data.item), true);
         EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
+    }
+
+    function shuffle_animation() {
+        if(!is_shuffling) return;
+
+        const elements = [];
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const element = state.game_state.elements[y][x];
+                if(element != NullElement)
+                    elements.push({x, y, uid: element.uid});
+            }
+        }
+
+        while(elements.length > 0) {
+            const element_from = elements.splice(math.random(0, elements.length - 1), 1)[0];
+
+            if(elements.length == 0) break;
+
+            const element_to = elements.splice(math.random(0, elements.length - 1), 1)[0];
+
+            const item_from = get_first_view_item_by_game_id(element_from.uid);
+            const item_to = get_first_view_item_by_game_id(element_to.uid);
+            
+            if ((item_from != undefined) && (item_to != undefined)) {
+
+                const from_world_pos = go.get_position(item_from._hash);
+                from_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1;
+                go.set_position(from_world_pos, item_from._hash);
+
+                const to_world_pos = go.get_position(item_to._hash);
+                to_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1;
+                go.set_position(to_world_pos, item_to._hash);
+
+                go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, 0.5);
+            }
+        }
+
+        timer.delay(0.5, false, shuffle_animation);
+    }
+
+    function shuffle_end_animation(state: GameState) {
+        is_shuffling = false;
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const element = state.elements[y][x];
+                if(element != NullElement) {
+                    const element_view = get_first_view_item_by_game_id(element.uid);
+                    if (element_view != undefined) {
+                        const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
+                        go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
+                    }
+                }
+            }
+        }
     }
 
     function remove_tutorial() {

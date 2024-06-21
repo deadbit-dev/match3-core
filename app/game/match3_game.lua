@@ -1313,8 +1313,7 @@ function ____exports.Game()
     function shuffle_field()
         Log.log("SHUFFLE FIELD")
         local state = field.save_state()
-        local event_data = {}
-        write_game_step_event("ON_SPINNING_ACTIVATED", event_data)
+        EventBus.send("SHUFFLE_START")
         local base_elements = {}
         for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
             for ____, element in ipairs(field.get_all_elements_by_type(element_id)) do
@@ -1335,7 +1334,6 @@ function ____exports.Game()
                 ))
                 if element ~= nil and other_element ~= nil then
                     field.swap_elements(element.x, element.y, other_element.x, other_element.y)
-                    event_data[#event_data + 1] = {element_from = element, element_to = other_element}
                 end
             end
         end
@@ -1345,6 +1343,10 @@ function ____exports.Game()
             function(steps)
                 if #steps ~= 0 then
                     process_game_step(false)
+                    EventBus.send(
+                        "SHUFFLE_END",
+                        copy_state(2)
+                    )
                 else
                     game_step_events = {}
                     field.load_state(state)

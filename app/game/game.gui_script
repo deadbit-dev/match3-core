@@ -319,7 +319,7 @@ function setup_sustem_ui(instance)
     )
     set_text(
         "current_level",
-        ("Уровень " .. tostring(GameStorage.get("current_level"))) .. 1
+        "Уровень " .. tostring(GameStorage.get("current_level") + 1)
     )
 end
 function setup_win_ui(instance)

@@ -475,4 +475,7 @@ export type _UserMessages = {
 
     SET_LIFE_NOTIFICATION: VoidMessage,
     REVIVE: number,
+
+    SHUFFLE_START: VoidMessage,
+    SHUFFLE_END: GameState
 };

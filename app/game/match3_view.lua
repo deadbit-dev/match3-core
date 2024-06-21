@@ -1,9 +1,9 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
+local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
-local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local ____exports = {}
 local flow = require("ludobits.m.flow")
@@ -36,7 +36,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator, resources)
-    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_spinning_activated_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, shuffle_animation, shuffle_end_animation, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, is_shuffling
     function recalculate_sizes()
         local ltrb = Camera.get_ltrb()
         if ltrb.z == prev_game_width and ltrb.w == prev_game_height then
@@ -293,6 +293,15 @@ function ____exports.View(animator, resources)
             end
         )
         EventBus.on(
+            "SHUFFLE_START",
+            function()
+                is_shuffling = true
+                shuffle_animation()
+            end,
+            true
+        )
+        EventBus.on("SHUFFLE_END", shuffle_end_animation, true)
+        EventBus.on(
             "TRY_ACTIVATE_SPINNING",
             function()
                 if is_processing then
@@ -355,6 +364,100 @@ function ____exports.View(animator, resources)
             function(data) return on_move(data) end,
             true
         )
+    end
+    function shuffle_animation()
+        if not is_shuffling then
+            return
+        end
+        local elements = {}
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        local element = state.game_state.elements[y + 1][x + 1]
+                        if element ~= NullElement then
+                            elements[#elements + 1] = {x = x, y = y, uid = element.uid}
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        while #elements > 0 do
+            local element_from = __TS__ArraySplice(
+                elements,
+                math.random(0, #elements - 1),
+                1
+            )[1]
+            if #elements == 0 then
+                break
+            end
+            local element_to = __TS__ArraySplice(
+                elements,
+                math.random(0, #elements - 1),
+                1
+            )[1]
+            local item_from = get_first_view_item_by_game_id(element_from.uid)
+            local item_to = get_first_view_item_by_game_id(element_to.uid)
+            if item_from ~= nil and item_to ~= nil then
+                local from_world_pos = go.get_position(item_from._hash)
+                from_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1
+                go.set_position(from_world_pos, item_from._hash)
+                local to_world_pos = go.get_position(item_to._hash)
+                to_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1
+                go.set_position(to_world_pos, item_to._hash)
+                go.animate(
+                    item_from._hash,
+                    "position",
+                    go.PLAYBACK_ONCE_FORWARD,
+                    to_world_pos,
+                    swap_element_easing,
+                    0.5
+                )
+                go.animate(
+                    item_to._hash,
+                    "position",
+                    go.PLAYBACK_ONCE_FORWARD,
+                    from_world_pos,
+                    swap_element_easing,
+                    0.5
+                )
+            end
+        end
+        timer.delay(0.5, false, shuffle_animation)
+    end
+    function shuffle_end_animation(state)
+        is_shuffling = false
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        local element = state.elements[y + 1][x + 1]
+                        if element ~= NullElement then
+                            local element_view = get_first_view_item_by_game_id(element.uid)
+                            if element_view ~= nil then
+                                local to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index)
+                                go.animate(
+                                    element_view._hash,
+                                    "position",
+                                    go.PLAYBACK_ONCE_FORWARD,
+                                    to_world_pos,
+                                    swap_element_easing,
+                                    0.5
+                                )
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
     end
     function remove_tutorial()
         EventBus.send("REMOVE_TUTORIAL")
@@ -452,20 +555,20 @@ function ____exports.View(animator, resources)
         is_processing = true
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch89 = event.key
+                local ____switch103 = event.key
                 local event_duration
-                local ____cond89 = ____switch89 == "ON_SWAP_ELEMENTS"
-                if ____cond89 then
+                local ____cond103 = ____switch103 == "ON_SWAP_ELEMENTS"
+                if ____cond103 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond89 = ____cond89 or ____switch89 == "ON_SPINNING_ACTIVATED"
-                if ____cond89 then
+                ____cond103 = ____cond103 or ____switch103 == "ON_SPINNING_ACTIVATED"
+                if ____cond103 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond89 = ____cond89 or ____switch89 == "ON_MOVED_ELEMENTS"
-                if ____cond89 then
+                ____cond103 = ____cond103 or ____switch103 == "ON_MOVED_ELEMENTS"
+                if ____cond103 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -512,24 +615,24 @@ function ____exports.View(animator, resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch99 = move_direction
-            local ____cond99 = ____switch99 == Direction.Up
-            if ____cond99 then
+            local ____switch113 = move_direction
+            local ____cond113 = ____switch113 == Direction.Up
+            if ____cond113 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond99 = ____cond99 or ____switch99 == Direction.Down
-            if ____cond99 then
+            ____cond113 = ____cond113 or ____switch113 == Direction.Down
+            if ____cond113 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond99 = ____cond99 or ____switch99 == Direction.Left
-            if ____cond99 then
+            ____cond113 = ____cond113 or ____switch113 == Direction.Left
+            if ____cond113 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond99 = ____cond99 or ____switch99 == Direction.Right
-            if ____cond99 then
+            ____cond113 = ____cond113 or ____switch113 == Direction.Right
+            if ____cond113 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1286,14 +1389,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch252 = dir
-            local ____cond252 = ____switch252 == Axis.Vertical
-            if ____cond252 then
+            local ____switch266 = dir
+            local ____cond266 = ____switch266 == Axis.Vertical
+            if ____cond266 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond252 = ____cond252 or ____switch252 == Axis.Horizontal
-            if ____cond252 then
+            ____cond266 = ____cond266 or ____switch266 == Axis.Horizontal
+            if ____cond266 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1540,38 +1643,6 @@ function ____exports.View(animator, resources)
                 activate_cell_animation(cell)
             end
         end
-    end
-    function on_spinning_activated_animation(message)
-        local data = message
-        for ____, swap_info in ipairs(data) do
-            local from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y)
-            local to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y)
-            local item_from = get_first_view_item_by_game_id(swap_info.element_from.uid)
-            if item_from == nil then
-                return 0
-            end
-            local item_to = get_first_view_item_by_game_id(swap_info.element_to.uid)
-            if item_to == nil then
-                return 0
-            end
-            go.animate(
-                item_from._hash,
-                "position",
-                go.PLAYBACK_ONCE_FORWARD,
-                to_world_pos,
-                swap_element_easing,
-                swap_element_time
-            )
-            go.animate(
-                item_to._hash,
-                "position",
-                go.PLAYBACK_ONCE_FORWARD,
-                from_world_pos,
-                swap_element_easing,
-                swap_element_time
-            )
-        end
-        return swap_element_time + 0.1
     end
     function on_element_activated_animation(message)
         local activation = message
@@ -1949,7 +2020,6 @@ function ____exports.View(animator, resources)
         ON_SWAP_ELEMENTS = on_swap_element_animation,
         ON_COMBINED = on_combined_animation,
         ON_ELEMENT_ACTIVATED = on_element_activated_animation,
-        ON_SPINNING_ACTIVATED = on_spinning_activated_animation,
         ON_ROCKET_ACTIVATED = on_rocket_activated_animation,
         ON_BUSTER_ACTIVATION = on_buster_activation_begin,
         DISKOSPHERE_ACTIVATED = on_diskisphere_activated_animation,
@@ -1982,6 +2052,7 @@ function ____exports.View(animator, resources)
     combinate_phase_duration = 0
     move_phase_duration = 0
     is_processing = false
+    is_shuffling = false
     local function init()
         Log.log("Init view")
         local scene_name = Scene.get_current_name()
@@ -1992,6 +2063,38 @@ function ____exports.View(animator, resources)
         end
         set_events()
         dispatch_messages()
+    end
+    local function on_spinning_activated_animation(message)
+        local data = message
+        for ____, swap_info in ipairs(data) do
+            local from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y)
+            local to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y)
+            local item_from = get_first_view_item_by_game_id(swap_info.element_from.uid)
+            if item_from == nil then
+                return 0
+            end
+            local item_to = get_first_view_item_by_game_id(swap_info.element_to.uid)
+            if item_to == nil then
+                return 0
+            end
+            go.animate(
+                item_from._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                to_world_pos,
+                swap_element_easing,
+                swap_element_time
+            )
+            go.animate(
+                item_to._hash,
+                "position",
+                go.PLAYBACK_ONCE_FORWARD,
+                from_world_pos,
+                swap_element_easing,
+                swap_element_time
+            )
+        end
+        return swap_element_time + 0.1
     end
     return init()
 end
