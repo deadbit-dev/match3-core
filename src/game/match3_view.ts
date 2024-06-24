@@ -202,6 +202,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     let move_phase_duration = 0;
     let is_processing = false;
     let is_shuffling = false;
+    let stop_shuffling = false;
 
     function init() {
         Log.log("Init view");
@@ -423,7 +424,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         });
 
         EventBus.on('SHUFFLE_START', () => {
+            if(is_shuffling) return;
             is_shuffling = true;
+            stop_shuffling = false;
             shuffle_animation();
         }, true);
         EventBus.on('SHUFFLE_END', shuffle_end_animation, true);
@@ -469,7 +472,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function shuffle_animation() {
-        if(!is_shuffling) return;
+        if(stop_shuffling) return;
+
+        Log.log('SHUFFLE ANIMATION');
 
         const elements = [];
         for(let y = 0; y < field_height; y++) {
@@ -500,16 +505,17 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 to_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1;
                 go.set_position(to_world_pos, item_to._hash);
 
-                go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
-                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, 0.5);
+                go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.7);
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, 0.7);
             }
         }
 
-        timer.delay(0.5, false, shuffle_animation);
+        timer.delay(0.7, false, shuffle_animation);
     }
 
     function shuffle_end_animation(state: GameState) {
         is_shuffling = false;
+        stop_shuffling = true;
         for(let y = 0; y < field_height; y++) {
             for(let x = 0; x < field_width; x++) {
                 const element = state.elements[y][x];
@@ -517,7 +523,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     const element_view = get_first_view_item_by_game_id(element.uid);
                     if (element_view != undefined) {
                         // TODO: move all elements to the center and after move by own places\
-                        
+
                         const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
                     }
@@ -1271,9 +1277,14 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         for (const cell of activation.activated_cells) {
             let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (activation.target_element != NullElement && cell.x == activation.target_element.x && cell.y == activation.target_element.y) skip = true;
+            for (const element of activation.damaged_elements) {
+                if (cell.x == element.x && cell.y == element.y)
+                    skip = true;
+            }
+            
+            if (activation.target_element != NullElement && cell.x == activation.target_element.x && cell.y == activation.target_element.y)
+                skip = true;
+
             if (!skip) activate_cell_animation(cell);
         }
 
@@ -1738,8 +1749,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         
         for (const item of items) gm.delete_item(item, true);
         delete state.game_id_to_view_index[id];
-
-
 
         return true;
     }
