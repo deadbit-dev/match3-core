@@ -6,7 +6,7 @@ embedded_instances {
   "  id: \"spinemodel\"\n"
   "  type: \"spinemodel\"\n"
   "  data: \"spine_scene: \\\"/assets/cat/avatar/avatar.spinescene\\\"\\n"
-  "default_animation: \\\"IDLE_TEST\\\"\\n"
+  "default_animation: \\\"idle\\\"\\n"
   "skin: \\\"\\\"\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "material: \\\"/defold-spine/assets/spine.material\\\"\\n"

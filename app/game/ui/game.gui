@@ -1565,7 +1565,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: -90.0
+    y: -68.0
     z: 0.0
     w: 1.0
   }
@@ -1576,8 +1576,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 0.2
-    y: 0.2
+    x: 0.8
+    y: 0.8
     z: 1.0
     w: 1.0
   }
@@ -1610,7 +1610,7 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   spine_scene: "avatar"
-  spine_default_animation: "IDLE_TEST"
+  spine_default_animation: "idle"
   spine_skin: ""
   custom_type: 405028931
   enabled: true

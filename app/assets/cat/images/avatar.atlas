@@ -1,17 +1,49 @@
 images {
-  image: "/assets/cat/images/avatar/bantik.png"
+  image: "/assets/cat/images/avatar/back.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/body with collar.png"
+  image: "/assets/cat/images/avatar/bow.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/haed above.png"
+  image: "/assets/cat/images/avatar/brow_l.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/haed.png"
+  image: "/assets/cat/images/avatar/brow_r.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/ear_l.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/ear_r.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eye_l.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eye_r.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eyelid_L.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eyelid_l_closed.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eyelid_r.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cat/images/avatar/eyelid_r_closed.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -19,23 +51,11 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/left brow.png"
+  image: "/assets/cat/images/avatar/head.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/left ear.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/left eye.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/left eyelid and lash.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/left eyelid closed.png"
+  image: "/assets/cat/images/avatar/head_above.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -43,31 +63,7 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cat/images/avatar/right brow.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/right ear.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/right eye.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/right eyelid and lash.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/right eyelid closed.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/wool in left ear.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
-  image: "/assets/cat/images/avatar/wool in right ear.png"
+  image: "/assets/cat/images/avatar/neck.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0
