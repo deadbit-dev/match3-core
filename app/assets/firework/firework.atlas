@@ -1,8 +1,4 @@
 images {
-  image: "/assets/firework/images/ball_2_big.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
   image: "/assets/firework/images/Firework_01.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
@@ -120,6 +116,10 @@ images {
 }
 images {
   image: "/assets/firework/images/Firework_30.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/firework/images/ball_2_big.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0
