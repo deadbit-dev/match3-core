@@ -2027,7 +2027,13 @@ function ____exports.Game()
         if is_buster(target.x, target.y) then
             try_activate_buster_element(target.x, target.y)
         else
-            field.remove_element(target.x, target.y, true, false)
+            field.remove_element(
+                target.x,
+                target.y,
+                true,
+                false,
+                true
+            )
         end
         return target
     end

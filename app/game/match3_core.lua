@@ -606,7 +606,10 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return neighbors
     end
-    local function remove_element(x, y, is_damaging, is_near_activation)
+    local function remove_element(x, y, is_damaging, is_near_activation, all)
+        if all == nil then
+            all = false
+        end
         local cell = get_cell(x, y)
         if cell == ____exports.NotActiveCell then
             return
@@ -615,7 +618,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if is_near_activation then
             on_near_activation(get_neighbor_cells(x, y))
         end
-        if not is_available_cell_type_for_move(cell) then
+        if not all and not is_available_cell_type_for_move(cell) then
             return
         end
         local element = get_element(x, y)

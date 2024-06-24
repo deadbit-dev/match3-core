@@ -2081,7 +2081,7 @@ export function Game() {
 
         const target = available_items[math.random(0, available_items.length - 1)];
         if(is_buster(target.x, target.y)) try_activate_buster_element(target.x, target.y);
-        else field.remove_element(target.x, target.y, true, false);
+        else field.remove_element(target.x, target.y, true, false, true);
 
         return target;
     }

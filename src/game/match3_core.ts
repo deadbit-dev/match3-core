@@ -642,7 +642,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
 
     // удаляет элемент с поля (метод нужен для вызова логики бустеров каких-то)
-    function remove_element(x: number, y: number, is_damaging: boolean, is_near_activation: boolean) {
+    function remove_element(x: number, y: number, is_damaging: boolean, is_near_activation: boolean, all=false) {
         // удаляем элемент с массива и вызываем try_damage_element если is_damaging = true
         // и вызываем on_near_activation для соседей если свойство is_near_activation = true
 
@@ -652,7 +652,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         on_cell_activation({x, y, uid: cell.uid});
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
 
-        if(!is_available_cell_type_for_move(cell)) return;
+        if(!all && !is_available_cell_type_for_move(cell)) return;
 
         const element = get_element(x, y);
         if(element == NullElement) return;
