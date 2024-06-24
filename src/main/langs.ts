@@ -84,7 +84,7 @@ export const lang_data = {
     "Английский-en": "Go to map"
   },
   "hammer": {
-    "Русский-ru": "",
+    "Русский-ru": "Молоток",
     "Английский-en": "Hammer",
   },
   "spinning": {

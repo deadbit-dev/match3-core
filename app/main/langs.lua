@@ -21,7 +21,7 @@ ____exports.lang_data = {
     continue = {["Русский-ru"] = "Продолжить", ["Английский-en"] = "Continue"},
     restart = {["Русский-ru"] = "Повторить", ["Английский-en"] = "Restart"},
     map = {["Русский-ru"] = "На карту", ["Английский-en"] = "Go to map"},
-    hammer = {["Русский-ru"] = "", ["Английский-en"] = "Hammer"},
+    hammer = {["Русский-ru"] = "Молоток", ["Английский-en"] = "Hammer"},
     spinning = {["Русский-ru"] = "Юла", ["Английский-en"] = "Spinning"},
     horizontal_rocket = {["Русский-ru"] = "Горизонтальная рокета", ["Английский-en"] = "Horizontal Rocket"},
     vertical_rocket = {["Русский-ru"] = "Вертикальная рокета", ["Английский-en"] = "Vertical Rocket"},
