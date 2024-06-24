@@ -516,6 +516,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if(element != NullElement) {
                     const element_view = get_first_view_item_by_game_id(element.uid);
                     if (element_view != undefined) {
+                        // TODO: move all elements to the center and after move by own places\
+                        
                         const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
                     }

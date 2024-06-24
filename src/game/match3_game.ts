@@ -48,7 +48,8 @@ import {
     CoreState,
     CellType,
     MovedInfo,
-    StepInfo
+    StepInfo,
+    CombinationMasks
 } from './match3_core';
 
 import { lang_data } from '../main/langs';
@@ -627,12 +628,16 @@ export function Game() {
         is_block_input = false;
 
         if(is_level_completed()) {
+            is_block_input = true;
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
             add_coins(level_config.coins);
-            timer.delay(0.5, false, () => EventBus.send('ON_WIN'));
-        } else if(!is_have_steps() || is_gameover) timer.delay(0.5, false, gameover);
+            timer.delay(1.5, false, () => EventBus.send('ON_WIN'));
+        } else if(!is_have_steps() || is_gameover) {
+            is_block_input = true;
+            timer.delay(1.5, false, gameover);
+        }
         
         Log.log("END STEP ANIMATION");
     }
@@ -847,6 +852,91 @@ export function Game() {
             on_end(steps);
         }, {parallel: true});
 
+        coroutines.push(coroutine);
+    }
+
+    function get_all_combinations(on_end: (combinations: CombinationInfo[]) => void) {
+        // комбинации проверяются через сверку масок по всему игровому полю
+        // чтобы получить что вся комбинация работает нам нужно все элементы маски взять и пройтись правилом
+        // is_combined_elements, при этом допустим у нас комбинация Comb4, т.е. 4 подряд элемента должны удовлетворять правилу
+        // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
+        // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
+        const coroutine = flow.start(() => {
+            const combinations: CombinationInfo[] = [];
+            const combinations_elements: {[key in number]: boolean} = {};
+
+            // проходимся по всем маскам с конца
+            for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
+                
+                // берем все варианты вращений маски
+                let masks =  field.get_rotated_masks(mask_index);
+
+                // проходимся по повернутым вариантам
+                for(let i = 0; i < masks.length; i++) {
+                    const mask = masks[i];
+                    
+                    // проходимся маской по полю
+                    for(let y = 0; y + mask.length <= field_height; y++) {
+                        for(let x = 0; x + mask[0].length <= field_width; x++) {
+                            const combination = {} as CombinationInfo;
+                            combination.elements = [];
+                            combination.angle = i * 90;
+                            
+                            let is_combined = true;
+                            let last_element: Element | typeof NullElement = NullElement;
+                            
+                            // проходимся маской по элементам в текущей позиции
+                            for(let i = 0; i < mask.length && is_combined; i++) {
+                                for(let j = 0; j < mask[0].length && is_combined; j++) {
+                                    if(mask[i][j] == 1) {
+                                        const cell = field.get_cell(x+j, y+i);
+                                        const element = field.get_element(x+j, y+i);
+                                        
+                                        if(element == NullElement || cell == NotActiveCell || !field.is_available_cell_type_for_activation(cell)) {
+                                            is_combined = false;
+                                            break;
+                                        }
+
+                                        // проверка на участие элемента в предыдущих комбинациях
+                                        if(combinations_elements[element.uid]) {
+                                            is_combined = false;
+                                            break;
+                                        }
+                                        
+                                        combination.elements.push({
+                                            x: x+j,
+                                            y: y+i,
+                                            uid: (element).uid
+                                        });
+
+                                        if(last_element != NullElement) {
+                                            is_combined = is_combined_elements(last_element, element);
+                                        }
+
+                                        last_element = element;
+                                    }
+                                }
+                            }
+
+                            if(is_combined) {
+                                combination.type = mask_index as CombinationType;
+                                combinations.push(combination);
+
+                                for(const element of combination.elements)
+                                    combinations_elements[element.uid] = true;
+
+                                return on_end(combinations);
+                            }
+                        }
+                    }
+
+                    flow.frames(1);
+                }
+            }
+
+            return on_end(combinations);
+        }, {parallel: true});
+        
         coroutines.push(coroutine);
     }
 
@@ -1425,7 +1515,7 @@ export function Game() {
             const element = base_elements.splice(math.random(0, base_elements.length - 1), 1).pop();
             if(base_elements.length > 0) {
                 const other_element = base_elements.splice(math.random(0, base_elements.length - 1), 1).pop();
-                if(element != undefined && other_element != undefined) {       
+                if(element != undefined && other_element != undefined) {
                     field.swap_elements(element.x, element.y, other_element.x, other_element.y);
                     //event_data.push({element_from: element, element_to: other_element});
                 }
@@ -1433,17 +1523,25 @@ export function Game() {
         }
 
         is_block_input = true;
-        search_available_steps(1, (steps) => {
-            if(steps.length != 0) {
-                process_game_step(false);
-                EventBus.send('SHUFFLE_END', copy_state(2));
-            }
-            else {
+        get_all_combinations((combinations: CombinationInfo[]) => {
+            if(combinations.length > 0) {
                 game_step_events = {} as GameStepEventBuffer;
                 field.load_state(state);
                 shuffle_field();
+                return;
             }
+            search_available_steps(1, (steps) => {
+                if(steps.length != 0) {
+                    process_game_step(false);
+                    EventBus.send('SHUFFLE_END', copy_state(2));
+                    return;
+                }
+                game_step_events = {} as GameStepEventBuffer;
+                field.load_state(state);
+                shuffle_field();
+            });
         });
+        
     }
     
     function try_hammer_activation(x: number, y: number) {

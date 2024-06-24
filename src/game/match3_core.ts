@@ -19,7 +19,7 @@ export enum CombinationType {
 
 // маски комбинации, для проверки надо также вращать(90,180,270)
 // но для оптимизаций те маски, которые имеют размерность 1, т.е.: 3,4,5 вращаем только на 90
-const CombinationMasks = [
+export const CombinationMasks = [
     // 3
     [
         [1, 1, 1]
@@ -213,6 +213,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         }
     }
 
+    function get_rotated_masks(mask_index: number) {
+        return rotated_masks[mask_index];
+    }
+
     function rotate_all_masks() {
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             let mask = CombinationMasks[mask_index];
@@ -247,7 +251,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // is_combined_elements, при этом допустим у нас комбинация Comb4, т.е. 4 подряд элемента должны удовлетворять правилу
         // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
-
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
@@ -313,6 +316,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
                             if(check) return combinations;
                         }
+
+                        
                     }
                 }
             }
@@ -921,7 +926,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     return {
         init, set_element_type, get_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
         get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
-        get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element,
+        get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element, is_available_cell_type_for_activation, get_rotated_masks,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,

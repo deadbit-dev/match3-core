@@ -24,7 +24,7 @@ ____exports.CombinationType.Comb3x4 = 6
 ____exports.CombinationType[____exports.CombinationType.Comb3x4] = "Comb3x4"
 ____exports.CombinationType.Comb3x5 = 7
 ____exports.CombinationType[____exports.CombinationType.Comb3x5] = "Comb3x5"
-local CombinationMasks = {
+____exports.CombinationMasks = {
     {{1, 1, 1}},
     {{1, 1, 1, 1}},
     {{
@@ -95,14 +95,14 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     local rotate_all_masks, is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_activation, is_available_cell_type_for_move, save_state, state, rotated_masks, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function rotate_all_masks()
         do
-            local mask_index = #CombinationMasks - 1
+            local mask_index = #____exports.CombinationMasks - 1
             while mask_index >= 0 do
-                local mask = CombinationMasks[mask_index + 1]
+                local mask = ____exports.CombinationMasks[mask_index + 1]
                 local is_one_row_mask = false
                 repeat
-                    local ____switch8 = mask_index
-                    local ____cond8 = ____switch8 == ____exports.CombinationType.Comb3 or ____switch8 == ____exports.CombinationType.Comb4 or ____switch8 == ____exports.CombinationType.Comb5
-                    if ____cond8 then
+                    local ____switch9 = mask_index
+                    local ____cond9 = ____switch9 == ____exports.CombinationType.Comb3 or ____switch9 == ____exports.CombinationType.Comb4 or ____switch9 == ____exports.CombinationType.Comb5
+                    if ____cond9 then
                         is_one_row_mask = true
                         break
                     end
@@ -300,6 +300,9 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             end
         end
     end
+    local function get_rotated_masks(mask_index)
+        return rotated_masks[mask_index + 1]
+    end
     local function get_all_combinations(check)
         if check == nil then
             check = false
@@ -307,7 +310,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         local combinations = {}
         local combinations_elements = {}
         do
-            local mask_index = #CombinationMasks - 1
+            local mask_index = #____exports.CombinationMasks - 1
             while mask_index >= 0 do
                 local masks = rotated_masks[mask_index + 1]
                 do
@@ -870,13 +873,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch189 = mode
-            local ____cond189 = ____switch189 == ____exports.ProcessMode.Combinate
-            if ____cond189 then
+            local ____switch190 = mode
+            local ____cond190 = ____switch190 == ____exports.ProcessMode.Combinate
+            if ____cond190 then
                 return process_combinate()
             end
-            ____cond189 = ____cond189 or ____switch189 == ____exports.ProcessMode.MoveElements
-            if ____cond189 then
+            ____cond190 = ____cond190 or ____switch190 == ____exports.ProcessMode.MoveElements
+            if ____cond190 then
                 return process_move()
             end
         until true
@@ -923,6 +926,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         get_free_cells = get_free_cells,
         get_all_elements_by_type = get_all_elements_by_type,
         try_damage_element = try_damage_element,
+        is_available_cell_type_for_activation = is_available_cell_type_for_activation,
+        get_rotated_masks = get_rotated_masks,
         set_callback_on_move_element = set_callback_on_move_element,
         set_callback_on_moved_elements = set_callback_on_moved_elements,
         set_callback_is_can_move = set_callback_is_can_move,
