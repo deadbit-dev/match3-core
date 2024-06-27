@@ -494,12 +494,24 @@ function set_tutorial()
     local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
     local tutorial = gui.get_node("tutorial")
     local tutorial_text = gui.get_node("tutorial_text")
-    gui.set_position(tutorial_text, tutorial_data.position)
+    gui.set_position(tutorial_text, tutorial_data.text.pos)
     gui.set_text(
         tutorial_text,
-        Lang.get_text(tutorial_data.text)
+        Lang.get_text(tutorial_data.text.data)
     )
     gui.set_enabled(tutorial, true)
+    if tutorial_data.arrow_pos ~= nil then
+        local arrow = gui.get_node("arrow")
+        gui.set_enabled(arrow, true)
+        gui.set_position(arrow, tutorial_data.arrow_pos)
+    end
+    if tutorial_data.buster_icon ~= nil then
+        local buster = gui.get_node("buster")
+        local buster_icon = gui.get_node("buster_icon")
+        gui.set_enabled(buster, true)
+        gui.set_position(buster, tutorial_data.buster_icon.pos)
+        gui.play_flipbook(buster_icon, tutorial_data.buster_icon.icon)
+    end
     if tutorial_data.busters ~= nil then
         local busters = __TS__ArrayIsArray(tutorial_data.busters) and tutorial_data.busters or ({tutorial_data.busters})
         for ____, buster in ipairs(busters) do

@@ -49,11 +49,13 @@ function walk() {
 
 function idle() {
     const anim_props = { blend_duration: 0.1, playback_rate: 1 };
+    spine.play_anim('#shadow', 'idle', go.PLAYBACK_LOOP_FORWARD, anim_props);
     spine.play_anim('#spinemodel', 'idle', go.PLAYBACK_LOOP_FORWARD, anim_props);
 }
 
 function walk_to(pos: vmath.vector3, callback?: () => void) {
     const anim_props = { blend_duration: 0.5, playback_rate: 1 };
+    spine.play_anim('#shadow', 'walk', go.PLAYBACK_ONCE_FORWARD, anim_props);
     spine.play_anim('#spinemodel', 'walk', go.PLAYBACK_ONCE_FORWARD, anim_props);
     go.animate(go.get_id(), 'position', go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, 1, 0, () => {
         if(callback != undefined) callback();
@@ -62,6 +64,7 @@ function walk_to(pos: vmath.vector3, callback?: () => void) {
 
 function action(callback?: () => void) {
     const anim_props = { blend_duration: 0.3, playback_rate: 1 };
+    spine.play_anim('#shadow', 'action', go.PLAYBACK_ONCE_FORWARD, anim_props);
     spine.play_anim('#spinemodel', 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
         if (message_id == hash("spine_animation_done") && callback != undefined) callback();
     });
@@ -69,6 +72,7 @@ function action(callback?: () => void) {
 
 function walk_back(pos: vmath.vector3, callback?: () => void) {
     const anim_props = { blend_duration: 0.5, playback_rate: 1 };
+    spine.play_anim('#shadow', 'walk_back', go.PLAYBACK_ONCE_FORWARD, anim_props);
     spine.play_anim('#spinemodel', 'walk_back', go.PLAYBACK_ONCE_FORWARD, anim_props);
     go.animate(go.get_id(), 'position', go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, 1, 0, () => {
         if(callback != undefined) callback();

@@ -209,9 +209,12 @@ ____exports._GAME_CONFIG = {
     tutorials_data = {
         [1] = {
             cells = {{x = 5, y = 4}, {x = 3, y = 5}, {x = 4, y = 5}, {x = 5, y = 5}},
+            bounds = {from_x = 3, from_y = 4, to_x = 6, to_y = 6},
             step = {from_x = 5, from_y = 4, to_x = 5, to_y = 5},
-            text = "tutorial_collect",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_collect",
+                pos = vmath.vector3(0, 320, 0)
+            }
         },
         [2] = {
             cells = {
@@ -221,9 +224,17 @@ ____exports._GAME_CONFIG = {
                 {x = 3, y = 5},
                 {x = 3, y = 6}
             },
+            bounds = {from_x = 3, from_y = 3, to_x = 5, to_y = 7},
             step = {from_x = 4, from_y = 4, to_x = 3, to_y = 4},
-            text = "tutorial_collect_rocket",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_collect_rocket",
+                pos = vmath.vector3(0, 320, 0)
+            },
+            arrow_pos = vmath.vector3(70, -85, 0),
+            buster_icon = {
+                icon = "rocket_icon",
+                pos = vmath.vector3(-30, -190, 0)
+            }
         },
         [3] = {
             cells = {
@@ -234,31 +245,49 @@ ____exports._GAME_CONFIG = {
                 {x = 6, y = 4},
                 {x = 7, y = 4}
             },
+            bounds = {from_x = 3, from_y = 3, to_x = 8, to_y = 5},
             step = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
-            text = "tutorial_collect_diskosphere",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_collect_diskosphere",
+                pos = vmath.vector3(0, 320, 0)
+            },
+            arrow_pos = vmath.vector3(70, -85, 0),
+            buster_icon = {
+                icon = "diskosphere_buster",
+                pos = vmath.vector3(-30, -190, 0)
+            }
         },
         [4] = {
             cells = {{x = 5, y = 3}, {x = 3, y = 4}, {x = 4, y = 4}, {x = 5, y = 4}},
+            bounds = {from_x = 3, from_y = 3, to_x = 6, to_y = 5},
             step = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
-            text = "tutorial_timer",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_timer",
+                pos = vmath.vector3(0, 320, 0)
+            }
         },
         [5] = {
             cells = {{x = 7, y = 3}, {x = 5, y = 4}, {x = 6, y = 4}, {x = 7, y = 4}},
+            bounds = {from_x = 5, from_y = 3, to_x = 8, to_y = 5},
             step = {from_x = 7, from_y = 3, to_x = 7, to_y = 4},
-            text = "tutorial_grass",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_grass",
+                pos = vmath.vector3(0, 320, 0)
+            }
         },
         [6] = {
             busters = "hammer",
-            text = "tutorial_hammer",
-            position = vmath.vector3(-160, 50, 0)
+            text = {
+                data = "tutorial_hammer",
+                pos = vmath.vector3(0, 50, 0)
+            }
         },
         [9] = {
             busters = "spinning",
-            text = "tutorial_spinning",
-            position = vmath.vector3(-160, 50, 0)
+            text = {
+                data = "tutorial_spinning",
+                pos = vmath.vector3(0, 50, 0)
+            }
         },
         [10] = {
             cells = {
@@ -271,20 +300,28 @@ ____exports._GAME_CONFIG = {
                 {x = 5, y = 5},
                 {x = 6, y = 5}
             },
+            bounds = {from_x = 3, from_y = 4, to_x = 7, to_y = 6},
             step = {from_x = 3, from_y = 4, to_x = 4, to_y = 4},
-            text = "tutorial_box",
-            position = vmath.vector3(-160, 320, 0)
+            text = {
+                data = "tutorial_box",
+                pos = vmath.vector3(0, 250, 0)
+            }
         },
         [13] = {
             cells = {{x = 6, y = 4}, {x = 6, y = 5}, {x = 7, y = 5}, {x = 8, y = 5}},
+            bounds = {from_x = 6, from_y = 4, to_x = 9, to_y = 6},
             step = {from_x = 6, from_y = 4, to_x = 6, to_y = 5},
-            text = "tutorial_web",
-            position = vmath.vector3(-260, 270, 0)
+            text = {
+                data = "tutorial_web",
+                pos = vmath.vector3(0, 270, 0)
+            }
         },
         [17] = {
             busters = {"horizontal_rocket", "vertical_rocket"},
-            text = "tutorial_rockets",
-            position = vmath.vector3(-160, 50, 0)
+            text = {
+                data = "tutorial_rockets",
+                pos = vmath.vector3(0, 50, 0)
+            }
         }
     },
     levels = {},

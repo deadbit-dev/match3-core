@@ -159,11 +159,17 @@ export interface Level {
 export type TutorialData = { 
     [key in number]: {
         cells?: {x: number, y: number}[],
+        bounds?: StepInfo,
         step?: StepInfo,
         busters?: string | string[],
 
-        text: keyof typeof lang_data,
-        position: vmath.vector3
+        text: {
+            data: keyof typeof lang_data,
+            pos: vmath.vector3,
+        },
+
+        arrow_pos?: vmath.vector3,
+        buster_icon?: {icon: string, pos: vmath.vector3}
     }
 };
 
@@ -421,18 +427,17 @@ export function Game() {
     function set_tutorial() {        
         const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
         const except_cells = tutorial_data.cells != undefined ? tutorial_data.cells : [];
-        lock_cells(except_cells);
-        
+        lock_cells(except_cells, tutorial_data?.bounds);
 
         if(tutorial_data.busters != undefined) {
-            if(Array.isArray(tutorial_data.busters)) lock_buters(tutorial_data.busters);
-            else lock_buters([tutorial_data.busters]);
-        } else lock_buters([]);
+            if(Array.isArray(tutorial_data.busters)) lock_busters(tutorial_data.busters);
+            else lock_busters([tutorial_data.busters]);
+        } else lock_busters([]);
     }
 
-    function lock_cells(except_cells: {x: number, y: number}[]) {
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
+    function lock_cells(except_cells: {x: number, y: number}[], bounds: StepInfo = {from_x: 0, from_y: 0, to_x: 0, to_y: 0}) {
+        for (let y = bounds.from_y; y < bounds.to_y; y++) {
+            for (let x = bounds.from_x; x < bounds.to_x; x++) {
                 if(!except_cells.find((cell) => (cell.x == x) && (cell.y == y))) {
                     const cell = field.get_cell(x, y);
                     if(cell != NotActiveCell) {
@@ -461,9 +466,7 @@ export function Game() {
         }
     }
 
-
-    // TODO: rename
-    function lock_buters(except_busters: string[]) {
+    function lock_busters(except_busters: string[]) {
         is_block_spinning = !except_busters.includes('spinning');
         is_block_hammer = !except_busters.includes('hammer');
         is_block_vertical_rocket = !except_busters.includes('vertical_rocket');
@@ -2211,21 +2214,27 @@ export function load_config() {
                             break;
                     }   
                 } else {
+                    if(data.element != undefined) {
+                        level.field.elements[y][x] = data.element;
+                    } else level.field.elements[y][x] = RandomElement;
+                    
                     if(data.cell != undefined) {
                         switch(data.cell) {
                             case CellId.Stone0:
                                 level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
+                                if(level.field.elements[y][x] == RandomElement)
+                                    level.field.elements[y][x] = NullElement;
+                                break;
+                            case CellId.Box:
+                                if(level.field.elements[y][x] == RandomElement)
+                                    level.field.elements[y][x] = NullElement;
                                 break;
                             case CellId.Grass:
                                 level.field.cells[y][x] = [CellId.Base, CellId.Grass];
                                 break;
                             default: level.field.cells[y][x] = [CellId.Base, data.cell];
                         }
-                    } else level.field.cells[y][x] = CellId.Base;
-
-                    if(data.element != undefined) {
-                        level.field.elements[y][x] = data.element;
-                    } else level.field.elements[y][x] = RandomElement;
+                    } else level.field.cells[y][x] = CellId.Base; 
                 }
             }
         }

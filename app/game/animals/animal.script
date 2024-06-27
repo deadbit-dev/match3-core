@@ -35,10 +35,12 @@ function walk()
 end
 function idle()
     local anim_props = {blend_duration = 0.1, playback_rate = 1}
+    spine.play_anim("#shadow", "idle", go.PLAYBACK_LOOP_FORWARD, anim_props)
     spine.play_anim("#spinemodel", "idle", go.PLAYBACK_LOOP_FORWARD, anim_props)
 end
 function walk_to(pos, callback)
     local anim_props = {blend_duration = 0.5, playback_rate = 1}
+    spine.play_anim("#shadow", "walk", go.PLAYBACK_ONCE_FORWARD, anim_props)
     spine.play_anim("#spinemodel", "walk", go.PLAYBACK_ONCE_FORWARD, anim_props)
     go.animate(
         go.get_id(),
@@ -57,6 +59,7 @@ function walk_to(pos, callback)
 end
 function action(callback)
     local anim_props = {blend_duration = 0.3, playback_rate = 1}
+    spine.play_anim("#shadow", "action", go.PLAYBACK_ONCE_FORWARD, anim_props)
     spine.play_anim(
         "#spinemodel",
         "action",
@@ -71,6 +74,7 @@ function action(callback)
 end
 function walk_back(pos, callback)
     local anim_props = {blend_duration = 0.5, playback_rate = 1}
+    spine.play_anim("#shadow", "walk_back", go.PLAYBACK_ONCE_FORWARD, anim_props)
     spine.play_anim("#spinemodel", "walk_back", go.PLAYBACK_ONCE_FORWARD, anim_props)
     go.animate(
         go.get_id(),

@@ -124,16 +124,17 @@ function ____exports.View(animator, resources)
         EventBus.on(
             "SET_TUTORIAL",
             function()
-                for ____, substrate in ipairs(state.substrates) do
-                    local substrate_view = msg.url(nil, substrate, "sprite")
-                    go.set(substrate_view, "material", resources.tutorial_sprite_material)
-                end
+                local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+                local bounds = tutorial_data.bounds ~= nil and tutorial_data.bounds or ({from_x = 0, from_y = 0, to_x = 0, to_y = 0})
                 do
-                    local y = 0
-                    while y < field_height do
+                    local y = bounds.from_y
+                    while y < bounds.to_y do
                         do
-                            local x = 0
-                            while x < field_width do
+                            local x = bounds.from_x
+                            while x < bounds.to_x do
+                                local substrate = state.substrates[y + 1][x + 1]
+                                local substrate_view = msg.url(nil, substrate, "sprite")
+                                go.set(substrate_view, "material", resources.tutorial_sprite_material)
                                 local cell = state.game_state.cells[y + 1][x + 1]
                                 if cell ~= NotActiveCell then
                                     local cell_views = get_all_view_items_by_game_id(cell.uid)
@@ -467,16 +468,17 @@ function ____exports.View(animator, resources)
     end
     function remove_tutorial()
         EventBus.send("REMOVE_TUTORIAL")
-        for ____, substrate in ipairs(state.substrates) do
-            local substrate_view = msg.url(nil, substrate, "sprite")
-            go.set(substrate_view, "material", resources.default_sprite_material)
-        end
+        local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+        local bounds = tutorial_data.bounds ~= nil and tutorial_data.bounds or ({from_x = 0, from_y = 0, to_x = 0, to_y = 0})
         do
-            local y = 0
-            while y < field_height do
+            local y = bounds.from_y
+            while y < bounds.to_y do
                 do
-                    local x = 0
-                    while x < field_width do
+                    local x = bounds.from_x
+                    while x < bounds.to_x do
+                        local substrate = state.substrates[y + 1][x + 1]
+                        local substrate_view = msg.url(nil, substrate, "sprite")
+                        go.set(substrate_view, "material", resources.default_sprite_material)
                         local cell = state.game_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
                             local cell_views = get_all_view_items_by_game_id(cell.uid)
@@ -561,20 +563,20 @@ function ____exports.View(animator, resources)
         is_processing = true
         for ____, event in ipairs(data.events) do
             repeat
-                local ____switch104 = event.key
+                local ____switch102 = event.key
                 local event_duration
-                local ____cond104 = ____switch104 == "ON_SWAP_ELEMENTS"
-                if ____cond104 then
+                local ____cond102 = ____switch102 == "ON_SWAP_ELEMENTS"
+                if ____cond102 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond104 = ____cond104 or ____switch104 == "ON_SPINNING_ACTIVATED"
-                if ____cond104 then
+                ____cond102 = ____cond102 or ____switch102 == "ON_SPINNING_ACTIVATED"
+                if ____cond102 then
                     flow.delay(event_to_animation[event.key](event.value))
                     break
                 end
-                ____cond104 = ____cond104 or ____switch104 == "ON_MOVED_ELEMENTS"
-                if ____cond104 then
+                ____cond102 = ____cond102 or ____switch102 == "ON_MOVED_ELEMENTS"
+                if ____cond102 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
                     on_move_phase_end()
@@ -621,24 +623,24 @@ function ____exports.View(animator, resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch114 = move_direction
-            local ____cond114 = ____switch114 == Direction.Up
-            if ____cond114 then
+            local ____switch112 = move_direction
+            local ____cond112 = ____switch112 == Direction.Up
+            if ____cond112 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond114 = ____cond114 or ____switch114 == Direction.Down
-            if ____cond114 then
+            ____cond112 = ____cond112 or ____switch112 == Direction.Down
+            if ____cond112 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond114 = ____cond114 or ____switch114 == Direction.Left
-            if ____cond114 then
+            ____cond112 = ____cond112 or ____switch112 == Direction.Left
+            if ____cond112 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond114 = ____cond114 or ____switch114 == Direction.Right
-            if ____cond114 then
+            ____cond112 = ____cond112 or ____switch112 == Direction.Right
+            if ____cond112 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -736,18 +738,41 @@ function ____exports.View(animator, resources)
                 end
             end
         end
-        for ____, substrate in ipairs(state.substrates) do
-            if substrate ~= nil then
+        do
+            local y = 0
+            while y < field_height do
                 do
-                    pcall(function()
-                        go.delete(substrate)
-                    end)
+                    local x = 0
+                    while x < field_width do
+                        local substrate = state.substrates[y + 1][x + 1]
+                        do
+                            pcall(function()
+                                go.delete(substrate)
+                            end)
+                        end
+                        x = x + 1
+                    end
                 end
+                y = y + 1
             end
         end
         state = {}
         state.game_id_to_view_index = {}
         state.substrates = {}
+        do
+            local y = 0
+            while y < field_height do
+                state.substrates[y + 1] = {}
+                do
+                    local x = 0
+                    while x < field_width do
+                        state.substrates[y + 1][x + 1] = 0
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
     end
     function reload_field(with_anim)
         if with_anim == nil then
@@ -808,8 +833,8 @@ function ____exports.View(animator, resources)
                             vmath.vector3(scale_ratio, scale_ratio, 1),
                             _go
                         )
-                        local ____state_substrates_6 = state.substrates
-                        ____state_substrates_6[#____state_substrates_6 + 1] = _go
+                        print(state.substrates[y + 1][x + 1])
+                        state.substrates[y + 1][x + 1] = _go
                         return
                     end
                     mask = rotate_matrix_90(mask)
@@ -825,6 +850,9 @@ function ____exports.View(animator, resources)
             y,
             z_index ~= nil and z_index or (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, cell_id) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index)
         )
+        if cell_id == CellId.Stone0 then
+            print(pos.z)
+        end
         local _go = gm.make_go("cell_view", pos)
         sprite.play_flipbook(
             msg.url(nil, _go, "sprite"),
@@ -842,8 +870,8 @@ function ____exports.View(animator, resources)
             state.game_id_to_view_index[id] = {}
         end
         if id ~= nil then
-            local ____state_game_id_to_view_index_id_7 = state.game_id_to_view_index[id]
-            ____state_game_id_to_view_index_id_7[#____state_game_id_to_view_index_id_7 + 1] = index
+            local ____state_game_id_to_view_index_id_6 = state.game_id_to_view_index[id]
+            ____state_game_id_to_view_index_id_6[#____state_game_id_to_view_index_id_6 + 1] = index
         end
         return index
     end
@@ -884,8 +912,8 @@ function ____exports.View(animator, resources)
             state.game_id_to_view_index[id] = {}
         end
         if id ~= nil then
-            local ____state_game_id_to_view_index_id_8 = state.game_id_to_view_index[id]
-            ____state_game_id_to_view_index_id_8[#____state_game_id_to_view_index_id_8 + 1] = index
+            local ____state_game_id_to_view_index_id_7 = state.game_id_to_view_index[id]
+            ____state_game_id_to_view_index_id_7[#____state_game_id_to_view_index_id_7 + 1] = index
         end
         return index
     end
@@ -1237,17 +1265,17 @@ function ____exports.View(animator, resources)
         )
         local element = activation.damaged_elements[counter + 1]
         while true do
-            local ____temp_12 = element == nil
-            if not ____temp_12 then
-                local ____opt_10 = get_first_view_item_by_game_id(element.uid)
-                ____temp_12 = (____opt_10 and ____opt_10._hash) == diskosphere
+            local ____temp_11 = element == nil
+            if not ____temp_11 then
+                local ____opt_9 = get_first_view_item_by_game_id(element.uid)
+                ____temp_11 = (____opt_9 and ____opt_9._hash) == diskosphere
             end
-            if not ____temp_12 then
+            if not ____temp_11 then
                 break
             end
-            local ____activation_damaged_elements_9 = activation.damaged_elements
+            local ____activation_damaged_elements_8 = activation.damaged_elements
             counter = counter - 1
-            element = ____activation_damaged_elements_9[counter + 1]
+            element = ____activation_damaged_elements_8[counter + 1]
         end
         local target_pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1)
         spine.set_ik_target_position(
@@ -1707,10 +1735,10 @@ function ____exports.View(animator, resources)
                                     if delayed_row_in_column[element.points[1].to_x + 1] == nil then
                                         delayed_row_in_column[element.points[1].to_x + 1] = 0
                                     end
-                                    local ____delayed_row_in_column_13, ____temp_14 = delayed_row_in_column, element.points[1].to_x + 1
-                                    local ____delayed_row_in_column_index_15 = ____delayed_row_in_column_13[____temp_14]
-                                    ____delayed_row_in_column_13[____temp_14] = ____delayed_row_in_column_index_15 + 1
-                                    local delay_factor = ____delayed_row_in_column_index_15
+                                    local ____delayed_row_in_column_12, ____temp_13 = delayed_row_in_column, element.points[1].to_x + 1
+                                    local ____delayed_row_in_column_index_14 = ____delayed_row_in_column_12[____temp_13]
+                                    ____delayed_row_in_column_12[____temp_13] = ____delayed_row_in_column_index_14 + 1
+                                    local delay_factor = ____delayed_row_in_column_index_14
                                     delay = delay_factor * duration_of_movement_between_cells
                                     if delay > max_delay then
                                         max_delay = delay
@@ -1775,13 +1803,13 @@ function ____exports.View(animator, resources)
     end
     function remove_random_element_animation(message, element, target_element, view_index, on_complited)
         local target_world_pos = get_world_pos(target_element.x, target_element.y, 3)
-        local ____temp_16
+        local ____temp_15
         if view_index ~= nil then
-            ____temp_16 = get_view_item_by_game_id_and_index(element.uid, view_index)
+            ____temp_15 = get_view_item_by_game_id_and_index(element.uid, view_index)
         else
-            ____temp_16 = get_first_view_item_by_game_id(element.uid)
+            ____temp_15 = get_first_view_item_by_game_id(element.uid)
         end
-        local item = ____temp_16
+        local item = ____temp_15
         if item == nil then
             return 0
         end
@@ -2070,6 +2098,20 @@ function ____exports.View(animator, resources)
         if __TS__ArrayIncludes(GAME_CONFIG.animal_levels, current_level + 1) then
             Scene.load_resource(scene_name, "cat")
             Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1])
+        end
+        do
+            local y = 0
+            while y < field_height do
+                state.substrates[y + 1] = {}
+                do
+                    local x = 0
+                    while x < field_width do
+                        state.substrates[y + 1][x + 1] = 0
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
         end
         set_events()
         dispatch_messages()

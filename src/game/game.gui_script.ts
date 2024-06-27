@@ -310,9 +310,24 @@ function set_tutorial() {
     const tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1];
     const tutorial = gui.get_node('tutorial');
     const tutorial_text = gui.get_node('tutorial_text');
-    gui.set_position(tutorial_text, tutorial_data.position);
-    gui.set_text(tutorial_text, Lang.get_text(tutorial_data.text));
+    gui.set_position(tutorial_text, tutorial_data.text.pos);
+    gui.set_text(tutorial_text, Lang.get_text(tutorial_data.text.data));
     gui.set_enabled(tutorial, true);
+
+    if(tutorial_data.arrow_pos != undefined) {
+        const arrow = gui.get_node('arrow');
+        gui.set_enabled(arrow, true);
+        gui.set_position(arrow, tutorial_data.arrow_pos);
+    }
+
+    if(tutorial_data.buster_icon != undefined) {
+        const buster = gui.get_node('buster');
+        const buster_icon = gui.get_node('buster_icon');
+
+        gui.set_enabled(buster, true);
+        gui.set_position(buster, tutorial_data.buster_icon.pos);
+        gui.play_flipbook(buster_icon, tutorial_data.buster_icon.icon);
+    }
 
     if(tutorial_data.busters != undefined) {
         const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];        

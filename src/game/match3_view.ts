@@ -101,7 +101,7 @@ const SubstrateMasks = [
 interface ViewState {
     game_state: GameState,
     game_id_to_view_index: { [key in number]: number[] },
-    substrates: hash[],
+    substrates: hash[][],
 }
 
 interface ViewResources {
@@ -215,6 +215,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[current_level + 1]);
         }
 
+        for(let y = 0; y < field_height; y++) {
+            state.substrates[y] = [];
+            for(let x = 0; x < field_width; x++) {
+                state.substrates[y][x] = 0;
+            }
+        }
+
         set_events();
         dispatch_messages();
     }
@@ -313,14 +320,14 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         });
 
         EventBus.on("SET_TUTORIAL", () => {
+            const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+            const bounds = tutorial_data.bounds != undefined ? tutorial_data.bounds : {from_x: 0, from_y: 0, to_x: 0, to_y: 0};
 
-            for(const substrate of state.substrates) {
-                const substrate_view = msg.url(undefined, substrate, "sprite");
-                go.set(substrate_view, "material", resources.tutorial_sprite_material);
-            }
-
-            for(let y = 0; y < field_height; y++) {
-                for(let x = 0; x < field_width; x++) {
+            for(let y = bounds.from_y; y < bounds.to_y; y++) {
+                for(let x = bounds.from_x; x < bounds.to_x; x++) {
+                    const substrate = state.substrates[y][x];
+                    const substrate_view = msg.url(undefined, substrate, "sprite");
+                    go.set(substrate_view, "material", resources.tutorial_sprite_material);
 
                     const cell = state.game_state.cells[y][x];
                     if(cell != NotActiveCell) {
@@ -535,13 +542,14 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function remove_tutorial() {
         EventBus.send('REMOVE_TUTORIAL');
 
-        for(const substrate of state.substrates) {
-            const substrate_view = msg.url(undefined, substrate, "sprite");
-            go.set(substrate_view, "material", resources.default_sprite_material);
-        }
+        const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+        const bounds = tutorial_data.bounds != undefined ? tutorial_data.bounds : {from_x: 0, from_y: 0, to_x: 0, to_y: 0};
 
-        for(let y = 0; y < field_height; y++) {
-            for(let x = 0; x < field_width; x++) {
+        for(let y = bounds.from_y; y < bounds.to_y; y++) {
+            for(let x = bounds.from_x; x < bounds.to_x; x++) {
+                const substrate = state.substrates[y][x];
+                const substrate_view = msg.url(undefined, substrate, "sprite");
+                go.set(substrate_view, "material", resources.default_sprite_material);
 
                 const cell = state.game_state.cells[y][x];
                 if(cell != NotActiveCell) {
@@ -764,8 +772,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         }
 
-        for(const substrate of state.substrates) {
-            if(substrate != null) {
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const substrate = state.substrates[y][x];
                 try { go.delete(substrate); } catch(any) {}
             }
         }
@@ -773,6 +782,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         state = {} as ViewState;
         state.game_id_to_view_index = {};
         state.substrates = [];
+
+        for(let y = 0; y < field_height; y++) {
+            state.substrates[y] = [];
+            for(let x = 0; x < field_width; x++)
+                state.substrates[y][x] = 0;
+        }
     }
 
     function reload_field(with_anim = false) {
@@ -811,7 +826,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     gm.set_rotation_hash(_go, -angle);
                     sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-                    state.substrates.push(_go);
+                    print(state.substrates[y][x]);
+                    state.substrates[y][x] = _go;
                     return;
                 }
 
@@ -858,6 +874,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
         const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.top_layer_cells.includes(cell_id) ?
             GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index);
+
+        if(cell_id == CellId.Stone0) print(pos.z);
         
         const _go = gm.make_go('cell_view', pos);
 

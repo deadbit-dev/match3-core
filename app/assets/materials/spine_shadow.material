@@ -1,0 +1,26 @@
+name: "model_shadow"
+tags: "tile"
+vertex_program: "/defold-spine/assets/spine.vp"
+fragment_program: "/defold-spine/assets/spine.fp"
+vertex_space: VERTEX_SPACE_WORLD
+vertex_constants {
+  name: "world_view_proj"
+  type: CONSTANT_TYPE_WORLDVIEWPROJ
+  value {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+}
+fragment_constants {
+  name: "tint"
+  type: CONSTANT_TYPE_USER
+  value {
+    x: 0.1
+    y: 0.1
+    z: 0.1
+    w: 0.5
+  }
+}
+max_page_count: 0
