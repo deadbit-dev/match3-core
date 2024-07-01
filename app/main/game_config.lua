@@ -253,7 +253,7 @@ ____exports._GAME_CONFIG = {
             },
             arrow_pos = vmath.vector3(70, -85, 0),
             buster_icon = {
-                icon = "diskosphere_buster",
+                icon = "diskosphere_icon",
                 pos = vmath.vector3(-30, -190, 0)
             }
         },
