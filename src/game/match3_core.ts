@@ -254,6 +254,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
+        // print("---------------------START-------------------------");
+
         // проходимся по всем маскам с конца
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             
@@ -263,6 +265,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             // проходимся по повернутым вариантам
             for(let i = 0; i < masks.length; i++) {
                 const mask = masks[i];
+
+                // print("MASK: ", mask_index as CombinationType, i * 90);
                 
                 // проходимся маской по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
@@ -310,6 +314,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                         if(is_combined) {
                             combination.type = mask_index as CombinationType;
                             combinations.push(combination);
+
+                            print("FOUND: ", combination.type);
 
                             for(const element of combination.elements)
                                 combinations_elements[element.uid] = true;

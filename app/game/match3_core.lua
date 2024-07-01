@@ -361,6 +361,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                         if is_combined then
                                             combination.type = mask_index
                                             combinations[#combinations + 1] = combination
+                                            print("FOUND: ", combination.type)
                                             for ____, element in ipairs(combination.elements) do
                                                 combinations_elements[element.uid] = true
                                             end

@@ -874,8 +874,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
         const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.top_layer_cells.includes(cell_id) ?
             GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index);
-
-        if(cell_id == CellId.Stone0) print(pos.z);
         
         const _go = gm.make_go('cell_view', pos);
 
@@ -1153,13 +1151,16 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         trace(activation, diskosphere, pos, counter - 1, on_complete);
     }
 
-    function explode_element_animation(element: ItemInfo) {
-        delete_all_view_items_by_game_id(element.uid);
+    function explode_element_animation(item: ItemInfo) {
+        delete_all_view_items_by_game_id(item.uid);
 
-        const type = (state.game_state.elements[element.y][element.x] as Element).id as ElementId;
+        const element = state.game_state.elements[item.y][item.x];
+        if(element == NullElement) return;
+
+        const type = element.id as ElementId;
         if(!GAME_CONFIG.base_elements.includes(type)) return;
 
-        const pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1);
+        const pos = get_world_pos(item.x, item.y, GAME_CONFIG.default_element_z_index + 0.1);
         const effect = gm.make_go('effect_view', pos);
         const effect_name = 'explode';
         

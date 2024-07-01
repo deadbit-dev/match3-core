@@ -518,6 +518,8 @@ export function Game() {
         stop_helper();
         
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
+
+        print("SWAPED");
         
         is_step = true;
         const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
@@ -1836,6 +1838,7 @@ export function Game() {
 
     function try_combo(combined_element: ItemInfo, combination: CombinationInfo) {
         let element: Element | typeof NullElement = NullElement;
+        print("COMB: ", combination.type);
         
         switch(combination.type) {
             case CombinationType.Comb4:
@@ -1849,6 +1852,7 @@ export function Game() {
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter);
             break;
             case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
+                print('HERE');
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite);
             break;
             case CombinationType.Comb3x4: case CombinationType.Comb3x5:
@@ -1941,7 +1945,10 @@ export function Game() {
                         if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
                     } 
                     
-                    if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
+                    if(new_cell == NotActiveCell) {
+                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
+                        print("MAKE BASE CELL");
+                    }
                 }
             }
         }
@@ -2241,7 +2248,7 @@ export function load_config() {
                                 break;
                             default: level.field.cells[y][x] = [CellId.Base, data.cell];
                         }
-                    } else level.field.cells[y][x] = CellId.Base; 
+                    } else level.field.cells[y][x] = CellId.Base;
                 }
             }
         }

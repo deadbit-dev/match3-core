@@ -850,9 +850,6 @@ function ____exports.View(animator, resources)
             y,
             z_index ~= nil and z_index or (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, cell_id) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index)
         )
-        if cell_id == CellId.Stone0 then
-            print(pos.z)
-        end
         local _go = gm.make_go("cell_view", pos)
         sprite.play_flipbook(
             msg.url(nil, _go, "sprite"),
@@ -1306,13 +1303,17 @@ function ____exports.View(animator, resources)
             on_complete
         )
     end
-    function explode_element_animation(element)
-        delete_all_view_items_by_game_id(element.uid)
-        local ____type = state.game_state.elements[element.y + 1][element.x + 1].id
+    function explode_element_animation(item)
+        delete_all_view_items_by_game_id(item.uid)
+        local element = state.game_state.elements[item.y + 1][item.x + 1]
+        if element == NullElement then
+            return
+        end
+        local ____type = element.id
         if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
             return
         end
-        local pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1)
+        local pos = get_world_pos(item.x, item.y, GAME_CONFIG.default_element_z_index + 0.1)
         local effect = gm.make_go("effect_view", pos)
         local effect_name = "explode"
         go.set_scale(
