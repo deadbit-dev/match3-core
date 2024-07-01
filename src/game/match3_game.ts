@@ -507,6 +507,8 @@ export function Game() {
         completed_tutorials.push(current_level + 1);
         GameStorage.set('completed_tutorials', completed_tutorials);
 
+        send_game_step();
+
         set_timer();
     }
 

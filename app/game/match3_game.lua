@@ -412,6 +412,7 @@ function ____exports.Game()
         local completed_tutorials = GameStorage.get("completed_tutorials")
         completed_tutorials[#completed_tutorials + 1] = current_level + 1
         GameStorage.set("completed_tutorials", completed_tutorials)
+        send_game_step()
         set_timer()
     end
     function on_swap_elements(elements)
