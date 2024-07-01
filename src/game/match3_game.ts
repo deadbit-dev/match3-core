@@ -2064,12 +2064,16 @@ export function Game() {
 
                 const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
                     const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
-                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && CellId.Stone2 == cell.id);
-                    return (target.is_cell && (check_for_not_stone || check_stone_with_last_cell));
+                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && [CellId.Stone1, CellId.Stone2].includes(cell.id));
+                    const check_not_completed = target.count > target.uids.length;
+                    print(target.type, target.count, target.uids.length);
+                    return (target.is_cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
                 }) != -1);
                 
                 const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
-                    return (!target.is_cell && target.type == element.type);
+                    const check_not_completed = target.count > target.uids.length;
+                    print(target.type, target.count, target.uids.length);
+                    return (!target.is_cell && check_not_completed && (target.type == element.type));
                 }) != -1);
                 
                  if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
@@ -2228,6 +2232,7 @@ export function load_config() {
                             case CellId.Box:
                                 if(level.field.elements[y][x] == RandomElement)
                                     level.field.elements[y][x] = NullElement;
+                                    level.field.cells[y][x] = [CellId.Base, data.cell];
                                 break;
                             case CellId.Grass:
                                 level.field.cells[y][x] = [CellId.Base, CellId.Grass];

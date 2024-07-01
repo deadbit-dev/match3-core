@@ -1983,8 +1983,10 @@ function ____exports.Game()
                                 targets,
                                 function(____, target)
                                     local check_for_not_stone = target.type ~= ____exports.CellId.Stone0 and target.type == cell.id
-                                    local check_stone_with_last_cell = target.type == ____exports.CellId.Stone0 and ____exports.CellId.Stone2 == cell.id
-                                    return target.is_cell and (check_for_not_stone or check_stone_with_last_cell)
+                                    local check_stone_with_last_cell = target.type == ____exports.CellId.Stone0 and __TS__ArrayIncludes({____exports.CellId.Stone1, ____exports.CellId.Stone2}, cell.id)
+                                    local check_not_completed = target.count > #target.uids
+                                    print(target.type, target.count, #target.uids)
+                                    return target.is_cell and check_not_completed and (check_for_not_stone or check_stone_with_last_cell)
                                 end
                             )) ~= -1
                         end
@@ -2003,7 +2005,9 @@ function ____exports.Game()
                             ____temp_38_41 = (____opt_39 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
-                                    return not target.is_cell and target.type == element.type
+                                    local check_not_completed = target.count > #target.uids
+                                    print(target.type, target.count, #target.uids)
+                                    return not target.is_cell and check_not_completed and target.type == element.type
                                 end
                             )) ~= -1
                         end
@@ -2205,6 +2209,7 @@ function ____exports.load_config()
                                         if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
                                             level.field.elements[y + 1][x + 1] = NullElement
                                         end
+                                        level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
                                         break
                                     end
                                     ____cond463 = ____cond463 or ____switch463 == ____exports.CellId.Grass
