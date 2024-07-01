@@ -1307,7 +1307,6 @@ function ____exports.View(animator, resources)
         )
     end
     function explode_element_animation(element)
-        print("EXPLODE: ", element.uid)
         delete_all_view_items_by_game_id(element.uid)
         local ____type = state.game_state.elements[element.y + 1][element.x + 1].id
         if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
@@ -1815,7 +1814,7 @@ function ____exports.View(animator, resources)
         end
         local current_world_pos = go.get_position(item._hash)
         current_world_pos.z = 3
-        go.set_position(current_world_pos)
+        go.set_position(current_world_pos, item._hash)
         go.animate(
             item._hash,
             "position",
@@ -1826,7 +1825,6 @@ function ____exports.View(animator, resources)
             0,
             function()
                 damage_element_animation(message, target_element.x, target_element.y, target_element.uid)
-                print("REMOVE HELICOPTER: ", element.uid)
                 damage_element_animation(
                     message,
                     element.x,
@@ -1844,7 +1842,6 @@ function ____exports.View(animator, resources)
     end
     function damage_element_animation(data, x, y, element_id, on_complite)
         local element_view_item = get_first_view_item_by_game_id(element_id)
-        print("DAMAGE: ", element_id, element_view_item and element_view_item._hash)
         if element_view_item ~= nil then
             go.animate(
                 element_view_item._hash,
