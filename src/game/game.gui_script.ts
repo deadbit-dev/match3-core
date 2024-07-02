@@ -341,7 +341,7 @@ function set_win() {
     gui.set_enabled(gui.get_node('win'), true);
 
     const anim_props = { blend_duration: 0, playback_rate: 1 };
-    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), go.PLAYBACK_ONCE_FORWARD, anim_props, () => print('END'));
+    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), go.PLAYBACK_ONCE_FORWARD, anim_props);
 }
 
 function set_gameover(instance: props, state: GameState) {

@@ -423,7 +423,6 @@ function ____exports.Game()
         if not try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y) then
             return
         end
-        print("SWAPED")
         is_step = true
         local is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y)
         process_game_step(is_procesed)
@@ -1724,7 +1723,6 @@ function ____exports.Game()
     end
     function try_combo(combined_element, combination)
         local element = NullElement
-        print("COMB: ", combination.type)
         repeat
             local ____switch368 = combination.type
             local ____cond368 = ____switch368 == CombinationType.Comb4
@@ -1744,7 +1742,6 @@ function ____exports.Game()
             end
             ____cond368 = ____cond368 or (____switch368 == CombinationType.Comb3x3a or ____switch368 == CombinationType.Comb3x3b)
             if ____cond368 then
-                print("HERE")
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
@@ -1842,7 +1839,6 @@ function ____exports.Game()
                     end
                     if new_cell == NotActiveCell then
                         new_cell = make_cell(item_info.x, item_info.y, ____exports.CellId.Base)
-                        print("MAKE BASE CELL")
                     end
                 end
             end
@@ -1990,7 +1986,6 @@ function ____exports.Game()
                                     local check_for_not_stone = target.type ~= ____exports.CellId.Stone0 and target.type == cell.id
                                     local check_stone_with_last_cell = target.type == ____exports.CellId.Stone0 and __TS__ArrayIncludes({____exports.CellId.Stone1, ____exports.CellId.Stone2}, cell.id)
                                     local check_not_completed = target.count > #target.uids
-                                    print(target.type, target.count, #target.uids)
                                     return target.is_cell and check_not_completed and (check_for_not_stone or check_stone_with_last_cell)
                                 end
                             )) ~= -1
@@ -2011,7 +2006,6 @@ function ____exports.Game()
                                 targets,
                                 function(____, target)
                                     local check_not_completed = target.count > #target.uids
-                                    print(target.type, target.count, #target.uids)
                                     return not target.is_cell and check_not_completed and target.type == element.type
                                 end
                             )) ~= -1

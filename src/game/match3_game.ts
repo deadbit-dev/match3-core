@@ -27,7 +27,6 @@ import {
     SwapedHelicoptersActivationMessage,
     SwapedDiskosphereActivationMessage,
     SwapedHelicopterWithElementMessage,
-    SpinningActivationMessage,
     CombinedMessage,
     ActivatedCellMessage,
     ElementActivationMessage,
@@ -518,8 +517,6 @@ export function Game() {
         stop_helper();
         
         if(!try_swap_elements(elements.from_x, elements.from_y, elements.to_x, elements.to_y)) return;
-
-        print("SWAPED");
         
         is_step = true;
         const is_procesed = try_combinate_before_buster_activation(elements.from_x, elements.from_y, elements.to_x, elements.to_y);
@@ -1838,7 +1835,6 @@ export function Game() {
 
     function try_combo(combined_element: ItemInfo, combination: CombinationInfo) {
         let element: Element | typeof NullElement = NullElement;
-        print("COMB: ", combination.type);
         
         switch(combination.type) {
             case CombinationType.Comb4:
@@ -1852,7 +1848,6 @@ export function Game() {
                 element = make_element(combined_element.x, combined_element.y, ElementId.Helicopter);
             break;
             case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
-                print('HERE');
                 element = make_element(combined_element.x, combined_element.y, ElementId.Dynamite);
             break;
             case CombinationType.Comb3x4: case CombinationType.Comb3x5:
@@ -1947,7 +1942,6 @@ export function Game() {
                     
                     if(new_cell == NotActiveCell) {
                         new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
-                        print("MAKE BASE CELL");
                     }
                 }
             }
@@ -2075,13 +2069,11 @@ export function Game() {
                     const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
                     const check_stone_with_last_cell = (target.type == CellId.Stone0 && [CellId.Stone1, CellId.Stone2].includes(cell.id));
                     const check_not_completed = target.count > target.uids.length;
-                    print(target.type, target.count, target.uids.length);
                     return (target.is_cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
                 }) != -1);
                 
                 const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
                     const check_not_completed = target.count > target.uids.length;
-                    print(target.type, target.count, target.uids.length);
                     return (!target.is_cell && check_not_completed && (target.type == element.type));
                 }) != -1);
                 
@@ -2098,6 +2090,7 @@ export function Game() {
         const target = available_items[math.random(0, available_items.length - 1)];
         if(is_buster(target.x, target.y)) try_activate_buster_element(target.x, target.y);
         else field.remove_element(target.x, target.y, true, false, true);
+
 
         return target;
     }

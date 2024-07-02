@@ -833,7 +833,6 @@ function ____exports.View(animator, resources)
                             vmath.vector3(scale_ratio, scale_ratio, 1),
                             _go
                         )
-                        print(state.substrates[y + 1][x + 1])
                         state.substrates[y + 1][x + 1] = _go
                         return
                     end
@@ -1515,8 +1514,11 @@ function ____exports.View(animator, resources)
                     skip = true
                 end
             end
-            if activation.target_element ~= NullElement and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
-                skip = true
+            if activation.target_element ~= NullElement then
+                local is_target_pos = cell.x == activation.target_element.x and cell.y == activation.target_element.y
+                if is_target_pos and cell.previous_id == activation.target_element.uid then
+                    skip = true
+                end
             end
             if not skip then
                 activate_cell_animation(cell)
@@ -1858,16 +1860,10 @@ function ____exports.View(animator, resources)
                         local key = ____value[1]
                         local value = ____value[2]
                         if key == "activated_cells" then
-                            local found = false
                             for ____, cell in ipairs(value) do
                                 if cell.x == x and cell.y == y then
                                     activate_cell_animation(cell)
-                                    found = true
-                                    break
                                 end
-                            end
-                            if found then
-                                break
                             end
                         end
                     end

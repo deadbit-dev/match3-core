@@ -361,7 +361,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                         if is_combined then
                                             combination.type = mask_index
                                             combinations[#combinations + 1] = combination
-                                            print("FOUND: ", combination.type)
                                             for ____, element in ipairs(combination.elements) do
                                                 combinations_elements[element.uid] = true
                                             end
@@ -615,7 +614,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if cell == ____exports.NotActiveCell then
             return
         end
-        on_cell_activation({x = x, y = y, uid = cell.uid})
+        local item = {x = x, y = y, uid = cell.uid}
+        on_cell_activation(item)
         if is_near_activation then
             on_near_activation(get_neighbor_cells(x, y))
         end

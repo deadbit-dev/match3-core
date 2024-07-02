@@ -826,7 +826,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     gm.set_rotation_hash(_go, -angle);
                     sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-                    print(state.substrates[y][x]);
                     state.substrates[y][x] = _go;
                     return;
                 }
@@ -1290,8 +1289,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_helicopter_activated_animation(message: Messages[MessageId]) {
         const activation = message as HelicopterActivationMessage;
-        for (const element of activation.damaged_elements)
+        for (const element of activation.damaged_elements) {
             damage_element_animation(message, element.x, element.y, element.uid);
+        }
 
         for (const cell of activation.activated_cells) {
             let skip = false;
@@ -1300,8 +1300,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     skip = true;
             }
             
-            if (activation.target_element != NullElement && cell.x == activation.target_element.x && cell.y == activation.target_element.y)
-                skip = true;
+            if (activation.target_element != NullElement) {
+                const is_target_pos = (cell.x == activation.target_element.x) && (cell.y == activation.target_element.y);
+                if(is_target_pos && (cell.previous_id == activation.target_element.uid)) skip = true;
+            }
 
             if (!skip) activate_cell_animation(cell);
         }
@@ -1653,16 +1655,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                     for (const [key, value] of Object.entries(data)) {
                         if (key == 'activated_cells') {
-                            let found = false;
                             for (const cell of value as ActivatedCellMessage[]) {
                                 if ((cell.x == x) && (cell.y == y)) {
                                     activate_cell_animation(cell);
-                                    found = true;
-                                    break;
                                 }
                             }
-
-                            if (found) break;
                         }
                     }
 

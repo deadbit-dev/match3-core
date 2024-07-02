@@ -254,8 +254,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         const combinations: CombinationInfo[] = [];
         const combinations_elements: {[key in number]: boolean} = {};
 
-        // print("---------------------START-------------------------");
-
         // проходимся по всем маскам с конца
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             
@@ -266,8 +264,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             for(let i = 0; i < masks.length; i++) {
                 const mask = masks[i];
 
-                // print("MASK: ", mask_index as CombinationType, i * 90);
-                
                 // проходимся маской по полю
                 for(let y = 0; y + mask.length <= size_y; y++) {
                     for(let x = 0; x + mask[0].length <= size_x; x++) {
@@ -314,8 +310,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
                         if(is_combined) {
                             combination.type = mask_index as CombinationType;
                             combinations.push(combination);
-
-                            print("FOUND: ", combination.type);
 
                             for(const element of combination.elements)
                                 combinations_elements[element.uid] = true;
@@ -655,7 +649,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         const cell = get_cell(x, y);
         if(cell == NotActiveCell) return;
 
-        on_cell_activation({x, y, uid: cell.uid});
+        const item = {x, y, uid: cell.uid};
+        on_cell_activation(item);
+
+        
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
 
         if(!all && !is_available_cell_type_for_move(cell)) return;
