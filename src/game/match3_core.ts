@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 
-import { rotate_matrix_90 } from "../utils/math_utils";
+import { rotateMatrix } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
@@ -234,10 +234,10 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             rotated_masks[mask_index] = [];
             rotated_masks[mask_index].push(mask);
 
-            let angle = 0;
+            let angle = 90;
             const max_angle = is_one_row_mask ? 90 : 270;
             while(angle <= max_angle) {
-                rotated_masks[mask_index].push(rotate_matrix_90(mask));
+                rotated_masks[mask_index].push(rotateMatrix(mask, angle));
                 angle += 90;
             }
         }

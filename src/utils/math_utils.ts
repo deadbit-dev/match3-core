@@ -83,20 +83,64 @@ export function is_intersect_zone(check_pos: vmath.vector3, go_pos: vmath.vector
     return is_point_in_zone(a, b, c, d, check_pos);
 }
 
-export function rotate_matrix_90(matrix: number[][]): number[][] {
-    const n = matrix.length;
-    const m = matrix[0].length;
-    const rotated_matrix: number[][] = [];
+// export function rotate_matrix_90(matrix: number[][]): number[][] {
+//     // const n = matrix.length;
+//     // const m = matrix[0].length;
+//     // const rotated_matrix: number[][] = [];
 
-    for (let i = 0; i < m; i++) {
-        rotated_matrix[i] = [];
-        for (let j = n - 1; j >= 0; j--) {
-            rotated_matrix[i].push(matrix[j][i]);
+//     // for (let i = 0; i < m; i++) {
+//     //     rotated_matrix[i] = [];
+//     //     for (let j = n - 1; j >= 0; j--) {
+//     //         rotated_matrix[i].push(matrix[j][i]);
+//     //     }
+//     // }
+
+//     // return rotated_matrix;
+
+//     return matrix[0].map((val, index) => matrix.map(row => row[row.length-1-index]));
+// }
+
+export function rotateMatrix(matrix: number[][], degrees: number): number[][] {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const rotated: number[][] = [];
+
+    // Initialize the rotated matrix with zeros
+    for (let y = 0; y < cols; y++) {
+        rotated[y] = [];
+        for(let x = 0; x < rows; x++) {
+            rotated[y][x] = 0;
         }
     }
 
-    return rotated_matrix;
+    // Calculate the new coordinates after rotation
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            let newRow, newCol;
+            switch (degrees) {
+                case 90:
+                    newRow = j;
+                    newCol = rows - 1 - i;
+                    break;
+                case 180:
+                    newRow = rows - 1 - i;
+                    newCol = cols - 1 - j;
+                    break;
+                case 270:
+                    newRow = cols - 1 - j;
+                    newCol = i;
+                    break;
+                default:
+                    Log.error("[ROTATION MATRIX] Invalid degrees: ", degrees);
+                    return matrix;
+            }
+            rotated[newRow][newCol] = matrix[i][j];
+        }
+    }
+
+    return rotated;
 }
+
 
 export function is_valid_pos(x: number, y: number, size_x: number, size_y: number): boolean {
     if(x < 0 || x >= size_x || y < 0 || y >= size_y) return false;

@@ -13,7 +13,7 @@
 
 
 import * as flow from 'ludobits.m.flow';
-import { Axis, Direction, is_valid_pos, rotate_matrix_90 } from '../utils/math_utils';
+import { Axis, Direction, is_valid_pos, rotateMatrix } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, PosXYMessage } from '../modules/modules_const';
 import { CombinedMessage, HelicopterActivationMessage, ActivationMessage, SwapElementsMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, ActivatedCellMessage, SwapedHelicoptersActivationMessage, MovedElementsMessage, SwapedHelicopterWithElementMessage, SpinningActivationMessage, ElementActivationMessage, RocketActivationMessage, GameStepMessage } from "../main/game_config";
@@ -805,7 +805,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             let is_90_mask = false;
             if (mask_index == SubstrateId.LeftRightStrip) is_90_mask = true;
 
-            let angle = 0;
+            let angle = 90;
             const max_angle = is_90_mask ? 90 : 270;
             while (angle <= max_angle) {
                 let is_valid = true;
@@ -830,7 +830,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     return;
                 }
 
-                mask = rotate_matrix_90(mask);
+                mask = rotateMatrix(mask, angle);
                 angle += 90;
             }
         }
@@ -865,7 +865,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     //             go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
     //         }
 
-    //         mask = rotate_matrix_90(mask);
+    //         mask = rotateMatrix(mask, angle);
     //         angle += 90;
     //     }
     // }

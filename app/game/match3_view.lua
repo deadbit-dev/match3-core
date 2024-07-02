@@ -11,7 +11,7 @@ local ____math_utils = require("utils.math_utils")
 local Axis = ____math_utils.Axis
 local Direction = ____math_utils.Direction
 local is_valid_pos = ____math_utils.is_valid_pos
-local rotate_matrix_90 = ____math_utils.rotate_matrix_90
+local rotateMatrix = ____math_utils.rotateMatrix
 local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
 local ____match3_core = require("game.match3_core")
@@ -797,7 +797,7 @@ function ____exports.View(animator, resources)
                 if mask_index == SubstrateId.LeftRightStrip then
                     is_90_mask = true
                 end
-                local angle = 0
+                local angle = 90
                 local max_angle = is_90_mask and 90 or 270
                 while angle <= max_angle do
                     local is_valid = true
@@ -836,7 +836,7 @@ function ____exports.View(animator, resources)
                         state.substrates[y + 1][x + 1] = _go
                         return
                     end
-                    mask = rotate_matrix_90(mask)
+                    mask = rotateMatrix(mask, angle)
                     angle = angle + 90
                 end
                 mask_index = mask_index + 1

@@ -92,26 +92,65 @@ function ____exports.is_intersect_zone(check_pos, go_pos, go_size, go_angle_deg,
         check_pos
     )
 end
-function ____exports.rotate_matrix_90(matrix)
-    local n = #matrix
-    local m = #matrix[1]
-    local rotated_matrix = {}
+function ____exports.rotateMatrix(matrix, degrees)
+    local rows = #matrix
+    local cols = #matrix[1]
+    local rotated = {}
+    do
+        local y = 0
+        while y < cols do
+            rotated[y + 1] = {}
+            do
+                local x = 0
+                while x < rows do
+                    rotated[y + 1][x + 1] = 0
+                    x = x + 1
+                end
+            end
+            y = y + 1
+        end
+    end
     do
         local i = 0
-        while i < m do
-            rotated_matrix[i + 1] = {}
+        while i < rows do
             do
-                local j = n - 1
-                while j >= 0 do
-                    local ____rotated_matrix_index_0 = rotated_matrix[i + 1]
-                    ____rotated_matrix_index_0[#____rotated_matrix_index_0 + 1] = matrix[j + 1][i + 1]
-                    j = j - 1
+                local j = 0
+                while j < cols do
+                    local newRow
+                    local newCol
+                    repeat
+                        local ____switch15 = degrees
+                        local ____cond15 = ____switch15 == 90
+                        if ____cond15 then
+                            newRow = j
+                            newCol = rows - 1 - i
+                            break
+                        end
+                        ____cond15 = ____cond15 or ____switch15 == 180
+                        if ____cond15 then
+                            newRow = rows - 1 - i
+                            newCol = cols - 1 - j
+                            break
+                        end
+                        ____cond15 = ____cond15 or ____switch15 == 270
+                        if ____cond15 then
+                            newRow = cols - 1 - j
+                            newCol = i
+                            break
+                        end
+                        do
+                            Log.error("[ROTATION MATRIX] Invalid degrees: ", degrees)
+                            return matrix
+                        end
+                    until true
+                    rotated[newRow + 1][newCol + 1] = matrix[i + 1][j + 1]
+                    j = j + 1
                 end
             end
             i = i + 1
         end
     end
-    return rotated_matrix
+    return rotated
 end
 function ____exports.is_valid_pos(x, y, size_x, size_y)
     if x < 0 or x >= size_x or y < 0 or y >= size_y then

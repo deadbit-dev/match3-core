@@ -6,7 +6,7 @@ local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
-local rotate_matrix_90 = ____math_utils.rotate_matrix_90
+local rotateMatrix = ____math_utils.rotateMatrix
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
 ____exports.CombinationType[____exports.CombinationType.Comb3] = "Comb3"
@@ -110,11 +110,11 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                 rotated_masks[mask_index + 1] = {}
                 local ____rotated_masks_index_0 = rotated_masks[mask_index + 1]
                 ____rotated_masks_index_0[#____rotated_masks_index_0 + 1] = mask
-                local angle = 0
+                local angle = 90
                 local max_angle = is_one_row_mask and 90 or 270
                 while angle <= max_angle do
                     local ____rotated_masks_index_1 = rotated_masks[mask_index + 1]
-                    ____rotated_masks_index_1[#____rotated_masks_index_1 + 1] = rotate_matrix_90(mask)
+                    ____rotated_masks_index_1[#____rotated_masks_index_1 + 1] = rotateMatrix(mask, angle)
                     angle = angle + 90
                 end
                 mask_index = mask_index - 1
