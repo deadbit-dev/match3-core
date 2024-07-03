@@ -53,6 +53,7 @@ import {
 
 import { lang_data } from '../main/langs';
 import { add_coins } from '../main/coins';
+import { copy_array_of_objects } from '../utils/utils';
 
 
 export const RandomElement = -2;
@@ -362,7 +363,7 @@ export function Game() {
             search_available_steps(5, (steps) => {
                 if(steps.length != 0) {
                     is_block_input = false;
-                    available_steps = steps;
+                    available_steps = copy_array_of_objects(steps);
                     return;
                 }
 
@@ -742,7 +743,7 @@ export function Game() {
             if(helper_data != null) {
                 Log.log("START HELPER");
 
-                reset_helper();
+                reset_previous_helper();
 
                 timer.delay(1, false, () => {
                     if(helper_data == null) return;
@@ -759,26 +760,29 @@ export function Game() {
     function stop_helper() {
         if(helper_timer == undefined) return;
         Log.log("STOP HELPER");
-
-        stop_all_coroutines();
-
-        helper_data = null;
         
         timer.cancel(helper_timer);
-        reset_helper();
+
+        stop_all_coroutines();
+        reset_current_helper();
+        reset_previous_helper();
     }
 
     function stop_all_coroutines() {
-        for(const coroutine of coroutines) {
+        for(const coroutine of coroutines)
             flow.stop(coroutine);
-        }
-
         coroutines = [];
     }
 
-    function reset_helper() {
+    function reset_current_helper() {
+        if(helper_data == null) return;
+        Log.log("RESET CURRENT HELPER");
+        helper_data = null;
+    }
+
+    function reset_previous_helper() {
         if(previous_helper_data == null) return;
-        Log.log("RESTART HELPER");
+        Log.log("RESET PREVIOUS HELPER");
         
         EventBus.trigger('ON_RESET_STEP_HELPER', previous_helper_data, true, true);
         previous_helper_data = null;
@@ -813,7 +817,12 @@ export function Game() {
                     combined_element: element
                 };
 
-                return Log.log("SETUP HELPER DATA");
+                return Log.log("SETUP HELPER DATA: ",
+                    helper_data.step.from_x,
+                    helper_data.step.from_y,
+                    helper_data.step.to_x,
+                    helper_data.step.to_y
+                );
             }
         }
     }
@@ -1745,7 +1754,7 @@ export function Game() {
 
         search_available_steps(5, (steps) => {
             if(steps.length != 0) {
-                available_steps = steps;
+                available_steps = copy_array_of_objects(steps);
                 return;
             }
 
@@ -1796,7 +1805,7 @@ export function Game() {
         set_random(previous_state.randomseed);
 
         search_available_steps(5, (steps) => {
-            available_steps = steps;
+            available_steps = copy_array_of_objects(steps);
         });
 
         EventBus.send('UPDATED_STATE', previous_state);

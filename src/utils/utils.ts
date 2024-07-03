@@ -148,3 +148,10 @@ export function set_position_xy(item: hash, x: number, y: number) {
 export function is_equal_game_items(cell1: ItemDataH, cell2: ItemDataH) {
     return cell1._hash == cell2._hash;
 }
+
+export function copy_array_of_objects<T>(array: T[]) {
+    const copy_of_array = [];
+    for(const element of array)
+        copy_of_array.push(Object.assign({}, element));
+    return copy_of_array;
+}
