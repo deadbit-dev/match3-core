@@ -1669,6 +1669,7 @@ export function Game() {
 
         if(is_tutorial()) {
             const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+            if(tutorial_data.busters != undefined) return false;
             if(tutorial_data.step != undefined) {
                 const is_from = (tutorial_data.step.from_x == from_x) && (tutorial_data.step.from_y == from_y) && (tutorial_data.step.to_x == to_x) && (tutorial_data.step.to_y == to_y);
                 const is_to = (tutorial_data.step.from_x == to_x) && (tutorial_data.step.from_y == to_y) && (tutorial_data.step.to_x == from_x) && (tutorial_data.step.to_y == from_y);

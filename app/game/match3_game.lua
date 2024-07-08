@@ -1594,6 +1594,9 @@ function ____exports.Game()
         selected_element = nil
         if is_tutorial() then
             local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+            if tutorial_data.busters ~= nil then
+                return false
+            end
             if tutorial_data.step ~= nil then
                 local is_from = tutorial_data.step.from_x == from_x and tutorial_data.step.from_y == from_y and tutorial_data.step.to_x == to_x and tutorial_data.step.to_y == to_y
                 local is_to = tutorial_data.step.from_x == to_x and tutorial_data.step.from_y == to_y and tutorial_data.step.to_x == from_x and tutorial_data.step.to_y == from_y
@@ -1744,29 +1747,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch371 = combination.type
-            local ____cond371 = ____switch371 == CombinationType.Comb4
-            if ____cond371 then
+            local ____switch372 = combination.type
+            local ____cond372 = ____switch372 == CombinationType.Comb4
+            if ____cond372 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond371 = ____cond371 or ____switch371 == CombinationType.Comb5
-            if ____cond371 then
+            ____cond372 = ____cond372 or ____switch372 == CombinationType.Comb5
+            if ____cond372 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond371 = ____cond371 or ____switch371 == CombinationType.Comb2x2
-            if ____cond371 then
+            ____cond372 = ____cond372 or ____switch372 == CombinationType.Comb2x2
+            if ____cond372 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond371 = ____cond371 or (____switch371 == CombinationType.Comb3x3a or ____switch371 == CombinationType.Comb3x3b)
-            if ____cond371 then
+            ____cond372 = ____cond372 or (____switch372 == CombinationType.Comb3x3a or ____switch372 == CombinationType.Comb3x3b)
+            if ____cond372 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond371 = ____cond371 or (____switch371 == CombinationType.Comb3x4 or ____switch371 == CombinationType.Comb3x5)
-            if ____cond371 then
+            ____cond372 = ____cond372 or (____switch372 == CombinationType.Comb3x4 or ____switch372 == CombinationType.Comb3x5)
+            if ____cond372 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2192,15 +2195,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch461 = data
-                                local ____cond461 = ____switch461 == "-"
-                                if ____cond461 then
+                                local ____switch462 = data
+                                local ____cond462 = ____switch462 == "-"
+                                if ____cond462 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond461 = ____cond461 or ____switch461 == ""
-                                if ____cond461 then
+                                ____cond462 = ____cond462 or ____switch462 == ""
+                                if ____cond462 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -2214,25 +2217,25 @@ function ____exports.load_config()
                             end
                             if data.cell ~= nil then
                                 repeat
-                                    local ____switch466 = data.cell
-                                    local ____cond466 = ____switch466 == ____exports.CellId.Stone0
-                                    if ____cond466 then
+                                    local ____switch467 = data.cell
+                                    local ____cond467 = ____switch467 == ____exports.CellId.Stone0
+                                    if ____cond467 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                         if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
                                             level.field.elements[y + 1][x + 1] = NullElement
                                         end
                                         break
                                     end
-                                    ____cond466 = ____cond466 or ____switch466 == ____exports.CellId.Box
-                                    if ____cond466 then
+                                    ____cond467 = ____cond467 or ____switch467 == ____exports.CellId.Box
+                                    if ____cond467 then
                                         if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
                                             level.field.elements[y + 1][x + 1] = NullElement
                                         end
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
                                         break
                                     end
-                                    ____cond466 = ____cond466 or ____switch466 == ____exports.CellId.Grass
-                                    if ____cond466 then
+                                    ____cond467 = ____cond467 or ____switch467 == ____exports.CellId.Grass
+                                    if ____cond467 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Grass}
                                         break
                                     end
