@@ -22,10 +22,10 @@ export const ADS_CONFIG = {
 };
 
 // для вк
-export const VK_SHARE_URL = '';
+export const VK_SHARE_URL = 'https://vk.com/app51867396';
 export const OK_SHARE_TEXT = '';
 // для андроида метрика
-export const ID_YANDEX_METRICA = "";
+export const ID_YANDEX_METRICA = sys.get_sys_info().system_name == 'Android' ? "c1ce595b-7bf8-4b99-b487-0457f8da7b95" : "91a2fd82-b0de-4fb2-b3a7-03bff14b9d09";
 // через сколько показать первое окно оценки
 export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 

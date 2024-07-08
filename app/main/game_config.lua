@@ -19,9 +19,9 @@ ____exports.ADS_CONFIG = {
     ads_interval = 4 * 60,
     ads_delay = 30
 }
-____exports.VK_SHARE_URL = ""
+____exports.VK_SHARE_URL = "https://vk.com/app51867396"
 ____exports.OK_SHARE_TEXT = ""
-____exports.ID_YANDEX_METRICA = ""
+____exports.ID_YANDEX_METRICA = sys.get_sys_info().system_name == "Android" and "c1ce595b-7bf8-4b99-b487-0457f8da7b95" or "91a2fd82-b0de-4fb2-b3a7-03bff14b9d09"
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.MAIN_BUNDLE_SCENES = {"game"}
