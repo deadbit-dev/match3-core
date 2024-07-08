@@ -1531,37 +1531,41 @@ function ____exports.View(animator, resources)
         return damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
     end
     function on_swaped_helicopters_animation(message)
-        local activation = message
+        local data = message
         local squash_duration = squash_element_animation(
-            activation.other_element,
-            activation.element,
+            data.other_element,
+            data.element,
             function()
-                for ____, element in ipairs(activation.damaged_elements) do
+                for ____, element in ipairs(data.damaged_elements) do
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
-                local target_element = table.remove(activation.target_elements)
+                local target_element = data.target_elements[1]
                 if target_element ~= nil and target_element ~= NullElement then
-                    remove_random_element_animation(message, activation.element, target_element)
+                    remove_random_element_animation(message, data.element, target_element)
+                else
+                    delete_all_view_items_by_game_id(data.element.uid)
                 end
-                target_element = table.remove(activation.target_elements)
+                target_element = data.target_elements[2]
                 if target_element ~= nil and target_element ~= NullElement then
-                    remove_random_element_animation(message, activation.other_element, target_element)
+                    remove_random_element_animation(message, data.other_element, target_element)
+                else
+                    delete_all_view_items_by_game_id(data.other_element.uid)
                 end
-                target_element = table.remove(activation.target_elements)
+                target_element = data.target_elements[3]
                 if target_element ~= nil and target_element ~= NullElement then
-                    make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid)
-                    remove_random_element_animation(message, activation.element, target_element, 1)
+                    make_element_view(data.element.x, data.element.y, ElementId.Helicopter, data.element.uid)
+                    remove_random_element_animation(message, data.element, target_element, 1)
                 end
             end
         )
-        for ____, cell in ipairs(activation.activated_cells) do
+        for ____, cell in ipairs(data.activated_cells) do
             local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
+            for ____, element in ipairs(data.damaged_elements) do
                 if cell.x == element.x and cell.y == element.y then
                     skip = true
                 end
             end
-            for ____, element in ipairs(activation.target_elements) do
+            for ____, element in ipairs(data.target_elements) do
                 if element ~= NullElement and cell.x == element.x and cell.y == element.y then
                     skip = true
                 end

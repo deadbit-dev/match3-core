@@ -1498,6 +1498,13 @@ export function Game() {
     function try_spinning_activation() {
         if(!busters.spinning.active || GameStorage.get('spinning_counts') <= 0) return false;
         
+        if(selected_element != null) {
+            EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
+            selected_element = null;
+        }
+
+        stop_helper();
+
         shuffle_field();
         
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);

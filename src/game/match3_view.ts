@@ -1317,32 +1317,36 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function on_swaped_helicopters_animation(message: Messages[MessageId]) {
-        const activation = message as SwapedHelicoptersActivationMessage;
+        const data = message as SwapedHelicoptersActivationMessage;
 
-        const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            for (const element of activation.damaged_elements)
+        const squash_duration = squash_element_animation(data.other_element, data.element, () => {
+            for (const element of data.damaged_elements)
                 damage_element_animation(message, element.x, element.y, element.uid);
 
-            let target_element = activation.target_elements.pop();
+            let target_element = data.target_elements[0];
             if (target_element != undefined && target_element != NullElement)
-                remove_random_element_animation(message, activation.element, target_element);
+                remove_random_element_animation(message, data.element, target_element);
+            else
+                delete_all_view_items_by_game_id(data.element.uid);
 
-            target_element = activation.target_elements.pop();
+            target_element = data.target_elements[1];
             if (target_element != undefined && target_element != NullElement)
-                remove_random_element_animation(message, activation.other_element, target_element);
+                remove_random_element_animation(message, data.other_element, target_element);
+            else
+                delete_all_view_items_by_game_id(data.other_element.uid);
 
-            target_element = activation.target_elements.pop();
+            target_element = data.target_elements[2];
             if (target_element != undefined && target_element != NullElement) {
-                make_element_view(activation.element.x, activation.element.y, ElementId.Helicopter, activation.element.uid);
-                remove_random_element_animation(message, activation.element, target_element, 1);
+                make_element_view(data.element.x, data.element.y, ElementId.Helicopter, data.element.uid);
+                remove_random_element_animation(message, data.element, target_element, 1);
             }
         });
 
-        for (const cell of activation.activated_cells) {
+        for (const cell of data.activated_cells) {
             let skip = false;
-            for (const element of activation.damaged_elements)
+            for (const element of data.damaged_elements)
                 if (cell.x == element.x && cell.y == element.y) skip = true;
-            for (const element of activation.target_elements)
+            for (const element of data.target_elements)
                 if (element != NullElement && cell.x == element.x && cell.y == element.y) skip = true;
             if (!skip) activate_cell_animation(cell);
         }
