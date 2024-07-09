@@ -591,6 +591,7 @@ function ____exports.View(animator, resources)
                 end
             until true
         end
+        print("G: ", data.state.elements)
         state.game_state = data.state
         is_processing = false
         EventBus.send("SET_HELPER")
@@ -782,7 +783,9 @@ function ____exports.View(animator, resources)
             return
         end
         local copy_state = copy_game_state()
+        print("C: ", copy_state.elements)
         reset_field()
+        print("AC: ", copy_state.elements)
         load_field(copy_state, with_anim)
     end
     function make_substrate_view(x, y, cells, z_index)

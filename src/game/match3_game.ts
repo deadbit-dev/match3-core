@@ -498,7 +498,8 @@ export function Game() {
     function complete_tutorial() {
         unlock_busters();
         unlock_cells();
-        update_cells_state();
+        update_state();
+        // update_cells_state();
 
         write_game_step_event('REMOVE_TUTORIAL', {});
         write_game_step_event('UPDATED_CELLS_STATE', get_state().cells);

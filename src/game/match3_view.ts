@@ -650,6 +650,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         }
 
+        print("G: ", data.state.elements);
+
         state.game_state = data.state;
 
         is_processing = false;
@@ -794,7 +796,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         if(state.game_state == null) return;
 
         const copy_state = copy_game_state();
+        print("C: ", copy_state.elements);
         reset_field();
+        print("AC: ", copy_state.elements);
         load_field(copy_state, with_anim);
     }
 

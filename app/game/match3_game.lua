@@ -112,7 +112,7 @@ ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_combination_for_helper, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, update_cells_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_combination_for_helper, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -405,7 +405,7 @@ function ____exports.Game()
     function complete_tutorial()
         unlock_busters()
         unlock_cells()
-        update_cells_state()
+        update_state()
         write_game_step_event("REMOVE_TUTORIAL", {})
         write_game_step_event(
             "UPDATED_CELLS_STATE",
@@ -1911,12 +1911,6 @@ function ____exports.Game()
         last_state.elements = field_state.elements
         return last_state
     end
-    function update_cells_state()
-        local last_state = get_state()
-        local field_state = field.save_state()
-        last_state.cells = field_state.cells
-        return last_state
-    end
     function copy_state(offset)
         if offset == nil then
             offset = 1
@@ -2155,6 +2149,12 @@ function ____exports.Game()
         set_busters()
         set_events()
         timer.delay(0.1, false, load_field)
+    end
+    local function update_cells_state()
+        local last_state = get_state()
+        local field_state = field.save_state()
+        last_state.cells = field_state.cells
+        return last_state
     end
     return init()
 end
