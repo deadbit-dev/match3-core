@@ -45,7 +45,9 @@ function ____exports.View(animator, resources)
         Log.log("RESIZE VIEW")
         prev_game_width = ltrb.z
         prev_game_height = ltrb.w
-        local changes_coff = math.abs(ltrb.w) / original_game_height
+        local width_ratio = math.abs(ltrb.z) / original_game_width
+        local height_ratio = math.abs(ltrb.w) / original_game_height
+        local changes_coff = math.min(width_ratio, height_ratio)
         cell_size = calculate_cell_size() * changes_coff
         scale_ratio = calculate_scale_ratio()
         cells_offset = vmath.vector3(

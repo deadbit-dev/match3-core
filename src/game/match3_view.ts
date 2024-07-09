@@ -235,7 +235,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         prev_game_width = ltrb.z;
         prev_game_height = ltrb.w;
 
-        const changes_coff = math.abs(ltrb.w) / original_game_height;
+        const width_ratio = math.abs(ltrb.z) / original_game_width;
+        const height_ratio = math.abs(ltrb.w) / original_game_height;
+
+        const changes_coff = math.min(width_ratio, height_ratio);
 
         cell_size = calculate_cell_size() * changes_coff;
         scale_ratio = calculate_scale_ratio();
