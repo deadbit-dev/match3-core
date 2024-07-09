@@ -343,7 +343,7 @@ function set_enabled_store(state: boolean) {
     const store = gui.get_node('store/manager');
     gui.set_enabled(store, state);
 
-    EventBus.send('STORE_ACTIVATION', state);
+    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_life_notification(state: boolean) {
@@ -405,19 +405,27 @@ function on_gameover_offer_close() {
 function set_enabled_hammer(state: boolean) {
     const hammer = gui.get_node('hammer/manager');
     gui.set_enabled(hammer, state);
+
+    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_spinning(state: boolean) {
     const spinning = gui.get_node('spinning/manager');
     gui.set_enabled(spinning, state);
+
+    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_horizontall_rocket(state: boolean) {
     const horizontal_rocket = gui.get_node('horizontal_rocket/manager');
     gui.set_enabled(horizontal_rocket, state);
+
+    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_vertical_rocket(state: boolean) {
     const vertical_rocket = gui.get_node('vertical_rocket/manager');
     gui.set_enabled(vertical_rocket, state);
+
+    EventBus.send('DLG_ACTIVE', state);
 }

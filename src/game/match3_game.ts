@@ -219,6 +219,7 @@ export function Game() {
     let is_step = false;
     
     let is_block_input = false;
+    let is_dlg_active = false;
     let is_block_spinning = false;
     let is_block_hammer = false;
     let is_block_vertical_rocket = false;
@@ -347,6 +348,9 @@ export function Game() {
         EventBus.on('REVERT_STEP', on_revert_step);
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
         EventBus.on('REVIVE', on_revive);
+        EventBus.on('DLG_ACTIVE', (state) => {
+            is_dlg_active = state;
+        });
     }
 
     function load_field() {
@@ -514,7 +518,7 @@ export function Game() {
     }
 
     function on_swap_elements(elements: StepInfo | undefined) {
-        if(is_block_input || is_gameover || elements == undefined) return;
+        if(is_block_input || is_dlg_active || is_gameover || elements == undefined) return;
 
         stop_helper();
         
@@ -526,7 +530,7 @@ export function Game() {
     }
 
     function on_click_activation(pos: PosXYMessage | undefined) {
-        if(is_block_input || is_gameover || pos == undefined) return;
+        if(is_block_input || is_dlg_active || is_gameover || pos == undefined) return;
 
         stop_helper();
 
@@ -566,7 +570,7 @@ export function Game() {
     }
 
     function on_activate_spinning() {
-        if(GameStorage.get('spinning_counts') <= 0 || is_block_input || is_block_spinning) return;
+        if(GameStorage.get('spinning_counts') <= 0 || is_block_input || is_dlg_active || is_block_spinning) return;
         
         busters.spinning.active = !busters.spinning.active;
 
@@ -583,7 +587,7 @@ export function Game() {
     }
 
     function on_activate_hammer() {
-        if(GameStorage.get('hammer_counts') <= 0 || is_block_input || is_block_hammer) return;
+        if(GameStorage.get('hammer_counts') <= 0 || is_block_input || is_dlg_active || is_block_hammer) return;
         
         busters.hammer.active = !busters.hammer.active;
 
@@ -597,7 +601,7 @@ export function Game() {
     }
     
     function on_activate_vertical_rocket() {
-        if(GameStorage.get('vertical_rocket_counts') <= 0 || is_block_input || is_block_vertical_rocket) return;
+        if(GameStorage.get('vertical_rocket_counts') <= 0 || is_block_input || is_dlg_active || is_block_vertical_rocket) return;
         
         busters.vertical_rocket.active = !busters.vertical_rocket.active;
 
@@ -611,7 +615,7 @@ export function Game() {
     }
 
     function on_activate_horizontal_rocket() {
-        if(GameStorage.get('horizontal_rocket_counts') <= 0 || is_block_input || is_block_horizontal_rocket) return;
+        if(GameStorage.get('horizontal_rocket_counts') <= 0 || is_block_input || is_dlg_active || is_block_horizontal_rocket) return;
         
         busters.horizontal_rocket.active = !busters.horizontal_rocket.active;
 

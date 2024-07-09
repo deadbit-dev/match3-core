@@ -494,7 +494,7 @@ export type _UserMessages = {
     SET_TUTORIAL: VoidMessage,
     REMOVE_TUTORIAL: VoidMessage,
 
-    STORE_ACTIVATION: boolean,
+    DLG_ACTIVE: boolean,
     LIFE_NOTIFICATION: boolean,
     NOT_ENOUGH_LIFE: VoidMessage,
 

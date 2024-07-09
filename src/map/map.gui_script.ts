@@ -95,7 +95,7 @@ function on_drag(action: any) {
 }
 
 function set_events(instace: props) {
-    EventBus.on('STORE_ACTIVATION', (state) => {
+    EventBus.on('DLG_ACTIVE', (state) => {
         instace.block_input = state;
     });
 

@@ -51,7 +51,7 @@ function on_drag(action)
 end
 function set_events(instace)
     EventBus.on(
-        "STORE_ACTIVATION",
+        "DLG_ACTIVE",
         function(state)
             instace.block_input = state
         end

@@ -112,7 +112,7 @@ ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_combination_for_helper, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_combination_for_helper, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -217,6 +217,12 @@ function ____exports.Game()
         EventBus.on("REVERT_STEP", on_revert_step)
         EventBus.on("ON_GAME_STEP_ANIMATION_END", on_game_step_animation_end)
         EventBus.on("REVIVE", on_revive)
+        EventBus.on(
+            "DLG_ACTIVE",
+            function(state)
+                is_dlg_active = state
+            end
+        )
     end
     function load_field()
         Log.log("LOAD FIELD")
@@ -418,7 +424,7 @@ function ____exports.Game()
         set_timer()
     end
     function on_swap_elements(elements)
-        if is_block_input or is_gameover or elements == nil then
+        if is_block_input or is_dlg_active or is_gameover or elements == nil then
             return
         end
         stop_helper()
@@ -430,7 +436,7 @@ function ____exports.Game()
         process_game_step(is_procesed)
     end
     function on_click_activation(pos)
-        if is_block_input or is_gameover or pos == nil then
+        if is_block_input or is_dlg_active or is_gameover or pos == nil then
             return
         end
         stop_helper()
@@ -465,7 +471,7 @@ function ____exports.Game()
         end
     end
     function on_activate_spinning()
-        if GameStorage.get("spinning_counts") <= 0 or is_block_input or is_block_spinning then
+        if GameStorage.get("spinning_counts") <= 0 or is_block_input or is_dlg_active or is_block_spinning then
             return
         end
         busters.spinning.active = not busters.spinning.active
@@ -480,7 +486,7 @@ function ____exports.Game()
         try_spinning_activation()
     end
     function on_activate_hammer()
-        if GameStorage.get("hammer_counts") <= 0 or is_block_input or is_block_hammer then
+        if GameStorage.get("hammer_counts") <= 0 or is_block_input or is_dlg_active or is_block_hammer then
             return
         end
         busters.hammer.active = not busters.hammer.active
@@ -493,7 +499,7 @@ function ____exports.Game()
         end
     end
     function on_activate_vertical_rocket()
-        if GameStorage.get("vertical_rocket_counts") <= 0 or is_block_input or is_block_vertical_rocket then
+        if GameStorage.get("vertical_rocket_counts") <= 0 or is_block_input or is_dlg_active or is_block_vertical_rocket then
             return
         end
         busters.vertical_rocket.active = not busters.vertical_rocket.active
@@ -506,7 +512,7 @@ function ____exports.Game()
         end
     end
     function on_activate_horizontal_rocket()
-        if GameStorage.get("horizontal_rocket_counts") <= 0 or is_block_input or is_block_horizontal_rocket then
+        if GameStorage.get("horizontal_rocket_counts") <= 0 or is_block_input or is_dlg_active or is_block_horizontal_rocket then
             return
         end
         busters.horizontal_rocket.active = not busters.horizontal_rocket.active
@@ -1747,29 +1753,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch372 = combination.type
-            local ____cond372 = ____switch372 == CombinationType.Comb4
-            if ____cond372 then
+            local ____switch373 = combination.type
+            local ____cond373 = ____switch373 == CombinationType.Comb4
+            if ____cond373 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond372 = ____cond372 or ____switch372 == CombinationType.Comb5
-            if ____cond372 then
+            ____cond373 = ____cond373 or ____switch373 == CombinationType.Comb5
+            if ____cond373 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond372 = ____cond372 or ____switch372 == CombinationType.Comb2x2
-            if ____cond372 then
+            ____cond373 = ____cond373 or ____switch373 == CombinationType.Comb2x2
+            if ____cond373 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond372 = ____cond372 or (____switch372 == CombinationType.Comb3x3a or ____switch372 == CombinationType.Comb3x3b)
-            if ____cond372 then
+            ____cond373 = ____cond373 or (____switch373 == CombinationType.Comb3x3a or ____switch373 == CombinationType.Comb3x3b)
+            if ____cond373 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond372 = ____cond372 or (____switch372 == CombinationType.Comb3x4 or ____switch372 == CombinationType.Comb3x5)
-            if ____cond372 then
+            ____cond373 = ____cond373 or (____switch373 == CombinationType.Comb3x4 or ____switch373 == CombinationType.Comb3x5)
+            if ____cond373 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2130,6 +2136,7 @@ function ____exports.Game()
     is_simulating = false
     is_step = false
     is_block_input = false
+    is_dlg_active = false
     is_block_spinning = false
     is_block_hammer = false
     is_block_vertical_rocket = false
@@ -2195,15 +2202,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch462 = data
-                                local ____cond462 = ____switch462 == "-"
-                                if ____cond462 then
+                                local ____switch463 = data
+                                local ____cond463 = ____switch463 == "-"
+                                if ____cond463 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond462 = ____cond462 or ____switch462 == ""
-                                if ____cond462 then
+                                ____cond463 = ____cond463 or ____switch463 == ""
+                                if ____cond463 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -2217,25 +2224,25 @@ function ____exports.load_config()
                             end
                             if data.cell ~= nil then
                                 repeat
-                                    local ____switch467 = data.cell
-                                    local ____cond467 = ____switch467 == ____exports.CellId.Stone0
-                                    if ____cond467 then
+                                    local ____switch468 = data.cell
+                                    local ____cond468 = ____switch468 == ____exports.CellId.Stone0
+                                    if ____cond468 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
                                         if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
                                             level.field.elements[y + 1][x + 1] = NullElement
                                         end
                                         break
                                     end
-                                    ____cond467 = ____cond467 or ____switch467 == ____exports.CellId.Box
-                                    if ____cond467 then
+                                    ____cond468 = ____cond468 or ____switch468 == ____exports.CellId.Box
+                                    if ____cond468 then
                                         if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
                                             level.field.elements[y + 1][x + 1] = NullElement
                                         end
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
                                         break
                                     end
-                                    ____cond467 = ____cond467 or ____switch467 == ____exports.CellId.Grass
-                                    if ____cond467 then
+                                    ____cond468 = ____cond468 or ____switch468 == ____exports.CellId.Grass
+                                    if ____cond468 then
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Grass}
                                         break
                                     end
