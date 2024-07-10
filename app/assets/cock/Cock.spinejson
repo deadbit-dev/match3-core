@@ -1324,7 +1324,7 @@
 			}
 		}
 	},
-	"prep": {
+	"action": {
 		"slots": {
 			"eye_closed": {
 				"attachment": [
