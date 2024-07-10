@@ -533,7 +533,16 @@ function set_win()
         gui.get_node("firework"),
         hash("firework"),
         go.PLAYBACK_ONCE_FORWARD,
-        anim_props
+        anim_props,
+        function(____self, node)
+            print("END")
+            gui.play_spine_anim(
+                gui.get_node("firework"),
+                hash("firework"),
+                go.PLAYBACK_ONCE_FORWARD,
+                anim_props
+            )
+        end
     )
 end
 function set_gameover(instance, state)

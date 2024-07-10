@@ -465,7 +465,7 @@ end
 function set_enabled_store(state)
     local store = gui.get_node("store/manager")
     gui.set_enabled(store, state)
-    EventBus.send("STORE_ACTIVATION", state)
+    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_life_notification(state)
     local life = gui.get_node("life_notification/manager")
@@ -528,18 +528,22 @@ end
 function set_enabled_hammer(state)
     local hammer = gui.get_node("hammer/manager")
     gui.set_enabled(hammer, state)
+    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_spinning(state)
     local spinning = gui.get_node("spinning/manager")
     gui.set_enabled(spinning, state)
+    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_horizontall_rocket(state)
     local horizontal_rocket = gui.get_node("horizontal_rocket/manager")
     gui.set_enabled(horizontal_rocket, state)
+    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_vertical_rocket(state)
     local vertical_rocket = gui.get_node("vertical_rocket/manager")
     gui.set_enabled(vertical_rocket, state)
+    EventBus.send("DLG_ACTIVE", state)
 end
 function ____exports.init(self)
     Manager.init_script()
