@@ -217,6 +217,7 @@ export function Game() {
     
     let is_simulating = false;
     let is_step = false;
+    let is_wait_until_animation_done = false;
     
     let is_block_input = false;
     let is_dlg_active = false;
@@ -518,7 +519,7 @@ export function Game() {
     }
 
     function on_swap_elements(elements: StepInfo | undefined) {
-        if(is_block_input || is_dlg_active || is_gameover || elements == undefined) return;
+        if(is_block_input || is_dlg_active || elements == undefined) return;
 
         stop_helper();
         
@@ -530,7 +531,7 @@ export function Game() {
     }
 
     function on_click_activation(pos: PosXYMessage | undefined) {
-        if(is_block_input || is_dlg_active || is_gameover || pos == undefined) return;
+        if(is_block_input || is_dlg_active || pos == undefined) return;
 
         stop_helper();
 
@@ -636,6 +637,7 @@ export function Game() {
     // TODO: move in logic game step end
     function on_game_step_animation_end() {
         is_block_input = false;
+        is_wait_until_animation_done = false;
 
         if(is_level_completed()) {
             is_block_input = true;
@@ -654,13 +656,15 @@ export function Game() {
 
     function on_game_timer_tick() {
         const dt = System.now() - start_game_time;
-        const remaining_time = level_config.time - dt;
-        if(level_config.time >= dt) {
-            get_state().remaining_time = remaining_time;
-            EventBus.send('GAME_TIMER', remaining_time);
-        } else {
+        // start_game_time++;
+        const remaining_time = math.max(0, level_config.time - dt);
+        get_state().remaining_time = remaining_time;
+        EventBus.send('GAME_TIMER', remaining_time);
+        if(remaining_time == 0) {
             timer.cancel(game_timer);
             is_gameover = true;
+            if(!is_wait_until_animation_done)
+                timer.delay(1.5, false, gameover);
         }
     }
 
@@ -740,10 +744,10 @@ export function Game() {
     
     function set_helper() {
         // search_helper_combination();
-        
+
         const delay = is_tutorial() ? 1 : 5;
         helper_timer = timer.delay(delay, false, () => {
-            set_combination_for_helper(available_steps);
+            set_helper_data(available_steps);
 
             if(helper_data != null) {
                 Log.log("START HELPER");
@@ -805,7 +809,7 @@ export function Game() {
     //     });
     // }
 
-    function set_combination_for_helper(steps: StepInfo[]) {
+    function set_helper_data(steps: StepInfo[]) {
         if(steps.length == 0) return;
 
         const step = steps[math.random(0, steps.length - 1)];
@@ -1765,6 +1769,7 @@ export function Game() {
 
         const last_state = update_state();
 
+        available_steps = [];
         search_available_steps(5, (steps) => {
             if(steps.length != 0) {
                 available_steps = copy_array_of_objects(steps);
@@ -1781,6 +1786,7 @@ export function Game() {
         if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', last_state.steps);
 
         send_game_step();
+        is_wait_until_animation_done = true;
 
         states.push({} as GameState);
 
@@ -1817,6 +1823,7 @@ export function Game() {
 
         set_random(previous_state.randomseed);
 
+        available_steps = [];
         search_available_steps(5, (steps) => {
             available_steps = copy_array_of_objects(steps);
         });
@@ -2261,7 +2268,9 @@ export function load_config() {
                             case CellId.Grass:
                                 level.field.cells[y][x] = [CellId.Base, CellId.Grass];
                                 break;
-                            default: level.field.cells[y][x] = [CellId.Base, data.cell];
+                            default:
+                                level.field.cells[y][x] = [CellId.Base, data.cell];
+                                break;
                         }
                     } else level.field.cells[y][x] = CellId.Base;
                 }

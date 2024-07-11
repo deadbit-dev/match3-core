@@ -16,9 +16,10 @@ input_method = HiddenInputField
 display_cutout = 0
 immersive_mode = 1
 minimum_sdk_version = 21
+package = com.example.match3
 
 [project]
-title = Math3
+title = Matсh3
 bundle_resources = /bundle
 version = 1.0
 custom_resources = /resources

@@ -186,7 +186,7 @@ ____exports._GAME_CONFIG = {
         47
     },
     level_to_animal = {
-        [4] = "cock",
+        [4] = "goose",
         [11] = "kozel",
         [18] = "kaban",
         [25] = "goose",

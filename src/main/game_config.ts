@@ -211,7 +211,7 @@ export const _GAME_CONFIG = {
 
     animal_levels: [4, 11, 18, 25, 32, 39, 47],
     level_to_animal: {
-        4: 'cock',
+        4: 'goose',
         11: 'kozel',
         18: 'kaban',
         25: 'goose',

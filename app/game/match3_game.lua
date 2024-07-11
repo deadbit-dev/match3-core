@@ -112,7 +112,7 @@ ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_combination_for_helper, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -424,7 +424,7 @@ function ____exports.Game()
         set_timer()
     end
     function on_swap_elements(elements)
-        if is_block_input or is_dlg_active or is_gameover or elements == nil then
+        if is_block_input or is_dlg_active or elements == nil then
             return
         end
         stop_helper()
@@ -436,7 +436,7 @@ function ____exports.Game()
         process_game_step(is_procesed)
     end
     function on_click_activation(pos)
-        if is_block_input or is_dlg_active or is_gameover or pos == nil then
+        if is_block_input or is_dlg_active or pos == nil then
             return
         end
         stop_helper()
@@ -530,6 +530,7 @@ function ____exports.Game()
     end
     function on_game_step_animation_end()
         is_block_input = false
+        is_wait_until_animation_done = false
         if is_level_completed() then
             is_block_input = true
             local completed_levels = GameStorage.get("completed_levels")
@@ -549,13 +550,15 @@ function ____exports.Game()
     end
     function on_game_timer_tick()
         local dt = System.now() - start_game_time
-        local remaining_time = level_config.time - dt
-        if level_config.time >= dt then
-            get_state().remaining_time = remaining_time
-            EventBus.send("GAME_TIMER", remaining_time)
-        else
+        local remaining_time = math.max(0, level_config.time - dt)
+        get_state().remaining_time = remaining_time
+        EventBus.send("GAME_TIMER", remaining_time)
+        if remaining_time == 0 then
             timer.cancel(game_timer)
             is_gameover = true
+            if not is_wait_until_animation_done then
+                timer.delay(1.5, false, gameover)
+            end
         end
     end
     function gameover()
@@ -644,7 +647,7 @@ function ____exports.Game()
             delay,
             false,
             function()
-                set_combination_for_helper(available_steps)
+                set_helper_data(available_steps)
                 if helper_data ~= nil then
                     Log.log("START HELPER")
                     reset_previous_helper()
@@ -697,7 +700,7 @@ function ____exports.Game()
         EventBus.trigger("ON_RESET_STEP_HELPER", previous_helper_data, true, true)
         previous_helper_data = nil
     end
-    function set_combination_for_helper(steps)
+    function set_helper_data(steps)
         if #steps == 0 then
             return
         end
@@ -1655,6 +1658,7 @@ function ____exports.Game()
             field.process_state(ProcessMode.MoveElements)
         end
         local last_state = update_state()
+        available_steps = {}
         search_available_steps(
             5,
             function(steps)
@@ -1675,6 +1679,7 @@ function ____exports.Game()
             EventBus.send("UPDATED_STEP_COUNTER", last_state.steps)
         end
         send_game_step()
+        is_wait_until_animation_done = true
         states[#states + 1] = {}
         set_targets(last_state.targets)
         set_steps(last_state.steps)
@@ -1717,6 +1722,7 @@ function ____exports.Game()
         previous_state.elements = state.elements
         states[#states + 1] = previous_state
         set_random(previous_state.randomseed)
+        available_steps = {}
         search_available_steps(
             5,
             function(steps)
@@ -2135,6 +2141,7 @@ function ____exports.Game()
     helper_data = nil
     is_simulating = false
     is_step = false
+    is_wait_until_animation_done = false
     is_block_input = false
     is_dlg_active = false
     is_block_spinning = false
@@ -2248,6 +2255,7 @@ function ____exports.load_config()
                                     end
                                     do
                                         level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
+                                        break
                                     end
                                 until true
                             else
