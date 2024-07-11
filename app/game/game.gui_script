@@ -532,14 +532,14 @@ function set_win()
     gui.play_spine_anim(
         gui.get_node("firework"),
         hash("firework"),
-        go.PLAYBACK_ONCE_FORWARD,
+        gui.PLAYBACK_ONCE_FORWARD,
         anim_props,
         function(____self, node)
             print("END")
             gui.play_spine_anim(
                 gui.get_node("firework"),
                 hash("firework"),
-                go.PLAYBACK_ONCE_FORWARD,
+                gui.PLAYBACK_ONCE_FORWARD,
                 anim_props
             )
         end
