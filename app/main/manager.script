@@ -1,5 +1,3 @@
-local ____lualib = require("lualib_bundle")
-local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
 local druid = require("druid.druid")
 local default_style = require("druid.styles.default.style")
@@ -15,17 +13,9 @@ function ____exports.init(self)
     Manager.init(
         function()
             EventBus.on(
-                "SYS_LOAD_SCENE",
+                "ON_SCENE_LOADED",
                 function(message)
                     local name = message.name
-                    local ____window_set_dim_mode_1 = window.set_dim_mode
-                    local ____name_includes_result_0
-                    if __TS__StringIncludes(name, "game") then
-                        ____name_includes_result_0 = window.DIMMING_OFF
-                    else
-                        ____name_includes_result_0 = window.DIMMING_ON
-                    end
-                    ____window_set_dim_mode_1(____name_includes_result_0)
                     if message.name == "game" then
                         Ads.show_banner(BannerPos.POS_BOTTOM_CENTER)
                     else

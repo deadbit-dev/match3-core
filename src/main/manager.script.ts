@@ -23,9 +23,9 @@ export function init(this: props) {
     register_manager();
     
     Manager.init(() => {
-        EventBus.on('SYS_LOAD_SCENE', (message) => {
+        EventBus.on('ON_SCENE_LOADED', (message) => {
             const name = message.name;
-            window.set_dim_mode(name.includes('game') ? window.DIMMING_OFF : window.DIMMING_ON);
+            // window.set_dim_mode(name.includes('game') ? window.DIMMING_OFF : window.DIMMING_ON);
             if (message.name == 'game')
                 Ads.show_banner(BannerPos.POS_BOTTOM_CENTER);
             else
