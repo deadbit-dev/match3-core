@@ -92,11 +92,11 @@ export const lang_data = {
     "Английский-en": "Spinning"
   },
   "horizontal_rocket": {
-    "Русский-ru": "Горизонтальная рокета",
+    "Русский-ru": "Горизонтальная ракета",
     "Английский-en": "Horizontal Rocket"
   },
   "vertical_rocket": {
-    "Русский-ru": "Вертикальная рокета",
+    "Русский-ru": "Вертикальная ракета",
     "Английский-en": "Vertical Rocket"
   },
   "hammer_description": {
