@@ -48,13 +48,10 @@ function ____exports.View(animator, resources)
         local width_ratio = math.abs(ltrb.z) / original_game_width
         local height_ratio = math.abs(ltrb.w) / original_game_height
         local changes_coff = math.min(width_ratio, height_ratio)
+        local height_delta = math.abs(ltrb.w) - original_game_height
         cell_size = calculate_cell_size() * changes_coff
         scale_ratio = calculate_scale_ratio()
-        cells_offset = vmath.vector3(
-            original_game_width / 2 - field_width / 2 * cell_size,
-            (-(original_game_height / 2 - max_field_height / 2 * calculate_cell_size()) + 100) * changes_coff,
-            0
-        )
+        cells_offset = calculate_cell_offset(height_delta, height_ratio)
         reload_field()
     end
     function copy_game_state()
@@ -86,8 +83,15 @@ function ____exports.View(animator, resources)
     function calculate_scale_ratio()
         return cell_size / origin_cell_size
     end
-    function calculate_cell_offset()
-        return vmath.vector3(original_game_width / 2 - field_width / 2 * cell_size, -(original_game_height / 2 - max_field_height / 2 * cell_size) + 100, 0)
+    function calculate_cell_offset(height_delta, changes_coff)
+        if height_delta == nil then
+            height_delta = 0
+        end
+        if changes_coff == nil then
+            changes_coff = 1
+        end
+        local offset_y = height_delta > 0 and -(original_game_height / 2 - max_field_height / 2 * calculate_cell_size()) - height_delta / 2 + 100 or (-(original_game_height / 2 - max_field_height / 2 * calculate_cell_size()) + 100) * changes_coff
+        return vmath.vector3(original_game_width / 2 - field_width / 2 * cell_size, offset_y, 0)
     end
     function set_targets()
         do

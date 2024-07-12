@@ -238,15 +238,26 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const width_ratio = math.abs(ltrb.z) / original_game_width;
         const height_ratio = math.abs(ltrb.w) / original_game_height;
 
+        // print("HR: ", height_ratio);
+
         const changes_coff = math.min(width_ratio, height_ratio);
+        const height_delta = math.abs(ltrb.w) - original_game_height;
+
+        // cell_size = calculate_cell_size() * changes_coff;
+        // scale_ratio = calculate_scale_ratio();
+        
+
+        // const changes_coff = math.abs(ltrb.w) / original_game_height;
 
         cell_size = calculate_cell_size() * changes_coff;
         scale_ratio = calculate_scale_ratio();
-        cells_offset = vmath.vector3(
-            original_game_width / 2 - (field_width / 2 * cell_size),
-            (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
-            0
-        );
+        // cells_offset = vmath.vector3(
+        //     original_game_width / 2 - (field_width / 2 * cell_size),
+        //     (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
+        //     0
+        // );
+
+        cells_offset = calculate_cell_offset(height_delta, height_ratio);
 
         reload_field();
     }
@@ -279,10 +290,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         return cell_size / origin_cell_size;
     }
 
-    function calculate_cell_offset() {
+    function calculate_cell_offset(height_delta = 0, changes_coff = 1) {
+        const offset_y = height_delta > 0 ? (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) - (height_delta / 2)) + 100 : (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff;
         return vmath.vector3(
             original_game_width / 2 - (field_width / 2 * cell_size),
-            -(original_game_height / 2 - (max_field_height / 2 * cell_size)) + 100,
+            offset_y,
+            // -(original_game_height / 2 - (max_field_height / 2 * cell_size)) + 100,
             0
         );
     }
