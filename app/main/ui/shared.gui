@@ -130,8 +130,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -162,6 +162,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -8486,8 +8487,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -8518,6 +8519,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -8830,8 +8832,9 @@ nodes {
   outline_alpha: 0.0
   shadow_alpha: 1.0
   overridden_fields: 1
+  overridden_fields: 36
   template_node_child: true
-  text_leading: 0.7
+  text_leading: 0.9
   text_tracking: 0.0
   custom_type: 0
   enabled: true
@@ -9203,8 +9206,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -9235,6 +9238,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -9985,8 +9989,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -10017,6 +10021,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -10332,8 +10337,9 @@ nodes {
   shadow_alpha: 1.0
   overridden_fields: 1
   overridden_fields: 8
+  overridden_fields: 36
   template_node_child: true
-  text_leading: 0.7
+  text_leading: 0.9
   text_tracking: 0.0
   custom_type: 0
   enabled: true
@@ -10705,8 +10711,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -10737,6 +10743,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -11054,8 +11061,9 @@ nodes {
   shadow_alpha: 1.0
   overridden_fields: 1
   overridden_fields: 8
+  overridden_fields: 36
   template_node_child: true
-  text_leading: 0.7
+  text_leading: 0.9
   text_tracking: 0.0
   custom_type: 0
   enabled: true
@@ -11427,8 +11435,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 540.0
-    y: 960.0
+    x: 3000.0
+    y: 3000.0
     z: 0.0
     w: 1.0
   }
@@ -11459,6 +11467,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.3
+  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -11776,8 +11785,9 @@ nodes {
   shadow_alpha: 1.0
   overridden_fields: 1
   overridden_fields: 8
+  overridden_fields: 36
   template_node_child: true
-  text_leading: 0.7
+  text_leading: 0.9
   text_tracking: 0.0
   custom_type: 0
   enabled: true
