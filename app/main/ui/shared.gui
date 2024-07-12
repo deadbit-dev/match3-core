@@ -8238,7 +8238,7 @@ nodes {
 }
 nodes {
   position {
-    x: 10.0
+    x: -2.0
     y: 4.0
     z: 0.0
     w: 1.0
@@ -8256,7 +8256,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 120.0
+    x: 100.0
     y: 50.0
     z: 0.0
     w: 1.0
@@ -8270,7 +8270,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "32"
+  font: "18"
   id: "lifes/text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -8298,6 +8298,7 @@ nodes {
   overridden_fields: 1
   overridden_fields: 4
   overridden_fields: 8
+  overridden_fields: 10
   overridden_fields: 14
   template_node_child: true
   text_leading: 1.0
