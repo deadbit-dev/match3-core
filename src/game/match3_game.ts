@@ -2254,23 +2254,18 @@ export function load_config() {
                     } else level.field.elements[y][x] = RandomElement;
                     
                     if(data.cell != undefined) {
-                        switch(data.cell) {
-                            case CellId.Stone0:
-                                level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
-                                if(level.field.elements[y][x] == RandomElement)
-                                    level.field.elements[y][x] = NullElement;
-                                break;
-                            case CellId.Box:
-                                if(level.field.elements[y][x] == RandomElement)
-                                    level.field.elements[y][x] = NullElement;
-                                    level.field.cells[y][x] = [CellId.Base, data.cell];
-                                break;
-                            case CellId.Grass:
-                                level.field.cells[y][x] = [CellId.Base, CellId.Grass];
-                                break;
-                            default:
-                                level.field.cells[y][x] = [CellId.Base, data.cell];
-                                break;
+                        if(data.cell == CellId.Stone0) {
+                            level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
+                            if(level.field.elements[y][x] == RandomElement)
+                                level.field.elements[y][x] = NullElement;
+                        } else if(data.cell == CellId.Box) {
+                            if(level.field.elements[y][x] == RandomElement)
+                                level.field.elements[y][x] = NullElement;
+                            level.field.cells[y][x] = [CellId.Base, data.cell];
+                        } else if(data.cell == CellId.Grass) {
+                            level.field.cells[y][x] = [CellId.Base, CellId.Grass];
+                        } else {
+                            level.field.cells[y][x] = [CellId.Base, data.cell];
                         }
                     } else level.field.cells[y][x] = CellId.Base;
                 }

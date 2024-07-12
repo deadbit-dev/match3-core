@@ -2230,34 +2230,21 @@ function ____exports.load_config()
                                 level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                             end
                             if data.cell ~= nil then
-                                repeat
-                                    local ____switch468 = data.cell
-                                    local ____cond468 = ____switch468 == ____exports.CellId.Stone0
-                                    if ____cond468 then
-                                        level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
-                                        if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
-                                            level.field.elements[y + 1][x + 1] = NullElement
-                                        end
-                                        break
+                                if data.cell == ____exports.CellId.Stone0 then
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Stone2, ____exports.CellId.Stone1, ____exports.CellId.Stone0}
+                                    if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
+                                        level.field.elements[y + 1][x + 1] = NullElement
                                     end
-                                    ____cond468 = ____cond468 or ____switch468 == ____exports.CellId.Box
-                                    if ____cond468 then
-                                        if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
-                                            level.field.elements[y + 1][x + 1] = NullElement
-                                        end
-                                        level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
-                                        break
+                                elseif data.cell == ____exports.CellId.Box then
+                                    if level.field.elements[y + 1][x + 1] == ____exports.RandomElement then
+                                        level.field.elements[y + 1][x + 1] = NullElement
                                     end
-                                    ____cond468 = ____cond468 or ____switch468 == ____exports.CellId.Grass
-                                    if ____cond468 then
-                                        level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Grass}
-                                        break
-                                    end
-                                    do
-                                        level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
-                                        break
-                                    end
-                                until true
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
+                                elseif data.cell == ____exports.CellId.Grass then
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, ____exports.CellId.Grass}
+                                else
+                                    level.field.cells[y + 1][x + 1] = {____exports.CellId.Base, data.cell}
+                                end
                             else
                                 level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                             end
