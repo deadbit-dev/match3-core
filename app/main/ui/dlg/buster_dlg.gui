@@ -11,6 +11,10 @@ fonts {
   name: "18"
   font: "/assets/fonts/18.font"
 }
+fonts {
+  name: "27_medium"
+  font: "/assets/fonts/27_medium.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"
@@ -389,7 +393,7 @@ nodes {
 nodes {
   position {
     x: 0.0
-    y: -65.0
+    y: -107.0
     z: 0.0
     w: 1.0
   }
@@ -420,7 +424,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "\320\240\320\260\320\267\320\261\320\270\320\262\320\260\320\265\321\202 \320\276\320\264\320\270\320\275 \320\273\321\216\320\261\320\276\320\271 \320\277\321\200\320\265\320\264\320\274\320\265\321\202"
-  font: "32"
+  font: "27_medium"
   id: "description"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -446,7 +450,7 @@ nodes {
   outline_alpha: 0.0
   shadow_alpha: 1.0
   template_node_child: false
-  text_leading: 0.7
+  text_leading: 0.9
   text_tracking: 0.0
   custom_type: 0
   enabled: true
