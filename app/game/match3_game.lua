@@ -556,6 +556,7 @@ function ____exports.Game()
         if remaining_time == 0 then
             timer.cancel(game_timer)
             is_gameover = true
+            is_block_input = true
             if not is_wait_until_animation_done then
                 timer.delay(1.5, false, gameover)
             end

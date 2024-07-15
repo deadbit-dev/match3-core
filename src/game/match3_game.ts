@@ -663,6 +663,7 @@ export function Game() {
         if(remaining_time == 0) {
             timer.cancel(game_timer);
             is_gameover = true;
+            is_block_input = true;
             if(!is_wait_until_animation_done)
                 timer.delay(1.5, false, gameover);
         }
