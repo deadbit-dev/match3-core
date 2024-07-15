@@ -825,7 +825,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             let is_90_mask = false;
             if (mask_index == SubstrateId.LeftRightStrip) is_90_mask = true;
 
-            let angle = 90;
+            let angle = 0;
             const max_angle = is_90_mask ? 90 : 270;
             while (angle <= max_angle) {
                 let is_valid = true;
@@ -844,13 +844,14 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     const pos = get_world_pos(x, y, z_index);
                     const _go = gm.make_go('substrate_view', pos);
                     gm.set_rotation_hash(_go, -angle);
-                    sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_database[mask_index as SubstrateId]);
+                    sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_view[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
                     state.substrates[y][x] = _go;
+                    
                     return;
                 }
 
-                mask = rotateMatrix(mask, angle);
+                mask = rotateMatrix(mask, 90);
                 angle += 90;
             }
         }

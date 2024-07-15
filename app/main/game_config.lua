@@ -36,6 +36,8 @@ else
     ____temp_0 = true
 end
 ____exports._GAME_CONFIG = {
+    min_lifes = 0,
+    max_lifes = 3,
     animal_offset = true,
     min_swipe_distance = 32,
     swap_element_easing = ____go_EASING_LINEAR_1,
@@ -58,7 +60,7 @@ ____exports._GAME_CONFIG = {
     default_element_z_index = 0,
     default_top_layer_cell_z_index = 2,
     default_vfx_z_index = 2.5,
-    substrate_database = {
+    substrate_view = {
         [SubstrateId.OutsideArc] = "outside_arc",
         [SubstrateId.OutsideInsideAngle] = "outside_inside_angle",
         [SubstrateId.OutsideAngle] = "outside_angle",

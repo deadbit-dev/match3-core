@@ -37,6 +37,9 @@ export const MAIN_BUNDLE_SCENES = ['game'];
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    min_lifes: 0,
+    max_lifes: 3,
+
     animal_offset: true,
 
     min_swipe_distance: 32,
@@ -70,7 +73,7 @@ export const _GAME_CONFIG = {
     default_top_layer_cell_z_index: 2,
     default_vfx_z_index: 2.5,
 
-    substrate_database: {
+    substrate_view: {
         [SubstrateId.OutsideArc]: 'outside_arc',
         [SubstrateId.OutsideInsideAngle]: 'outside_inside_angle',
         [SubstrateId.OutsideAngle]: 'outside_angle',

@@ -806,7 +806,7 @@ function ____exports.View(animator, resources)
                 if mask_index == SubstrateId.LeftRightStrip then
                     is_90_mask = true
                 end
-                local angle = 90
+                local angle = 0
                 local max_angle = is_90_mask and 90 or 270
                 while angle <= max_angle do
                     local is_valid = true
@@ -836,7 +836,7 @@ function ____exports.View(animator, resources)
                         gm.set_rotation_hash(_go, -angle)
                         sprite.play_flipbook(
                             msg.url(nil, _go, "sprite"),
-                            GAME_CONFIG.substrate_database[mask_index]
+                            GAME_CONFIG.substrate_view[mask_index]
                         )
                         go.set_scale(
                             vmath.vector3(scale_ratio, scale_ratio, 1),
@@ -845,7 +845,7 @@ function ____exports.View(animator, resources)
                         state.substrates[y + 1][x + 1] = _go
                         return
                     end
-                    mask = rotateMatrix(mask, angle)
+                    mask = rotateMatrix(mask, 90)
                     angle = angle + 90
                 end
                 mask_index = mask_index + 1

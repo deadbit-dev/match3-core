@@ -9,6 +9,7 @@ local is_enough_coins = ____coins.is_enough_coins
 local remove_coins = ____coins.remove_coins
 local ____life = require("main.life")
 local add_lifes = ____life.add_lifes
+local is_max_lifes = ____life.is_max_lifes
 local remove_lifes = ____life.remove_lifes
 function set_events()
     EventBus.on("ON_SCENE_LOADED", on_scene_loaded, true)
@@ -112,7 +113,7 @@ function setup_store(instance)
     instance.druid:new_button(
         "store/buy_x1_btn",
         function()
-            if not is_enough_coins(30) then
+            if not is_enough_coins(30) or is_max_lifes() then
                 return
             end
             add_lifes(1)
@@ -122,7 +123,7 @@ function setup_store(instance)
     instance.druid:new_button(
         "store/buy_x2_btn",
         function()
-            if not is_enough_coins(50) then
+            if not is_enough_coins(50) or is_max_lifes() then
                 return
             end
             add_lifes(2)
@@ -132,7 +133,7 @@ function setup_store(instance)
     instance.druid:new_button(
         "store/buy_x3_btn",
         function()
-            if not is_enough_coins(70) then
+            if not is_enough_coins(70) or is_max_lifes() then
                 return
             end
             add_lifes(3)
@@ -487,6 +488,9 @@ function on_remove_coins()
     )
 end
 function on_add_lifes()
+    if GameStorage.get("infinit_life").is_active then
+        return
+    end
     local lifes_text = gui.get_node("lifes/text")
     gui.set_text(
         lifes_text,
@@ -494,6 +498,9 @@ function on_add_lifes()
     )
 end
 function on_remove_lifes()
+    if GameStorage.get("infinit_life").is_active then
+        return
+    end
     local lifes_text = gui.get_node("lifes/text")
     gui.set_text(
         lifes_text,
@@ -502,17 +509,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch84 = scene.name
-        local ____cond84 = ____switch84 == "game"
-        if ____cond84 then
+        local ____switch86 = scene.name
+        local ____cond86 = ____switch86 == "game"
+        if ____cond86 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond84 = ____cond84 or ____switch84 == "map"
-        if ____cond84 then
+        ____cond86 = ____cond86 or ____switch86 == "map"
+        if ____cond86 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)

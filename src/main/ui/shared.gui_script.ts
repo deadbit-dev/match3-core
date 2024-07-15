@@ -10,7 +10,7 @@ import * as druid from 'druid.druid';
 import { NameMessage } from '../../modules/modules_const';
 import { parse_time } from '../../utils/utils';
 import { add_coins, is_enough_coins, remove_coins } from '../coins';
-import { add_lifes, remove_lifes } from '../life';
+import { add_lifes, is_max_lifes, remove_lifes } from '../life';
 
 
 interface props {
@@ -103,21 +103,21 @@ function setup_store(instance: props) {
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
 
     instance.druid.new_button('store/buy_x1_btn', () => {
-        if(!is_enough_coins(30)) return;
+        if(!is_enough_coins(30) || is_max_lifes()) return;
 
         add_lifes(1);
         remove_coins(30);
     });
 
     instance.druid.new_button('store/buy_x2_btn', () => {
-        if(!is_enough_coins(50)) return;
+        if(!is_enough_coins(50) || is_max_lifes()) return;
 
         add_lifes(2);
         remove_coins(50);
     });
 
     instance.druid.new_button('store/buy_x3_btn', () => {
-        if(!is_enough_coins(70)) return;
+        if(!is_enough_coins(70) || is_max_lifes()) return;
 
         add_lifes(3);
         remove_coins(70);
@@ -306,7 +306,6 @@ function on_infinit_life_tick() {
     const delta = System.now() - life.start_time;
     
     gui.play_flipbook(gui.get_node('lifes/icon'), 'infinite_life_icon');
-
     gui.set_text(gui.get_node('lifes/text'), parse_time(life.duration - delta));
     
     if(delta >= life.duration) {
@@ -364,11 +363,15 @@ function on_remove_coins() {
 }
 
 function on_add_lifes() {
+    if(GameStorage.get('infinit_life').is_active) return;
+
     const lifes_text = gui.get_node('lifes/text');
     gui.set_text(lifes_text, tostring(GameStorage.get('life').amount));
 }
 
 function on_remove_lifes() {
+    if(GameStorage.get('infinit_life').is_active) return;
+
     const lifes_text = gui.get_node('lifes/text');
     gui.set_text(lifes_text, tostring(GameStorage.get('life').amount));
 

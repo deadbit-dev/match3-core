@@ -2,6 +2,6 @@
 mode = Zip
 zip-filepath = build/resources
 supported-versions = "0.0.0"
-publickey = E:\Dev\Defold\math3-core\app\manifest.public.der
-privatekey = E:\Dev\Defold\math3-core\app\manifest.private.der
+publickey = /Users/pavel/Dev/match3-core/app/manifest.public.der
+privatekey = /Users/pavel/Dev/match3-core/app/manifest.private.der
 
