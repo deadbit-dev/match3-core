@@ -203,6 +203,18 @@ export const _GAME_CONFIG = {
         ElementId.Emerald
     ],
 
+    feed_elements: [
+        ElementId.Acorn,
+        ElementId.Cheese,
+        ElementId.Chicken,
+        ElementId.Cabbage,
+        ElementId.Hay,
+        ElementId.MediumMeat,
+        ElementId.RareMeat,
+        ElementId.Salad,
+        ElementId.SunFlower
+    ],
+
     buster_elements: [
         ElementId.VerticalRocket,
         ElementId.HorizontalRocket,
@@ -412,7 +424,7 @@ export interface SwapedDiskosphereActivationMessage extends SwapedActivationMess
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
-export interface TargetMessage { id: number, count: number }
+export interface TargetMessage { id: number, amount: number, type: number }
 
 export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
 

@@ -1,8 +1,9 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_events, update_targets, update_buttons, set_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui
+local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_events, update_targets, feed_animation, update_buttons, set_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui
 local druid = require("druid.druid")
 local ____coins = require("main.coins")
 local is_enough_coins = ____coins.is_enough_coins
@@ -450,31 +451,106 @@ end
 function update_targets(data)
     repeat
         local ____switch60 = data.id
+        local previous_amount0, previous_amount1, previous_amount2
         local ____cond60 = ____switch60 == 0
         if ____cond60 then
-            set_text(
-                "first_target_counts",
-                math.max(0, data.count)
-            )
+            previous_amount0 = tonumber(gui.get_text(gui.get_node("first_target_counts")))
+            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
+                local count0 = previous_amount0 ~= nil and previous_amount0 - data.amount or 0
+                if count0 ~= 0 then
+                    timer.delay(
+                        math.random(),
+                        false,
+                        function()
+                            set_text(
+                                "first_target_counts",
+                                math.max(0, data.amount)
+                            )
+                            feed_animation(data.type)
+                        end
+                    )
+                end
+            else
+                set_text(
+                    "first_target_counts",
+                    math.max(0, data.amount)
+                )
+            end
             break
         end
         ____cond60 = ____cond60 or ____switch60 == 1
         if ____cond60 then
-            set_text(
-                "second_target_counts",
-                math.max(0, data.count)
-            )
+            previous_amount1 = tonumber(gui.get_text(gui.get_node("second_target_counts")))
+            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
+                local count1 = previous_amount1 ~= nil and previous_amount1 - data.amount or 0
+                if count1 ~= 0 then
+                    timer.delay(
+                        math.random(),
+                        false,
+                        function()
+                            set_text(
+                                "second_target_counts",
+                                math.max(0, data.amount)
+                            )
+                            feed_animation(data.type)
+                        end
+                    )
+                end
+            else
+                set_text(
+                    "second_target_counts",
+                    math.max(0, data.amount)
+                )
+            end
             break
         end
         ____cond60 = ____cond60 or ____switch60 == 2
         if ____cond60 then
-            set_text(
-                "third_target_counts",
-                math.max(0, data.count)
-            )
+            previous_amount2 = tonumber(gui.get_text(gui.get_node("third_target_counts")))
+            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
+                local count2 = previous_amount2 ~= nil and previous_amount2 - data.amount or 0
+                if count2 ~= 0 then
+                    timer.delay(
+                        math.random(),
+                        false,
+                        function()
+                            set_text(
+                                "third_target_counts",
+                                math.max(0, data.amount)
+                            )
+                            feed_animation(data.type)
+                        end
+                    )
+                end
+            else
+                set_text(
+                    "third_target_counts",
+                    math.max(0, data.amount)
+                )
+            end
             break
         end
     until true
+end
+function feed_animation(item_type)
+    local element = gui.new_box_node(
+        vmath.vector3(420, 870, 0),
+        vmath.vector3(40, 40, 1)
+    )
+    local view = GAME_CONFIG.element_view[item_type]
+    gui.set_texture(element, "graphics")
+    gui.play_flipbook(element, view)
+    gui.animate(
+        element,
+        "position",
+        vmath.vector3(250, 150, 0),
+        gui.EASING_INCUBIC,
+        1,
+        0,
+        function()
+            gui.delete_node(element)
+        end
+    )
 end
 function update_buttons(instance)
     local spinning = GameStorage.get("spinning_counts")
@@ -567,7 +643,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_1_text"),
-            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+            tostring((tostring(math.min(#target1.uids, target1.count)) .. "/") .. tostring(target1.count))
         )
         gui.set_enabled(
             gui.get_node("target_1_fail_icon"),
@@ -587,7 +663,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_1_text"),
-            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+            tostring((tostring(math.min(#target1.uids, target1.count)) .. "/") .. tostring(target1.count))
         )
         gui.set_enabled(
             gui.get_node("target_1_fail_icon"),
@@ -606,7 +682,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_2_text"),
-            tostring((tostring(#target2.uids) .. "/") .. tostring(target2.count))
+            tostring((tostring(math.min(#target2.uids, target2.count)) .. "/") .. tostring(target2.count))
         )
         gui.set_enabled(
             gui.get_node("target_2_fail_icon"),
@@ -626,7 +702,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_1_text"),
-            tostring((tostring(#target1.uids) .. "/") .. tostring(target1.count))
+            tostring((tostring(math.min(#target1.uids, target1.count)) .. "/") .. tostring(target1.count))
         )
         gui.set_enabled(
             gui.get_node("target_1_fail_icon"),
@@ -645,7 +721,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_2_text"),
-            tostring((tostring(#target2.uids) .. "/") .. tostring(target2.count))
+            tostring((tostring(math.min(#target2.uids, target2.count)) .. "/") .. tostring(target2.count))
         )
         gui.set_enabled(
             gui.get_node("target_2_fail_icon"),
@@ -664,7 +740,7 @@ function set_gameover(instance, state)
         )
         gui.set_text(
             gui.get_node("target_3_text"),
-            tostring((tostring(#target3.uids) .. "/") .. tostring(target3.count))
+            tostring((tostring(math.min(#target3.uids, target3.count)) .. "/") .. tostring(target3.count))
         )
         gui.set_enabled(
             gui.get_node("target_3_fail_icon"),
@@ -698,10 +774,6 @@ function set_gameover_offer()
 end
 function disabled_gameover_offer()
     remove_lifes(1)
-    gui.set_enabled(
-        gui.get_node("damage"),
-        false
-    )
     gui.set_enabled(
         gui.get_node("gameover_offer_close"),
         false

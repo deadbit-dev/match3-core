@@ -170,6 +170,17 @@ ____exports._GAME_CONFIG = {
         ElementId.Ruby,
         ElementId.Emerald
     },
+    feed_elements = {
+        ElementId.Acorn,
+        ElementId.Cheese,
+        ElementId.Chicken,
+        ElementId.Cabbage,
+        ElementId.Hay,
+        ElementId.MediumMeat,
+        ElementId.RareMeat,
+        ElementId.Salad,
+        ElementId.SunFlower
+    },
     buster_elements = {
         ElementId.VerticalRocket,
         ElementId.HorizontalRocket,

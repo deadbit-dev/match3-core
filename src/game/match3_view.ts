@@ -326,7 +326,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 const target = state.targets[i];
                 const amount = target.count - target.uids.length;
                 targets[i] = amount;
-                EventBus.send('UPDATED_TARGET', {id: i, count: amount});
+                EventBus.send('UPDATED_TARGET', {id: i, amount, type: target.type});
             }
 
             recalculate_sizes();
@@ -812,9 +812,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         if(state.game_state == null) return;
 
         const copy_state = copy_game_state();
-        print("C: ", copy_state.elements);
         reset_field();
-        print("AC: ", copy_state.elements);
         load_field(copy_state, with_anim);
     }
 
@@ -1796,7 +1794,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             const target = state.game_state.targets[i];
             if (target.uids.indexOf(id) != -1) {
                 targets[i] = math.max(0, targets[i] - 1);
-                EventBus.send('UPDATED_TARGET', {id: i, count: targets[i]});
+                EventBus.send('UPDATED_TARGET', {id: i, amount: targets[i], type: target.type});
             }
         }
     }

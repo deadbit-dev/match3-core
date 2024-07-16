@@ -7,6 +7,10 @@ fonts {
   name: "18"
   font: "/assets/fonts/18.font"
 }
+fonts {
+  name: "27"
+  font: "/assets/fonts/27.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"

@@ -176,6 +176,11 @@ function setup_store(instance: props) {
         remove_coins(GameStorage.get('coins'));
         remove_lifes(GameStorage.get('life').amount);
 
+        const life = GameStorage.get('life');
+        life.start_time = System.now() - life.start_time;
+        GameStorage.set('life', life);
+        on_life_tick();
+
         const infinit_life = GameStorage.get('infinit_life');
         infinit_life.start_time = System.now() - infinit_life.duration;
         GameStorage.set('infinit_life', infinit_life);
@@ -265,7 +270,11 @@ function setup_vertical_rocket(instance: props) {
 
 function setup_life_notification(instance: props) {
     instance.druid.new_button('life_notification/buy_button', () => {
-        if(!is_enough_coins(30)) return;
+        if(!is_enough_coins(30)) {
+            set_enabled_life_notification(false);
+            set_enabled_store(true);
+            return;
+        }
 
         set_enabled_life_notification(false);
         remove_coins(30);
@@ -306,13 +315,16 @@ function on_infinit_life_tick() {
     const delta = System.now() - life.start_time;
     
     gui.play_flipbook(gui.get_node('lifes/icon'), 'infinite_life_icon');
-    gui.set_text(gui.get_node('lifes/text'), parse_time(life.duration - delta));
+    const text = gui.get_node('lifes/text');
+    gui.set_text(text, parse_time(life.duration - delta));
+    gui.set_font(text, life.duration > (1 * 60 * 60) ? '18' : '27');
     
     if(delta >= life.duration) {
         life.is_active = false;
         GameStorage.set('infinit_life', life);
         gui.play_flipbook(gui.get_node('lifes/icon'), 'life_icon');
-        gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
+        gui.set_text(text, tostring(GameStorage.get('life').amount));
+        gui.set_font(text, '32');
     }
 }
 

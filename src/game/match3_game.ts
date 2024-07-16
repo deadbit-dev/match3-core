@@ -640,6 +640,7 @@ export function Game() {
         is_wait_until_animation_done = false;
 
         if(is_level_completed()) {
+            Log.log('COMPLETED LEVEL: ', current_level + 1);
             is_block_input = true;
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
@@ -662,16 +663,18 @@ export function Game() {
         EventBus.send('GAME_TIMER', remaining_time);
         if(remaining_time == 0) {
             timer.cancel(game_timer);
-            is_gameover = true;
             is_block_input = true;
-            if(!is_wait_until_animation_done)
-                timer.delay(1.5, false, gameover);
+            if(!is_level_completed()) {
+                is_gameover = true;
+                if(!is_wait_until_animation_done)
+                    timer.delay(1.5, false, gameover);
+            }
         }
     }
 
     function gameover() {
         GAME_CONFIG.is_revive = false;
-        GAME_CONFIG.revive_state = copy_state(2);
+        GAME_CONFIG.revive_state = copy_state(1);
         EventBus.send('ON_GAME_OVER', get_state());
     }
 
@@ -1277,7 +1280,7 @@ export function Game() {
         event_data.element = {x, y, uid: rocket.uid};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
-        event_data.axis = rocket.type == ElementId.VerticalRocket ? Axis.Vertical : Axis.Horizontal;
+        event_data.axis = rocket.type == ElementId.AxisRocket ? Axis.All : rocket.type == ElementId.VerticalRocket ? Axis.Vertical : Axis.Horizontal;
      
         if(rocket.type == ElementId.VerticalRocket || rocket.type == ElementId.AxisRocket) {
             for(let i = 0; i < field_height; i++) {
@@ -1563,7 +1566,7 @@ export function Game() {
             search_available_steps(1, (steps) => {
                 if(steps.length != 0) {
                     process_game_step(false);
-                    EventBus.send('SHUFFLE_END', copy_state(2));
+                    EventBus.send('SHUFFLE_END', copy_state(1));
                     return;
                 }
                 game_step_events = {} as GameStepEventBuffer;
@@ -1797,7 +1800,7 @@ export function Game() {
     }
     
     function revert_step(): boolean {
-        Log.log("REVERT STEP");
+        if(states.length < 3) return false;
 
         states.pop(); // delete new state after game step
         states.pop(); // delete current state
@@ -1805,11 +1808,20 @@ export function Game() {
         let previous_state = states.pop();
         if(previous_state == undefined) return false;
 
+        Log.log("REVERT STEP");
+
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const cell = previous_state.cells[y][x];
-                if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
-                else field.set_cell(x, y, NotActiveCell);
+                if(cell != NotActiveCell) {
+                    if(cell.id != CellId.Lock) make_cell(x, y, cell.id, cell?.data);
+                    else {
+                        const cell_id = (cell.data.under_cells as CellId[]).pop();
+                        if(cell_id != undefined) make_cell(x, y, cell_id, cell?.data);
+                        else make_cell(x, y, CellId.Base);
+                    }
+                    
+                } else field.set_cell(x, y, NotActiveCell);
 
                 const element = previous_state.elements[y][x];
                 if(element != NullElement) make_element(x, y, element.type, element.data);
@@ -1841,7 +1853,7 @@ export function Game() {
     }
 
     function is_level_completed() {
-        for(const target of get_state(2).targets) {
+        for(const target of get_state(1).targets) {
             if(target.uids.length < target.count) return false;
         }
 
@@ -2009,9 +2021,9 @@ export function Game() {
     //#endregion CALLBACKS
     //#region HELPERS
     
-    function get_state(offset = 1) {
-        assert(states.length - offset >= 0);
-        return states[states.length - offset];
+    function get_state(offset = 0) {
+        assert(states.length - (1 + offset) >= 0);
+        return states[states.length - (1 + offset)];
     }
 
     function update_state() {
@@ -2023,16 +2035,8 @@ export function Game() {
 
         return last_state;
     }
-    
-    function update_cells_state() {
-        const last_state = get_state();
-        const field_state = field.save_state();
-        last_state.cells = field_state.cells;
 
-        return last_state;
-    }
-
-    function copy_state(offset = 1) {
+    function copy_state(offset = 0) {
         const from_state = get_state(offset);
         const to_state = Object.assign({}, from_state);
 
@@ -2090,6 +2094,7 @@ export function Game() {
     
     function remove_random_element(exclude?: ItemInfo[], targets?: TargetState[], only_base_elements = true) {
         const available_items = [];
+        
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 const cell = field.get_cell(x, y);
@@ -2107,10 +2112,28 @@ export function Game() {
                     return (!target.is_cell && check_not_completed && (target.type == element.type));
                 }) != -1);
                 
-                 if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
-                 else if(is_valid_element) {
+                if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
+                else if(is_valid_element) {
                     if(only_base_elements && GAME_CONFIG.base_elements.includes(element.type)) available_items.push({x, y, uid: element.uid});
                     else available_items.push({x, y, uid: element.uid});
+                }
+            }
+        }
+
+        if(available_items.length == 0) {
+            print("HERE");
+            for (let y = 0; y < field_height; y++) {
+                for (let x = 0; x < field_width; x++) {
+                    const cell = field.get_cell(x, y);
+                    const element = field.get_element(x, y);
+                    const is_valid_cell = (cell != NotActiveCell);
+                    const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1);
+                    
+                    if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
+                    else if(is_valid_element) {
+                        if(only_base_elements && GAME_CONFIG.base_elements.includes(element.type)) available_items.push({x, y, uid: element.uid});
+                        else available_items.push({x, y, uid: element.uid});
+                    }
                 }
             }
         }

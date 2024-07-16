@@ -118,7 +118,7 @@ function ____exports.View(animator, resources)
                         local target = state.targets[i + 1]
                         local amount = target.count - #target.uids
                         targets[i] = amount
-                        EventBus.send("UPDATED_TARGET", {id = i, count = amount})
+                        EventBus.send("UPDATED_TARGET", {id = i, amount = amount, type = target.type})
                         i = i + 1
                     end
                 end
@@ -789,9 +789,7 @@ function ____exports.View(animator, resources)
             return
         end
         local copy_state = copy_game_state()
-        print("C: ", copy_state.elements)
         reset_field()
-        print("AC: ", copy_state.elements)
         load_field(copy_state, with_anim)
     end
     function make_substrate_view(x, y, cells, z_index)
@@ -2006,7 +2004,7 @@ function ____exports.View(animator, resources)
                 local target = state.game_state.targets[i + 1]
                 if __TS__ArrayIndexOf(target.uids, id) ~= -1 then
                     targets[i] = math.max(0, targets[i] - 1)
-                    EventBus.send("UPDATED_TARGET", {id = i, count = targets[i]})
+                    EventBus.send("UPDATED_TARGET", {id = i, amount = targets[i], type = target.type})
                 end
                 i = i + 1
             end

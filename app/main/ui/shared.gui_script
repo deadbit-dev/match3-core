@@ -238,6 +238,10 @@ function setup_store(instance)
         function()
             remove_coins(GameStorage.get("coins"))
             remove_lifes(GameStorage.get("life").amount)
+            local life = GameStorage.get("life")
+            life.start_time = System.now() - life.start_time
+            GameStorage.set("life", life)
+            on_life_tick()
             local infinit_life = GameStorage.get("infinit_life")
             infinit_life.start_time = System.now() - infinit_life.duration
             GameStorage.set("infinit_life", infinit_life)
@@ -387,6 +391,8 @@ function setup_life_notification(instance)
         "life_notification/buy_button",
         function()
             if not is_enough_coins(30) then
+                set_enabled_life_notification(false)
+                set_enabled_store(true)
                 return
             end
             set_enabled_life_notification(false)
@@ -430,10 +436,12 @@ function on_infinit_life_tick()
         gui.get_node("lifes/icon"),
         "infinite_life_icon"
     )
+    local text = gui.get_node("lifes/text")
     gui.set_text(
-        gui.get_node("lifes/text"),
+        text,
         parse_time(life.duration - delta)
     )
+    gui.set_font(text, life.duration > 1 * 60 * 60 and "18" or "27")
     if delta >= life.duration then
         life.is_active = false
         GameStorage.set("infinit_life", life)
@@ -442,9 +450,10 @@ function on_infinit_life_tick()
             "life_icon"
         )
         gui.set_text(
-            gui.get_node("lifes/text"),
+            text,
             tostring(GameStorage.get("life").amount)
         )
+        gui.set_font(text, "32")
     end
 end
 function set_enabled_coins(state)
