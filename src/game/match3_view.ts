@@ -1135,7 +1135,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         });
         
-        return 0.5;
+        return 1;
     }
 
     function trace(activation: ActivationMessage, diskosphere: hash, pos: vmath.vector3, counter: number, on_complete: () => void) {

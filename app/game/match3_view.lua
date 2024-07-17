@@ -1234,7 +1234,7 @@ function ____exports.View(animator, resources)
                 end
             end
         )
-        return 0.5
+        return 1
     end
     function trace(activation, diskosphere, pos, counter, on_complete)
         local anim_props = {blend_duration = 0, playback_rate = 1}
