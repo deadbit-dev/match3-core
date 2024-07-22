@@ -651,7 +651,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
         const item = {x, y, uid: cell.uid};
         on_cell_activation(item);
-
         
         if(is_near_activation) on_near_activation(get_neighbor_cells(x, y));
 

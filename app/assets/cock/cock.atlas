@@ -7,6 +7,10 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
+  image: "/assets/cock/images/bg.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
   image: "/assets/cock/images/body.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
@@ -36,6 +40,10 @@ images {
 }
 images {
   image: "/assets/cock/images/head.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cock/images/head_above.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {

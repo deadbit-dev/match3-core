@@ -117,6 +117,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     const swap_element_time = GAME_CONFIG.swap_element_time;
     const squash_element_easing = GAME_CONFIG.squash_element_easing;
     const squash_element_time = GAME_CONFIG.squash_element_time;
+    const helicopter_spin_duration = GAME_CONFIG.helicopter_spin_duration;
     const helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration;
     const damaged_element_easing = GAME_CONFIG.damaged_element_easing;
     const damaged_element_delay = GAME_CONFIG.damaged_element_delay;
@@ -326,7 +327,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 const target = state.targets[i];
                 const amount = target.count - target.uids.length;
                 targets[i] = amount;
-                EventBus.send('UPDATED_TARGET', {id: i, amount, type: target.type});
+                EventBus.send('UPDATED_TARGET', {id: i, amount, type: target.type, is_cell: target.is_cell});
             }
 
             recalculate_sizes();
@@ -366,10 +367,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         });
 
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', (data) => {
-            flow.start(() => {
-                on_wrong_swap_element_animation(data);
-                EventBus.send('SET_HELPER');
-            });
+            flow.start(() => on_wrong_swap_element_animation(data));
         });
 
         EventBus.on('ON_GAME_STEP', (events) => {
@@ -657,7 +655,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 case 'ON_MOVED_ELEMENTS':
                     on_move_phase_begin();
                     move_phase_duration = event_to_animation[event.key](event.value);
-                    on_move_phase_end();
+                    on_move_phase_end(event.value);
                     break;
                 default:
                     const event_duration = event_to_animation[event.key](event.value);
@@ -666,8 +664,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         }
 
-        print("G: ", data.state.elements);
-
+        print("SET");
         state.game_state = data.state;
 
         is_processing = false;
@@ -1044,14 +1041,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_diskisphere_activated_animation(message: Messages[MessageId]) {
         const activation = message as ActivationMessage;
-        const activated_duration = activate_diskosphere_animation(activation, () => {
-            for (const cell of activation.activated_cells) {
-                let skip = false;
-                for (const element of activation.damaged_elements)
-                    if (cell.x == element.x && cell.y == element.y) skip = true;
-                if (!skip) activate_cell_animation(cell);
-            }
-        });
+        const activated_duration = activate_diskosphere_animation(activation);
 
         return activated_duration;
     }
@@ -1061,13 +1051,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         damage_element_animation(message, activation.other_element.x, activation.other_element.y, activation.other_element.uid);
         const activated_duration = activate_diskosphere_animation(activation, () => {
-            for (const cell of activation.activated_cells) {
-                let skip = false;
-                for (const element of activation.damaged_elements)
-                    if (cell.x == element.x && cell.y == element.y) skip = true;
-                if (!skip) activate_cell_animation(cell);
-            }
-
             for (const element of activation.maked_elements)
                 make_element_view(element.x, element.y, element.type, element.uid, true);
         });
@@ -1082,14 +1065,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
             delete_view_item_by_game_id(activation.other_element.uid);
-            activate_duration = activate_diskosphere_animation(activation, () => {
-                for (const cell of activation.activated_cells) {
-                    let skip = false;
-                    for (const element of activation.damaged_elements)
-                        if (cell.x == element.x && cell.y == element.y) skip = true;
-                    if (!skip) activate_cell_animation(cell);
-                }
-            });
+            activate_duration = activate_diskosphere_animation(activation);
         });
 
         return squash_duration + 0.5;
@@ -1097,19 +1073,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_swaped_diskosphere_with_element_animation(message: Messages[MessageId]) {
         const activation = message as SwapedActivationMessage;
-        const activate_duration = activate_diskosphere_animation(activation, () => {
-            for (const cell of activation.activated_cells) {
-                let skip = false;
-                for (const element of activation.damaged_elements)
-                    if (cell.x == element.x && cell.y == element.y) skip = true;
-                if (!skip) activate_cell_animation(cell);
-            }
-        });
+        const activate_duration = activate_diskosphere_animation(activation);
 
         return activate_duration;
     }
     
-    function activate_diskosphere_animation(activation: ActivationMessage, on_complete: () => void) {
+    function activate_diskosphere_animation(activation: ActivationMessage, on_complete?: () => void) {
         delete_view_item_by_game_id(activation.element.uid);
         
         const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1);
@@ -1129,7 +1098,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     trace(activation, _go, pos, activation.damaged_elements.length, () => {
                         spine.play_anim(msg.url(undefined, _go, 'diskosphere_light'), 'light_ball_explosion', go.PLAYBACK_ONCE_FORWARD, anim_props);
                         msg.post(msg.url(undefined, _go, 'diskosphere'), 'disable');
-                        on_complete();
+                        if(on_complete != undefined) on_complete();
                     });
                 }
             }
@@ -1162,6 +1131,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             if (message_id == hash("spine_animation_done")) {
                 go.delete(projectile);
                 explode_element_animation(element);
+                const cell = activation.activated_cells[activation.activated_cells.findIndex((item) => {
+                    return (item.x == element.x && item.y == element.y);
+                })];
+
+                if(cell != undefined) activate_cell_animation(cell);
             }
         });
     
@@ -1171,6 +1145,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function explode_element_animation(item: ItemInfo) {
         delete_all_view_items_by_game_id(item.uid);
+
+        print("GET");
 
         const element = state.game_state.elements[item.y][item.x];
         if(element == NullElement) return;
@@ -1329,7 +1305,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         if (activation.target_element != NullElement) {
             remove_random_element_animation(message, activation.element, activation.target_element);
-            return damaged_element_time + helicopter_fly_duration + 0.2;
+            return damaged_element_time + (helicopter_spin_duration * 0.5) + helicopter_fly_duration;
         }
 
         return damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid);
@@ -1370,7 +1346,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             if (!skip) activate_cell_animation(cell);
         }
 
-        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2;
+        return squash_duration + damaged_element_time + (helicopter_spin_duration * 0.5) + helicopter_fly_duration;
     }
 
     function on_swaped_helicopter_with_element_animation(message: Messages[MessageId]) {
@@ -1391,7 +1367,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             if (!skip) activate_cell_animation(cell);
         }
 
-        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2;
+        return squash_duration + damaged_element_time + (helicopter_spin_duration * 0.5) + helicopter_fly_duration;
     }
 
     function on_dynamite_activated_animation(message: Messages[MessageId]) {
@@ -1475,36 +1451,45 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_element_activated_animation(message: Messages[MessageId]) {
         const activation = message as ElementActivationMessage;
-
         damage_element_animation(message, activation.x, activation.y, activation.uid);
 
-        for (const cell of activation.activated_cells) {
-            if (cell.x == activation.x && cell.y == activation.y) activate_cell_animation(cell);
-        }
-
         return damaged_element_time;
-
     }
 
     function activate_cell_animation(cell: ActivatedCellMessage) {
         delete_all_view_items_by_game_id(cell.previous_id);
         make_cell_view(cell.x, cell.y, cell.id, cell.uid);
 
-        // const pos = get_world_pos(cell.x, cell.y, GAME_CONFIG.default_element_z_index + 1.1);
-        // const effect = gm.make_go('effect_view', pos);
-        // const effect_name = 'cell_explode';
+        const type = (state.game_state.cells[cell.y][cell.x] as Cell).id as CellId;
+        const pos = get_world_pos(cell.x, cell.y, (GAME_CONFIG.top_layer_cells.includes(type) ? GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) + 0.1);
+        const is_stone = (type == CellId.Stone0 || type == CellId.Stone1 || type == CellId.Stone2);
+        const effect_name = is_stone ? "cell_stone_explode" : GAME_CONFIG.cell_view[type] + '_explode';
+        
+        if(!GAME_CONFIG.explodable_cells.includes(type))
+            return 0;
+        
+        const effect = gm.make_go('effect_view', pos);        
 
-        // msg.post(msg.url(undefined, effect, undefined), 'disable');
-        // msg.post(msg.url(undefined, effect, effect_name), 'enable');
+        msg.post(msg.url(undefined, effect, undefined), 'disable');
+        msg.post(msg.url(undefined, effect, effect_name), 'enable');
 
-        // go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), effect);
+        go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), effect);
 
-        // const type = (state.game_state.cells[cell.y][cell.x] as Cell).id as CellId;
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
 
-        // const anim_props = { blend_duration: 0, playback_rate: 1 };
-        // spine.play_anim(msg.url(undefined, effect, effect_name), GAME_CONFIG.cell_colors[type], go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
-        //     go.delete(effect);
-        // });
+        print("ANIM: ", cell.x, cell.y);
+
+        let anim_name = '';
+        switch(type) {
+            case CellId.Stone0: anim_name = 'morph_1'; break;
+            case CellId.Stone1: anim_name = 'morph_2'; break;
+            case CellId.Stone2: anim_name = 'morph_3'; break;
+            default: anim_name = 'morph'; break;
+        }
+
+        spine.play_anim(msg.url(undefined, effect, effect_name), anim_name, go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
+            go.delete(effect);
+        });
 
         return 0;
     }
@@ -1518,8 +1503,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function on_moved_elements_animation(message: Messages[MessageId]) {
         const data = message as MovedElementsMessage;
         const elements = data.elements;
-
-        state.game_state = data.state;
 
         const delayed_row_in_column: number[] = [];
 
@@ -1621,8 +1604,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         return max_move_duration + max_delay;
     }
 
-    function on_move_phase_end() {
+    function on_move_phase_end(message: Messages[MessageId]) {
+        const data = message as MovedElementsMessage;
         flow.delay(move_phase_duration);
+        state.game_state = data.state;
         move_phase_duration = 0;
     }
 
@@ -1657,15 +1642,16 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const current_world_pos = go.get_position(item._hash);
         current_world_pos.z = 3;
         go.set_position(current_world_pos, item._hash);
-
-        go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, helicopter_fly_duration, 0, () => {
+        go.animate(item._hash, 'euler.z', go.PLAYBACK_ONCE_FORWARD, 720, go.EASING_INCUBIC, helicopter_spin_duration);
+        go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, helicopter_fly_duration, helicopter_spin_duration * 0.5, () => {
             damage_element_animation(message, target_element.x, target_element.y, target_element.uid);
             damage_element_animation(message, element.x, element.y, element.uid, () => {
                 if (on_complited != undefined) on_complited();
             });
         });
+        
 
-        return helicopter_fly_duration + damaged_element_time;
+        return helicopter_spin_duration + helicopter_fly_duration + damaged_element_time;
     }
 
     // TODO: refactoring
@@ -1794,7 +1780,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             const target = state.game_state.targets[i];
             if (target.uids.indexOf(id) != -1) {
                 targets[i] = math.max(0, targets[i] - 1);
-                EventBus.send('UPDATED_TARGET', {id: i, amount: targets[i], type: target.type});
+                EventBus.send('UPDATED_TARGET', {id: i, amount: targets[i], type: target.type, is_cell: target.is_cell});
             }
         }
     }

@@ -216,7 +216,20 @@ function setup_busters(instance)
             "spinning/button",
             function()
                 if GameStorage.get("spinning_counts") == 0 then
-                    return EventBus.send("TRY_BUY_SPINNING")
+                    if __TS__ArrayIncludes(
+                        GAME_CONFIG.tutorial_levels,
+                        GameStorage.get("current_level") + 1
+                    ) then
+                        if __TS__ArrayIncludes(
+                            GameStorage.get("completed_tutorials"),
+                            GameStorage.get("current_level") + 1
+                        ) then
+                            EventBus.send("TRY_BUY_SPINNING")
+                        end
+                    else
+                        EventBus.send("TRY_BUY_SPINNING")
+                    end
+                    return
                 end
                 EventBus.send("TRY_ACTIVATE_SPINNING")
             end
@@ -239,7 +252,20 @@ function setup_busters(instance)
             "hammer/button",
             function()
                 if GameStorage.get("hammer_counts") == 0 then
-                    return EventBus.send("TRY_BUY_HAMMER")
+                    if __TS__ArrayIncludes(
+                        GAME_CONFIG.tutorial_levels,
+                        GameStorage.get("current_level") + 1
+                    ) then
+                        if __TS__ArrayIncludes(
+                            GameStorage.get("completed_tutorials"),
+                            GameStorage.get("current_level") + 1
+                        ) then
+                            EventBus.send("TRY_BUY_HAMMER")
+                        end
+                    else
+                        EventBus.send("TRY_BUY_HAMMER")
+                    end
+                    return
                 end
                 EventBus.send("TRY_ACTIVATE_HAMMER")
             end
@@ -262,7 +288,20 @@ function setup_busters(instance)
             "horizontal_rocket/button",
             function()
                 if GameStorage.get("horizontal_rocket_counts") == 0 then
-                    return EventBus.send("TRY_BUY_HORIZONTAL_ROCKET")
+                    if __TS__ArrayIncludes(
+                        GAME_CONFIG.tutorial_levels,
+                        GameStorage.get("current_level") + 1
+                    ) then
+                        if __TS__ArrayIncludes(
+                            GameStorage.get("completed_tutorials"),
+                            GameStorage.get("current_level") + 1
+                        ) then
+                            EventBus.send("TRY_BUY_HORIZONTAL_ROCKET")
+                        end
+                    else
+                        EventBus.send("TRY_BUY_HORIZONTAL_ROCKET")
+                    end
+                    return
                 end
                 EventBus.send("TRY_ACTIVATE_HORIZONTAL_ROCKET")
             end
@@ -285,7 +324,20 @@ function setup_busters(instance)
             "vertical_rocket/button",
             function()
                 if GameStorage.get("vertical_rocket_counts") == 0 then
-                    return EventBus.send("TRY_BUY_VERTICAL_ROCKET")
+                    if __TS__ArrayIncludes(
+                        GAME_CONFIG.tutorial_levels,
+                        GameStorage.get("current_level") + 1
+                    ) then
+                        if __TS__ArrayIncludes(
+                            GameStorage.get("completed_tutorials"),
+                            GameStorage.get("current_level") + 1
+                        ) then
+                            EventBus.send("TRY_BUY_VERTICAL_ROCKET")
+                        end
+                    else
+                        EventBus.send("TRY_BUY_VERTICAL_ROCKET")
+                    end
+                    return
                 end
                 EventBus.send("TRY_ACTIVATE_VERTICAL_ROCKET")
             end
@@ -325,6 +377,10 @@ function setup_sustem_ui(instance)
 end
 function setup_win_ui(instance)
     instance.druid:new_button("continue_button", next_level)
+    instance.druid:new_button(
+        "win_close",
+        function() return Scene.load("map") end
+    )
     gui.set_enabled(
         gui.get_node("win"),
         false
@@ -450,87 +506,35 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch60 = data.id
-        local previous_amount0, previous_amount1, previous_amount2
-        local ____cond60 = ____switch60 == 0
-        if ____cond60 then
-            previous_amount0 = tonumber(gui.get_text(gui.get_node("first_target_counts")))
-            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
-                local count0 = previous_amount0 ~= nil and previous_amount0 - data.amount or 0
-                if count0 ~= 0 then
-                    timer.delay(
-                        math.random(),
-                        false,
-                        function()
-                            set_text(
-                                "first_target_counts",
-                                math.max(0, data.amount)
-                            )
-                            feed_animation(data.type)
-                        end
-                    )
-                end
-            else
-                set_text(
-                    "first_target_counts",
-                    math.max(0, data.amount)
-                )
-            end
+        local ____switch73 = data.id
+        local ____cond73 = ____switch73 == 0
+        if ____cond73 then
+            set_text(
+                "first_target_counts",
+                math.max(0, data.amount)
+            )
             break
         end
-        ____cond60 = ____cond60 or ____switch60 == 1
-        if ____cond60 then
-            previous_amount1 = tonumber(gui.get_text(gui.get_node("second_target_counts")))
-            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
-                local count1 = previous_amount1 ~= nil and previous_amount1 - data.amount or 0
-                if count1 ~= 0 then
-                    timer.delay(
-                        math.random(),
-                        false,
-                        function()
-                            set_text(
-                                "second_target_counts",
-                                math.max(0, data.amount)
-                            )
-                            feed_animation(data.type)
-                        end
-                    )
-                end
-            else
-                set_text(
-                    "second_target_counts",
-                    math.max(0, data.amount)
-                )
-            end
+        ____cond73 = ____cond73 or ____switch73 == 1
+        if ____cond73 then
+            set_text(
+                "second_target_counts",
+                math.max(0, data.amount)
+            )
             break
         end
-        ____cond60 = ____cond60 or ____switch60 == 2
-        if ____cond60 then
-            previous_amount2 = tonumber(gui.get_text(gui.get_node("third_target_counts")))
-            if __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 then
-                local count2 = previous_amount2 ~= nil and previous_amount2 - data.amount or 0
-                if count2 ~= 0 then
-                    timer.delay(
-                        math.random(),
-                        false,
-                        function()
-                            set_text(
-                                "third_target_counts",
-                                math.max(0, data.amount)
-                            )
-                            feed_animation(data.type)
-                        end
-                    )
-                end
-            else
-                set_text(
-                    "third_target_counts",
-                    math.max(0, data.amount)
-                )
-            end
+        ____cond73 = ____cond73 or ____switch73 == 2
+        if ____cond73 then
+            set_text(
+                "third_target_counts",
+                math.max(0, data.amount)
+            )
             break
         end
     until true
+    if not data.is_cell and __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 and data.amount == 0 then
+        feed_animation(data.type)
+    end
 end
 function feed_animation(item_type)
     local element = gui.new_box_node(
@@ -548,7 +552,11 @@ function feed_animation(item_type)
         1,
         0,
         function()
-            gui.delete_node(element)
+            timer.delay(
+                3,
+                false,
+                function() return gui.delete_node(element) end
+            )
         end
     )
 end

@@ -30,7 +30,7 @@ export function init(this: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
-    if(this.block_input) return;
+    if(GAME_CONFIG.is_busy_input || this.block_input) return;
 
     this.druid.on_input(action_id, action);
     if(action_id == ID_MESSAGES.MSG_TOUCH && !action.pressed && !action.released) on_drag(action);
@@ -96,6 +96,7 @@ function on_drag(action: any) {
 
 function set_events(instace: props) {
     EventBus.on('DLG_ACTIVE', (state) => {
+        print("M: ", state);
         instace.block_input = state;
     });
 

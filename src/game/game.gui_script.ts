@@ -31,7 +31,7 @@ export function init(this: props): void {
     set_events(this);
 }
 
-export function on_input(this: props, action_id: string | hash, action: unknown): void {
+export function on_input(this: props, action_id: string | hash, action: unknown): boolean {
     return this.druid.on_input(action_id, action);
 }
 
@@ -169,8 +169,13 @@ function setup_busters(instance: props) {
     
     if(GameStorage.get('spinning_opened')) {
         instance.druid.new_button('spinning/button', () => {
-            if(GameStorage.get('spinning_counts') == 0)
-                return EventBus.send('TRY_BUY_SPINNING');
+            if(GameStorage.get('spinning_counts') == 0) {
+                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+                        EventBus.send('TRY_BUY_SPINNING');
+                } else EventBus.send('TRY_BUY_SPINNING');
+                return;
+            }
             EventBus.send('TRY_ACTIVATE_SPINNING');
         });
 
@@ -181,8 +186,13 @@ function setup_busters(instance: props) {
 
     if(GameStorage.get('hammer_opened')) {
         instance.druid.new_button('hammer/button', () => {
-            if(GameStorage.get('hammer_counts') == 0)
-                return EventBus.send('TRY_BUY_HAMMER');
+            if(GameStorage.get('hammer_counts') == 0) {
+                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+                        EventBus.send('TRY_BUY_HAMMER');
+                } else EventBus.send('TRY_BUY_HAMMER');
+                return;
+            }
             EventBus.send('TRY_ACTIVATE_HAMMER');
         });
         
@@ -193,8 +203,13 @@ function setup_busters(instance: props) {
     
     if(GameStorage.get('horizontal_rocket_opened')) {
         instance.druid.new_button('horizontal_rocket/button', () => {
-            if(GameStorage.get('horizontal_rocket_counts') == 0)
-                return EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');         
+            if(GameStorage.get('horizontal_rocket_counts') == 0) {
+                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+                        EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');
+                } else EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');
+                return;
+            }
             EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
         });
         
@@ -205,8 +220,13 @@ function setup_busters(instance: props) {
 
     if(GameStorage.get('vertical_rocket_opened')) {
         instance.druid.new_button('vertical_rocket/button', () => {
-            if(GameStorage.get('vertical_rocket_counts') == 0)
-                return EventBus.send('TRY_BUY_VERTICAL_ROCKET');
+            if(GameStorage.get('vertical_rocket_counts') == 0) {
+                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+                        EventBus.send('TRY_BUY_VERTICAL_ROCKET');
+                } else EventBus.send('TRY_BUY_VERTICAL_ROCKET');
+                return;
+            }
             EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
         });
         
@@ -228,6 +248,7 @@ function setup_sustem_ui(instance: props) {
 
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', next_level);
+    instance.druid.new_button('win_close', () => Scene.load('map'));
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
     gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
@@ -283,53 +304,22 @@ function set_events(instance: props) {
 // TODO: refactoring
 function update_targets(data: TargetMessage) {
     switch(data.id) {
-        case 0:
-            const previous_amount0 = tonumber(gui.get_text(gui.get_node('first_target_counts')));
-            if(GAME_CONFIG.feed_elements.indexOf(data.type) != -1) {
-                const count0 = previous_amount0 != undefined ? previous_amount0 - data.amount : 0;
-                if(count0 != 0) {
-                    timer.delay(math.random(), false, () => {
-                        set_text('first_target_counts', math.max(0, data.amount));
-                        feed_animation(data.type);
-                    });
-                }
-            } else set_text('first_target_counts', math.max(0, data.amount));
-        break;
-        case 1:
-            const previous_amount1 = tonumber(gui.get_text(gui.get_node('second_target_counts')));
-            if(GAME_CONFIG.feed_elements.indexOf(data.type) != -1) {
-                const count1 = previous_amount1 != undefined ? previous_amount1 - data.amount : 0;
-                if(count1 != 0) {
-                    timer.delay(math.random(), false, () => {
-                        set_text('second_target_counts', math.max(0, data.amount));
-                        feed_animation(data.type);
-                    });
-                }
-            } else set_text('second_target_counts', math.max(0, data.amount));
-        break;
-        case 2:
-            const previous_amount2 = tonumber(gui.get_text(gui.get_node('third_target_counts')));
-            if(GAME_CONFIG.feed_elements.indexOf(data.type) != -1) {
-                const count2 = previous_amount2 != undefined ? previous_amount2 - data.amount : 0;
-                if(count2 != 0) {
-                    timer.delay(math.random(), false, () => {
-                        set_text('third_target_counts', math.max(0, data.amount));
-                        feed_animation(data.type);
-                    });
-                }
-            } else set_text('third_target_counts', math.max(0, data.amount));
-        break;
+        case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
+        case 1: set_text('second_target_counts', math.max(0, data.amount)); break;
+        case 2: set_text('third_target_counts', math.max(0, data.amount)); break;
     }
+
+    if(!data.is_cell && GAME_CONFIG.feed_elements.indexOf(data.type) != -1 && data.amount == 0)
+        feed_animation(data.type);
 }
 
 function feed_animation(item_type: number) {
-    
     const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
     const view = GAME_CONFIG.element_view[item_type as ElementId];
     gui.set_texture(element, 'graphics');
     gui.play_flipbook(element, view);
     gui.animate(element, 'position', vmath.vector3(250, 150, 0), gui.EASING_INCUBIC, 1, 0, () => {
-        gui.delete_node(element);
+        timer.delay(3, false, () => gui.delete_node(element));
     });
 }
 

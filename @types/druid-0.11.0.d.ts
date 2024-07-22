@@ -22,7 +22,7 @@ type CreateItemFunction = (this: any, data: any, index: number, data_list: any) 
 interface DruidClass {
     final(): void;
     on_message(message_id: string | hash, message: unknown, sender: string | hash | url): void;
-    on_input: (action_id: string | hash, action: unknown) => void;
+    on_input: (action_id: string | hash, action: unknown) => boolean;
     update(dt: number): void;
     remove(component: DruidNode): void;
 
@@ -45,6 +45,7 @@ interface DruidConstructor {
 
 interface DruidBlocker {
     set_enabled: (state: boolean) => void;
+    is_enabled: () => boolean
 }
 
 interface DruidButton {

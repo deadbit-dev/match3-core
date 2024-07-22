@@ -1,0 +1,85 @@
+{ "skeleton": { "images": "C:/Users/MotherOfBees/Music/ANIMATION/NONAME/SOURCE/images/" },
+"PhotoshopToSpine": { "scale": 1, "padding": 1, "trim": true },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "Фон", "bone": "root", "attachment": "Фон" },
+	{ "name": "right_paw_back", "bone": "root", "attachment": "right_paw_back" },
+	{ "name": "right_paw_bent", "bone": "root", "attachment": "right_paw_bent" },
+	{ "name": "right_paw", "bone": "root", "attachment": "right_paw" },
+	{ "name": "left_paw", "bone": "root", "attachment": "left_paw" },
+	{ "name": "right_wing", "bone": "root", "attachment": "right_wing" },
+	{ "name": "body", "bone": "root", "attachment": "body" },
+	{ "name": "tail_upper", "bone": "root", "attachment": "tail_upper" },
+	{ "name": "tail_midle", "bone": "root", "attachment": "tail_midle" },
+	{ "name": "tail_lower", "bone": "root", "attachment": "tail_lower" },
+	{ "name": "left_wing", "bone": "root", "attachment": "left_wing" },
+	{ "name": "neck", "bone": "root", "attachment": "neck" },
+	{ "name": "head", "bone": "root", "attachment": "head" },
+	{ "name": "chin", "bone": "root", "attachment": "chin" },
+	{ "name": "crest", "bone": "root", "attachment": "crest" },
+	{ "name": "beak_lower", "bone": "root", "attachment": "beak_lower" },
+	{ "name": "beak_upper", "bone": "root", "attachment": "beak_upper" },
+	{ "name": "eye_closed", "bone": "root" }
+],
+"skins": {
+	"default": {
+		"Фон": {
+			"Фон": { "x": 0, "y": 463, "width": 1922, "height": 1082 }
+		},
+		"right_paw_back": {
+			"right_paw_back": { "x": 128, "y": 232.5, "width": 406, "height": 189 }
+		},
+		"right_paw_bent": {
+			"right_paw_bent": { "x": -44, "y": 264, "width": 210, "height": 240 }
+		},
+		"right_paw": {
+			"right_paw": { "x": -133, "y": 158, "width": 288, "height": 324 }
+		},
+		"left_paw": {
+			"left_paw": { "x": 115, "y": 143, "width": 232, "height": 358 }
+		},
+		"right_wing": {
+			"right_wing": { "x": -74.5, "y": 361, "width": 251, "height": 372 }
+		},
+		"body": {
+			"body": { "x": -15.5, "y": 444, "width": 699, "height": 424 }
+		},
+		"tail_upper": {
+			"tail_upper": { "x": 275, "y": 657.5, "width": 452, "height": 551 }
+		},
+		"tail_midle": {
+			"tail_midle": { "x": 230.5, "y": 546.5, "width": 363, "height": 589 }
+		},
+		"tail_lower": {
+			"tail_lower": { "x": 208.5, "y": 406, "width": 319, "height": 512 }
+		},
+		"left_wing": {
+			"left_wing": { "x": 3, "y": 377.5, "width": 304, "height": 373 }
+		},
+		"neck": {
+			"neck": { "x": -210, "y": 643, "width": 308, "height": 412 }
+		},
+		"head": {
+			"head": { "x": -283, "y": 777, "width": 130, "height": 172 }
+		},
+		"chin": {
+			"chin": { "x": -294.5, "y": 704.5, "width": 95, "height": 143 }
+		},
+		"crest": {
+			"crest": { "x": -315.5, "y": 868, "width": 187, "height": 204 }
+		},
+		"beak_lower": {
+			"beak_lower": { "x": -332, "y": 758.5, "width": 32, "height": 29 }
+		},
+		"beak_upper": {
+			"beak_upper": { "x": -338.5, "y": 770, "width": 63, "height": 34 }
+		},
+		"eye_closed": {
+			"eye_closed": { "x": -280, "y": 796.5, "width": 64, "height": 51 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

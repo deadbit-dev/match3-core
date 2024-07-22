@@ -20,7 +20,7 @@ export function init(this: props): void {
     set_events(this);
 }
 
-export function on_input(this: props, action_id: string | hash, action: any): void {
+export function on_input(this: props, action_id: string | hash, action: any): boolean {
     return this.druid.on_input(action_id, action);
 }
 

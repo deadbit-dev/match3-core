@@ -53,6 +53,7 @@ function set_events(instace)
     EventBus.on(
         "DLG_ACTIVE",
         function(state)
+            print("M: ", state)
             instace.block_input = state
         end
     )
@@ -73,7 +74,7 @@ function ____exports.init(self)
     Scene.load_resource("map", "shared_gui")
 end
 function ____exports.on_input(self, action_id, action)
-    if self.block_input then
+    if GAME_CONFIG.is_busy_input or self.block_input then
         return
     end
     self.druid:on_input(action_id, action)

@@ -50,6 +50,7 @@ export const _GAME_CONFIG = {
     squash_element_easing: go.EASING_INCUBIC,
     squash_element_time: 0.25,
 
+    helicopter_spin_duration: 0.5 + 0.75,
     helicopter_fly_duration: 0.75,
 
     damaged_element_easing: go.EASING_INOUTBACK,
@@ -195,6 +196,14 @@ export const _GAME_CONFIG = {
         [CellId.Web]: ''
     },
 
+    explodable_cells: [
+        CellId.Box,
+        CellId.Grass,
+        CellId.Stone0,
+        CellId.Stone1,
+        CellId.Stone2
+    ],
+
     base_elements: [
         ElementId.Dimonde,
         ElementId.Gold,
@@ -226,7 +235,7 @@ export const _GAME_CONFIG = {
 
     animal_levels: [4, 11, 18, 25, 32, 39, 47],
     level_to_animal: {
-        4: 'goose',
+        4: 'cock',
         11: 'kozel',
         18: 'kaban',
         25: 'goose',
@@ -360,7 +369,9 @@ export const _GAME_CONFIG = {
     levels: [] as Level[],
     
     is_revive: false,
-    revive_state: {} as GameState
+    revive_state: {} as GameState,
+
+    is_busy_input: false
 };
 
 
@@ -424,7 +435,7 @@ export interface SwapedDiskosphereActivationMessage extends SwapedActivationMess
 export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
-export interface TargetMessage { id: number, amount: number, type: number }
+export interface TargetMessage { id: number, amount: number, type: number, is_cell: boolean }
 
 export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
 
@@ -510,6 +521,7 @@ export type _UserMessages = {
     REMOVE_TUTORIAL: VoidMessage,
 
     DLG_ACTIVE: boolean,
+
     LIFE_NOTIFICATION: boolean,
     NOT_ENOUGH_LIFE: VoidMessage,
 

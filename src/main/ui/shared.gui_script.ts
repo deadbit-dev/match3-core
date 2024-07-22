@@ -14,7 +14,8 @@ import { add_lifes, is_max_lifes, remove_lifes } from '../life';
 
 
 interface props {
-    druid: DruidClass,
+    druid: DruidClass
+    dlg_opened: boolean
 }
 
 export function init(this: props): void {
@@ -25,7 +26,7 @@ export function init(this: props): void {
     gui.set_render_order(10);
 
     setup(this);
-    set_events();
+    set_events(this);
 
     timer.delay(1200, true, () => add_lifes(1));
     
@@ -37,7 +38,7 @@ export function init(this: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
-    this.druid?.on_input(action_id, action);
+    GAME_CONFIG.is_busy_input = this.druid?.on_input(action_id, action);
 }
 
 export function update(this: props, dt: number): void {
@@ -54,7 +55,7 @@ export function final(this: props): void {
     Manager.final_script();
 }
 
-function set_events() {
+function set_events(data: props) {
     EventBus.on('ON_SCENE_LOADED', on_scene_loaded, true);
     EventBus.on('ON_GAME_OVER', on_gameover, true);
     EventBus.on('SET_LIFE_NOTIFICATION', () => set_enabled_life_notification(true), true);
@@ -63,60 +64,78 @@ function set_events() {
     EventBus.on('ADDED_COIN', on_add_coins, true);
     EventBus.on('REMOVED_COIN', on_remove_coins, true);
     EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
-    EventBus.on('TRY_BUY_HAMMER', () => set_enabled_hammer(true), true);
-    EventBus.on('TRY_BUY_SPINNING', () => set_enabled_spinning(true), true);
-    EventBus.on('TRY_BUY_HORIZONTAL_ROCKET', () => set_enabled_horizontall_rocket(true), true);
-    EventBus.on('TRY_BUY_VERTICAL_ROCKET', () => set_enabled_vertical_rocket(true), true);
+    EventBus.on('TRY_BUY_HAMMER', () => {
+        print("RECIVED");
+        if(data.dlg_opened) return;
+        print("PASSED");
+        set_enabled_hammer(true);
+        data.dlg_opened = true;
+    }, true);
+    EventBus.on('TRY_BUY_SPINNING', () => {
+        if(data.dlg_opened) return;
+        set_enabled_spinning(true);
+        data.dlg_opened = true;
+    }, true);
+    EventBus.on('TRY_BUY_HORIZONTAL_ROCKET', () => {
+        if(data.dlg_opened) return;
+        set_enabled_horizontall_rocket(true);
+        data.dlg_opened = true;
+    }, true);
+    EventBus.on('TRY_BUY_VERTICAL_ROCKET', () => {
+        if(data.dlg_opened) return;
+        set_enabled_vertical_rocket(true);
+        data.dlg_opened = true;
+    }, true);
 }
 
-function setup(instance: props) {
-    setup_coins(instance);
-    setup_life(instance);
-    setup_store(instance);
-    setup_settings(instance);
-    setup_life_notification(instance);
-    setup_busters(instance);
+function setup(data: props) {
+    setup_coins(data);
+    setup_life(data);
+    setup_store(data);
+    setup_settings(data);
+    setup_life_notification(data);
+    setup_busters(data);
 }
 
-function setup_coins(instance: props) {
-    instance.druid.new_button('coins/button', () => set_enabled_store(true));
+function setup_coins(data: props) {
+    data.druid.new_button('coins/button', () => set_enabled_store(true));
     gui.set_text(gui.get_node('coins/text'), tostring(GameStorage.get('coins')));
 }
 
-function setup_life(instance: props) {
-    instance.druid.new_button('lifes/button', () => set_enabled_store(true));
+function setup_life(data: props) {
+    data.druid.new_button('lifes/button', () => set_enabled_store(true));
     gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
 }
 
-function setup_store(instance: props) {
-    instance.druid.new_button('store_button', () => set_enabled_store(true));
+function setup_store(data: props) {
+    data.druid.new_button('store_button', () => set_enabled_store(true));
 
-    instance.druid.new_button('store/close', () => set_enabled_store(false));
+    data.druid.new_button('store/close', () => set_enabled_store(false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
     
-    instance.druid.new_button('store/buy_30_btn', () => add_coins(30));
-    instance.druid.new_button('store/buy_150_btn', () => add_coins(150));
-    instance.druid.new_button('store/buy_300_btn', () => add_coins(300));
-    instance.druid.new_button('store/buy_800_btn', () => add_coins(800));
+    data.druid.new_button('store/buy_30_btn', () => add_coins(30));
+    data.druid.new_button('store/buy_150_btn', () => add_coins(150));
+    data.druid.new_button('store/buy_300_btn', () => add_coins(300));
+    data.druid.new_button('store/buy_800_btn', () => add_coins(800));
 
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
 
-    instance.druid.new_button('store/buy_x1_btn', () => {
+    data.druid.new_button('store/buy_x1_btn', () => {
         if(!is_enough_coins(30) || is_max_lifes()) return;
 
         add_lifes(1);
         remove_coins(30);
     });
 
-    instance.druid.new_button('store/buy_x2_btn', () => {
+    data.druid.new_button('store/buy_x2_btn', () => {
         if(!is_enough_coins(50) || is_max_lifes()) return;
 
         add_lifes(2);
         remove_coins(50);
     });
 
-    instance.druid.new_button('store/buy_x3_btn', () => {
+    data.druid.new_button('store/buy_x3_btn', () => {
         if(!is_enough_coins(70) || is_max_lifes()) return;
 
         add_lifes(3);
@@ -125,7 +144,7 @@ function setup_store(instance: props) {
 
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
 
-    instance.druid.new_button('store/junior_box/buy_button/button', () => {
+    data.druid.new_button('store/junior_box/buy_button/button', () => {
         if(!is_enough_coins(90)) return;
 
         remove_coins(90);
@@ -137,11 +156,13 @@ function setup_store(instance: props) {
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 1);
         GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 1);
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
+
+        EventBus.send('UPDATED_BUTTONS');
     });
 
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
     
-    instance.druid.new_button('store/catlover_box/buy_button/button', () => {
+    data.druid.new_button('store/catlover_box/buy_button/button', () => {
         if(!is_enough_coins(180)) return;
 
         remove_coins(180);
@@ -153,26 +174,28 @@ function setup_store(instance: props) {
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 2);
         GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 2);
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 2);
+
+        EventBus.send('UPDATED_BUTTONS');
     });
 
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
 
-    instance.druid.new_button('store/buy_ad_1_btn', () => {
+    data.druid.new_button('store/buy_ad_1_btn', () => {
         if(!is_enough_coins(100)) return;
         remove_coins(100);
     });
 
-    instance.druid.new_button('store/buy_ad_7_btn', () => {
+    data.druid.new_button('store/buy_ad_7_btn', () => {
         if(!is_enough_coins(250)) return;
         remove_coins(250);
     });
 
-    instance.druid.new_button('store/buy_ad_30_btn', () => {
+    data.druid.new_button('store/buy_ad_30_btn', () => {
         if(!is_enough_coins(600)) return;
         remove_coins(600);
     });
 
-    instance.druid.new_button('store/reset/button', () => {
+    data.druid.new_button('store/reset/button', () => {
         remove_coins(GameStorage.get('coins'));
         remove_lifes(GameStorage.get('life').amount);
 
@@ -193,83 +216,111 @@ function setup_store(instance: props) {
     });
 }
 
-function setup_settings(instance: props) {
-    instance.druid.new_button('settings_button', () => {});
+function setup_settings(data: props) {
+    data.druid.new_button('settings_button', () => {});
 }
 
-function setup_busters(instance: props) {
-    setup_hammer(instance);
-    setup_spinning(instance);
-    setup_horizontal_rocket(instance);
-    setup_vertical_rocket(instance);
+function setup_busters(data: props) {
+    setup_hammer(data);
+    setup_spinning(data);
+    setup_horizontal_rocket(data);
+    setup_vertical_rocket(data);
 }
 
-function setup_hammer(instance: props) {
+function setup_hammer(data: props) {
     gui.set_text(gui.get_node('hammer/title_text'), Lang.get_text('hammer'));
     gui.set_text(gui.get_node('hammer/description'), Lang.get_text('hammer_description'));
     gui.set_text(gui.get_node('hammer/buy_button_text'), Lang.get_text('buy') + " 30");
 
-    instance.druid.new_button('hammer/buy_button', () => {
-        if(!is_enough_coins(30)) return;
+    data.druid.new_button('hammer/buy_button', () => {
+        if(!is_enough_coins(30)) {
+            set_enabled_hammer(false);
+            set_enabled_store(true);
+            return;
+        }
         remove_coins(30);
         GameStorage.set('hammer_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_hammer(false);
     });
 
-    instance.druid.new_button('hammer/close', () => set_enabled_hammer(false));
+    data.druid.new_button('hammer/close', () => {
+        set_enabled_hammer(false);
+        data.dlg_opened = false; 
+    });
 }
 
-function setup_spinning(instance: props) {
+function setup_spinning(data: props) {
     gui.set_text(gui.get_node('spinning/title_text'), Lang.get_text('spinning'));
     gui.set_text(gui.get_node('spinning/description'), Lang.get_text('spinning_description'));
     gui.set_text(gui.get_node('spinning/buy_button_text'), Lang.get_text('buy') + " 30");
 
-    instance.druid.new_button('spinning/buy_button', () => {
-        if(!is_enough_coins(30)) return;
+    data.druid.new_button('spinning/buy_button', () => {
+        if(!is_enough_coins(30)) {
+            set_enabled_spinning(false);
+            set_enabled_store(true);
+            return;
+        }
         remove_coins(30);
         GameStorage.set('spinning_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_spinning(false);
     });
 
-    instance.druid.new_button('spinning/close', () => set_enabled_spinning(false));
+    data.druid.new_button('spinning/close', () => {
+        set_enabled_spinning(false);
+        data.dlg_opened = false;
+    });
 }
 
-function setup_horizontal_rocket(instance: props) {
+function setup_horizontal_rocket(data: props) {
     gui.set_text(gui.get_node('horizontal_rocket/title_text'), Lang.get_text('horizontal_rocket'));
     gui.set_text(gui.get_node('horizontal_rocket/description'), Lang.get_text('horizontal_rocket_description'));
     gui.set_text(gui.get_node('horizontal_rocket/buy_button_text'), Lang.get_text('buy') + " 30");
     
-    instance.druid.new_button('horizontal_rocket/buy_button', () => {
-        if(!is_enough_coins(30)) return;
+    data.druid.new_button('horizontal_rocket/buy_button', () => {
+        if(!is_enough_coins(30)) {
+            set_enabled_horizontall_rocket(false);
+            set_enabled_store(true);
+            return;
+        }
         remove_coins(30);
         GameStorage.set('horizontal_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_horizontall_rocket(false);
     });
 
-    instance.druid.new_button('horizontal_rocket/close', () => set_enabled_horizontall_rocket(false));
+    data.druid.new_button('horizontal_rocket/close', () => {
+        set_enabled_horizontall_rocket(false);
+        data.dlg_opened = false;
+    });
 }
 
-function setup_vertical_rocket(instance: props) {
+function setup_vertical_rocket(data: props) {
     gui.set_text(gui.get_node('vertical_rocket/title_text'), Lang.get_text('vertical_rocket'));
     gui.set_text(gui.get_node('vertical_rocket/description'), Lang.get_text('vertical_rocket_description'));
     gui.set_text(gui.get_node('vertical_rocket/buy_button_text'), Lang.get_text('buy') + " 30");
     
-    instance.druid.new_button('vertical_rocket/buy_button', () => {
-        if(!is_enough_coins(30)) return;
+    data.druid.new_button('vertical_rocket/buy_button', () => {
+        if(!is_enough_coins(30)) {
+            set_enabled_vertical_rocket(false);
+            set_enabled_store(true);
+            return;
+        }
         remove_coins(30);
         GameStorage.set('vertical_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_vertical_rocket(false);
     });
 
-    instance.druid.new_button('vertical_rocket/close', () => set_enabled_vertical_rocket(false));
+    data.druid.new_button('vertical_rocket/close', () => {
+        set_enabled_vertical_rocket(false);
+        data.dlg_opened = false;
+    });
 }
 
-function setup_life_notification(instance: props) {
-    instance.druid.new_button('life_notification/buy_button', () => {
+function setup_life_notification(data: props) {
+    data.druid.new_button('life_notification/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_life_notification(false);
             set_enabled_store(true);
@@ -281,7 +332,7 @@ function setup_life_notification(instance: props) {
         add_lifes(1);
     });
 
-    instance.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
+    data.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
 }
 
 function on_life_tick() {

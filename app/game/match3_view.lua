@@ -3,6 +3,7 @@ local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
+local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local ____exports = {}
@@ -36,7 +37,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator, resources)
-    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, shuffle_animation, shuffle_end_animation, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, is_shuffling, stop_shuffling
+    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, shuffle_animation, shuffle_end_animation, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_spin_duration, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing, is_shuffling, stop_shuffling
     function recalculate_sizes()
         local ltrb = Camera.get_ltrb()
         if ltrb.z == prev_game_width and ltrb.w == prev_game_height then
@@ -118,7 +119,7 @@ function ____exports.View(animator, resources)
                         local target = state.targets[i + 1]
                         local amount = target.count - #target.uids
                         targets[i] = amount
-                        EventBus.send("UPDATED_TARGET", {id = i, amount = amount, type = target.type})
+                        EventBus.send("UPDATED_TARGET", {id = i, amount = amount, type = target.type, is_cell = target.is_cell})
                         i = i + 1
                     end
                 end
@@ -169,10 +170,7 @@ function ____exports.View(animator, resources)
         EventBus.on(
             "ON_WRONG_SWAP_ELEMENTS",
             function(data)
-                flow.start(function()
-                    on_wrong_swap_element_animation(data)
-                    EventBus.send("SET_HELPER")
-                end)
+                flow.start(function() return on_wrong_swap_element_animation(data) end)
             end
         )
         EventBus.on(
@@ -585,7 +583,7 @@ function ____exports.View(animator, resources)
                 if ____cond102 then
                     on_move_phase_begin()
                     move_phase_duration = event_to_animation[event.key](event.value)
-                    on_move_phase_end()
+                    on_move_phase_end(event.value)
                     break
                 end
                 do
@@ -597,7 +595,7 @@ function ____exports.View(animator, resources)
                 end
             until true
         end
-        print("G: ", data.state.elements)
+        print("SET")
         state.game_state = data.state
         is_processing = false
         EventBus.send("SET_HELPER")
@@ -1084,22 +1082,7 @@ function ____exports.View(animator, resources)
     end
     function on_diskisphere_activated_animation(message)
         local activation = message
-        local activated_duration = activate_diskosphere_animation(
-            activation,
-            function()
-                for ____, cell in ipairs(activation.activated_cells) do
-                    local skip = false
-                    for ____, element in ipairs(activation.damaged_elements) do
-                        if cell.x == element.x and cell.y == element.y then
-                            skip = true
-                        end
-                    end
-                    if not skip then
-                        activate_cell_animation(cell)
-                    end
-                end
-            end
-        )
+        local activated_duration = activate_diskosphere_animation(activation)
         return activated_duration
     end
     function on_swaped_diskosphere_with_buster_animation(message)
@@ -1108,17 +1091,6 @@ function ____exports.View(animator, resources)
         local activated_duration = activate_diskosphere_animation(
             activation,
             function()
-                for ____, cell in ipairs(activation.activated_cells) do
-                    local skip = false
-                    for ____, element in ipairs(activation.damaged_elements) do
-                        if cell.x == element.x and cell.y == element.y then
-                            skip = true
-                        end
-                    end
-                    if not skip then
-                        activate_cell_animation(cell)
-                    end
-                end
                 for ____, element in ipairs(activation.maked_elements) do
                     make_element_view(
                         element.x,
@@ -1141,44 +1113,14 @@ function ____exports.View(animator, resources)
             activation.element,
             function()
                 delete_view_item_by_game_id(activation.other_element.uid)
-                activate_duration = activate_diskosphere_animation(
-                    activation,
-                    function()
-                        for ____, cell in ipairs(activation.activated_cells) do
-                            local skip = false
-                            for ____, element in ipairs(activation.damaged_elements) do
-                                if cell.x == element.x and cell.y == element.y then
-                                    skip = true
-                                end
-                            end
-                            if not skip then
-                                activate_cell_animation(cell)
-                            end
-                        end
-                    end
-                )
+                activate_duration = activate_diskosphere_animation(activation)
             end
         )
         return squash_duration + 0.5
     end
     function on_swaped_diskosphere_with_element_animation(message)
         local activation = message
-        local activate_duration = activate_diskosphere_animation(
-            activation,
-            function()
-                for ____, cell in ipairs(activation.activated_cells) do
-                    local skip = false
-                    for ____, element in ipairs(activation.damaged_elements) do
-                        if cell.x == element.x and cell.y == element.y then
-                            skip = true
-                        end
-                    end
-                    if not skip then
-                        activate_cell_animation(cell)
-                    end
-                end
-            end
-        )
+        local activate_duration = activate_diskosphere_animation(activation)
         return activate_duration
     end
     function activate_diskosphere_animation(activation, on_complete)
@@ -1227,7 +1169,9 @@ function ____exports.View(animator, resources)
                                     msg.url(nil, _go, "diskosphere"),
                                     "disable"
                                 )
-                                on_complete()
+                                if on_complete ~= nil then
+                                    on_complete()
+                                end
                             end
                         )
                     end
@@ -1295,6 +1239,15 @@ function ____exports.View(animator, resources)
                 if message_id == hash("spine_animation_done") then
                     go.delete(projectile)
                     explode_element_animation(element)
+                    local cell = activation.activated_cells[__TS__ArrayFindIndex(
+                        activation.activated_cells,
+                        function(____, item)
+                            return item.x == element.x and item.y == element.y
+                        end
+                    ) + 1]
+                    if cell ~= nil then
+                        activate_cell_animation(cell)
+                    end
                 end
             end
         )
@@ -1311,6 +1264,7 @@ function ____exports.View(animator, resources)
     end
     function explode_element_animation(item)
         delete_all_view_items_by_game_id(item.uid)
+        print("GET")
         local element = state.game_state.elements[item.y + 1][item.x + 1]
         if element == NullElement then
             return
@@ -1430,14 +1384,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch267 = dir
-            local ____cond267 = ____switch267 == Axis.Vertical
-            if ____cond267 then
+            local ____switch243 = dir
+            local ____cond243 = ____switch243 == Axis.Vertical
+            if ____cond243 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond267 = ____cond267 or ____switch267 == Axis.Horizontal
-            if ____cond267 then
+            ____cond243 = ____cond243 or ____switch243 == Axis.Horizontal
+            if ____cond243 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1533,7 +1487,7 @@ function ____exports.View(animator, resources)
         end
         if activation.target_element ~= NullElement then
             remove_random_element_animation(message, activation.element, activation.target_element)
-            return damaged_element_time + helicopter_fly_duration + 0.2
+            return damaged_element_time + helicopter_spin_duration * 0.5 + helicopter_fly_duration
         end
         return damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
     end
@@ -1581,7 +1535,7 @@ function ____exports.View(animator, resources)
                 activate_cell_animation(cell)
             end
         end
-        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
+        return squash_duration + damaged_element_time + helicopter_spin_duration * 0.5 + helicopter_fly_duration
     end
     function on_swaped_helicopter_with_element_animation(message)
         local activation = message
@@ -1611,7 +1565,7 @@ function ____exports.View(animator, resources)
                 activate_cell_animation(cell)
             end
         end
-        return squash_duration + damaged_element_time + helicopter_fly_duration + 0.2
+        return squash_duration + damaged_element_time + helicopter_spin_duration * 0.5 + helicopter_fly_duration
     end
     function on_dynamite_activated_animation(message)
         local activation = message
@@ -1695,16 +1649,69 @@ function ____exports.View(animator, resources)
     function on_element_activated_animation(message)
         local activation = message
         damage_element_animation(message, activation.x, activation.y, activation.uid)
-        for ____, cell in ipairs(activation.activated_cells) do
-            if cell.x == activation.x and cell.y == activation.y then
-                activate_cell_animation(cell)
-            end
-        end
         return damaged_element_time
     end
     function activate_cell_animation(cell)
         delete_all_view_items_by_game_id(cell.previous_id)
         make_cell_view(cell.x, cell.y, cell.id, cell.uid)
+        local ____type = state.game_state.cells[cell.y + 1][cell.x + 1].id
+        local pos = get_world_pos(
+            cell.x,
+            cell.y,
+            (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, ____type) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index) + 0.1
+        )
+        local is_stone = ____type == CellId.Stone0 or ____type == CellId.Stone1 or ____type == CellId.Stone2
+        local effect_name = is_stone and "cell_stone_explode" or GAME_CONFIG.cell_view[____type] .. "_explode"
+        if not __TS__ArrayIncludes(GAME_CONFIG.explodable_cells, ____type) then
+            return 0
+        end
+        local effect = gm.make_go("effect_view", pos)
+        msg.post(
+            msg.url(nil, effect, nil),
+            "disable"
+        )
+        msg.post(
+            msg.url(nil, effect, effect_name),
+            "enable"
+        )
+        go.set_scale(
+            vmath.vector3(scale_ratio, scale_ratio, 1),
+            effect
+        )
+        local anim_props = {blend_duration = 0, playback_rate = 1}
+        print("ANIM: ", cell.x, cell.y)
+        local anim_name = ""
+        repeat
+            local ____switch316 = ____type
+            local ____cond316 = ____switch316 == CellId.Stone0
+            if ____cond316 then
+                anim_name = "morph_1"
+                break
+            end
+            ____cond316 = ____cond316 or ____switch316 == CellId.Stone1
+            if ____cond316 then
+                anim_name = "morph_2"
+                break
+            end
+            ____cond316 = ____cond316 or ____switch316 == CellId.Stone2
+            if ____cond316 then
+                anim_name = "morph_3"
+                break
+            end
+            do
+                anim_name = "morph"
+                break
+            end
+        until true
+        spine.play_anim(
+            msg.url(nil, effect, effect_name),
+            anim_name,
+            go.PLAYBACK_ONCE_FORWARD,
+            anim_props,
+            function()
+                go.delete(effect)
+            end
+        )
         return 0
     end
     function on_move_phase_begin()
@@ -1714,7 +1721,6 @@ function ____exports.View(animator, resources)
     function on_moved_elements_animation(message)
         local data = message
         local elements = data.elements
-        state.game_state = data.state
         local delayed_row_in_column = {}
         local max_delay = 0
         local max_move_duration = 0
@@ -1810,8 +1816,10 @@ function ____exports.View(animator, resources)
         end
         return max_move_duration + max_delay
     end
-    function on_move_phase_end()
+    function on_move_phase_end(message)
+        local data = message
         flow.delay(move_phase_duration)
+        state.game_state = data.state
         move_phase_duration = 0
     end
     function remove_random_element_animation(message, element, target_element, view_index, on_complited)
@@ -1831,12 +1839,20 @@ function ____exports.View(animator, resources)
         go.set_position(current_world_pos, item._hash)
         go.animate(
             item._hash,
+            "euler.z",
+            go.PLAYBACK_ONCE_FORWARD,
+            720,
+            go.EASING_INCUBIC,
+            helicopter_spin_duration
+        )
+        go.animate(
+            item._hash,
             "position",
             go.PLAYBACK_ONCE_FORWARD,
             target_world_pos,
             go.EASING_INCUBIC,
             helicopter_fly_duration,
-            0,
+            helicopter_spin_duration * 0.5,
             function()
                 damage_element_animation(message, target_element.x, target_element.y, target_element.uid)
                 damage_element_animation(
@@ -1852,7 +1868,7 @@ function ____exports.View(animator, resources)
                 )
             end
         )
-        return helicopter_fly_duration + damaged_element_time
+        return helicopter_spin_duration + helicopter_fly_duration + damaged_element_time
     end
     function damage_element_animation(data, x, y, element_id, on_complite)
         local element_view_item = get_first_view_item_by_game_id(element_id)
@@ -2004,7 +2020,7 @@ function ____exports.View(animator, resources)
                 local target = state.game_state.targets[i + 1]
                 if __TS__ArrayIndexOf(target.uids, id) ~= -1 then
                     targets[i] = math.max(0, targets[i] - 1)
-                    EventBus.send("UPDATED_TARGET", {id = i, amount = targets[i], type = target.type})
+                    EventBus.send("UPDATED_TARGET", {id = i, amount = targets[i], type = target.type, is_cell = target.is_cell})
                 end
                 i = i + 1
             end
@@ -2041,6 +2057,7 @@ function ____exports.View(animator, resources)
     swap_element_time = GAME_CONFIG.swap_element_time
     squash_element_easing = GAME_CONFIG.squash_element_easing
     squash_element_time = GAME_CONFIG.squash_element_time
+    helicopter_spin_duration = GAME_CONFIG.helicopter_spin_duration
     helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration
     damaged_element_easing = GAME_CONFIG.damaged_element_easing
     damaged_element_delay = GAME_CONFIG.damaged_element_delay
