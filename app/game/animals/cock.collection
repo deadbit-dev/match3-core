@@ -49,7 +49,7 @@ embedded_instances {
   "embedded_components {\n"
   "  id: \"spinemodel\"\n"
   "  type: \"spinemodel\"\n"
-  "  data: \"spine_scene: \\\"/assets/cock/cock.spinescene\\\"\\n"
+  "  data: \"spine_scene: \\\"/assets/cock/cockerel.spinescene\\\"\\n"
   "default_animation: \\\"idle\\\"\\n"
   "skin: \\\"\\\"\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
