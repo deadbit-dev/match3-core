@@ -334,7 +334,7 @@ function feed_animation(item_type: number) {
             gui.set_texture(element, 'graphics');
             gui.play_flipbook(element, view);
             gui.animate(element, 'position', vmath.vector3(250, 150, 0), gui.EASING_INCUBIC, 1, 0, () => {
-                timer.delay(3, false, () => gui.delete_node(element));
+                timer.delay(5, false, () => gui.delete_node(element));
             });
         });
     }

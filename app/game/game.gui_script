@@ -618,7 +618,7 @@ function feed_animation(item_type)
                         0,
                         function()
                             timer.delay(
-                                3,
+                                5,
                                 false,
                                 function() return gui.delete_node(element) end
                             )

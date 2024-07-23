@@ -567,7 +567,7 @@ function ____exports.Game()
             if not is_level_completed() then
                 is_gameover = true
                 if not is_wait_until_animation_done then
-                    timer.delay(1.5, false, gameover)
+                    timer.delay(3.5, false, gameover)
                 end
             end
         end

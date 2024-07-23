@@ -685,7 +685,7 @@ export function Game() {
             if(!is_level_completed()) {
                 is_gameover = true;
                 if(!is_wait_until_animation_done)
-                    timer.delay(1.5, false, gameover);
+                    timer.delay(3.5, false, gameover);
             }
         }
     }
