@@ -55,6 +55,19 @@ function setup(instance: props) {
     setup_sustem_ui(instance);
     setup_win_ui(instance);
     setup_gameover_ui(instance);
+
+    gui.animate(gui.get_node('substrate'), 'position', vmath.vector3(270, 880, 0), gui.EASING_INCUBIC, 0.5);
+    gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(270, 65, 0), gui.EASING_INCUBIC, 0.5);
+
+    gui.set_scale(gui.get_node('hammer/button'), vmath.vector3(0, 0, 0));
+    gui.set_scale(gui.get_node('spinning/button'), vmath.vector3(0, 0, 0));
+    gui.set_scale(gui.get_node('horizontal_rocket/button'), vmath.vector3(0, 0, 0));
+    gui.set_scale(gui.get_node('vertical_rocket/button'), vmath.vector3(0, 0, 0));
+
+    gui.animate(gui.get_node('hammer/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    gui.animate(gui.get_node('spinning/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    gui.animate(gui.get_node('horizontal_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    gui.animate(gui.get_node('vertical_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
 }
 
 function setup_info_ui(instance: props) {
@@ -314,13 +327,17 @@ function update_targets(data: TargetMessage) {
 }
 
 function feed_animation(item_type: number) {
-    const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
-    const view = GAME_CONFIG.element_view[item_type as ElementId];
-    gui.set_texture(element, 'graphics');
-    gui.play_flipbook(element, view);
-    gui.animate(element, 'position', vmath.vector3(250, 150, 0), gui.EASING_INCUBIC, 1, 0, () => {
-        timer.delay(3, false, () => gui.delete_node(element));
-    });
+    for(let i = 0; i < 10; i++) {
+        timer.delay(0.05 * i, false, () => {
+            const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
+            const view = GAME_CONFIG.element_view[item_type as ElementId];
+            gui.set_texture(element, 'graphics');
+            gui.play_flipbook(element, view);
+            gui.animate(element, 'position', vmath.vector3(250, 150, 0), gui.EASING_INCUBIC, 1, 0, () => {
+                timer.delay(3, false, () => gui.delete_node(element));
+            });
+        });
+    }
 }
 
 function update_buttons(instance: props) {
@@ -377,7 +394,6 @@ function set_win() {
 
     const anim_props = { blend_duration: 0, playback_rate: 1 };
     gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, node: any) => {
-        print("END");
         gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_ONCE_FORWARD, anim_props);
     });
 }

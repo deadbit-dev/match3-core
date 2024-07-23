@@ -20,6 +20,64 @@ function setup(instance)
     setup_sustem_ui(instance)
     setup_win_ui(instance)
     setup_gameover_ui(instance)
+    gui.animate(
+        gui.get_node("substrate"),
+        "position",
+        vmath.vector3(270, 880, 0),
+        gui.EASING_INCUBIC,
+        0.5
+    )
+    gui.animate(
+        gui.get_node("system_buttons"),
+        "position",
+        vmath.vector3(270, 65, 0),
+        gui.EASING_INCUBIC,
+        0.5
+    )
+    gui.set_scale(
+        gui.get_node("hammer/button"),
+        vmath.vector3(0, 0, 0)
+    )
+    gui.set_scale(
+        gui.get_node("spinning/button"),
+        vmath.vector3(0, 0, 0)
+    )
+    gui.set_scale(
+        gui.get_node("horizontal_rocket/button"),
+        vmath.vector3(0, 0, 0)
+    )
+    gui.set_scale(
+        gui.get_node("vertical_rocket/button"),
+        vmath.vector3(0, 0, 0)
+    )
+    gui.animate(
+        gui.get_node("hammer/button"),
+        "scale",
+        vmath.vector3(0.9, 0.9, 1),
+        gui.EASING_INCUBIC,
+        0.3
+    )
+    gui.animate(
+        gui.get_node("spinning/button"),
+        "scale",
+        vmath.vector3(0.9, 0.9, 1),
+        gui.EASING_INCUBIC,
+        0.3
+    )
+    gui.animate(
+        gui.get_node("horizontal_rocket/button"),
+        "scale",
+        vmath.vector3(0.9, 0.9, 1),
+        gui.EASING_INCUBIC,
+        0.3
+    )
+    gui.animate(
+        gui.get_node("vertical_rocket/button"),
+        "scale",
+        vmath.vector3(0.9, 0.9, 1),
+        gui.EASING_INCUBIC,
+        0.3
+    )
 end
 function setup_info_ui(instance)
     setup_step_or_time(instance)
@@ -537,28 +595,40 @@ function update_targets(data)
     end
 end
 function feed_animation(item_type)
-    local element = gui.new_box_node(
-        vmath.vector3(420, 870, 0),
-        vmath.vector3(40, 40, 1)
-    )
-    local view = GAME_CONFIG.element_view[item_type]
-    gui.set_texture(element, "graphics")
-    gui.play_flipbook(element, view)
-    gui.animate(
-        element,
-        "position",
-        vmath.vector3(250, 150, 0),
-        gui.EASING_INCUBIC,
-        1,
-        0,
-        function()
+    do
+        local i = 0
+        while i < 10 do
             timer.delay(
-                3,
+                0.05 * i,
                 false,
-                function() return gui.delete_node(element) end
+                function()
+                    local element = gui.new_box_node(
+                        vmath.vector3(420, 870, 0),
+                        vmath.vector3(40, 40, 1)
+                    )
+                    local view = GAME_CONFIG.element_view[item_type]
+                    gui.set_texture(element, "graphics")
+                    gui.play_flipbook(element, view)
+                    gui.animate(
+                        element,
+                        "position",
+                        vmath.vector3(250, 150, 0),
+                        gui.EASING_INCUBIC,
+                        1,
+                        0,
+                        function()
+                            timer.delay(
+                                3,
+                                false,
+                                function() return gui.delete_node(element) end
+                            )
+                        end
+                    )
+                end
             )
+            i = i + 1
         end
-    )
+    end
 end
 function update_buttons(instance)
     local spinning = GameStorage.get("spinning_counts")
@@ -619,7 +689,6 @@ function set_win()
         gui.PLAYBACK_ONCE_FORWARD,
         anim_props,
         function(____self, node)
-            print("END")
             gui.play_spine_anim(
                 gui.get_node("firework"),
                 hash("firework"),

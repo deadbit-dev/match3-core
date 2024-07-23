@@ -65,26 +65,20 @@ function set_events(data: props) {
     EventBus.on('REMOVED_COIN', on_remove_coins, true);
     EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
     EventBus.on('TRY_BUY_HAMMER', () => {
-        print("RECIVED");
         if(data.dlg_opened) return;
-        print("PASSED");
-        set_enabled_hammer(true);
-        data.dlg_opened = true;
+        set_enabled_hammer(data, true);
     }, true);
     EventBus.on('TRY_BUY_SPINNING', () => {
         if(data.dlg_opened) return;
-        set_enabled_spinning(true);
-        data.dlg_opened = true;
+        set_enabled_spinning(data, true);
     }, true);
     EventBus.on('TRY_BUY_HORIZONTAL_ROCKET', () => {
         if(data.dlg_opened) return;
-        set_enabled_horizontall_rocket(true);
-        data.dlg_opened = true;
+        set_enabled_horizontall_rocket(data, true);
     }, true);
     EventBus.on('TRY_BUY_VERTICAL_ROCKET', () => {
         if(data.dlg_opened) return;
-        set_enabled_vertical_rocket(true);
-        data.dlg_opened = true;
+        set_enabled_vertical_rocket(data, true);
     }, true);
 }
 
@@ -92,7 +86,6 @@ function setup(data: props) {
     setup_coins(data);
     setup_life(data);
     setup_store(data);
-    setup_settings(data);
     setup_life_notification(data);
     setup_busters(data);
 }
@@ -216,10 +209,6 @@ function setup_store(data: props) {
     });
 }
 
-function setup_settings(data: props) {
-    data.druid.new_button('settings_button', () => {});
-}
-
 function setup_busters(data: props) {
     setup_hammer(data);
     setup_spinning(data);
@@ -234,19 +223,18 @@ function setup_hammer(data: props) {
 
     data.druid.new_button('hammer/buy_button', () => {
         if(!is_enough_coins(30)) {
-            set_enabled_hammer(false);
+            set_enabled_hammer(data, false);
             set_enabled_store(true);
             return;
         }
         remove_coins(30);
         GameStorage.set('hammer_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_hammer(false);
+        set_enabled_hammer(data, false);
     });
 
     data.druid.new_button('hammer/close', () => {
-        set_enabled_hammer(false);
-        data.dlg_opened = false; 
+        set_enabled_hammer(data, false);
     });
 }
 
@@ -257,19 +245,18 @@ function setup_spinning(data: props) {
 
     data.druid.new_button('spinning/buy_button', () => {
         if(!is_enough_coins(30)) {
-            set_enabled_spinning(false);
+            set_enabled_spinning(data, false);
             set_enabled_store(true);
             return;
         }
         remove_coins(30);
         GameStorage.set('spinning_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_spinning(false);
+        set_enabled_spinning(data, false);
     });
 
     data.druid.new_button('spinning/close', () => {
-        set_enabled_spinning(false);
-        data.dlg_opened = false;
+        set_enabled_spinning(data, false);
     });
 }
 
@@ -280,19 +267,18 @@ function setup_horizontal_rocket(data: props) {
     
     data.druid.new_button('horizontal_rocket/buy_button', () => {
         if(!is_enough_coins(30)) {
-            set_enabled_horizontall_rocket(false);
+            set_enabled_horizontall_rocket(data, false);
             set_enabled_store(true);
             return;
         }
         remove_coins(30);
         GameStorage.set('horizontal_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_horizontall_rocket(false);
+        set_enabled_horizontall_rocket(data, false);
     });
 
     data.druid.new_button('horizontal_rocket/close', () => {
-        set_enabled_horizontall_rocket(false);
-        data.dlg_opened = false;
+        set_enabled_horizontall_rocket(data, false);
     });
 }
 
@@ -303,19 +289,18 @@ function setup_vertical_rocket(data: props) {
     
     data.druid.new_button('vertical_rocket/buy_button', () => {
         if(!is_enough_coins(30)) {
-            set_enabled_vertical_rocket(false);
+            set_enabled_vertical_rocket(data, false);
             set_enabled_store(true);
             return;
         }
         remove_coins(30);
         GameStorage.set('vertical_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_vertical_rocket(false);
+        set_enabled_vertical_rocket(data, false);
     });
 
     data.druid.new_button('vertical_rocket/close', () => {
-        set_enabled_vertical_rocket(false);
-        data.dlg_opened = false;
+        set_enabled_vertical_rocket(data, false);
     });
 }
 
@@ -396,25 +381,6 @@ function set_enabled_store_button(state: boolean) {
     gui.set_enabled(store_button, state);
 }
 
-function set_enabled_settings_button(state: boolean) {
-    const settings_button = gui.get_node('settings_button');
-    gui.set_enabled(settings_button, state);
-}
-
-function set_enabled_store(state: boolean) {
-    const store = gui.get_node('store/manager');
-    gui.set_enabled(store, state);
-
-    EventBus.send('DLG_ACTIVE', state);
-}
-
-function set_enabled_life_notification(state: boolean) {
-    const life = gui.get_node('life_notification/manager');
-    gui.set_enabled(life, state);
-
-    EventBus.send('LIFE_NOTIFICATION', state);
-}
-
 function on_add_coins() {
     const coins_text = gui.get_node('coins/text');
     gui.set_text(coins_text, tostring(GameStorage.get('coins')));
@@ -446,13 +412,11 @@ function on_scene_loaded(scene: NameMessage) {
             set_enabled_coins(false);
             set_enabled_lifes(false);
             set_enabled_store_button(false);
-            set_enabled_settings_button(false);
         break;
         case 'map':
             set_enabled_coins(true);
             set_enabled_lifes(true);
             set_enabled_store_button(true);
-            set_enabled_settings_button(true);
         break;
     }
 }
@@ -462,36 +426,112 @@ function on_gameover() {
     set_enabled_lifes(true);
 }
 
-function on_gameover_offer_close() {
-    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
-        timer.delay(5, false, () => set_enabled_life_notification(true));
+function set_enabled_store(state: boolean) {
+    const store = gui.get_node('store/manager');
+    
+    if(state) {
+        gui.set_enabled(store, state);
+        gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 1500, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(store, state);
+        });
     }
+
+    EventBus.send('DLG_ACTIVE', state);
 }
 
-function set_enabled_hammer(state: boolean) {
+function set_enabled_life_notification(state: boolean) {
+    const life = gui.get_node('life_notification/manager');
+
+    if(state) {
+        gui.set_enabled(life, state);
+        gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(life, state);
+        });
+    }
+
+    EventBus.send('LIFE_NOTIFICATION', state);
+}
+
+function set_enabled_hammer(data: props, state: boolean) {
     const hammer = gui.get_node('hammer/manager');
-    gui.set_enabled(hammer, state);
+
+    if(state) {
+        gui.set_enabled(hammer, state);
+        gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(hammer, state);
+        });
+    }
+
+    data.dlg_opened = state;
 
     EventBus.send('DLG_ACTIVE', state);
 }
 
-function set_enabled_spinning(state: boolean) {
+function set_enabled_spinning(data: props, state: boolean) {
     const spinning = gui.get_node('spinning/manager');
-    gui.set_enabled(spinning, state);
+    
+    if(state) {
+        gui.set_enabled(spinning, state);
+        gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(spinning, state);
+        });
+    }
+
+    data.dlg_opened = state;
 
     EventBus.send('DLG_ACTIVE', state);
 }
 
-function set_enabled_horizontall_rocket(state: boolean) {
+function set_enabled_horizontall_rocket(data: props, state: boolean) {
     const horizontal_rocket = gui.get_node('horizontal_rocket/manager');
-    gui.set_enabled(horizontal_rocket, state);
+   
+    if(state) {
+        gui.set_enabled(horizontal_rocket, state);
+        gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(horizontal_rocket, state);
+        });
+    }
+
+    data.dlg_opened = state;
 
     EventBus.send('DLG_ACTIVE', state);
 }
 
-function set_enabled_vertical_rocket(state: boolean) {
+function set_enabled_vertical_rocket(data: props, state: boolean) {
     const vertical_rocket = gui.get_node('vertical_rocket/manager');
-    gui.set_enabled(vertical_rocket, state);
+
+    if(state) {
+        gui.set_enabled(vertical_rocket, state);
+        gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+    } else {
+        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(vertical_rocket, state);
+        });
+    }
+
+    data.dlg_opened = state;
 
     EventBus.send('DLG_ACTIVE', state);
 }

@@ -19,6 +19,7 @@ local ____match3_core = require("game.match3_core")
 local NullElement = ____match3_core.NullElement
 local NotActiveCell = ____match3_core.NotActiveCell
 local MoveType = ____match3_core.MoveType
+local is_available_cell_type_for_move = ____match3_core.is_available_cell_type_for_move
 local ____match3_game = require("game.match3_game")
 local SubstrateId = ____match3_game.SubstrateId
 local CellId = ____match3_game.CellId
@@ -386,8 +387,9 @@ function ____exports.View(animator, resources)
                 do
                     local x = 0
                     while x < field_width do
+                        local cell = state.game_state.cells[y + 1][x + 1]
                         local element = state.game_state.elements[y + 1][x + 1]
-                        if element ~= NullElement then
+                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
                             elements[#elements + 1] = {x = x, y = y, uid = element.uid}
                         end
                         x = x + 1
@@ -595,7 +597,6 @@ function ____exports.View(animator, resources)
                 end
             until true
         end
-        print("SET")
         state.game_state = data.state
         is_processing = false
         EventBus.send("SET_HELPER")
@@ -1264,7 +1265,6 @@ function ____exports.View(animator, resources)
     end
     function explode_element_animation(item)
         delete_all_view_items_by_game_id(item.uid)
-        print("GET")
         local element = state.game_state.elements[item.y + 1][item.x + 1]
         if element == NullElement then
             return
@@ -1648,7 +1648,14 @@ function ____exports.View(animator, resources)
     end
     function on_element_activated_animation(message)
         local activation = message
-        damage_element_animation(message, activation.x, activation.y, activation.uid)
+        local time = damage_element_animation(message, activation.x, activation.y, activation.uid)
+        if time == 0 then
+            for ____, cell in ipairs(activation.activated_cells) do
+                if cell.x == activation.x and cell.y == activation.y then
+                    activate_cell_animation(cell)
+                end
+            end
+        end
         return damaged_element_time
     end
     function activate_cell_animation(cell)
@@ -1679,22 +1686,21 @@ function ____exports.View(animator, resources)
             effect
         )
         local anim_props = {blend_duration = 0, playback_rate = 1}
-        print("ANIM: ", cell.x, cell.y)
         local anim_name = ""
         repeat
-            local ____switch316 = ____type
-            local ____cond316 = ____switch316 == CellId.Stone0
-            if ____cond316 then
+            local ____switch320 = ____type
+            local ____cond320 = ____switch320 == CellId.Stone0
+            if ____cond320 then
                 anim_name = "morph_1"
                 break
             end
-            ____cond316 = ____cond316 or ____switch316 == CellId.Stone1
-            if ____cond316 then
+            ____cond320 = ____cond320 or ____switch320 == CellId.Stone1
+            if ____cond320 then
                 anim_name = "morph_2"
                 break
             end
-            ____cond316 = ____cond316 or ____switch316 == CellId.Stone2
-            if ____cond316 then
+            ____cond320 = ____cond320 or ____switch320 == CellId.Stone2
+            if ____cond320 then
                 anim_name = "morph_3"
                 break
             end
@@ -1899,8 +1905,9 @@ function ____exports.View(animator, resources)
                     end
                 end
             )
+            return damaged_element_time + 0.5
         end
-        return damaged_element_time + 0.5
+        return 0
     end
     function squash_element_animation(element, target_element, on_complite)
         local to_world_pos = get_world_pos(target_element.x, target_element.y)

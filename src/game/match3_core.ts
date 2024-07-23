@@ -555,7 +555,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
             for(let x = 0; x < size_x; x++) {
                 const cell = get_cell(x, y);
                 const element = get_element(x, y);
-                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement && element.type == element_type) {
+                if(cell != NotActiveCell && element != NullElement && element.type == element_type) {
                     target_elements.push({x, y, uid: element.uid});
                 }
             }
@@ -665,29 +665,6 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         }
 
         return element;
-    }
-
-    function is_available_cell_type_for_activation(cell: Cell): boolean {
-        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
-        if(is_disabled) return false;
-
-        return true;
-    }
-
-    function is_available_cell_type_for_move(cell: Cell): boolean {
-        const is_not_moved = bit.band(cell.type, CellType.NotMoved) == CellType.NotMoved;
-        const is_locked = bit.band(cell.type, CellType.Locked) == CellType.Locked;
-        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
-        if(is_not_moved || is_locked || is_disabled) return false;
-
-        return true;
-    }
-
-    function is_available_cell_type_for_click(cell: Cell): boolean {
-        const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
-        if(is_disabled) return false;
-
-        return true;
     }
     
     // ввод пользователя на перемещение элементов
@@ -927,8 +904,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
   
     return {
         init, set_element_type, get_element_type, set_cell, get_cell, set_element, get_element, remove_element, swap_elements, get_pos_by_uid,
-        get_neighbor_cells, get_neighbor_elements, is_available_cell_type_for_move, try_move, try_click, process_state, save_state, load_state,
-        get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element, is_available_cell_type_for_activation, get_rotated_masks,
+        get_neighbor_cells, get_neighbor_elements, try_move, try_click, process_state, save_state, load_state,
+        get_all_combinations, get_free_cells, get_all_elements_by_type, try_damage_element, get_rotated_masks,
         set_callback_on_move_element, set_callback_on_moved_elements, set_callback_is_can_move, is_can_move_base,
         set_callback_is_combined_elements, is_combined_elements_base,
         set_callback_on_combinated, on_combined_base,
@@ -938,6 +915,30 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         set_callback_on_cell_activation, on_cell_activation_base,
         set_callback_on_cell_activated
     };
+}
+
+
+export function is_available_cell_type_for_activation(cell: Cell): boolean {
+    const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+    if(is_disabled) return false;
+
+    return true;
+}
+
+export function is_available_cell_type_for_move(cell: Cell): boolean {
+    const is_not_moved = bit.band(cell.type, CellType.NotMoved) == CellType.NotMoved;
+    const is_locked = bit.band(cell.type, CellType.Locked) == CellType.Locked;
+    const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+    if(is_not_moved || is_locked || is_disabled) return false;
+
+    return true;
+}
+
+export function is_available_cell_type_for_click(cell: Cell): boolean {
+    const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+    if(is_disabled) return false;
+
+    return true;
 }
 
 

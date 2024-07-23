@@ -26,6 +26,7 @@ import {
     MoveType,
     Element,
     CellState,
+    is_available_cell_type_for_move,
 } from "./match3_core";
 
 import { SubstrateId, CellId, ElementId, GameState } from './match3_game';
@@ -239,24 +240,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const width_ratio = math.abs(ltrb.z) / original_game_width;
         const height_ratio = math.abs(ltrb.w) / original_game_height;
 
-        // print("HR: ", height_ratio);
-
         const changes_coff = math.min(width_ratio, height_ratio);
         const height_delta = math.abs(ltrb.w) - original_game_height;
 
-        // cell_size = calculate_cell_size() * changes_coff;
-        // scale_ratio = calculate_scale_ratio();
-        
-
-        // const changes_coff = math.abs(ltrb.w) / original_game_height;
-
         cell_size = calculate_cell_size() * changes_coff;
         scale_ratio = calculate_scale_ratio();
-        // cells_offset = vmath.vector3(
-        //     original_game_width / 2 - (field_width / 2 * cell_size),
-        //     (-(original_game_height / 2 - (max_field_height / 2 * calculate_cell_size())) + 100) * changes_coff,
-        //     0
-        // );
 
         cells_offset = calculate_cell_offset(height_delta, height_ratio);
 
@@ -500,9 +488,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const elements = [];
         for(let y = 0; y < field_height; y++) {
             for(let x = 0; x < field_width; x++) {
+                const cell = state.game_state.cells[y][x];
                 const element = state.game_state.elements[y][x];
-                if(element != NullElement)
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
                     elements.push({x, y, uid: element.uid});
+                }
             }
         }
 
@@ -664,7 +654,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         }
 
-        print("SET");
         state.game_state = data.state;
 
         is_processing = false;
@@ -1146,8 +1135,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function explode_element_animation(item: ItemInfo) {
         delete_all_view_items_by_game_id(item.uid);
 
-        print("GET");
-
         const element = state.game_state.elements[item.y][item.x];
         if(element == NullElement) return;
 
@@ -1451,7 +1438,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_element_activated_animation(message: Messages[MessageId]) {
         const activation = message as ElementActivationMessage;
-        damage_element_animation(message, activation.x, activation.y, activation.uid);
+        const time = damage_element_animation(message, activation.x, activation.y, activation.uid);
+        if(time == 0) {
+            for (const cell of activation.activated_cells) {
+                if (cell.x == activation.x && cell.y == activation.y)
+                    activate_cell_animation(cell);
+            }
+        }
 
         return damaged_element_time;
     }
@@ -1476,8 +1469,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), effect);
 
         const anim_props = { blend_duration: 0, playback_rate: 1 };
-
-        print("ANIM: ", cell.x, cell.y);
 
         let anim_name = '';
         switch(type) {
@@ -1661,7 +1652,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
                 damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
                     explode_element_animation({x, y, uid: element_id});
-
                     for (const [key, value] of Object.entries(data)) {
                         if (key == 'activated_cells') {
                             for (const cell of value as ActivatedCellMessage[]) {
@@ -1674,9 +1664,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                     if (on_complite != undefined) on_complite();
                 });
+            return damaged_element_time + 0.5;
         }
 
-        return damaged_element_time + 0.5;
+        return 0;
     }
 
     function squash_element_animation(element: ItemInfo, target_element: ItemInfo, on_complite?: () => void) {

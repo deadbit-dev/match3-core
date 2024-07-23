@@ -48,7 +48,9 @@ import {
     CellType,
     MovedInfo,
     StepInfo,
-    CombinationMasks
+    CombinationMasks,
+    is_available_cell_type_for_move,
+    is_available_cell_type_for_activation
 } from './match3_core';
 
 import { lang_data } from '../main/langs';
@@ -226,6 +228,8 @@ export function Game() {
     let is_block_vertical_rocket = false;
     let is_block_horizontal_rocket = false;
 
+    let is_shuffling = false;
+
     let is_gameover = false;
 
     let is_first_step = true;
@@ -352,7 +356,6 @@ export function Game() {
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
         EventBus.on('REVIVE', on_revive);
         EventBus.on('DLG_ACTIVE', (state) => {
-            print('DLG_ACTIVE: ', state);
             is_dlg_active = state;
         });
     }
@@ -362,68 +365,56 @@ export function Game() {
         
         states.push({} as GameState);
 
-        try_load_field();
-        
-        if(is_tutorial()) set_tutorial();
+        try_load_field(() => {
+            if(is_tutorial()) set_tutorial();
             
-        if(!is_tutorial()) {
-            is_block_input = true;
-            search_available_steps(5, (steps) => {
-                if(steps.length != 0) {
-                    is_block_input = false;
-                    available_steps = copy_array_of_objects(steps);
-                    return;
-                }
-
-                shuffle_field();
-            });
-        } else {
-            const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
-            if(step != undefined) available_steps = [step];
-        }
-
-        init_targets();
-        
-        set_steps(level_config.steps);
-        if(!is_tutorial()) set_timer();
-        set_random();
-
-        if(GAME_CONFIG.is_revive) {
-            Log.log('REVIVE');
-
-            GAME_CONFIG.is_revive = false;
-
-            states.pop();
-
-            for(let y = 0; y < field_height; y++) {
-                for(let x = 0; x < field_width; x++) {
-                    const cell = GAME_CONFIG.revive_state.cells[y][x];
-                    if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
-                    else field.set_cell(x, y, NotActiveCell);
-
-                    const element = GAME_CONFIG.revive_state.elements[y][x];
-                    if(element != NullElement) make_element(x, y, element.type, element.data);
-                    else field.set_element(x, y, NullElement);
-                }
+            if(is_tutorial()) {
+                const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
+                if(step != undefined) available_steps = [step];
             }
-
-            const state = field.save_state();
-            GAME_CONFIG.revive_state.cells = state.cells;
-            GAME_CONFIG.revive_state.elements = state.elements;
-            states.push(GAME_CONFIG.revive_state);
-        }
-
-        const last_state = update_state();
-
-        EventBus.send('ON_LOAD_FIELD', last_state);
-
-        if(is_tutorial()) EventBus.send('SET_TUTORIAL');
-
-        states.push({} as GameState);
     
-        set_targets(last_state.targets);
-        set_steps(last_state.steps);
-        set_random();
+            init_targets();
+            
+            set_steps(level_config.steps);
+            set_random();
+    
+            if(GAME_CONFIG.is_revive) {
+                Log.log('REVIVE');
+    
+                GAME_CONFIG.is_revive = false;
+    
+                states.pop();
+    
+                for(let y = 0; y < field_height; y++) {
+                    for(let x = 0; x < field_width; x++) {
+                        const cell = GAME_CONFIG.revive_state.cells[y][x];
+                        if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
+                        else field.set_cell(x, y, NotActiveCell);
+    
+                        const element = GAME_CONFIG.revive_state.elements[y][x];
+                        if(element != NullElement) make_element(x, y, element.type, element.data);
+                        else field.set_element(x, y, NullElement);
+                    }
+                }
+    
+                const state = field.save_state();
+                GAME_CONFIG.revive_state.cells = state.cells;
+                GAME_CONFIG.revive_state.elements = state.elements;
+                states.push(GAME_CONFIG.revive_state);
+            }
+    
+            const last_state = update_state();
+    
+            EventBus.send('ON_LOAD_FIELD', last_state);
+    
+            if(is_tutorial()) EventBus.send('SET_TUTORIAL');
+    
+            states.push({} as GameState);
+        
+            set_targets(last_state.targets);
+            set_steps(last_state.steps);
+            set_random();
+        });
     }
 
     function is_tutorial() {
@@ -488,7 +479,7 @@ export function Game() {
         is_block_horizontal_rocket = false;
     }
 
-    function try_load_field() {
+    function try_load_field(on_end: () => void) {
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
                 load_cell(x, y);
@@ -498,9 +489,20 @@ export function Game() {
 
         if(field.get_all_combinations(true).length > 0) {
             field.init();
-            try_load_field();
+            try_load_field(on_end);
             return;
         }
+
+        search_available_steps(1, (steps) => {
+            if(steps.length != 0) {
+                available_steps = copy_array_of_objects(steps);
+                return on_end();
+            }
+
+            field.init();
+            try_load_field(on_end);
+            return;
+        });
     }
 
     function complete_tutorial() {
@@ -765,6 +767,8 @@ export function Game() {
     function set_helper() {
         // search_helper_combination();
 
+        if(is_shuffling) return;
+
         const delay = is_tutorial() ? 1 : 5;
         helper_timer = timer.delay(delay, false, () => {
             set_helper_data(available_steps);
@@ -934,7 +938,7 @@ export function Game() {
                                         const cell = field.get_cell(x+j, y+i);
                                         const element = field.get_element(x+j, y+i);
                                         
-                                        if(element == NullElement || cell == NotActiveCell || !field.is_available_cell_type_for_activation(cell)) {
+                                        if(element == NullElement || cell == NotActiveCell || !is_available_cell_type_for_activation(cell)) {
                                             is_combined = false;
                                             break;
                                         }
@@ -1555,14 +1559,19 @@ export function Game() {
         let state = field.save_state();
 
         EventBus.send('SHUFFLE_START');
+
+        is_shuffling = true;
         
         // const event_data: SpinningActivationMessage = [];
         // write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
         
         const base_elements = [];
         for(const element_id of GAME_CONFIG.base_elements) {
-            for(const element of field.get_all_elements_by_type(element_id))
-                base_elements.push(element);
+            for(const element of field.get_all_elements_by_type(element_id)) {
+                const cell = field.get_cell(element.x, element.y);
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell))
+                    base_elements.push(element);
+            }
         }
 
         while(base_elements.length > 0) {
@@ -1580,18 +1589,17 @@ export function Game() {
         get_all_combinations((combinations: CombinationInfo[]) => {
             if(combinations.length > 0) {
                 game_step_events = {} as GameStepEventBuffer;
-                field.load_state(state);
                 shuffle_field();
                 return;
             }
             search_available_steps(1, (steps) => {
                 if(steps.length != 0) {
                     process_game_step(false);
+                    is_shuffling = false;
                     EventBus.send('SHUFFLE_END', copy_state(1));
                     return;
                 }
                 game_step_events = {} as GameStepEventBuffer;
-                field.load_state(state);
                 shuffle_field();
             });
         });
@@ -1691,7 +1699,7 @@ export function Game() {
         if(cell_from == NotActiveCell || cell_to == NotActiveCell) return false;
 
         // TODO: remove because this check will be in try_move below
-        if(!field.is_available_cell_type_for_move(cell_from) || !field.is_available_cell_type_for_move(cell_to)) return false;
+        if(!is_available_cell_type_for_move(cell_from) || !is_available_cell_type_for_move(cell_to)) return false;
 
         const element_from = field.get_element(from_x, from_y);
         const element_to = field.get_element(to_x, to_y);
@@ -2142,7 +2150,6 @@ export function Game() {
         }
 
         if(available_items.length == 0) {
-            print("HERE");
             for (let y = 0; y < field_height; y++) {
                 for (let x = 0; x < field_width; x++) {
                     const cell = field.get_cell(x, y);

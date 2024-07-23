@@ -53,7 +53,6 @@ function set_events(instace)
     EventBus.on(
         "DLG_ACTIVE",
         function(state)
-            print("M: ", state)
             instace.block_input = state
         end
     )

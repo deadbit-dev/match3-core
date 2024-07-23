@@ -7,6 +7,29 @@ local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local rotateMatrix = ____math_utils.rotateMatrix
+function ____exports.is_available_cell_type_for_activation(cell)
+    local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+    if is_disabled then
+        return false
+    end
+    return true
+end
+function ____exports.is_available_cell_type_for_move(cell)
+    local is_not_moved = bit.band(cell.type, ____exports.CellType.NotMoved) == ____exports.CellType.NotMoved
+    local is_locked = bit.band(cell.type, ____exports.CellType.Locked) == ____exports.CellType.Locked
+    local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+    if is_not_moved or is_locked or is_disabled then
+        return false
+    end
+    return true
+end
+function ____exports.is_available_cell_type_for_click(cell)
+    local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
+    if is_disabled then
+        return false
+    end
+    return true
+end
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
 ____exports.CombinationType[____exports.CombinationType.Comb3] = "Comb3"
@@ -92,7 +115,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     if complex_process_move == nil then
         complex_process_move = true
     end
-    local rotate_all_masks, is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, is_available_cell_type_for_activation, is_available_cell_type_for_move, save_state, state, rotated_masks, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
+    local rotate_all_masks, is_combined_elements_base, is_combined_elements, try_damage_element, on_near_activation_base, on_near_activation, on_cell_activation_base, on_cell_activation, get_cell, set_element, get_element, swap_elements, get_neighbor_cells, save_state, state, rotated_masks, damaged_elements, cb_is_combined_elements, cb_on_near_activation, cb_on_cell_activation, cb_on_cell_activated, cb_on_damaged_element
     function rotate_all_masks()
         do
             local mask_index = #____exports.CombinationMasks - 1
@@ -227,22 +250,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return neighbors
     end
-    function is_available_cell_type_for_activation(cell)
-        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
-        if is_disabled then
-            return false
-        end
-        return true
-    end
-    function is_available_cell_type_for_move(cell)
-        local is_not_moved = bit.band(cell.type, ____exports.CellType.NotMoved) == ____exports.CellType.NotMoved
-        local is_locked = bit.band(cell.type, ____exports.CellType.Locked) == ____exports.CellType.Locked
-        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
-        if is_not_moved or is_locked or is_disabled then
-            return false
-        end
-        return true
-    end
     function save_state()
         local st = {cells = {}, element_types = state.element_types, elements = {}}
         do
@@ -337,7 +344,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                                                         if mask[i + 1][j + 1] == 1 then
                                                             local cell = get_cell(x + j, y + i)
                                                             local element = get_element(x + j, y + i)
-                                                            if element == ____exports.NullElement or cell == ____exports.NotActiveCell or not is_available_cell_type_for_activation(cell) then
+                                                            if element == ____exports.NullElement or cell == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_activation(cell) then
                                                                 is_combined = false
                                                                 break
                                                             end
@@ -387,11 +394,11 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function is_can_move_base(from_x, from_y, to_x, to_y)
         local cell_from = get_cell(from_x, from_y)
-        if cell_from == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_from) then
+        if cell_from == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_move(cell_from) then
             return false
         end
         local cell_to = get_cell(to_x, to_y)
-        if cell_to == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_to) then
+        if cell_to == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_move(cell_to) then
             return false
         end
         local element_from = get_element(from_x, from_y)
@@ -542,7 +549,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     while x < size_x do
                         local cell = get_cell(x, y)
                         local element = get_element(x, y)
-                        if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) and element ~= ____exports.NullElement and element.type == element_type then
+                        if cell ~= ____exports.NotActiveCell and element ~= ____exports.NullElement and element.type == element_type then
                             target_elements[#target_elements + 1] = {x = x, y = y, uid = element.uid}
                         end
                         x = x + 1
@@ -619,7 +626,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if is_near_activation then
             on_near_activation(get_neighbor_cells(x, y))
         end
-        if not all and not is_available_cell_type_for_move(cell) then
+        if not all and not ____exports.is_available_cell_type_for_move(cell) then
             return
         end
         local element = get_element(x, y)
@@ -638,13 +645,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             set_element(x, y, ____exports.NullElement)
         end
         return element
-    end
-    local function is_available_cell_type_for_click(cell)
-        local is_disabled = bit.band(cell.type, ____exports.CellType.Disabled) == ____exports.CellType.Disabled
-        if is_disabled then
-            return false
-        end
-        return true
     end
     local function try_move(from_x, from_y, to_x, to_y)
         local is_can = is_can_move(from_x, from_y, to_x, to_y)
@@ -681,7 +681,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function try_click(x, y)
         local cell = get_cell(x, y)
-        if cell == ____exports.NotActiveCell or not is_available_cell_type_for_click(cell) then
+        if cell == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_click(cell) then
             return false
         end
         local element = get_element(x, y)
@@ -743,7 +743,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             while j >= 0 do
                 local cell = get_cell(x, j)
                 if cell ~= ____exports.NotActiveCell then
-                    if not is_available_cell_type_for_move(cell) then
+                    if not ____exports.is_available_cell_type_for_move(cell) then
                         return false
                     end
                     local element = get_element(x, j)
@@ -788,7 +788,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         local neighbor_cells = get_neighbor_cells(x, y, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
         for ____, neighbor_cell in ipairs(neighbor_cells) do
             local cell = get_cell(neighbor_cell.x, neighbor_cell.y)
-            if cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+            if cell ~= ____exports.NotActiveCell and ____exports.is_available_cell_type_for_move(cell) then
                 local element = get_element(neighbor_cell.x, neighbor_cell.y)
                 if element ~= ____exports.NullElement then
                     set_element(x, y, element)
@@ -826,7 +826,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     while x < size_x do
                         local cell = get_cell(x, y)
                         local element = get_element(x, y)
-                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and ____exports.is_available_cell_type_for_move(cell) then
                             try_move_element_from_up(x, y)
                             is_procesed = true
                         end
@@ -847,7 +847,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
                     while x < size_x do
                         local cell = get_cell(x, y)
                         local element = get_element(x, y)
-                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and is_available_cell_type_for_move(cell) then
+                        if element == ____exports.NullElement and cell ~= ____exports.NotActiveCell and ____exports.is_available_cell_type_for_move(cell) then
                             if try_move_element_from_corners(x, y) then
                                 return true
                             end
@@ -877,13 +877,13 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     end
     local function process_state(mode)
         repeat
-            local ____switch190 = mode
-            local ____cond190 = ____switch190 == ____exports.ProcessMode.Combinate
-            if ____cond190 then
+            local ____switch184 = mode
+            local ____cond184 = ____switch184 == ____exports.ProcessMode.Combinate
+            if ____cond184 then
                 return process_combinate()
             end
-            ____cond190 = ____cond190 or ____switch190 == ____exports.ProcessMode.MoveElements
-            if ____cond190 then
+            ____cond184 = ____cond184 or ____switch184 == ____exports.ProcessMode.MoveElements
+            if ____cond184 then
                 return process_move()
             end
         until true
@@ -920,7 +920,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         get_pos_by_uid = get_pos_by_uid,
         get_neighbor_cells = get_neighbor_cells,
         get_neighbor_elements = get_neighbor_elements,
-        is_available_cell_type_for_move = is_available_cell_type_for_move,
         try_move = try_move,
         try_click = try_click,
         process_state = process_state,
@@ -930,7 +929,6 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         get_free_cells = get_free_cells,
         get_all_elements_by_type = get_all_elements_by_type,
         try_damage_element = try_damage_element,
-        is_available_cell_type_for_activation = is_available_cell_type_for_activation,
         get_rotated_masks = get_rotated_masks,
         set_callback_on_move_element = set_callback_on_move_element,
         set_callback_on_moved_elements = set_callback_on_moved_elements,

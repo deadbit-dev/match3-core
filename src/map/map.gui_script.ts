@@ -96,7 +96,6 @@ function on_drag(action: any) {
 
 function set_events(instace: props) {
     EventBus.on('DLG_ACTIVE', (state) => {
-        print("M: ", state);
         instace.block_input = state;
     });
 

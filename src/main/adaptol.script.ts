@@ -41,18 +41,11 @@ export function init(this: props) {
         const width_ratio = math.abs(ltrb.z) / original_game_width;
         const height_ratio = math.abs(ltrb.w) / original_game_height;
 
-        print("lW: ", ltrb.z);
-        print("lH: ", ltrb.w);
-        print("WR: ", width_ratio);
-        print("HR: ", height_ratio);
-
         const changes_coff = math.min(width_ratio, height_ratio);
         const height_delta = math.abs(ltrb.w) - original_game_height;
         
         const half_of_width = original_game_width * 0.5;
         const delta_x = (half_of_width - this.original_position.x) * changes_coff;
-
-        print("HD: ", height_delta);
 
         const offset_y = height_delta > 0 ? this.original_position.y - (height_delta / 2) : this.original_position.y * height_ratio;
 

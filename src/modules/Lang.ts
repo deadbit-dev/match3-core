@@ -83,7 +83,6 @@ function LangModule() {
 
     function add_lang_data(lang: string, data: ILangData) {
         langs_data[lang] = data;
-        //print('register lang:', lang);
     }
 
     function set_lang(lang: string, save_lang = false, apply_lang = true) {

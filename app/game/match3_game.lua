@@ -22,6 +22,8 @@ local CombinationType = ____match3_core.CombinationType
 local ProcessMode = ____match3_core.ProcessMode
 local CellType = ____match3_core.CellType
 local CombinationMasks = ____match3_core.CombinationMasks
+local is_available_cell_type_for_move = ____match3_core.is_available_cell_type_for_move
+local is_available_cell_type_for_activation = ____match3_core.is_available_cell_type_for_activation
 local ____coins = require("main.coins")
 local add_coins = ____coins.add_coins
 local ____utils = require("utils.utils")
@@ -111,7 +113,7 @@ ____exports.ElementId[____exports.ElementId.Dynamite] = "Dynamite"
 ____exports.ElementId.Diskosphere = 19
 ____exports.ElementId[____exports.ElementId.Diskosphere] = "Diskosphere"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_gameover, is_first_step
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, make_cell, generate_cell_type_by_cell_id, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_all_combinations, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_simulating, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_shuffling, is_gameover, is_first_step
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -219,7 +221,6 @@ function ____exports.Game()
         EventBus.on(
             "DLG_ACTIVE",
             function(state)
-                print("DLG_ACTIVE: ", state)
                 is_dlg_active = state
             end
         )
@@ -227,77 +228,62 @@ function ____exports.Game()
     function load_field()
         Log.log("LOAD FIELD")
         states[#states + 1] = {}
-        try_load_field()
-        if is_tutorial() then
-            set_tutorial()
-        end
-        if not is_tutorial() then
-            is_block_input = true
-            search_available_steps(
-                5,
-                function(steps)
-                    if #steps ~= 0 then
-                        is_block_input = false
-                        available_steps = copy_array_of_objects(steps)
-                        return
-                    end
-                    shuffle_field()
-                end
-            )
-        else
-            local step = GAME_CONFIG.tutorials_data[current_level + 1].step
-            if step ~= nil then
-                available_steps = {step}
+        try_load_field(function()
+            if is_tutorial() then
+                set_tutorial()
             end
-        end
-        init_targets()
-        set_steps(level_config.steps)
-        if not is_tutorial() then
-            set_timer()
-        end
-        set_random()
-        if GAME_CONFIG.is_revive then
-            Log.log("REVIVE")
-            GAME_CONFIG.is_revive = false
-            table.remove(states)
-            do
-                local y = 0
-                while y < field_height do
-                    do
-                        local x = 0
-                        while x < field_width do
-                            local cell = GAME_CONFIG.revive_state.cells[y + 1][x + 1]
-                            if cell ~= NotActiveCell then
-                                make_cell(x, y, cell.id, cell and cell.data)
-                            else
-                                field.set_cell(x, y, NotActiveCell)
+            if is_tutorial() then
+                local step = GAME_CONFIG.tutorials_data[current_level + 1].step
+                if step ~= nil then
+                    available_steps = {step}
+                end
+            end
+            init_targets()
+            set_steps(level_config.steps)
+            set_random()
+            if GAME_CONFIG.is_revive then
+                Log.log("REVIVE")
+                GAME_CONFIG.is_revive = false
+                table.remove(states)
+                do
+                    local y = 0
+                    while y < field_height do
+                        do
+                            local x = 0
+                            while x < field_width do
+                                local cell = GAME_CONFIG.revive_state.cells[y + 1][x + 1]
+                                if cell ~= NotActiveCell then
+                                    make_cell(x, y, cell.id, cell and cell.data)
+                                else
+                                    field.set_cell(x, y, NotActiveCell)
+                                end
+                                local element = GAME_CONFIG.revive_state.elements[y + 1][x + 1]
+                                if element ~= NullElement then
+                                    make_element(x, y, element.type, element.data)
+                                else
+                                    field.set_element(x, y, NullElement)
+                                end
+                                x = x + 1
                             end
-                            local element = GAME_CONFIG.revive_state.elements[y + 1][x + 1]
-                            if element ~= NullElement then
-                                make_element(x, y, element.type, element.data)
-                            else
-                                field.set_element(x, y, NullElement)
-                            end
-                            x = x + 1
                         end
+                        y = y + 1
                     end
-                    y = y + 1
                 end
+                local state = field.save_state()
+                GAME_CONFIG.revive_state.cells = state.cells
+                GAME_CONFIG.revive_state.elements = state.elements
+                states[#states + 1] = GAME_CONFIG.revive_state
             end
-            local state = field.save_state()
-            GAME_CONFIG.revive_state.cells = state.cells
-            GAME_CONFIG.revive_state.elements = state.elements
-            states[#states + 1] = GAME_CONFIG.revive_state
-        end
-        local last_state = update_state()
-        EventBus.send("ON_LOAD_FIELD", last_state)
-        if is_tutorial() then
-            EventBus.send("SET_TUTORIAL")
-        end
-        states[#states + 1] = {}
-        set_targets(last_state.targets)
-        set_steps(last_state.steps)
-        set_random()
+            local last_state = update_state()
+            EventBus.send("ON_LOAD_FIELD", last_state)
+            if is_tutorial() then
+                EventBus.send("SET_TUTORIAL")
+            end
+            states[#states + 1] = {}
+            set_targets(last_state.targets)
+            set_steps(last_state.steps)
+            set_random()
+        end)
     end
     function is_tutorial()
         local is_tutorial_level = __TS__ArrayIncludes(GAME_CONFIG.tutorial_levels, current_level + 1)
@@ -387,7 +373,7 @@ function ____exports.Game()
         is_block_vertical_rocket = false
         is_block_horizontal_rocket = false
     end
-    function try_load_field()
+    function try_load_field(on_end)
         do
             local y = 0
             while y < field_height do
@@ -404,9 +390,21 @@ function ____exports.Game()
         end
         if #field.get_all_combinations(true) > 0 then
             field.init()
-            try_load_field()
+            try_load_field(on_end)
             return
         end
+        search_available_steps(
+            1,
+            function(steps)
+                if #steps ~= 0 then
+                    available_steps = copy_array_of_objects(steps)
+                    return on_end()
+                end
+                field.init()
+                try_load_field(on_end)
+                return
+            end
+        )
     end
     function complete_tutorial()
         unlock_busters()
@@ -655,6 +653,9 @@ function ____exports.Game()
         return element
     end
     function set_helper()
+        if is_shuffling then
+            return
+        end
         local delay = is_tutorial() and 1 or 5
         helper_timer = timer.delay(
             delay,
@@ -808,7 +809,7 @@ function ____exports.Game()
                                                                 if mask[i + 1][j + 1] == 1 then
                                                                     local cell = field.get_cell(x + j, y + i)
                                                                     local element = field.get_element(x + j, y + i)
-                                                                    if element == NullElement or cell == NotActiveCell or not field.is_available_cell_type_for_activation(cell) then
+                                                                    if element == NullElement or cell == NotActiveCell or not is_available_cell_type_for_activation(cell) then
                                                                         is_combined = false
                                                                         break
                                                                     end
@@ -1456,10 +1457,14 @@ function ____exports.Game()
         Log.log("SHUFFLE FIELD")
         local state = field.save_state()
         EventBus.send("SHUFFLE_START")
+        is_shuffling = true
         local base_elements = {}
         for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
             for ____, element in ipairs(field.get_all_elements_by_type(element_id)) do
-                base_elements[#base_elements + 1] = element
+                local cell = field.get_cell(element.x, element.y)
+                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
+                    base_elements[#base_elements + 1] = element
+                end
             end
         end
         while #base_elements > 0 do
@@ -1483,7 +1488,6 @@ function ____exports.Game()
         get_all_combinations(function(combinations)
             if #combinations > 0 then
                 game_step_events = {}
-                field.load_state(state)
                 shuffle_field()
                 return
             end
@@ -1492,6 +1496,7 @@ function ____exports.Game()
                 function(steps)
                     if #steps ~= 0 then
                         process_game_step(false)
+                        is_shuffling = false
                         EventBus.send(
                             "SHUFFLE_END",
                             copy_state(1)
@@ -1499,7 +1504,6 @@ function ____exports.Game()
                         return
                     end
                     game_step_events = {}
-                    field.load_state(state)
                     shuffle_field()
                 end
             )
@@ -1614,7 +1618,7 @@ function ____exports.Game()
         if cell_from == NotActiveCell or cell_to == NotActiveCell then
             return false
         end
-        if not field.is_available_cell_type_for_move(cell_from) or not field.is_available_cell_type_for_move(cell_to) then
+        if not is_available_cell_type_for_move(cell_from) or not is_available_cell_type_for_move(cell_to) then
             return false
         end
         local element_from = field.get_element(from_x, from_y)
@@ -1796,29 +1800,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch385 = combination.type
-            local ____cond385 = ____switch385 == CombinationType.Comb4
-            if ____cond385 then
+            local ____switch386 = combination.type
+            local ____cond386 = ____switch386 == CombinationType.Comb4
+            if ____cond386 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond385 = ____cond385 or ____switch385 == CombinationType.Comb5
-            if ____cond385 then
+            ____cond386 = ____cond386 or ____switch386 == CombinationType.Comb5
+            if ____cond386 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond385 = ____cond385 or ____switch385 == CombinationType.Comb2x2
-            if ____cond385 then
+            ____cond386 = ____cond386 or ____switch386 == CombinationType.Comb2x2
+            if ____cond386 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond385 = ____cond385 or (____switch385 == CombinationType.Comb3x3a or ____switch385 == CombinationType.Comb3x3b)
-            if ____cond385 then
+            ____cond386 = ____cond386 or (____switch386 == CombinationType.Comb3x3a or ____switch386 == CombinationType.Comb3x3b)
+            if ____cond386 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond385 = ____cond385 or (____switch385 == CombinationType.Comb3x4 or ____switch385 == CombinationType.Comb3x5)
-            if ____cond385 then
+            ____cond386 = ____cond386 or (____switch386 == CombinationType.Comb3x4 or ____switch386 == CombinationType.Comb3x5)
+            if ____cond386 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2093,7 +2097,6 @@ function ____exports.Game()
             end
         end
         if #available_items == 0 then
-            print("HERE")
             do
                 local y = 0
                 while y < field_height do
@@ -2221,6 +2224,7 @@ function ____exports.Game()
     is_block_hammer = false
     is_block_vertical_rocket = false
     is_block_horizontal_rocket = false
+    is_shuffling = false
     is_gameover = false
     is_first_step = true
     local function init()
@@ -2277,15 +2281,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch482 = data
-                                local ____cond482 = ____switch482 == "-"
-                                if ____cond482 then
+                                local ____switch483 = data
+                                local ____cond483 = ____switch483 == "-"
+                                if ____cond483 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond482 = ____cond482 or ____switch482 == ""
-                                if ____cond482 then
+                                ____cond483 = ____cond483 or ____switch483 == ""
+                                if ____cond483 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

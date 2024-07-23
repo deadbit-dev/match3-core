@@ -21,15 +21,10 @@ function ____exports.init(self)
             self.prev_game_height = ltrb.w
             local width_ratio = math.abs(ltrb.z) / original_game_width
             local height_ratio = math.abs(ltrb.w) / original_game_height
-            print("lW: ", ltrb.z)
-            print("lH: ", ltrb.w)
-            print("WR: ", width_ratio)
-            print("HR: ", height_ratio)
             local changes_coff = math.min(width_ratio, height_ratio)
             local height_delta = math.abs(ltrb.w) - original_game_height
             local half_of_width = original_game_width * 0.5
             local delta_x = (half_of_width - self.original_position.x) * changes_coff
-            print("HD: ", height_delta)
             local offset_y = height_delta > 0 and self.original_position.y - height_delta / 2 or self.original_position.y * height_ratio
             go.set_position(vmath.vector3(self.with_x_position and half_of_width - delta_x or self.original_position.x, self.with_y_position and offset_y or self.original_position.y, self.original_position.z))
             if self.with_scale then

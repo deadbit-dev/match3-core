@@ -60,7 +60,7 @@ background_color {
 nodes {
   position {
     x: 270.0
-    y: 880.0
+    y: 1050.0
     z: 0.0
     w: 1.0
   }
@@ -496,8 +496,8 @@ nodes {
   }
   color {
     x: 0.988
-    y: 0.922
-    z: 0.851
+    y: 0.969
+    z: 0.855
     w: 1.0
   }
   type: TYPE_TEXT
@@ -509,9 +509,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 0.475
-    y: 0.243
-    z: 0.024
+    x: 0.388
+    y: 0.106
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -622,8 +622,8 @@ nodes {
   }
   color {
     x: 0.988
-    y: 0.922
-    z: 0.851
+    y: 0.969
+    z: 0.855
     w: 1.0
   }
   type: TYPE_TEXT
@@ -635,9 +635,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 0.475
-    y: 0.243
-    z: 0.024
+    x: 0.388
+    y: 0.106
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -1101,8 +1101,8 @@ nodes {
   }
   color {
     x: 0.988
-    y: 0.922
-    z: 0.851
+    y: 0.969
+    z: 0.855
     w: 1.0
   }
   type: TYPE_TEXT
@@ -1114,9 +1114,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 0.475
-    y: 0.243
-    z: 0.024
+    x: 0.388
+    y: 0.106
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -1286,8 +1286,8 @@ nodes {
   }
   color {
     x: 0.988
-    y: 0.922
-    z: 0.851
+    y: 0.969
+    z: 0.855
     w: 1.0
   }
   type: TYPE_TEXT
@@ -1299,9 +1299,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 0.475
-    y: 0.243
-    z: 0.024
+    x: 0.388
+    y: 0.106
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -1471,8 +1471,8 @@ nodes {
   }
   color {
     x: 0.988
-    y: 0.922
-    z: 0.851
+    y: 0.969
+    z: 0.855
     w: 1.0
   }
   type: TYPE_TEXT
@@ -1484,9 +1484,9 @@ nodes {
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   outline {
-    x: 0.475
-    y: 0.243
-    z: 0.024
+    x: 0.388
+    y: 0.106
+    z: 0.0
     w: 1.0
   }
   shadow {
@@ -1501,7 +1501,7 @@ nodes {
   layer: ""
   inherit_alpha: true
   alpha: 1.0
-  outline_alpha: 0.0
+  outline_alpha: 1.0
   shadow_alpha: 1.0
   template_node_child: false
   text_leading: 1.0
@@ -1903,6 +1903,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -2190,6 +2191,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -2477,6 +2479,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -2766,6 +2769,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 3
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -2962,7 +2966,7 @@ nodes {
 nodes {
   position {
     x: 270.0
-    y: 65.0
+    y: -100.0
     z: 0.0
     w: 1.0
   }
