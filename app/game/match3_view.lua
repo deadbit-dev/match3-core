@@ -373,7 +373,6 @@ function ____exports.View(animator, resources)
                         if element ~= NullElement then
                             local element_view = get_first_view_item_by_game_id(element.uid)
                             if element_view ~= nil then
-                                print(x, y, element.uid)
                                 local to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index)
                                 go.animate(
                                     element_view._hash,
@@ -1398,8 +1397,9 @@ function ____exports.View(animator, resources)
         end
         for ____, cell in ipairs(activation.activated_cells) do
             local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
+            for ____, item in ipairs(activation.damaged_elements) do
+                local element = state.game_state.elements[item.y + 1][item.x + 1]
+                if element ~= NullElement and cell.x == item.x and cell.y == item.y then
                     skip = true
                 end
             end
@@ -1449,14 +1449,17 @@ function ____exports.View(animator, resources)
         )
         for ____, cell in ipairs(data.activated_cells) do
             local skip = false
-            for ____, element in ipairs(data.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
+            for ____, item in ipairs(data.damaged_elements) do
+                local element = state.game_state.elements[item.y + 1][item.x + 1]
+                if element ~= NullElement and cell.x == item.x and cell.y == item.y then
                     skip = true
                 end
             end
-            for ____, element in ipairs(data.target_elements) do
-                if element ~= NullElement and cell.x == element.x and cell.y == element.y then
-                    skip = true
+            for ____, item in ipairs(data.target_elements) do
+                if item ~= NullElement then
+                    if cell.previous_id == item.uid and cell.x == item.x and cell.y == item.y then
+                        skip = true
+                    end
                 end
             end
             if not skip then
@@ -1481,13 +1484,17 @@ function ____exports.View(animator, resources)
         )
         for ____, cell in ipairs(activation.activated_cells) do
             local skip = false
-            for ____, element in ipairs(activation.damaged_elements) do
-                if cell.x == element.x and cell.y == element.y then
+            for ____, item in ipairs(activation.damaged_elements) do
+                local element = state.game_state.elements[item.y + 1][item.x + 1]
+                if element ~= NullElement and cell.x == item.x and cell.y == item.y then
                     skip = true
+                    break
                 end
             end
-            if activation.target_element ~= NullElement and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
-                skip = true
+            if activation.target_element ~= NullElement then
+                if cell.previous_id == activation.target_element.uid and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
+                    skip = true
+                end
             end
             if not skip then
                 activate_cell_animation(cell)
@@ -1616,19 +1623,19 @@ function ____exports.View(animator, resources)
         local anim_props = {blend_duration = 0, playback_rate = 1}
         local anim_name = ""
         repeat
-            local ____switch311 = ____type
-            local ____cond311 = ____switch311 == CellId.Stone0
-            if ____cond311 then
+            local ____switch308 = ____type
+            local ____cond308 = ____switch308 == CellId.Stone0
+            if ____cond308 then
                 anim_name = "morph_1"
                 break
             end
-            ____cond311 = ____cond311 or ____switch311 == CellId.Stone1
-            if ____cond311 then
+            ____cond308 = ____cond308 or ____switch308 == CellId.Stone1
+            if ____cond308 then
                 anim_name = "morph_2"
                 break
             end
-            ____cond311 = ____cond311 or ____switch311 == CellId.Stone2
-            if ____cond311 then
+            ____cond308 = ____cond308 or ____switch308 == CellId.Stone2
+            if ____cond308 then
                 anim_name = "morph_3"
                 break
             end
@@ -2070,38 +2077,6 @@ function ____exports.View(animator, resources)
         end
         set_events()
         dispatch_messages()
-    end
-    local function on_spinning_activated_animation(message)
-        local data = message
-        for ____, swap_info in ipairs(data) do
-            local from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y)
-            local to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y)
-            local item_from = get_first_view_item_by_game_id(swap_info.element_from.uid)
-            if item_from == nil then
-                return 0
-            end
-            local item_to = get_first_view_item_by_game_id(swap_info.element_to.uid)
-            if item_to == nil then
-                return 0
-            end
-            go.animate(
-                item_from._hash,
-                "position",
-                go.PLAYBACK_ONCE_FORWARD,
-                to_world_pos,
-                swap_element_easing,
-                swap_element_time
-            )
-            go.animate(
-                item_to._hash,
-                "position",
-                go.PLAYBACK_ONCE_FORWARD,
-                from_world_pos,
-                swap_element_easing,
-                swap_element_time
-            )
-        end
-        return swap_element_time + 0.1
     end
     return init()
 end

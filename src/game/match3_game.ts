@@ -366,41 +366,18 @@ export function Game() {
         states.push({} as GameState);
 
         try_load_field(() => {
-            if(is_tutorial()) set_tutorial();
-            
-            if(is_tutorial()) {
-                const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
-                if(step != undefined) available_steps = [step];
-            }
-    
-            init_targets();
-            
-            set_steps(level_config.steps);
-            set_random();
-    
-            if(GAME_CONFIG.is_revive) {
-                Log.log('REVIVE');
-    
-                GAME_CONFIG.is_revive = false;
-    
-                states.pop();
-    
-                for(let y = 0; y < field_height; y++) {
-                    for(let x = 0; x < field_width; x++) {
-                        const cell = GAME_CONFIG.revive_state.cells[y][x];
-                        if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
-                        else field.set_cell(x, y, NotActiveCell);
-    
-                        const element = GAME_CONFIG.revive_state.elements[y][x];
-                        if(element != NullElement) make_element(x, y, element.type, element.data);
-                        else field.set_element(x, y, NullElement);
-                    }
+            if(!GAME_CONFIG.is_revive) {
+                if(is_tutorial()) set_tutorial();
+                
+                if(is_tutorial()) {
+                    const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
+                    if(step != undefined) available_steps = [step];
                 }
-    
-                const state = field.save_state();
-                GAME_CONFIG.revive_state.cells = state.cells;
-                GAME_CONFIG.revive_state.elements = state.elements;
-                states.push(GAME_CONFIG.revive_state);
+        
+                init_targets();
+                
+                set_steps(level_config.steps);
+                set_random();
             }
     
             const last_state = update_state();
@@ -414,6 +391,8 @@ export function Game() {
             set_targets(last_state.targets);
             set_steps(last_state.steps);
             set_random();
+
+            GAME_CONFIG.is_revive = false;
         });
     }
 
@@ -480,17 +459,42 @@ export function Game() {
     }
 
     function try_load_field(on_end: () => void) {
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
-                load_cell(x, y);
-                load_element(x, y);
-            }
-        }
+        if(GAME_CONFIG.is_revive) {
+            Log.log('REVIVE');
 
-        if(field.get_all_combinations(true).length > 0) {
-            field.init();
-            try_load_field(on_end);
-            return;
+            available_steps = [];
+
+            states.pop();
+
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+                    const cell = GAME_CONFIG.revive_state.cells[y][x];
+                    if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
+                    else field.set_cell(x, y, NotActiveCell);
+
+                    const element = GAME_CONFIG.revive_state.elements[y][x];
+                    if(element != NullElement) make_element(x, y, element.type, element.data);
+                    else field.set_element(x, y, NullElement);
+                }
+            }
+
+            const state = field.save_state();
+            GAME_CONFIG.revive_state.cells = state.cells;
+            GAME_CONFIG.revive_state.elements = state.elements;
+            states.push(GAME_CONFIG.revive_state);
+        } else {
+            for (let y = 0; y < field_height; y++) {
+                for (let x = 0; x < field_width; x++) {
+                    load_cell(x, y);
+                    load_element(x, y);
+                }
+            }
+
+            if(field.get_all_combinations(true).length > 0) {
+                field.init();
+                try_load_field(on_end);
+                return;
+            }
         }
 
         search_available_steps(1, (steps) => {
@@ -691,6 +695,7 @@ export function Game() {
     }
 
     function gameover() {
+        stop_helper();
         GAME_CONFIG.is_revive = false;
         GAME_CONFIG.revive_state = copy_state(1);
         EventBus.send('ON_GAME_OVER', get_state());

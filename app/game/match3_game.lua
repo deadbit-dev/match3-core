@@ -230,50 +230,19 @@ function ____exports.Game()
         Log.log("LOAD FIELD")
         states[#states + 1] = {}
         try_load_field(function()
-            if is_tutorial() then
-                set_tutorial()
-            end
-            if is_tutorial() then
-                local step = GAME_CONFIG.tutorials_data[current_level + 1].step
-                if step ~= nil then
-                    available_steps = {step}
+            if not GAME_CONFIG.is_revive then
+                if is_tutorial() then
+                    set_tutorial()
                 end
-            end
-            init_targets()
-            set_steps(level_config.steps)
-            set_random()
-            if GAME_CONFIG.is_revive then
-                Log.log("REVIVE")
-                GAME_CONFIG.is_revive = false
-                table.remove(states)
-                do
-                    local y = 0
-                    while y < field_height do
-                        do
-                            local x = 0
-                            while x < field_width do
-                                local cell = GAME_CONFIG.revive_state.cells[y + 1][x + 1]
-                                if cell ~= NotActiveCell then
-                                    make_cell(x, y, cell.id, cell and cell.data)
-                                else
-                                    field.set_cell(x, y, NotActiveCell)
-                                end
-                                local element = GAME_CONFIG.revive_state.elements[y + 1][x + 1]
-                                if element ~= NullElement then
-                                    make_element(x, y, element.type, element.data)
-                                else
-                                    field.set_element(x, y, NullElement)
-                                end
-                                x = x + 1
-                            end
-                        end
-                        y = y + 1
+                if is_tutorial() then
+                    local step = GAME_CONFIG.tutorials_data[current_level + 1].step
+                    if step ~= nil then
+                        available_steps = {step}
                     end
                 end
-                local state = field.save_state()
-                GAME_CONFIG.revive_state.cells = state.cells
-                GAME_CONFIG.revive_state.elements = state.elements
-                states[#states + 1] = GAME_CONFIG.revive_state
+                init_targets()
+                set_steps(level_config.steps)
+                set_random()
             end
             local last_state = update_state()
             EventBus.send("ON_LOAD_FIELD", last_state)
@@ -284,6 +253,7 @@ function ____exports.Game()
             set_targets(last_state.targets)
             set_steps(last_state.steps)
             set_random()
+            GAME_CONFIG.is_revive = false
         end)
     end
     function is_tutorial()
@@ -327,8 +297,8 @@ function ____exports.Game()
                                 if cell.data == nil or cell.data.under_cells == nil then
                                     cell.data.under_cells = {}
                                 end
-                                local ____cell_data_under_cells_5 = cell.data.under_cells
-                                ____cell_data_under_cells_5[#____cell_data_under_cells_5 + 1] = cell.id
+                                local ____cell_data_under_cells_3 = cell.data.under_cells
+                                ____cell_data_under_cells_3[#____cell_data_under_cells_3 + 1] = cell.id
                                 cell.id = ____exports.CellId.Lock
                                 cell.type = ____exports.CellId.Lock
                                 field.set_cell(x, y, cell)
@@ -375,24 +345,58 @@ function ____exports.Game()
         is_block_horizontal_rocket = false
     end
     function try_load_field(on_end)
-        do
-            local y = 0
-            while y < field_height do
-                do
-                    local x = 0
-                    while x < field_width do
-                        load_cell(x, y)
-                        load_element(x, y)
-                        x = x + 1
+        if GAME_CONFIG.is_revive then
+            Log.log("REVIVE")
+            available_steps = {}
+            table.remove(states)
+            do
+                local y = 0
+                while y < field_height do
+                    do
+                        local x = 0
+                        while x < field_width do
+                            local cell = GAME_CONFIG.revive_state.cells[y + 1][x + 1]
+                            if cell ~= NotActiveCell then
+                                make_cell(x, y, cell.id, cell and cell.data)
+                            else
+                                field.set_cell(x, y, NotActiveCell)
+                            end
+                            local element = GAME_CONFIG.revive_state.elements[y + 1][x + 1]
+                            if element ~= NullElement then
+                                make_element(x, y, element.type, element.data)
+                            else
+                                field.set_element(x, y, NullElement)
+                            end
+                            x = x + 1
+                        end
                     end
+                    y = y + 1
                 end
-                y = y + 1
             end
-        end
-        if #field.get_all_combinations(true) > 0 then
-            field.init()
-            try_load_field(on_end)
-            return
+            local state = field.save_state()
+            GAME_CONFIG.revive_state.cells = state.cells
+            GAME_CONFIG.revive_state.elements = state.elements
+            states[#states + 1] = GAME_CONFIG.revive_state
+        else
+            do
+                local y = 0
+                while y < field_height do
+                    do
+                        local x = 0
+                        while x < field_width do
+                            load_cell(x, y)
+                            load_element(x, y)
+                            x = x + 1
+                        end
+                    end
+                    y = y + 1
+                end
+            end
+            if #field.get_all_combinations(true) > 0 then
+                field.init()
+                try_load_field(on_end)
+                return
+            end
         end
         search_available_steps(
             1,
@@ -574,6 +578,7 @@ function ____exports.Game()
         end
     end
     function gameover()
+        stop_helper()
         GAME_CONFIG.is_revive = false
         GAME_CONFIG.revive_state = copy_state(1)
         EventBus.send(
@@ -1924,29 +1929,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch428 = combination.type
-            local ____cond428 = ____switch428 == CombinationType.Comb4
-            if ____cond428 then
+            local ____switch430 = combination.type
+            local ____cond430 = ____switch430 == CombinationType.Comb4
+            if ____cond430 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond428 = ____cond428 or ____switch428 == CombinationType.Comb5
-            if ____cond428 then
+            ____cond430 = ____cond430 or ____switch430 == CombinationType.Comb5
+            if ____cond430 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond428 = ____cond428 or ____switch428 == CombinationType.Comb2x2
-            if ____cond428 then
+            ____cond430 = ____cond430 or ____switch430 == CombinationType.Comb2x2
+            if ____cond430 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond428 = ____cond428 or (____switch428 == CombinationType.Comb3x3a or ____switch428 == CombinationType.Comb3x3b)
-            if ____cond428 then
+            ____cond430 = ____cond430 or (____switch430 == CombinationType.Comb3x3a or ____switch430 == CombinationType.Comb3x3b)
+            if ____cond430 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond428 = ____cond428 or (____switch428 == CombinationType.Comb3x4 or ____switch428 == CombinationType.Comb3x5)
-            if ____cond428 then
+            ____cond430 = ____cond430 or (____switch430 == CombinationType.Comb3x4 or ____switch430 == CombinationType.Comb3x5)
+            if ____cond430 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2495,15 +2500,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch527 = data
-                                local ____cond527 = ____switch527 == "-"
-                                if ____cond527 then
+                                local ____switch529 = data
+                                local ____cond529 = ____switch529 == "-"
+                                if ____cond529 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond527 = ____cond527 or ____switch527 == ""
-                                if ____cond527 then
+                                ____cond529 = ____cond529 or ____switch529 == ""
+                                if ____cond529 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

@@ -474,7 +474,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if(element != NullElement) {
                     const element_view = get_first_view_item_by_game_id(element.uid);
                     if (element_view != undefined) {
-                        print(x,y, element.uid);
                         const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
                     } else make_element_view(x, y, element.type, element.uid, true);
@@ -1217,14 +1216,18 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         for (const cell of activation.activated_cells) {
             let skip = false;
-            for (const element of activation.damaged_elements) {
-                if (cell.x == element.x && cell.y == element.y)
+            for (const item of activation.damaged_elements) {
+                const element = state.game_state.elements[item.y][item.x];
+                if (element != NullElement && cell.x == item.x && cell.y == item.y) {
                     skip = true;
+                }
             }
             
             if (activation.target_element != NullElement) {
                 const is_target_pos = (cell.x == activation.target_element.x) && (cell.y == activation.target_element.y);
-                if(is_target_pos && (cell.previous_id == activation.target_element.uid)) skip = true;
+                if(is_target_pos && (cell.previous_id == activation.target_element.uid)) {
+                    skip = true;
+                }
             }
 
             if (!skip) activate_cell_animation(cell);
@@ -1266,10 +1269,18 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         for (const cell of data.activated_cells) {
             let skip = false;
-            for (const element of data.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            for (const element of data.target_elements)
-                if (element != NullElement && cell.x == element.x && cell.y == element.y) skip = true;
+            for (const item of data.damaged_elements) {
+                const element = state.game_state.elements[item.y][item.x];
+                if (element != NullElement && cell.x == item.x && cell.y == item.y)
+                    skip = true;
+            }
+            for (const item of data.target_elements) {
+                if(item != NullElement) {
+                    if (cell.previous_id == item.uid && cell.x == item.x && cell.y == item.y) {
+                        skip = true;
+                    }
+                }
+            }
             if (!skip) activate_cell_animation(cell);
         }
 
@@ -1288,9 +1299,18 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         for (const cell of activation.activated_cells) {
             let skip = false;
-            for (const element of activation.damaged_elements)
-                if (cell.x == element.x && cell.y == element.y) skip = true;
-            if (activation.target_element != NullElement && cell.x == activation.target_element.x && cell.y == activation.target_element.y) skip = true;
+            for (const item of activation.damaged_elements) {
+                const element = state.game_state.elements[item.y][item.x];
+                if (element != NullElement && cell.x == item.x && cell.y == item.y) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (activation.target_element != NullElement) {
+                if(cell.previous_id == activation.target_element.uid && cell.x == activation.target_element.x && cell.y == activation.target_element.y) {
+                    skip = true;
+                }
+            }
             if (!skip) activate_cell_animation(cell);
         }
 
@@ -1355,25 +1375,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if (cell.x == element.x && cell.y == element.y) skip = true;
             if (!skip) activate_cell_animation(cell);
         }
-    }
-
-    function on_spinning_activated_animation(message: Messages[MessageId]) {
-        const data = message as SpinningActivationMessage;
-        for (const swap_info of data) {
-            const from_world_pos = get_world_pos(swap_info.element_from.x, swap_info.element_from.y);
-            const to_world_pos = get_world_pos(swap_info.element_to.x, swap_info.element_to.y);
-
-            const item_from = get_first_view_item_by_game_id(swap_info.element_from.uid);
-            if (item_from == undefined) return 0;
-
-            const item_to = get_first_view_item_by_game_id(swap_info.element_to.uid);
-            if (item_to == undefined) return 0;
-
-            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
-            go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
-        }
-
-        return swap_element_time + 0.1;
     }
 
     function on_element_activated_animation(message: Messages[MessageId]) {

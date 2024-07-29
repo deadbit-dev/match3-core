@@ -21,9 +21,6 @@ function ____exports.is_available_cell_type_for_move(cell)
     if is_not_moved or is_locked or is_disabled then
         return false
     end
-    if cell.id == 3 then
-        print("PASS")
-    end
     return true
 end
 function ____exports.is_available_cell_type_for_click(cell)

@@ -57,19 +57,20 @@ function SceneModule() {
     // загрузить сцену с именем. wait_ready_manager - ждать ли сначала полной загрузки менеджера
     function load(name: string, wait_ready_manager = false) {
         _wait_ready_manager = wait_ready_manager;
-        scene_resources[name] = [];
+        if(scene_resources[name] == undefined)
+            scene_resources[name] = [];
         Manager.send('SYS_LOAD_SCENE', { name });
     }
     function load_resource(scene: string, resource: string) {
+        if(scene_resources[scene].indexOf(resource) != -1)
+            return;
         scene_resources[scene].push(resource);
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }
 
     function unload_resource(scene: string, resource: string) {
-        const index = scene_resources[scene].indexOf(resource);
-        if(index == -1) return;
-
-        // scene_resources[scene].splice(index, 1);
+        if(scene_resources[scene].indexOf(resource) == -1)
+            return;
         
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
@@ -80,11 +81,11 @@ function SceneModule() {
         if(resources == null) return;
         
         for(const resource of resources) {
-            if(!except?.includes(resource))
+            if(!except?.includes(resource)) {
                 unload_resource(scene, resource);
+                scene_resources[scene].splice(scene_resources[scene].indexOf(resource), 1);
+            }
         }
-
-        scene_resources[scene] = [];
     }
 
     function restart() {

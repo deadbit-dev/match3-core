@@ -1,5 +1,5 @@
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
@@ -78,6 +78,7 @@ function setup(data)
     setup_life(data)
     setup_store(data)
     setup_life_notification(data)
+    setup_not_enough_coins(data)
     setup_busters(data)
 end
 function setup_coins(data)
@@ -136,8 +137,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x1_btn",
         function()
-            if not is_enough_coins(30) or is_max_lifes() then
+            if is_max_lifes() then
                 return
+            end
+            if not is_enough_coins(30) then
+                return set_enabled_not_enough_coins(true)
             end
             add_lifes(1)
             remove_coins(30)
@@ -146,8 +150,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x2_btn",
         function()
-            if not is_enough_coins(50) or is_max_lifes() then
+            if is_max_lifes() then
                 return
+            end
+            if not is_enough_coins(50) then
+                return set_enabled_not_enough_coins(true)
             end
             add_lifes(2)
             remove_coins(50)
@@ -156,8 +163,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x3_btn",
         function()
-            if not is_enough_coins(70) or is_max_lifes() then
+            if is_max_lifes() then
                 return
+            end
+            if not is_enough_coins(70) then
+                return set_enabled_not_enough_coins(true)
             end
             add_lifes(3)
             remove_coins(70)
@@ -171,7 +181,7 @@ function setup_store(data)
         "store/junior_box/buy_button/button",
         function()
             if not is_enough_coins(90) then
-                return
+                return set_enabled_not_enough_coins(true)
             end
             remove_coins(90)
             add_coins(150)
@@ -203,7 +213,7 @@ function setup_store(data)
         "store/catlover_box/buy_button/button",
         function()
             if not is_enough_coins(180) then
-                return
+                return set_enabled_not_enough_coins(true)
             end
             remove_coins(180)
             add_coins(300)
@@ -235,7 +245,7 @@ function setup_store(data)
         "store/buy_ad_1_btn",
         function()
             if not is_enough_coins(100) then
-                return
+                return set_enabled_not_enough_coins(true)
             end
             remove_coins(100)
         end
@@ -244,7 +254,7 @@ function setup_store(data)
         "store/buy_ad_7_btn",
         function()
             if not is_enough_coins(250) then
-                return
+                return set_enabled_not_enough_coins(true)
             end
             remove_coins(250)
         end
@@ -253,7 +263,7 @@ function setup_store(data)
         "store/buy_ad_30_btn",
         function()
             if not is_enough_coins(600) then
-                return
+                return set_enabled_not_enough_coins(true)
             end
             remove_coins(600)
         end
@@ -302,7 +312,7 @@ function setup_hammer(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_hammer(data, false)
-                set_enabled_store(true)
+                set_enabled_not_enough_coins(true)
                 return
             end
             remove_coins(30)
@@ -336,7 +346,7 @@ function setup_spinning(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_spinning(data, false)
-                set_enabled_store(true)
+                set_enabled_not_enough_coins(true)
                 return
             end
             remove_coins(30)
@@ -370,7 +380,7 @@ function setup_horizontal_rocket(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_horizontall_rocket(data, false)
-                set_enabled_store(true)
+                set_enabled_not_enough_coins(true)
                 return
             end
             remove_coins(30)
@@ -404,7 +414,7 @@ function setup_vertical_rocket(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_vertical_rocket(data, false)
-                set_enabled_store(true)
+                set_enabled_not_enough_coins(true)
                 return
             end
             remove_coins(30)
@@ -426,7 +436,7 @@ function setup_life_notification(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_life_notification(false)
-                set_enabled_store(true)
+                set_enabled_not_enough_coins(true)
                 return
             end
             set_enabled_life_notification(false)
@@ -437,6 +447,20 @@ function setup_life_notification(data)
     data.druid:new_button(
         "life_notification/close",
         function() return set_enabled_life_notification(false) end
+    )
+end
+function setup_not_enough_coins(data)
+    data.druid:new_button(
+        "not_enough_coins/buy_button",
+        function()
+            local store = gui.get_node("store/manager")
+            if gui.is_enabled(store, false) then
+                set_enabled_not_enough_coins(false)
+                return
+            end
+            set_enabled_not_enough_coins(false)
+            set_enabled_store(true)
+        end
     )
 end
 function on_life_tick()
@@ -538,16 +562,16 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch86 = scene.name
-        local ____cond86 = ____switch86 == "game"
-        if ____cond86 then
+        local ____switch92 = scene.name
+        local ____cond92 = ____switch92 == "game"
+        if ____cond92 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             break
         end
-        ____cond86 = ____cond86 or ____switch86 == "map"
-        if ____cond86 then
+        ____cond92 = ____cond92 or ____switch92 == "map"
+        if ____cond92 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -638,6 +662,45 @@ function set_enabled_life_notification(state)
         )
     end
     EventBus.send("LIFE_NOTIFICATION", state)
+end
+function set_enabled_not_enough_coins(state)
+    local coins = gui.get_node("not_enough_coins/manager")
+    if state then
+        gui.set_enabled(coins, state)
+        gui.animate(
+            gui.get_node("not_enough_coins/dlg"),
+            "position",
+            vmath.vector3(270, 480, 0),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        gui.animate(
+            gui.get_node("not_enough_coins/fade"),
+            "color",
+            vmath.vector4(0, 0, 0, 0.3),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+    else
+        gui.animate(
+            gui.get_node("not_enough_coins/fade"),
+            "color",
+            vmath.vector4(0, 0, 0, 0),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        gui.animate(
+            gui.get_node("not_enough_coins/dlg"),
+            "position",
+            vmath.vector3(270, 1150, 0),
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(coins, state)
+            end
+        )
+    end
 end
 function set_enabled_hammer(data, state)
     local hammer = gui.get_node("hammer/manager")

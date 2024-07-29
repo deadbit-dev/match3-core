@@ -932,10 +932,6 @@ export function is_available_cell_type_for_move(cell: Cell): boolean {
     
     if(is_not_moved || is_locked || is_disabled) return false;
 
-    if(cell.id == 3) {
-        print('PASS');
-    }
-
     return true;
 }
 
