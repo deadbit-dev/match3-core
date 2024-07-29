@@ -154,17 +154,6 @@ ____exports._GAME_CONFIG = {
         [ElementId.Salad] = "",
         [ElementId.Hay] = ""
     },
-    cell_colors = {
-        [CellId.Base] = "",
-        [CellId.Box] = "",
-        [CellId.Flowers] = "",
-        [CellId.Grass] = "",
-        [CellId.Lock] = "",
-        [CellId.Stone0] = "",
-        [CellId.Stone1] = "",
-        [CellId.Stone2] = "",
-        [CellId.Web] = ""
-    },
     explodable_cells = {
         CellId.Box,
         CellId.Grass,

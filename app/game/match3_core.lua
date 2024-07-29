@@ -21,6 +21,9 @@ function ____exports.is_available_cell_type_for_move(cell)
     if is_not_moved or is_locked or is_disabled then
         return false
     end
+    if cell.id == 3 then
+        print("PASS")
+    end
     return true
 end
 function ____exports.is_available_cell_type_for_click(cell)
@@ -402,16 +405,15 @@ function ____exports.Field(size_x, size_y, complex_process_move)
             return false
         end
         local element_from = get_element(from_x, from_y)
-        if element_from == ____exports.NullElement then
-            return false
-        end
-        local element_type_from = state.element_types[element_from.type]
-        if not element_type_from.is_movable then
-            return false
+        if element_from ~= ____exports.NullElement then
+            local element_type_from = state.element_types[element_from.type]
+            if not element_type_from.is_movable then
+                return false
+            end
         end
         local element_to = get_element(to_x, to_y)
         if element_to ~= ____exports.NullElement then
-            local element_type_to = state.element_types[element_from.type]
+            local element_type_to = state.element_types[element_to.type]
             if not element_type_to.is_movable then
                 return false
             end
@@ -421,7 +423,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         local combinations = get_all_combinations(true)
         for ____, combination in ipairs(combinations) do
             for ____, element in ipairs(combination.elements) do
-                local is_from = element.uid == element_from.uid
+                local is_from = element_from ~= ____exports.NullElement and element_from.uid == element.uid
                 local is_to = element_to ~= ____exports.NullElement and element_to.uid == element.uid
                 if is_from or is_to then
                     was = true

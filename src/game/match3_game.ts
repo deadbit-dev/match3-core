@@ -1136,7 +1136,7 @@ export function Game() {
         else if(try_activate_swaped_dynamite_with_element(other_x, other_y, x, y)) activated = true;
         else if(try_activate_swaped_buster_with_buster(x, y, other_x, other_y)) activated = true;
 
-        if(!activated) activated_elements.splice(activated_elements.length - 2, 2);
+        if(activated) activated_elements.splice(activated_elements.length - 2, 2);
 
         return activated;
     }
@@ -1553,57 +1553,162 @@ export function Game() {
         return true;
     }
 
+    function is_available_for_placed(x: number, y: number) {
+        const cell = field.get_cell(x, y);
+        if(cell == NotActiveCell) return false;
+        if(!is_available_cell_type_for_move(cell)) return false;
+        const element = field.get_element(x, y);
+        if(element == NullElement) return false;
+        return true;
+    }
+
     function shuffle_field() {
         Log.log("SHUFFLE FIELD");
 
-        let state = field.save_state();
-
-        EventBus.send('SHUFFLE_START');
-
-        is_shuffling = true;
-        
-        // const event_data: SpinningActivationMessage = [];
-        // write_game_step_event('ON_SPINNING_ACTIVATED', event_data);
-        
-        const base_elements = [];
-        for(const element_id of GAME_CONFIG.base_elements) {
-            for(const element of field.get_all_elements_by_type(element_id)) {
-                const cell = field.get_cell(element.x, element.y);
-                if(cell != NotActiveCell && is_available_cell_type_for_move(cell))
-                    base_elements.push(element);
-            }
-        }
-
-        while(base_elements.length > 0) {
-            const element = base_elements.splice(math.random(0, base_elements.length - 1), 1).pop();
-            if(base_elements.length > 0) {
-                const other_element = base_elements.splice(math.random(0, base_elements.length - 1), 1).pop();
-                if(element != undefined && other_element != undefined) {
-                    field.swap_elements(element.x, element.y, other_element.x, other_element.y);
-                    //event_data.push({element_from: element, element_to: other_element});
+        // collectiong elements for shuffling
+        const elements = [];
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const cell = field.get_cell(x, y);
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                    const element = field.get_element(x, y);
+                    if(element != NullElement)
+                        elements.push(element);
+                    field.set_element(x, y, NullElement);
                 }
             }
         }
 
-        is_block_input = true;
-        get_all_combinations((combinations: CombinationInfo[]) => {
-            if(combinations.length > 0) {
-                game_step_events = {} as GameStepEventBuffer;
-                shuffle_field();
-                return;
-            }
-            search_available_steps(1, (steps) => {
-                if(steps.length != 0) {
-                    process_game_step(false);
-                    is_shuffling = false;
-                    EventBus.send('SHUFFLE_END', copy_state(1));
-                    return;
+        // sorting elements by type
+        const elements_by_type: {[key in number]: Element[]} = {};
+        for(const element of elements) {
+            if(elements_by_type[element.id] == undefined) {
+                elements_by_type[element.id] = [];
+                for(const other_element of elements) {
+                    if(element.id == other_element.id) {
+                        elements_by_type[element.id].push(other_element);
+                    }
                 }
-                game_step_events = {} as GameStepEventBuffer;
-                shuffle_field();
-            });
-        });
+            }
+        }
+
+        // sorting by counts for minimum combination 3x1
+        const available_elements = [];
+        for(const elements of Object.values(elements_by_type)) {
+            if(elements.length >= 3) {
+                const idx = available_elements.push([] as Element[]) - 1;
+                for(let i = 0; i < 3; i++) {
+                    available_elements[idx].push(elements.splice(math.random(0, elements.length - 1), 1)[0]);
+                }
+            }
+        }
+
+        // pick random elements if can
+        const combo_elements = (available_elements.length > 0) ? available_elements[math.random(0, available_elements.length - 1)] : [];
+        for(const combo_element of combo_elements) {
+            elements.splice(elements.findIndex((elm) => elm.uid == combo_element.uid), 1);
+        }
+
+        // shuffling other elements
+        for(let y = field_height - 1; y >= 0 && elements.length > 0; y--) {
+            for(let x = 0; x < field_width && elements.length > 0; x++) {
+                const cell = field.get_cell(x, y);
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                    const exclude_ids: number[] = [];
+                    const neighbors = field.get_neighbor_elements(x, y);
+                    for(const neighbor of neighbors) {
+                        const neighbor_element = field.get_element(neighbor.x, neighbor.y);
+                        if(neighbor_element != NullElement)
+                            exclude_ids.push(neighbor_element.id);
+                    }
+                    
+                    let element_idx = elements.findIndex((elm) => {
+                        return (combo_elements.findIndex((combo_elm) => combo_elm.uid == elm.uid) == -1) && !exclude_ids.includes(elm.id);
+                    });
+
+                    if(element_idx == -1) element_idx = math.random(0, elements.length - 1);
+
+                    const element = elements.splice(element_idx, 1)[0];
+                    field.set_element(x, y, element);
+                }
+            }
+        }
+
+        // searching available place for 3x1 combo
+        const available_combo_positions = [];
+        for(let y = 1; y < field_height; y++) {
+            for(let x = 0; x < field_width - 2; x++) {
+                let available = true;
+                for(let i = 0; i < 3 && available; i++) {
+                    if(!is_available_for_placed(x + i, y) || (i == 2 && !is_available_for_placed(x + i, y - 1)))
+                        available = false;
+                }
+                if(available)
+                    available_combo_positions.push({x, y});
+            }
+        }
+
+        for(let y = field_height - 1; y >= 0 && available_combo_positions.length == 0; y--) {
+            for(let x = 0; x < field_width && available_combo_positions.length == 0; x++) {
+                let available = true;
+                for(let i = 0; i < 3 && available; i++) {
+                    const cell = field.get_cell(x + i, y);
+                    if(cell == NotActiveCell || !is_available_cell_type_for_move(cell))
+                        available = false;
+                    
+                    if(i == 2) {
+                        const top_cell = field.get_cell(x + i, y - 1);
+                        if(top_cell == NotActiveCell || !is_available_cell_type_for_move(top_cell))
+                            available = false;
+                    }
+                }
+                if(available) {
+                    available_combo_positions.push({x, y});
+                    for(let i = x; i <= x+3; i++) {
+                        for(let j = y - ((i == x+3) ? 0 : 1); j < field_height; j++) {
+                            const cell = field.get_cell(i, j);
+                            if(cell == NotActiveCell || !is_available_cell_type_for_move(cell))
+                                break;
+                            const element = field.get_element(i, j);
+                            if(element != NullElement)
+                                break;
+                            make_element(i, j, GAME_CONFIG.base_elements[math.random(0, GAME_CONFIG.base_elements.length - 1)]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // placed 3x1 combo
+        const swaped_elements: (Element | typeof NullElement)[] = [];
+        const combo_pos = available_combo_positions[math.random(0, available_combo_positions.length - 1)];
+        const rand_id = GAME_CONFIG.base_elements[math.random(0, GAME_CONFIG.base_elements.length - 1)];
+        for(let i = 0; i < 3; i++) {
+            const element_to = Object.assign({}, field.get_element(combo_pos.x + i, i == 2 ? combo_pos.y - 1 : combo_pos.y));
+            swaped_elements.push(element_to);
+            if(combo_elements.length != 0) {
+                const element_from = combo_elements.splice(math.random(0, combo_elements.length - 1), 1)[0];
+                field.set_element(combo_pos.x + i, i == 2 ? combo_pos.y - 1 : combo_pos.y, element_from);
+            } else make_element(combo_pos.x + i, i == 2 ? combo_pos.y - 1 : combo_pos.y, rand_id);
+        }
+
+        // fill empty cell
+        for(let y = field_height - 1; y >= 0 && swaped_elements.length > 0; y--) {
+            for(let x = 0; x < field_width && swaped_elements.length > 0; x++) {
+                const cell = field.get_cell(x, y);
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                    const element = field.get_element(x, y);
+                    if(element == NullElement)
+                        field.set_element(x, y, swaped_elements.splice(math.random(0, swaped_elements.length - 1), 1)[0]);
+                }
+            }
+        }
+
+        const last_state = update_state();
+        new_state(last_state);
         
+        EventBus.send('SHUFFLE', copy_state(1));
+        timer.delay(0.7, false, () => process_game_step());
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -1821,11 +1926,7 @@ export function Game() {
         send_game_step();
         is_wait_until_animation_done = true;
 
-        states.push({} as GameState);
-
-        set_targets(last_state.targets);
-        set_steps(last_state.steps);
-        set_random();
+        new_state(last_state);
     }
     
     function revert_step(): boolean {
@@ -2049,10 +2150,22 @@ export function Game() {
 
     //#endregion CALLBACKS
     //#region HELPERS
+
+    function clear_game_step_events() {
+        game_step_events = {} as GameStepEventBuffer;
+    }
     
     function get_state(offset = 0) {
         assert(states.length - (1 + offset) >= 0);
         return states[states.length - (1 + offset)];
+    }
+
+    function new_state(last_state: GameState) {
+        states.push({} as GameState);
+
+        set_targets(last_state.targets);
+        set_steps(last_state.steps);
+        set_random();
     }
 
     function update_state() {
@@ -2131,7 +2244,7 @@ export function Game() {
 
                 const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
                     const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
-                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && [CellId.Stone1, CellId.Stone2].includes(cell.id));
+                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && [CellId.Stone0, CellId.Stone1, CellId.Stone2].includes(cell.id));
                     const check_not_completed = target.count > target.uids.length;
                     return (target.is_cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
                 }) != -1);
@@ -2154,7 +2267,7 @@ export function Game() {
                 for (let x = 0; x < field_width; x++) {
                     const cell = field.get_cell(x, y);
                     const element = field.get_element(x, y);
-                    const is_valid_cell = (cell != NotActiveCell);
+                    const is_valid_cell = (cell != NotActiveCell && cell.id != CellId.Base);
                     const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1);
                     
                     if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
@@ -2206,7 +2319,7 @@ export function Game() {
         if(is_simulating) return;
 
         EventBus.send('ON_GAME_STEP', { events: game_step_events, state: get_state()});
-        game_step_events = {} as GameStepEventBuffer;
+        clear_game_step_events();
     }
 
     //#endregion HELPERS

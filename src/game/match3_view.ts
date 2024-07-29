@@ -203,8 +203,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     let combinate_phase_duration = 0;
     let move_phase_duration = 0;
     let is_processing = false;
-    let is_shuffling = false;
-    let stop_shuffling = false;
 
     function init() {
         Log.log("Init view");
@@ -432,13 +430,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         });
 
-        EventBus.on('SHUFFLE_START', () => {
-            if(is_shuffling) return;
-            is_shuffling = true;
-            stop_shuffling = false;
-            shuffle_animation();
-        }, true);
-        EventBus.on('SHUFFLE_END', shuffle_end_animation, true);
+        EventBus.on('SHUFFLE', shuffle_animation, true);
 
         EventBus.on('TRY_ACTIVATE_SPINNING', () => {
             if (is_processing) return;
@@ -465,11 +457,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             EventBus.send('REVERT_STEP');
         });
 
-        // EventBus.on('ON_REVERT_STEP', (states) => {
-        //     flow.start(() => on_revert_step_animation(states.current_state, states.previous_state));
-        //     EventBus.send('SET_HELPER');
-        // });
-
         EventBus.on('UPDATED_STATE', update_state);
 
         EventBus.on('ON_WIN', set_win, true);
@@ -480,64 +467,17 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         EventBus.on('MSG_ON_MOVE', (data) => on_move(data), true);
     }
 
-    function shuffle_animation() {
-        if(stop_shuffling) return;
-
-        Log.log('SHUFFLE ANIMATION');
-
-        const elements = [];
-        for(let y = 0; y < field_height; y++) {
-            for(let x = 0; x < field_width; x++) {
-                const cell = state.game_state.cells[y][x];
-                const element = state.game_state.elements[y][x];
-                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
-                    elements.push({x, y, uid: element.uid});
-                }
-            }
-        }
-
-        while(elements.length > 0) {
-            const element_from = elements.splice(math.random(0, elements.length - 1), 1)[0];
-
-            if(elements.length == 0) break;
-
-            const element_to = elements.splice(math.random(0, elements.length - 1), 1)[0];
-
-            const item_from = get_first_view_item_by_game_id(element_from.uid);
-            const item_to = get_first_view_item_by_game_id(element_to.uid);
-            
-            if ((item_from != undefined) && (item_to != undefined)) {
-
-                const from_world_pos = go.get_position(item_from._hash);
-                from_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1;
-                go.set_position(from_world_pos, item_from._hash);
-
-                const to_world_pos = go.get_position(item_to._hash);
-                to_world_pos.z = GAME_CONFIG.default_top_layer_cell_z_index + 0.1;
-                go.set_position(to_world_pos, item_to._hash);
-
-                go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.7);
-                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, 0.7);
-            }
-        }
-
-        timer.delay(0.7, false, shuffle_animation);
-    }
-
-    function shuffle_end_animation(state: GameState) {
-        is_shuffling = false;
-        stop_shuffling = true;
+    function shuffle_animation(state: GameState) {
         for(let y = 0; y < field_height; y++) {
             for(let x = 0; x < field_width; x++) {
                 const element = state.elements[y][x];
                 if(element != NullElement) {
                     const element_view = get_first_view_item_by_game_id(element.uid);
                     if (element_view != undefined) {
-                        // TODO: move all elements to the center and after move by own places\
-
+                        print(x,y, element.uid);
                         const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
-                    }
+                    } else make_element_view(x, y, element.type, element.uid, true);
                 }
             }
         }

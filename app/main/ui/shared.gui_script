@@ -29,6 +29,10 @@ function set_events(data)
         true
     )
     EventBus.on(
+        "REQUEST_OPEN_STORE",
+        function() return set_enabled_store(true) end
+    )
+    EventBus.on(
         "TRY_BUY_HAMMER",
         function()
             if data.dlg_opened then
@@ -534,16 +538,16 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch85 = scene.name
-        local ____cond85 = ____switch85 == "game"
-        if ____cond85 then
+        local ____switch86 = scene.name
+        local ____cond86 = ____switch86 == "game"
+        if ____cond86 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             break
         end
-        ____cond85 = ____cond85 or ____switch85 == "map"
-        if ____cond85 then
+        ____cond86 = ____cond86 or ____switch86 == "map"
+        if ____cond86 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)

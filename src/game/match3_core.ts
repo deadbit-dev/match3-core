@@ -358,14 +358,14 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         if(cell_to == NotActiveCell || !is_available_cell_type_for_move(cell_to)) return false;
         
         const element_from = get_element(from_x, from_y);
-        if(element_from == NullElement) return false;
-
-        const element_type_from = state.element_types[element_from.type];
-        if(!element_type_from.is_movable) return false;
+        if(element_from != NullElement) {
+            const element_type_from = state.element_types[element_from.type];
+            if(!element_type_from.is_movable) return false;
+        }
 
         const element_to = get_element(to_x, to_y);
         if(element_to != NullElement) {
-            const element_type_to = state.element_types[element_from.type];
+            const element_type_to = state.element_types[element_to.type];
             if(!element_type_to.is_movable) return false;
         }
 
@@ -376,7 +376,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         
         for(const combination of combinations) {
             for(const element of combination.elements) {
-                const is_from = element.uid == element_from.uid; 
+                const is_from = element_from != NullElement && element_from.uid == element.uid;
                 const is_to = element_to != NullElement && element_to.uid == element.uid; 
                 if(is_from || is_to) {
                     was = true;
@@ -929,7 +929,12 @@ export function is_available_cell_type_for_move(cell: Cell): boolean {
     const is_not_moved = bit.band(cell.type, CellType.NotMoved) == CellType.NotMoved;
     const is_locked = bit.band(cell.type, CellType.Locked) == CellType.Locked;
     const is_disabled = bit.band(cell.type, CellType.Disabled) == CellType.Disabled;
+    
     if(is_not_moved || is_locked || is_disabled) return false;
+
+    if(cell.id == 3) {
+        print('PASS');
+    }
 
     return true;
 }

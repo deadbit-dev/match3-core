@@ -64,6 +64,7 @@ function set_events(data: props) {
     EventBus.on('ADDED_COIN', on_add_coins, true);
     EventBus.on('REMOVED_COIN', on_remove_coins, true);
     EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
+    EventBus.on('REQUEST_OPEN_STORE', () => set_enabled_store(true));
     EventBus.on('TRY_BUY_HAMMER', () => {
         if(data.dlg_opened) return;
         set_enabled_hammer(data, true);

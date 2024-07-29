@@ -184,18 +184,6 @@ export const _GAME_CONFIG = {
         [ElementId.Hay]: ''
     },
 
-    cell_colors: {
-        [CellId.Base]: '',
-        [CellId.Box]: '',
-        [CellId.Flowers]: '',
-        [CellId.Grass]: '',
-        [CellId.Lock]: '',
-        [CellId.Stone0]: '',
-        [CellId.Stone1]: '',
-        [CellId.Stone2]: '',
-        [CellId.Web]: ''
-    },
-
     explodable_cells: [
         CellId.Box,
         CellId.Grass,
@@ -531,6 +519,8 @@ export type _UserMessages = {
     ADDED_COIN: VoidMessage,
     REMOVED_COIN: VoidMessage,
 
+    REQUEST_OPEN_STORE: VoidMessage,
+
     TRY_BUY_HAMMER: VoidMessage,
     TRY_BUY_SPINNING: VoidMessage,
     TRY_BUY_HORIZONTAL_ROCKET: VoidMessage,
@@ -539,6 +529,5 @@ export type _UserMessages = {
     SET_LIFE_NOTIFICATION: VoidMessage,
     REVIVE: number,
 
-    SHUFFLE_START: VoidMessage,
-    SHUFFLE_END: GameState
+    SHUFFLE: GameState
 };

@@ -507,6 +507,7 @@ function setup_gameover_ui(instance)
         "steps_by_coins/button",
         function()
             if not is_enough_coins(500) then
+                EventBus.send("REQUEST_OPEN_STORE")
                 return
             end
             remove_coins(500)
