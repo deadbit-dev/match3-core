@@ -77,7 +77,8 @@ ____exports._GAME_CONFIG = {
     },
     cell_view = {
         [CellId.Base] = "cell_white",
-        [CellId.Grass] = "cell_grass",
+        [CellId.Grass0] = "cell_grass",
+        [CellId.Grass1] = "cell_grass",
         [CellId.Flowers] = "cell_flowers",
         [CellId.Web] = "cell_web",
         [CellId.Box] = "cell_box",
@@ -86,7 +87,7 @@ ____exports._GAME_CONFIG = {
         [CellId.Stone2] = "cell_stone_2",
         [CellId.Lock] = "cell_lock"
     },
-    activation_cells = {CellId.Web, CellId.Grass, CellId.Flowers},
+    activation_cells = {CellId.Web, CellId.Grass0, CellId.Grass1, CellId.Flowers},
     near_activated_cells = {CellId.Box, CellId.Stone0, CellId.Stone1, CellId.Stone2},
     disabled_cells = {
         CellId.Box,
@@ -156,7 +157,8 @@ ____exports._GAME_CONFIG = {
     },
     explodable_cells = {
         CellId.Box,
-        CellId.Grass,
+        CellId.Grass0,
+        CellId.Grass1,
         CellId.Stone0,
         CellId.Stone1,
         CellId.Stone2

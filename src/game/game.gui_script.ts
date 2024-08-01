@@ -12,7 +12,7 @@ import { is_enough_coins, remove_coins } from '../main/coins';
 import { TargetMessage } from '../main/game_config';
 import { remove_lifes } from '../main/life';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { Busters, CellId, ElementId, GameState, Level } from './match3_game';
+import { Busters, CellId, ElementId, GameState, Level, TargetType } from './match3_game';
 
 
 interface props {
@@ -133,7 +133,7 @@ function setup_targets(instance: props) {
         }
 
         const target = targets[0];
-        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
         gui.play_flipbook(gui.get_node('first_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('first_target_counts', target.count);
     }
@@ -154,7 +154,7 @@ function setup_targets(instance: props) {
         }
 
         const target = targets[1];
-        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
         gui.play_flipbook(gui.get_node('second_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('second_target_counts', target.count);
     }
@@ -167,7 +167,7 @@ function setup_targets(instance: props) {
         gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
         
         const target = targets[2];
-        const view = target.is_cell ? GAME_CONFIG.cell_view[target.type as CellId] : GAME_CONFIG.element_view[target.type as ElementId];
+        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
         gui.play_flipbook(gui.get_node('third_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
         set_text('third_target_counts', target.count);
     }
@@ -319,14 +319,14 @@ function set_events(instance: props) {
 
 // TODO: refactoring
 function update_targets(data: TargetMessage) {
-    switch(data.id) {
+    switch(data.idx) {
         case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
         case 1: set_text('second_target_counts', math.max(0, data.amount)); break;
         case 2: set_text('third_target_counts', math.max(0, data.amount)); break;
     }
 
-    if(!data.is_cell && GAME_CONFIG.feed_elements.indexOf(data.type) != -1 && data.amount == 0)
-        feed_animation(data.type);
+    if(data.type == TargetType.Element && GAME_CONFIG.feed_elements.indexOf(data.id) != -1 && data.amount == 0)
+        feed_animation(data.id);
 }
 
 function feed_animation(item_type: number) {
@@ -413,7 +413,7 @@ function set_gameover(instance: props, state: GameState) {
     
     if(state.targets.length == 1) {
         const target1 = state.targets[0];
-        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        const view1 = target1.type == TargetType.Cell ? GAME_CONFIG.cell_view[target1.id as CellId] : GAME_CONFIG.element_view[target1.id as ElementId];
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
         
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
@@ -425,7 +425,7 @@ function set_gameover(instance: props, state: GameState) {
     }
     else if(state.targets.length == 2) {
         const target1 = state.targets[0];
-        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        const view1 = target1.type == TargetType.Cell ? GAME_CONFIG.cell_view[target1.id as CellId] : GAME_CONFIG.element_view[target1.id as ElementId];
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
         
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
@@ -436,7 +436,7 @@ function set_gameover(instance: props, state: GameState) {
         gui.set_enabled(target_1, true);
         
         const target2 = state.targets[1];
-        const view2 = target2.is_cell ? GAME_CONFIG.cell_view[target2.type as CellId] : GAME_CONFIG.element_view[target2.type as ElementId];
+        const view2 = target2.type == TargetType.Cell ? GAME_CONFIG.cell_view[target2.id as CellId] : GAME_CONFIG.element_view[target2.id as ElementId];
         gui.play_flipbook(gui.get_node('target_2'), (view2 == 'cell_web') ? view2 + '_ui' : view2);
         
         gui.set_text(gui.get_node('target_2_text'), tostring(math.min(target2.uids.length, target2.count) + "/" + target2.count));
@@ -448,7 +448,7 @@ function set_gameover(instance: props, state: GameState) {
     }
     else if(state.targets.length == 3) {
         const target1 = state.targets[0];
-        const view1 = target1.is_cell ? GAME_CONFIG.cell_view[target1.type as CellId] : GAME_CONFIG.element_view[target1.type as ElementId];
+        const view1 = target1.type == TargetType.Cell ? GAME_CONFIG.cell_view[target1.id as CellId] : GAME_CONFIG.element_view[target1.id as ElementId];
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
         
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
@@ -459,7 +459,7 @@ function set_gameover(instance: props, state: GameState) {
         gui.set_enabled(target_1, true);
     
         const target2 = state.targets[1];
-        const view2 = target2.is_cell ? GAME_CONFIG.cell_view[target2.type as CellId] : GAME_CONFIG.element_view[target2.type as ElementId];
+        const view2 = target2.type == TargetType.Cell ? GAME_CONFIG.cell_view[target2.id as CellId] : GAME_CONFIG.element_view[target2.id as ElementId];
         gui.play_flipbook(gui.get_node('target_2'), (view2 == 'cell_web') ? view2 + '_ui' : view2);
 
         gui.set_text(gui.get_node('target_2_text'), tostring(math.min(target2.uids.length, target2.count) + "/" + target2.count));
@@ -470,7 +470,7 @@ function set_gameover(instance: props, state: GameState) {
         gui.set_enabled(target_2, true);
     
         const target3 = state.targets[2];
-        const view3 = target3.is_cell ? GAME_CONFIG.cell_view[target3.type as CellId] : GAME_CONFIG.element_view[target3.type as ElementId];
+        const view3 = target3.type == TargetType.Cell ? GAME_CONFIG.cell_view[target3.id as CellId] : GAME_CONFIG.element_view[target3.id as ElementId];
         gui.play_flipbook(gui.get_node('target_3'), (view3 == 'cell_web') ? view3 + '_ui' : view3);
 
         gui.set_text(gui.get_node('target_3_text'), tostring(math.min(target3.uids.length, target3.count) + "/" + target3.count));

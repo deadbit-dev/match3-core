@@ -14,6 +14,8 @@ local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
+local ____match3_game = require("game.match3_game")
+local TargetType = ____match3_game.TargetType
 function setup(instance)
     setup_info_ui(instance)
     setup_busters(instance)
@@ -189,7 +191,7 @@ function setup_targets(instance)
             end
         until true
         local target = targets[1]
-        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
+        local view = target.type == TargetType.Cell and GAME_CONFIG.cell_view[target.id] or GAME_CONFIG.element_view[target.id]
         gui.play_flipbook(
             gui.get_node("first_target_icon"),
             view == "cell_web" and view .. "_ui" or view
@@ -227,7 +229,7 @@ function setup_targets(instance)
             end
         until true
         local target = targets[2]
-        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
+        local view = target.type == TargetType.Cell and GAME_CONFIG.cell_view[target.id] or GAME_CONFIG.element_view[target.id]
         gui.play_flipbook(
             gui.get_node("second_target_icon"),
             view == "cell_web" and view .. "_ui" or view
@@ -246,7 +248,7 @@ function setup_targets(instance)
             vmath.vector3(0.4, 0.4, 1)
         )
         local target = targets[3]
-        local view = target.is_cell and GAME_CONFIG.cell_view[target.type] or GAME_CONFIG.element_view[target.type]
+        local view = target.type == TargetType.Cell and GAME_CONFIG.cell_view[target.id] or GAME_CONFIG.element_view[target.id]
         gui.play_flipbook(
             gui.get_node("third_target_icon"),
             view == "cell_web" and view .. "_ui" or view
@@ -565,7 +567,7 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch73 = data.id
+        local ____switch73 = data.idx
         local ____cond73 = ____switch73 == 0
         if ____cond73 then
             set_text(
@@ -591,8 +593,8 @@ function update_targets(data)
             break
         end
     until true
-    if not data.is_cell and __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.type) ~= -1 and data.amount == 0 then
-        feed_animation(data.type)
+    if data.type == TargetType.Element and __TS__ArrayIndexOf(GAME_CONFIG.feed_elements, data.id) ~= -1 and data.amount == 0 then
+        feed_animation(data.id)
     end
 end
 function feed_animation(item_type)
@@ -714,7 +716,7 @@ function set_gameover(instance, state)
     local target_3 = gui.get_node("target_3")
     if #state.targets == 1 then
         local target1 = state.targets[1]
-        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        local view1 = target1.type == TargetType.Cell and GAME_CONFIG.cell_view[target1.id] or GAME_CONFIG.element_view[target1.id]
         gui.play_flipbook(
             gui.get_node("target_1"),
             view1 == "cell_web" and view1 .. "_ui" or view1
@@ -734,7 +736,7 @@ function set_gameover(instance, state)
         gui.set_enabled(target_1, true)
     elseif #state.targets == 2 then
         local target1 = state.targets[1]
-        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        local view1 = target1.type == TargetType.Cell and GAME_CONFIG.cell_view[target1.id] or GAME_CONFIG.element_view[target1.id]
         gui.play_flipbook(
             gui.get_node("target_1"),
             view1 == "cell_web" and view1 .. "_ui" or view1
@@ -753,7 +755,7 @@ function set_gameover(instance, state)
         )
         gui.set_enabled(target_1, true)
         local target2 = state.targets[2]
-        local view2 = target2.is_cell and GAME_CONFIG.cell_view[target2.type] or GAME_CONFIG.element_view[target2.type]
+        local view2 = target2.type == TargetType.Cell and GAME_CONFIG.cell_view[target2.id] or GAME_CONFIG.element_view[target2.id]
         gui.play_flipbook(
             gui.get_node("target_2"),
             view2 == "cell_web" and view2 .. "_ui" or view2
@@ -773,7 +775,7 @@ function set_gameover(instance, state)
         gui.set_enabled(target_2, true)
     elseif #state.targets == 3 then
         local target1 = state.targets[1]
-        local view1 = target1.is_cell and GAME_CONFIG.cell_view[target1.type] or GAME_CONFIG.element_view[target1.type]
+        local view1 = target1.type == TargetType.Cell and GAME_CONFIG.cell_view[target1.id] or GAME_CONFIG.element_view[target1.id]
         gui.play_flipbook(
             gui.get_node("target_1"),
             view1 == "cell_web" and view1 .. "_ui" or view1
@@ -792,7 +794,7 @@ function set_gameover(instance, state)
         )
         gui.set_enabled(target_1, true)
         local target2 = state.targets[2]
-        local view2 = target2.is_cell and GAME_CONFIG.cell_view[target2.type] or GAME_CONFIG.element_view[target2.type]
+        local view2 = target2.type == TargetType.Cell and GAME_CONFIG.cell_view[target2.id] or GAME_CONFIG.element_view[target2.id]
         gui.play_flipbook(
             gui.get_node("target_2"),
             view2 == "cell_web" and view2 .. "_ui" or view2
@@ -811,7 +813,7 @@ function set_gameover(instance, state)
         )
         gui.set_enabled(target_2, true)
         local target3 = state.targets[3]
-        local view3 = target3.is_cell and GAME_CONFIG.cell_view[target3.type] or GAME_CONFIG.element_view[target3.type]
+        local view3 = target3.type == TargetType.Cell and GAME_CONFIG.cell_view[target3.id] or GAME_CONFIG.element_view[target3.id]
         gui.play_flipbook(
             gui.get_node("target_3"),
             view3 == "cell_web" and view3 .. "_ui" or view3

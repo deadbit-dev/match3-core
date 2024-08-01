@@ -23,6 +23,7 @@ local ____match3_game = require("game.match3_game")
 local SubstrateId = ____match3_game.SubstrateId
 local CellId = ____match3_game.CellId
 local ElementId = ____match3_game.ElementId
+local is_element = ____match3_game.is_element
 local SubstrateMasks = {
     {{0, 1, 0}, {1, 0, 1}, {0, 0, 0}},
     {{0, 1, 0}, {1, 0, 0}, {0, 0, 1}},
@@ -37,7 +38,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator, resources)
-    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, shuffle_animation, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_game_id, get_view_item_by_game_id_and_index, get_all_view_items_by_game_id, delete_view_item_by_game_id, delete_all_view_items_by_game_id, update_target_by_id, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_spin_duration, helicopter_fly_duration, damaged_element_easing, damaged_element_delay, damaged_element_time, damaged_element_scale, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
+    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_targets, set_events, shuffle_animation, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, make_cell_view, make_element_view, on_swap_element_animation, on_wrong_swap_element_animation, on_combined_animation, combo_animation, on_buster_activation_begin, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_move_phase_begin, on_moved_elements_animation, on_move_phase_end, remove_random_element_animation, damage_element_animation, squash_element_animation, get_world_pos, get_field_pos, get_move_direction, get_first_view_item_by_uid, get_view_item_by_uid_and_index, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_target_by_uid, try_make_under_cell, min_swipe_distance, swap_element_easing, swap_element_time, squash_element_easing, squash_element_time, helicopter_spin_duration, helicopter_fly_duration, damaged_element_time, movement_to_point, duration_of_movement_between_cells, spawn_element_easing, spawn_element_time, current_level, level_config, field_width, field_height, max_field_width, max_field_height, offset_border, origin_cell_size, event_to_animation, gm, targets, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration, is_processing
     function recalculate_sizes()
         local ltrb = Camera.get_ltrb()
         if ltrb.z == prev_game_width and ltrb.w == prev_game_height then
@@ -119,7 +120,7 @@ function ____exports.View(animator, resources)
                         local target = state.targets[i + 1]
                         local amount = target.count - #target.uids
                         targets[i] = amount
-                        EventBus.send("UPDATED_TARGET", {id = i, amount = amount, type = target.type, is_cell = target.is_cell})
+                        EventBus.send("UPDATED_TARGET", {idx = i, amount = amount, id = target.id, type = target.type})
                         i = i + 1
                     end
                 end
@@ -144,7 +145,7 @@ function ____exports.View(animator, resources)
                                 go.set(substrate_view, "material", resources.tutorial_sprite_material)
                                 local cell = state.game_state.cells[y + 1][x + 1]
                                 if cell ~= NotActiveCell then
-                                    local cell_views = get_all_view_items_by_game_id(cell.uid)
+                                    local cell_views = get_all_view_items_by_uid(cell.uid)
                                     if cell_views ~= nil then
                                         for ____, cell_view in ipairs(cell_views) do
                                             local cell_view_url = msg.url(nil, cell_view._hash, "sprite")
@@ -155,7 +156,7 @@ function ____exports.View(animator, resources)
                                 local element = state.game_state.elements[y + 1][x + 1]
                                 if element ~= NullElement then
                                     local ____msg_url_2 = msg.url
-                                    local ____opt_0 = get_first_view_item_by_game_id(element.uid)
+                                    local ____opt_0 = get_first_view_item_by_uid(element.uid)
                                     local element_view = ____msg_url_2(nil, ____opt_0 and ____opt_0._hash, "sprite")
                                     go.set(element_view, "material", resources.tutorial_sprite_material)
                                 end
@@ -188,7 +189,7 @@ function ____exports.View(animator, resources)
                 if element == nil then
                     return
                 end
-                local item = get_first_view_item_by_game_id(element.uid)
+                local item = get_first_view_item_by_uid(element.uid)
                 if item == nil then
                     return
                 end
@@ -210,7 +211,7 @@ function ____exports.View(animator, resources)
                 if element == nil then
                     return
                 end
-                local item = get_first_view_item_by_game_id(element.uid)
+                local item = get_first_view_item_by_uid(element.uid)
                 if item == nil then
                     return
                 end
@@ -222,7 +223,7 @@ function ____exports.View(animator, resources)
         EventBus.on(
             "ON_SET_STEP_HELPER",
             function(data)
-                local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
+                local combined_item = get_first_view_item_by_uid(data.combined_element.uid)
                 if combined_item ~= nil then
                     local from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index)
                     local to_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index)
@@ -250,7 +251,7 @@ function ____exports.View(animator, resources)
                     )
                 end
                 for ____, element in ipairs(data.elements) do
-                    local item = get_first_view_item_by_game_id(element.uid)
+                    local item = get_first_view_item_by_uid(element.uid)
                     if item ~= nil then
                         go.animate(
                             msg.url(nil, item._hash, "sprite"),
@@ -267,7 +268,7 @@ function ____exports.View(animator, resources)
         EventBus.on(
             "ON_RESET_STEP_HELPER",
             function(data)
-                local combined_item = get_first_view_item_by_game_id(data.combined_element.uid)
+                local combined_item = get_first_view_item_by_uid(data.combined_element.uid)
                 if combined_item ~= nil then
                     go.cancel_animations(combined_item._hash)
                     local to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index)
@@ -285,7 +286,7 @@ function ____exports.View(animator, resources)
                     )
                 end
                 for ____, element in ipairs(data.elements) do
-                    local item = get_first_view_item_by_game_id(element.uid)
+                    local item = get_first_view_item_by_uid(element.uid)
                     if item ~= nil then
                         go.cancel_animations(msg.url(nil, item._hash, "sprite"))
                         go.set(
@@ -371,7 +372,7 @@ function ____exports.View(animator, resources)
                     while x < field_width do
                         local element = state.elements[y + 1][x + 1]
                         if element ~= NullElement then
-                            local element_view = get_first_view_item_by_game_id(element.uid)
+                            local element_view = get_first_view_item_by_uid(element.uid)
                             if element_view ~= nil then
                                 local to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index)
                                 go.animate(
@@ -414,7 +415,7 @@ function ____exports.View(animator, resources)
                         go.set(substrate_view, "material", resources.default_sprite_material)
                         local cell = state.game_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
-                            local cell_views = get_all_view_items_by_game_id(cell.uid)
+                            local cell_views = get_all_view_items_by_uid(cell.uid)
                             if cell_views ~= nil then
                                 for ____, cell_view in ipairs(cell_views) do
                                     local cell_view_url = msg.url(nil, cell_view._hash, "sprite")
@@ -425,7 +426,7 @@ function ____exports.View(animator, resources)
                         local element = state.game_state.elements[y + 1][x + 1]
                         if element ~= NullElement then
                             local ____msg_url_5 = msg.url
-                            local ____opt_3 = get_first_view_item_by_game_id(element.uid)
+                            local ____opt_3 = get_first_view_item_by_uid(element.uid)
                             local element_view = ____msg_url_5(nil, ____opt_3 and ____opt_3._hash, "sprite")
                             go.set(element_view, "material", resources.default_sprite_material)
                         end
@@ -455,7 +456,7 @@ function ____exports.View(animator, resources)
                     while x < field_width do
                         local current_cell = state.game_state.cells[y + 1][x + 1]
                         if current_cell ~= NotActiveCell then
-                            local items = get_all_view_items_by_game_id(current_cell.uid)
+                            local items = get_all_view_items_by_uid(current_cell.uid)
                             if items ~= nil then
                                 for ____, item in ipairs(items) do
                                     gm.delete_item(item, true)
@@ -659,15 +660,12 @@ function ____exports.View(animator, resources)
     function reset_field()
         Log.log("RESET FIELD VIEW")
         for ____, ____value in ipairs(__TS__ObjectEntries(state.game_id_to_view_index)) do
-            local sid = ____value[1]
+            local uid = ____value[1]
             local index = ____value[2]
-            local id = tonumber(sid)
-            if id ~= nil then
-                local items = get_all_view_items_by_game_id(id)
-                if items ~= nil then
-                    for ____, item in ipairs(items) do
-                        gm.delete_item(item, true)
-                    end
+            local items = get_all_view_items_by_uid(uid)
+            if items ~= nil then
+                for ____, item in ipairs(items) do
+                    gm.delete_item(item, true)
                 end
             end
         end
@@ -776,7 +774,7 @@ function ____exports.View(animator, resources)
             end
         end
     end
-    function make_cell_view(x, y, cell_id, id, z_index)
+    function make_cell_view(x, y, cell_id, uid, z_index)
         local pos = get_world_pos(
             x,
             y,
@@ -794,17 +792,16 @@ function ____exports.View(animator, resources)
         if cell_id == CellId.Base then
             gm.set_color_hash(_go, GAME_CONFIG.base_cell_color)
         end
+        print("MAKE: ", _go)
         local index = gm.add_game_item({_hash = _go, is_clickable = true})
-        if state.game_id_to_view_index[id] == nil then
-            state.game_id_to_view_index[id] = {}
+        if state.game_id_to_view_index[uid] == nil then
+            state.game_id_to_view_index[uid] = {}
         end
-        if id ~= nil then
-            local ____state_game_id_to_view_index_id_6 = state.game_id_to_view_index[id]
-            ____state_game_id_to_view_index_id_6[#____state_game_id_to_view_index_id_6 + 1] = index
-        end
+        local ____state_game_id_to_view_index_uid_6 = state.game_id_to_view_index[uid]
+        ____state_game_id_to_view_index_uid_6[#____state_game_id_to_view_index_uid_6 + 1] = index
         return index
     end
-    function make_element_view(x, y, ____type, id, spawn_anim, z_index)
+    function make_element_view(x, y, ____type, uid, spawn_anim, z_index)
         if spawn_anim == nil then
             spawn_anim = false
         end
@@ -837,12 +834,12 @@ function ____exports.View(animator, resources)
             )
         end
         local index = gm.add_game_item({_hash = _go, is_clickable = true})
-        if state.game_id_to_view_index[id] == nil then
-            state.game_id_to_view_index[id] = {}
+        if state.game_id_to_view_index[uid] == nil then
+            state.game_id_to_view_index[uid] = {}
         end
-        if id ~= nil then
-            local ____state_game_id_to_view_index_id_7 = state.game_id_to_view_index[id]
-            ____state_game_id_to_view_index_id_7[#____state_game_id_to_view_index_id_7 + 1] = index
+        if uid ~= nil then
+            local ____state_game_id_to_view_index_uid_7 = state.game_id_to_view_index[uid]
+            ____state_game_id_to_view_index_uid_7[#____state_game_id_to_view_index_uid_7 + 1] = index
         end
         return index
     end
@@ -853,7 +850,7 @@ function ____exports.View(animator, resources)
         local element_from = data.element_from
         local element_to = data.element_to
         state.game_state = data.state
-        local item_from = get_first_view_item_by_game_id(element_from.uid)
+        local item_from = get_first_view_item_by_uid(element_from.uid)
         if item_from ~= nil then
             go.animate(
                 item_from._hash,
@@ -865,7 +862,7 @@ function ____exports.View(animator, resources)
             )
         end
         if element_to ~= NullElement then
-            local item_to = get_first_view_item_by_game_id(element_to.uid)
+            local item_to = get_first_view_item_by_uid(element_to.uid)
             if item_to ~= nil then
                 go.animate(
                     item_to._hash,
@@ -885,7 +882,7 @@ function ____exports.View(animator, resources)
         local element_from = data.element_from
         local element_to = data.element_to
         is_processing = true
-        local item_from = get_first_view_item_by_game_id(element_from.uid)
+        local item_from = get_first_view_item_by_uid(element_from.uid)
         if item_from ~= nil then
             go.animate(
                 item_from._hash,
@@ -912,7 +909,7 @@ function ____exports.View(animator, resources)
             )
         end
         if element_to ~= NullElement then
-            local item_to = get_first_view_item_by_game_id(element_to.uid)
+            local item_to = get_first_view_item_by_uid(element_to.uid)
             if item_to ~= nil then
                 go.animate(
                     item_to._hash,
@@ -964,7 +961,7 @@ function ____exports.View(animator, resources)
             local i = 0
             while i < #combo.combination.elements do
                 local element = combo.combination.elements[i + 1]
-                local item = get_first_view_item_by_game_id(element.uid)
+                local item = get_first_view_item_by_uid(element.uid)
                 if item ~= nil then
                     if i == #combo.combination.elements - 1 then
                         go.animate(
@@ -976,7 +973,7 @@ function ____exports.View(animator, resources)
                             squash_element_time,
                             0,
                             function()
-                                delete_view_item_by_game_id(element.uid)
+                                delete_view_item_by_uid(element.uid)
                                 if combo.maked_element ~= nil then
                                     make_element_view(combo.maked_element.x, combo.maked_element.y, combo.maked_element.type, combo.maked_element.uid)
                                 end
@@ -991,7 +988,7 @@ function ____exports.View(animator, resources)
                             squash_element_easing,
                             squash_element_time,
                             0,
-                            function() return delete_view_item_by_game_id(element.uid) end
+                            function() return delete_view_item_by_uid(element.uid) end
                         )
                     end
                 end
@@ -1040,7 +1037,7 @@ function ____exports.View(animator, resources)
             activation.other_element,
             activation.element,
             function()
-                delete_view_item_by_game_id(activation.other_element.uid)
+                delete_view_item_by_uid(activation.other_element.uid)
                 activate_duration = activate_diskosphere_animation(activation)
             end
         )
@@ -1052,7 +1049,7 @@ function ____exports.View(animator, resources)
         return activate_duration
     end
     function activate_diskosphere_animation(activation, on_complete)
-        delete_view_item_by_game_id(activation.element.uid)
+        delete_view_item_by_uid(activation.element.uid)
         local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1)
         local _go = gm.make_go("effect_view", pos)
         go.set_scale(
@@ -1142,7 +1139,7 @@ function ____exports.View(animator, resources)
         while true do
             local ____temp_11 = element == nil
             if not ____temp_11 then
-                local ____opt_9 = get_first_view_item_by_game_id(element.uid)
+                local ____opt_9 = get_first_view_item_by_uid(element.uid)
                 ____temp_11 = (____opt_9 and ____opt_9._hash) == diskosphere
             end
             if not ____temp_11 then
@@ -1191,12 +1188,12 @@ function ____exports.View(animator, resources)
         )
     end
     function explode_element_animation(item)
-        delete_all_view_items_by_game_id(item.uid)
+        delete_all_view_items_by_uid(item.uid)
         local element = state.game_state.elements[item.y + 1][item.x + 1]
         if element == NullElement then
             return
         end
-        local ____type = element.id
+        local ____type = element.type
         if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
             return
         end
@@ -1258,8 +1255,8 @@ function ____exports.View(animator, resources)
             activation.other_element,
             activation.element,
             function()
-                delete_view_item_by_game_id(activation.element.uid)
-                delete_view_item_by_game_id(activation.other_element.uid)
+                delete_view_item_by_uid(activation.element.uid)
+                delete_view_item_by_uid(activation.other_element.uid)
                 make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid)
                 activate_duration = activate_rocket_animation(
                     activation,
@@ -1286,8 +1283,8 @@ function ____exports.View(animator, resources)
         return squash_duration + damaged_element_time
     end
     function activate_rocket_animation(activation, dir, on_fly_end)
-        if activation.element.uid ~= -1 then
-            delete_view_item_by_game_id(activation.element.uid)
+        if activation.element.uid ~= "" then
+            delete_view_item_by_uid(activation.element.uid)
         end
         local pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1)
         rocket_effect(pos, dir)
@@ -1311,14 +1308,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch234 = dir
-            local ____cond234 = ____switch234 == Axis.Vertical
-            if ____cond234 then
+            local ____switch232 = dir
+            local ____cond232 = ____switch232 == Axis.Vertical
+            if ____cond232 then
                 gm.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond234 = ____cond234 or ____switch234 == Axis.Horizontal
-            if ____cond234 then
+            ____cond232 = ____cond232 or ____switch232 == Axis.Horizontal
+            if ____cond232 then
                 gm.set_rotation_hash(part0, 90)
                 gm.set_rotation_hash(part1, -90)
                 break
@@ -1403,9 +1400,9 @@ function ____exports.View(animator, resources)
                     skip = true
                 end
             end
-            if activation.target_element ~= NullElement then
-                local is_target_pos = cell.x == activation.target_element.x and cell.y == activation.target_element.y
-                if is_target_pos and cell.previous_id == activation.target_element.uid then
+            if activation.target_item ~= NullElement then
+                local is_target_pos = cell.x == activation.target_item.x and cell.y == activation.target_item.y
+                if is_target_pos and (is_element(activation.target_item) or cell.previous_uid == activation.target_item.uid) then
                     skip = true
                 end
             end
@@ -1413,8 +1410,8 @@ function ____exports.View(animator, resources)
                 activate_cell_animation(cell)
             end
         end
-        if activation.target_element ~= NullElement then
-            remove_random_element_animation(message, activation.element, activation.target_element)
+        if activation.target_item ~= NullElement then
+            remove_random_element_animation(message, activation.element, activation.target_item)
             return damaged_element_time + helicopter_spin_duration * 0.5 + helicopter_fly_duration
         end
         return damage_element_animation(message, activation.element.x, activation.element.y, activation.element.uid)
@@ -1428,19 +1425,19 @@ function ____exports.View(animator, resources)
                 for ____, element in ipairs(data.damaged_elements) do
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
-                local target_element = data.target_elements[1]
+                local target_element = data.target_items[1]
                 if target_element ~= nil and target_element ~= NullElement then
                     remove_random_element_animation(message, data.element, target_element)
                 else
-                    delete_all_view_items_by_game_id(data.element.uid)
+                    delete_all_view_items_by_uid(data.element.uid)
                 end
-                target_element = data.target_elements[2]
+                target_element = data.target_items[2]
                 if target_element ~= nil and target_element ~= NullElement then
                     remove_random_element_animation(message, data.other_element, target_element)
                 else
-                    delete_all_view_items_by_game_id(data.other_element.uid)
+                    delete_all_view_items_by_uid(data.other_element.uid)
                 end
-                target_element = data.target_elements[3]
+                target_element = data.target_items[3]
                 if target_element ~= nil and target_element ~= NullElement then
                     make_element_view(data.element.x, data.element.y, ElementId.Helicopter, data.element.uid)
                     remove_random_element_animation(message, data.element, target_element, 1)
@@ -1455,9 +1452,10 @@ function ____exports.View(animator, resources)
                     skip = true
                 end
             end
-            for ____, item in ipairs(data.target_elements) do
+            for ____, item in ipairs(data.target_items) do
                 if item ~= NullElement then
-                    if cell.previous_id == item.uid and cell.x == item.x and cell.y == item.y then
+                    local is_target_pos = cell.x == item.x and cell.y == item.y
+                    if is_target_pos and (is_element(item) or cell.previous_uid == item.uid) then
                         skip = true
                     end
                 end
@@ -1477,8 +1475,8 @@ function ____exports.View(animator, resources)
                 for ____, element in ipairs(activation.damaged_elements) do
                     damage_element_animation(message, element.x, element.y, element.uid)
                 end
-                if activation.target_element ~= NullElement then
-                    remove_random_element_animation(message, activation.element, activation.target_element)
+                if activation.target_item ~= NullElement then
+                    remove_random_element_animation(message, activation.element, activation.target_item)
                 end
             end
         )
@@ -1491,8 +1489,9 @@ function ____exports.View(animator, resources)
                     break
                 end
             end
-            if activation.target_element ~= NullElement then
-                if cell.previous_id == activation.target_element.uid and cell.x == activation.target_element.x and cell.y == activation.target_element.y then
+            if activation.target_item ~= NullElement then
+                local is_target_pos = cell.x == activation.target_item.x and cell.y == activation.target_item.y
+                if is_target_pos and (is_element(activation.target_item) or cell.previous_uid == activation.target_item.uid) then
                     skip = true
                 end
             end
@@ -1523,7 +1522,7 @@ function ____exports.View(animator, resources)
             activation.other_element,
             activation.element,
             function()
-                delete_view_item_by_game_id(activation.other_element.uid)
+                delete_view_item_by_uid(activation.other_element.uid)
                 activate_duration = activate_dynamite_animation(
                     activation,
                     1.5,
@@ -1553,7 +1552,7 @@ function ____exports.View(animator, resources)
             msg.url(nil, _go, "dynamite"),
             "enable"
         )
-        delete_view_item_by_game_id(activation.element.uid)
+        delete_view_item_by_uid(activation.element.uid)
         local anim_props = {blend_duration = 0, playback_rate = 1.25}
         spine.play_anim(
             msg.url(nil, _go, "dynamite"),
@@ -1593,13 +1592,18 @@ function ____exports.View(animator, resources)
         end
         return damaged_element_time
     end
-    function activate_cell_animation(cell)
-        delete_all_view_items_by_game_id(cell.previous_id)
-        make_cell_view(cell.x, cell.y, cell.id, cell.uid)
-        local ____type = state.game_state.cells[cell.y + 1][cell.x + 1].id
+    function activate_cell_animation(activation)
+        delete_all_view_items_by_uid(activation.previous_uid)
+        local cell = state.game_state.cells[activation.y + 1][activation.x + 1]
+        if cell == NotActiveCell then
+            return
+        end
+        try_make_under_cell(activation.x, activation.y, cell)
+        make_cell_view(activation.x, activation.y, activation.id, activation.uid)
+        local ____type = cell.id
         local pos = get_world_pos(
-            cell.x,
-            cell.y,
+            activation.x,
+            activation.y,
             (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, ____type) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index) + 0.1
         )
         local is_stone = ____type == CellId.Stone0 or ____type == CellId.Stone1 or ____type == CellId.Stone2
@@ -1623,19 +1627,19 @@ function ____exports.View(animator, resources)
         local anim_props = {blend_duration = 0, playback_rate = 1}
         local anim_name = ""
         repeat
-            local ____switch308 = ____type
-            local ____cond308 = ____switch308 == CellId.Stone0
-            if ____cond308 then
+            local ____switch307 = ____type
+            local ____cond307 = ____switch307 == CellId.Stone0
+            if ____cond307 then
                 anim_name = "morph_1"
                 break
             end
-            ____cond308 = ____cond308 or ____switch308 == CellId.Stone1
-            if ____cond308 then
+            ____cond307 = ____cond307 or ____switch307 == CellId.Stone1
+            if ____cond307 then
                 anim_name = "morph_2"
                 break
             end
-            ____cond308 = ____cond308 or ____switch308 == CellId.Stone2
-            if ____cond308 then
+            ____cond307 = ____cond307 or ____switch307 == CellId.Stone2
+            if ____cond307 then
                 anim_name = "morph_3"
                 break
             end
@@ -1681,7 +1685,7 @@ function ____exports.View(animator, resources)
                             if point.type == MoveType.Requested then
                                 make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid)
                             end
-                            local item_from = get_first_view_item_by_game_id(element.data.uid)
+                            local item_from = get_first_view_item_by_uid(element.data.uid)
                             if item_from ~= nil then
                                 local to_world_pos = get_world_pos(point.to_x, point.to_y)
                                 if point.type == MoveType.Requested then
@@ -1767,9 +1771,9 @@ function ____exports.View(animator, resources)
         local target_world_pos = get_world_pos(target_element.x, target_element.y, 3)
         local ____temp_15
         if view_index ~= nil then
-            ____temp_15 = get_view_item_by_game_id_and_index(element.uid, view_index)
+            ____temp_15 = get_view_item_by_uid_and_index(element.uid, view_index)
         else
-            ____temp_15 = get_first_view_item_by_game_id(element.uid)
+            ____temp_15 = get_first_view_item_by_uid(element.uid)
         end
         local item = ____temp_15
         if item == nil then
@@ -1811,42 +1815,31 @@ function ____exports.View(animator, resources)
         )
         return helicopter_spin_duration + helicopter_fly_duration + damaged_element_time
     end
-    function damage_element_animation(data, x, y, element_id, on_complite)
-        local element_view_item = get_first_view_item_by_game_id(element_id)
+    function damage_element_animation(data, x, y, uid, on_complite)
+        local element_view_item = get_first_view_item_by_uid(uid)
         if element_view_item ~= nil then
-            go.animate(
-                element_view_item._hash,
-                "scale",
-                go.PLAYBACK_ONCE_FORWARD,
-                damaged_element_scale,
-                damaged_element_easing,
-                damaged_element_time,
-                damaged_element_delay,
-                function()
-                    explode_element_animation({x = x, y = y, uid = element_id})
-                    for ____, ____value in ipairs(__TS__ObjectEntries(data)) do
-                        local key = ____value[1]
-                        local value = ____value[2]
-                        if key == "activated_cells" then
-                            for ____, cell in ipairs(value) do
-                                if cell.x == x and cell.y == y then
-                                    activate_cell_animation(cell)
-                                end
-                            end
+            explode_element_animation({x = x, y = y, uid = uid})
+            for ____, ____value in ipairs(__TS__ObjectEntries(data)) do
+                local key = ____value[1]
+                local value = ____value[2]
+                if key == "activated_cells" then
+                    for ____, cell in ipairs(value) do
+                        if cell.x == x and cell.y == y then
+                            activate_cell_animation(cell)
                         end
                     end
-                    if on_complite ~= nil then
-                        on_complite()
-                    end
                 end
-            )
-            return damaged_element_time + 0.5
+            end
+            if on_complite ~= nil then
+                on_complite()
+            end
+            return 0.5
         end
         return 0
     end
     function squash_element_animation(element, target_element, on_complite)
         local to_world_pos = get_world_pos(target_element.x, target_element.y)
-        local item = get_first_view_item_by_game_id(element.uid)
+        local item = get_first_view_item_by_uid(element.uid)
         if item == nil then
             return 0
         end
@@ -1907,22 +1900,22 @@ function ____exports.View(animator, resources)
             return Direction.None
         end
     end
-    function get_first_view_item_by_game_id(id)
-        local indices = state.game_id_to_view_index[id]
+    function get_first_view_item_by_uid(uid)
+        local indices = state.game_id_to_view_index[uid]
         if indices == nil then
             return
         end
         return gm.get_item_by_index(indices[1])
     end
-    function get_view_item_by_game_id_and_index(id, index)
-        local indices = state.game_id_to_view_index[id]
+    function get_view_item_by_uid_and_index(uid, index)
+        local indices = state.game_id_to_view_index[uid]
         if indices == nil then
             return
         end
         return gm.get_item_by_index(indices[index + 1])
     end
-    function get_all_view_items_by_game_id(id)
-        local indices = state.game_id_to_view_index[id]
+    function get_all_view_items_by_uid(uid)
+        local indices = state.game_id_to_view_index[uid]
         if indices == nil then
             return
         end
@@ -1932,37 +1925,38 @@ function ____exports.View(animator, resources)
         end
         return items
     end
-    function delete_view_item_by_game_id(id)
-        local item = get_first_view_item_by_game_id(id)
+    function delete_view_item_by_uid(uid)
+        local item = get_first_view_item_by_uid(uid)
         if item == nil then
-            __TS__Delete(state.game_id_to_view_index, id)
+            __TS__Delete(state.game_id_to_view_index, uid)
             return false
         end
-        update_target_by_id(id)
+        update_target_by_uid(uid)
         gm.delete_item(item, true)
-        __TS__ArraySplice(state.game_id_to_view_index[id], 0, 1)
+        __TS__ArraySplice(state.game_id_to_view_index[uid], 0, 1)
         return true
     end
-    function delete_all_view_items_by_game_id(id)
-        local items = get_all_view_items_by_game_id(id)
+    function delete_all_view_items_by_uid(uid)
+        local items = get_all_view_items_by_uid(uid)
         if items == nil then
             return false
         end
-        update_target_by_id(id)
+        update_target_by_uid(uid)
         for ____, item in ipairs(items) do
+            print("DELETE: ", item._hash)
             gm.delete_item(item, true)
         end
-        __TS__Delete(state.game_id_to_view_index, id)
+        __TS__Delete(state.game_id_to_view_index, uid)
         return true
     end
-    function update_target_by_id(id)
+    function update_target_by_uid(uid)
         do
             local i = 0
             while i < #state.game_state.targets do
                 local target = state.game_state.targets[i + 1]
-                if __TS__ArrayIndexOf(target.uids, id) ~= -1 then
+                if __TS__ArrayIndexOf(target.uids, uid) ~= -1 then
                     targets[i] = math.max(0, targets[i] - 1)
-                    EventBus.send("UPDATED_TARGET", {id = i, amount = targets[i], type = target.type, is_cell = target.is_cell})
+                    EventBus.send("UPDATED_TARGET", {idx = i, amount = targets[i], id = target.id, type = target.type})
                 end
                 i = i + 1
             end
@@ -1976,16 +1970,16 @@ function ____exports.View(animator, resources)
                 while i >= 0 do
                     local cell_id = cell.data.under_cells[i + 1]
                     if cell_id ~= nil then
-                        local z_index = (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, cell_id) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index) - depth
-                        make_cell_view(
-                            x,
-                            y,
-                            cell_id,
-                            cell.uid,
-                            z_index
-                        )
-                        depth = depth + 0.1
                         if cell_id == CellId.Base then
+                            local z_index = (__TS__ArrayIncludes(GAME_CONFIG.top_layer_cells, cell_id) and GAME_CONFIG.default_top_layer_cell_z_index or GAME_CONFIG.default_cell_z_index) - depth
+                            make_cell_view(
+                                x,
+                                y,
+                                cell_id,
+                                cell.uid,
+                                z_index
+                            )
+                            depth = depth + 0.1
                             break
                         end
                     end
@@ -2001,10 +1995,10 @@ function ____exports.View(animator, resources)
     squash_element_time = GAME_CONFIG.squash_element_time
     helicopter_spin_duration = GAME_CONFIG.helicopter_spin_duration
     helicopter_fly_duration = GAME_CONFIG.helicopter_fly_duration
-    damaged_element_easing = GAME_CONFIG.damaged_element_easing
-    damaged_element_delay = GAME_CONFIG.damaged_element_delay
+    local damaged_element_easing = GAME_CONFIG.damaged_element_easing
+    local damaged_element_delay = GAME_CONFIG.damaged_element_delay
     damaged_element_time = GAME_CONFIG.damaged_element_time
-    damaged_element_scale = GAME_CONFIG.damaged_element_scale
+    local damaged_element_scale = GAME_CONFIG.damaged_element_scale
     movement_to_point = GAME_CONFIG.movement_to_point
     duration_of_movement_between_cells = GAME_CONFIG.duration_of_movement_bettween_cells
     spawn_element_easing = GAME_CONFIG.spawn_element_easing

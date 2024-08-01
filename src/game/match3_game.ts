@@ -76,7 +76,8 @@ export enum SubstrateId {
 
 export enum CellId {
     Base,
-    Grass,
+    Grass0,
+    Grass1,
     Flowers,
     Web,
     Box,
@@ -109,15 +110,19 @@ export enum ElementId {
     Diskosphere
 }
 
+export enum TargetType {
+    Cell,
+    Element
+}
+
 export interface Target {
-    type: number,
+    id: number,
+    type: TargetType,
     count: number
 }
 
-// REFACTORING
 export interface TargetState extends Target {
-    is_cell: boolean,
-    uids: number[]
+    uids: string[]
 }
 
 export interface Buster {
@@ -203,7 +208,7 @@ export function Game() {
     let game_item_counter = 0;
     let states: GameState[] = [];
     
-    let activated_elements: number[] = [];
+    let activated_elements: string[] = [];
     let game_step_events: GameStepEventBuffer = [];
 
     let selected_element: ItemInfo | null = null;
@@ -229,6 +234,7 @@ export function Game() {
     let is_block_horizontal_rocket = false;
 
     let is_shuffling = false;
+    let is_searched = false;
 
     let is_gameover = false;
 
@@ -365,35 +371,34 @@ export function Game() {
         
         states.push({} as GameState);
 
-        try_load_field(() => {
-            if(!GAME_CONFIG.is_revive) {
-                if(is_tutorial()) set_tutorial();
-                
-                if(is_tutorial()) {
-                    const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
-                    if(step != undefined) available_steps = [step];
-                }
-        
-                init_targets();
-                
-                set_steps(level_config.steps);
-                set_random();
+        try_load_field();
+        if(!GAME_CONFIG.is_revive) {
+            if(is_tutorial()) set_tutorial();
+            
+            if(is_tutorial()) {
+                const step = GAME_CONFIG.tutorials_data[current_level + 1].step;
+                if(step != undefined) available_steps = [step];
             }
     
-            const last_state = update_state();
-    
-            EventBus.send('ON_LOAD_FIELD', last_state);
-    
-            if(is_tutorial()) EventBus.send('SET_TUTORIAL');
-    
-            states.push({} as GameState);
-        
-            set_targets(last_state.targets);
-            set_steps(last_state.steps);
+            init_targets();
+            
+            set_steps(level_config.steps);
             set_random();
+        }
+    
+        const last_state = update_state();
 
-            GAME_CONFIG.is_revive = false;
-        });
+        EventBus.send('ON_LOAD_FIELD', last_state);
+
+        if(is_tutorial()) EventBus.send('SET_TUTORIAL');
+
+        states.push({} as GameState);
+    
+        set_targets(last_state.targets);
+        set_steps(last_state.steps);
+        set_random();
+
+        GAME_CONFIG.is_revive = false;
     }
 
     function is_tutorial() {
@@ -458,7 +463,7 @@ export function Game() {
         is_block_horizontal_rocket = false;
     }
 
-    function try_load_field(on_end: () => void) {
+    function try_load_field() {
         if(GAME_CONFIG.is_revive) {
             Log.log('REVIVE');
 
@@ -492,20 +497,24 @@ export function Game() {
 
             if(field.get_all_combinations(true).length > 0) {
                 field.init();
-                try_load_field(on_end);
+                try_load_field();
+                // try_load_field(on_end);
                 return;
             }
         }
 
+        is_block_input = true;
         search_available_steps(1, (steps) => {
             if(steps.length != 0) {
                 available_steps = copy_array_of_objects(steps);
-                return on_end();
+                is_block_input = false;
+                return;
+                // return on_end();
             }
 
-            field.init();
-            try_load_field(on_end);
-            return;
+            // field.init();
+            // try_load_field(on_end);
+            // return;
         });
     }
 
@@ -673,6 +682,8 @@ export function Game() {
             is_block_input = true;
             timer.delay(1.5, false, gameover);
         }
+
+        if(is_searched && available_steps.length == 0) shuffle_field();
         
         Log.log("END STEP ANIMATION");
     }
@@ -702,7 +713,6 @@ export function Game() {
     }
 
     function load_cell(x: number, y: number) {
-        // TODO: load save
         const cell_config = level_config['field']['cells'][y][x];
         if(Array.isArray(cell_config)) {
             const cells = Object.assign([], cell_config);
@@ -712,9 +722,12 @@ export function Game() {
     }
 
     function load_element(x: number, y: number) {
-        // TODO: load save
         const element = level_config['field']['elements'][y][x];
         make_element(x, y, element == RandomElement ? get_random_element_id() : element);
+    }
+
+    function get_cell_uid() {
+        return "C" + game_item_counter++;
     }
 
     function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell, data?: any): Cell | typeof NotActiveCell {
@@ -722,7 +735,7 @@ export function Game() {
         
         const cell = {
             id: cell_id,
-            uid: game_item_counter++,
+            uid: get_cell_uid(),
             type: generate_cell_type_by_cell_id(cell_id),
             cnt_acts: 0,
             cnt_near_acts: 0,
@@ -751,12 +764,15 @@ export function Game() {
         return type;
     }
 
+    function get_element_uid() {
+        return 'E' + game_item_counter++;
+    }
+
     function make_element(x: number, y: number, element_id: ElementId | typeof NullElement, data: any = null): Element | typeof NullElement {
         if(element_id == NullElement) return NullElement;
-        
+
         const element: Element = {
-            id: element_id,
-            uid: game_item_counter++,
+            uid: get_element_uid(),
             type: element_id,
             data: data
         };
@@ -866,6 +882,8 @@ export function Game() {
     }
     
     function search_available_steps(count: number, on_end: (steps: StepInfo[]) => void) {
+        is_searched = false;
+
         const coroutine = flow.start(() => {
             Log.log("SEARCH AVAILABLE STEPS");
 
@@ -914,7 +932,7 @@ export function Game() {
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
         const coroutine = flow.start(() => {
             const combinations: CombinationInfo[] = [];
-            const combinations_elements: {[key in number]: boolean} = {};
+            const combinations_elements: {[key in string]: boolean} = {};
 
             // проходимся по всем маскам с конца
             for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
@@ -1160,10 +1178,10 @@ export function Game() {
         event_data.activated_cells = [];
 
         const elements = field.get_all_elements_by_type(element_id);
-        for(const element of elements) field.remove_element(element.x, element.y, true, true);
+        for(const element of elements) field.remove_element(element.x, element.y, false, true);
         event_data.damaged_elements = elements;
 
-        field.remove_element(x, y, true, false);
+        field.remove_element(x, y);
 
         return true;
     }
@@ -1186,13 +1204,13 @@ export function Game() {
         for(const element_id of GAME_CONFIG.base_elements) {
             const elements = field.get_all_elements_by_type(element_id);
             for(const element of elements) {
-                field.remove_element(element.x, element.y, true, false);
+                field.remove_element(element.x, element.y);
                 event_data.damaged_elements.push(element);
             }
         }
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1218,15 +1236,15 @@ export function Game() {
 
         const elements = field.get_all_elements_by_type(element_id);
         for(const element of elements) {
-            field.remove_element(element.x, element.y, true, false);
+            field.remove_element(element.x, element.y);
             event_data.damaged_elements.push(element);
 
             const maked_element = make_element(element.x, element.y, other_buster.type, true);
             if(maked_element != NullElement) event_data.maked_elements.push({x: element.x, y: element.y, uid: maked_element.uid, type: maked_element.type});
         }
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         for(const element of elements) try_activate_buster_element(element.x, element.y);
 
@@ -1254,15 +1272,15 @@ export function Game() {
 
         const elements = field.get_all_elements_by_type(element_id);
         for(const element of elements) {
-            field.remove_element(element.x, element.y, true, false);
+            field.remove_element(element.x, element.y);
             event_data.damaged_elements.push(element);
 
             const maked_element = make_element(element.x, element.y, buster.type, true);
             if(maked_element != NullElement) event_data.maked_elements.push({x: element.x, y: element.y, uid: maked_element.uid, type: maked_element.type});
         }
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         for(const element of elements) try_activate_buster_element(element.x, element.y);
 
@@ -1286,14 +1304,14 @@ export function Game() {
 
         const elements = field.get_all_elements_by_type(other_element.type);
         for(const element of elements) {
-            field.remove_element(element.x, element.y, true, false);
+            field.remove_element(element.x, element.y);
             event_data.damaged_elements.push(element);
         }
 
         print("LOGIC: ", event_data.activated_cells.length);
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1316,7 +1334,7 @@ export function Game() {
                 if(i != y) {
                     if(is_buster(x, i)) try_activate_buster_element(x, i);
                     else {
-                        const removed_element = field.remove_element(x, i, true, false);
+                        const removed_element = field.remove_element(x, i);
                         if(removed_element != undefined) event_data.damaged_elements.push({x, y: i, uid: removed_element.uid});
                     }
                 }
@@ -1328,14 +1346,14 @@ export function Game() {
                 if(i != x) {
                     if(is_buster(i, y)) try_activate_buster_element(i, y);
                     else {
-                        const removed_element = field.remove_element(i, y, true, false);
+                        const removed_element = field.remove_element(i, y);
                         if(removed_element != undefined) event_data.damaged_elements.push({x: i, y, uid: removed_element.uid});
                     }
                 }
             }
         }
 
-        field.remove_element(x, y, true, false);
+        field.remove_element(x, y);
 
         return true;
     }
@@ -1360,7 +1378,7 @@ export function Game() {
             if(i != y) {
                 if(is_buster(x, i)) try_activate_buster_element(x, i);
                 else {
-                    const removed_element = field.remove_element(x, i, true, false);
+                    const removed_element = field.remove_element(x, i);
                     if(removed_element != undefined) event_data.damaged_elements.push({x, y: i, uid: removed_element.uid});
                 }
             }
@@ -1370,14 +1388,14 @@ export function Game() {
             if(i != x) {
                 if(is_buster(i, y)) try_activate_buster_element(i, y);
                 else {
-                    const removed_element = field.remove_element(i, y, true, false);
+                    const removed_element = field.remove_element(i, y);
                     if(removed_element != undefined) event_data.damaged_elements.push({x: i, y, uid: removed_element.uid});
                 }
             }
         }
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1409,9 +1427,9 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        event_data.target_element = remove_random_element(event_data.damaged_elements, get_state().targets);
+        event_data.target_item = remove_random_element(event_data.damaged_elements, get_state().targets);
 
-        field.remove_element(x, y, true, false);
+        field.remove_element(x, y);
         
         return true;
     }
@@ -1424,7 +1442,7 @@ export function Game() {
         if(other_helicopter == NullElement || other_helicopter.type != ElementId.Helicopter) return false;
 
         const event_data = {} as SwapedHelicoptersActivationMessage;
-        event_data.target_elements = [];
+        event_data.target_items = [];
         event_data.activated_cells = [];
 
         write_game_step_event('SWAPED_HELICOPTERS_ACTIVATED', event_data);
@@ -1437,10 +1455,10 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        for(let i = 0; i < 3; i++) event_data.target_elements.push(remove_random_element(event_data.damaged_elements, get_state().targets));
+        for(let i = 0; i < 3; i++) event_data.target_items.push(remove_random_element(event_data.damaged_elements, get_state().targets));
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1466,10 +1484,10 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        event_data.target_element = remove_random_element(event_data.damaged_elements, get_state().targets);
+        event_data.target_item = remove_random_element(event_data.damaged_elements, get_state().targets);
 
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1489,7 +1507,7 @@ export function Game() {
             [1, 1, 1]
         ]);
 
-        field.remove_element(x, y, true, false);
+        field.remove_element(x, y);
 
         return true;
     }
@@ -1515,8 +1533,8 @@ export function Game() {
             [1, 1, 1, 1, 1]
         ]);
         
-        field.remove_element(x, y, true, false);
-        field.remove_element(other_x, other_y, true, false);
+        field.remove_element(x, y);
+        field.remove_element(other_x, other_y);
 
         return true;
     }
@@ -1587,11 +1605,11 @@ export function Game() {
         // sorting elements by type
         const elements_by_type: {[key in number]: Element[]} = {};
         for(const element of elements) {
-            if(elements_by_type[element.id] == undefined) {
-                elements_by_type[element.id] = [];
+            if(elements_by_type[element.type] == undefined) {
+                elements_by_type[element.type] = [];
                 for(const other_element of elements) {
-                    if(element.id == other_element.id) {
-                        elements_by_type[element.id].push(other_element);
+                    if(element.type == other_element.type) {
+                        elements_by_type[element.type].push(other_element);
                     }
                 }
             }
@@ -1624,11 +1642,11 @@ export function Game() {
                     for(const neighbor of neighbors) {
                         const neighbor_element = field.get_element(neighbor.x, neighbor.y);
                         if(neighbor_element != NullElement)
-                            exclude_ids.push(neighbor_element.id);
+                            exclude_ids.push(neighbor_element.type);
                     }
                     
                     let element_idx = elements.findIndex((elm) => {
-                        return (combo_elements.findIndex((combo_elm) => combo_elm.uid == elm.uid) == -1) && !exclude_ids.includes(elm.id);
+                        return (combo_elements.findIndex((combo_elm) => combo_elm.uid == elm.uid) == -1) && !exclude_ids.includes(elm.type);
                     });
 
                     if(element_idx == -1) element_idx = math.random(0, elements.length - 1);
@@ -1713,7 +1731,7 @@ export function Game() {
         new_state(last_state);
         
         EventBus.send('SHUFFLE', copy_state(1));
-        timer.delay(0.7, false, () => process_game_step());
+        timer.delay(0.7, false, () => process_game_step(true));
     }
     
     function try_hammer_activation(x: number, y: number) {
@@ -1722,15 +1740,15 @@ export function Game() {
         if(selected_element != null) EventBus.trigger('ON_ELEMENT_UNSELECTED', selected_element, true, true);
         selected_element = null;       
 
-        // FIXME: for buster under wall
-        if(is_buster(x, y)) try_activate_buster_element(x, y);
+        let is_activeted = false;
+        if(is_buster(x, y)) is_activeted = try_activate_buster_element(x, y);
         else {
             const event_data = {} as ElementActivationMessage;
             event_data.x = x;
             event_data.y = y;
             event_data.activated_cells = [];
             write_game_step_event('ON_ELEMENT_ACTIVATED', event_data);
-            const removed_element = field.remove_element(x, y, true, false);
+            const removed_element = field.remove_element(x, y);
             if(removed_element != undefined) event_data.uid = removed_element.uid;
         }
 
@@ -1751,7 +1769,7 @@ export function Game() {
         const event_data = {} as RocketActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
         
-        event_data.element = {x, y, uid: -1};
+        event_data.element = {x, y, uid: ''};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
         event_data.axis = Axis.Horizontal;
@@ -1759,7 +1777,7 @@ export function Game() {
         for(let i = 0; i < field_width; i++) {
             if(is_buster(i, y)) try_activate_buster_element(i, y);
             else {
-                const removed_element = field.remove_element(i, y, true, false);
+                const removed_element = field.remove_element(i, y);
                 if(removed_element != undefined) event_data.damaged_elements.push({x: i, y, uid: removed_element.uid});
             }
         }
@@ -1781,7 +1799,7 @@ export function Game() {
         const event_data = {} as RocketActivationMessage;
         write_game_step_event('ROCKET_ACTIVATED', event_data);
         
-        event_data.element = {x, y, uid: -1};
+        event_data.element = {x, y, uid: ''};
         event_data.damaged_elements = [];
         event_data.activated_cells = [];
         event_data.axis = Axis.Vertical;
@@ -1789,7 +1807,7 @@ export function Game() {
         for(let i = 0; i < field_height; i++) {
             if(is_buster(x, i)) try_activate_buster_element(x, i);
             else {
-                const removed_element = field.remove_element(x, i, true, false);
+                const removed_element = field.remove_element(x, i);
                 if(removed_element != undefined) event_data.damaged_elements.push({x, y: i, uid: removed_element.uid});
             }
         }
@@ -1914,13 +1932,14 @@ export function Game() {
 
         available_steps = [];
         search_available_steps(5, (steps) => {
+            is_searched = true;
+
             if(steps.length != 0) {
                 available_steps = copy_array_of_objects(steps);
                 return;
             }
 
             stop_helper();
-            shuffle_field();
         });
 
         if(level_config.steps != undefined && is_step) get_state().steps--;
@@ -2056,7 +2075,7 @@ export function Game() {
         if(element == NullElement) return;
 
         for(const target of get_state().targets) {
-            if(!target.is_cell && target.type == element.type) {
+            if(target.type == TargetType.Element && target.id == element.type) {
                 target.uids.push(element.uid);
             }
         }
@@ -2132,15 +2151,20 @@ export function Game() {
                         y: item_info.y,
                         uid: new_cell.uid,
                         id: new_cell.id,
-                        previous_id: item_info.uid 
+                        previous_uid: item_info.uid 
                     });
                 }
             }
 
+            // TODO: REFACTORING FOR SEVERAL ACTIVATION CELL (THIS IS ABSOLUTELY SHIT)
             for(const target of get_state().targets) {
-                const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
-                const check_stone_with_last_cell = (target.type == CellId.Stone0 && CellId.Stone2 == cell.id);
-                if(target.is_cell && (check_for_not_stone || check_stone_with_last_cell)) {
+                const check_for_not_stone = (target.id != CellId.Stone0 && target.id == cell.id);
+                const check_stone_with_last_cell = (target.id == CellId.Stone0 && CellId.Stone2 == cell.id);
+                const checks_for_stone = (check_for_not_stone || check_stone_with_last_cell);
+                const check_for_not_grass = (target.id != CellId.Grass0 && target.id == cell.id);
+                const check_grass_with_last_cell = (target.id == CellId.Grass0 && CellId.Grass1 == cell.id);
+                const checks_for_grass = (check_for_not_grass || check_grass_with_last_cell);
+                if(target.type == TargetType.Cell && checks_for_stone && checks_for_grass) {
                     target.uids.push(cell.uid);
                 }
             }
@@ -2248,15 +2272,15 @@ export function Game() {
                 const element = field.get_element(x, y);
 
                 const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
-                    const check_for_not_stone = (target.type != CellId.Stone0 && target.type == cell.id);
-                    const check_stone_with_last_cell = (target.type == CellId.Stone0 && [CellId.Stone0, CellId.Stone1, CellId.Stone2].includes(cell.id));
+                    const check_for_not_stone = (target.id != CellId.Stone0 && target.id == cell.id);
+                    const check_stone_with_last_cell = (target.id == CellId.Stone0 && [CellId.Stone0, CellId.Stone1, CellId.Stone2].includes(cell.id));
                     const check_not_completed = target.count > target.uids.length;
-                    return (target.is_cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
+                    return (target.type == TargetType.Cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
                 }) != -1);
                 
                 const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
                     const check_not_completed = target.count > target.uids.length;
-                    return (!target.is_cell && check_not_completed && (target.type == element.type));
+                    return (target.type == TargetType.Element && check_not_completed && (target.id == element.type));
                 }) != -1);
                 
                 if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
@@ -2288,7 +2312,7 @@ export function Game() {
 
         const target = available_items[math.random(0, available_items.length - 1)];
         if(is_buster(target.x, target.y)) try_activate_buster_element(target.x, target.y);
-        else field.remove_element(target.x, target.y, true, false, true);
+        else field.remove_element(target.x, target.y, false, true);
 
 
         return target;
@@ -2303,7 +2327,7 @@ export function Game() {
                     if(is_valid_pos(j, i, field_width, field_height)) {
                         if(is_buster(j, i)) try_activate_buster_element(j, i);
                         else {
-                            const removed_element = field.remove_element(j, i, true, is_near_activation);
+                            const removed_element = field.remove_element(j, i, is_near_activation);
                             if(removed_element != undefined) removed_elements.push({x: j, y: i, uid: removed_element.uid});
                         }
                     }
@@ -2432,8 +2456,8 @@ export function load_config() {
                             if(level.field.elements[y][x] == RandomElement)
                                 level.field.elements[y][x] = NullElement;
                             level.field.cells[y][x] = [CellId.Base, data.cell];
-                        } else if(data.cell == CellId.Grass) {
-                            level.field.cells[y][x] = [CellId.Base, CellId.Grass];
+                        } else if(data.cell == CellId.Grass0) {
+                            level.field.cells[y][x] = [CellId.Base, CellId.Grass1, CellId.Grass0];
                         } else {
                             level.field.cells[y][x] = [CellId.Base, data.cell];
                         }
@@ -2446,8 +2470,8 @@ export function load_config() {
             let target;
             if(target_data.type.element != undefined) {
                 target = {
-                    is_cell: false,
-                    type: target_data.type.element as number,
+                    id: target_data.type.element as number,
+                    type: TargetType.Element,
                     count: 0,
                     uids: []
                 };
@@ -2455,8 +2479,8 @@ export function load_config() {
 
             if(target_data.type.cell != undefined) {
                 target = {
-                    is_cell: true,
-                    type: target_data.type.cell as number,
+                    id: target_data.type.cell as number,
+                    type: TargetType.Cell,
                     count: 0,
                     uids: []
                 };
@@ -2471,4 +2495,12 @@ export function load_config() {
 
         GAME_CONFIG.levels.push(level);
     }
+}
+
+export function is_element(item: ItemInfo) {
+    return (item.uid[0] == 'E');
+}
+
+export function is_cell(item: ItemInfo) {
+    return (item.uid[0] == 'C');
 }

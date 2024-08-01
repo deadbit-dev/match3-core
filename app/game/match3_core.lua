@@ -612,7 +612,10 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         end
         return neighbors
     end
-    local function remove_element(x, y, is_damaging, is_near_activation, all)
+    local function remove_element(x, y, is_near_activation, all)
+        if is_near_activation == nil then
+            is_near_activation = false
+        end
         if all == nil then
             all = false
         end
@@ -632,7 +635,7 @@ function ____exports.Field(size_x, size_y, complex_process_move)
         if element == ____exports.NullElement then
             return
         end
-        if is_damaging and try_damage_element({x = x, y = y, uid = element.uid}) then
+        if try_damage_element({x = x, y = y, uid = element.uid}) then
             __TS__ArraySplice(
                 damaged_elements,
                 __TS__ArrayFindIndex(

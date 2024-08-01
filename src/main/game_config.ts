@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element, CombinationType, Cell, NotActiveCell, CellState } from "../game/match3_core";
-import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TutorialData } from "../game/match3_game";
+import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TargetType, TutorialData } from "../game/match3_game";
 import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
@@ -90,7 +90,8 @@ export const _GAME_CONFIG = {
 
     cell_view: {
         [CellId.Base]: 'cell_white',
-        [CellId.Grass]: 'cell_grass',
+        [CellId.Grass0]: 'cell_grass',
+        [CellId.Grass1]: 'cell_grass',
         [CellId.Flowers]: 'cell_flowers',
         [CellId.Web]: 'cell_web',
         [CellId.Box]: 'cell_box',
@@ -102,7 +103,8 @@ export const _GAME_CONFIG = {
     
     activation_cells: [
         CellId.Web,
-        CellId.Grass,
+        CellId.Grass0,
+        CellId.Grass1,
         CellId.Flowers
     ],
 
@@ -186,7 +188,8 @@ export const _GAME_CONFIG = {
 
     explodable_cells: [
         CellId.Box,
-        CellId.Grass,
+        CellId.Grass0,
+        CellId.Grass1,
         CellId.Stone0,
         CellId.Stone1,
         CellId.Stone2
@@ -414,16 +417,16 @@ export interface SwapedActivationMessage extends ActivationMessage { other_eleme
 
 export interface RocketActivationMessage extends ActivationMessage { axis: Axis }
 
-export interface HelicopterActivationMessage extends ActivationMessage { target_element: ItemInfo | typeof NullElement }
-export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_elements: (ItemInfo | typeof NullElement)[] }
-export interface SwapedHelicopterWithElementMessage extends SwapedActivationMessage { target_element: ItemInfo | typeof NullElement }
+export interface HelicopterActivationMessage extends ActivationMessage { target_item: ItemInfo | typeof NullElement }
+export interface SwapedHelicopterWithElementMessage extends SwapedActivationMessage { target_item: ItemInfo | typeof NullElement }
+export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_items: (ItemInfo | typeof NullElement)[] }
 
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
-export interface ActivatedCellMessage extends ItemInfo { id: number, previous_id: number }
+export interface ActivatedCellMessage extends ItemInfo { id: number, previous_uid: string }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
-export interface TargetMessage { id: number, amount: number, type: number, is_cell: boolean }
+export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
 
 export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
 

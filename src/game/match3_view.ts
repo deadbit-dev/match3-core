@@ -24,12 +24,10 @@ import {
     NotActiveCell,
     Cell,
     MoveType,
-    Element,
     CellState,
-    is_available_cell_type_for_move,
 } from "./match3_core";
 
-import { SubstrateId, CellId, ElementId, GameState } from './match3_game';
+import { SubstrateId, CellId, ElementId, GameState, is_element } from './match3_game';
 
 const SubstrateMasks = [
     [
@@ -101,7 +99,7 @@ const SubstrateMasks = [
 
 interface ViewState {
     game_state: GameState,
-    game_id_to_view_index: { [key in number]: number[] },
+    game_id_to_view_index: { [key in string]: number[] },
     substrates: hash[][],
 }
 
@@ -313,7 +311,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 const target = state.targets[i];
                 const amount = target.count - target.uids.length;
                 targets[i] = amount;
-                EventBus.send('UPDATED_TARGET', {id: i, amount, type: target.type, is_cell: target.is_cell});
+                EventBus.send('UPDATED_TARGET', {idx: i, amount, id: target.id, type: target.type});
             }
 
             recalculate_sizes();
@@ -334,7 +332,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                     const cell = state.game_state.cells[y][x];
                     if(cell != NotActiveCell) {
-                        const cell_views = get_all_view_items_by_game_id(cell.uid);
+                        const cell_views = get_all_view_items_by_uid(cell.uid);
                         if(cell_views != undefined) {
                             for(const cell_view of cell_views) {
                                 const cell_view_url = msg.url(undefined, cell_view._hash, "sprite");
@@ -345,7 +343,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                     const element = state.game_state.elements[y][x];
                     if(element != NullElement) {
-                        const element_view = msg.url(undefined, get_first_view_item_by_game_id(element.uid)?._hash, "sprite");
+                        const element_view = msg.url(undefined, get_first_view_item_by_uid(element.uid)?._hash, "sprite");
                         go.set(element_view, "material", resources.tutorial_sprite_material);
                     }
                 }
@@ -364,7 +362,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         EventBus.on('ON_ELEMENT_SELECTED', (element) => {
             if (element == undefined) return;
 
-            const item = get_first_view_item_by_game_id(element.uid);
+            const item = get_first_view_item_by_uid(element.uid);
             if (item == undefined) return;
 
             selected_element_position = go.get_position(item._hash);
@@ -376,7 +374,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         EventBus.on('ON_ELEMENT_UNSELECTED', (element) => {
             if (element == undefined) return;
 
-            const item = get_first_view_item_by_game_id(element.uid);
+            const item = get_first_view_item_by_uid(element.uid);
             if (item == undefined) return;
 
             go.cancel_animations(item._hash);
@@ -386,7 +384,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         });
 
         EventBus.on('ON_SET_STEP_HELPER', (data) => {
-            const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
+            const combined_item = get_first_view_item_by_uid(data.combined_element.uid);
             if (combined_item != undefined) {
                 let from_pos = get_world_pos(data.step.from_x, data.step.from_y, GAME_CONFIG.default_element_z_index);
                 let to_pos = get_world_pos(data.step.to_x, data.step.to_y, GAME_CONFIG.default_element_z_index);
@@ -403,7 +401,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
 
             for (const element of data.elements) {
-                const item = get_first_view_item_by_game_id(element.uid);
+                const item = get_first_view_item_by_uid(element.uid);
                 if (item != undefined) {
                     go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
                 }
@@ -411,7 +409,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         });
 
         EventBus.on('ON_RESET_STEP_HELPER', (data) => {
-            const combined_item = get_first_view_item_by_game_id(data.combined_element.uid);
+            const combined_item = get_first_view_item_by_uid(data.combined_element.uid);
             if (combined_item != undefined) {
                 go.cancel_animations(combined_item._hash);
                 const to_pos = get_world_pos(data.combined_element.x, data.combined_element.y, GAME_CONFIG.default_element_z_index);
@@ -422,7 +420,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
 
             for (const element of data.elements) {
-                const item = get_first_view_item_by_game_id(element.uid);
+                const item = get_first_view_item_by_uid(element.uid);
                 if (item != undefined) {
                     go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
                     go.set(msg.url(undefined, item._hash, 'sprite'), 'tint', vmath.vector4(1, 1, 1, 1));
@@ -472,7 +470,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             for(let x = 0; x < field_width; x++) {
                 const element = state.elements[y][x];
                 if(element != NullElement) {
-                    const element_view = get_first_view_item_by_game_id(element.uid);
+                    const element_view = get_first_view_item_by_uid(element.uid);
                     if (element_view != undefined) {
                         const to_world_pos = get_world_pos(x, y, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, 0.5);
@@ -496,7 +494,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                 const cell = state.game_state.cells[y][x];
                 if(cell != NotActiveCell) {
-                    const cell_views = get_all_view_items_by_game_id(cell.uid);
+                    const cell_views = get_all_view_items_by_uid(cell.uid);
                     if(cell_views != undefined) {
                         for(const cell_view of cell_views) {
                             const cell_view_url = msg.url(undefined, cell_view._hash, "sprite");
@@ -507,7 +505,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
                 const element = state.game_state.elements[y][x];
                 if(element != NullElement) {
-                    const element_view = msg.url(undefined, get_first_view_item_by_game_id(element.uid)?._hash, "sprite");
+                    const element_view = msg.url(undefined, get_first_view_item_by_uid(element.uid)?._hash, "sprite");
                     go.set(element_view, "material", resources.default_sprite_material);
                 }
             }
@@ -532,7 +530,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 const current_cell = state.game_state.cells[y][x];
                 if (current_cell != NotActiveCell) {
                     // DELETE ALL CELLS
-                    const items = get_all_view_items_by_game_id(current_cell.uid);
+                    const items = get_all_view_items_by_uid(current_cell.uid);
                     if(items != undefined) {
                         for(const item of items) {
                             gm.delete_item(item, true);
@@ -707,12 +705,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function reset_field() {
         Log.log("RESET FIELD VIEW");
 
-        for(const [sid, index] of Object.entries(state.game_id_to_view_index)) {
-            const id = tonumber(sid);
-            if(id != undefined) {
-                const items = get_all_view_items_by_game_id(id);
-                if(items != undefined) for (const item of items) gm.delete_item(item, true);
-            }
+        for(const [uid, index] of Object.entries(state.game_id_to_view_index)) {
+            const items = get_all_view_items_by_uid(uid);
+            if(items != undefined) for (const item of items) gm.delete_item(item, true);
         }
 
         for(let y = 0; y < field_height; y++) {
@@ -814,7 +809,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     //     }
     // }
 
-    function make_cell_view(x: number, y: number, cell_id: CellId, id: number, z_index?: number) {
+    function make_cell_view(x: number, y: number, cell_id: CellId, uid: string, z_index?: number) {
         const pos = get_world_pos(x, y, z_index != undefined ? z_index : GAME_CONFIG.top_layer_cells.includes(cell_id) ?
             GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index);
         
@@ -825,14 +820,16 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         if (cell_id == CellId.Base) gm.set_color_hash(_go, GAME_CONFIG.base_cell_color);
 
+        print("MAKE: ", _go);
+
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
-        if (state.game_id_to_view_index[id] == undefined) state.game_id_to_view_index[id] = [];
-        if (id != undefined) state.game_id_to_view_index[id].push(index);
+        if (state.game_id_to_view_index[uid] == undefined) state.game_id_to_view_index[uid] = [];
+        state.game_id_to_view_index[uid].push(index);
 
         return index;
     }
 
-    function make_element_view(x: number, y: number, type: ElementId, id: number, spawn_anim = false, z_index = GAME_CONFIG.default_element_z_index) {
+    function make_element_view(x: number, y: number, type: ElementId, uid: string, spawn_anim = false, z_index = GAME_CONFIG.default_element_z_index) {
         const pos = get_world_pos(x, y, z_index);
         const _go = gm.make_go('element_view', pos);
 
@@ -844,8 +841,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
 
         const index = gm.add_game_item({ _hash: _go, is_clickable: true });
-        if (state.game_id_to_view_index[id] == undefined) state.game_id_to_view_index[id] = [];
-        if (id != undefined) state.game_id_to_view_index[id].push(index);
+        if (state.game_id_to_view_index[uid] == undefined) state.game_id_to_view_index[uid] = [];
+        if (uid != undefined) state.game_id_to_view_index[uid].push(index);
 
         return index;
     }
@@ -864,13 +861,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         state.game_state = data.state;
 
-        const item_from = get_first_view_item_by_game_id(element_from.uid);
+        const item_from = get_first_view_item_by_uid(element_from.uid);
         if (item_from != undefined) {
             go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
         }
 
         if (element_to != NullElement) {
-            const item_to = get_first_view_item_by_game_id(element_to.uid);
+            const item_to = get_first_view_item_by_uid(element_to.uid);
             if (item_to != undefined) {
                 go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time);
             }
@@ -888,7 +885,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
         is_processing = true;
 
-        const item_from = get_first_view_item_by_game_id(element_from.uid);
+        const item_from = get_first_view_item_by_uid(element_from.uid);
         if (item_from != undefined) {
             go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
                 go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
@@ -898,7 +895,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         }
 
         if (element_to != NullElement) {
-            const item_to = get_first_view_item_by_game_id(element_to.uid);
+            const item_to = get_first_view_item_by_uid(element_to.uid);
             if (item_to != undefined) {
                 go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, swap_element_easing, swap_element_time, 0, () => {
                     go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time);
@@ -933,12 +930,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const target_element_world_pos = get_world_pos(combo.combined_element.x, combo.combined_element.y);
         for (let i = 0; i < combo.combination.elements.length; i++) {
             const element = combo.combination.elements[i];
-            const item = get_first_view_item_by_game_id(element.uid);
+            const item = get_first_view_item_by_uid(element.uid);
             if (item != undefined) {
                 if (i == combo.combination.elements.length - 1) {
                     go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
                         squash_element_easing, squash_element_time, 0, () => {
-                            delete_view_item_by_game_id(element.uid);
+                            delete_view_item_by_uid(element.uid);
                             if (combo.maked_element != undefined) {
                                 make_element_view(
                                     combo.maked_element.x,
@@ -950,7 +947,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                         });
                 } else {
                     go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, target_element_world_pos,
-                        squash_element_easing, squash_element_time, 0, () => delete_view_item_by_game_id(element.uid));
+                        squash_element_easing, squash_element_time, 0, () => delete_view_item_by_uid(element.uid));
                 }
             }
         }
@@ -992,7 +989,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const activation = message as SwapedActivationMessage;
         let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            delete_view_item_by_game_id(activation.other_element.uid);
+            delete_view_item_by_uid(activation.other_element.uid);
             activate_duration = activate_diskosphere_animation(activation);
         });
 
@@ -1007,7 +1004,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
     
     function activate_diskosphere_animation(activation: ActivationMessage, on_complete?: () => void) {
-        delete_view_item_by_game_id(activation.element.uid);
+        delete_view_item_by_uid(activation.element.uid);
         
         const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1);
         const _go = gm.make_go('effect_view', pos);
@@ -1050,7 +1047,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         msg.post(msg.url(undefined, projectile, 'diskosphere_projectile'), 'enable');
 
         let element = activation.damaged_elements[counter];
-        while(element == null || get_first_view_item_by_game_id(element.uid)?._hash == diskosphere)
+        while(element == null || get_first_view_item_by_uid(element.uid)?._hash == diskosphere)
             element = activation.damaged_elements[--counter];
 
         const target_pos = get_world_pos(element.x, element.y, GAME_CONFIG.default_element_z_index + 0.1);
@@ -1072,12 +1069,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function explode_element_animation(item: ItemInfo) {
-        delete_all_view_items_by_game_id(item.uid);
+        delete_all_view_items_by_uid(item.uid);
 
         const element = state.game_state.elements[item.y][item.x];
         if(element == NullElement) return;
 
-        const type = element.id as ElementId;
+        const type = element.type as ElementId;
         if(!GAME_CONFIG.base_elements.includes(type)) return;
 
         const pos = get_world_pos(item.x, item.y, GAME_CONFIG.default_element_z_index + 0.1);
@@ -1118,8 +1115,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const activation = message as SwapedActivationMessage;
         let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            delete_view_item_by_game_id(activation.element.uid);
-            delete_view_item_by_game_id(activation.other_element.uid);
+            delete_view_item_by_uid(activation.element.uid);
+            delete_view_item_by_uid(activation.other_element.uid);
 
             make_element_view(activation.element.x, activation.element.y, ElementId.AxisRocket, activation.element.uid);
 
@@ -1140,7 +1137,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function activate_rocket_animation(activation: ActivationMessage, dir: Axis, on_fly_end: () => void) {
-        if(activation.element.uid != -1) delete_view_item_by_game_id(activation.element.uid);
+        if(activation.element.uid != '') delete_view_item_by_uid(activation.element.uid);
 
         const pos = get_world_pos(activation.element.x, activation.element.y, GAME_CONFIG.default_element_z_index + 2.1);
         rocket_effect(pos, dir);
@@ -1223,9 +1220,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 }
             }
             
-            if (activation.target_element != NullElement) {
-                const is_target_pos = (cell.x == activation.target_element.x) && (cell.y == activation.target_element.y);
-                if(is_target_pos && (cell.previous_id == activation.target_element.uid)) {
+            if (activation.target_item != NullElement) {
+                const is_target_pos = (cell.x == activation.target_item.x) && (cell.y == activation.target_item.y);
+                if(is_target_pos && (is_element(activation.target_item) || (cell.previous_uid == activation.target_item.uid))) {
                     skip = true;
                 }
             }
@@ -1233,8 +1230,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             if (!skip) activate_cell_animation(cell);
         }
 
-        if (activation.target_element != NullElement) {
-            remove_random_element_animation(message, activation.element, activation.target_element);
+        if (activation.target_item != NullElement) {
+            remove_random_element_animation(message, activation.element, activation.target_item);
             return damaged_element_time + (helicopter_spin_duration * 0.5) + helicopter_fly_duration;
         }
 
@@ -1248,19 +1245,19 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             for (const element of data.damaged_elements)
                 damage_element_animation(message, element.x, element.y, element.uid);
 
-            let target_element = data.target_elements[0];
+            let target_element = data.target_items[0];
             if (target_element != undefined && target_element != NullElement)
                 remove_random_element_animation(message, data.element, target_element);
             else
-                delete_all_view_items_by_game_id(data.element.uid);
+                delete_all_view_items_by_uid(data.element.uid);
 
-            target_element = data.target_elements[1];
+            target_element = data.target_items[1];
             if (target_element != undefined && target_element != NullElement)
                 remove_random_element_animation(message, data.other_element, target_element);
             else
-                delete_all_view_items_by_game_id(data.other_element.uid);
+                delete_all_view_items_by_uid(data.other_element.uid);
 
-            target_element = data.target_elements[2];
+            target_element = data.target_items[2];
             if (target_element != undefined && target_element != NullElement) {
                 make_element_view(data.element.x, data.element.y, ElementId.Helicopter, data.element.uid);
                 remove_random_element_animation(message, data.element, target_element, 1);
@@ -1274,9 +1271,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if (element != NullElement && cell.x == item.x && cell.y == item.y)
                     skip = true;
             }
-            for (const item of data.target_elements) {
-                if(item != NullElement) {
-                    if (cell.previous_id == item.uid && cell.x == item.x && cell.y == item.y) {
+            for (const item of data.target_items) {
+                if (item != NullElement) {
+                    const is_target_pos = (cell.x == item.x) && (cell.y == item.y);
+                    if(is_target_pos && (is_element(item) || (cell.previous_uid == item.uid))) {
                         skip = true;
                     }
                 }
@@ -1293,8 +1291,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             for (const element of activation.damaged_elements)
                 damage_element_animation(message, element.x, element.y, element.uid);
 
-            if (activation.target_element != NullElement)
-                remove_random_element_animation(message, activation.element, activation.target_element);
+            if (activation.target_item != NullElement)
+                remove_random_element_animation(message, activation.element, activation.target_item);
         });
 
         for (const cell of activation.activated_cells) {
@@ -1306,8 +1304,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     break;
                 }
             }
-            if (activation.target_element != NullElement) {
-                if(cell.previous_id == activation.target_element.uid && cell.x == activation.target_element.x && cell.y == activation.target_element.y) {
+            if (activation.target_item != NullElement) {
+                const is_target_pos = (cell.x == activation.target_item.x) && (cell.y == activation.target_item.y);
+                if(is_target_pos && (is_element(activation.target_item) || (cell.previous_uid == activation.target_item.uid))) {
                     skip = true;
                 }
             }
@@ -1334,7 +1333,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const activation = message as SwapedActivationMessage;
         let activate_duration = 0;
         const squash_duration = squash_element_animation(activation.other_element, activation.element, () => {
-            delete_view_item_by_game_id(activation.other_element.uid);
+            delete_view_item_by_uid(activation.other_element.uid);
             activate_duration = activate_dynamite_animation(activation, 1.5, () => {
                 for (const element of activation.damaged_elements)
                     damage_element_animation(message, element.x, element.y, element.uid);
@@ -1355,7 +1354,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         msg.post(msg.url(undefined, _go, undefined), 'disable');
         msg.post(msg.url(undefined, _go, 'dynamite'), 'enable');
 
-        delete_view_item_by_game_id(activation.element.uid);
+        delete_view_item_by_uid(activation.element.uid);
 
         const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'dynamite'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any) => {
@@ -1390,12 +1389,19 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         return damaged_element_time;
     }
 
-    function activate_cell_animation(cell: ActivatedCellMessage) {
-        delete_all_view_items_by_game_id(cell.previous_id);
-        make_cell_view(cell.x, cell.y, cell.id, cell.uid);
+    function activate_cell_animation(activation: ActivatedCellMessage) {
+        delete_all_view_items_by_uid(activation.previous_uid);
 
-        const type = (state.game_state.cells[cell.y][cell.x] as Cell).id as CellId;
-        const pos = get_world_pos(cell.x, cell.y, (GAME_CONFIG.top_layer_cells.includes(type) ? GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) + 0.1);
+        const cell = state.game_state.cells[activation.y][activation.x];
+        if(cell == NotActiveCell) return;
+        
+        try_make_under_cell(activation.x, activation.y, cell);
+        make_cell_view(activation.x, activation.y, activation.id, activation.uid);
+
+        // const cell = state.game_state.cells[activation.y][activation.x];
+        // if(cell == NotActiveCell) return;
+        const type = cell.id as CellId;
+        const pos = get_world_pos(activation.x, activation.y, (GAME_CONFIG.top_layer_cells.includes(type) ? GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) + 0.1);
         const is_stone = (type == CellId.Stone0 || type == CellId.Stone1 || type == CellId.Stone2);
         const effect_name = is_stone ? "cell_stone_explode" : GAME_CONFIG.cell_view[type] + '_explode';
         
@@ -1455,7 +1461,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                     if (point.type == MoveType.Requested)
                         make_element_view(point.to_x, point.to_y, element.data.type, element.data.uid);
 
-                    const item_from = get_first_view_item_by_game_id(element.data.uid);
+                    const item_from = get_first_view_item_by_uid(element.data.uid);
                     if (item_from != undefined) {
                         const to_world_pos = get_world_pos(point.to_x, point.to_y);
 
@@ -1568,7 +1574,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function remove_random_element_animation(message: Messages[MessageId], element: ItemInfo, target_element: ItemInfo, view_index?: number, on_complited?: () => void) {
         const target_world_pos = get_world_pos(target_element.x, target_element.y, 3);
-        const item = view_index != undefined ? get_view_item_by_game_id_and_index(element.uid, view_index) : get_first_view_item_by_game_id(element.uid);
+        const item = view_index != undefined ? get_view_item_by_uid_and_index(element.uid, view_index) : get_first_view_item_by_uid(element.uid);
         if (item == undefined) return 0;
 
         const current_world_pos = go.get_position(item._hash);
@@ -1587,25 +1593,25 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     // TODO: refactoring
-    function damage_element_animation(data: Messages[MessageId], x: number, y: number, element_id: number, on_complite?: () => void) {
-        const element_view_item = get_first_view_item_by_game_id(element_id);
+    function damage_element_animation(data: Messages[MessageId], x: number, y: number, uid: string, on_complite?: () => void) {
+        const element_view_item = get_first_view_item_by_uid(uid);
         if (element_view_item != undefined) {
-            go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
-                damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
-                    explode_element_animation({x, y, uid: element_id});
-                    for (const [key, value] of Object.entries(data)) {
-                        if (key == 'activated_cells') {
-                            for (const cell of value as ActivatedCellMessage[]) {
-                                if ((cell.x == x) && (cell.y == y)) {
-                                    activate_cell_animation(cell);
-                                }
+            // go.animate(element_view_item._hash, 'scale', go.PLAYBACK_ONCE_FORWARD,
+            //     damaged_element_scale, damaged_element_easing, damaged_element_time, damaged_element_delay, () => {
+                explode_element_animation({x, y, uid});
+                for (const [key, value] of Object.entries(data)) {
+                    if (key == 'activated_cells') {
+                        for (const cell of value as ActivatedCellMessage[]) {
+                            if ((cell.x == x) && (cell.y == y)) {
+                                activate_cell_animation(cell);
                             }
                         }
                     }
+                }
 
-                    if (on_complite != undefined) on_complite();
-                });
-            return damaged_element_time + 0.5;
+                if (on_complite != undefined) on_complite();
+                // });
+            return  0.5;
         }
 
         return 0;
@@ -1614,7 +1620,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     function squash_element_animation(element: ItemInfo, target_element: ItemInfo, on_complite?: () => void) {
         const to_world_pos = get_world_pos(target_element.x, target_element.y);
 
-        const item = get_first_view_item_by_game_id(element.uid);
+        const item = get_first_view_item_by_uid(element.uid);
         if (item == undefined) return 0;
 
         go.animate(item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, swap_element_easing, swap_element_time, 0, () => {
@@ -1655,22 +1661,22 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         else return Direction.None;
     }
 
-    function get_first_view_item_by_game_id(id: number) {
-        const indices = state.game_id_to_view_index[id];
+    function get_first_view_item_by_uid(uid: string) {
+        const indices = state.game_id_to_view_index[uid];
         if (indices == undefined) return;
 
         return gm.get_item_by_index(indices[0]);
     }
 
-    function get_view_item_by_game_id_and_index(id: number, index: number) {
-        const indices = state.game_id_to_view_index[id];
+    function get_view_item_by_uid_and_index(uid: string, index: number) {
+        const indices = state.game_id_to_view_index[uid];
         if (indices == undefined) return;
 
         return gm.get_item_by_index(indices[index]);
     }
 
-    function get_all_view_items_by_game_id(id: number) {
-        const indices = state.game_id_to_view_index[id];
+    function get_all_view_items_by_uid(uid: string) {
+        const indices = state.game_id_to_view_index[uid];
         if (indices == undefined) return;
 
         const items = [];
@@ -1680,39 +1686,42 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         return items;
     }
 
-    function delete_view_item_by_game_id(id: number) {
-        const item = get_first_view_item_by_game_id(id);
+    function delete_view_item_by_uid(uid: string) {
+        const item = get_first_view_item_by_uid(uid);
         if (item == undefined) {
-            delete state.game_id_to_view_index[id];
+            delete state.game_id_to_view_index[uid];
             return false;
         }
 
-        update_target_by_id(id);
+        update_target_by_uid(uid);
 
         gm.delete_item(item, true);
-        state.game_id_to_view_index[id].splice(0, 1);
+        state.game_id_to_view_index[uid].splice(0, 1);
 
         return true;
     }
 
-    function delete_all_view_items_by_game_id(id: number) {
-        const items = get_all_view_items_by_game_id(id);
+    function delete_all_view_items_by_uid(uid: string) {
+        const items = get_all_view_items_by_uid(uid);
         if (items == undefined) return false;
 
-        update_target_by_id(id);
+        update_target_by_uid(uid);
         
-        for (const item of items) gm.delete_item(item, true);
-        delete state.game_id_to_view_index[id];
+        for (const item of items) {
+            print("DELETE: ", item._hash);
+            gm.delete_item(item, true);
+        }
+        delete state.game_id_to_view_index[uid];
 
         return true;
     }
  
-    function update_target_by_id(id: number) {
+    function update_target_by_uid(uid: string) {
         for (let i = 0; i < state.game_state.targets.length; i++) {
             const target = state.game_state.targets[i];
-            if (target.uids.indexOf(id) != -1) {
+            if (target.uids.indexOf(uid) != -1) {
                 targets[i] = math.max(0, targets[i] - 1);
-                EventBus.send('UPDATED_TARGET', {id: i, amount: targets[i], type: target.type, is_cell: target.is_cell});
+                EventBus.send('UPDATED_TARGET', {idx: i, amount: targets[i], id: target.id, type: target.type});
             }
         }
     }
@@ -1723,11 +1732,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             for (let i = (cell.data.under_cells as CellId[]).length - 1; i >= 0; i--) {
                 const cell_id = (cell.data.under_cells as CellId[])[i];
                 if (cell_id != undefined) {
-                    const z_index = (GAME_CONFIG.top_layer_cells.includes(cell_id) ?
-                        GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) - depth;
-                    make_cell_view(x, y, cell_id, cell.uid, z_index);
-                    depth += 0.1;
-                    if (cell_id == CellId.Base) break;
+                    if (cell_id == CellId.Base) {
+                        const z_index = (GAME_CONFIG.top_layer_cells.includes(cell_id) ?
+                            GAME_CONFIG.default_top_layer_cell_z_index : GAME_CONFIG.default_cell_z_index) - depth;
+                        make_cell_view(x, y, cell_id, cell.uid, z_index);
+                        depth += 0.1;
+                        break;
+                    }
                 }
             }
         }

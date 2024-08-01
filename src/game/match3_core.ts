@@ -91,7 +91,7 @@ export const NotActiveCell = -1;
 // описание свойств клетки
 export interface Cell {
     id: number;
-    uid: number;
+    uid: string; // maybe change in hash
     type: number; // маска свойств
     cnt_acts?: number; // число активаций которое произошло(при реакции в качестве соседней клетки + условие наличия флага ActionLocked)
     cnt_near_acts?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций
@@ -111,8 +111,7 @@ export const NullElement = -1;
 
 // непосредственно элемент
 export interface Element {
-    id: number;
-    uid: number;
+    uid: string; // maybe change in hash
     type: number;
     data?: any;
 }
@@ -121,7 +120,7 @@ export interface Element {
 export interface ItemInfo {
     x: number;
     y: number;
-    uid: number;
+    uid: string;
 }
 
 // информация о ходе
@@ -183,7 +182,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     
     const rotated_masks: number[][][][] = [];
     const moved_elements: MovedInfo[] = [];
-    const damaged_elements: number[] = [];
+    const damaged_elements: string[] = [];
 
     // кастомные колбеки 
     let cb_is_can_move: FncIsCanMove;
@@ -252,7 +251,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // мы можем не каждый с каждым чекать, а просто сверять 1x2, 2x3, 3x4 т.е. вызывать функцию is_combined_elements с такими вот парами, 
         // надо прикинуть вроде ведь не обязательно делать все переборы, если че потом будет несложно чуть изменить, но для оптимизации пока так
         const combinations: CombinationInfo[] = [];
-        const combinations_elements: {[key in number]: boolean} = {};
+        const combinations_elements: {[key in string]: boolean} = {};
 
         // проходимся по всем маскам с конца
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
@@ -564,7 +563,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         return target_elements;
     }
 
-    function get_pos_by_uid(uid: number) {
+    function get_pos_by_uid(uid: string) {
         for(let y = 0; y < size_y; y++) {
             for(let x = 0; x < size_x; x++) {
                 const element = get_element(x, y);
@@ -642,9 +641,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
     }
 
     // удаляет элемент с поля (метод нужен для вызова логики бустеров каких-то)
-    function remove_element(x: number, y: number, is_damaging: boolean, is_near_activation: boolean, all=false) {
-        // удаляем элемент с массива и вызываем try_damage_element если is_damaging = true
-        // и вызываем on_near_activation для соседей если свойство is_near_activation = true
+    function remove_element(x: number, y: number, is_near_activation = false, all = false) {
+        // вызываем on_near_activation для соседей если свойство is_near_activation = true
 
         const cell = get_cell(x, y);
         if(cell == NotActiveCell) return;
@@ -659,7 +657,7 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         const element = get_element(x, y);
         if(element == NullElement) return;
 
-        if(is_damaging && try_damage_element({x, y, uid: element.uid})) {
+        if(try_damage_element({x, y, uid: element.uid})) {
             damaged_elements.splice(damaged_elements.findIndex((elem) => elem == element.uid), 1);
             set_element(x, y, NullElement);
         }
