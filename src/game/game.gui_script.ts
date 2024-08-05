@@ -8,11 +8,48 @@
 /* eslint-disable no-case-declarations */
 
 import * as druid from 'druid.druid';
-import { is_enough_coins, remove_coins } from '../main/coins';
 import { TargetMessage } from '../main/game_config';
-import { remove_lifes } from '../main/life';
 import { parse_time, set_text, set_text_colors } from '../utils/utils';
 import { Busters, CellId, ElementId, GameState, Level, TargetType } from './match3_game';
+import { is_enough_coins, remove_coins, remove_lifes } from './match3_utils';
+
+const presets = {
+    targets: [
+        // set position and scale for each target, depend of total targets length
+        {
+            node_name: 'first_target',
+            preset_depend_of_length: {
+                1: { position: vmath.vector3(0, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                2: { position: vmath.vector3(-40, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(-35, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+            }
+            
+        },
+        {
+            node_name: 'second_target',
+            preset_depend_of_length: {
+                2: { position: vmath.vector3(40, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(35, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+            }
+        },
+        {
+            node_name: 'third_target',
+            preset_depend_of_length: {
+                3: { position: vmath.vector3(0, -35, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+            }
+        }
+    ]
+} as { 
+    targets: {
+        node_name: string,
+        preset_depend_of_length: { 
+            [key in number]: {
+                position: vmath.vector3,
+                scale: vmath.vector3
+            }
+        }
+    }[]
+};
 
 
 interface props {
@@ -80,14 +117,6 @@ function setup_step_or_time(instance: props) {
         const node = gui.get_node('timer');
         gui.set_enabled(node, true);
 
-        if(instance.level['steps'] == undefined) {
-            gui.set_position(node, vmath.vector3(0, 0, 0));
-            gui.set_scale(node, vmath.vector3(1, 1, 1));
-        } else {
-            gui.set_position(node, vmath.vector3(0, 0, 0));
-            gui.set_scale(node, vmath.vector3(1, 1, 1));
-        }
-
         set_text('time', parse_time(instance.level['time']));
 
         gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('time'));
@@ -97,14 +126,6 @@ function setup_step_or_time(instance: props) {
         const node = gui.get_node('step_counter');
         gui.set_enabled(node, true);
 
-        if(instance.level['time'] == undefined) {
-            gui.set_position(node, vmath.vector3(0, 0, 0));
-            gui.set_scale(node, vmath.vector3(1, 1, 1));
-        } else {
-            gui.set_position(node, vmath.vector3(0, 0, 0));
-            gui.set_scale(node, vmath.vector3(1, 1, 1));
-        }
-
         set_text('steps', instance.level['steps']);
 
         gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('steps'));
@@ -113,63 +134,24 @@ function setup_step_or_time(instance: props) {
 
 function setup_targets(instance: props) {
     const targets = instance.level['targets'];
-    if(targets[0] != undefined) {
-        const node = gui.get_node('first_target');
-        gui.set_enabled(node, true);
+    for(let i = 0; i < targets.length; i++) {
+        const target = targets[i];
+        if(target != undefined) {
+            const node = gui.get_node(presets.targets[i].node_name);
+            gui.set_enabled(node, true);
+            gui.set_position(node, presets.targets[i].preset_depend_of_length[targets.length].position);
+            gui.set_scale(node, presets.targets[i].preset_depend_of_length[targets.length].scale);
+
+            let view;
+            if(target.type == TargetType.Cell) {
+                view = GAME_CONFIG.cell_view[target.id as CellId];
+                if(Array.isArray(view))
+                    view = view[0];
+            } else view = GAME_CONFIG.element_view[target.id as ElementId];
         
-        switch(targets.length) {
-            case 1: 
-                gui.set_position(node, vmath.vector3(0, 0, 0));
-                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
-            break;
-            case 2:
-                gui.set_position(node, vmath.vector3(-40, 0, 0));
-                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
-            break;
-            case 3:
-                gui.set_position(node, vmath.vector3(-35, 20, 0));
-                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
-            break;
+            gui.play_flipbook(gui.get_node(presets.targets[i].node_name + '_icon'), (view == 'cell_web') ? view + '_ui' : view);
+            set_text(presets.targets[i].node_name + '_counts', target.count);
         }
-
-        const target = targets[0];
-        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
-        gui.play_flipbook(gui.get_node('first_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
-        set_text('first_target_counts', target.count);
-    }
-
-    if(targets[1] != undefined) {
-        const node = gui.get_node('second_target');
-        gui.set_enabled(node, true);
-        
-        switch(targets.length) {
-            case 2:
-                gui.set_position(node, vmath.vector3(40, 0, 0));
-                gui.set_scale(node, vmath.vector3(0.5, 0.5, 1));
-            break;
-            case 3:
-                gui.set_position(node, vmath.vector3(35, 20, 0));
-                gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
-            break;
-        }
-
-        const target = targets[1];
-        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
-        gui.play_flipbook(gui.get_node('second_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
-        set_text('second_target_counts', target.count);
-    }
-
-    if(targets[2] != undefined) {
-        const node = gui.get_node('third_target');
-        gui.set_enabled(node, true);
-        
-        gui.set_position(node, vmath.vector3(0, -35, 0));
-        gui.set_scale(node, vmath.vector3(0.4, 0.4, 1));
-        
-        const target = targets[2];
-        const view = target.type == TargetType.Cell ? GAME_CONFIG.cell_view[target.id as CellId] : GAME_CONFIG.element_view[target.id as ElementId];
-        gui.play_flipbook(gui.get_node('third_target_icon'), (view == 'cell_web') ? view + '_ui' : view);
-        set_text('third_target_counts', target.count);
     }
 
     gui.set_text(gui.get_node('targets_box/text'), Lang.get_text('targets'));
@@ -189,7 +171,7 @@ function setup_busters(instance: props) {
                 } else EventBus.send('TRY_BUY_SPINNING');
                 return;
             }
-            EventBus.send('TRY_ACTIVATE_SPINNING');
+            EventBus.send('ACTIVATE_BUSTER', {name: 'SPINNING'});
         });
 
         gui.set_enabled(gui.get_node('spinning/lock'), false);
@@ -206,7 +188,7 @@ function setup_busters(instance: props) {
                 } else EventBus.send('TRY_BUY_HAMMER');
                 return;
             }
-            EventBus.send('TRY_ACTIVATE_HAMMER');
+            EventBus.send('ACTIVATE_BUSTER', {name: 'HAMMER'});
         });
         
         gui.set_enabled(gui.get_node('hammer/lock'), false);
@@ -223,7 +205,7 @@ function setup_busters(instance: props) {
                 } else EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');
                 return;
             }
-            EventBus.send('TRY_ACTIVATE_HORIZONTAL_ROCKET');
+            EventBus.send('ACTIVATE_BUSTER', {name: 'HORIZONTAL_ROCKET'});
         });
         
         gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
@@ -240,7 +222,7 @@ function setup_busters(instance: props) {
                 } else EventBus.send('TRY_BUY_VERTICAL_ROCKET');
                 return;
             }
-            EventBus.send('TRY_ACTIVATE_VERTICAL_ROCKET');
+            EventBus.send('ACTIVATE_BUSTER', {name: 'VERTICAL_ROCKET'});
         });
         
         gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
@@ -254,7 +236,7 @@ function setup_busters(instance: props) {
 function setup_sustem_ui(instance: props) {
     instance.druid.new_button('back/button', () => Scene.load('map'));
     instance.druid.new_button('restart/button', () => Scene.restart());
-    instance.druid.new_button('revert_step/button', () => EventBus.send('TRY_REVERT_STEP'));
+    instance.druid.new_button('revert_step/button', () => EventBus.send('REVERT_STEP'));
 
     set_text('current_level', 'Уровень ' + (GameStorage.get('current_level') + 1));
 }
@@ -305,6 +287,7 @@ function setup_gameover_ui(instance: props) {
     });
 }
 
+// TODO: get data from game load event instead read config
 function set_events(instance: props) {
     EventBus.on('INIT_UI', () => setup(instance));
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
@@ -317,7 +300,6 @@ function set_events(instance: props) {
     EventBus.on('ON_GAME_OVER', (state) => set_gameover(instance, state), true);
 }
 
-// TODO: refactoring
 function update_targets(data: TargetMessage) {
     switch(data.idx) {
         case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
@@ -396,11 +378,10 @@ function set_win() {
     gui.set_enabled(gui.get_node('win'), true);
 
     const anim_props = { blend_duration: 0, playback_rate: 1 };
-    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, node: any) => {
-        gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_ONCE_FORWARD, anim_props);
-    });
+    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
 }
 
+// TODO: make presets for gameover
 function set_gameover(instance: props, state: GameState) {
     disable_game_ui();
     

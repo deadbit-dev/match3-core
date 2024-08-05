@@ -63,7 +63,7 @@ export const _GAME_CONFIG = {
     complex_move: true,
 
     movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
-    duration_of_movement_bettween_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.05`))! : 0.05,
+    duration_of_movement_between_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.05`))! : 0.05,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -88,54 +88,52 @@ export const _GAME_CONFIG = {
         [SubstrateId.Full]: 'full'
     } as { [key in SubstrateId]: string },
 
+    // last view first for activation
     cell_view: {
         [CellId.Base]: 'cell_white',
-        [CellId.Grass0]: 'cell_grass',
-        [CellId.Grass1]: 'cell_grass',
+        [CellId.Grass]: ['cell_grass_1', 'cell_grass'],
         [CellId.Flowers]: 'cell_flowers',
         [CellId.Web]: 'cell_web',
         [CellId.Box]: 'cell_box',
-        [CellId.Stone0]: 'cell_stone_0',
-        [CellId.Stone1]: 'cell_stone_1',
-        [CellId.Stone2]: 'cell_stone_2',
+        [CellId.Stone]: ['cell_stone_2', 'cell_stone_1', 'cell_stone'],
         [CellId.Lock]: 'cell_lock'
-    } as { [key in CellId]: string },
+    } as { [key in CellId]: string | string[] },
+
+    // TODO: maybe counts activation by cell_view
+    cell_activations: {
+        [CellId.Box]: { activations: 1, near_activations: 1 },
+        [CellId.Flowers]: { activations: 1 },
+        [CellId.Grass]: { activations: 2 },
+        [CellId.Stone]: { near_activations: 3 },
+        [CellId.Web]: { activations: 1 }
+    } as { [key in CellId]: { activations?: number, near_activations ?: number}},
     
     activation_cells: [
         CellId.Web,
-        CellId.Grass0,
-        CellId.Grass1,
+        CellId.Grass,
         CellId.Flowers
     ],
 
     near_activated_cells: [
         CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2
+        CellId.Stone,
     ],
     
     disabled_cells: [
         CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
+        CellId.Stone,
         CellId.Lock
     ],
 
     not_moved_cells: [
         CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
+        CellId.Stone,
         CellId.Web
     ],
 
     top_layer_cells: [
         CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
+        CellId.Stone,
         CellId.Web,
         CellId.Lock
     ],
@@ -188,11 +186,8 @@ export const _GAME_CONFIG = {
 
     explodable_cells: [
         CellId.Box,
-        CellId.Grass0,
-        CellId.Grass1,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2
+        CellId.Grass,
+        CellId.Stone,
     ],
 
     base_elements: [
@@ -423,7 +418,7 @@ export interface SwapedHelicoptersActivationMessage extends SwapedActivationMess
 
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
-export interface ActivatedCellMessage extends ItemInfo { id: number, previous_uid: string }
+export interface ActivatedCellMessage { x: number, y: number, cell: Cell }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
 export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
@@ -452,14 +447,7 @@ export type _UserMessages = {
     ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
     CLICK_ACTIVATION: PosXYMessage,
 
-    TRY_ACTIVATE_SPINNING: VoidMessage,
-    TRY_ACTIVATE_HAMMER: VoidMessage,
-    TRY_ACTIVATE_HORIZONTAL_ROCKET: VoidMessage,
-    TRY_ACTIVATE_VERTICAL_ROCKET: VoidMessage,
-    ACTIVATE_SPINNING: VoidMessage,
-    ACTIVATE_HAMMER: VoidMessage,
-    ACTIVATE_VERTICAL_ROCKET: VoidMessage,
-    ACTIVATE_HORIZONTAL_ROCKET: VoidMessage,
+    ACTIVATE_BUSTER: NameMessage,
     
     ON_SPINNING_ACTIVATED: SpinningActivationMessage,
 

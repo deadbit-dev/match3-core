@@ -159,7 +159,7 @@
 	}
 ],
 "animations": {
-	"morph_1": {
+	"3": {
 		"slots": {
 			"fog": {
 				"rgba": [
@@ -377,7 +377,7 @@
 			}
 		]
 	},
-	"morph_2": {
+	"2": {
 		"slots": {
 			"fog": {
 				"rgba": [
@@ -994,7 +994,7 @@
 			}
 		]
 	},
-	"morph_3": {
+	"1": {
 		"slots": {
 			"fog": {
 				"rgba": [

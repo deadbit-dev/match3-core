@@ -1,16 +1,15 @@
 local ____exports = {}
 local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
+local ____match3_utils = require("game.match3_utils")
+local add_lifes = ____match3_utils.add_lifes
+local add_coins = ____match3_utils.add_coins
+local is_max_lifes = ____match3_utils.is_max_lifes
+local is_enough_coins = ____match3_utils.is_enough_coins
+local remove_coins = ____match3_utils.remove_coins
+local remove_lifes = ____match3_utils.remove_lifes
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
-local ____coins = require("main.coins")
-local add_coins = ____coins.add_coins
-local is_enough_coins = ____coins.is_enough_coins
-local remove_coins = ____coins.remove_coins
-local ____life = require("main.life")
-local add_lifes = ____life.add_lifes
-local is_max_lifes = ____life.is_max_lifes
-local remove_lifes = ____life.remove_lifes
 function set_events(data)
     EventBus.on("ON_SCENE_LOADED", on_scene_loaded, true)
     EventBus.on("ON_GAME_OVER", on_gameover, true)

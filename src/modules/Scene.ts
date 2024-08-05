@@ -64,6 +64,9 @@ function SceneModule() {
     function load_resource(scene: string, resource: string) {
         if(scene_resources[scene].indexOf(resource) != -1)
             return;
+
+        print("LOAD: ", resource);
+
         scene_resources[scene].push(resource);
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }
@@ -72,12 +75,13 @@ function SceneModule() {
         if(scene_resources[scene].indexOf(resource) == -1)
             return;
         
+        print("UNLOAD: ", resource);
+        
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
 
     function unload_all_resources(scene: string, except?: string[]) {
-        // const scene = get_current_name();
-        const resources = scene_resources[scene];
+        const resources = Object.assign([], scene_resources[scene]);
         if(resources == null) return;
         
         for(const resource of resources) {

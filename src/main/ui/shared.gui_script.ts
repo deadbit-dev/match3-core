@@ -7,10 +7,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes } from '../../game/match3_utils';
 import { NameMessage } from '../../modules/modules_const';
 import { parse_time } from '../../utils/utils';
-import { add_coins, is_enough_coins, remove_coins } from '../coins';
-import { add_lifes, is_max_lifes, remove_lifes } from '../life';
 
 
 interface props {

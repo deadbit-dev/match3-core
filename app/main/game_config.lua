@@ -54,7 +54,7 @@ ____exports._GAME_CONFIG = {
     base_cell_color = ____temp_5,
     complex_move = true,
     movement_to_point = ____temp_0,
-    duration_of_movement_bettween_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.05")) or 0.05,
+    duration_of_movement_between_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.05")) or 0.05,
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     default_substrate_z_index = -2,
@@ -77,40 +77,25 @@ ____exports._GAME_CONFIG = {
     },
     cell_view = {
         [CellId.Base] = "cell_white",
-        [CellId.Grass0] = "cell_grass",
-        [CellId.Grass1] = "cell_grass",
+        [CellId.Grass] = {"cell_grass_1", "cell_grass"},
         [CellId.Flowers] = "cell_flowers",
         [CellId.Web] = "cell_web",
         [CellId.Box] = "cell_box",
-        [CellId.Stone0] = "cell_stone_0",
-        [CellId.Stone1] = "cell_stone_1",
-        [CellId.Stone2] = "cell_stone_2",
+        [CellId.Stone] = {"cell_stone_2", "cell_stone_1", "cell_stone"},
         [CellId.Lock] = "cell_lock"
     },
-    activation_cells = {CellId.Web, CellId.Grass0, CellId.Grass1, CellId.Flowers},
-    near_activated_cells = {CellId.Box, CellId.Stone0, CellId.Stone1, CellId.Stone2},
-    disabled_cells = {
-        CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
-        CellId.Lock
+    cell_activations = {
+        [CellId.Box] = {activations = 1, near_activations = 1},
+        [CellId.Flowers] = {activations = 1},
+        [CellId.Grass] = {activations = 2},
+        [CellId.Stone] = {near_activations = 3},
+        [CellId.Web] = {activations = 1}
     },
-    not_moved_cells = {
-        CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
-        CellId.Web
-    },
-    top_layer_cells = {
-        CellId.Box,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2,
-        CellId.Web,
-        CellId.Lock
-    },
+    activation_cells = {CellId.Web, CellId.Grass, CellId.Flowers},
+    near_activated_cells = {CellId.Box, CellId.Stone},
+    disabled_cells = {CellId.Box, CellId.Stone, CellId.Lock},
+    not_moved_cells = {CellId.Box, CellId.Stone, CellId.Web},
+    top_layer_cells = {CellId.Box, CellId.Stone, CellId.Web, CellId.Lock},
     element_view = {
         [ElementId.Dimonde] = "element_diamond",
         [ElementId.Gold] = "element_gold",
@@ -155,14 +140,7 @@ ____exports._GAME_CONFIG = {
         [ElementId.Salad] = "",
         [ElementId.Hay] = ""
     },
-    explodable_cells = {
-        CellId.Box,
-        CellId.Grass0,
-        CellId.Grass1,
-        CellId.Stone0,
-        CellId.Stone1,
-        CellId.Stone2
-    },
+    explodable_cells = {CellId.Box, CellId.Grass, CellId.Stone},
     base_elements = {
         ElementId.Dimonde,
         ElementId.Gold,

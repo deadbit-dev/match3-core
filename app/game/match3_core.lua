@@ -170,8 +170,8 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     function on_near_activation_base(items)
         for ____, item in ipairs(items) do
             local cell = get_cell(item.x, item.y)
-            if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.cnt_near_acts ~= nil then
-                cell.cnt_near_acts = cell.cnt_near_acts + 1
+            if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.near_activations ~= nil then
+                cell.near_activations = cell.near_activations - 1
                 if cb_on_cell_activated ~= nil then
                     cb_on_cell_activated(item)
                 end
@@ -188,12 +188,12 @@ function ____exports.Field(size_x, size_y, complex_process_move)
     function on_cell_activation_base(item)
         local activated = false
         local cell = get_cell(item.x, item.y)
-        if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLocked) == ____exports.CellType.ActionLocked and cell.cnt_acts ~= nil then
-            cell.cnt_acts = cell.cnt_acts + 1
+        if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLocked) == ____exports.CellType.ActionLocked and cell.activations ~= nil then
+            cell.activations = cell.activations - 1
             activated = true
         end
-        if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.cnt_near_acts ~= nil then
-            cell.cnt_near_acts = cell.cnt_near_acts + 1
+        if cell ~= ____exports.NotActiveCell and bit.band(cell.type, ____exports.CellType.ActionLockedNear) == ____exports.CellType.ActionLockedNear and cell.near_activations ~= nil then
+            cell.near_activations = cell.near_activations - 1
             activated = true
         end
         if activated and cb_on_cell_activated ~= nil then

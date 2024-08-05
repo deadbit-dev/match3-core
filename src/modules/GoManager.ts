@@ -21,6 +21,46 @@ interface DragData {
 
 type CallbackFunction = () => void;
 
+export interface GoManager {
+    make_go: (this: void, name: string, pos: vmath.vector3, is_add_list ?: boolean) => hash;
+    set_color_hash: (this: void, _go: hash, color: string, alpha ?: number, name ?: string) => void;
+    add_game_item: <T extends IGameItem> (this: void, gi: T, add_go_list ?: boolean) => number;
+    get_item_by_index: (this: void, index: number) => IGameItem;
+    delete_item: (this: void, item: IGameItem, remove_from_scene ?: boolean, recursive ?: boolean) => boolean;
+    set_rotation_hash: (this: void, _go: hash, deg_angle: number) => void;
+    delete_go: (this: void, _go: hash, remove_from_scene ?: boolean, recursive ?: boolean) => boolean;
+    set_position_xy: (this: void, item: IGameItem, x: number, y: number, align_x ?: number, align_y ?: number) => void;
+    do_message: (this: void, message_id: hash, message: any, sender: hash) => void;
+    on_click: (this: void, x: number, y: number, isDown: boolean, isMove?: boolean) => void;
+    get_item_from_pos: (this: void, x: number, y: number) => null | [IGameItem, IGameItem[]];
+    set_render_order: (this: void, item: IGameItem, index: number) => void;
+    set_render_order_hash: (this: void, _go: hash, index: number) => void;
+    get_render_order: (this: void, item: IGameItem) => number;
+    get_render_order_hash: (this: void, _go: hash) => number;
+    do_move_anim: (this: void, item: IGameItem, pos: vmath.vector3, timeSec: number, delay ?: number) => void;
+    do_scale_anim: (this: void, item: IGameItem, scale: vmath.vector3, timeSec: number, delay ?: number) => void;
+    do_fade_anim: (this: void, item: IGameItem, value: number, timeSec: number, delay ?: number, prop ?: string) => void;
+    do_move_anim_hash: (this: void, _go: hash, pos: vmath.vector3, timeSec: number, delay ?: number, cb?: CallbackFunction) => void;
+    do_fade_anim_hash: (this: void, _go: hash, value: number, timeSec: number, delay ?: number, prop ?: string) => void;
+    do_scale_anim_hash: (this: void, _go: hash, scale: vmath.vector3, timeSec: number, delay ?: number, cb?: CallbackFunction) => void;
+    get_item_by_go: (this: void, _hash: hash) => IGameItem;
+    get_go_by_item: (this: void, item: IGameItem) => hash;
+    clear_and_remove_items: (this: void) => void;
+    set_sprite_hash: (this: void, _go: hash, id_anim: string, name_sprite ?: string) => void;
+    move_to_with_speed_hash: (this: void, _go: hash, pos: vmath.vector3, speed: number, cb?: CallbackFunction) => void;
+    move_to_with_speed: (this: void, item: IGameItem, pos: vmath.vector3, speed: number, cb?: CallbackFunction) => void;
+    set_position_xy_hash: (this: void, _go: hash, x: number, y: number, align_x ?: number, align_y ?: number) => void;
+    is_intersect: (this: void, pos: vmath.vector3, item: IGameItem, inner_offset?: vmath.vector3) => boolean;
+    is_intersect_hash: (this: void, pos: vmath.vector3, _go: hash, inner_offset?: vmath.vector3) => boolean;
+    draw_debug_intersect: (this: void, name_prefab ?: string) => void;
+    move_to_with_time_hash: (this: void, _go: hash, pos: vmath.vector3, time: number, cb?: CallbackFunction) => void;
+    get_sprite_hash: (this: void, _go: hash) => hash;
+    start_dragging_list: (this: void, list: hash[], inc_z_index ?: number) => void;
+    stop_all_dragging: (this: void, reset_pos ?: boolean) => void;
+    stop_dragging_list: (this: void, list: hash[], reset_pos ?: boolean) => void;
+    reset_dragging_list: (this: void, time: number, cb_end?: CallbackFunction) => void;
+}
+
 export function GoManager() {
 
     let go_list: hash[] = [];
@@ -29,7 +69,7 @@ export function GoManager() {
     let index = 0;
     let index2GameItem: { [key in number]: IGameItem } = {};
 
-    function make_go(name = 'cell', pos: vmath.vector3, is_add_list = false) {
+    function make_go(name: string, pos: vmath.vector3, is_add_list = false) {
         const item = factory.create("/prefabs#" + name, pos);
         if (is_add_list)
             go_list.push(item);
@@ -293,7 +333,7 @@ export function GoManager() {
         down_item = null;
     }
 
-    function get_item_by_index(index: number) {
+    function get_item_by_index(index: number): IGameItem {
         // game_items[index];
         return index2GameItem[index];
     }
@@ -306,7 +346,7 @@ export function GoManager() {
         return index++;
     }
 
-    function delete_go(_go: hash, remove_from_scene = true, recursive = false) {
+    function delete_go(_go: hash, remove_from_scene = true, recursive = false): boolean {
         for (let i = go_list.length - 1; i >= 0; i--) {
             const _go_item = go_list[i];
             if (_go == _go_item) {
@@ -319,7 +359,7 @@ export function GoManager() {
         return false;
     }
 
-    function delete_item(item: IGameItem, remove_from_scene = true, recursive = false) {
+    function delete_item(item: IGameItem, remove_from_scene = true, recursive = false): boolean {
         for (const [key, value] of Object.entries(index2GameItem)) {
             const index = tonumber(key);
             if (index != undefined && value == item) {

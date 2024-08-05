@@ -103,7 +103,7 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/assets/cells/cell_stone_0.png"
+  image: "/assets/cells/cell_stone.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
@@ -168,6 +168,10 @@ images {
 }
 images {
   image: "/assets/cells/cell_lock.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/cells/cell_grass_1.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

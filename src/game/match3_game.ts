@@ -15,7 +15,7 @@
 
 import * as flow from 'ludobits.m.flow';
 
-import { MessageId, Messages, PosXYMessage } from '../modules/modules_const';
+import { MessageId, Messages, NameMessage, PosXYMessage } from '../modules/modules_const';
 
 import { Axis, is_valid_pos } from '../utils/math_utils';
 
@@ -54,8 +54,8 @@ import {
 } from './match3_core';
 
 import { lang_data } from '../main/langs';
-import { add_coins } from '../main/coins';
 import { copy_array_of_objects } from '../utils/utils';
+import { add_coins } from './match3_utils';
 
 
 export const RandomElement = -2;
@@ -76,14 +76,11 @@ export enum SubstrateId {
 
 export enum CellId {
     Base,
-    Grass0,
-    Grass1,
+    Grass,
     Flowers,
     Web,
     Box,
-    Stone0,
-    Stone1,
-    Stone2,
+    Stone,
     Lock
 }
 
@@ -222,7 +219,6 @@ export function Game() {
     let helper_data: StepHelperMessage | null = null;
     let helper_timer: hash;
     
-    let is_simulating = false;
     let is_step = false;
     let is_wait_until_animation_done = false;
     
@@ -276,6 +272,10 @@ export function Game() {
     function set_targets(targets: TargetState[]) {
         const last_state = get_state();
         last_state.targets = targets;
+        for(let i = 0; i < last_state.targets.length; i++) {
+            const target = last_state.targets[i];
+            target.uids = Object.assign([], targets[i].uids);
+        }
     }
 
     function set_timer() {
@@ -318,13 +318,6 @@ export function Game() {
     }
     
     function set_busters() {
-        // ------------ DEBUG -----------
-        // GameStorage.set('spinning_counts', 5);
-        // GameStorage.set('hammer_counts', 5);
-        // GameStorage.set('horizontal_rocket_counts', 5);
-        // GameStorage.set('vertical_rocket_counts', 5);
-        // ------------------------------
-
         if(!GameStorage.get('spinning_opened') && level_config.busters.spinning.counts != 0) GameStorage.set('spinning_opened', true);
         if(!GameStorage.get('hammer_opened') && level_config.busters.hammer.counts != 0) GameStorage.set('hammer_opened', true);
         if(!GameStorage.get('horizontal_rocket_opened') && level_config.busters.horizontal_rocket.counts != 0) GameStorage.set('horizontal_rocket_opened', true);
@@ -341,11 +334,6 @@ export function Game() {
 
         const vertical_rocket_counts = tonumber(level_config.busters.vertical_rocket.counts);
         if(GameStorage.get('vertical_rocket_counts') <= 0 && vertical_rocket_counts != undefined) GameStorage.set('vertical_rocket_counts', vertical_rocket_counts);
-        
-        // busters.spinning.active = (GameStorage.get('spinning_counts') <= 0);
-        // busters.hammer.active = (GameStorage.get('hammer_counts') <= 0);
-        // busters.horizontal_rocket.active = (GameStorage.get('horizontal_rocket_counts') <= 0);
-        // busters.vertical_rocket.active = (GameStorage.get('vertical_rocket_counts') <= 0);
 
         EventBus.send('UPDATED_BUTTONS');
     }
@@ -354,10 +342,7 @@ export function Game() {
         EventBus.on('SET_HELPER', set_helper);
         EventBus.on('SWAP_ELEMENTS', on_swap_elements);
         EventBus.on('CLICK_ACTIVATION', on_click_activation);
-        EventBus.on('ACTIVATE_SPINNING', on_activate_spinning);
-        EventBus.on('ACTIVATE_HAMMER', on_activate_hammer);
-        EventBus.on('ACTIVATE_VERTICAL_ROCKET', on_activate_vertical_rocket);
-        EventBus.on('ACTIVATE_HORIZONTAL_ROCKET', on_activate_horizontal_rocket);
+        EventBus.on('ACTIVATE_BUSTER', on_activate_buster);
         EventBus.on('REVERT_STEP', on_revert_step);
         EventBus.on('ON_GAME_STEP_ANIMATION_END', on_game_step_animation_end);
         EventBus.on('REVIVE', on_revive);
@@ -498,7 +483,6 @@ export function Game() {
             if(field.get_all_combinations(true).length > 0) {
                 field.init();
                 try_load_field();
-                // try_load_field(on_end);
                 return;
             }
         }
@@ -509,12 +493,7 @@ export function Game() {
                 available_steps = copy_array_of_objects(steps);
                 is_block_input = false;
                 return;
-                // return on_end();
             }
-
-            // field.init();
-            // try_load_field(on_end);
-            // return;
         });
     }
 
@@ -522,7 +501,6 @@ export function Game() {
         unlock_busters();
         unlock_cells();
         update_state();
-        // update_cells_state();
 
         write_game_step_event('REMOVE_TUTORIAL', {});
         write_game_step_event('UPDATED_CELLS_STATE', get_state().cells);
@@ -598,6 +576,15 @@ export function Game() {
                     }
                 }
             }
+        }
+    }
+
+    function on_activate_buster(message: NameMessage) {
+        switch(message.name) {
+            case 'SPINNING': on_activate_spinning(); break;
+            case 'HAMMER': on_activate_hammer(); break;
+            case 'VERTICAL_ROCKET': on_activate_vertical_rocket(); break;
+            case 'HORIZONTAL_ROCKET': on_activate_horizontal_rocket(); break;
         }
     }
 
@@ -732,13 +719,15 @@ export function Game() {
 
     function make_cell(x: number, y: number, cell_id: CellId | typeof NotActiveCell, data?: any): Cell | typeof NotActiveCell {
         if(cell_id == NotActiveCell) return NotActiveCell;
+
+        const activations_info = GAME_CONFIG.cell_activations[cell_id];
         
         const cell = {
             id: cell_id,
             uid: get_cell_uid(),
             type: generate_cell_type_by_cell_id(cell_id),
-            cnt_acts: 0,
-            cnt_near_acts: 0,
+            activations: (activations_info != undefined) ? activations_info.activations : undefined,
+            near_activations: (activations_info != undefined) ? activations_info.near_activations : undefined,
             data: Object.assign({}, data)
         };
 
@@ -841,18 +830,6 @@ export function Game() {
         EventBus.trigger('ON_RESET_STEP_HELPER', previous_helper_data, true, true);
         previous_helper_data = null;
     }
-
-    // function search_helper_combination() {
-    //     print("[GAME]: search combination");
-
-    //     search_available_steps(Infinity, (steps: StepInfo[]) => {
-    //         print("[GAME]: end search available steps in search helper combination");
-    //         // search_best_step(steps, (best_step) => {
-    //             // print("[GAME]: end search best step after search available steps");
-    //             get_helper_combination(steps);
-    //         // });
-    //     });
-    // }
 
     function set_helper_data(steps: StepInfo[]) {
         if(steps.length == 0) return;
@@ -1008,48 +985,6 @@ export function Game() {
         
         coroutines.push(coroutine);
     }
-
-    // function search_best_step(steps: StepInfo[], on_end: (step: StepInfo) => void) {
-    //     const coroutine = flow.start(() => {
-    //         print("[GAME]: search best step");
-
-    //         let best_step = {} as StepInfo;
-    //         let max_damaged_elements = 0;
-    //         for(const step of steps) {
-
-    //             print("[GAME]: call get_count_damaged_elements_of_step");
-
-    //             const count_damaged_elements = get_count_damaged_elements_of_step(step);
-    //             if(count_damaged_elements > max_damaged_elements) {
-    //                 max_damaged_elements = count_damaged_elements;
-    //                 best_step = step;
-    //             }
-
-    //             flow.frames(1);
-    //         }
-
-    //         print("[GAME]: found best step: ", best_step.from_x, best_step.from_y, best_step.to_x, best_step.to_y);
-    //         on_end(best_step);
-    //     });
-
-    //     coroutines.push(coroutine);
-    // }
-
-    // function get_count_damaged_elements_of_step(step: StepInfo) {
-    //     let count_damaged_elements = 0;
-    //     field.set_callback_on_damaged_element((item: ItemInfo) => {
-    //         on_damaged_element(item);
-    //         count_damaged_elements++;
-    //     });
-
-    //     simulate_game_step(step);
-        
-    //     field.set_callback_on_damaged_element(on_damaged_element);
-
-    //     print("[GAME]: damaged elements by step: ", count_damaged_elements);
-
-    //     return count_damaged_elements;
-    // }
     
     function get_step_combination(step: StepInfo): CombinationInfo | undefined {
         field.swap_elements(step.from_x, step.from_y, step.to_x, step.to_y);
@@ -1095,11 +1030,9 @@ export function Game() {
     }
     
     function try_click_activation(x: number, y: number) {
-        if(!is_simulating) {
-            if(try_hammer_activation(x, y)) return true;
-            if(try_horizontal_rocket_activation(x, y)) return true;
-            if(try_vertical_rocket_activation(x, y)) return true;
-        }
+        if(try_hammer_activation(x, y)) return true;
+        if(try_horizontal_rocket_activation(x, y)) return true;
+        if(try_vertical_rocket_activation(x, y)) return true;
 
         if(field.try_click(x, y) && try_activate_buster_element(x, y)) {
             is_step = true;
@@ -1307,8 +1240,6 @@ export function Game() {
             field.remove_element(element.x, element.y);
             event_data.damaged_elements.push(element);
         }
-
-        print("LOGIC: ", event_data.activated_cells.length);
 
         field.remove_element(x, y);
         field.remove_element(other_x, other_y);
@@ -1881,46 +1812,6 @@ export function Game() {
         get_state().randomseed = randomseed;
     }
 
-    // function simulate_game_step(step: StepInfo) {
-    //     const previous_state = field.save_state();
-
-    //     print("[GAME]: simulating game step: ", step.from_x, step.from_y, step.to_x, step.to_y);
-        
-    //     const element_from = field.get_element(step.from_x, step.from_y);
-    //     const element_to = field.get_element(step.to_x, step.to_y);
-
-    //     if(element_from != NullElement) print(element_from.type);
-    //     if(element_to != NullElement) print(element_to.type);
-
-    //     is_simulating = true;
-        
-    //     let after_activation = false;
-
-    //     if(step.from_x == step.to_x && step.from_y == step.to_y) {
-    //         after_activation = try_click_activation(step.from_x, step.from_y);
-    //         if(!after_activation) return;
-    //     } else {
-    //         if(!field.try_move(step.from_x, step.from_y, step.to_x, step.to_y)) return;
-    //         after_activation = try_combinate_before_buster_activation(step.from_x, step.from_y, step.to_x, step.to_y);
-    //     }
-        
-    //     if(after_activation) field.process_state(ProcessMode.MoveElements);
-
-    //     while(field.process_state(ProcessMode.Combinate)) {
-    //         print("[GAME]: after combinate in simulating");
-    //         field.process_state(ProcessMode.MoveElements);
-    //         print("[GAME]: after movements in simulating");
-    //     }
-
-    //     field.load_state(previous_state);
-
-    //     is_simulating = false;
-
-    //     math.randomseed(randomseed);
-
-    //     print("[GAME]: simulating game step end: ", step.from_x, step.from_y, step.to_x, step.to_y);
-    // }
-
     function process_game_step(after_activation = false) {
         if(after_activation) field.process_state(ProcessMode.MoveElements);
 
@@ -1950,7 +1841,11 @@ export function Game() {
         send_game_step();
         is_wait_until_animation_done = true;
 
+        // print(get_state().targets[1].uids.length);
+
         new_state(last_state);
+
+        // print(get_state(1).targets[1].uids.length);
     }
     
     function revert_step(): boolean {
@@ -1968,13 +1863,11 @@ export function Game() {
             for (let x = 0; x < field_width; x++) {
                 const cell = previous_state.cells[y][x];
                 if(cell != NotActiveCell) {
-                    if(cell.id != CellId.Lock) make_cell(x, y, cell.id, cell?.data);
-                    else {
+                    if(cell.id == CellId.Lock) {
                         const cell_id = (cell.data.under_cells as CellId[]).pop();
                         if(cell_id != undefined) make_cell(x, y, cell_id, cell?.data);
                         else make_cell(x, y, CellId.Base);
-                    }
-                    
+                    } else field.set_cell(x, y, cell);
                 } else field.set_cell(x, y, NotActiveCell);
 
                 const element = previous_state.elements[y][x];
@@ -2051,7 +1944,7 @@ export function Game() {
             break;
         }
 
-        if(element != NullElement && !is_simulating) {
+        if(element != NullElement) {
             (game_step_events[game_step_events.length - 1].value as CombinedMessage).maked_element = {
                 x: combined_element.x,
                 y: combined_element.y,
@@ -2069,8 +1962,6 @@ export function Game() {
         const index = activated_elements.indexOf(item.uid);
         if(index != -1) activated_elements.splice(index, 1);
 
-        if(is_simulating) return;
-
         const element = field.get_element(item.x, item.y);
         if(element == NullElement) return;
 
@@ -2082,10 +1973,6 @@ export function Game() {
     }
 
     function is_combined_elements(e1: Element, e2: Element) {
-        // const e1_pos = field.get_pos_by_uid(e1.uid);
-        // const e2_pos = field.get_pos_by_uid(e2.uid);
-        // if(is_buster(e1_pos.x, e1_pos.y) || is_buster(e2_pos.x, e2_pos.y)) return false;
-
         if(field.get_element_type(e1.type).is_clickable || field.get_element_type(e2.type).is_clickable) return false;
         
         return field.is_combined_elements_base(e1, e2);
@@ -2116,57 +2003,45 @@ export function Game() {
         let new_cell: (Cell | typeof NotActiveCell) = NotActiveCell;
 
         if(bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) {
-            if(cell.cnt_near_acts != undefined) {
-                if(cell.cnt_near_acts > 0) {
-                    if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
-                        const cell_id = (cell.data.under_cells as CellId[]).pop();
-                        if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
-                    }
-                    
-                    if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
+            if(cell.near_activations != undefined && cell.near_activations == 0) {
+                if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
+                    const cell_id = (cell.data.under_cells as CellId[]).pop();
+                    if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
                 }
+                
+                if(new_cell == NotActiveCell) new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
             }
         }
 
         if(bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) {
-            if(cell.cnt_acts != undefined) {
-                if(cell.cnt_acts > 0) {
-                    if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
-                        const cell_id = (cell.data.under_cells as CellId[]).pop();
-                        if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
-                    } 
-                    
-                    if(new_cell == NotActiveCell) {
-                        new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
-                    }
+            if(cell.activations != undefined && cell.activations == 0) {
+                if(cell.data != undefined && cell.data.under_cells != undefined && (cell.data.under_cells as CellId[]).length > 0) {
+                    const cell_id = (cell.data.under_cells as CellId[]).pop();
+                    if(cell_id != undefined) new_cell = make_cell(item_info.x, item_info.y, cell_id, cell.data);
+                } 
+                
+                if(new_cell == NotActiveCell) {
+                    new_cell = make_cell(item_info.x, item_info.y, CellId.Base);
                 }
             }
         }
 
-        if(new_cell != NotActiveCell && !is_simulating) {
-            for(const [key, value] of Object.entries(game_step_events[game_step_events.length - 1].value)) {
-                if(key == 'activated_cells') {
-                    (value as ActivatedCellMessage[]).push({
-                        x: item_info.x,
-                        y: item_info.y,
-                        uid: new_cell.uid,
-                        id: new_cell.id,
-                        previous_uid: item_info.uid 
-                    });
-                }
+        for(const [key, value] of Object.entries(game_step_events[game_step_events.length - 1].value)) {
+            if(key == 'activated_cells') {
+                (value as ActivatedCellMessage[]).push({
+                    x: item_info.x,
+                    y: item_info.y,
+                    cell: (new_cell != NotActiveCell) ? new_cell : cell
+                });
             }
+        }
 
-            // TODO: REFACTORING FOR SEVERAL ACTIVATION CELL (THIS IS ABSOLUTELY SHIT)
+        if(new_cell != NotActiveCell) {
             for(const target of get_state().targets) {
-                const check_for_not_stone = (target.id != CellId.Stone0 && target.id == cell.id);
-                const check_stone_with_last_cell = (target.id == CellId.Stone0 && CellId.Stone2 == cell.id);
-                const checks_for_stone = (check_for_not_stone || check_stone_with_last_cell);
-                const check_for_not_grass = (target.id != CellId.Grass0 && target.id == cell.id);
-                const check_grass_with_last_cell = (target.id == CellId.Grass0 && CellId.Grass1 == cell.id);
-                const checks_for_grass = (check_for_not_grass || check_grass_with_last_cell);
-                if(target.type == TargetType.Cell && checks_for_stone && checks_for_grass) {
+                const is_activated = cell?.activations == 0;
+                const is_near_activated = cell?.near_activations == 0;
+                if(target.type == TargetType.Cell && target.id == cell.id && (is_activated || is_near_activated))
                     target.uids.push(cell.uid);
-                }
             }
         }
     }
@@ -2272,15 +2147,11 @@ export function Game() {
                 const element = field.get_element(x, y);
 
                 const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
-                    const check_for_not_stone = (target.id != CellId.Stone0 && target.id == cell.id);
-                    const check_stone_with_last_cell = (target.id == CellId.Stone0 && [CellId.Stone0, CellId.Stone1, CellId.Stone2].includes(cell.id));
-                    const check_not_completed = target.count > target.uids.length;
-                    return (target.type == TargetType.Cell && check_not_completed && (check_for_not_stone || check_stone_with_last_cell));
+                    return (target.type == TargetType.Cell && target.id == cell.id && target.count > target.uids.length);
                 }) != -1);
                 
                 const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
-                    const check_not_completed = target.count > target.uids.length;
-                    return (target.type == TargetType.Element && check_not_completed && (target.id == element.type));
+                    return (target.type == TargetType.Element && target.id == element.type && target.count > target.uids.length);
                 }) != -1);
                 
                 if(is_valid_cell) available_items.push({x, y, uid: (element != NullElement) ? element.uid : cell.uid});
@@ -2339,14 +2210,10 @@ export function Game() {
     }
 
     function write_game_step_event<T extends MessageId>(message_id: T, message: Messages[T]) {
-        if(is_simulating) return;
-
         game_step_events.push({key: message_id, value: message});
     }
 
     function send_game_step() {
-        if(is_simulating) return;
-
         EventBus.send('ON_GAME_STEP', { events: game_step_events, state: get_state()});
         clear_game_step_events();
     }
@@ -2448,19 +2315,9 @@ export function load_config() {
                     } else level.field.elements[y][x] = RandomElement;
                     
                     if(data.cell != undefined) {
-                        if(data.cell == CellId.Stone0) {
-                            level.field.cells[y][x] = [CellId.Base, CellId.Stone2, CellId.Stone1, CellId.Stone0];
-                            if(level.field.elements[y][x] == RandomElement)
-                                level.field.elements[y][x] = NullElement;
-                        } else if(data.cell == CellId.Box) {
-                            if(level.field.elements[y][x] == RandomElement)
-                                level.field.elements[y][x] = NullElement;
-                            level.field.cells[y][x] = [CellId.Base, data.cell];
-                        } else if(data.cell == CellId.Grass0) {
-                            level.field.cells[y][x] = [CellId.Base, CellId.Grass1, CellId.Grass0];
-                        } else {
-                            level.field.cells[y][x] = [CellId.Base, data.cell];
-                        }
+                        level.field.cells[y][x] = [CellId.Base, data.cell];
+                        if(level.field.elements[y][x] == RandomElement && (data.cell == CellId.Stone || data.cell == CellId.Box))
+                            level.field.elements[y][x] = NullElement;
                     } else level.field.cells[y][x] = CellId.Base;
                 }
             }
@@ -2495,12 +2352,4 @@ export function load_config() {
 
         GAME_CONFIG.levels.push(level);
     }
-}
-
-export function is_element(item: ItemInfo) {
-    return (item.uid[0] == 'E');
-}
-
-export function is_cell(item: ItemInfo) {
-    return (item.uid[0] == 'C');
 }

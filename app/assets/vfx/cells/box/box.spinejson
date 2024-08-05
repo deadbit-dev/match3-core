@@ -161,7 +161,7 @@
 	}
 ],
 "animations": {
-	"morph": {
+	"1": {
 		"slots": {
 			"Box_1": {
 				"rgba": [

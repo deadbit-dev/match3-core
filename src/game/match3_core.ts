@@ -91,10 +91,10 @@ export const NotActiveCell = -1;
 // описание свойств клетки
 export interface Cell {
     id: number;
-    uid: string; // maybe change in hash
+    uid: string;
     type: number; // маска свойств
-    cnt_acts?: number; // число активаций которое произошло(при реакции в качестве соседней клетки + условие наличия флага ActionLocked)
-    cnt_near_acts?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций
+    activations?: number; // если маска содержит свойство ActionLocked то это число требуемых активаций
+    near_activations?: number; // если маска содержит свойство ActionLockedNear то это число требуемых активаций
     data?: any;
 }
 
@@ -111,7 +111,7 @@ export const NullElement = -1;
 
 // непосредственно элемент
 export interface Element {
-    uid: string; // maybe change in hash
+    uid: string;
     type: number;
     data?: any;
 }
@@ -473,8 +473,8 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
         // если клетка из массива содержит флаг ActionLockedNear то увеличиваем счетчик cnt_near_acts и вызываем событие cb_on_cell_activated
         for(const item of items) {
             const cell = get_cell(item.x, item.y);
-            if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.cnt_near_acts != undefined) {
-                cell.cnt_near_acts++;
+            if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.near_activations != undefined) {
+                cell.near_activations--;
                 if(cb_on_cell_activated != undefined) cb_on_cell_activated(item);
             }
         }
@@ -496,13 +496,13 @@ export function Field(size_x: number, size_y: number, complex_process_move = tru
 
         const cell = get_cell(item.x, item.y);
     
-        if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) && cell.cnt_acts != undefined) {
-            cell.cnt_acts++;
+        if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLocked) == CellType.ActionLocked) && cell.activations != undefined) {
+            cell.activations--;
             activated = true;
         }
 
-        if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.cnt_near_acts != undefined) {
-            cell.cnt_near_acts++;
+        if(cell != NotActiveCell && (bit.band(cell.type, CellType.ActionLockedNear) == CellType.ActionLockedNear) && cell.near_activations != undefined) {
+            cell.near_activations--;
             activated = true;
         }
         
