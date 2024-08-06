@@ -1,9 +1,9 @@
 local ____lualib = require("lualib_bundle")
-local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArrayIndexOf = ____lualib.__TS__ArrayIndexOf
 local ____exports = {}
-local setup, setup_info_ui, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_events, update_targets, feed_animation, update_buttons, set_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, presets
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, presets, hand_timer
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
@@ -82,7 +82,19 @@ function setup(instance)
 end
 function setup_info_ui(instance)
     setup_step_or_time(instance)
+    setup_avatar_or_clock(instance)
     setup_targets(instance)
+end
+function setup_avatar_or_clock(instance)
+    if __TS__ArrayIncludes(
+        GAME_CONFIG.animal_levels,
+        GameStorage.get("current_level") + 1
+    ) then
+        local avatar = gui.get_node("avatar")
+        local clock = gui.get_node("clock")
+        gui.set_enabled(avatar, false)
+        gui.set_enabled(clock, true)
+    end
 end
 function setup_step_or_time(instance)
     if instance.level.time ~= nil then
@@ -398,7 +410,12 @@ function setup_gameover_ui(instance)
         end
     )
 end
+function set_animal_tutorial_tip()
+    local window = gui.get_node("window")
+    gui.set_enabled(window, true)
+end
 function set_events(instance)
+    EventBus.on("SET_ANIMAL_TUTORIAL_TIP", set_animal_tutorial_tip, true)
     EventBus.on(
         "INIT_UI",
         function() return setup(instance) end
@@ -426,19 +443,8 @@ function set_events(instance)
         ) end,
         true
     )
-    EventBus.on(
-        "SET_TUTORIAL",
-        function() return set_tutorial() end,
-        true
-    )
-    EventBus.on(
-        "REMOVE_TUTORIAL",
-        function() return gui.set_enabled(
-            gui.get_node("tutorial"),
-            false
-        ) end,
-        true
-    )
+    EventBus.on("SET_TUTORIAL", set_tutorial, true)
+    EventBus.on("REMOVE_TUTORIAL", remove_tutorial, true)
     EventBus.on("ON_WIN", set_win, true)
     EventBus.on(
         "ON_GAME_OVER",
@@ -448,25 +454,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch69 = data.idx
-        local ____cond69 = ____switch69 == 0
-        if ____cond69 then
+        local ____switch71 = data.idx
+        local ____cond71 = ____switch71 == 0
+        if ____cond71 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond69 = ____cond69 or ____switch69 == 1
-        if ____cond69 then
+        ____cond71 = ____cond71 or ____switch71 == 1
+        if ____cond71 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond69 = ____cond69 or ____switch69 == 2
-        if ____cond69 then
+        ____cond71 = ____cond71 or ____switch71 == 2
+        if ____cond71 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -558,7 +564,134 @@ function set_tutorial()
                 "top"
             )
         end
+        if __TS__ArrayIncludes(busters, "spinning") then
+            local hand = gui.get_node("hand")
+            hand_timer = timer.delay(
+                4,
+                true,
+                function()
+                    gui.set_position(
+                        hand,
+                        vmath.vector3(-170, -350, 0)
+                    )
+                    gui.set_enabled(hand, true)
+                    gui.animate(
+                        hand,
+                        gui.PROP_SCALE,
+                        vmath.vector3(0.7, 0.7, 0.7),
+                        gui.EASING_INCUBIC,
+                        0.5,
+                        0,
+                        function()
+                            gui.set_enabled(hand, false)
+                        end,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
+                end
+            )
+        end
+        if __TS__ArrayIncludes(busters, "hammer") then
+            local hand = gui.get_node("hand")
+            hand_timer = timer.delay(
+                4,
+                true,
+                function()
+                    gui.set_position(
+                        hand,
+                        vmath.vector3(-60, -350, 0)
+                    )
+                    gui.set_enabled(hand, true)
+                    gui.animate(
+                        hand,
+                        gui.PROP_SCALE,
+                        vmath.vector3(0.7, 0.7, 0.7),
+                        gui.EASING_INCUBIC,
+                        0.5,
+                        0,
+                        function()
+                            gui.animate(
+                                hand,
+                                gui.PROP_POSITION,
+                                vmath.vector3(70, 70, 0),
+                                gui.EASING_INCUBIC,
+                                1,
+                                0,
+                                function()
+                                    gui.animate(
+                                        hand,
+                                        gui.PROP_SCALE,
+                                        vmath.vector3(0.7, 0.7, 0.7),
+                                        gui.EASING_INCUBIC,
+                                        0.5,
+                                        0,
+                                        function()
+                                            gui.set_enabled(hand, false)
+                                        end,
+                                        gui.PLAYBACK_ONCE_PINGPONG
+                                    )
+                                end
+                            )
+                        end,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
+                end
+            )
+        end
+        if __TS__ArrayIncludes(busters, "horizontal_rocket") then
+            local hand = gui.get_node("hand")
+            hand_timer = timer.delay(
+                4,
+                true,
+                function()
+                    gui.set_position(
+                        hand,
+                        vmath.vector3(50, -350, 0)
+                    )
+                    gui.set_enabled(hand, true)
+                    gui.animate(
+                        hand,
+                        gui.PROP_SCALE,
+                        vmath.vector3(0.7, 0.7, 0.7),
+                        gui.EASING_INCUBIC,
+                        0.5,
+                        0,
+                        function()
+                            gui.animate(
+                                hand,
+                                gui.PROP_POSITION,
+                                vmath.vector3(-100, 20, 0),
+                                gui.EASING_INCUBIC,
+                                1,
+                                0,
+                                function()
+                                    gui.animate(
+                                        hand,
+                                        gui.PROP_SCALE,
+                                        vmath.vector3(0.7, 0.7, 0.7),
+                                        gui.EASING_INCUBIC,
+                                        0.5,
+                                        0,
+                                        function()
+                                            gui.set_enabled(hand, false)
+                                        end,
+                                        gui.PLAYBACK_ONCE_PINGPONG
+                                    )
+                                end
+                            )
+                        end,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
+                end
+            )
+        end
     end
+end
+function remove_tutorial()
+    timer.cancel(hand_timer)
+    gui.set_enabled(
+        gui.get_node("tutorial"),
+        false
+    )
 end
 function set_win()
     disable_game_ui()
@@ -810,6 +943,14 @@ function ____exports.init(self)
     self.druid = druid.new(self)
     self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     self.busters = self.level.busters
+    self.druid:new_button(
+        "btn",
+        function()
+            local window = gui.get_node("window")
+            gui.set_enabled(window, false)
+            EventBus.send("HIDED_ANIMAL_TUTORIAL_TIP")
+        end
+    )
     set_events(self)
 end
 function ____exports.on_input(self, action_id, action)

@@ -33,7 +33,9 @@ local get_field_max_width = ____match3_utils.get_field_max_width
 local get_field_offset_border = ____match3_utils.get_field_offset_border
 local get_field_width = ____match3_utils.get_field_width
 local get_move_direction = ____match3_utils.get_move_direction
+local is_animal_level = ____match3_utils.is_animal_level
 local is_element = ____match3_utils.is_element
+local is_tutorial_level = ____match3_utils.is_tutorial_level
 local SubstrateMasks = {
     {{0, 1, 0}, {1, 0, 1}, {0, 0, 0}},
     {{0, 1, 0}, {1, 0, 0}, {0, 0, 1}},
@@ -114,7 +116,18 @@ function ____exports.View(animator, resources)
     end
     function set_events()
         EventBus.on("ON_LOAD_FIELD", on_load_field, true)
-        EventBus.on("SET_TUTORIAL", set_tutorial, true)
+        EventBus.on(
+            "SET_TUTORIAL",
+            function()
+                if is_animal_level() and is_tutorial_level() then
+                    EventBus.send("SET_ANIMAL_TUTORIAL_TIP")
+                else
+                    set_tutorial()
+                end
+            end,
+            true
+        )
+        EventBus.on("HIDED_ANIMAL_TUTORIAL_TIP", set_tutorial, true)
         EventBus.on("ON_WRONG_SWAP_ELEMENTS", on_wrong_swap_element_animation, true)
         EventBus.on("ON_GAME_STEP", on_game_step, true)
         EventBus.on("ON_ELEMENT_SELECTED", on_element_selected, true)
@@ -417,20 +430,20 @@ function ____exports.View(animator, resources)
             local view = {state = view_state, get_world_pos = get_world_pos, get_view_item_by_uid = get_view_item_by_uid}
             for ____, event in ipairs(data.events) do
                 repeat
-                    local ____switch73 = event.key
+                    local ____switch76 = event.key
                     local event_duration
-                    local ____cond73 = ____switch73 == "ON_SWAP_ELEMENTS"
-                    if ____cond73 then
+                    local ____cond76 = ____switch76 == "ON_SWAP_ELEMENTS"
+                    if ____cond76 then
                         flow.delay(event_to_animation[event.key](event.value))
                         break
                     end
-                    ____cond73 = ____cond73 or ____switch73 == "ON_SPINNING_ACTIVATED"
-                    if ____cond73 then
+                    ____cond76 = ____cond76 or ____switch76 == "ON_SPINNING_ACTIVATED"
+                    if ____cond76 then
                         flow.delay(event_to_animation[event.key](event.value))
                         break
                     end
-                    ____cond73 = ____cond73 or ____switch73 == "ON_MOVED_ELEMENTS"
-                    if ____cond73 then
+                    ____cond76 = ____cond76 or ____switch76 == "ON_MOVED_ELEMENTS"
+                    if ____cond76 then
                         on_move_phase_begin()
                         move_phase_duration = event_to_animation[event.key](event.value)
                         on_move_phase_end(event.value)
@@ -478,24 +491,24 @@ function ____exports.View(animator, resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch83 = move_direction
-            local ____cond83 = ____switch83 == Direction.Up
-            if ____cond83 then
+            local ____switch86 = move_direction
+            local ____cond86 = ____switch86 == Direction.Up
+            if ____cond86 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond83 = ____cond83 or ____switch83 == Direction.Down
-            if ____cond83 then
+            ____cond86 = ____cond86 or ____switch86 == Direction.Down
+            if ____cond86 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond83 = ____cond83 or ____switch83 == Direction.Left
-            if ____cond83 then
+            ____cond86 = ____cond86 or ____switch86 == Direction.Left
+            if ____cond86 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond83 = ____cond83 or ____switch83 == Direction.Right
-            if ____cond83 then
+            ____cond86 = ____cond86 or ____switch86 == Direction.Right
+            if ____cond86 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1392,14 +1405,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch250 = dir
-            local ____cond250 = ____switch250 == Axis.Vertical
-            if ____cond250 then
+            local ____switch253 = dir
+            local ____cond253 = ____switch253 == Axis.Vertical
+            if ____cond253 then
                 view_state.go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond250 = ____cond250 or ____switch250 == Axis.Horizontal
-            if ____cond250 then
+            ____cond253 = ____cond253 or ____switch253 == Axis.Horizontal
+            if ____cond253 then
                 view_state.go_manager.set_rotation_hash(part0, 90)
                 view_state.go_manager.set_rotation_hash(part1, -90)
                 break

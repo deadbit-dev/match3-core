@@ -6,6 +6,14 @@ export function get_current_level() {
     return GameStorage.get('current_level');
 }
 
+export function is_animal_level() {
+    return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
+}
+
+export function is_tutorial_level() {
+    return GAME_CONFIG.tutorial_levels.includes(get_current_level() + 1);
+}
+
 export function get_level_targets() {
     const level_config = GAME_CONFIG.levels[get_current_level()];
     return level_config.targets;

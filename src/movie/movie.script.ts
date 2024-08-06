@@ -31,5 +31,5 @@ export function final(this: props): void {
 
 function on_end() {
     GameStorage.set("move_showed", true);
-    Scene.load("map");
+    EventBus.send('MOVIE_END');
 }

@@ -1,10 +1,23 @@
 local ____lualib = require("lualib_bundle")
+local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__StringAccess = ____lualib.__TS__StringAccess
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
 function ____exports.get_current_level()
     return GameStorage.get("current_level")
+end
+function ____exports.is_animal_level()
+    return __TS__ArrayIncludes(
+        GAME_CONFIG.animal_levels,
+        ____exports.get_current_level() + 1
+    )
+end
+function ____exports.is_tutorial_level()
+    return __TS__ArrayIncludes(
+        GAME_CONFIG.tutorial_levels,
+        ____exports.get_current_level() + 1
+    )
 end
 function ____exports.get_level_targets()
     local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]

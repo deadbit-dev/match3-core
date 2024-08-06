@@ -65,6 +65,13 @@ export function init(this: props): void {
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
     this.busters = this.level['busters'];
 
+    // FIXME: (for now) test animal tutorial tip
+    this.druid.new_button('btn', () => {
+        const window = gui.get_node('window');
+        gui.set_enabled(window, false);
+        EventBus.send("HIDED_ANIMAL_TUTORIAL_TIP");
+    });
+
     set_events(this);
 }
 
@@ -109,7 +116,17 @@ function setup(instance: props) {
 
 function setup_info_ui(instance: props) {
     setup_step_or_time(instance);
+    setup_avatar_or_clock(instance);
     setup_targets(instance);
+}
+
+function setup_avatar_or_clock(instance: props) {
+    if(GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) {
+        const avatar = gui.get_node('avatar');
+        const clock = gui.get_node('clock');
+        gui.set_enabled(avatar, false);
+        gui.set_enabled(clock, true);
+    }
 }
 
 function setup_step_or_time(instance: props) {
@@ -287,15 +304,21 @@ function setup_gameover_ui(instance: props) {
     });
 }
 
+function set_animal_tutorial_tip() {
+    const window = gui.get_node('window');
+    gui.set_enabled(window, true);
+}
+
 // TODO: get data from game load event instead read config
 function set_events(instance: props) {
+    EventBus.on('SET_ANIMAL_TUTORIAL_TIP', set_animal_tutorial_tip, true);
     EventBus.on('INIT_UI', () => setup(instance));
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
     EventBus.on('UPDATED_TARGET', (data) => update_targets(data), true);
     EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
-    EventBus.on('SET_TUTORIAL', () => set_tutorial(), true);
-    EventBus.on('REMOVE_TUTORIAL', () => gui.set_enabled(gui.get_node('tutorial'), false), true);
+    EventBus.on('SET_TUTORIAL', set_tutorial, true);
+    EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN', set_win, true);
     EventBus.on('ON_GAME_OVER', (state) => set_gameover(instance, state), true);
 }
@@ -343,6 +366,7 @@ function update_buttons(instance: props) {
     set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
 }
 
+let hand_timer: hash;
 function set_tutorial() {
     const tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1];
     const tutorial = gui.get_node('tutorial');
@@ -370,7 +394,56 @@ function set_tutorial() {
         const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];        
         for(const buster of busters)
             gui.set_layer(gui.get_node(buster + "/button"), "top");
+
+        if(busters.includes('spinning')) {
+            // TODO: separate hand logic
+            const hand = gui.get_node('hand');
+            hand_timer = timer.delay(4, true, () => {
+                gui.set_position(hand, vmath.vector3(-170, -350, 0));
+                gui.set_enabled(hand, true);
+                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                    gui.set_enabled(hand, false);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
+        }
+
+        if(busters.includes('hammer')) {
+            // TODO: separate hand logic
+            const hand = gui.get_node('hand');
+            hand_timer = timer.delay(4, true, () => {
+                gui.set_position(hand, vmath.vector3(-60, -350, 0));
+                gui.set_enabled(hand, true);
+                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                    gui.animate(hand, gui.PROP_POSITION, vmath.vector3(70, 70, 0), gui.EASING_INCUBIC, 1, 0, () => {
+                        gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                            gui.set_enabled(hand, false);
+                        }, gui.PLAYBACK_ONCE_PINGPONG);
+                    });
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
+        }
+
+        if(busters.includes('horizontal_rocket')) {
+            // TODO: separate hand logic
+            const hand = gui.get_node('hand');
+            hand_timer = timer.delay(4, true, () => {
+                gui.set_position(hand, vmath.vector3(50, -350, 0));
+                gui.set_enabled(hand, true);
+                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                    gui.animate(hand, gui.PROP_POSITION, vmath.vector3(-100, 20, 0), gui.EASING_INCUBIC, 1, 0, () => {
+                        gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                            gui.set_enabled(hand, false);
+                        }, gui.PLAYBACK_ONCE_PINGPONG);
+                    });
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
+        }
     }
+}
+
+function remove_tutorial() {
+    timer.cancel(hand_timer);
+    gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
 function set_win() {

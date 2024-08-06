@@ -2,7 +2,7 @@ local ____exports = {}
 local on_end
 function on_end()
     GameStorage.set("move_showed", true)
-    Scene.load("map")
+    EventBus.send("MOVIE_END")
 end
 function ____exports.init(self)
     Manager.init_script()

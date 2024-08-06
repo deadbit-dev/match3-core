@@ -403,17 +403,19 @@ function ____exports.Game()
                 return
             end
         end
-        is_block_input = true
-        search_available_steps(
-            1,
-            function(steps)
-                if #steps ~= 0 then
-                    available_steps = copy_array_of_objects(steps)
-                    is_block_input = false
-                    return
+        if not is_tutorial() then
+            is_block_input = true
+            search_available_steps(
+                1,
+                function(steps)
+                    if #steps ~= 0 then
+                        available_steps = copy_array_of_objects(steps)
+                        is_block_input = false
+                        return
+                    end
                 end
-            end
-        )
+            )
+        end
     end
     function complete_tutorial()
         unlock_busters()
@@ -488,24 +490,24 @@ function ____exports.Game()
     end
     function on_activate_buster(message)
         repeat
-            local ____switch93 = message.name
-            local ____cond93 = ____switch93 == "SPINNING"
-            if ____cond93 then
+            local ____switch94 = message.name
+            local ____cond94 = ____switch94 == "SPINNING"
+            if ____cond94 then
                 on_activate_spinning()
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == "HAMMER"
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == "HAMMER"
+            if ____cond94 then
                 on_activate_hammer()
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == "VERTICAL_ROCKET"
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == "VERTICAL_ROCKET"
+            if ____cond94 then
                 on_activate_vertical_rocket()
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == "HORIZONTAL_ROCKET"
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == "HORIZONTAL_ROCKET"
+            if ____cond94 then
                 on_activate_horizontal_rocket()
                 break
             end
@@ -1984,29 +1986,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch434 = combination.type
-            local ____cond434 = ____switch434 == CombinationType.Comb4
-            if ____cond434 then
+            local ____switch435 = combination.type
+            local ____cond435 = ____switch435 == CombinationType.Comb4
+            if ____cond435 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond434 = ____cond434 or ____switch434 == CombinationType.Comb5
-            if ____cond434 then
+            ____cond435 = ____cond435 or ____switch435 == CombinationType.Comb5
+            if ____cond435 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond434 = ____cond434 or ____switch434 == CombinationType.Comb2x2
-            if ____cond434 then
+            ____cond435 = ____cond435 or ____switch435 == CombinationType.Comb2x2
+            if ____cond435 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond434 = ____cond434 or (____switch434 == CombinationType.Comb3x3a or ____switch434 == CombinationType.Comb3x3b)
-            if ____cond434 then
+            ____cond435 = ____cond435 or (____switch435 == CombinationType.Comb3x3a or ____switch435 == CombinationType.Comb3x3b)
+            if ____cond435 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond434 = ____cond434 or (____switch434 == CombinationType.Comb3x4 or ____switch434 == CombinationType.Comb3x5)
-            if ____cond434 then
+            ____cond435 = ____cond435 or (____switch435 == CombinationType.Comb3x4 or ____switch435 == CombinationType.Comb3x5)
+            if ____cond435 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2526,15 +2528,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch528 = data
-                                local ____cond528 = ____switch528 == "-"
-                                if ____cond528 then
+                                local ____switch529 = data
+                                local ____cond529 = ____switch529 == "-"
+                                if ____cond529 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond528 = ____cond528 or ____switch528 == ""
-                                if ____cond528 then
+                                ____cond529 = ____cond529 or ____switch529 == ""
+                                if ____cond529 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

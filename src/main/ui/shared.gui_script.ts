@@ -148,15 +148,14 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
 
     data.druid.new_button('store/junior_box/buy_button/button', () => {
-        if(!is_enough_coins(90)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(true);
 
-        remove_coins(90);
+        remove_coins(80);
         add_coins(150);
         
         set_infinit_life(1);
         
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
-        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 1);
         GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 1);
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
 
@@ -166,17 +165,17 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
     
     data.druid.new_button('store/catlover_box/buy_button/button', () => {
-        if(!is_enough_coins(180)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(160)) return set_enabled_not_enough_coins(true);
 
-        remove_coins(180);
+        remove_coins(160);
         add_coins(300);
 
         set_infinit_life(24);
         
-        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 2);
-        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 2);
-        GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 2);
-        GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 2);
+        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
+        GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 1);
+        GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 1);
+        GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
 
         EventBus.send('UPDATED_BUTTONS');
     });

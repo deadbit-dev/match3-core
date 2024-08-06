@@ -40,7 +40,9 @@ import {
     get_field_width,
     get_level_targets,
     get_move_direction,
-    is_element
+    is_animal_level,
+    is_element,
+    is_tutorial_level
 } from './match3_utils';
 
 const SubstrateMasks = [
@@ -273,9 +275,15 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function set_events() {
-        EventBus.on('ON_LOAD_FIELD', on_load_field, true);
-        
-        EventBus.on("SET_TUTORIAL", set_tutorial, true);
+        EventBus.on('ON_LOAD_FIELD',  on_load_field, true);
+
+        EventBus.on("SET_TUTORIAL", () => {
+            if(is_animal_level() && is_tutorial_level()) {
+                EventBus.send('SET_ANIMAL_TUTORIAL_TIP'); 
+            } else set_tutorial();
+        }, true);
+
+        EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', set_tutorial, true);
         
         EventBus.on('ON_WRONG_SWAP_ELEMENTS', on_wrong_swap_element_animation, true);
         

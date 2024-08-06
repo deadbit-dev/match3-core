@@ -487,14 +487,16 @@ export function Game() {
             }
         }
 
-        is_block_input = true;
-        search_available_steps(1, (steps) => {
-            if(steps.length != 0) {
-                available_steps = copy_array_of_objects(steps);
-                is_block_input = false;
-                return;
-            }
-        });
+        if(!is_tutorial()) {
+            is_block_input = true;
+            search_available_steps(1, (steps) => {
+                if(steps.length != 0) {
+                    available_steps = copy_array_of_objects(steps);
+                    is_block_input = false;
+                    return;
+                }
+            });
+        }
     }
 
     function complete_tutorial() {
