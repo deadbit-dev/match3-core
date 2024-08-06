@@ -267,6 +267,7 @@ function setup_win_ui(instance: props) {
 }
 
 function next_level() {
+    GAME_CONFIG.steps_by_ad = 0;
     GameStorage.set('current_level', GameStorage.get('current_level') + 1);
     Scene.restart();
 }
@@ -291,7 +292,10 @@ function setup_gameover_ui(instance: props) {
     instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
-    instance.druid.new_button('steps_by_ad/button', () => EventBus.send('REVIVE', 3));
+    instance.druid.new_button('steps_by_ad/button', () => {
+        GAME_CONFIG.steps_by_ad++;
+        EventBus.send('REVIVE', 3);
+    });
     
     gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов         500");
     instance.druid.new_button('steps_by_coins/button', () => {
@@ -576,7 +580,7 @@ function set_gameover(instance: props, state: GameState) {
 
 function set_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), true);
-    gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
+    if(GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
     gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
 }
 

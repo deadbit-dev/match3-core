@@ -802,9 +802,6 @@ function ____exports.View(animator, resources)
         if __TS__ArrayIsArray(GAME_CONFIG.cell_view[id]) then
             local index = cell.activations ~= nil and cell.activations or (cell.near_activations ~= nil and cell.near_activations or 1)
             print(x, y, index)
-            if index == 0 then
-                index = 1
-            end
             view = GAME_CONFIG.cell_view[id][index]
         else
             view = GAME_CONFIG.cell_view[id]
@@ -1277,7 +1274,7 @@ function ____exports.View(animator, resources)
             return
         end
         local ____type = element.type
-        if not __TS__ArrayIncludes(GAME_CONFIG.base_elements, ____type) then
+        if __TS__ArrayIncludes(GAME_CONFIG.buster_elements, ____type) then
             return
         end
         local pos = get_world_pos(item.x, item.y, GAME_CONFIG.default_element_z_index + 0.1)
@@ -1434,14 +1431,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch259 = dir
-            local ____cond259 = ____switch259 == Axis.Vertical
-            if ____cond259 then
+            local ____switch258 = dir
+            local ____cond258 = ____switch258 == Axis.Vertical
+            if ____cond258 then
                 view_state.go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond259 = ____cond259 or ____switch259 == Axis.Horizontal
-            if ____cond259 then
+            ____cond258 = ____cond258 or ____switch258 == Axis.Horizontal
+            if ____cond258 then
                 view_state.go_manager.set_rotation_hash(part0, 90)
                 view_state.go_manager.set_rotation_hash(part1, -90)
                 break

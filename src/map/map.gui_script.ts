@@ -63,6 +63,7 @@ function load_level(level: number) {
     if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
         return EventBus.send('NOT_ENOUGH_LIFE');
     }
+    GAME_CONFIG.steps_by_ad = 0;
     GameStorage.set('current_level', level);
     Scene.load('game');
 }

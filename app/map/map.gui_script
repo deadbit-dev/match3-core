@@ -20,6 +20,7 @@ function load_level(level)
     if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
         return EventBus.send("NOT_ENOUGH_LIFE")
     end
+    GAME_CONFIG.steps_by_ad = 0
     GameStorage.set("current_level", level)
     Scene.load("game")
 end

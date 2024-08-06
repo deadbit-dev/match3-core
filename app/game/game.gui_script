@@ -347,6 +347,7 @@ function setup_win_ui(instance)
     )
 end
 function next_level()
+    GAME_CONFIG.steps_by_ad = 0
     GameStorage.set(
         "current_level",
         GameStorage.get("current_level") + 1
@@ -391,7 +392,10 @@ function setup_gameover_ui(instance)
     )
     instance.druid:new_button(
         "steps_by_ad/button",
-        function() return EventBus.send("REVIVE", 3) end
+        function()
+            GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
+            EventBus.send("REVIVE", 3)
+        end
     )
     gui.set_text(
         gui.get_node("steps_by_coins/text"),
@@ -910,10 +914,12 @@ function set_gameover_offer()
         gui.get_node("gameover_offer_close"),
         true
     )
-    gui.set_enabled(
-        gui.get_node("steps_by_ad/button"),
-        true
-    )
+    if GAME_CONFIG.steps_by_ad < 2 then
+        gui.set_enabled(
+            gui.get_node("steps_by_ad/button"),
+            true
+        )
+    end
     gui.set_enabled(
         gui.get_node("steps_by_coins/button"),
         true

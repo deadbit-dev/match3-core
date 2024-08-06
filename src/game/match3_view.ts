@@ -818,7 +818,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         if(Array.isArray(GAME_CONFIG.cell_view[id as CellId])) {
             let index = (cell.activations != undefined) ? cell.activations : cell.near_activations != undefined ? cell.near_activations : 1;
             print(x, y, index);
-            if(index == 0) index = 1;
+            // if(index == 0) index = 1;
             view = GAME_CONFIG.cell_view[id as CellId][index - 1];
         } else view = GAME_CONFIG.cell_view[id as CellId] as string;
 
@@ -1142,7 +1142,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         if(element == NullElement) return;
     
         const type = element.type as ElementId;
-        if(!GAME_CONFIG.base_elements.includes(type)) return;
+        if(GAME_CONFIG.buster_elements.includes(type)) return;
     
         const pos = get_world_pos(item.x, item.y, GAME_CONFIG.default_element_z_index + 0.1);
         const effect = view_state.go_manager.make_go('effect_view', pos);

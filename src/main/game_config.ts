@@ -167,22 +167,16 @@ export const _GAME_CONFIG = {
         [ElementId.Topaz]: 'purple',
         [ElementId.Ruby]: 'red',
         [ElementId.Emerald]: 'green',
-        [ElementId.VerticalRocket]: '',
-        [ElementId.HorizontalRocket]: '',
-        [ElementId.AxisRocket]: '',
-        [ElementId.Helicopter]: '',
-        [ElementId.Dynamite]: '',
-        [ElementId.Diskosphere]: '',
-        [ElementId.Cheese]: '',
-        [ElementId.Cabbage]: '',
-        [ElementId.Acorn]: '',
-        [ElementId.RareMeat]: '',
-        [ElementId.MediumMeat]: '',
-        [ElementId.Chicken]: '',
-        [ElementId.SunFlower]: '',
-        [ElementId.Salad]: '' ,
-        [ElementId.Hay]: ''
-    },
+        [ElementId.Cheese]: 'yellow',
+        [ElementId.Cabbage]: 'green',
+        [ElementId.Acorn]: 'yellow',
+        [ElementId.RareMeat]: 'red',
+        [ElementId.MediumMeat]: 'red',
+        [ElementId.Chicken]: 'red',
+        [ElementId.SunFlower]: 'yellow',
+        [ElementId.Salad]: 'green' ,
+        [ElementId.Hay]: 'yellow'
+    } as {[key in number]: string},
 
     explodable_cells: [
         CellId.Box,
@@ -357,7 +351,9 @@ export const _GAME_CONFIG = {
     is_revive: false,
     revive_state: {} as GameState,
 
-    is_busy_input: false
+    is_busy_input: false,
+
+    steps_by_ad: 0
 };
 
 
