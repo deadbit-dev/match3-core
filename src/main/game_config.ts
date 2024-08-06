@@ -523,6 +523,8 @@ export type _UserMessages = {
     SHUFFLE: GameState,
 
     MOVIE_END: VoidMessage,
-    SET_ANIMAL_TUTORIAL_TIP: VoidMessage
-    HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage
+    SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
+    HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
+    FEED_ANIMAL: number,
+    SET_WIN_UI: VoidMessage
 };

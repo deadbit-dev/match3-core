@@ -74,8 +74,8 @@ function SceneModule() {
     function unload_resource(scene: string, resource: string) {
         if(scene_resources[scene].indexOf(resource) == -1)
             return;
-        
-        print("UNLOAD: ", resource);
+
+        scene_resources[scene].splice(scene_resources[scene].indexOf(resource), 1);
         
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
@@ -87,7 +87,6 @@ function SceneModule() {
         for(const resource of resources) {
             if(!except?.includes(resource)) {
                 unload_resource(scene, resource);
-                scene_resources[scene].splice(scene_resources[scene].indexOf(resource), 1);
             }
         }
     }

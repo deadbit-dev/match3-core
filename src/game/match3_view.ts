@@ -28,7 +28,7 @@ import {
     MoveType,
 } from "./match3_core";
 
-import { SubstrateId, GameState, CellId, ElementId } from './match3_game';
+import { SubstrateId, GameState, CellId, ElementId, TargetType } from './match3_game';
 
 import { 
     get_current_level,
@@ -508,8 +508,26 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function set_win() {
-        reset_field();
-        remove_animals();
+        let is_feeded = false;
+        for(let i = 0; i < view_state.game_state.targets.length; i++) {
+            const target = view_state.game_state.targets[i];
+            if(target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id)) {
+                is_feeded = true;
+                EventBus.send('FEED_ANIMAL', target.id);
+            }
+        }
+
+        if(is_feeded) {
+            timer.delay(7.5, false, () => {
+                reset_field();
+                remove_animals();
+                EventBus.send('SET_WIN_UI');
+            });
+        } else {
+            reset_field();
+            remove_animals();
+            EventBus.send('SET_WIN_UI');
+        }
     }
 
     function set_gameover() {
@@ -747,7 +765,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
 
     function on_move_phase_end(message: Messages[MessageId]) {
         const data = message as MovedElementsMessage;
-        flow.delay(move_phase_duration);
+        flow.delay(move_phase_duration + 0.3);
         view_state.game_state = data.state;
         move_phase_duration = 0;
     }
@@ -798,8 +816,9 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     
         let view = '';
         if(Array.isArray(GAME_CONFIG.cell_view[id as CellId])) {
-            const index = (cell.activations != undefined) ? cell.activations : cell.near_activations != undefined ? cell.near_activations : 1;
+            let index = (cell.activations != undefined) ? cell.activations : cell.near_activations != undefined ? cell.near_activations : 1;
             print(x, y, index);
+            if(index == 0) index = 1;
             view = GAME_CONFIG.cell_view[id as CellId][index - 1];
         } else view = GAME_CONFIG.cell_view[id as CellId] as string;
 

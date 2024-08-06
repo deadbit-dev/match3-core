@@ -24,6 +24,7 @@ local ____match3_game = require("game.match3_game")
 local SubstrateId = ____match3_game.SubstrateId
 local CellId = ____match3_game.CellId
 local ElementId = ____match3_game.ElementId
+local TargetType = ____match3_game.TargetType
 local ____match3_utils = require("game.match3_utils")
 local get_current_level = ____match3_utils.get_current_level
 local get_field_cell_size = ____match3_utils.get_field_cell_size
@@ -400,8 +401,33 @@ function ____exports.View(animator, resources)
         return 0
     end
     function set_win()
-        reset_field()
-        remove_animals()
+        local is_feeded = false
+        do
+            local i = 0
+            while i < #view_state.game_state.targets do
+                local target = view_state.game_state.targets[i + 1]
+                if target.type == TargetType.Element and __TS__ArrayIncludes(GAME_CONFIG.feed_elements, target.id) then
+                    is_feeded = true
+                    EventBus.send("FEED_ANIMAL", target.id)
+                end
+                i = i + 1
+            end
+        end
+        if is_feeded then
+            timer.delay(
+                7.5,
+                false,
+                function()
+                    reset_field()
+                    remove_animals()
+                    EventBus.send("SET_WIN_UI")
+                end
+            )
+        else
+            reset_field()
+            remove_animals()
+            EventBus.send("SET_WIN_UI")
+        end
     end
     function set_gameover()
         reset_field()
@@ -430,20 +456,20 @@ function ____exports.View(animator, resources)
             local view = {state = view_state, get_world_pos = get_world_pos, get_view_item_by_uid = get_view_item_by_uid}
             for ____, event in ipairs(data.events) do
                 repeat
-                    local ____switch76 = event.key
+                    local ____switch81 = event.key
                     local event_duration
-                    local ____cond76 = ____switch76 == "ON_SWAP_ELEMENTS"
-                    if ____cond76 then
+                    local ____cond81 = ____switch81 == "ON_SWAP_ELEMENTS"
+                    if ____cond81 then
                         flow.delay(event_to_animation[event.key](event.value))
                         break
                     end
-                    ____cond76 = ____cond76 or ____switch76 == "ON_SPINNING_ACTIVATED"
-                    if ____cond76 then
+                    ____cond81 = ____cond81 or ____switch81 == "ON_SPINNING_ACTIVATED"
+                    if ____cond81 then
                         flow.delay(event_to_animation[event.key](event.value))
                         break
                     end
-                    ____cond76 = ____cond76 or ____switch76 == "ON_MOVED_ELEMENTS"
-                    if ____cond76 then
+                    ____cond81 = ____cond81 or ____switch81 == "ON_MOVED_ELEMENTS"
+                    if ____cond81 then
                         on_move_phase_begin()
                         move_phase_duration = event_to_animation[event.key](event.value)
                         on_move_phase_end(event.value)
@@ -491,24 +517,24 @@ function ____exports.View(animator, resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch86 = move_direction
-            local ____cond86 = ____switch86 == Direction.Up
-            if ____cond86 then
+            local ____switch91 = move_direction
+            local ____cond91 = ____switch91 == Direction.Up
+            if ____cond91 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond86 = ____cond86 or ____switch86 == Direction.Down
-            if ____cond86 then
+            ____cond91 = ____cond91 or ____switch91 == Direction.Down
+            if ____cond91 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond86 = ____cond86 or ____switch86 == Direction.Left
-            if ____cond86 then
+            ____cond91 = ____cond91 or ____switch91 == Direction.Left
+            if ____cond91 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond86 = ____cond86 or ____switch86 == Direction.Right
-            if ____cond86 then
+            ____cond91 = ____cond91 or ____switch91 == Direction.Right
+            if ____cond91 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -720,7 +746,7 @@ function ____exports.View(animator, resources)
     end
     function on_move_phase_end(message)
         local data = message
-        flow.delay(move_phase_duration)
+        flow.delay(move_phase_duration + 0.3)
         view_state.game_state = data.state
         move_phase_duration = 0
     end
@@ -776,6 +802,9 @@ function ____exports.View(animator, resources)
         if __TS__ArrayIsArray(GAME_CONFIG.cell_view[id]) then
             local index = cell.activations ~= nil and cell.activations or (cell.near_activations ~= nil and cell.near_activations or 1)
             print(x, y, index)
+            if index == 0 then
+                index = 1
+            end
             view = GAME_CONFIG.cell_view[id][index]
         else
             view = GAME_CONFIG.cell_view[id]
@@ -1405,14 +1434,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch253 = dir
-            local ____cond253 = ____switch253 == Axis.Vertical
-            if ____cond253 then
+            local ____switch259 = dir
+            local ____cond259 = ____switch259 == Axis.Vertical
+            if ____cond259 then
                 view_state.go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond253 = ____cond253 or ____switch253 == Axis.Horizontal
-            if ____cond253 then
+            ____cond259 = ____cond259 or ____switch259 == Axis.Horizontal
+            if ____cond259 then
                 view_state.go_manager.set_rotation_hash(part0, 90)
                 view_state.go_manager.set_rotation_hash(part1, -90)
                 break
