@@ -650,6 +650,8 @@ export function Game() {
     }
 
     function on_revert_step() {
+        if(is_wait_until_animation_done)
+            return;
         stop_helper();
         revert_step();
     }
@@ -1833,6 +1835,7 @@ export function Game() {
             }
 
             stop_helper();
+            if(!is_wait_until_animation_done) shuffle_field();
         });
 
         if(level_config.steps != undefined && is_step) get_state().steps--;
@@ -1843,11 +1846,7 @@ export function Game() {
         send_game_step();
         is_wait_until_animation_done = true;
 
-        // print(get_state().targets[1].uids.length);
-
         new_state(last_state);
-
-        // print(get_state(1).targets[1].uids.length);
     }
     
     function revert_step(): boolean {
@@ -2028,16 +2027,18 @@ export function Game() {
             }
         }
 
+        // UPDATED CELL VIEW
         for(const [key, value] of Object.entries(game_step_events[game_step_events.length - 1].value)) {
             if(key == 'activated_cells') {
                 (value as ActivatedCellMessage[]).push({
                     x: item_info.x,
                     y: item_info.y,
-                    cell: (new_cell != NotActiveCell) ? new_cell : cell
+                    cell: (new_cell != NotActiveCell) ? new_cell : Object.assign({}, cell)
                 });
             }
         }
 
+        // UPDATED TARGETS
         if(new_cell != NotActiveCell) {
             for(const target of get_state().targets) {
                 const is_activated = cell?.activations == 0;

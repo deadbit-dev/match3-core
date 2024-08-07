@@ -101,7 +101,7 @@ export const _GAME_CONFIG = {
 
     // TODO: maybe counts activation by cell_view
     cell_activations: {
-        [CellId.Box]: { activations: 1, near_activations: 1 },
+        [CellId.Box]: { near_activations: 1 },
         [CellId.Flowers]: { activations: 1 },
         [CellId.Grass]: { activations: 2 },
         [CellId.Stone]: { near_activations: 3 },

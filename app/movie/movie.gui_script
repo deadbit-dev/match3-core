@@ -12,7 +12,6 @@ function ____exports.init(self)
     EventBus.on(
         "MOVIE_END",
         function()
-            print("HERE")
             local window = gui.get_node("window")
             gui.set_enabled(window, true)
         end

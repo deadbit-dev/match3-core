@@ -812,13 +812,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         
         const id = (cell_id != undefined) ? cell_id : cell.id;
 
-        print(x, y, id);
+        print(x, y, cell_id, cell.id);
     
         let view = '';
         if(Array.isArray(GAME_CONFIG.cell_view[id as CellId])) {
             let index = (cell.activations != undefined) ? cell.activations : cell.near_activations != undefined ? cell.near_activations : 1;
             print(x, y, index);
-            // if(index == 0) index = 1;
             view = GAME_CONFIG.cell_view[id as CellId][index - 1];
         } else view = GAME_CONFIG.cell_view[id as CellId] as string;
 
@@ -1526,8 +1525,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         go.set_scale(vmath.vector3(view_state.scale_ratio, view_state.scale_ratio, 1), effect);
     
         const anim_props = { blend_duration: 0, playback_rate: 1 };
-
-        print(previous_cell.activations);
     
         let anim_name = '';
         if(type == CellId.Grass) anim_name = '1'; // FIXME: remove after added second grass activation effect

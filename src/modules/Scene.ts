@@ -65,8 +65,6 @@ function SceneModule() {
         if(scene_resources[scene].indexOf(resource) != -1)
             return;
 
-        print("LOAD: ", resource);
-
         scene_resources[scene].push(resource);
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }

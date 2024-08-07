@@ -568,6 +568,9 @@ function ____exports.Game()
         end
     end
     function on_revert_step()
+        if is_wait_until_animation_done then
+            return
+        end
         stop_helper()
         revert_step()
     end
@@ -1886,6 +1889,9 @@ function ____exports.Game()
                     return
                 end
                 stop_helper()
+                if not is_wait_until_animation_done then
+                    shuffle_field()
+                end
             end
         )
         if level_config.steps ~= nil and is_step then
@@ -1986,29 +1992,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch435 = combination.type
-            local ____cond435 = ____switch435 == CombinationType.Comb4
-            if ____cond435 then
+            local ____switch437 = combination.type
+            local ____cond437 = ____switch437 == CombinationType.Comb4
+            if ____cond437 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond435 = ____cond435 or ____switch435 == CombinationType.Comb5
-            if ____cond435 then
+            ____cond437 = ____cond437 or ____switch437 == CombinationType.Comb5
+            if ____cond437 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond435 = ____cond435 or ____switch435 == CombinationType.Comb2x2
-            if ____cond435 then
+            ____cond437 = ____cond437 or ____switch437 == CombinationType.Comb2x2
+            if ____cond437 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond435 = ____cond435 or (____switch435 == CombinationType.Comb3x3a or ____switch435 == CombinationType.Comb3x3b)
-            if ____cond435 then
+            ____cond437 = ____cond437 or (____switch437 == CombinationType.Comb3x3a or ____switch437 == CombinationType.Comb3x3b)
+            if ____cond437 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond435 = ____cond435 or (____switch435 == CombinationType.Comb3x4 or ____switch435 == CombinationType.Comb3x5)
-            if ____cond435 then
+            ____cond437 = ____cond437 or (____switch437 == CombinationType.Comb3x4 or ____switch437 == CombinationType.Comb3x5)
+            if ____cond437 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
@@ -2102,7 +2108,11 @@ function ____exports.Game()
             local key = ____value[1]
             local value = ____value[2]
             if key == "activated_cells" then
-                value[#value + 1] = {x = item_info.x, y = item_info.y, cell = new_cell ~= NotActiveCell and new_cell or cell}
+                value[#value + 1] = {
+                    x = item_info.x,
+                    y = item_info.y,
+                    cell = new_cell ~= NotActiveCell and new_cell or __TS__ObjectAssign({}, cell)
+                }
             end
         end
         if new_cell ~= NotActiveCell then
@@ -2528,15 +2538,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch529 = data
-                                local ____cond529 = ____switch529 == "-"
-                                if ____cond529 then
+                                local ____switch531 = data
+                                local ____cond531 = ____switch531 == "-"
+                                if ____cond531 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond529 = ____cond529 or ____switch529 == ""
-                                if ____cond529 then
+                                ____cond531 = ____cond531 or ____switch531 == ""
+                                if ____cond531 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break

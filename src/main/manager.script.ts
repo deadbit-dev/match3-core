@@ -44,7 +44,7 @@ export function init(this: props) {
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 
-        load_config();
+        timer.delay(0, false, load_config);
     }, true);
 }
 

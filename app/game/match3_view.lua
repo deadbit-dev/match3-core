@@ -797,7 +797,7 @@ function ____exports.View(animator, resources)
         )
         local _go = view_state.go_manager.make_go("cell_view", pos)
         local id = cell_id ~= nil and cell_id or cell.id
-        print(x, y, id)
+        print(x, y, cell_id, cell.id)
         local view = ""
         if __TS__ArrayIsArray(GAME_CONFIG.cell_view[id]) then
             local index = cell.activations ~= nil and cell.activations or (cell.near_activations ~= nil and cell.near_activations or 1)
@@ -1762,7 +1762,6 @@ function ____exports.View(animator, resources)
             effect
         )
         local anim_props = {blend_duration = 0, playback_rate = 1}
-        print(previous_cell.activations)
         local anim_name = ""
         if ____type == CellId.Grass then
             anim_name = "1"

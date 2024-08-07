@@ -22,7 +22,6 @@ export function init(this: props): void {
     });
     
     EventBus.on('MOVIE_END', () => {
-        print('HERE');
         const window = gui.get_node('window');
         gui.set_enabled(window, true);
     });
