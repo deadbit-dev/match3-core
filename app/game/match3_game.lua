@@ -115,7 +115,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, get_cell_uid, make_cell, generate_cell_type_by_cell_id, get_element_uid, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, is_available_for_placed, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, clear_game_step_events, get_state, new_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, write_game_step_event, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_shuffling, is_searched, is_gameover, is_first_step
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, get_cell_uid, make_cell, generate_cell_type_by_cell_id, get_element_uid, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, is_available_for_placed, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, new_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, clear_game_step_events, write_game_step_event, get_current_game_step_event, game_step_event_end, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, current_game_step_event, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_shuffling, is_searched, is_gameover, is_first_step
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -489,25 +489,28 @@ function ____exports.Game()
         end
     end
     function on_activate_buster(message)
+        if is_wait_until_animation_done then
+            return
+        end
         repeat
-            local ____switch94 = message.name
-            local ____cond94 = ____switch94 == "SPINNING"
-            if ____cond94 then
+            local ____switch95 = message.name
+            local ____cond95 = ____switch95 == "SPINNING"
+            if ____cond95 then
                 on_activate_spinning()
                 break
             end
-            ____cond94 = ____cond94 or ____switch94 == "HAMMER"
-            if ____cond94 then
+            ____cond95 = ____cond95 or ____switch95 == "HAMMER"
+            if ____cond95 then
                 on_activate_hammer()
                 break
             end
-            ____cond94 = ____cond94 or ____switch94 == "VERTICAL_ROCKET"
-            if ____cond94 then
+            ____cond95 = ____cond95 or ____switch95 == "VERTICAL_ROCKET"
+            if ____cond95 then
                 on_activate_vertical_rocket()
                 break
             end
-            ____cond94 = ____cond94 or ____switch94 == "HORIZONTAL_ROCKET"
-            if ____cond94 then
+            ____cond95 = ____cond95 or ____switch95 == "HORIZONTAL_ROCKET"
+            if ____cond95 then
                 on_activate_horizontal_rocket()
                 break
             end
@@ -877,13 +880,18 @@ function ____exports.Game()
         if not is_procesed then
             is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y)
         else
-            write_game_step_event("ON_BUSTER_ACTIVATION", {})
-            if is_from_buster then
-                is_activated = try_activate_buster_element(to_x, to_y)
-            end
-            if is_to_buster then
-                is_activated = try_activate_buster_element(from_x, from_y)
-            end
+            write_game_step_event(
+                "ON_BUSTER_ACTIVATION",
+                {},
+                function()
+                    if is_from_buster then
+                        is_activated = try_activate_buster_element(to_x, to_y)
+                    end
+                    if is_to_buster then
+                        is_activated = try_activate_buster_element(from_x, from_y)
+                    end
+                end
+            )
         end
         return is_procesed or is_activated
     end
@@ -1001,15 +1009,20 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("DISKOSPHERE_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = diskosphere.uid}
-        event_data.activated_cells = {}
-        local elements = field.get_all_elements_by_type(element_id)
-        for ____, element in ipairs(elements) do
-            field.remove_element(element.x, element.y, false, true)
-        end
-        event_data.damaged_elements = elements
-        field.remove_element(x, y)
+        write_game_step_event(
+            "DISKOSPHERE_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = diskosphere.uid}
+                event_data.activated_cells = {}
+                local elements = field.get_all_elements_by_type(element_id)
+                for ____, element in ipairs(elements) do
+                    field.remove_element(element.x, element.y, false, true)
+                end
+                event_data.damaged_elements = elements
+                field.remove_element(x, y)
+            end
+        )
         return true
     end
     function try_activate_swaped_diskospheres(x, y, other_x, other_y)
@@ -1022,21 +1035,26 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("SWAPED_DISKOSPHERES_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = diskosphere.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_diskosphere.uid}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
-            local elements = field.get_all_elements_by_type(element_id)
-            for ____, element in ipairs(elements) do
-                field.remove_element(element.x, element.y)
-                local ____event_data_damaged_elements_14 = event_data.damaged_elements
-                ____event_data_damaged_elements_14[#____event_data_damaged_elements_14 + 1] = element
+        write_game_step_event(
+            "SWAPED_DISKOSPHERES_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = diskosphere.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_diskosphere.uid}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                    local elements = field.get_all_elements_by_type(element_id)
+                    for ____, element in ipairs(elements) do
+                        field.remove_element(element.x, element.y)
+                        local ____event_data_damaged_elements_14 = event_data.damaged_elements
+                        ____event_data_damaged_elements_14[#____event_data_damaged_elements_14 + 1] = element
+                    end
+                end
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
             end
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
+        )
         return true
     end
     function try_activate_swaped_diskosphere_with_buster(x, y, other_x, other_y)
@@ -1049,32 +1067,37 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = diskosphere.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_buster.uid}
-        event_data.activated_cells = {}
-        event_data.damaged_elements = {}
-        event_data.maked_elements = {}
-        local element_id = get_random_element_id()
-        if element_id == NullElement then
-            return false
-        end
-        local elements = field.get_all_elements_by_type(element_id)
-        for ____, element in ipairs(elements) do
-            field.remove_element(element.x, element.y)
-            local ____event_data_damaged_elements_15 = event_data.damaged_elements
-            ____event_data_damaged_elements_15[#____event_data_damaged_elements_15 + 1] = element
-            local maked_element = make_element(element.x, element.y, other_buster.type, true)
-            if maked_element ~= NullElement then
-                local ____event_data_maked_elements_16 = event_data.maked_elements
-                ____event_data_maked_elements_16[#____event_data_maked_elements_16 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
+        write_game_step_event(
+            "SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = diskosphere.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_buster.uid}
+                event_data.activated_cells = {}
+                event_data.damaged_elements = {}
+                event_data.maked_elements = {}
+                local element_id = get_random_element_id()
+                if element_id == NullElement then
+                    return false
+                end
+                local elements = field.get_all_elements_by_type(element_id)
+                for ____, element in ipairs(elements) do
+                    field.remove_element(element.x, element.y)
+                    local ____event_data_damaged_elements_15 = event_data.damaged_elements
+                    ____event_data_damaged_elements_15[#____event_data_damaged_elements_15 + 1] = element
+                    local maked_element = make_element(element.x, element.y, other_buster.type, true)
+                    if maked_element ~= NullElement then
+                        local ____event_data_maked_elements_16 = event_data.maked_elements
+                        ____event_data_maked_elements_16[#____event_data_maked_elements_16 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
+                    end
+                end
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
+                for ____, element in ipairs(elements) do
+                    try_activate_buster_element(element.x, element.y)
+                end
             end
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
-        for ____, element in ipairs(elements) do
-            try_activate_buster_element(element.x, element.y)
-        end
+        )
         return true
     end
     function try_activate_swaped_buster_with_diskosphere(x, y, other_x, other_y)
@@ -1092,27 +1115,32 @@ function ____exports.Game()
         event_data.activated_cells = {}
         event_data.damaged_elements = {}
         event_data.maked_elements = {}
-        write_game_step_event("SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED", event_data)
-        local element_id = get_random_element_id()
-        if element_id == NullElement then
-            return false
-        end
-        local elements = field.get_all_elements_by_type(element_id)
-        for ____, element in ipairs(elements) do
-            field.remove_element(element.x, element.y)
-            local ____event_data_damaged_elements_17 = event_data.damaged_elements
-            ____event_data_damaged_elements_17[#____event_data_damaged_elements_17 + 1] = element
-            local maked_element = make_element(element.x, element.y, buster.type, true)
-            if maked_element ~= NullElement then
-                local ____event_data_maked_elements_18 = event_data.maked_elements
-                ____event_data_maked_elements_18[#____event_data_maked_elements_18 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
+        write_game_step_event(
+            "SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED",
+            event_data,
+            function()
+                local element_id = get_random_element_id()
+                if element_id == NullElement then
+                    return false
+                end
+                local elements = field.get_all_elements_by_type(element_id)
+                for ____, element in ipairs(elements) do
+                    field.remove_element(element.x, element.y)
+                    local ____event_data_damaged_elements_17 = event_data.damaged_elements
+                    ____event_data_damaged_elements_17[#____event_data_damaged_elements_17 + 1] = element
+                    local maked_element = make_element(element.x, element.y, buster.type, true)
+                    if maked_element ~= NullElement then
+                        local ____event_data_maked_elements_18 = event_data.maked_elements
+                        ____event_data_maked_elements_18[#____event_data_maked_elements_18 + 1] = {x = element.x, y = element.y, uid = maked_element.uid, type = maked_element.type}
+                    end
+                end
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
+                for ____, element in ipairs(elements) do
+                    try_activate_buster_element(element.x, element.y)
+                end
             end
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
-        for ____, element in ipairs(elements) do
-            try_activate_buster_element(element.x, element.y)
-        end
+        )
         return true
     end
     function try_activate_swaped_diskosphere_with_element(x, y, other_x, other_y)
@@ -1125,19 +1153,24 @@ function ____exports.Game()
             return try_activate_diskosphere(x, y)
         end
         local event_data = {}
-        write_game_step_event("SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = diskosphere.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        local elements = field.get_all_elements_by_type(other_element.type)
-        for ____, element in ipairs(elements) do
-            field.remove_element(element.x, element.y)
-            local ____event_data_damaged_elements_19 = event_data.damaged_elements
-            ____event_data_damaged_elements_19[#____event_data_damaged_elements_19 + 1] = element
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
+        write_game_step_event(
+            "SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = diskosphere.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                local elements = field.get_all_elements_by_type(other_element.type)
+                for ____, element in ipairs(elements) do
+                    field.remove_element(element.x, element.y)
+                    local ____event_data_damaged_elements_19 = event_data.damaged_elements
+                    ____event_data_damaged_elements_19[#____event_data_damaged_elements_19 + 1] = element
+                end
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
+            end
+        )
         return true
     end
     function try_activate_rocket(x, y)
@@ -1146,50 +1179,55 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = rocket.uid}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        event_data.axis = rocket.type == ____exports.ElementId.AxisRocket and Axis.All or (rocket.type == ____exports.ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal)
-        if rocket.type == ____exports.ElementId.VerticalRocket or rocket.type == ____exports.ElementId.AxisRocket then
-            do
-                local i = 0
-                while i < field_height do
-                    if i ~= y then
-                        if is_buster(x, i) then
-                            try_activate_buster_element(x, i)
-                        else
-                            local removed_element = field.remove_element(x, i)
-                            if removed_element ~= nil then
-                                local ____event_data_damaged_elements_20 = event_data.damaged_elements
-                                ____event_data_damaged_elements_20[#____event_data_damaged_elements_20 + 1] = {x = x, y = i, uid = removed_element.uid}
+        write_game_step_event(
+            "ROCKET_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = rocket.uid}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                event_data.axis = rocket.type == ____exports.ElementId.AxisRocket and Axis.All or (rocket.type == ____exports.ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal)
+                if rocket.type == ____exports.ElementId.VerticalRocket or rocket.type == ____exports.ElementId.AxisRocket then
+                    do
+                        local i = 0
+                        while i < field_height do
+                            if i ~= y then
+                                if is_buster(x, i) then
+                                    try_activate_buster_element(x, i)
+                                else
+                                    local removed_element = field.remove_element(x, i)
+                                    if removed_element ~= nil then
+                                        local ____event_data_damaged_elements_20 = event_data.damaged_elements
+                                        ____event_data_damaged_elements_20[#____event_data_damaged_elements_20 + 1] = {x = x, y = i, uid = removed_element.uid}
+                                    end
+                                end
                             end
+                            i = i + 1
                         end
                     end
-                    i = i + 1
                 end
-            end
-        end
-        if rocket.type == ____exports.ElementId.HorizontalRocket or rocket.type == ____exports.ElementId.AxisRocket then
-            do
-                local i = 0
-                while i < field_width do
-                    if i ~= x then
-                        if is_buster(i, y) then
-                            try_activate_buster_element(i, y)
-                        else
-                            local removed_element = field.remove_element(i, y)
-                            if removed_element ~= nil then
-                                local ____event_data_damaged_elements_21 = event_data.damaged_elements
-                                ____event_data_damaged_elements_21[#____event_data_damaged_elements_21 + 1] = {x = i, y = y, uid = removed_element.uid}
+                if rocket.type == ____exports.ElementId.HorizontalRocket or rocket.type == ____exports.ElementId.AxisRocket then
+                    do
+                        local i = 0
+                        while i < field_width do
+                            if i ~= x then
+                                if is_buster(i, y) then
+                                    try_activate_buster_element(i, y)
+                                else
+                                    local removed_element = field.remove_element(i, y)
+                                    if removed_element ~= nil then
+                                        local ____event_data_damaged_elements_21 = event_data.damaged_elements
+                                        ____event_data_damaged_elements_21[#____event_data_damaged_elements_21 + 1] = {x = i, y = y, uid = removed_element.uid}
+                                    end
+                                end
                             end
+                            i = i + 1
                         end
                     end
-                    i = i + 1
                 end
+                field.remove_element(x, y)
             end
-        end
-        field.remove_element(x, y)
+        )
         return true
     end
     function try_activate_swaped_rockets(x, y, other_x, other_y)
@@ -1202,47 +1240,52 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("SWAPED_ROCKETS_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = rocket.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_rocket.uid}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        do
-            local i = 0
-            while i < field_height do
-                if i ~= y then
-                    if is_buster(x, i) then
-                        try_activate_buster_element(x, i)
-                    else
-                        local removed_element = field.remove_element(x, i)
-                        if removed_element ~= nil then
-                            local ____event_data_damaged_elements_22 = event_data.damaged_elements
-                            ____event_data_damaged_elements_22[#____event_data_damaged_elements_22 + 1] = {x = x, y = i, uid = removed_element.uid}
+        write_game_step_event(
+            "SWAPED_ROCKETS_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = rocket.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_rocket.uid}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                do
+                    local i = 0
+                    while i < field_height do
+                        if i ~= y then
+                            if is_buster(x, i) then
+                                try_activate_buster_element(x, i)
+                            else
+                                local removed_element = field.remove_element(x, i)
+                                if removed_element ~= nil then
+                                    local ____event_data_damaged_elements_22 = event_data.damaged_elements
+                                    ____event_data_damaged_elements_22[#____event_data_damaged_elements_22 + 1] = {x = x, y = i, uid = removed_element.uid}
+                                end
+                            end
                         end
+                        i = i + 1
                     end
                 end
-                i = i + 1
-            end
-        end
-        do
-            local i = 0
-            while i < field_width do
-                if i ~= x then
-                    if is_buster(i, y) then
-                        try_activate_buster_element(i, y)
-                    else
-                        local removed_element = field.remove_element(i, y)
-                        if removed_element ~= nil then
-                            local ____event_data_damaged_elements_23 = event_data.damaged_elements
-                            ____event_data_damaged_elements_23[#____event_data_damaged_elements_23 + 1] = {x = i, y = y, uid = removed_element.uid}
+                do
+                    local i = 0
+                    while i < field_width do
+                        if i ~= x then
+                            if is_buster(i, y) then
+                                try_activate_buster_element(i, y)
+                            else
+                                local removed_element = field.remove_element(i, y)
+                                if removed_element ~= nil then
+                                    local ____event_data_damaged_elements_23 = event_data.damaged_elements
+                                    ____event_data_damaged_elements_23[#____event_data_damaged_elements_23 + 1] = {x = i, y = y, uid = removed_element.uid}
+                                end
+                            end
                         end
+                        i = i + 1
                     end
                 end
-                i = i + 1
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
             end
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
+        )
         return true
     end
     function try_activate_swaped_rocket_with_element(x, y, other_x, other_y)
@@ -1265,15 +1308,20 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("HELICOPTER_ACTIVATED", event_data)
-        event_data.activated_cells = {}
-        event_data.element = {x = x, y = y, uid = helicopter.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-        event_data.target_item = remove_random_element(
-            event_data.damaged_elements,
-            get_state().targets
+        write_game_step_event(
+            "HELICOPTER_ACTIVATED",
+            event_data,
+            function()
+                event_data.activated_cells = {}
+                event_data.element = {x = x, y = y, uid = helicopter.uid}
+                event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+                event_data.target_item = remove_random_element(
+                    event_data.damaged_elements,
+                    get_state().targets
+                )
+                field.remove_element(x, y)
+            end
         )
-        field.remove_element(x, y)
         return true
     end
     function try_activate_swaped_helicopters(x, y, other_x, other_y)
@@ -1288,23 +1336,28 @@ function ____exports.Game()
         local event_data = {}
         event_data.target_items = {}
         event_data.activated_cells = {}
-        write_game_step_event("SWAPED_HELICOPTERS_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = helicopter.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_helicopter.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-        do
-            local i = 0
-            while i < 3 do
-                local ____event_data_target_items_24 = event_data.target_items
-                ____event_data_target_items_24[#____event_data_target_items_24 + 1] = remove_random_element(
-                    event_data.damaged_elements,
-                    get_state().targets
-                )
-                i = i + 1
+        write_game_step_event(
+            "SWAPED_HELICOPTERS_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = helicopter.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_helicopter.uid}
+                event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+                do
+                    local i = 0
+                    while i < 3 do
+                        local ____event_data_target_items_24 = event_data.target_items
+                        ____event_data_target_items_24[#____event_data_target_items_24 + 1] = remove_random_element(
+                            event_data.damaged_elements,
+                            get_state().targets
+                        )
+                        i = i + 1
+                    end
+                end
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
             end
-        end
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
+        )
         return true
     end
     function try_activate_swaped_helicopter_with_element(x, y, other_x, other_y)
@@ -1320,17 +1373,22 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED", event_data)
-        event_data.activated_cells = {}
-        event_data.element = {x = x, y = y, uid = helicopter.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-        event_data.target_item = remove_random_element(
-            event_data.damaged_elements,
-            get_state().targets
+        write_game_step_event(
+            "SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED",
+            event_data,
+            function()
+                event_data.activated_cells = {}
+                event_data.element = {x = x, y = y, uid = helicopter.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_element.uid}
+                event_data.damaged_elements = remove_element_by_mask(x, y, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+                event_data.target_item = remove_random_element(
+                    event_data.damaged_elements,
+                    get_state().targets
+                )
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
+            end
         )
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
         return true
     end
     function try_activate_dynamite(x, y)
@@ -1339,11 +1397,16 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("DYNAMITE_ACTIVATED", event_data)
-        event_data.activated_cells = {}
-        event_data.element = {x = x, y = y, uid = dynamite.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}})
-        field.remove_element(x, y)
+        write_game_step_event(
+            "DYNAMITE_ACTIVATED",
+            event_data,
+            function()
+                event_data.activated_cells = {}
+                event_data.element = {x = x, y = y, uid = dynamite.uid}
+                event_data.damaged_elements = remove_element_by_mask(x, y, {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}})
+                field.remove_element(x, y)
+            end
+        )
         return true
     end
     function try_activate_swaped_dynamites(x, y, other_x, other_y)
@@ -1356,49 +1419,54 @@ function ____exports.Game()
             return false
         end
         local event_data = {}
-        write_game_step_event("SWAPED_DYNAMITES_ACTIVATED", event_data)
-        event_data.activated_cells = {}
-        event_data.element = {x = x, y = y, uid = dynamite.uid}
-        event_data.other_element = {x = other_x, y = other_y, uid = other_dynamite.uid}
-        event_data.damaged_elements = remove_element_by_mask(x, y, {
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                0,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            },
-            {
-                1,
-                1,
-                1,
-                1,
-                1
-            }
-        })
-        field.remove_element(x, y)
-        field.remove_element(other_x, other_y)
+        write_game_step_event(
+            "SWAPED_DYNAMITES_ACTIVATED",
+            event_data,
+            function()
+                event_data.activated_cells = {}
+                event_data.element = {x = x, y = y, uid = dynamite.uid}
+                event_data.other_element = {x = other_x, y = other_y, uid = other_dynamite.uid}
+                event_data.damaged_elements = remove_element_by_mask(x, y, {
+                    {
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    },
+                    {
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    },
+                    {
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    },
+                    {
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    },
+                    {
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    }
+                })
+                field.remove_element(x, y)
+                field.remove_element(other_x, other_y)
+            end
+        )
         return true
     end
     function try_activate_swaped_dynamite_with_element(x, y, other_x, other_y)
@@ -1716,11 +1784,16 @@ function ____exports.Game()
             event_data.x = x
             event_data.y = y
             event_data.activated_cells = {}
-            write_game_step_event("ON_ELEMENT_ACTIVATED", event_data)
-            local removed_element = field.remove_element(x, y)
-            if removed_element ~= nil then
-                event_data.uid = removed_element.uid
-            end
+            write_game_step_event(
+                "ON_ELEMENT_ACTIVATED",
+                event_data,
+                function()
+                    local removed_element = field.remove_element(x, y)
+                    if removed_element ~= nil then
+                        event_data.uid = removed_element.uid
+                    end
+                end
+            )
         end
         GameStorage.set(
             "hammer_counts",
@@ -1739,32 +1812,37 @@ function ____exports.Game()
         end
         selected_element = nil
         local event_data = {}
-        write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = ""}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        event_data.axis = Axis.Horizontal
-        do
-            local i = 0
-            while i < field_width do
-                if is_buster(i, y) then
-                    try_activate_buster_element(i, y)
-                else
-                    local removed_element = field.remove_element(i, y)
-                    if removed_element ~= nil then
-                        local ____event_data_damaged_elements_28 = event_data.damaged_elements
-                        ____event_data_damaged_elements_28[#____event_data_damaged_elements_28 + 1] = {x = i, y = y, uid = removed_element.uid}
+        write_game_step_event(
+            "ROCKET_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = ""}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                event_data.axis = Axis.Horizontal
+                do
+                    local i = 0
+                    while i < field_width do
+                        if is_buster(i, y) then
+                            try_activate_buster_element(i, y)
+                        else
+                            local removed_element = field.remove_element(i, y)
+                            if removed_element ~= nil then
+                                local ____event_data_damaged_elements_28 = event_data.damaged_elements
+                                ____event_data_damaged_elements_28[#____event_data_damaged_elements_28 + 1] = {x = i, y = y, uid = removed_element.uid}
+                            end
+                        end
+                        i = i + 1
                     end
                 end
-                i = i + 1
+                GameStorage.set(
+                    "horizontal_rocket_counts",
+                    GameStorage.get("horizontal_rocket_counts") - 1
+                )
+                busters.horizontal_rocket.active = false
+                EventBus.send("UPDATED_BUTTONS")
             end
-        end
-        GameStorage.set(
-            "horizontal_rocket_counts",
-            GameStorage.get("horizontal_rocket_counts") - 1
         )
-        busters.horizontal_rocket.active = false
-        EventBus.send("UPDATED_BUTTONS")
         return true
     end
     function try_vertical_rocket_activation(x, y)
@@ -1776,32 +1854,37 @@ function ____exports.Game()
         end
         selected_element = nil
         local event_data = {}
-        write_game_step_event("ROCKET_ACTIVATED", event_data)
-        event_data.element = {x = x, y = y, uid = ""}
-        event_data.damaged_elements = {}
-        event_data.activated_cells = {}
-        event_data.axis = Axis.Vertical
-        do
-            local i = 0
-            while i < field_height do
-                if is_buster(x, i) then
-                    try_activate_buster_element(x, i)
-                else
-                    local removed_element = field.remove_element(x, i)
-                    if removed_element ~= nil then
-                        local ____event_data_damaged_elements_29 = event_data.damaged_elements
-                        ____event_data_damaged_elements_29[#____event_data_damaged_elements_29 + 1] = {x = x, y = i, uid = removed_element.uid}
+        write_game_step_event(
+            "ROCKET_ACTIVATED",
+            event_data,
+            function()
+                event_data.element = {x = x, y = y, uid = ""}
+                event_data.damaged_elements = {}
+                event_data.activated_cells = {}
+                event_data.axis = Axis.Vertical
+                do
+                    local i = 0
+                    while i < field_height do
+                        if is_buster(x, i) then
+                            try_activate_buster_element(x, i)
+                        else
+                            local removed_element = field.remove_element(x, i)
+                            if removed_element ~= nil then
+                                local ____event_data_damaged_elements_29 = event_data.damaged_elements
+                                ____event_data_damaged_elements_29[#____event_data_damaged_elements_29 + 1] = {x = x, y = i, uid = removed_element.uid}
+                            end
+                        end
+                        i = i + 1
                     end
                 end
-                i = i + 1
+                GameStorage.set(
+                    "vertical_rocket_counts",
+                    GameStorage.get("vertical_rocket_counts") - 1
+                )
+                busters.vertical_rocket.active = false
+                EventBus.send("UPDATED_BUTTONS")
             end
-        end
-        GameStorage.set(
-            "vertical_rocket_counts",
-            GameStorage.get("vertical_rocket_counts") - 1
         )
-        busters.vertical_rocket.active = false
-        EventBus.send("UPDATED_BUTTONS")
         return true
     end
     function try_swap_elements(from_x, from_y, to_x, to_y)
@@ -1992,35 +2075,35 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch437 = combination.type
-            local ____cond437 = ____switch437 == CombinationType.Comb4
-            if ____cond437 then
+            local ____switch454 = combination.type
+            local ____cond454 = ____switch454 == CombinationType.Comb4
+            if ____cond454 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond437 = ____cond437 or ____switch437 == CombinationType.Comb5
-            if ____cond437 then
+            ____cond454 = ____cond454 or ____switch454 == CombinationType.Comb5
+            if ____cond454 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond437 = ____cond437 or ____switch437 == CombinationType.Comb2x2
-            if ____cond437 then
+            ____cond454 = ____cond454 or ____switch454 == CombinationType.Comb2x2
+            if ____cond454 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond437 = ____cond437 or (____switch437 == CombinationType.Comb3x3a or ____switch437 == CombinationType.Comb3x3b)
-            if ____cond437 then
+            ____cond454 = ____cond454 or (____switch454 == CombinationType.Comb3x3a or ____switch454 == CombinationType.Comb3x3b)
+            if ____cond454 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond437 = ____cond437 or (____switch437 == CombinationType.Comb3x4 or ____switch437 == CombinationType.Comb3x5)
-            if ____cond437 then
+            ____cond454 = ____cond454 or (____switch454 == CombinationType.Comb3x4 or ____switch454 == CombinationType.Comb3x5)
+            if ____cond454 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end
         until true
         if element ~= NullElement then
-            game_step_events[#game_step_events].value.maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}
+            get_current_game_step_event().value.maked_element = {x = combined_element.x, y = combined_element.y, uid = element.uid, type = element.type}
             return true
         end
         return false
@@ -2051,9 +2134,14 @@ function ____exports.Game()
         if is_buster(combined_element.x, combined_element.y) then
             return
         end
-        write_game_step_event("ON_COMBINED", {combined_element = combined_element, combination = combination, activated_cells = {}})
-        field.on_combined_base(combined_element, combination)
-        try_combo(combined_element, combination)
+        write_game_step_event(
+            "ON_COMBINED",
+            {combined_element = combined_element, combination = combination, activated_cells = {}},
+            function()
+                field.on_combined_base(combined_element, combination)
+                try_combo(combined_element, combination)
+            end
+        )
     end
     function on_request_element(x, y)
         return make_element(
@@ -2104,7 +2192,7 @@ function ____exports.Game()
                 end
             end
         end
-        for ____, ____value in ipairs(__TS__ObjectEntries(game_step_events[#game_step_events].value)) do
+        for ____, ____value in ipairs(__TS__ObjectEntries(get_current_game_step_event().value)) do
             local key = ____value[1]
             local value = ____value[2]
             if key == "activated_cells" then
@@ -2131,9 +2219,6 @@ function ____exports.Game()
         ____GAME_CONFIG_revive_state_40[____steps_41] = ____GAME_CONFIG_revive_state_40[____steps_41] + steps
         GAME_CONFIG.is_revive = true
         Scene.restart()
-    end
-    function clear_game_step_events()
-        game_step_events = {}
     end
     function get_state(offset)
         if offset == nil then
@@ -2361,8 +2446,24 @@ function ____exports.Game()
         end
         return removed_elements
     end
-    function write_game_step_event(message_id, message)
-        game_step_events[#game_step_events + 1] = {key = message_id, value = message}
+    function clear_game_step_events()
+        game_step_events = {}
+    end
+    function write_game_step_event(message_id, message, inside_logic)
+        local ____temp_55 = #game_step_events + 1
+        game_step_events[____temp_55] = {key = message_id, value = message}
+        local index = ____temp_55 - 1
+        current_game_step_event[#current_game_step_event + 1] = index
+        if inside_logic ~= nil then
+            inside_logic()
+        end
+        game_step_event_end()
+    end
+    function get_current_game_step_event()
+        return game_step_events[current_game_step_event[#current_game_step_event] + 1]
+    end
+    function game_step_event_end()
+        table.remove(current_game_step_event)
     end
     function send_game_step()
         EventBus.send(
@@ -2385,6 +2486,7 @@ function ____exports.Game()
     states = {}
     activated_elements = {}
     game_step_events = {}
+    current_game_step_event = {}
     selected_element = nil
     spawn_element_chances = {}
     available_steps = {}
@@ -2538,15 +2640,15 @@ function ____exports.load_config()
                         local data = level_data.field[y + 1][x + 1]
                         if type(data) == "string" then
                             repeat
-                                local ____switch531 = data
-                                local ____cond531 = ____switch531 == "-"
-                                if ____cond531 then
+                                local ____switch552 = data
+                                local ____cond552 = ____switch552 == "-"
+                                if ____cond552 then
                                     level.field.cells[y + 1][x + 1] = NotActiveCell
                                     level.field.elements[y + 1][x + 1] = NullElement
                                     break
                                 end
-                                ____cond531 = ____cond531 or ____switch531 == ""
-                                if ____cond531 then
+                                ____cond552 = ____cond552 or ____switch552 == ""
+                                if ____cond552 then
                                     level.field.cells[y + 1][x + 1] = ____exports.CellId.Base
                                     level.field.elements[y + 1][x + 1] = ____exports.RandomElement
                                     break
@@ -2584,12 +2686,12 @@ function ____exports.load_config()
             if target ~= nil then
                 local count = tonumber(target_data.count)
                 target.count = count ~= nil and count or target.count
-                local ____level_targets_55 = level.targets
-                ____level_targets_55[#____level_targets_55 + 1] = target
+                local ____level_targets_56 = level.targets
+                ____level_targets_56[#____level_targets_56 + 1] = target
             end
         end
-        local ____GAME_CONFIG_levels_56 = GAME_CONFIG.levels
-        ____GAME_CONFIG_levels_56[#____GAME_CONFIG_levels_56 + 1] = level
+        local ____GAME_CONFIG_levels_57 = GAME_CONFIG.levels
+        ____GAME_CONFIG_levels_57[#____GAME_CONFIG_levels_57 + 1] = level
     end
 end
 return ____exports

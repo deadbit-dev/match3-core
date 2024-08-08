@@ -1,7 +1,6 @@
 import { Direction } from "../utils/math_utils";
 import { ItemInfo } from "./match3_core";
 
-
 export function get_current_level() {
     return GameStorage.get('current_level');
 }

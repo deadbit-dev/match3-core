@@ -160,6 +160,18 @@ export function get_neighbors<T>(x: number, y: number, array: T[][], mask: numbe
     return neighbors;
 }
 
+export function is_neighbor(x: number, y: number, other_x: number, other_y: number, mask = [[0, 1, 0,], [1, 0, 1], [0, 1, 0]]): boolean {
+    for (let i = other_y - 1; i <= other_y + 1; i++) {
+        for (let j = other_x - 1; j <= other_x + 1; j++) {
+            if (mask[i - (other_y - 1)][j - (other_x - 1)] == 1 && j == x && i == y) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 export function get_debug_intersect_points() {
     return [a, b, c, d];
 }

@@ -177,6 +177,27 @@ function ____exports.get_neighbors(x, y, array, mask)
     end
     return neighbors
 end
+function ____exports.is_neighbor(x, y, other_x, other_y, mask)
+    if mask == nil then
+        mask = {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}}
+    end
+    do
+        local i = other_y - 1
+        while i <= other_y + 1 do
+            do
+                local j = other_x - 1
+                while j <= other_x + 1 do
+                    if mask[i - (other_y - 1) + 1][j - (other_x - 1) + 1] == 1 and j == x and i == y then
+                        return true
+                    end
+                    j = j + 1
+                end
+            end
+            i = i + 1
+        end
+    end
+    return false
+end
 function ____exports.get_debug_intersect_points()
     return {a, b, c, d}
 end

@@ -14,7 +14,7 @@
 
 
 import * as flow from 'ludobits.m.flow';
-import { Axis, Direction, is_valid_pos, rotateMatrix } from '../utils/math_utils';
+import { Axis, Direction, get_neighbors, is_neighbor, is_valid_pos, rotateMatrix } from '../utils/math_utils';
 import { GoManager } from '../modules/GoManager';
 import { IGameItem, MessageId, Messages, NameMessage, PosXYMessage } from '../modules/modules_const';
 import { MovedElementsMessage, GameStepMessage, StepHelperMessage, ActivatedCellMessage, ActivationMessage, CombinedMessage, ElementActivationMessage, HelicopterActivationMessage, RocketActivationMessage, SwapedActivationMessage, SwapedDiskosphereActivationMessage, SwapedHelicoptersActivationMessage, SwapedHelicopterWithElementMessage, SwapElementsMessage } from "../main/game_config";
@@ -1309,26 +1309,37 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         for (const element of activation.damaged_elements) {
             damage_element_animation(message, element.x, element.y, element.uid);
         }
-    
+        
+        print("ACTIVATED: ", activation.element.x, activation.element.y, activation.element.uid, activation.activated_cells.length);
+
+        const activated: number[] = [];
         for (const cell_info of activation.activated_cells) {
             const previous_cell = get_cell(cell_info.x, cell_info.y);
             if(previous_cell != NotActiveCell) {
                 let skip = false;
                 for (const item of activation.damaged_elements) {
-                    const element = view_state.game_state.elements[item.y][item.x];
+                    const element = get_element(item.x, item.y);
                     if (element != NullElement && cell_info.x == item.x && cell_info.y == item.y) {
                         skip = true;
                     }
                 }
+
+                print(activation.element.uid, activation.target_item);
                 
                 if (activation.target_item != NullElement) {
                     const is_target_pos = (cell_info.x == activation.target_item.x) && (cell_info.y == activation.target_item.y);
-                    if(is_target_pos && (is_element(activation.target_item) || (previous_cell.uid == activation.target_item.uid))) {
+                    const is_not_neighbour = !is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y);
+                    const was_activated = activated.includes(cell_info.y * get_field_width() + cell_info.x);
+                    print(activation.element.uid, cell_info.x, cell_info.y, is_target_pos, is_not_neighbour, was_activated);
+                    if(is_target_pos && (is_element(activation.target_item) || is_not_neighbour || was_activated)) {
                         skip = true;
                     }
                 }
         
-                if (!skip) activate_cell_animation(cell_info);
+                if (!skip) {
+                    activated.push(cell_info.y * get_field_width() + cell_info.x);
+                    activate_cell_animation(cell_info);
+                }
             }
         }
     
@@ -1366,24 +1377,30 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             }
         });
     
+        const activated: number[] = [];
         for (const cell_info of data.activated_cells) {
             const previous_cell = get_cell(cell_info.x, cell_info.y);
             if(previous_cell != NotActiveCell) {
                 let skip = false;
                 for (const item of data.damaged_elements) {
-                    const element = view_state.game_state.elements[item.y][item.x];
+                    const element = get_element(item.x, item.y);
                     if (element != NullElement && cell_info.x == item.x && cell_info.y == item.y)
                         skip = true;
                 }
                 for (const item of data.target_items) {
                     if (item != NullElement) {
                         const is_target_pos = (cell_info.x == item.x) && (cell_info.y == item.y);
-                        if(is_target_pos && (is_element(item) || (previous_cell.uid == item.uid))) {
+                        const is_not_neighbour = !is_neighbor(cell_info.x, cell_info.y, data.element.x, data.element.y);
+                        const was_activated = activated.includes(cell_info.y * get_field_width() + cell_info.x);
+                        if(is_target_pos && (is_element(item) || is_not_neighbour || was_activated)) {
                             skip = true;
                         }
                     }
                 }
-                if (!skip) activate_cell_animation(cell_info);
+                if (!skip) {
+                    activated.push(cell_info.y * get_field_width() + cell_info.x);
+                    activate_cell_animation(cell_info);
+                }
             }
         }
     
@@ -1400,12 +1417,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 remove_random_element_animation(message, activation.element, activation.target_item);
         });
     
+        const activated: number[] = [];
         for (const cell_info of activation.activated_cells) {
             const previous_cell = get_cell(cell_info.x, cell_info.y);
             if(previous_cell != NotActiveCell) {
                 let skip = false;
                 for (const item of activation.damaged_elements) {
-                    const element = view_state.game_state.elements[item.y][item.x];
+                    const element = get_element(item.x, item.y);
                     if (element != NullElement && cell_info.x == item.x && cell_info.y == item.y) {
                         skip = true;
                         break;
@@ -1413,11 +1431,16 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 }
                 if (activation.target_item != NullElement) {
                     const is_target_pos = (cell_info.x == activation.target_item.x) && (cell_info.y == activation.target_item.y);
-                    if(is_target_pos && (is_element(activation.target_item) || (previous_cell.uid == activation.target_item.uid))) {
+                    const is_not_neighbour = !is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y);
+                    const was_activated = activated.includes(cell_info.y * get_field_width() + cell_info.x);
+                    if(is_target_pos && (is_element(activation.target_item) || is_not_neighbour || was_activated)) {
                         skip = true;
                     }
                 }
-                if (!skip) activate_cell_animation(cell_info);
+                if (!skip) {
+                    activated.push(cell_info.y * get_field_width() + cell_info.x);
+                    activate_cell_animation(cell_info);
+                }
             }
         }
     

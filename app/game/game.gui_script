@@ -370,6 +370,7 @@ function setup_gameover_ui(instance)
                 EventBus.send("SET_LIFE_NOTIFICATION")
                 return
             end
+            GAME_CONFIG.steps_by_ad = 0
             Scene.restart()
         end
     )

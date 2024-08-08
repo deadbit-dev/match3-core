@@ -12,6 +12,7 @@ local flow = require("ludobits.m.flow")
 local ____math_utils = require("utils.math_utils")
 local Axis = ____math_utils.Axis
 local Direction = ____math_utils.Direction
+local is_neighbor = ____math_utils.is_neighbor
 local is_valid_pos = ____math_utils.is_valid_pos
 local rotateMatrix = ____math_utils.rotateMatrix
 local ____GoManager = require("modules.GoManager")
@@ -51,7 +52,7 @@ local SubstrateMasks = {
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
 }
 function ____exports.View(animator, resources)
-    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_events, on_load_field, set_tutorial, on_element_selected, on_element_unselected, on_set_step_helper, on_reset_step_helper, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, on_buster_activation_begin, on_move_phase_begin, on_move_phase_end, get_world_pos, get_view_item_by_uid, try_make_under_cell, make_cell_view, make_element_view, get_cell, get_field_pos, get_view_item_by_uid_and_index, get_all_view_items_by_uid, update_target_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, on_swap_element_animation, on_wrong_swap_element_animation, combo_animation, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace_animation, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, on_combined_animation, squash_element_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_moved_elements_animation, remove_random_element_animation, damage_element_animation, shuffle_animation, event_to_animation, original_game_width, original_game_height, prev_game_width, prev_game_height, view_state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration
+    local recalculate_sizes, copy_game_state, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, set_events, on_load_field, set_tutorial, on_element_selected, on_element_unselected, on_set_step_helper, on_reset_step_helper, remove_tutorial, update_state, update_cells_state, set_win, set_gameover, remove_animals, on_game_step, dispatch_messages, on_down, on_move, on_up, recalculate_cell_offset, load_field, reset_field, reload_field, make_substrate_view, on_buster_activation_begin, on_move_phase_begin, on_move_phase_end, get_world_pos, get_view_item_by_uid, try_make_under_cell, make_cell_view, make_element_view, get_cell, get_element, get_field_pos, get_view_item_by_uid_and_index, get_all_view_items_by_uid, update_target_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, on_swap_element_animation, on_wrong_swap_element_animation, combo_animation, on_diskisphere_activated_animation, on_swaped_diskosphere_with_buster_animation, on_swaped_diskospheres_animation, on_swaped_diskosphere_with_element_animation, activate_diskosphere_animation, trace_animation, explode_element_animation, on_rocket_activated_animation, on_swaped_rockets_animation, activate_rocket_animation, on_combined_animation, squash_element_animation, rocket_effect, on_helicopter_activated_animation, on_swaped_helicopters_animation, on_swaped_helicopter_with_element_animation, on_dynamite_activated_animation, on_swaped_dynamites_animation, activate_dynamite_animation, dynamite_activate_cell_animation, on_element_activated_animation, activate_cell_animation, on_moved_elements_animation, remove_random_element_animation, damage_element_animation, shuffle_animation, event_to_animation, original_game_width, original_game_height, prev_game_width, prev_game_height, view_state, down_item, selected_element_position, combinate_phase_duration, move_phase_duration
     function recalculate_sizes()
         local ltrb = Camera.get_ltrb()
         if ltrb.z == prev_game_width and ltrb.w == prev_game_height then
@@ -871,6 +872,9 @@ function ____exports.View(animator, resources)
     function get_cell(x, y)
         return view_state.game_state.cells[y + 1][x + 1]
     end
+    function get_element(x, y)
+        return view_state.game_state.elements[y + 1][x + 1]
+    end
     function get_field_pos(world_pos)
         do
             local y = 0
@@ -1515,23 +1519,46 @@ function ____exports.View(animator, resources)
         for ____, element in ipairs(activation.damaged_elements) do
             damage_element_animation(message, element.x, element.y, element.uid)
         end
+        print(
+            "ACTIVATED: ",
+            activation.element.x,
+            activation.element.y,
+            activation.element.uid,
+            #activation.activated_cells
+        )
+        local activated = {}
         for ____, cell_info in ipairs(activation.activated_cells) do
             local previous_cell = get_cell(cell_info.x, cell_info.y)
             if previous_cell ~= NotActiveCell then
                 local skip = false
                 for ____, item in ipairs(activation.damaged_elements) do
-                    local element = view_state.game_state.elements[item.y + 1][item.x + 1]
+                    local element = get_element(item.x, item.y)
                     if element ~= NullElement and cell_info.x == item.x and cell_info.y == item.y then
                         skip = true
                     end
                 end
+                print(activation.element.uid, activation.target_item)
                 if activation.target_item ~= NullElement then
                     local is_target_pos = cell_info.x == activation.target_item.x and cell_info.y == activation.target_item.y
-                    if is_target_pos and (is_element(activation.target_item) or previous_cell.uid == activation.target_item.uid) then
+                    local is_not_neighbour = not is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y)
+                    local was_activated = __TS__ArrayIncludes(
+                        activated,
+                        cell_info.y * get_field_width() + cell_info.x
+                    )
+                    print(
+                        activation.element.uid,
+                        cell_info.x,
+                        cell_info.y,
+                        is_target_pos,
+                        is_not_neighbour,
+                        was_activated
+                    )
+                    if is_target_pos and (is_element(activation.target_item) or is_not_neighbour or was_activated) then
                         skip = true
                     end
                 end
                 if not skip then
+                    activated[#activated + 1] = cell_info.y * get_field_width() + cell_info.x
                     activate_cell_animation(cell_info)
                 end
             end
@@ -1570,12 +1597,13 @@ function ____exports.View(animator, resources)
                 end
             end
         )
+        local activated = {}
         for ____, cell_info in ipairs(data.activated_cells) do
             local previous_cell = get_cell(cell_info.x, cell_info.y)
             if previous_cell ~= NotActiveCell then
                 local skip = false
                 for ____, item in ipairs(data.damaged_elements) do
-                    local element = view_state.game_state.elements[item.y + 1][item.x + 1]
+                    local element = get_element(item.x, item.y)
                     if element ~= NullElement and cell_info.x == item.x and cell_info.y == item.y then
                         skip = true
                     end
@@ -1583,12 +1611,18 @@ function ____exports.View(animator, resources)
                 for ____, item in ipairs(data.target_items) do
                     if item ~= NullElement then
                         local is_target_pos = cell_info.x == item.x and cell_info.y == item.y
-                        if is_target_pos and (is_element(item) or previous_cell.uid == item.uid) then
+                        local is_not_neighbour = not is_neighbor(cell_info.x, cell_info.y, data.element.x, data.element.y)
+                        local was_activated = __TS__ArrayIncludes(
+                            activated,
+                            cell_info.y * get_field_width() + cell_info.x
+                        )
+                        if is_target_pos and (is_element(item) or is_not_neighbour or was_activated) then
                             skip = true
                         end
                     end
                 end
                 if not skip then
+                    activated[#activated + 1] = cell_info.y * get_field_width() + cell_info.x
                     activate_cell_animation(cell_info)
                 end
             end
@@ -1609,12 +1643,13 @@ function ____exports.View(animator, resources)
                 end
             end
         )
+        local activated = {}
         for ____, cell_info in ipairs(activation.activated_cells) do
             local previous_cell = get_cell(cell_info.x, cell_info.y)
             if previous_cell ~= NotActiveCell then
                 local skip = false
                 for ____, item in ipairs(activation.damaged_elements) do
-                    local element = view_state.game_state.elements[item.y + 1][item.x + 1]
+                    local element = get_element(item.x, item.y)
                     if element ~= NullElement and cell_info.x == item.x and cell_info.y == item.y then
                         skip = true
                         break
@@ -1622,11 +1657,17 @@ function ____exports.View(animator, resources)
                 end
                 if activation.target_item ~= NullElement then
                     local is_target_pos = cell_info.x == activation.target_item.x and cell_info.y == activation.target_item.y
-                    if is_target_pos and (is_element(activation.target_item) or previous_cell.uid == activation.target_item.uid) then
+                    local is_not_neighbour = not is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y)
+                    local was_activated = __TS__ArrayIncludes(
+                        activated,
+                        cell_info.y * get_field_width() + cell_info.x
+                    )
+                    if is_target_pos and (is_element(activation.target_item) or is_not_neighbour or was_activated) then
                         skip = true
                     end
                 end
                 if not skip then
+                    activated[#activated + 1] = cell_info.y * get_field_width() + cell_info.x
                     activate_cell_animation(cell_info)
                 end
             end
@@ -2057,9 +2098,6 @@ function ____exports.View(animator, resources)
         end
         set_events()
         dispatch_messages()
-    end
-    local function get_element(x, y)
-        return view_state.game_state.elements[y + 1][x + 1]
     end
     return init()
 end

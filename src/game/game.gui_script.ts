@@ -281,6 +281,8 @@ function setup_gameover_ui(instance: props) {
             EventBus.send("SET_LIFE_NOTIFICATION");
             return;
         }
+
+        GAME_CONFIG.steps_by_ad = 0;
         
         Scene.restart();
     });
