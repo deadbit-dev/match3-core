@@ -186,16 +186,11 @@ export interface GameState extends CoreState {
 }
 
 export function Game() {
-    //#region CONFIG        
-
     const current_level = GameStorage.get('current_level');
     const level_config = GAME_CONFIG.levels[current_level];
     const field_width = level_config['field']['width'];
     const field_height = level_config['field']['height'];
-    const busters = level_config['busters'];
-
-    //#endregion CONFIGURATIONS
-    //#region MAIN          
+    const busters = level_config['busters']; 
 
     const field = Field(field_width, field_height, GAME_CONFIG.complex_move);
 
@@ -256,9 +251,6 @@ export function Game() {
 
         timer.delay(0.1, false, load_field);
     }
-    
-    //#endregion MAIN
-    //#region SETUP
     
     function init_targets() {
         const last_state = get_state();
@@ -354,11 +346,12 @@ export function Game() {
 
     function load_field() {
         Log.log("LOAD FIELD");
-        
-        states.push({} as GameState);
 
         try_load_field();
+
         if(!GAME_CONFIG.is_revive) {
+            states.push({} as GameState);
+
             if(is_tutorial()) set_tutorial();
             
             if(is_tutorial()) {
@@ -455,24 +448,20 @@ export function Game() {
 
             available_steps = [];
 
-            states.pop();
+            states = Object.assign([], GAME_CONFIG.revive_states);
 
+            const state = get_state(1);
             for(let y = 0; y < field_height; y++) {
                 for(let x = 0; x < field_width; x++) {
-                    const cell = GAME_CONFIG.revive_state.cells[y][x];
-                    if(cell != NotActiveCell) make_cell(x, y, cell.id, cell?.data);
+                    const cell = state.cells[y][x];
+                    if(cell != NotActiveCell) field.set_cell(x, y, cell);
                     else field.set_cell(x, y, NotActiveCell);
 
-                    const element = GAME_CONFIG.revive_state.elements[y][x];
-                    if(element != NullElement) make_element(x, y, element.type, element.data);
+                    const element = state.elements[y][x];
+                    if(element != NullElement) field.set_element(x, y, element);
                     else field.set_element(x, y, NullElement);
                 }
             }
-
-            const state = field.save_state();
-            GAME_CONFIG.revive_state.cells = state.cells;
-            GAME_CONFIG.revive_state.elements = state.elements;
-            states.push(GAME_CONFIG.revive_state);
         } else {
             for (let y = 0; y < field_height; y++) {
                 for (let x = 0; x < field_width; x++) {
@@ -662,23 +651,26 @@ export function Game() {
 
     // TODO: move in logic game step end
     function on_game_step_animation_end() {
-        is_block_input = false;
+        if(is_searched) is_block_input = false;
         is_wait_until_animation_done = false;
 
         if(is_level_completed()) {
             Log.log('COMPLETED LEVEL: ', current_level + 1);
             is_block_input = true;
+            timer.cancel(game_timer);
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
             add_coins(level_config.coins);
             timer.delay(1.5, false, () => EventBus.send('ON_WIN'));
-        } else if(!is_have_steps() || is_gameover) {
-            is_block_input = true;
-            timer.delay(1.5, false, gameover);
         }
 
         if(is_searched && available_steps.length == 0) shuffle_field();
+        
+        if(!is_have_steps() || is_gameover) {
+            is_block_input = true;
+            timer.delay(1.5, false, gameover);
+        }
         
         Log.log("END STEP ANIMATION");
     }
@@ -703,7 +695,9 @@ export function Game() {
     function gameover() {
         stop_helper();
         GAME_CONFIG.is_revive = false;
-        GAME_CONFIG.revive_state = copy_state(1);
+        GAME_CONFIG.revive_states = [];
+        for(let i = 0; i < states.length - 1; i++)
+            GAME_CONFIG.revive_states.push(copy_state(states.length - 1 - i));
         EventBus.send('ON_GAME_OVER', get_state());
     }
 
@@ -778,13 +772,8 @@ export function Game() {
 
         return element;
     }
-
-    //#endregion SETUP
-    //#region ACTIONS
     
     function set_helper() {
-        // search_helper_combination();
-
         if(is_shuffling) return;
 
         const delay = is_tutorial() ? 1 : 5;
@@ -1367,7 +1356,7 @@ export function Game() {
                 [0, 1, 0]
             ]);
 
-            event_data.target_item = remove_random_element(event_data.damaged_elements, get_state().targets);
+            event_data.target_item = remove_random_element([event_data.element], get_state().targets);
 
             field.remove_element(x, y);
         });
@@ -1395,7 +1384,7 @@ export function Game() {
                 [0, 1, 0]
             ]);
 
-            for(let i = 0; i < 3; i++) event_data.target_items.push(remove_random_element(event_data.damaged_elements, get_state().targets));
+            for(let i = 0; i < 3; i++) event_data.target_items.push(remove_random_element([event_data.element], get_state().targets));
 
             field.remove_element(x, y);
             field.remove_element(other_x, other_y);
@@ -1425,7 +1414,7 @@ export function Game() {
                 [0, 1, 0]
             ]);
 
-            event_data.target_item = remove_random_element(event_data.damaged_elements, get_state().targets);
+            event_data.target_item = remove_random_element([event_data.element], get_state().targets);
 
             field.remove_element(x, y);
             field.remove_element(other_x, other_y);
@@ -1840,12 +1829,17 @@ export function Game() {
             is_searched = true;
 
             if(steps.length != 0) {
+                is_block_input = false;
                 available_steps = copy_array_of_objects(steps);
                 return;
             }
 
             stop_helper();
-            if(!is_wait_until_animation_done) shuffle_field();
+
+            if(!is_wait_until_animation_done) {
+                shuffle_field();
+                is_block_input = false;
+            }
         });
 
         if(level_config.steps != undefined && is_step) get_state().steps--;
@@ -1854,6 +1848,7 @@ export function Game() {
         if(level_config.steps != undefined) EventBus.send('UPDATED_STEP_COUNTER', last_state.steps);
 
         send_game_step();
+        is_block_input = true;
         is_wait_until_animation_done = true;
 
         new_state(last_state);
@@ -1923,10 +1918,7 @@ export function Game() {
             return get_state().steps > 0;
         }
         return true;
-    }
-
-    //#endregion ACTIONS
-    //#region CALLBACKS     
+    }   
 
     function is_can_move(from_x: number, from_y: number, to_x: number, to_y: number) {
         if(field.is_can_move_base(from_x, from_y, to_x, to_y)) return true;
@@ -2043,6 +2035,7 @@ export function Game() {
                 (value as ActivatedCellMessage[]).push({
                     x: item_info.x,
                     y: item_info.y,
+                    prev: Object.assign({}, cell),
                     cell: (new_cell != NotActiveCell) ? new_cell : Object.assign({}, cell)
                 });
             }
@@ -2053,20 +2046,19 @@ export function Game() {
             for(const target of get_state().targets) {
                 const is_activated = cell?.activations == 0;
                 const is_near_activated = cell?.near_activations == 0;
-                if(target.type == TargetType.Cell && target.id == cell.id && (is_activated || is_near_activated))
+                if(target.type == TargetType.Cell && target.id == cell.id && (is_activated || is_near_activated)) {
+                    print("PUSH: ", cell.uid);
                     target.uids.push(cell.uid);
+                }
             }
         }
     }
 
     function on_revive(steps: number) {
-        GAME_CONFIG.revive_state.steps += steps;
+        GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].steps += steps;
         GAME_CONFIG.is_revive = true;
         Scene.restart();
     }
-
-    //#endregion CALLBACKS
-    //#region HELPERS
     
     function get_state(offset = 0) {
         assert(states.length - (1 + offset) >= 0);
@@ -2155,11 +2147,12 @@ export function Game() {
                 const cell = field.get_cell(x, y);
                 const element = field.get_element(x, y);
 
-                const is_valid_cell = (cell != NotActiveCell) && (targets?.findIndex((target) => {
+                const is_valid_cell = (cell != NotActiveCell) && (exclude?.findIndex((item) => (item.x == x && item.y == y)) == -1) && (targets?.findIndex((target) => {
                     return (target.type == TargetType.Cell && target.id == cell.id && target.count > target.uids.length);
                 }) != -1);
                 
-                const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => item.uid == element.uid) == -1) && (targets?.findIndex((target) => {
+                // const is_valid_element = (element != NullElement) && (targets?.findIndex((target) => {
+                const is_valid_element = (element != NullElement) && (exclude?.findIndex((item) => (item.x == x && item.y == y)) == -1) && (targets?.findIndex((target) => {
                     return (target.type == TargetType.Element && target.id == element.type && target.count > target.uids.length);
                 }) != -1);
                 
@@ -2242,138 +2235,5 @@ export function Game() {
         clear_game_step_events();
     }
 
-    //#endregion HELPERS
-
     return init();
-}
-
-export function load_config() {
-    const data = sys.load_resource('/resources/levels.json')[0];
-    if(data == null) return;
-
-    const levels = json.decode(data) as { 
-        time: number,
-        steps: number,
-        targets: {
-            count: number,
-            type: { cell: CellId | undefined, element: ElementId | undefined }
-        }[],
-        busters: {
-            hammer: number,
-            spinning: number,
-            horizontal_rocket: number,
-            vertical_rocket: number
-        },
-        coins: number,
-        additional_element: ElementId,
-        exclude_element: ElementId,
-        field: (string | { cell: CellId | undefined, element: ElementId | undefined })[][]
-    }[];
-    
-    for(const level_data of levels) {
-        const level: Level = {
-            field: { 
-                width: 10,
-                height: 10,
-                max_width: 8,
-                max_height: 8,
-                cell_size: 128,
-                offset_border: 20,
-
-                cells: [] as (typeof NotActiveCell | CellId)[][] | CellId[][][],
-                elements: [] as (typeof NullElement | typeof RandomElement | ElementId)[][]
-            },
-
-            coins: level_data.coins,
-
-            additional_element: level_data.additional_element,
-            exclude_element: level_data.exclude_element,
-
-            time: level_data.time,
-            steps: level_data.steps,
-            targets: [] as TargetState[],
-
-            busters: {
-                hammer: {
-                    name: 'hammer',
-                    counts: level_data.busters.hammer,
-                    active: false
-                },
-                spinning: {
-                    name: 'spinning',
-                    counts: level_data.busters.spinning,
-                    active: false
-                },
-                horizontal_rocket: {
-                    name: 'horizontal_rocket',
-                    counts: level_data.busters.horizontal_rocket,
-                    active: false
-                },
-                vertical_rocket: {
-                    name: 'vertical_rocket',
-                    counts: level_data. busters.vertical_rocket,
-                    active: false
-                }
-            }
-        };
-
-        for(let y = 0; y < level_data.field.length; y++) {
-            level.field.cells[y] = [];
-            level.field.elements[y] = [];
-            for(let x = 0; x < level_data.field[y].length; x++) {
-                const data = level_data.field[y][x];
-                if(typeof data === 'string') {
-                    switch(data) {
-                        case '-':
-                            level.field.cells[y][x] = NotActiveCell;
-                            level.field.elements[y][x] = NullElement;
-                            break;
-                        case '':
-                            level.field.cells[y][x] = CellId.Base;
-                            level.field.elements[y][x] = RandomElement;
-                            break;
-                    }   
-                } else {
-                    if(data.element != undefined) {
-                        level.field.elements[y][x] = data.element;
-                    } else level.field.elements[y][x] = RandomElement;
-                    
-                    if(data.cell != undefined) {
-                        level.field.cells[y][x] = [CellId.Base, data.cell];
-                        if(level.field.elements[y][x] == RandomElement && (data.cell == CellId.Stone || data.cell == CellId.Box))
-                            level.field.elements[y][x] = NullElement;
-                    } else level.field.cells[y][x] = CellId.Base;
-                }
-            }
-        }
-
-        for(const target_data of level_data.targets) {
-            let target;
-            if(target_data.type.element != undefined) {
-                target = {
-                    id: target_data.type.element as number,
-                    type: TargetType.Element,
-                    count: 0,
-                    uids: []
-                };
-            }
-
-            if(target_data.type.cell != undefined) {
-                target = {
-                    id: target_data.type.cell as number,
-                    type: TargetType.Cell,
-                    count: 0,
-                    uids: []
-                };
-            }
-
-            if(target != undefined) {
-                const count = tonumber(target_data.count);
-                target.count = count != undefined ? count : target.count;
-                level.targets.push(target);
-            }
-        }
-
-        GAME_CONFIG.levels.push(level);
-    }
 }

@@ -811,17 +811,12 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const _go = view_state.go_manager.make_go('cell_view', pos);
         
         const id = (cell_id != undefined) ? cell_id : cell.id;
-
-        print(x, y, cell_id, cell.id);
     
         let view = '';
         if(Array.isArray(GAME_CONFIG.cell_view[id as CellId])) {
             let index = (cell.activations != undefined) ? cell.activations : cell.near_activations != undefined ? cell.near_activations : 1;
-            print(x, y, index);
             view = GAME_CONFIG.cell_view[id as CellId][index - 1];
         } else view = GAME_CONFIG.cell_view[id as CellId] as string;
-
-        print(x, y, view);
 
         sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), view);
         go.set_scale(vmath.vector3(view_state.scale_ratio, view_state.scale_ratio, 1), _go);
@@ -899,19 +894,20 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             const target = view_state.game_state.targets[i];
             if (target.uids.indexOf(uid) != -1) {
                 view_state.targets[i] = math.max(0, view_state.targets[i] - 1);
+                print("UPDATED TARGET: ", uid);
                 EventBus.send('UPDATED_TARGET', {idx: i, amount: view_state.targets[i], id: target.id, type: target.type});
             }
         }
     }
     
-    function delete_view_item_by_uid(uid: string) {
+    function delete_view_item_by_uid(uid: string, update_target = true) {
         const item = get_view_item_by_uid(uid);
         if (item == undefined) {
             delete view_state.game_id_to_view_index[uid];
             return false;
         }
     
-        update_target_by_uid(uid);
+        if(update_target) update_target_by_uid(uid);
     
         view_state.go_manager.delete_item(item, true);
         view_state.game_id_to_view_index[uid].splice(0, 1);
@@ -919,11 +915,11 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         return true;
     }
     
-    function delete_all_view_items_by_uid(uid: string) {
+    function delete_all_view_items_by_uid(uid: string, update_target = true) {
         const items = get_all_view_items_by_uid(uid);
         if (items == undefined) return false;
     
-        update_target_by_uid(uid);
+        if(update_target) update_target_by_uid(uid);
         
         for (const item of items) {
             view_state.go_manager.delete_item(item, true);
@@ -1136,6 +1132,8 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     
     function explode_element_animation(item: ItemInfo) {
         delete_all_view_items_by_uid(item.uid);
+
+        print("EX: ", item.x, item.y, item.uid);
     
         const element = view_state.game_state.elements[item.y][item.x];
         if(element == NullElement) return;
@@ -1170,7 +1168,10 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 let skip = false;
                 for (const element of activation.damaged_elements)
                     if (cell.x == element.x && cell.y == element.y) skip = true;
-                if (!skip) activate_cell_animation(cell);
+                if (!skip) {
+                    print("ROCKET_ACTIVATED_CELL_ANIMATION: ", cell.x, cell.y);
+                    activate_cell_animation(cell);
+                }
             }
         });
     
@@ -1309,8 +1310,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         for (const element of activation.damaged_elements) {
             damage_element_animation(message, element.x, element.y, element.uid);
         }
-        
-        print("ACTIVATED: ", activation.element.x, activation.element.y, activation.element.uid, activation.activated_cells.length);
 
         const activated: number[] = [];
         for (const cell_info of activation.activated_cells) {
@@ -1323,20 +1322,18 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                         skip = true;
                     }
                 }
-
-                print(activation.element.uid, activation.target_item);
                 
                 if (activation.target_item != NullElement) {
                     const is_target_pos = (cell_info.x == activation.target_item.x) && (cell_info.y == activation.target_item.y);
                     const is_not_neighbour = !is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y);
                     const was_activated = activated.includes(cell_info.y * get_field_width() + cell_info.x);
-                    print(activation.element.uid, cell_info.x, cell_info.y, is_target_pos, is_not_neighbour, was_activated);
                     if(is_target_pos && (is_element(activation.target_item) || is_not_neighbour || was_activated)) {
                         skip = true;
                     }
                 }
         
                 if (!skip) {
+                    print("HELICOPTER_ACTIVATED_CELL_ANIMATION: ", cell_info.x, cell_info.y);
                     activated.push(cell_info.y * get_field_width() + cell_info.x);
                     activate_cell_animation(cell_info);
                 }
@@ -1524,10 +1521,26 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         const previous_cell = get_cell(activation.x, activation.y);
         if(previous_cell == NotActiveCell) return;
 
-        delete_all_view_items_by_uid(previous_cell.uid);
+        // FIXME: come up with better solution
+        if(activation.cell.uid == activation.prev.uid && activation.prev.uid != previous_cell.uid) return;
+        
+        if(activation.cell.activations != undefined && previous_cell.activations != undefined) {
+            if(activation.cell.id == previous_cell.id && activation.cell.activations == previous_cell.activations) return;
+        }
+        
+        if(activation.cell.near_activations != undefined && previous_cell.near_activations != undefined) {
+            if(activation.cell.id == previous_cell.id && activation.cell.near_activations == previous_cell.near_activations) return;
+        }
+
+        print("ACTIVATE_ANIMATION: ", activation.x, activation.y, activation.cell.id, activation.prev.uid, activation.cell.uid, previous_cell.uid);
+
+        delete_all_view_items_by_uid(previous_cell.uid, activation.cell.uid != previous_cell.uid);
         
         try_make_under_cell(activation.x, activation.y, activation.cell);
         make_cell_view(activation.x, activation.y, activation.cell);
+
+        // we can do that here ?
+        view_state.game_state.cells[activation.y][activation.x] = activation.cell;
     
         const type = previous_cell.id as CellId;
         if(!GAME_CONFIG.explodable_cells.includes(type))
@@ -1691,6 +1704,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if (key == 'activated_cells') {
                     for (const cell of value as ActivatedCellMessage[]) {
                         if ((cell.x == x) && (cell.y == y)) {
+                            print("DC: ", cell.x, cell.y, cell.cell.uid);
                             activate_cell_animation(cell);
                         }
                     }

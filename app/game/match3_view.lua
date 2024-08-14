@@ -798,16 +798,13 @@ function ____exports.View(animator, resources)
         )
         local _go = view_state.go_manager.make_go("cell_view", pos)
         local id = cell_id ~= nil and cell_id or cell.id
-        print(x, y, cell_id, cell.id)
         local view = ""
         if __TS__ArrayIsArray(GAME_CONFIG.cell_view[id]) then
             local index = cell.activations ~= nil and cell.activations or (cell.near_activations ~= nil and cell.near_activations or 1)
-            print(x, y, index)
             view = GAME_CONFIG.cell_view[id][index]
         else
             view = GAME_CONFIG.cell_view[id]
         end
-        print(x, y, view)
         sprite.play_flipbook(
             msg.url(nil, _go, "sprite"),
             view
@@ -921,29 +918,40 @@ function ____exports.View(animator, resources)
                 local target = view_state.game_state.targets[i + 1]
                 if __TS__ArrayIndexOf(target.uids, uid) ~= -1 then
                     view_state.targets[i] = math.max(0, view_state.targets[i] - 1)
+                    print("UPDATED TARGET: ", uid)
                     EventBus.send("UPDATED_TARGET", {idx = i, amount = view_state.targets[i], id = target.id, type = target.type})
                 end
                 i = i + 1
             end
         end
     end
-    function delete_view_item_by_uid(uid)
+    function delete_view_item_by_uid(uid, update_target)
+        if update_target == nil then
+            update_target = true
+        end
         local item = get_view_item_by_uid(uid)
         if item == nil then
             __TS__Delete(view_state.game_id_to_view_index, uid)
             return false
         end
-        update_target_by_uid(uid)
+        if update_target then
+            update_target_by_uid(uid)
+        end
         view_state.go_manager.delete_item(item, true)
         __TS__ArraySplice(view_state.game_id_to_view_index[uid], 0, 1)
         return true
     end
-    function delete_all_view_items_by_uid(uid)
+    function delete_all_view_items_by_uid(uid, update_target)
+        if update_target == nil then
+            update_target = true
+        end
         local items = get_all_view_items_by_uid(uid)
         if items == nil then
             return false
         end
-        update_target_by_uid(uid)
+        if update_target then
+            update_target_by_uid(uid)
+        end
         for ____, item in ipairs(items) do
             view_state.go_manager.delete_item(item, true)
         end
@@ -1273,6 +1281,7 @@ function ____exports.View(animator, resources)
     end
     function explode_element_animation(item)
         delete_all_view_items_by_uid(item.uid)
+        print("EX: ", item.x, item.y, item.uid)
         local element = view_state.game_state.elements[item.y + 1][item.x + 1]
         if element == NullElement then
             return
@@ -1325,6 +1334,7 @@ function ____exports.View(animator, resources)
                         end
                     end
                     if not skip then
+                        print("ROCKET_ACTIVATED_CELL_ANIMATION: ", cell.x, cell.y)
                         activate_cell_animation(cell)
                     end
                 end
@@ -1435,14 +1445,14 @@ function ____exports.View(animator, resources)
             part1
         )
         repeat
-            local ____switch258 = dir
-            local ____cond258 = ____switch258 == Axis.Vertical
-            if ____cond258 then
+            local ____switch260 = dir
+            local ____cond260 = ____switch260 == Axis.Vertical
+            if ____cond260 then
                 view_state.go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond258 = ____cond258 or ____switch258 == Axis.Horizontal
-            if ____cond258 then
+            ____cond260 = ____cond260 or ____switch260 == Axis.Horizontal
+            if ____cond260 then
                 view_state.go_manager.set_rotation_hash(part0, 90)
                 view_state.go_manager.set_rotation_hash(part1, -90)
                 break
@@ -1519,13 +1529,6 @@ function ____exports.View(animator, resources)
         for ____, element in ipairs(activation.damaged_elements) do
             damage_element_animation(message, element.x, element.y, element.uid)
         end
-        print(
-            "ACTIVATED: ",
-            activation.element.x,
-            activation.element.y,
-            activation.element.uid,
-            #activation.activated_cells
-        )
         local activated = {}
         for ____, cell_info in ipairs(activation.activated_cells) do
             local previous_cell = get_cell(cell_info.x, cell_info.y)
@@ -1537,7 +1540,6 @@ function ____exports.View(animator, resources)
                         skip = true
                     end
                 end
-                print(activation.element.uid, activation.target_item)
                 if activation.target_item ~= NullElement then
                     local is_target_pos = cell_info.x == activation.target_item.x and cell_info.y == activation.target_item.y
                     local is_not_neighbour = not is_neighbor(cell_info.x, cell_info.y, activation.element.x, activation.element.y)
@@ -1545,19 +1547,12 @@ function ____exports.View(animator, resources)
                         activated,
                         cell_info.y * get_field_width() + cell_info.x
                     )
-                    print(
-                        activation.element.uid,
-                        cell_info.x,
-                        cell_info.y,
-                        is_target_pos,
-                        is_not_neighbour,
-                        was_activated
-                    )
                     if is_target_pos and (is_element(activation.target_item) or is_not_neighbour or was_activated) then
                         skip = true
                     end
                 end
                 if not skip then
+                    print("HELICOPTER_ACTIVATED_CELL_ANIMATION: ", cell_info.x, cell_info.y)
                     activated[#activated + 1] = cell_info.y * get_field_width() + cell_info.x
                     activate_cell_animation(cell_info)
                 end
@@ -1770,9 +1765,32 @@ function ____exports.View(animator, resources)
         if previous_cell == NotActiveCell then
             return
         end
-        delete_all_view_items_by_uid(previous_cell.uid)
+        if activation.cell.uid == activation.prev.uid and activation.prev.uid ~= previous_cell.uid then
+            return
+        end
+        if activation.cell.activations ~= nil and previous_cell.activations ~= nil then
+            if activation.cell.id == previous_cell.id and activation.cell.activations == previous_cell.activations then
+                return
+            end
+        end
+        if activation.cell.near_activations ~= nil and previous_cell.near_activations ~= nil then
+            if activation.cell.id == previous_cell.id and activation.cell.near_activations == previous_cell.near_activations then
+                return
+            end
+        end
+        print(
+            "ACTIVATE_ANIMATION: ",
+            activation.x,
+            activation.y,
+            activation.cell.id,
+            activation.prev.uid,
+            activation.cell.uid,
+            previous_cell.uid
+        )
+        delete_all_view_items_by_uid(previous_cell.uid, activation.cell.uid ~= previous_cell.uid)
         try_make_under_cell(activation.x, activation.y, activation.cell)
         make_cell_view(activation.x, activation.y, activation.cell)
+        view_state.game_state.cells[activation.y + 1][activation.x + 1] = activation.cell
         local ____type = previous_cell.id
         if not __TS__ArrayIncludes(GAME_CONFIG.explodable_cells, ____type) then
             return 0
@@ -1976,6 +1994,7 @@ function ____exports.View(animator, resources)
                 if key == "activated_cells" then
                     for ____, cell in ipairs(value) do
                         if cell.x == x and cell.y == y then
+                            print("DC: ", cell.x, cell.y, cell.cell.uid)
                             activate_cell_animation(cell)
                         end
                     end

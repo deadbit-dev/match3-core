@@ -5,8 +5,8 @@ local ____Ads = require("modules.Ads")
 local BannerPos = ____Ads.BannerPos
 local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
-local ____match3_game = require("game.match3_game")
-local load_config = ____match3_game.load_config
+local ____match3_level = require("game.match3_level")
+local load_levels_config = ____match3_level.load_levels_config
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -32,7 +32,7 @@ function ____exports.init(self)
             Camera.set_go_prjection(-1, 1, -3, 3)
             Scene.load(GameStorage.get("move_showed") and "map" or "movie")
             Scene.set_bg("#88dfeb")
-            timer.delay(0, false, load_config)
+            timer.delay(0, false, load_levels_config)
         end,
         true
     )

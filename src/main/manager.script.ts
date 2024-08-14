@@ -11,7 +11,7 @@ import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
 import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
-import { load_config } from '../game/match3_game';
+import { load_levels_config } from '../game/match3_level';
 
 
 interface props {
@@ -44,7 +44,7 @@ export function init(this: props) {
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 
-        timer.delay(0, false, load_config);
+        timer.delay(0, false, load_levels_config);
     }, true);
 }
 

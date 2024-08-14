@@ -349,7 +349,7 @@ export const _GAME_CONFIG = {
     levels: [] as Level[],
     
     is_revive: false,
-    revive_state: {} as GameState,
+    revive_states: {} as GameState[],
 
     is_busy_input: false,
 
@@ -414,7 +414,7 @@ export interface SwapedHelicoptersActivationMessage extends SwapedActivationMess
 
 export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
 
-export interface ActivatedCellMessage { x: number, y: number, cell: Cell }
+export interface ActivatedCellMessage { x: number, y: number, prev: Cell, cell: Cell }
 export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
 
 export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
