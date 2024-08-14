@@ -582,7 +582,9 @@ function ____exports.Game()
         if is_level_completed() then
             Log.log("COMPLETED LEVEL: ", current_level + 1)
             is_block_input = true
-            timer.cancel(game_timer)
+            if game_timer ~= nil then
+                timer.cancel(game_timer)
+            end
             local completed_levels = GameStorage.get("completed_levels")
             completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
             GameStorage.set("completed_levels", completed_levels)
@@ -2087,29 +2089,29 @@ function ____exports.Game()
     function try_combo(combined_element, combination)
         local element = NullElement
         repeat
-            local ____switch456 = combination.type
-            local ____cond456 = ____switch456 == CombinationType.Comb4
-            if ____cond456 then
+            local ____switch457 = combination.type
+            local ____cond457 = ____switch457 == CombinationType.Comb4
+            if ____cond457 then
                 element = make_element(combined_element.x, combined_element.y, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond456 = ____cond456 or ____switch456 == CombinationType.Comb5
-            if ____cond456 then
+            ____cond457 = ____cond457 or ____switch457 == CombinationType.Comb5
+            if ____cond457 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond456 = ____cond456 or ____switch456 == CombinationType.Comb2x2
-            if ____cond456 then
+            ____cond457 = ____cond457 or ____switch457 == CombinationType.Comb2x2
+            if ____cond457 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond456 = ____cond456 or (____switch456 == CombinationType.Comb3x3a or ____switch456 == CombinationType.Comb3x3b)
-            if ____cond456 then
+            ____cond457 = ____cond457 or (____switch457 == CombinationType.Comb3x3a or ____switch457 == CombinationType.Comb3x3b)
+            if ____cond457 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond456 = ____cond456 or (____switch456 == CombinationType.Comb3x4 or ____switch456 == CombinationType.Comb3x5)
-            if ____cond456 then
+            ____cond457 = ____cond457 or (____switch457 == CombinationType.Comb3x4 or ____switch457 == CombinationType.Comb3x5)
+            if ____cond457 then
                 element = make_element(combined_element.x, combined_element.y, ____exports.ElementId.AxisRocket)
                 break
             end

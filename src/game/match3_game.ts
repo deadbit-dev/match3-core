@@ -657,7 +657,7 @@ export function Game() {
         if(is_level_completed()) {
             Log.log('COMPLETED LEVEL: ', current_level + 1);
             is_block_input = true;
-            timer.cancel(game_timer);
+            if(game_timer != null) timer.cancel(game_timer);
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
