@@ -31,47 +31,8 @@ end
 local use_only_projection = false
 local anchor_x = 0
 local anchor_y = 0
-local function width_projection(near, far)
-  local width = render.get_width()
-  local height = render.get_height()
-  local window_width = render.get_window_width()
-  local window_height = render.get_window_height()
-
-  local wr = window_width / width
-  local sh = window_height / wr
-  local w = width
-  local h = sh
-  
-  local left= -w / 2
-  local right = w / 2
-  local bottom =  -h / 2
-  local top = h / 2
-  
-  -- top
-  if anchor_y == 1 then
-    bottom = -h
-    top = 0
-  end
-  
-  -- bottom
-  if anchor_y == -1 then
-    bottom = 0
-    top = h
-  end
-  
-  -- left
-  if anchor_x == -1 then
-    left = 0
-    right = w
-  end
-  
-  -- right
-  if anchor_x == 1 then
-    left = -w
-    right = 0
-  end
-
-  return vmath.matrix4_orthographic(left, right, bottom, top, near, far)
+local function width_projection(near, far, zoom)
+  return Camera.width_projection()
 end
 
 local function get_projection(self)
@@ -213,5 +174,7 @@ function on_message(self, message_id, message)
     anchor_y = message.anchor_y or 0
   elseif message_id == hash('use_only_projection') then
     use_only_projection = message.value
+  elseif message_id == hash('set_zoom') then
+    self.zoom = message.zoom
   end
 end

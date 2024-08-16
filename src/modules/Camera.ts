@@ -31,6 +31,7 @@ function CameraModule() {
     let _near = -1;
     let _far = 1;
     let _zoom = 1;
+    let _game_width = DISPLAY_WIDTH;
 
     function init() {
         update_window_size();
@@ -72,6 +73,16 @@ function CameraModule() {
         update_window_size();
     }
 
+    function set_width_range(value: number) {
+        _game_width = value;
+        WINDOW_WIDTH = 1;
+        update_window_size();
+    }
+
+    function get_width_range() {
+        return _game_width;
+    }
+
 
     function get_zoom() {
         return _zoom;
@@ -94,6 +105,7 @@ function CameraModule() {
             return;
         WINDOW_WIDTH = width;
         WINDOW_HEIGHT = height;
+        EventBus.trigger('SYS_ON_RESIZED', { width, height }, false);
     }
 
     function set_window_scaling_factor(scaling_factor: number) {
@@ -104,18 +116,16 @@ function CameraModule() {
     }
 
     function width_viewport() {
-        const width = DISPLAY_WIDTH / get_zoom();
-        const height = DISPLAY_HEIGHT;
-        const wr = WINDOW_WIDTH / width;
-        const sh = WINDOW_HEIGHT / wr;
-        const w = width;
-        const h = sh;
+        let w = _game_width / get_zoom();
+        let h = WINDOW_HEIGHT / WINDOW_WIDTH * w;
 
         let left = -w / 2;
         let right = w / 2;
         let bottom = -h / 2;
         let top = h / 2;
 
+        const left_x = (DISPLAY_WIDTH - w) / 2;
+        // ----
         if (anchor_y == 1) {
             bottom = -h;
             top = 0;
@@ -127,8 +137,8 @@ function CameraModule() {
         }
 
         if (anchor_x == -1) {
-            left = 0;
-            right = w;
+            left = left_x;
+            right = w + left_x;
         }
 
         if (anchor_x == 1) {
@@ -220,5 +230,5 @@ function CameraModule() {
     }
     init();
 
-    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window };
+    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window, width_projection, set_width_range, get_width_range };
 }

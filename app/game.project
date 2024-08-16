@@ -50,7 +50,7 @@ game_binding = /project_settings/game.input_bindingc
 show_fullscreen_button = 0
 show_made_with_defold = 0
 show_console_banner = 0
-scale_mode = fit
+scale_mode = stretch
 htmlfile = /project_settings/index.html
 
 [sprite]

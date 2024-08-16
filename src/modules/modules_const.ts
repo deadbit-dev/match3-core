@@ -51,6 +51,7 @@ export type _SystemMessages = {
     MSG_ON_DOWN_ITEM: ItemMessage,
     MSG_ON_UP_ITEM: ItemMessage,
     MSG_ON_MOVE_ITEM: ItemMessage,
+    SYS_ON_RESIZED: { width: number, height: number }
 
 };
 

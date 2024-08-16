@@ -115,7 +115,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, get_cell_uid, make_cell, generate_cell_type_by_cell_id, get_element_uid, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_busters, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, is_available_for_placed, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, new_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, clear_game_step_events, write_game_step_event, get_current_game_step_event, game_step_event_end, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, current_game_step_event, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_shuffling, is_searched, is_gameover, is_first_step
+    local init_targets, set_targets, set_timer, set_steps, set_element_types, set_element_chances, set_busters, set_events, load_field, is_tutorial, set_tutorial, lock_cells, unlock_cells, lock_busters, unlock_busters, try_load_field, complete_tutorial, on_swap_elements, on_click_activation, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_vertical_rocket, on_activate_horizontal_rocket, on_revert_step, on_game_step_animation_end, on_game_timer_tick, gameover, load_cell, load_element, get_cell_uid, make_cell, generate_cell_type_by_cell_id, get_element_uid, make_element, set_helper, stop_helper, stop_all_coroutines, reset_current_helper, reset_previous_helper, set_helper_data, search_available_steps, get_step_combination, try_combinate_before_buster_activation, try_click_activation, try_activate_buster_element, try_activate_swaped_buster, try_activate_diskosphere, try_activate_swaped_diskospheres, try_activate_swaped_diskosphere_with_buster, try_activate_swaped_buster_with_diskosphere, try_activate_swaped_diskosphere_with_element, try_activate_rocket, try_activate_swaped_rockets, try_activate_swaped_rocket_with_element, try_activate_helicopter, try_activate_swaped_helicopters, try_activate_swaped_helicopter_with_element, try_activate_dynamite, try_activate_swaped_dynamites, try_activate_swaped_dynamite_with_element, try_activate_swaped_buster_with_buster, try_spinning_activation, is_available_for_placed, shuffle_field, try_hammer_activation, try_horizontal_rocket_activation, try_vertical_rocket_activation, try_swap_elements, set_random, process_game_step, revert_step, is_level_completed, is_have_steps, is_can_move, try_combo, on_damaged_element, is_combined_elements, on_combined, on_request_element, on_moved_elements, on_cell_activated, on_revive, get_state, new_state, update_state, copy_state, is_buster, get_random_element_id, remove_random_element, remove_element_by_mask, clear_game_step_events, write_game_step_event, get_current_game_step_event, game_step_event_end, send_game_step, current_level, level_config, field_width, field_height, busters, field, game_timer, start_game_time, game_item_counter, states, activated_elements, game_step_events, current_game_step_event, selected_element, spawn_element_chances, available_steps, coroutines, previous_helper_data, helper_data, helper_timer, is_step, is_wait_until_animation_done, is_block_input, is_dlg_active, is_block_spinning, is_block_hammer, is_block_vertical_rocket, is_block_horizontal_rocket, is_shuffling, is_searched, is_gameover, is_first_step
     function init_targets()
         local last_state = get_state()
         last_state.targets = {}
@@ -889,7 +889,7 @@ function ____exports.Game()
         local is_activated = false
         local is_procesed = field.process_state(ProcessMode.Combinate)
         if not is_procesed then
-            is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y)
+            is_activated = try_activate_swaped_buster(to_x, to_y, from_x, from_y)
         else
             write_game_step_event(
                 "ON_BUSTER_ACTIVATION",
@@ -955,7 +955,7 @@ function ____exports.Game()
         end
         return activated
     end
-    function try_activate_swaped_busters(x, y, other_x, other_y)
+    function try_activate_swaped_buster(x, y, other_x, other_y)
         local element = field.get_element(x, y)
         local other_element = field.get_element(other_x, other_y)
         if element == NullElement and other_element == NullElement then
@@ -2223,7 +2223,6 @@ function ____exports.Game()
                 local is_activated = (cell and cell.activations) == 0
                 local is_near_activated = (cell and cell.near_activations) == 0
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id and (is_activated or is_near_activated) then
-                    print("PUSH: ", cell.uid)
                     local ____target_uids_38 = target.uids
                     ____target_uids_38[#____target_uids_38 + 1] = cell.uid
                 end
@@ -2494,7 +2493,7 @@ function ____exports.Game()
             "ON_GAME_STEP",
             {
                 events = game_step_events,
-                state = get_state()
+                state = copy_state()
             }
         )
         clear_game_step_events()

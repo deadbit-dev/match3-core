@@ -26,6 +26,7 @@ import {
     Cell,
     CellState,
     MoveType,
+    CoreState,
 } from "./match3_core";
 
 import { SubstrateId, GameState, CellId, ElementId, TargetType } from './match3_game';
@@ -238,20 +239,22 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     }
 
     function copy_game_state() {
-        const copy_state = Object.assign({}, view_state.game_state);
+        const state = Object.assign({}, view_state.game_state);
 
-        copy_state.cells = [];
-        copy_state.elements = [];
+        state.cells = [];
+        state.elements = [];
 
         for(let y = 0; y < get_field_height(); y++) {
-            copy_state.cells[y] = [];
-            copy_state.elements[y] = [];
+            state.cells[y] = [];
+            state.elements[y] = [];
             
             for(let x = 0; x < get_field_width(); x++) {
-                copy_state.cells[y][x] = view_state.game_state.cells[y][x];
-                copy_state.elements[y][x] = view_state.game_state.elements[y][x];
+                state.cells[y][x] = view_state.game_state.cells[y][x];
+                state.elements[y][x] = view_state.game_state.elements[y][x];
             }
         }
+
+        const copy_state = json.decode(json.encode(state)) as GameState;
         
         copy_state.targets = Object.assign([], view_state.game_state.targets);
         return copy_state;
@@ -324,9 +327,25 @@ export function View(animator: FluxGroup, resources: ViewResources) {
         }
 
         recalculate_sizes();
-        timer.delay(0.1, true, recalculate_sizes);
+        // timer.delay(0.1, true, recalculate_sizes);
 
+        EventBus.on("SYS_ON_RESIZED", on_resize);
         EventBus.send('SET_HELPER');
+    }
+    
+    function on_resize(data: { width: number, height: number }) {
+        const display_height = 960;
+        const window_aspect = data.width / data.height;
+        const display_width = tonumber(sys.get_config("display.width"));
+        if (display_width) {
+            const aspect = display_width / display_height;
+            let zoom = 1;
+            if (window_aspect >= aspect) {
+                const height = display_width / window_aspect;
+                zoom = height / display_height;
+            }
+            Camera.set_zoom(zoom);
+        }
     }
 
     function set_tutorial() {
@@ -493,13 +512,13 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                             view_state.go_manager.delete_item(item, true);
                         }
                     }
-                    // CREATE NEW CELLS
-                    const cell = cells[y][x];
-                    view_state.game_state.cells[y][x] = cell;
-                    if(cell != NotActiveCell) {
-                        try_make_under_cell(x, y, cell);
-                        make_cell_view(x, y, cell);
-                    }
+                }
+                // CREATE NEW CELLS
+                const cell = cells[y][x];
+                view_state.game_state.cells[y][x] = cell;
+                if(cell != NotActiveCell) {
+                    try_make_under_cell(x, y, cell);
+                    make_cell_view(x, y, cell);
                 }
             }
         }
@@ -894,7 +913,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             const target = view_state.game_state.targets[i];
             if (target.uids.indexOf(uid) != -1) {
                 view_state.targets[i] = math.max(0, view_state.targets[i] - 1);
-                print("UPDATED TARGET: ", uid);
                 EventBus.send('UPDATED_TARGET', {idx: i, amount: view_state.targets[i], id: target.id, type: target.type});
             }
         }
@@ -1132,8 +1150,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
     
     function explode_element_animation(item: ItemInfo) {
         delete_all_view_items_by_uid(item.uid);
-
-        print("EX: ", item.x, item.y, item.uid);
     
         const element = view_state.game_state.elements[item.y][item.x];
         if(element == NullElement) return;
@@ -1168,10 +1184,7 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 let skip = false;
                 for (const element of activation.damaged_elements)
                     if (cell.x == element.x && cell.y == element.y) skip = true;
-                if (!skip) {
-                    print("ROCKET_ACTIVATED_CELL_ANIMATION: ", cell.x, cell.y);
-                    activate_cell_animation(cell);
-                }
+                if (!skip) activate_cell_animation(cell);
             }
         });
     
@@ -1333,7 +1346,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 }
         
                 if (!skip) {
-                    print("HELICOPTER_ACTIVATED_CELL_ANIMATION: ", cell_info.x, cell_info.y);
                     activated.push(cell_info.y * get_field_width() + cell_info.x);
                     activate_cell_animation(cell_info);
                 }
@@ -1532,8 +1544,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
             if(activation.cell.id == previous_cell.id && activation.cell.near_activations == previous_cell.near_activations) return;
         }
 
-        print("ACTIVATE_ANIMATION: ", activation.x, activation.y, activation.cell.id, activation.prev.uid, activation.cell.uid, previous_cell.uid);
-
         delete_all_view_items_by_uid(previous_cell.uid, activation.cell.uid != previous_cell.uid);
         
         try_make_under_cell(activation.x, activation.y, activation.cell);
@@ -1704,7 +1714,6 @@ export function View(animator: FluxGroup, resources: ViewResources) {
                 if (key == 'activated_cells') {
                     for (const cell of value as ActivatedCellMessage[]) {
                         if ((cell.x == x) && (cell.y == y)) {
-                            print("DC: ", cell.x, cell.y, cell.cell.uid);
                             activate_cell_animation(cell);
                         }
                     }

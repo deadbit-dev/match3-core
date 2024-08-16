@@ -677,7 +677,6 @@ export function Game() {
 
     function on_game_timer_tick() {
         const dt = System.now() - start_game_time;
-        // start_game_time++;
         const remaining_time = math.max(0, level_config.time - dt);
         get_state().remaining_time = remaining_time;
         EventBus.send('GAME_TIMER', remaining_time);
@@ -1016,7 +1015,7 @@ export function Game() {
         let is_activated = false;
         
         const is_procesed = field.process_state(ProcessMode.Combinate);
-        if(!is_procesed) is_activated = try_activate_swaped_busters(to_x, to_y, from_x, from_y);
+        if(!is_procesed) is_activated = try_activate_swaped_buster(to_x, to_y, from_x, from_y);
         else { 
             write_game_step_event('ON_BUSTER_ACTIVATION', {}, () => {
                 if(is_from_buster) is_activated = try_activate_buster_element(to_x, to_y);
@@ -1036,6 +1035,7 @@ export function Game() {
             is_step = true;
             return true;
         }
+
         return false;
     }
 
@@ -1062,7 +1062,7 @@ export function Game() {
         return activated;
     }
 
-    function try_activate_swaped_busters(x: number, y: number, other_x: number, other_y: number) {
+    function try_activate_swaped_buster(x: number, y: number, other_x: number, other_y: number) {
         const element = field.get_element(x, y);
         const other_element = field.get_element(other_x, other_y);
 
@@ -2047,7 +2047,6 @@ export function Game() {
                 const is_activated = cell?.activations == 0;
                 const is_near_activated = cell?.near_activations == 0;
                 if(target.type == TargetType.Cell && target.id == cell.id && (is_activated || is_near_activated)) {
-                    print("PUSH: ", cell.uid);
                     target.uids.push(cell.uid);
                 }
             }
@@ -2231,7 +2230,7 @@ export function Game() {
     }
 
     function send_game_step() {
-        EventBus.send('ON_GAME_STEP', { events: game_step_events, state: get_state()});
+        EventBus.send('ON_GAME_STEP', { events: game_step_events, state: copy_state()});
         clear_game_step_events();
     }
 
