@@ -1,21 +1,17 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
-local __TS__StringAccess = ____lualib.__TS__StringAccess
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
 function ____exports.get_current_level()
     return GameStorage.get("current_level")
 end
+function ____exports.get_current_level_config()
+    return GAME_CONFIG.levels[____exports.get_current_level() + 1]
+end
 function ____exports.is_animal_level()
     return __TS__ArrayIncludes(
         GAME_CONFIG.animal_levels,
-        ____exports.get_current_level() + 1
-    )
-end
-function ____exports.is_tutorial_level()
-    return __TS__ArrayIncludes(
-        GAME_CONFIG.tutorial_levels,
         ____exports.get_current_level() + 1
     )
 end
@@ -47,6 +43,10 @@ function ____exports.get_field_cell_size()
     local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
     return level_config.field.cell_size
 end
+function ____exports.get_busters()
+    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
+    return level_config.busters
+end
 function ____exports.get_move_direction(dir)
     local cs45 = 0.7
     if dir.y > cs45 then
@@ -60,12 +60,6 @@ function ____exports.get_move_direction(dir)
     else
         return Direction.None
     end
-end
-function ____exports.is_element(item)
-    return __TS__StringAccess(item.uid, 0) == "E"
-end
-function ____exports.is_cell(item)
-    return __TS__StringAccess(item.uid, 0) == "C"
 end
 function ____exports.add_lifes(amount)
     local life = GameStorage.get("life")
@@ -97,5 +91,24 @@ function ____exports.remove_coins(amount)
     coins = coins - amount
     GameStorage.set("coins", coins)
     EventBus.send("REMOVED_COIN")
+end
+function ____exports.is_tutorial()
+    local current_level = ____exports.get_current_level()
+    local is_tutorial_level = __TS__ArrayIncludes(GAME_CONFIG.tutorial_levels, current_level + 1)
+    local is_not_completed = not __TS__ArrayIncludes(
+        GameStorage.get("completed_tutorials"),
+        current_level + 1
+    )
+    return is_tutorial_level and is_not_completed
+end
+function ____exports.is_tutorial_step(swap_info)
+    local current_level = ____exports.get_current_level()
+    local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+    if tutorial_data.step == nil then
+        return true
+    end
+    local is_from = swap_info.from.x == tutorial_data.step.from.x and swap_info.from.y == tutorial_data.step.from.y
+    local is_to = swap_info.to.x == tutorial_data.step.to.x and swap_info.to.y == tutorial_data.step.to.y
+    return is_from and is_to
 end
 return ____exports

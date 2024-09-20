@@ -17,6 +17,9 @@ export function init(this: props): void {
     Manager.init_script();
     this.druid = druid.new(this);
 
+    gui.set_text(gui.get_node('description'), Lang.get_text('movie_description'));
+    gui.set_text(gui.get_node('text'), Lang.get_text('play'));
+
     this.druid.new_button('btn', () => {
         Scene.load("map");
     });

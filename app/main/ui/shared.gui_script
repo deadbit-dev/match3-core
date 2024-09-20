@@ -115,19 +115,31 @@ function setup_store(data)
     )
     data.druid:new_button(
         "store/buy_30_btn",
-        function() return add_coins(30) end
+        function()
+            Sound.play("purchase")
+            add_coins(30)
+        end
     )
     data.druid:new_button(
         "store/buy_150_btn",
-        function() return add_coins(150) end
+        function()
+            Sound.play("purchase")
+            add_coins(150)
+        end
     )
     data.druid:new_button(
         "store/buy_300_btn",
-        function() return add_coins(300) end
+        function()
+            Sound.play("purchase")
+            add_coins(300)
+        end
     )
     data.druid:new_button(
         "store/buy_800_btn",
-        function() return add_coins(800) end
+        function()
+            Sound.play("purchase")
+            add_coins(800)
+        end
     )
     gui.set_text(
         gui.get_node("store/life_title_text"),
@@ -142,6 +154,7 @@ function setup_store(data)
             if not is_enough_coins(30) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             add_lifes(1)
             remove_coins(30)
         end
@@ -155,6 +168,7 @@ function setup_store(data)
             if not is_enough_coins(50) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             add_lifes(2)
             remove_coins(50)
         end
@@ -168,6 +182,7 @@ function setup_store(data)
             if not is_enough_coins(70) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             add_lifes(3)
             remove_coins(70)
         end
@@ -182,6 +197,7 @@ function setup_store(data)
             if not is_enough_coins(80) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             remove_coins(80)
             add_coins(150)
             set_infinit_life(1)
@@ -210,6 +226,7 @@ function setup_store(data)
             if not is_enough_coins(160) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             remove_coins(160)
             add_coins(300)
             set_infinit_life(24)
@@ -242,6 +259,7 @@ function setup_store(data)
             if not is_enough_coins(100) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             remove_coins(100)
         end
     )
@@ -251,6 +269,7 @@ function setup_store(data)
             if not is_enough_coins(250) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             remove_coins(250)
         end
     )
@@ -260,6 +279,7 @@ function setup_store(data)
             if not is_enough_coins(600) then
                 return set_enabled_not_enough_coins(true)
             end
+            Sound.play("purchase")
             remove_coins(600)
         end
     )
@@ -575,11 +595,20 @@ function on_scene_loaded(scene)
     until true
 end
 function on_gameover()
-    set_enabled_coins(true)
-    set_enabled_lifes(true)
+    timer.delay(
+        GAME_CONFIG.delay_before_gameover,
+        false,
+        function()
+            set_enabled_coins(true)
+            set_enabled_lifes(true)
+        end
+    )
 end
 function set_enabled_store(state)
     local store = gui.get_node("store/manager")
+    if state and gui.is_enabled(store, false) then
+        return
+    end
     if state then
         gui.set_enabled(store, state)
         gui.animate(
@@ -592,10 +621,12 @@ function set_enabled_store(state)
         gui.animate(
             gui.get_node("store/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
+        Sound.play("store")
     else
         gui.animate(
             gui.get_node("store/fade"),
@@ -615,8 +646,9 @@ function set_enabled_store(state)
                 gui.set_enabled(store, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
+        Sound.stop("store")
     end
-    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_life_notification(state)
     local life = gui.get_node("life_notification/manager")
@@ -632,10 +664,11 @@ function set_enabled_life_notification(state)
         gui.animate(
             gui.get_node("life_notification/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("life_notification/fade"),
@@ -655,6 +688,7 @@ function set_enabled_life_notification(state)
                 gui.set_enabled(life, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
     EventBus.send("LIFE_NOTIFICATION", state)
 end
@@ -672,10 +706,11 @@ function set_enabled_not_enough_coins(state)
         gui.animate(
             gui.get_node("not_enough_coins/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("not_enough_coins/fade"),
@@ -695,6 +730,7 @@ function set_enabled_not_enough_coins(state)
                 gui.set_enabled(coins, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
 end
 function set_enabled_hammer(data, state)
@@ -711,10 +747,11 @@ function set_enabled_hammer(data, state)
         gui.animate(
             gui.get_node("hammer/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("hammer/fade"),
@@ -734,9 +771,9 @@ function set_enabled_hammer(data, state)
                 gui.set_enabled(hammer, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
     data.dlg_opened = state
-    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_spinning(data, state)
     local spinning = gui.get_node("spinning/manager")
@@ -752,10 +789,11 @@ function set_enabled_spinning(data, state)
         gui.animate(
             gui.get_node("spinning/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("spinning/fade"),
@@ -775,9 +813,9 @@ function set_enabled_spinning(data, state)
                 gui.set_enabled(spinning, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
     data.dlg_opened = state
-    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_horizontall_rocket(data, state)
     local horizontal_rocket = gui.get_node("horizontal_rocket/manager")
@@ -793,10 +831,11 @@ function set_enabled_horizontall_rocket(data, state)
         gui.animate(
             gui.get_node("horizontal_rocket/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("horizontal_rocket/fade"),
@@ -816,9 +855,9 @@ function set_enabled_horizontall_rocket(data, state)
                 gui.set_enabled(horizontal_rocket, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
     data.dlg_opened = state
-    EventBus.send("DLG_ACTIVE", state)
 end
 function set_enabled_vertical_rocket(data, state)
     local vertical_rocket = gui.get_node("vertical_rocket/manager")
@@ -834,10 +873,11 @@ function set_enabled_vertical_rocket(data, state)
         gui.animate(
             gui.get_node("vertical_rocket/fade"),
             "color",
-            vmath.vector4(0, 0, 0, 0.3),
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
             0.3
         )
+        EventBus.send("OPENED_DLG")
     else
         gui.animate(
             gui.get_node("vertical_rocket/fade"),
@@ -857,9 +897,9 @@ function set_enabled_vertical_rocket(data, state)
                 gui.set_enabled(vertical_rocket, state)
             end
         )
+        EventBus.send("CLOSED_DLG")
     end
     data.dlg_opened = state
-    EventBus.send("DLG_ACTIVE", state)
 end
 function ____exports.init(self)
     Manager.init_script()

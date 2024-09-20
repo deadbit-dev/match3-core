@@ -16,7 +16,7 @@ ____exports.lang_data = {
     steps = {["Русский-ru"] = "Ходов", ["Английский-en"] = "Steps"},
     time = {["Русский-ru"] = "Время", ["Английский-en"] = "Time"},
     targets = {["Русский-ru"] = "Цели", ["Английский-en"] = "Targets"},
-    win_title = {["Русский-ru"] = "Победа", ["Английский-en"] = "Win"},
+    win_title = {["Русский-ru"] = "Уровень пройден!", ["Английский-en"] = "Level completed!"},
     gameover_title = {["Русский-ru"] = "Уровень не пройден", ["Английский-en"] = "Gameover"},
     continue = {["Русский-ru"] = "Продолжить", ["Английский-en"] = "Continue"},
     restart = {["Русский-ru"] = "Повторить", ["Английский-en"] = "Restart"},
@@ -35,6 +35,8 @@ ____exports.lang_data = {
     junior_box = {["Русский-ru"] = "Набор новичкка", ["Английский-en"] = "Junior box"},
     catlover_box = {["Русский-ru"] = "Набор кошатника", ["Английский-en"] = "Catlover box"},
     remove_ad = {["Русский-ru"] = "Отключить рекламу", ["Английский-en"] = "Remove ad"},
-    next_life = {["Русский-ru"] = "Следующая жизнь через", ["Английский-en"] = "Next life through"}
+    next_life = {["Русский-ru"] = "Следующая жизнь через", ["Английский-en"] = "Next life through"},
+    movie_description = {["Русский-ru"] = "Кошка потерялась, помоги ей преодолеть препятствия и вернуться домой", ["Английский-en"] = "The cat is lost, help her overcome obstacles and return home"},
+    play = {["Русский-ru"] = "Играть", ["Английский-en"] = "Play"}
 }
 return ____exports

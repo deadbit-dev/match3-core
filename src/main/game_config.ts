@@ -2,9 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { NullElement, CoreState, ItemInfo, StepInfo, CombinationInfo, MovedInfo, Element, CombinationType, Cell, NotActiveCell, CellState } from "../game/match3_core";
-import { CellId, ElementId, GameState, Level, RandomElement, SubstrateId, Target, TargetState, TargetType, TutorialData } from "../game/match3_game";
-import { MessageId, Messages, NameMessage, PosXYMessage, VoidMessage } from "../modules/modules_const";
+import { NullElement, SwapInfo, CombinationInfo, MoveInfo, Element, DamageInfo, Position, ElementInfo } from "../game/core";
+import { Level } from "../game/match3_level";
+import { CellId, ElementId, TargetType, GameState, TutorialData, LockInfo, UnlockInfo } from "../game/game";
+import { SubstrateId } from "../game/view";
+import { NameMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
 
 export const IS_DEBUG_MODE = true;
@@ -37,21 +39,33 @@ export const MAIN_BUNDLE_SCENES = ['game'];
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    min_swipe_distance: 32,
+    swap_element_easing: go.EASING_INOUTQUAD,
+    swap_element_time: 0.15,
+
+    combination_delay: 0.2,
+    // combination_delay_after_swap: 0.1,
+    // combination_delay_after_falling: 0.25,
+
+    squash_easing: go.EASING_INCUBIC,
+    squash_time: 0.25,
+
+    falling_dalay: 0.05,
+    falling_time: 0.15,
+
     min_lifes: 0,
     max_lifes: 3,
 
+    delay_before_win: 3,
+    delay_before_gameover: 3,
+
     animal_offset: true,
+    animal_level_delay_before_win: 5,
 
-    min_swipe_distance: 32,
-    
-    swap_element_easing: go.EASING_LINEAR,
-    swap_element_time: 0.25,
+    fade_value: 0.7,
 
-    squash_element_easing: go.EASING_INCUBIC,
-    squash_element_time: 0.25,
-
-    helicopter_spin_duration: 0.5 + 0.75,
-    helicopter_fly_duration: 0.75,
+    helicopter_spin_duration: 0.5 + 2,
+    helicopter_fly_duration: 2,
 
     damaged_element_easing: go.EASING_INOUTBACK,
     damaged_element_time: 0.25,
@@ -59,11 +73,6 @@ export const _GAME_CONFIG = {
     damaged_element_scale: 0.3,
 
     base_cell_color: sys.get_sys_info().system_name == 'HTML5' ? html5.run(`new URL(location).searchParams.get('color')||'#c29754'`) : '#c29754',
-
-    complex_move: true,
-
-    movement_to_point: sys.get_sys_info().system_name == 'HTML5' ? (html5.run(`new URL(location).searchParams.get('move')==null`) == 'true') : true,
-    duration_of_movement_between_cells: sys.get_sys_info().system_name == 'HTML5' ? tonumber(html5.run(`new URL(location).searchParams.get('time')||0.05`))! : 0.05,
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
@@ -95,34 +104,39 @@ export const _GAME_CONFIG = {
         [CellId.Flowers]: 'cell_flowers',
         [CellId.Web]: 'cell_web',
         [CellId.Box]: 'cell_box',
-        [CellId.Stone]: ['cell_stone_2', 'cell_stone_1', 'cell_stone'],
-        [CellId.Lock]: 'cell_lock'
+        [CellId.Stone]: ['cell_stone_2', 'cell_stone_1', 'cell_stone']
     } as { [key in CellId]: string | string[] },
 
-    // TODO: maybe counts activation by cell_view
-    cell_activations: {
-        [CellId.Box]: { near_activations: 1 },
-        [CellId.Flowers]: { activations: 1 },
-        [CellId.Grass]: { activations: 2 },
-        [CellId.Stone]: { near_activations: 3 },
-        [CellId.Web]: { activations: 1 }
-    } as { [key in CellId]: { activations?: number, near_activations ?: number}},
+    sounded_cells: [CellId.Box, CellId.Web, CellId.Grass, CellId.Stone],
+    cell_sound: {
+        [CellId.Box]: 'wood',
+        [CellId.Grass]: 'grass',
+        [CellId.Web]: 'web',
+        [CellId.Stone]: 'stone'
+    } as { [key in number]: string},
+
+    cell_strength: {
+        [CellId.Box]: 1,
+        [CellId.Flowers]: 1,
+        [CellId.Grass]: 2,
+        [CellId.Stone]: 3,
+        [CellId.Web]: 1
+    } as { [key in CellId]: number},
     
-    activation_cells: [
+    damage_cells: [
         CellId.Web,
         CellId.Grass,
         CellId.Flowers
     ],
 
-    near_activated_cells: [
+    near_damage_cells: [
         CellId.Box,
         CellId.Stone,
     ],
     
     disabled_cells: [
         CellId.Box,
-        CellId.Stone,
-        CellId.Lock
+        CellId.Stone
     ],
 
     not_moved_cells: [
@@ -134,8 +148,7 @@ export const _GAME_CONFIG = {
     top_layer_cells: [
         CellId.Box,
         CellId.Stone,
-        CellId.Web,
-        CellId.Lock
+        CellId.Web
     ],
 
     element_view: {
@@ -146,7 +159,7 @@ export const _GAME_CONFIG = {
         [ElementId.Emerald]: 'element_emerald',
         [ElementId.VerticalRocket]: 'vertical_rocket_buster',
         [ElementId.HorizontalRocket]: 'horizontal_rocket_buster',
-        [ElementId.AxisRocket]: 'axis_rocket_buster',
+        [ElementId.AllAxisRocket]: 'axis_rocket_buster',
         [ElementId.Helicopter]: 'helicopter_buster',
         [ElementId.Dynamite]: 'dynamite_buster',
         [ElementId.Diskosphere]: 'diskosphere_buster',
@@ -207,10 +220,16 @@ export const _GAME_CONFIG = {
     buster_elements: [
         ElementId.VerticalRocket,
         ElementId.HorizontalRocket,
-        ElementId.AxisRocket,
+        ElementId.AllAxisRocket,
         ElementId.Dynamite,
         ElementId.Helicopter,
         ElementId.Diskosphere
+    ],
+
+    rockets: [
+        ElementId.VerticalRocket,
+        ElementId.HorizontalRocket,
+        ElementId.AllAxisRocket
     ],
 
     animal_levels: [4, 11, 18, 25, 32, 39, 47],
@@ -232,8 +251,14 @@ export const _GAME_CONFIG = {
                                             {x: 5, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
             ],
-            bounds: {from_x: 3, from_y: 4, to_x: 6, to_y: 6},
-            step: {from_x: 5, from_y: 4, to_x: 5, to_y: 5},
+            bounds: {
+                from: {x: 3, y: 4},
+                to: {x: 6, y: 6}
+            },
+            step: {
+                from: {x: 5, y: 4},
+                to: {x: 5, y: 5}
+            },
             text: {
                 data: "tutorial_collect",
                 pos: vmath.vector3(0, 320, 0)
@@ -246,8 +271,14 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 5},
                 {x: 3, y: 6},
             ],
-            bounds: {from_x: 3, from_y: 3, to_x: 5, to_y: 7},
-            step: {from_x: 4, from_y: 4, to_x: 3, to_y: 4},
+            bounds: {
+                from: {x: 3, y: 3},
+                to: {x: 5, y: 7}
+            },
+            step: {
+                from: {x: 4, y: 4},
+                to: {x: 3, y: 4}
+            },
             text: { 
                 data: "tutorial_collect_rocket",
                 pos: vmath.vector3(0, 320, 0)
@@ -263,8 +294,14 @@ export const _GAME_CONFIG = {
                                             {x: 5, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
             ],
-            bounds: {from_x: 3, from_y: 3, to_x: 8, to_y: 5},
-            step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            bounds: {
+                from: {x: 3, y: 3},
+                to: {x: 8, y: 5}
+            },
+            step: {
+                from: {x: 5, y: 3},
+                to: {x: 5, y: 4}
+            },
             text: {
                 data: "tutorial_collect_diskosphere",
                 pos: vmath.vector3(0, 320, 0)
@@ -280,8 +317,14 @@ export const _GAME_CONFIG = {
                                             {x: 5, y: 3},
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
             ],
-            bounds: {from_x: 3, from_y: 3, to_x: 6, to_y: 5},
-            step: {from_x: 5, from_y: 3, to_x: 5, to_y: 4},
+            bounds: {
+                from: {x: 3, y: 3},
+                to: {x: 6, y: 5}
+            },
+            step: {
+                from: {x: 5, y: 3},
+                to: {x: 5, y: 4}
+            },
             text: {
                 data: "tutorial_timer",
                 pos: vmath.vector3(0, 320, 0)
@@ -292,8 +335,14 @@ export const _GAME_CONFIG = {
                                             {x: 7, y: 3},
                 {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
             ],
-            bounds: {from_x: 5, from_y: 3, to_x: 8, to_y: 5},
-            step: {from_x: 7, from_y: 3, to_x: 7, to_y: 4},
+            bounds: {
+                from: {x: 5, y: 3},
+                to: {x: 8, y: 5}
+            },
+            step: {
+                from: {x: 7, y: 3},
+                to: {x: 7, y: 4}
+            },
             text: {
                 data: "tutorial_grass",
                 pos: vmath.vector3(0, 320, 0)
@@ -318,8 +367,14 @@ export const _GAME_CONFIG = {
                 {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
                 {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
             ],
-            bounds: {from_x: 3, from_y: 4, to_x: 7, to_y: 6},
-            step: {from_x: 3, from_y: 4, to_x: 4, to_y: 4},
+            bounds: {
+                from: {x: 3, y: 4},
+                to: {x: 7, y: 6}
+            },
+            step: {
+                from: {x: 3, y: 4},
+                to: {x: 4, y: 4}
+            },
             text: {
                 data: "tutorial_box",
                 pos: vmath.vector3(0, 250, 0)
@@ -330,8 +385,14 @@ export const _GAME_CONFIG = {
                 {x: 6, y: 4}, 
                 {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
             ],
-            bounds: {from_x: 6, from_y: 4, to_x: 9, to_y: 6},
-            step: {from_x: 6, from_y: 4, to_x: 6, to_y: 5},
+            bounds: {
+                from: {x: 6, y: 4},
+                to: {x: 9, y: 6}
+            },
+            step: {
+                from: {x: 6, y: 4},
+                to: {x: 6, y: 5}
+            },
             text: {
                 data: "tutorial_web",
                 pos: vmath.vector3(0, 270, 0)
@@ -349,6 +410,7 @@ export const _GAME_CONFIG = {
     levels: [] as Level[],
     
     is_revive: false,
+    is_restart: false,
     revive_states: {} as GameState[],
 
     is_busy_input: false,
@@ -392,119 +454,117 @@ export const _STORAGE_CONFIG = {
     completed_tutorials: [] as number[]
 };
 
-export type GameStepEventBuffer = { key: MessageId, value: Messages[MessageId] }[];
-export type MovedElementsMessage = { elements: MovedInfo[], state: GameState };
-
-export interface GameStepMessage { events: GameStepEventBuffer, state: GameState }
-
-export interface ElementMessage extends ItemInfo { type: number }
-export interface ElementActivationMessage extends ItemInfo { activated_cells: ActivatedCellMessage[] }
-export interface SwapElementsMessage { from: {x: number, y: number}, to: {x: number, y: number}, element_from: Element, element_to: Element | typeof NullElement, state: GameState }
-export interface CombinedMessage { combined_element: ItemInfo, combination: CombinationInfo, activated_cells: ActivatedCellMessage[], maked_element?: ElementMessage }
-export interface StepHelperMessage { step: StepInfo, combined_element: ItemInfo, elements: ItemInfo[] }
-
-export interface ActivationMessage { element: ItemInfo, damaged_elements: ItemInfo[], activated_cells: ActivatedCellMessage[] }
-export interface SwapedActivationMessage extends ActivationMessage { other_element: ItemInfo }
-
-export interface RocketActivationMessage extends ActivationMessage { axis: Axis }
-
-export interface HelicopterActivationMessage extends ActivationMessage { target_item: ItemInfo | typeof NullElement }
-export interface SwapedHelicopterWithElementMessage extends SwapedActivationMessage { target_item: ItemInfo | typeof NullElement }
-export interface SwapedHelicoptersActivationMessage extends SwapedActivationMessage { target_items: (ItemInfo | typeof NullElement)[] }
-
-export interface SwapedDiskosphereActivationMessage extends SwapedActivationMessage { maked_elements: ElementMessage[] }
-
-export interface ActivatedCellMessage { x: number, y: number, prev: Cell, cell: Cell }
-export interface RevertStepMessage { current_state: GameState, previous_state: GameState }
-
 export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
-
-export type SpinningActivationMessage = { element_from: ItemInfo, element_to: ItemInfo }[];
+export interface SwapElementsMessage extends SwapInfo { element_from: Element, element_to: Element | typeof NullElement }
+export interface CombinateMessage { combined_positions: Position[] }
+export interface ResponseCombinateMessage { pos: Position, combination: CombinationInfo }
+export interface CombinedMessage { pos: Position, damages: DamageInfo[], maked_element?: Element }
+export interface CombinateBustersMessage { buster_from: ElementInfo, buster_to: ElementInfo }
+export interface RequestElementMessage { pos: Position, element: Element }
+export interface BusterActivatedMessage { pos: Position, uid: number, damages: DamageInfo[] }
+export interface DynamiteActivatedMessage extends BusterActivatedMessage { big_range: boolean }
+export interface RocketActivatedMessage extends BusterActivatedMessage { axis: Axis }
+export interface HelicopterActivatedMessage extends BusterActivatedMessage { triple: boolean }
+export interface DiskosphereActivatedMessage extends BusterActivatedMessage { buster?: ElementId }
+export interface DiskosphereDamageElementMessage { damage_info: DamageInfo, buster?: ElementId }
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
     SYS_LOAD_RESOURCE: NameMessage,
     SYS_UNLOAD_RESOURCE: NameMessage,
 
-    REQUEST_LOAD_FIELD: VoidMessage,
-    ON_LOAD_FIELD: GameState,
+    REQUEST_LOAD_GAME: VoidMessage,
+    RESPONSE_LOAD_GAME: GameState,
+
+    REQUEST_CLICK: Position,
+
+    REQUEST_TRY_SWAP_ELEMENTS: SwapInfo,
+    RESPONSE_SWAP_ELEMENTS: SwapElementsMessage,
+    RESPONSE_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
+    REQUEST_SWAP_ELEMENTS_END: SwapElementsMessage,
+
+    REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP: SwapElementsMessage,
+
+    RESPONSE_COMBINATE_BUSTERS: CombinateBustersMessage,
+    REQUEST_COMBINED_BUSTERS: CombinateBustersMessage,
+
+    REQUEST_COMBINATE: CombinateMessage,
+    RESPONSE_COMBINATE: CombinationInfo,
+    REQUEST_COMBINATION: CombinationInfo,
+    RESPONSE_COMBINATION: CombinedMessage,
+    REQUEST_COMBINATION_END: DamageInfo[],
+
+    REQUEST_FALLING: Position,
+    REQUEST_FALL_END: Position,
+    RESPONSE_FALLING: MoveInfo,
+    RESPONSE_FALL_END: Element,
+
+    REQUESTED_ELEMENT: RequestElementMessage,
+
+    RESPONSE_HAMMER_DAMAGE: DamageInfo,
+
+    RESPONSE_DYNAMITE_ACTIVATED: DynamiteActivatedMessage,
+    REQUEST_DYNAMITE_ACTION: DynamiteActivatedMessage,
+    RESPONSE_DYNAMITE_ACTION: DynamiteActivatedMessage,
+
+    RESPONSE_ACTIVATED_ROCKET: RocketActivatedMessage,
+    REQUEST_ROCKET_END: DamageInfo[],
+
+    RESPONSE_ACTIVATED_DISKOSPHERE: DiskosphereActivatedMessage,
+    REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END: DiskosphereDamageElementMessage,
+
+    RESPONSE_ACTIVATED_HELICOPTER: HelicopterActivatedMessage,
+    REQUEST_HELICOPTER_ACTION: HelicopterActivatedMessage,
+    RESPONSE_HELICOPTER_ACTION: BusterActivatedMessage,
+    REQUEST_HELICOPTER_START_FLYING: BusterActivatedMessage,
+    REQUEST_HELICOPTER_END: BusterActivatedMessage,
+
+    REQUEST_SHUFFLE_END: VoidMessage,
+
+    //---------------------------------------------------------------
 
     INIT_UI: VoidMessage,
-
-    UPDATED_STATE: GameState,
-    UPDATED_CELLS_STATE: CellState,
-
-    GAME_TIMER: number,
-
-    SET_HELPER: VoidMessage,
-
-    SWAP_ELEMENTS: StepInfo,
-    ON_SWAP_ELEMENTS: SwapElementsMessage,
-    ON_WRONG_SWAP_ELEMENTS: SwapElementsMessage,
-    CLICK_ACTIVATION: PosXYMessage,
-
-    ACTIVATE_BUSTER: NameMessage,
-    
-    ON_SPINNING_ACTIVATED: SpinningActivationMessage,
-
-    ON_ELEMENT_SELECTED: ItemInfo,
-    ON_ELEMENT_UNSELECTED: ItemInfo,
-
-    ON_SET_STEP_HELPER: StepHelperMessage,
-    ON_RESET_STEP_HELPER: StepHelperMessage,
-
-    ON_BUSTER_ACTIVATION: VoidMessage,
-
-    SWAPED_BUSTER_WITH_DISKOSPHERE_ACTIVATED: SwapedDiskosphereActivationMessage,
-
-    DISKOSPHERE_ACTIVATED: ActivationMessage,
-    SWAPED_DISKOSPHERES_ACTIVATED: SwapedActivationMessage,
-    SWAPED_DISKOSPHERE_WITH_BUSTER_ACTIVATED: SwapedDiskosphereActivationMessage,
-    SWAPED_DISKOSPHERE_WITH_ELEMENT_ACTIVATED: SwapedActivationMessage,
-
-    ROCKET_ACTIVATED: RocketActivationMessage,
-    SWAPED_ROCKETS_ACTIVATED: SwapedActivationMessage,
-
-    HELICOPTER_ACTIVATED: HelicopterActivationMessage,
-    SWAPED_HELICOPTERS_ACTIVATED: SwapedHelicoptersActivationMessage,
-    SWAPED_HELICOPTER_WITH_ELEMENT_ACTIVATED: SwapedHelicopterWithElementMessage,
-
-    DYNAMITE_ACTIVATED: ActivationMessage,
-    SWAPED_DYNAMITES_ACTIVATED: SwapedActivationMessage,
-
-    ON_COMBINED: CombinedMessage,
-
-    ON_MOVED_ELEMENTS: MovedElementsMessage,
-    ON_GAME_STEP: GameStepMessage,
-    ON_GAME_STEP_ANIMATION_END: VoidMessage,
-
-    TRY_REVERT_STEP: VoidMessage,
-    REVERT_STEP: VoidMessage,
-    ON_REVERT_STEP: RevertStepMessage,
-
-    ON_ELEMENT_ACTIVATED: ElementActivationMessage,
-
-    UPDATED_BUTTONS: VoidMessage,
     UPDATED_STEP_COUNTER: number,
-    UPDATED_TIMER: number,
     UPDATED_TARGET: TargetMessage,
-
-    ON_WIN: VoidMessage,
-    ON_GAME_OVER: GameState,
-
-    SET_TUTORIAL: VoidMessage,
-    REMOVE_TUTORIAL: VoidMessage,
-
-    DLG_ACTIVE: boolean,
-
-    LIFE_NOTIFICATION: boolean,
-    NOT_ENOUGH_LIFE: VoidMessage,
 
     ADDED_LIFE: VoidMessage,
     REMOVED_LIFE: VoidMessage,
 
     ADDED_COIN: VoidMessage,
     REMOVED_COIN: VoidMessage,
+
+    OPENED_DLG: VoidMessage,
+    CLOSED_DLG: VoidMessage,
+
+    LIFE_NOTIFICATION: boolean,
+    NOT_ENOUGH_LIFE: VoidMessage,
+
+    ON_WIN: GameState,
+    ON_GAME_OVER: GameState,
+
+    MOVIE_END: VoidMessage,
+
+    UPDATED_STATE: GameState,
+
+    GAME_TIMER: number,
+
+    SET_HELPER: VoidMessage,
+
+    SWAP_ELEMENTS: SwapInfo,
+
+    ACTIVATE_BUSTER: NameMessage,
+
+    // ON_ELEMENT_SELECTED: ItemInfo,
+    // ON_ELEMENT_UNSELECTED: ItemInfo,
+
+    // ON_SET_STEP_HELPER: StepHelperMessage,
+    // ON_RESET_STEP_HELPER: StepHelperMessage,
+
+    UPDATED_BUTTONS: VoidMessage,
+    UPDATED_TIMER: number,
+
+    SET_TUTORIAL: LockInfo,
+    REMOVE_TUTORIAL: UnlockInfo,
 
     REQUEST_OPEN_STORE: VoidMessage,
 
@@ -518,7 +578,6 @@ export type _UserMessages = {
 
     SHUFFLE: GameState,
 
-    MOVIE_END: VoidMessage,
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
     FEED_ANIMAL: number,

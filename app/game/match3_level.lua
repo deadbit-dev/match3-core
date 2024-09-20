@@ -1,11 +1,11 @@
 local ____exports = {}
-local ____match3_core = require("game.match3_core")
-local NotActiveCell = ____match3_core.NotActiveCell
-local NullElement = ____match3_core.NullElement
-local ____match3_game = require("game.match3_game")
-local CellId = ____match3_game.CellId
-local RandomElement = ____match3_game.RandomElement
-local TargetType = ____match3_game.TargetType
+local ____core = require("game.core")
+local NotActiveCell = ____core.NotActiveCell
+local NullElement = ____core.NullElement
+local ____game = require("game.game")
+local TargetType = ____game.TargetType
+local CellId = ____game.CellId
+local RandomElement = ____game.RandomElement
 function ____exports.load_levels_config()
     local data = sys.load_resource("/resources/levels.json")
     if data == nil then
@@ -30,7 +30,7 @@ function ____exports.load_levels_config()
             time = level_data.time,
             steps = level_data.steps,
             targets = {},
-            busters = {hammer = {name = "hammer", counts = level_data.busters.hammer, active = false}, spinning = {name = "spinning", counts = level_data.busters.spinning, active = false}, horizontal_rocket = {name = "horizontal_rocket", counts = level_data.busters.horizontal_rocket, active = false}, vertical_rocket = {name = "vertical_rocket", counts = level_data.busters.vertical_rocket, active = false}}
+            busters = {hammer = {name = "hammer", counts = level_data.busters.hammer, active = false, block = false}, spinning = {name = "spinning", counts = level_data.busters.spinning, active = false, block = false}, horizontal_rocket = {name = "horizontal_rocket", counts = level_data.busters.horizontal_rocket, active = false, block = false}, vertical_rocket = {name = "vertical_rocket", counts = level_data.busters.vertical_rocket, active = false, block = false}}
         }
         do
             local y = 0

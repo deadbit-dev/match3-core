@@ -26,6 +26,7 @@ export function init(this: props): void {
 
     set_events(this);
 
+    Sound.play('map');
     Scene.load_resource('map', 'shared_gui');
 }
 
@@ -65,6 +66,7 @@ function load_level(level: number) {
     }
     GAME_CONFIG.steps_by_ad = 0;
     GameStorage.set('current_level', level);
+    Sound.stop('map');
     Scene.load('game');
 }
 
@@ -96,8 +98,15 @@ function on_drag(action: any) {
 }
 
 function set_events(instace: props) {
-    EventBus.on('DLG_ACTIVE', (state) => {
-        instace.block_input = state;
+    EventBus.on('OPENED_DLG', () => {
+        instace.block_input = true;
+        Sound.stop('map');
+    });
+
+    EventBus.on('CLOSED_DLG', () => {
+        instace.block_input = false;
+        Sound.play('map');
+        
     });
 
     EventBus.on('LIFE_NOTIFICATION', (state) => {

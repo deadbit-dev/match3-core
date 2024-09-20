@@ -1,8 +1,8 @@
 local ____exports = {}
 local flow = require("ludobits.m.flow")
 local flux = require("utils.flux")
-local ____match3_view = require("game.match3_view")
-local View = ____match3_view.View
+local ____view = require("game.view")
+local View = ____view.View
 go.property(
     "default_sprite_material",
     resource.material("/builtins/materials/sprite.material")
@@ -16,7 +16,7 @@ function ____exports.init(self)
     Manager.init_script()
     msg.post(".", "acquire_input_focus")
     flow.start(
-        function() return View(self.animator, {default_sprite_material = self.default_sprite_material, tutorial_sprite_material = self.tutorial_sprite_material}) end,
+        function() return View({default_sprite_material = self.default_sprite_material, tutorial_sprite_material = self.tutorial_sprite_material}) end,
         {}
     )
 end

@@ -1,5 +1,30 @@
-import { NotActiveCell, NullElement } from "./match3_core";
-import { CellId, ElementId, Level, RandomElement, TargetState, TargetType } from "./match3_game";
+import { NotActiveCell, NullElement } from "./core";
+import { TargetType, TargetState, Busters, CellId, ElementId, RandomElement } from "./game"; 
+
+export interface Level {
+    field: { 
+        width: number,
+        height: number,
+        max_width: number,
+        max_height: number,
+        cell_size: number,
+        offset_border: number,
+
+        cells: (typeof NotActiveCell | CellId)[][] | CellId[][][],
+        elements: (typeof NullElement | typeof RandomElement | ElementId)[][]
+    },
+
+    coins: number,
+
+    additional_element: ElementId,
+    exclude_element: ElementId,
+
+    time: number,
+    steps: number,
+    targets: TargetState[],
+
+    busters: Busters
+}
 
 export function load_levels_config() {
     const data = sys.load_resource('/resources/levels.json')[0];
@@ -51,22 +76,26 @@ export function load_levels_config() {
                 hammer: {
                     name: 'hammer',
                     counts: level_data.busters.hammer,
-                    active: false
+                    active: false,
+                    block: false,
                 },
                 spinning: {
                     name: 'spinning',
                     counts: level_data.busters.spinning,
-                    active: false
+                    active: false,
+                    block: false,
                 },
                 horizontal_rocket: {
                     name: 'horizontal_rocket',
                     counts: level_data.busters.horizontal_rocket,
-                    active: false
+                    active: false,
+                    block: false,
                 },
                 vertical_rocket: {
                     name: 'vertical_rocket',
                     counts: level_data. busters.vertical_rocket,
-                    active: false
+                    active: false,
+                    block: false
                 }
             }
         };

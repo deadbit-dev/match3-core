@@ -38,7 +38,7 @@ export function init(this: props) {
 
         default_style.scroll.WHEEL_SCROLL_SPEED = 10;
         druid.set_default_style(default_style);
-        Sound.attach_druid_click('sel');
+        Sound.attach_druid_click('btn');
         Camera.set_go_prjection(-1, 1, -3, 3);
 
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');

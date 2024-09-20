@@ -1,16 +1,16 @@
 import { Direction } from "../utils/math_utils";
-import { ItemInfo } from "./match3_core";
+import { SwapInfo } from "./core";
 
 export function get_current_level() {
     return GameStorage.get('current_level');
 }
 
-export function is_animal_level() {
-    return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
+export function get_current_level_config() {
+    return GAME_CONFIG.levels[get_current_level()];
 }
 
-export function is_tutorial_level() {
-    return GAME_CONFIG.tutorial_levels.includes(get_current_level() + 1);
+export function is_animal_level() {
+    return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
 }
 
 export function get_level_targets() {
@@ -48,6 +48,11 @@ export function get_field_cell_size() {
     return level_config['field']['cell_size'];
 }
 
+export function get_busters() {
+    const level_config = GAME_CONFIG.levels[get_current_level()];
+    return level_config['busters'];
+}
+
 export function get_move_direction(dir: vmath.vector3) {
     const cs45 = 0.7;
     if (dir.y > cs45) return Direction.Up;
@@ -55,13 +60,6 @@ export function get_move_direction(dir: vmath.vector3) {
     else if (dir.x < -cs45) return Direction.Left;
     else if (dir.x > cs45) return Direction.Right;
     else return Direction.None;
-}
-export function is_element(item: ItemInfo) {
-    return (item.uid[0] == 'E');
-}
-
-export function is_cell(item: ItemInfo) {
-    return (item.uid[0] == 'C');
 }
 
 export function add_lifes(amount: number) {
@@ -99,4 +97,22 @@ export function remove_coins(amount: number) {
     coins -= amount;
     GameStorage.set('coins', coins);
     EventBus.send('REMOVED_COIN');
+}
+
+export function is_tutorial() {
+    const current_level = get_current_level();
+    const is_tutorial_level = GAME_CONFIG.tutorial_levels.includes(current_level + 1);
+    const is_not_completed = !GameStorage.get('completed_tutorials').includes(current_level + 1);
+    return (is_tutorial_level && is_not_completed);
+}
+
+export function is_tutorial_step(swap_info: SwapInfo) {
+    const current_level = get_current_level();
+    const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+    if(tutorial_data.step == undefined)
+        return true;
+
+    const is_from = swap_info.from.x == tutorial_data.step.from.x && swap_info.from.y == tutorial_data.step.from.y;
+    const is_to = swap_info.to.x == tutorial_data.step.to.x && swap_info.to.y == tutorial_data.step.to.y;
+    return (is_from && is_to);
 }

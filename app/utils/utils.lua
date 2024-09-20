@@ -3,7 +3,6 @@ local __TS__StringReplace = ____lualib.__TS__StringReplace
 local __TS__StringSubstr = ____lualib.__TS__StringSubstr
 local __TS__StringSplit = ____lualib.__TS__StringSplit
 local __TS__ArraySort = ____lualib.__TS__ArraySort
-local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
 local ____exports = {}
 function ____exports.hex2rgba(hex, alpha)
     if alpha == nil then
@@ -182,12 +181,5 @@ function ____exports.set_position_xy(item, x, y)
 end
 function ____exports.is_equal_game_items(cell1, cell2)
     return cell1._hash == cell2._hash
-end
-function ____exports.copy_array_of_objects(array)
-    local copy_of_array = {}
-    for ____, element in ipairs(array) do
-        copy_of_array[#copy_of_array + 1] = __TS__ObjectAssign({}, element)
-    end
-    return copy_of_array
 end
 return ____exports

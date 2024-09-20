@@ -108,10 +108,22 @@ function setup_store(data: props) {
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
     
-    data.druid.new_button('store/buy_30_btn', () => add_coins(30));
-    data.druid.new_button('store/buy_150_btn', () => add_coins(150));
-    data.druid.new_button('store/buy_300_btn', () => add_coins(300));
-    data.druid.new_button('store/buy_800_btn', () => add_coins(800));
+    data.druid.new_button('store/buy_30_btn', () => {
+        Sound.play('purchase');
+        add_coins(30);
+    });
+    data.druid.new_button('store/buy_150_btn', () => {
+        Sound.play('purchase');
+        add_coins(150);
+    });
+    data.druid.new_button('store/buy_300_btn', () => {
+        Sound.play('purchase');
+        add_coins(300);
+    });
+    data.druid.new_button('store/buy_800_btn', () => {
+        Sound.play('purchase');
+        add_coins(800);
+    });
 
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
 
@@ -120,6 +132,8 @@ function setup_store(data: props) {
         if(!is_enough_coins(30)) {
             return set_enabled_not_enough_coins(true);
         }
+
+        Sound.play('purchase');
 
         add_lifes(1);
         remove_coins(30);
@@ -131,6 +145,8 @@ function setup_store(data: props) {
             return set_enabled_not_enough_coins(true);
         }
 
+        Sound.play('purchase');
+
         add_lifes(2);
         remove_coins(50);
     });
@@ -141,6 +157,8 @@ function setup_store(data: props) {
             return set_enabled_not_enough_coins(true);
         }
 
+        Sound.play('purchase');
+
         add_lifes(3);
         remove_coins(70);
     });
@@ -149,6 +167,8 @@ function setup_store(data: props) {
 
     data.druid.new_button('store/junior_box/buy_button/button', () => {
         if(!is_enough_coins(80)) return set_enabled_not_enough_coins(true);
+
+        Sound.play('purchase');
 
         remove_coins(80);
         add_coins(150);
@@ -167,6 +187,8 @@ function setup_store(data: props) {
     data.druid.new_button('store/catlover_box/buy_button/button', () => {
         if(!is_enough_coins(160)) return set_enabled_not_enough_coins(true);
 
+        Sound.play('purchase');
+
         remove_coins(160);
         add_coins(300);
 
@@ -184,16 +206,19 @@ function setup_store(data: props) {
 
     data.druid.new_button('store/buy_ad_1_btn', () => {
         if(!is_enough_coins(100)) return set_enabled_not_enough_coins(true);
+        Sound.play('purchase');
         remove_coins(100);
     });
 
     data.druid.new_button('store/buy_ad_7_btn', () => {
         if(!is_enough_coins(250)) return set_enabled_not_enough_coins(true);
+        Sound.play('purchase');
         remove_coins(250);
     });
 
     data.druid.new_button('store/buy_ad_30_btn', () => {
         if(!is_enough_coins(600)) return set_enabled_not_enough_coins(true);
+        Sound.play('purchase');
         remove_coins(600);
     });
 
@@ -444,25 +469,31 @@ function on_scene_loaded(scene: NameMessage) {
 }
 
 function on_gameover() {
-    set_enabled_coins(true);
-    set_enabled_lifes(true);
+    timer.delay(GAME_CONFIG.delay_before_gameover, false, () => {
+        set_enabled_coins(true);
+        set_enabled_lifes(true);
+    });
 }
 
 function set_enabled_store(state: boolean) {
     const store = gui.get_node('store/manager');
-    
+
+    if(state && gui.is_enabled(store, false) ) return;
+
     if(state) {
         gui.set_enabled(store, state);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
+        Sound.play('store');
     } else {
         gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 1500, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(store, state);
         });
+        EventBus.send('CLOSED_DLG');
+        Sound.stop('store');
     }
-
-    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_life_notification(state: boolean) {
@@ -471,12 +502,14 @@ function set_enabled_life_notification(state: boolean) {
     if(state) {
         gui.set_enabled(life, state);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(life, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 
     EventBus.send('LIFE_NOTIFICATION', state);
@@ -488,12 +521,14 @@ function set_enabled_not_enough_coins(state: boolean) {
     if(state) {
         gui.set_enabled(coins, state);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('not_enough_coins/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('not_enough_coins/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('not_enough_coins/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(coins, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 }
 
@@ -503,17 +538,17 @@ function set_enabled_hammer(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(hammer, state);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(hammer, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 
     data.dlg_opened = state;
-
-    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_spinning(data: props, state: boolean) {
@@ -522,17 +557,17 @@ function set_enabled_spinning(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(spinning, state);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(spinning, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 
     data.dlg_opened = state;
-
-    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_horizontall_rocket(data: props, state: boolean) {
@@ -541,17 +576,17 @@ function set_enabled_horizontall_rocket(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(horizontal_rocket, state);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(horizontal_rocket, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 
     data.dlg_opened = state;
-
-    EventBus.send('DLG_ACTIVE', state);
 }
 
 function set_enabled_vertical_rocket(data: props, state: boolean) {
@@ -560,15 +595,15 @@ function set_enabled_vertical_rocket(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(vertical_rocket, state);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0.3), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG');
     } else {
         gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(vertical_rocket, state);
         });
+        EventBus.send('CLOSED_DLG');
     }
 
     data.dlg_opened = state;
-
-    EventBus.send('DLG_ACTIVE', state);
 }

@@ -64,8 +64,8 @@ export const lang_data = {
     "Английский-en": "Targets"
   },
   "win_title": {
-    "Русский-ru": "Победа",
-    "Английский-en": "Win"
+    "Русский-ru": "Уровень пройден!",
+    "Английский-en": "Level completed!"
   },
   "gameover_title": {
     "Русский-ru": "Уровень не пройден",
@@ -142,5 +142,13 @@ export const lang_data = {
   "next_life": {
     "Русский-ru": "Следующая жизнь через",
     "Английский-en": "Next life through"
+  },
+  "movie_description": {
+    "Русский-ru": "Кошка потерялась, помоги ей преодолеть препятствия и вернуться домой",
+    "Английский-en": "The cat is lost, help her overcome obstacles and return home"
+  },
+  "play": {
+    "Русский-ru": "Играть",
+    "Английский-en": "Play"
   }
 };

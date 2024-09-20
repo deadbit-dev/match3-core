@@ -1,10 +1,11 @@
 local ____lualib = require("lualib_bundle")
 local __TS__StringIncludes = ____lualib.__TS__StringIncludes
 local ____exports = {}
-local ____match3_game = require("game.match3_game")
-local CellId = ____match3_game.CellId
-local ElementId = ____match3_game.ElementId
-local SubstrateId = ____match3_game.SubstrateId
+local ____game = require("game.game")
+local CellId = ____game.CellId
+local ElementId = ____game.ElementId
+local ____view = require("game.view")
+local SubstrateId = ____view.SubstrateId
 ____exports.IS_DEBUG_MODE = true
 ____exports.IS_HUAWEI = sys.get_sys_info().system_name == "Android" and __TS__StringIncludes(
     sys.get_config("android.package"),
@@ -25,36 +26,29 @@ ____exports.ID_YANDEX_METRICA = sys.get_sys_info().system_name == "Android" and 
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.MAIN_BUNDLE_SCENES = {"game"}
-local ____go_EASING_LINEAR_1 = go.EASING_LINEAR
-local ____go_EASING_INCUBIC_2 = go.EASING_INCUBIC
-local ____temp_3 = 0.5 + 0.75
-local ____go_EASING_INOUTBACK_4 = go.EASING_INOUTBACK
-local ____temp_5 = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#c29754'") or "#c29754"
-local ____temp_0
-if sys.get_sys_info().system_name == "HTML5" then
-    ____temp_0 = html5.run("new URL(location).searchParams.get('move')==null") == "true"
-else
-    ____temp_0 = true
-end
 ____exports._GAME_CONFIG = {
+    min_swipe_distance = 32,
+    swap_element_easing = go.EASING_INOUTQUAD,
+    swap_element_time = 0.15,
+    combination_delay = 0.2,
+    squash_easing = go.EASING_INCUBIC,
+    squash_time = 0.25,
+    falling_dalay = 0.05,
+    falling_time = 0.15,
     min_lifes = 0,
     max_lifes = 3,
+    delay_before_win = 3,
+    delay_before_gameover = 3,
     animal_offset = true,
-    min_swipe_distance = 32,
-    swap_element_easing = ____go_EASING_LINEAR_1,
-    swap_element_time = 0.25,
-    squash_element_easing = ____go_EASING_INCUBIC_2,
-    squash_element_time = 0.25,
-    helicopter_spin_duration = ____temp_3,
-    helicopter_fly_duration = 0.75,
-    damaged_element_easing = ____go_EASING_INOUTBACK_4,
+    animal_level_delay_before_win = 5,
+    fade_value = 0.7,
+    helicopter_spin_duration = 0.5 + 2,
+    helicopter_fly_duration = 2,
+    damaged_element_easing = go.EASING_INOUTBACK,
     damaged_element_time = 0.25,
     damaged_element_delay = 0,
     damaged_element_scale = 0.3,
-    base_cell_color = ____temp_5,
-    complex_move = true,
-    movement_to_point = ____temp_0,
-    duration_of_movement_between_cells = sys.get_sys_info().system_name == "HTML5" and tonumber(html5.run("new URL(location).searchParams.get('time')||0.05")) or 0.05,
+    base_cell_color = sys.get_sys_info().system_name == "HTML5" and html5.run("new URL(location).searchParams.get('color')||'#c29754'") or "#c29754",
     spawn_element_easing = go.EASING_INCUBIC,
     spawn_element_time = 0.5,
     default_substrate_z_index = -2,
@@ -81,21 +75,22 @@ ____exports._GAME_CONFIG = {
         [CellId.Flowers] = "cell_flowers",
         [CellId.Web] = "cell_web",
         [CellId.Box] = "cell_box",
-        [CellId.Stone] = {"cell_stone_2", "cell_stone_1", "cell_stone"},
-        [CellId.Lock] = "cell_lock"
+        [CellId.Stone] = {"cell_stone_2", "cell_stone_1", "cell_stone"}
     },
-    cell_activations = {
-        [CellId.Box] = {near_activations = 1},
-        [CellId.Flowers] = {activations = 1},
-        [CellId.Grass] = {activations = 2},
-        [CellId.Stone] = {near_activations = 3},
-        [CellId.Web] = {activations = 1}
+    sounded_cells = {CellId.Box, CellId.Web, CellId.Grass, CellId.Stone},
+    cell_sound = {[CellId.Box] = "wood", [CellId.Grass] = "grass", [CellId.Web] = "web", [CellId.Stone] = "stone"},
+    cell_strength = {
+        [CellId.Box] = 1,
+        [CellId.Flowers] = 1,
+        [CellId.Grass] = 2,
+        [CellId.Stone] = 3,
+        [CellId.Web] = 1
     },
-    activation_cells = {CellId.Web, CellId.Grass, CellId.Flowers},
-    near_activated_cells = {CellId.Box, CellId.Stone},
-    disabled_cells = {CellId.Box, CellId.Stone, CellId.Lock},
+    damage_cells = {CellId.Web, CellId.Grass, CellId.Flowers},
+    near_damage_cells = {CellId.Box, CellId.Stone},
+    disabled_cells = {CellId.Box, CellId.Stone},
     not_moved_cells = {CellId.Box, CellId.Stone, CellId.Web},
-    top_layer_cells = {CellId.Box, CellId.Stone, CellId.Web, CellId.Lock},
+    top_layer_cells = {CellId.Box, CellId.Stone, CellId.Web},
     element_view = {
         [ElementId.Dimonde] = "element_diamond",
         [ElementId.Gold] = "element_gold",
@@ -104,7 +99,7 @@ ____exports._GAME_CONFIG = {
         [ElementId.Emerald] = "element_emerald",
         [ElementId.VerticalRocket] = "vertical_rocket_buster",
         [ElementId.HorizontalRocket] = "horizontal_rocket_buster",
-        [ElementId.AxisRocket] = "axis_rocket_buster",
+        [ElementId.AllAxisRocket] = "axis_rocket_buster",
         [ElementId.Helicopter] = "helicopter_buster",
         [ElementId.Dynamite] = "dynamite_buster",
         [ElementId.Diskosphere] = "diskosphere_buster",
@@ -156,11 +151,12 @@ ____exports._GAME_CONFIG = {
     buster_elements = {
         ElementId.VerticalRocket,
         ElementId.HorizontalRocket,
-        ElementId.AxisRocket,
+        ElementId.AllAxisRocket,
         ElementId.Dynamite,
         ElementId.Helicopter,
         ElementId.Diskosphere
     },
+    rockets = {ElementId.VerticalRocket, ElementId.HorizontalRocket, ElementId.AllAxisRocket},
     animal_levels = {
         4,
         11,
@@ -194,8 +190,8 @@ ____exports._GAME_CONFIG = {
     tutorials_data = {
         [1] = {
             cells = {{x = 5, y = 4}, {x = 3, y = 5}, {x = 4, y = 5}, {x = 5, y = 5}},
-            bounds = {from_x = 3, from_y = 4, to_x = 6, to_y = 6},
-            step = {from_x = 5, from_y = 4, to_x = 5, to_y = 5},
+            bounds = {from = {x = 3, y = 4}, to = {x = 6, y = 6}},
+            step = {from = {x = 5, y = 4}, to = {x = 5, y = 5}},
             text = {
                 data = "tutorial_collect",
                 pos = vmath.vector3(0, 320, 0)
@@ -209,8 +205,8 @@ ____exports._GAME_CONFIG = {
                 {x = 3, y = 5},
                 {x = 3, y = 6}
             },
-            bounds = {from_x = 3, from_y = 3, to_x = 5, to_y = 7},
-            step = {from_x = 4, from_y = 4, to_x = 3, to_y = 4},
+            bounds = {from = {x = 3, y = 3}, to = {x = 5, y = 7}},
+            step = {from = {x = 4, y = 4}, to = {x = 3, y = 4}},
             text = {
                 data = "tutorial_collect_rocket",
                 pos = vmath.vector3(0, 320, 0)
@@ -230,8 +226,8 @@ ____exports._GAME_CONFIG = {
                 {x = 6, y = 4},
                 {x = 7, y = 4}
             },
-            bounds = {from_x = 3, from_y = 3, to_x = 8, to_y = 5},
-            step = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
+            bounds = {from = {x = 3, y = 3}, to = {x = 8, y = 5}},
+            step = {from = {x = 5, y = 3}, to = {x = 5, y = 4}},
             text = {
                 data = "tutorial_collect_diskosphere",
                 pos = vmath.vector3(0, 320, 0)
@@ -244,8 +240,8 @@ ____exports._GAME_CONFIG = {
         },
         [4] = {
             cells = {{x = 5, y = 3}, {x = 3, y = 4}, {x = 4, y = 4}, {x = 5, y = 4}},
-            bounds = {from_x = 3, from_y = 3, to_x = 6, to_y = 5},
-            step = {from_x = 5, from_y = 3, to_x = 5, to_y = 4},
+            bounds = {from = {x = 3, y = 3}, to = {x = 6, y = 5}},
+            step = {from = {x = 5, y = 3}, to = {x = 5, y = 4}},
             text = {
                 data = "tutorial_timer",
                 pos = vmath.vector3(0, 320, 0)
@@ -253,8 +249,8 @@ ____exports._GAME_CONFIG = {
         },
         [5] = {
             cells = {{x = 7, y = 3}, {x = 5, y = 4}, {x = 6, y = 4}, {x = 7, y = 4}},
-            bounds = {from_x = 5, from_y = 3, to_x = 8, to_y = 5},
-            step = {from_x = 7, from_y = 3, to_x = 7, to_y = 4},
+            bounds = {from = {x = 5, y = 3}, to = {x = 8, y = 5}},
+            step = {from = {x = 7, y = 3}, to = {x = 7, y = 4}},
             text = {
                 data = "tutorial_grass",
                 pos = vmath.vector3(0, 320, 0)
@@ -285,8 +281,8 @@ ____exports._GAME_CONFIG = {
                 {x = 5, y = 5},
                 {x = 6, y = 5}
             },
-            bounds = {from_x = 3, from_y = 4, to_x = 7, to_y = 6},
-            step = {from_x = 3, from_y = 4, to_x = 4, to_y = 4},
+            bounds = {from = {x = 3, y = 4}, to = {x = 7, y = 6}},
+            step = {from = {x = 3, y = 4}, to = {x = 4, y = 4}},
             text = {
                 data = "tutorial_box",
                 pos = vmath.vector3(0, 250, 0)
@@ -294,8 +290,8 @@ ____exports._GAME_CONFIG = {
         },
         [13] = {
             cells = {{x = 6, y = 4}, {x = 6, y = 5}, {x = 7, y = 5}, {x = 8, y = 5}},
-            bounds = {from_x = 6, from_y = 4, to_x = 9, to_y = 6},
-            step = {from_x = 6, from_y = 4, to_x = 6, to_y = 5},
+            bounds = {from = {x = 6, y = 4}, to = {x = 9, y = 6}},
+            step = {from = {x = 6, y = 4}, to = {x = 6, y = 5}},
             text = {
                 data = "tutorial_web",
                 pos = vmath.vector3(0, 270, 0)
@@ -311,6 +307,7 @@ ____exports._GAME_CONFIG = {
     },
     levels = {},
     is_revive = false,
+    is_restart = false,
     revive_states = {},
     is_busy_input = false,
     steps_by_ad = 0

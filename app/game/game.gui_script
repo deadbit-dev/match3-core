@@ -2,18 +2,22 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, set_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, presets, hand_timer
+local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
+local get_point_curve = ____utils.get_point_curve
 local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
-local ____match3_game = require("game.match3_game")
-local TargetType = ____match3_game.TargetType
 local ____match3_utils = require("game.match3_utils")
+local get_current_level_config = ____match3_utils.get_current_level_config
+local is_animal_level = ____match3_utils.is_animal_level
 local is_enough_coins = ____match3_utils.is_enough_coins
 local remove_coins = ____match3_utils.remove_coins
 local remove_lifes = ____match3_utils.remove_lifes
+local ____game = require("game.game")
+local TargetType = ____game.TargetType
 function setup(instance)
     setup_info_ui(instance)
     setup_busters(instance)
@@ -33,50 +37,6 @@ function setup(instance)
         vmath.vector3(270, 65, 0),
         gui.EASING_INCUBIC,
         0.5
-    )
-    gui.set_scale(
-        gui.get_node("hammer/button"),
-        vmath.vector3(0, 0, 0)
-    )
-    gui.set_scale(
-        gui.get_node("spinning/button"),
-        vmath.vector3(0, 0, 0)
-    )
-    gui.set_scale(
-        gui.get_node("horizontal_rocket/button"),
-        vmath.vector3(0, 0, 0)
-    )
-    gui.set_scale(
-        gui.get_node("vertical_rocket/button"),
-        vmath.vector3(0, 0, 0)
-    )
-    gui.animate(
-        gui.get_node("hammer/button"),
-        "scale",
-        vmath.vector3(0.9, 0.9, 1),
-        gui.EASING_INCUBIC,
-        0.3
-    )
-    gui.animate(
-        gui.get_node("spinning/button"),
-        "scale",
-        vmath.vector3(0.9, 0.9, 1),
-        gui.EASING_INCUBIC,
-        0.3
-    )
-    gui.animate(
-        gui.get_node("horizontal_rocket/button"),
-        "scale",
-        vmath.vector3(0.9, 0.9, 1),
-        gui.EASING_INCUBIC,
-        0.3
-    )
-    gui.animate(
-        gui.get_node("vertical_rocket/button"),
-        "scale",
-        vmath.vector3(0.9, 0.9, 1),
-        gui.EASING_INCUBIC,
-        0.3
     )
 end
 function setup_info_ui(instance)
@@ -312,15 +272,17 @@ end
 function setup_sustem_ui(instance)
     instance.druid:new_button(
         "back/button",
-        function() return Scene.load("map") end
+        function()
+            Sound.stop("game")
+            Scene.load("map")
+        end
     )
     instance.druid:new_button(
         "restart/button",
-        function() return Scene.restart() end
-    )
-    instance.druid:new_button(
-        "revert_step/button",
-        function() return EventBus.send("REVERT_STEP") end
+        function()
+            GAME_CONFIG.is_restart = true
+            Scene.restart()
+        end
     )
     set_text(
         "current_level",
@@ -331,7 +293,10 @@ function setup_win_ui(instance)
     instance.druid:new_button("continue_button", next_level)
     instance.druid:new_button(
         "win_close",
-        function() return Scene.load("map") end
+        function()
+            Sound.stop("game")
+            Scene.load("map")
+        end
     )
     gui.set_enabled(
         gui.get_node("win"),
@@ -352,6 +317,7 @@ function next_level()
         "current_level",
         GameStorage.get("current_level") + 1
     )
+    GAME_CONFIG.is_restart = true
     Scene.restart()
 end
 function setup_gameover_ui(instance)
@@ -371,6 +337,7 @@ function setup_gameover_ui(instance)
                 return
             end
             GAME_CONFIG.steps_by_ad = 0
+            GAME_CONFIG.is_restart = true
             Scene.restart()
         end
     )
@@ -380,11 +347,17 @@ function setup_gameover_ui(instance)
     )
     instance.druid:new_button(
         "map_button",
-        function() return Scene.load("map") end
+        function()
+            Sound.stop("game")
+            Scene.load("map")
+        end
     )
     instance.druid:new_button(
         "gameover_close",
-        function() return Scene.load("map") end
+        function()
+            Sound.stop("game")
+            Scene.load("map")
+        end
     )
     instance.druid:new_button("gameover_offer_close", disabled_gameover_offer)
     gui.set_text(
@@ -449,15 +422,18 @@ function set_events(instance)
     )
     EventBus.on("SET_TUTORIAL", set_tutorial, true)
     EventBus.on("REMOVE_TUTORIAL", remove_tutorial, true)
-    EventBus.on("SET_WIN_UI", set_win, true)
+    EventBus.on("ON_WIN", on_win)
     EventBus.on(
         "ON_GAME_OVER",
         function(state)
-            set_gameover(instance, state)
+            timer.delay(
+                GAME_CONFIG.delay_before_gameover,
+                false,
+                function() return set_gameover(instance, state) end
+            )
         end,
         true
     )
-    EventBus.on("FEED_ANIMAL", feed_animation, true)
 end
 function update_targets(data)
     repeat
@@ -488,47 +464,53 @@ function update_targets(data)
         end
     until true
 end
-function feed_animation(item_type)
-    do
-        local i = 0
-        while i < 10 do
-            timer.delay(
-                0.05 * i,
-                false,
-                function()
-                    local element = gui.new_box_node(
-                        vmath.vector3(420, 870, 0),
-                        vmath.vector3(40, 40, 1)
-                    )
-                    local view = GAME_CONFIG.element_view[item_type]
-                    gui.set_texture(element, "graphics")
-                    gui.play_flipbook(element, view)
-                    gui.animate(
-                        element,
-                        "position",
-                        vmath.vector3(250, 150, 0),
-                        gui.EASING_INCUBIC,
-                        1,
-                        0,
-                        function()
-                            gui.animate(
-                                element,
-                                gui.PROP_SCALE,
-                                vmath.vector3(0, 0, 0),
-                                gui.EASING_INCUBIC,
-                                0.5,
-                                5,
-                                function()
-                                    gui.delete_node(element)
-                                end
-                            )
-                        end
-                    )
-                end
-            )
-            i = i + 1
+function feed_animation()
+    flow.start(function()
+        local level_config = get_current_level_config()
+        local item_id = 0
+        for ____, target in ipairs(level_config.targets) do
+            if target.type == TargetType.Element and __TS__ArrayIncludes(GAME_CONFIG.feed_elements, target.id) then
+                item_id = target.id
+            end
         end
-    end
+        local element = gui.new_box_node(
+            vmath.vector3(420, 870, 0),
+            vmath.vector3(40, 40, 1)
+        )
+        local view = GAME_CONFIG.element_view[item_id]
+        gui.set_texture(element, "graphics")
+        gui.play_flipbook(element, view)
+        local ltrb = Camera.get_ltrb()
+        local width = 540
+        local height = math.abs(ltrb.w)
+        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.2}}
+        local result = vmath.vector3()
+        do
+            local i = 0
+            while i < 100 do
+                local p = get_point_curve(i / 100, points, result)
+                gui.animate(
+                    element,
+                    gui.PROP_POSITION,
+                    p,
+                    gui.EASING_LINEAR,
+                    0.01
+                )
+                flow.delay(0.01)
+                i = i + 1
+            end
+        end
+        local scale = gui.get_scale(element)
+        scale.x = scale.x * 2
+        scale.y = scale.y * 2
+        gui.animate(
+            element,
+            gui.PROP_SCALE,
+            scale,
+            gui.EASING_INCUBIC,
+            0.5
+        )
+    end)
 end
 function update_buttons(instance)
     local spinning = GameStorage.get("spinning_counts")
@@ -705,18 +687,28 @@ function remove_tutorial()
         false
     )
 end
-function set_win()
-    disable_game_ui()
-    gui.set_enabled(
-        gui.get_node("win"),
-        true
-    )
-    local anim_props = {blend_duration = 0, playback_rate = 1}
-    gui.play_spine_anim(
-        gui.get_node("firework"),
-        hash("firework"),
-        gui.PLAYBACK_LOOP_FORWARD,
-        anim_props
+function on_win()
+    if is_animal_level() then
+        feed_animation()
+    end
+    timer.delay(
+        is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,
+        false,
+        function()
+            disable_game_ui()
+            gui.set_enabled(
+                gui.get_node("win"),
+                true
+            )
+            Sound.play("passed")
+            local anim_props = {blend_duration = 0, playback_rate = 1}
+            gui.play_spine_anim(
+                gui.get_node("firework"),
+                hash("firework"),
+                gui.PLAYBACK_LOOP_FORWARD,
+                anim_props
+            )
+        end
     )
 end
 function set_gameover(instance, state)
@@ -729,6 +721,7 @@ function set_gameover(instance, state)
         gui.get_node("missing_targets"),
         true
     )
+    Sound.play("failed")
     local target_1 = gui.get_node("target_1")
     local target_2 = gui.get_node("target_2")
     local target_3 = gui.get_node("target_3")

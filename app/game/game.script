@@ -1,6 +1,6 @@
 local ____exports = {}
-local ____match3_game = require("game.match3_game")
-local Game = ____match3_game.Game
+local ____game = require("game.game")
+local Game = ____game.Game
 function ____exports.init(self)
     Manager.init_script()
     Game()

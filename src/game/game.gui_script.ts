@@ -7,11 +7,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable no-case-declarations */
 
+import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { TargetMessage } from '../main/game_config';
-import { parse_time, set_text, set_text_colors } from '../utils/utils';
-import { Busters, CellId, ElementId, GameState, Level, TargetType } from './match3_game';
-import { is_enough_coins, remove_coins, remove_lifes } from './match3_utils';
+import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, remove_coins, remove_lifes } from './match3_utils';
+import { Busters, CellId, ElementId, GameState, TargetType } from './game';
+import { Level } from './match3_level';
 
 const presets = {
     targets: [
@@ -103,15 +105,15 @@ function setup(instance: props) {
     gui.animate(gui.get_node('substrate'), 'position', vmath.vector3(270, 880, 0), gui.EASING_INCUBIC, 0.5);
     gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(270, 65, 0), gui.EASING_INCUBIC, 0.5);
 
-    gui.set_scale(gui.get_node('hammer/button'), vmath.vector3(0, 0, 0));
-    gui.set_scale(gui.get_node('spinning/button'), vmath.vector3(0, 0, 0));
-    gui.set_scale(gui.get_node('horizontal_rocket/button'), vmath.vector3(0, 0, 0));
-    gui.set_scale(gui.get_node('vertical_rocket/button'), vmath.vector3(0, 0, 0));
+    // gui.set_scale(gui.get_node('hammer/button'), vmath.vector3(0, 0, 0));
+    // gui.set_scale(gui.get_node('spinning/button'), vmath.vector3(0, 0, 0));
+    // gui.set_scale(gui.get_node('horizontal_rocket/button'), vmath.vector3(0, 0, 0));
+    // gui.set_scale(gui.get_node('vertical_rocket/button'), vmath.vector3(0, 0, 0));
 
-    gui.animate(gui.get_node('hammer/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
-    gui.animate(gui.get_node('spinning/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
-    gui.animate(gui.get_node('horizontal_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
-    gui.animate(gui.get_node('vertical_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    // gui.animate(gui.get_node('hammer/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    // gui.animate(gui.get_node('spinning/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    // gui.animate(gui.get_node('horizontal_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
+    // gui.animate(gui.get_node('vertical_rocket/button'), 'scale', vmath.vector3(0.9, 0.9, 1), gui.EASING_INCUBIC, 0.3);
 }
 
 function setup_info_ui(instance: props) {
@@ -251,16 +253,25 @@ function setup_busters(instance: props) {
 }
 
 function setup_sustem_ui(instance: props) {
-    instance.druid.new_button('back/button', () => Scene.load('map'));
-    instance.druid.new_button('restart/button', () => Scene.restart());
-    instance.druid.new_button('revert_step/button', () => EventBus.send('REVERT_STEP'));
+    instance.druid.new_button('back/button', () => {
+        Sound.stop('game');
+        Scene.load('map');
+    });
+    instance.druid.new_button('restart/button', () => {
+        GAME_CONFIG.is_restart = true;
+        Scene.restart();
+    });
+    // instance.druid.new_button('revert_step/button', () => EventBus.send('REVERT_STEP'));
 
     set_text('current_level', 'Уровень ' + (GameStorage.get('current_level') + 1));
 }
 
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', next_level);
-    instance.druid.new_button('win_close', () => Scene.load('map'));
+    instance.druid.new_button('win_close', () => {
+        Sound.stop('game');
+        Scene.load('map');
+    });
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
     gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
@@ -269,6 +280,7 @@ function setup_win_ui(instance: props) {
 function next_level() {
     GAME_CONFIG.steps_by_ad = 0;
     GameStorage.set('current_level', GameStorage.get('current_level') + 1);
+    GAME_CONFIG.is_restart = true;
     Scene.restart();
 }
 
@@ -284,13 +296,21 @@ function setup_gameover_ui(instance: props) {
 
         GAME_CONFIG.steps_by_ad = 0;
         
+        GAME_CONFIG.is_restart = true;
         Scene.restart();
     });
     
     gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
-    instance.druid.new_button('map_button', () => Scene.load('map'));
+    instance.druid.new_button('map_button', () => {
+        Sound.stop('game');
+        Scene.load('map');
+    });
     
-    instance.druid.new_button('gameover_close', () => Scene.load('map'));
+    instance.druid.new_button('gameover_close', () => {
+        Sound.stop('game');
+        Scene.load('map');
+    });
+
     instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
@@ -325,10 +345,8 @@ function set_events(instance: props) {
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
-    EventBus.on('SET_WIN_UI', set_win, true);
-    EventBus.on('ON_GAME_OVER', (state) => { set_gameover(instance, state); }, true);
-    EventBus.on('FEED_ANIMAL', feed_animation, true);
-
+    EventBus.on('ON_WIN', on_win);
+    EventBus.on('ON_GAME_OVER', (state) => { timer.delay(GAME_CONFIG.delay_before_gameover, false, () => set_gameover(instance, state)); }, true);
 }
 
 function update_targets(data: TargetMessage) {
@@ -339,18 +357,42 @@ function update_targets(data: TargetMessage) {
     }
 }
 
-function feed_animation(item_type: number) {
-    for(let i = 0; i < 10; i++) {
-        timer.delay(0.05 * i, false, () => {
-            const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
-            const view = GAME_CONFIG.element_view[item_type as ElementId];
-            gui.set_texture(element, 'graphics');
-            gui.play_flipbook(element, view);
-            gui.animate(element, 'position', vmath.vector3(250, 150, 0), gui.EASING_INCUBIC, 1, 0, () => {
-                gui.animate(element, gui.PROP_SCALE, vmath.vector3(0, 0, 0), gui.EASING_INCUBIC, 0.5, 5, () => { gui.delete_node(element); });
-            });
-        });
-    }
+function feed_animation() {
+    flow.start(() => {
+        const level_config = get_current_level_config();
+        let item_id = 0;
+        for(const target of level_config.targets) {
+            if(target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id))
+                item_id = target.id;
+        }
+
+        const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
+        const view = GAME_CONFIG.element_view[item_id as ElementId];
+        gui.set_texture(element, 'graphics');
+        gui.play_flipbook(element, view);
+
+        const ltrb = Camera.get_ltrb();
+        const width = 540;
+        const height = math.abs(ltrb.w);
+        const points = [
+            {x: 420, y: 870},
+            {x: width * 0.3, y: height * 0.5},
+            {x: width * 0.5, y: height * 0.2}
+        ];
+
+        let result = vmath.vector3();
+        for (let i = 0; i < 100; i++) {
+            const p = get_point_curve(i / 100, points, result);
+            gui.animate(element, gui.PROP_POSITION, p, gui.EASING_LINEAR, 0.01);
+
+            flow.delay(0.01);
+        }
+
+        const scale = gui.get_scale(element);
+        scale.x *= 2;
+        scale.y *= 2;
+        gui.animate(element, gui.PROP_SCALE, scale, gui.EASING_INCUBIC, 0.5);
+    });
 }
 
 function update_buttons(instance: props) {
@@ -451,12 +493,19 @@ function remove_tutorial() {
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
-function set_win() {
-    disable_game_ui();
-    gui.set_enabled(gui.get_node('win'), true);
+function on_win() {
+    if(is_animal_level())
+        feed_animation();
 
-    const anim_props = { blend_duration: 0, playback_rate: 1 };
-    gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
+    timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
+        disable_game_ui();
+        gui.set_enabled(gui.get_node('win'), true);
+
+        Sound.play('passed');
+    
+        const anim_props = { blend_duration: 0, playback_rate: 1 };
+        gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
+    });
 }
 
 // TODO: make presets for gameover
@@ -465,6 +514,8 @@ function set_gameover(instance: props, state: GameState) {
     
     gui.set_enabled(gui.get_node('gameover'), true);
     gui.set_enabled(gui.get_node('missing_targets'), true);
+
+    Sound.play('failed');
 
     const target_1 = gui.get_node('target_1');
     const target_2 = gui.get_node('target_2');

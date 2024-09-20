@@ -79,7 +79,7 @@ function SceneModule() {
     }
 
     function unload_all_resources(scene: string, except?: string[]) {
-        const resources = Object.assign([], scene_resources[scene]);
+        const resources = json.decode(json.encode(scene_resources[scene]));
         if(resources == null) return;
         
         for(const resource of resources) {

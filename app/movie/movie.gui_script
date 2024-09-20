@@ -3,6 +3,14 @@ local druid = require("druid.druid")
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)
+    gui.set_text(
+        gui.get_node("description"),
+        Lang.get_text("movie_description")
+    )
+    gui.set_text(
+        gui.get_node("text"),
+        Lang.get_text("play")
+    )
     self.druid:new_button(
         "btn",
         function()
