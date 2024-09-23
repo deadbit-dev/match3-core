@@ -148,3 +148,10 @@ export function set_position_xy(item: hash, x: number, y: number) {
 export function is_equal_game_items(cell1: ItemDataH, cell2: ItemDataH) {
     return cell1._hash == cell2._hash;
 }
+
+export function shuffle_array<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}

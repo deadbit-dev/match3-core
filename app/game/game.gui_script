@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_set, on_shuffle_end, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -434,6 +434,8 @@ function set_events(instance)
         end,
         true
     )
+    EventBus.on("SET_SHUFFLE", on_shuffle_set)
+    EventBus.on("SHUFFLE", on_shuffle_end)
 end
 function update_targets(data)
     repeat
@@ -958,6 +960,44 @@ function disable_game_ui()
     gui.set_enabled(
         gui.get_node("system_buttons"),
         false
+    )
+end
+function on_shuffle_set()
+    local shuffle = gui.get_node("shuffle")
+    local lock = gui.get_node("lock1")
+    gui.set_enabled(lock, true)
+    gui.animate(
+        lock,
+        gui.PROP_COLOR,
+        vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
+        gui.EASING_INCUBIC,
+        0.3,
+        0,
+        function()
+            gui.set_enabled(shuffle, true)
+        end
+    )
+end
+function on_shuffle_end()
+    timer.delay(
+        0.7,
+        false,
+        function()
+            local shuffle = gui.get_node("shuffle")
+            local lock = gui.get_node("lock1")
+            gui.set_enabled(shuffle, false)
+            gui.animate(
+                lock,
+                gui.PROP_COLOR,
+                vmath.vector4(),
+                gui.EASING_INCUBIC,
+                0.3,
+                0,
+                function()
+                    gui.set_enabled(lock, false)
+                end
+            )
+        end
     )
 end
 presets = {targets = {

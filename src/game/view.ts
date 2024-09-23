@@ -8,10 +8,10 @@ import * as flow from 'ludobits.m.flow';
 import { GoManager } from "../modules/GoManager";
 import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
-import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level } from "./match3_utils";
+import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./match3_utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
+import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -154,7 +154,16 @@ export function View(resources: ViewResources) {
         EventBus.on('MSG_ON_MOVE', on_move);
         EventBus.on('ON_WIN', on_win);
         EventBus.on('ON_GAME_OVER', on_gameover);
-        EventBus.on('SET_TUTORIAL', on_set_tutorial);
+        EventBus.on('SET_TUTORIAL', (lock_info: LockInfo) => {
+            if(is_animal_level() && is_tutorial()) {
+                EventBus.send('SET_ANIMAL_TUTORIAL_TIP');
+                EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
+                    on_set_tutorial(lock_info);
+                });
+            } else on_set_tutorial(lock_info);
+        });
+        EventBus.on('SET_HELPER', on_set_helper, false);
+        EventBus.on('STOP_HELPER', on_stop_helper, false);
         EventBus.on('REMOVE_TUTORIAL', on_remove_tutorial);
         EventBus.on('RESPONSE_SWAP_ELEMENTS', swap_elements_animation, false);
         EventBus.on('RESPONSE_WRONG_SWAP_ELEMENTS', wrong_swap_elements_animation, false);
@@ -548,6 +557,43 @@ export function View(resources: ViewResources) {
         down_item = null;
     }
 
+    function on_set_helper(data: HelperMessage) {
+        const combined_item = get_view_item_by_uid(data.combined_element.uid);
+        if (combined_item != undefined) {
+            const from_pos = get_world_pos(data.step.from, GAME_CONFIG.default_element_z_index);
+            const to_pos = get_world_pos(data.step.to, GAME_CONFIG.default_element_z_index);
+
+            go.set_position(from_pos, combined_item._hash);
+            go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
+            go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
+        }
+
+        for (const element of data.elements) {
+            const item = get_view_item_by_uid(element.uid);
+            if (item != undefined) {
+                go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
+            }
+        }
+    }
+
+    function on_stop_helper(data: HelperMessage) {
+        const combined_item = get_view_item_by_uid(data.combined_element.uid);
+        if (combined_item != undefined) {
+            go.cancel_animations(combined_item._hash);
+            
+            const from_pos = get_world_pos(data.step.from, GAME_CONFIG.default_element_z_index);
+            go.animate(combined_item._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_pos, go.EASING_INCUBIC, 0.15);
+        }
+
+        for (const element of data.elements) {
+            const item = get_view_item_by_uid(element.uid);
+            if (item != undefined) {
+                go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
+                go.set(msg.url(undefined, item._hash, 'sprite'), 'tint', vmath.vector4(1, 1, 1, 1));
+            }
+        }
+    }
+
     function swap_elements_animation(message: SwapElementsMessage) {
         const from_world_pos = get_world_pos(message.from);
         const to_world_pos = get_world_pos(message.to);
@@ -557,13 +603,13 @@ export function View(resources: ViewResources) {
     
         const item_from = get_view_item_by_uid(element_from.uid);
         if (item_from != undefined) {
-            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time);
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time, 0.1);
         }
     
         if (element_to != NullElement) {
             const item_to = get_view_item_by_uid(element_to.uid);
             if (item_to != undefined) {
-                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time);
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time, 0.1);
             }
         }
 
@@ -1041,21 +1087,28 @@ export function View(resources: ViewResources) {
     }
 
     function on_shuffle_animation(game_state: GameState) {
+        flow.delay(1);
+
         Sound.play('shuffle');
+
         for(let y = 0; y < get_field_height(); y++) {
             for(let x = 0; x < get_field_width(); x++) {
                 const element = game_state.elements[y][x];
                 if(element != NullElement) {
                     const element_view = get_view_item_by_uid(element.uid);
                     if (element_view != undefined) {
+                        print("SET-VIEW: ", element.id, element.uid, x, y);
                         const to_world_pos = get_world_pos({x, y}, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.swap_element_easing, 0.5);
-                    } else make_element_view(x, y, element, true);
+                    } else {
+                        print("MAKE-VIEW: ", element.id, element.uid, x, y);
+                        make_element_view(x, y, element, true);
+                    }
                 }
             }
         }
 
-        timer.delay(GAME_CONFIG.swap_element_easing, false, () => {
+        timer.delay(0.5, false, () => {
             EventBus.send('REQUEST_SHUFFLE_END');
         });
     }

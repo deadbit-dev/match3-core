@@ -1,282 +1,211 @@
 images {
   image: "/assets/ui/lable.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/hammer_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/arrow_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/restart_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/rocket_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/spinning_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/time_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/btn_b.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/cir_b.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/circle_2l.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/close.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/exit.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/home.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/setings.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/share.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/snd_0.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/snd_1.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/star_0.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/star_1.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/lock.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/button_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/mini_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/avatar_back.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/close_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/long_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/game_title_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/complete_window.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/light.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/btn_3.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_btn.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/close_store_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/zero_life_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/btn_4_time.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/Back_1.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/Back_2.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/up.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/slot_back.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/slot_back_2.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/btn_2.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_icon_1.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_icon_2.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_icon_3.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/coin_icon_4.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/store_title_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/life_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/remove_ad_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/infinite_life_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/btn_1.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/damaged_life_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/ad_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/fail_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/rat.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/dog.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/cock.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/goat.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/guse.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/pig.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/plus.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/store.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/arrow.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/system_button.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/elements/diskosphere_buster.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/diskosphere_icon.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/clock.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/start_window.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/finger.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
   image: "/assets/ui/target_substrate.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
-margin: 0
+images {
+  image: "/assets/ui/whirligig.png"
+}
 extrude_borders: 2
-inner_padding: 0
-max_page_width: 0
-max_page_height: 0
-rename_patterns: ""

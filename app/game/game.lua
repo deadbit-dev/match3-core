@@ -4,11 +4,11 @@ local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
-local __TS__ObjectValues = ____lualib.__TS__ObjectValues
-local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
+local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
+local flow = require("ludobits.m.flow")
 local ____match3_utils = require("game.match3_utils")
 local get_field_width = ____match3_utils.get_field_width
 local get_field_height = ____match3_utils.get_field_height
@@ -31,6 +31,8 @@ local NullElement = ____core.NullElement
 local ____math_utils = require("utils.math_utils")
 local Axis = ____math_utils.Axis
 local is_valid_pos = ____math_utils.is_valid_pos
+local ____utils = require("utils.utils")
+local shuffle_array = ____utils.shuffle_array
 ____exports.CellId = CellId or ({})
 ____exports.CellId.Base = 0
 ____exports.CellId[____exports.CellId.Base] = "Base"
@@ -92,7 +94,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, on_tick, update_timer, check_all_idle, is_level_completed, is_timeout, is_have_steps, on_gameover, on_revive, shuffle_field, on_shuffle_field_end, is_available_for_placed, try_load_field, has_combination, has_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, second_check, is_all_idle, is_block_input, is_first_step, start_game_time, game_timer
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, on_tick, set_helper, stop_helper, update_timer, check_all_idle, is_level_completed, is_timeout, is_have_steps, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, second_check, is_all_idle, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -124,7 +126,7 @@ function ____exports.Game()
         EventBus.on("REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END", on_diskosphere_damage_element_end, false)
         EventBus.on("REQUEST_HELICOPTER_ACTION", on_helicopter_action, false)
         EventBus.on("REQUEST_HELICOPTER_END", on_helicopter_end, false)
-        EventBus.on("REQUEST_SHUFFLE_END", on_shuffle_field_end)
+        EventBus.on("REQUEST_SHUFFLE_END", on_shuffle_end)
     end
     function set_element_chances()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -156,9 +158,6 @@ function ____exports.Game()
             set_targets(level_config.targets)
             set_steps(level_config.steps)
             set_random()
-            if is_tutorial() then
-                set_tutorial()
-            end
         end
         EventBus.send(
             "RESPONSE_LOAD_GAME",
@@ -168,7 +167,7 @@ function ____exports.Game()
             set_tutorial()
         end
         GAME_CONFIG.is_revive = false
-        game_timer = timer.delay(1, true, on_tick)
+        game_timer = timer.delay(0.5, true, on_tick)
     end
     function set_tutorial()
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]
@@ -213,28 +212,40 @@ function ____exports.Game()
                 unlock_buster(tutorial_data.busters)
             end
         end
+        if tutorial_data.step ~= nil then
+            local combined_element = field.get_element(tutorial_data.step.from)
+            local elements = {}
+            for ____, info in ipairs(lock_info) do
+                if not info.is_locked and info.element ~= NullElement then
+                    elements[#elements + 1] = info.element
+                end
+            end
+            if combined_element ~= NullElement then
+                set_helper({step = tutorial_data.step, combined_element = combined_element, elements = elements})
+            end
+        end
         EventBus.send("SET_TUTORIAL", lock_info)
     end
     function unlock_buster(name)
         repeat
-            local ____switch30 = name
-            local ____cond30 = ____switch30 == "hammer"
-            if ____cond30 then
+            local ____switch34 = name
+            local ____cond34 = ____switch34 == "hammer"
+            if ____cond34 then
                 busters.hammer.block = false
                 break
             end
-            ____cond30 = ____cond30 or ____switch30 == "spinning"
-            if ____cond30 then
+            ____cond34 = ____cond34 or ____switch34 == "spinning"
+            if ____cond34 then
                 busters.spinning.block = false
                 break
             end
-            ____cond30 = ____cond30 or ____switch30 == "horizontal_rocket"
-            if ____cond30 then
+            ____cond34 = ____cond34 or ____switch34 == "horizontal_rocket"
+            if ____cond34 then
                 busters.horizontal_rocket.block = false
                 break
             end
-            ____cond30 = ____cond30 or ____switch30 == "vertical_rocket"
-            if ____cond30 then
+            ____cond34 = ____cond34 or ____switch34 == "vertical_rocket"
+            if ____cond34 then
                 busters.vertical_rocket.block = false
                 break
             end
@@ -283,10 +294,50 @@ function ____exports.Game()
                 EventBus.send("UPDATED_BUTTONS")
             end
             if busters.spinning.active or not has_step() then
-                shuffle_field()
+                stop_helper()
+                shuffle()
             end
             busters.spinning.active = false
+            if not is_tutorial() and helper_timer == nil then
+                helper_timer = timer.delay(
+                    5,
+                    false,
+                    function()
+                        set_helper()
+                    end
+                )
+            end
         end
+    end
+    function set_helper(message)
+        if message ~= nil then
+            helper_data = message
+        else
+            local info = get_step()
+            local combined_element = field.get_element(info.step.from)
+            local elements = {}
+            for ____, pos in ipairs(info.combination.elementsInfo) do
+                local element = field.get_element(pos)
+                if element ~= NullElement then
+                    elements[#elements + 1] = element
+                end
+            end
+            if combined_element ~= NullElement then
+                helper_data = {step = info.step, combined_element = combined_element, elements = elements}
+            end
+        end
+        if helper_data ~= nil then
+            EventBus.send("SET_HELPER", helper_data)
+        end
+    end
+    function stop_helper()
+        if helper_timer == nil or helper_data == nil then
+            return
+        end
+        timer.cancel(helper_timer)
+        EventBus.send("STOP_HELPER", helper_data)
+        helper_timer = nil
+        helper_data = nil
     end
     function update_timer()
         if start_game_time == 0 then
@@ -352,276 +403,110 @@ function ____exports.Game()
         GAME_CONFIG.is_restart = true
         Scene.restart()
     end
-    function shuffle_field()
-        Log.log("SHUFFLE FIELD")
-        local elements = {}
-        do
-            local y = 0
-            while y < field_height do
-                do
-                    local x = 0
-                    while x < field_width do
-                        local cell = field.get_cell({x = x, y = y})
-                        if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
-                            local element = field.get_element({x = x, y = y})
-                            if element ~= NullElement then
-                                elements[#elements + 1] = element
-                            end
-                            field.set_element({x = x, y = y}, NullElement)
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
-        local elements_by_type = {}
-        for ____, element in ipairs(elements) do
-            if elements_by_type[element.type] == nil then
-                elements_by_type[element.type] = {}
-                for ____, other_element in ipairs(elements) do
-                    if element.type == other_element.type then
-                        local ____elements_by_type_element_type_4 = elements_by_type[element.type]
-                        ____elements_by_type_element_type_4[#____elements_by_type_element_type_4 + 1] = other_element
-                    end
-                end
-            end
-        end
-        local available_elements = {}
-        for ____, elements in ipairs(__TS__ObjectValues(elements_by_type)) do
-            if #elements >= 3 then
-                local ____temp_5 = #available_elements + 1
-                available_elements[____temp_5] = {}
-                local idx = ____temp_5 - 1
-                do
-                    local i = 0
-                    while i < 3 do
-                        local ____available_elements_index_6 = available_elements[idx + 1]
-                        ____available_elements_index_6[#____available_elements_index_6 + 1] = __TS__ArraySplice(
-                            elements,
-                            math.random(0, #elements - 1),
-                            1
-                        )[1]
-                        i = i + 1
-                    end
-                end
-            end
-        end
-        local combo_elements = #available_elements > 0 and available_elements[math.random(0, #available_elements - 1) + 1] or ({})
-        for ____, combo_element in ipairs(combo_elements) do
-            __TS__ArraySplice(
-                elements,
-                __TS__ArrayFindIndex(
-                    elements,
-                    function(____, elm) return elm.uid == combo_element.uid end
-                ),
-                1
+    function shuffle()
+        is_block_input = true
+        EventBus.send("SET_SHUFFLE")
+        print("SET")
+        shuffle_field(function()
+            print("SHUFFLE")
+            update_core_state()
+            EventBus.send(
+                "SHUFFLE",
+                copy_state()
             )
-        end
-        do
-            local y = field_height - 1
-            while y >= 0 and #elements > 0 do
+        end)
+    end
+    function on_shuffle_end()
+        is_block_input = false
+    end
+    function shuffle_field(on_end)
+        return flow.start(
+            function()
+                Log.log("SHUFFLE FIELD")
+                local positions = {}
+                local elements = {}
                 do
-                    local x = 0
-                    while x < field_width and #elements > 0 do
-                        local cell = field.get_cell({x = x, y = y})
-                        if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
-                            local exclude_ids = {}
-                            local neighbors = field.get_neighbor_elements({x = x, y = y})
-                            for ____, neighbor in ipairs(neighbors) do
-                                exclude_ids[#exclude_ids + 1] = neighbor.type
-                            end
-                            local element_idx = __TS__ArrayFindIndex(
-                                elements,
-                                function(____, elm)
-                                    return __TS__ArrayFindIndex(
-                                        combo_elements,
-                                        function(____, combo_elm) return combo_elm.uid == elm.uid end
-                                    ) == -1 and not __TS__ArrayIncludes(exclude_ids, elm.type)
-                                end
-                            )
-                            if element_idx == -1 then
-                                element_idx = math.random(0, #elements - 1)
-                            end
-                            local element = __TS__ArraySplice(elements, element_idx, 1)[1]
-                            field.set_element({x = x, y = y}, element)
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y - 1
-            end
-        end
-        local available_combo_positions = {}
-        do
-            local y = 1
-            while y < field_height do
-                do
-                    local x = 0
-                    while x < field_width - 2 do
-                        local available = true
+                    local y = 0
+                    while y < field_height do
                         do
-                            local i = 0
-                            while i < 3 and available do
-                                if not is_available_for_placed({x = x + i, y = y}) or i == 2 and not is_available_for_placed({x = x + i, y = y - 1}) then
-                                    available = false
-                                end
-                                i = i + 1
-                            end
-                        end
-                        if available then
-                            available_combo_positions[#available_combo_positions + 1] = {x = x, y = y}
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
-        do
-            local y = field_height - 1
-            while y >= 0 and #available_combo_positions == 0 do
-                do
-                    local x = 0
-                    while x < field_width and #available_combo_positions == 0 do
-                        local available = true
-                        do
-                            local i = 0
-                            while i < 3 and available do
-                                local cell = field.get_cell({x = x + i, y = y})
-                                if cell == NotActiveCell or not field.is_available_cell_type_for_move(cell) then
-                                    available = false
-                                end
-                                if i == 2 then
-                                    local top_cell = field.get_cell({x = x + i, y = y - 1})
-                                    if top_cell == NotActiveCell or not field.is_available_cell_type_for_move(top_cell) then
-                                        available = false
+                            local x = 0
+                            while x < field_width do
+                                local cell = field.get_cell({x = x, y = y})
+                                if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
+                                    local element = field.get_element({x = x, y = y})
+                                    if element ~= NullElement then
+                                        print("GRAB: ", x, y)
+                                        positions[#positions + 1] = {x = x, y = y}
+                                        elements[#elements + 1] = element
+                                        field.set_element({x = x, y = y}, NullElement)
                                     end
                                 end
-                                i = i + 1
+                                x = x + 1
                             end
                         end
-                        if available then
-                            available_combo_positions[#available_combo_positions + 1] = {x = x, y = y}
-                            do
-                                local i = x
-                                while i <= x + 3 do
-                                    do
-                                        local j = y - (i == x + 3 and 0 or 1)
-                                        while j < field_height do
-                                            local cell = field.get_cell({x = i, y = j})
-                                            if cell == NotActiveCell or not field.is_available_cell_type_for_move(cell) then
-                                                break
-                                            end
-                                            local element = field.get_element({x = i, y = j})
-                                            if element ~= NullElement then
-                                                break
-                                            end
-                                            make_element(
-                                                {x = i, y = j},
-                                                GAME_CONFIG.base_elements[math.random(0, #GAME_CONFIG.base_elements - 1) + 1]
-                                            )
-                                            j = j + 1
-                                        end
-                                    end
-                                    i = i + 1
-                                end
-                            end
-                        end
-                        x = x + 1
+                        y = y + 1
                     end
                 end
-                y = y - 1
-            end
-        end
-        local swaped_elements = {}
-        local combo_pos = available_combo_positions[math.random(0, #available_combo_positions - 1) + 1]
-        local rand_id = GAME_CONFIG.base_elements[math.random(0, #GAME_CONFIG.base_elements - 1) + 1]
-        do
-            local i = 0
-            while i < 3 do
-                local element_to = json.decode(json.encode(field.get_element({x = combo_pos.x + i, y = i == 2 and combo_pos.y - 1 or combo_pos.y})))
-                swaped_elements[#swaped_elements + 1] = element_to
-                if #combo_elements ~= 0 then
-                    local element_from = __TS__ArraySplice(
-                        combo_elements,
-                        math.random(0, #combo_elements - 1),
-                        1
-                    )[1]
-                    field.set_element({x = combo_pos.x + i, y = i == 2 and combo_pos.y - 1 or combo_pos.y}, element_from)
-                else
-                    make_element({x = combo_pos.x + i, y = i == 2 and combo_pos.y - 1 or combo_pos.y}, rand_id)
-                end
-                i = i + 1
-            end
-        end
-        do
-            local y = field_height - 1
-            while y >= 0 and #swaped_elements > 0 do
-                do
-                    local x = 0
-                    while x < field_width and #swaped_elements > 0 do
-                        local cell = field.get_cell({x = x, y = y})
-                        if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
-                            local element = field.get_element({x = x, y = y})
-                            if element == NullElement then
-                                field.set_element(
-                                    {x = x, y = y},
-                                    __TS__ArraySplice(
-                                        swaped_elements,
-                                        math.random(0, #swaped_elements - 1),
-                                        1
-                                    )[1]
+                shuffle_array(elements)
+                local counter = 0
+                local optimize_count = 5
+                local element_assigned = false
+                for ____, position in ipairs(positions) do
+                    if counter >= optimize_count then
+                        counter = 0
+                        flow.frames(1)
+                    end
+                    do
+                        local i = 0
+                        while i < #elements do
+                            local elementIndex = math.floor(math.random() * #elements)
+                            local element = elements[elementIndex + 1]
+                            field.set_element(position, element)
+                            if field.search_combination(position) == NotFound then
+                                __TS__ArraySplice(elements, elementIndex, 1)
+                                element_assigned = true
+                                print(
+                                    "ASSIGNED: ",
+                                    element.id,
+                                    element.uid,
+                                    position.x,
+                                    position.y
                                 )
+                                break
+                            end
+                            i = i + 1
+                        end
+                    end
+                    if not element_assigned then
+                        print("TRY-MAKE: ", position.x, position.y)
+                        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                            if __TS__ArrayFind(
+                                elements,
+                                function(____, element) return element.id == element_id end
+                            ) == nil then
+                                local elem = make_element(position, element_id)
+                                if elem ~= NullElement then
+                                    print(
+                                        "MAKED: ",
+                                        elem.id,
+                                        elem.uid,
+                                        position.x,
+                                        position.y
+                                    )
+                                end
                             end
                         end
-                        x = x + 1
                     end
+                    counter = counter + 1
                 end
-                y = y - 1
-            end
-        end
-        update_core_state()
-        EventBus.send(
-            "SHUFFLE",
-            copy_state()
+                if not has_step() then
+                    shuffle_field(on_end)
+                else
+                    return on_end()
+                end
+            end,
+            {parallel = true}
         )
-    end
-    function on_shuffle_field_end()
-        do
-            local y = field_height - 1
-            while y >= 0 do
-                do
-                    local x = 0
-                    while x < field_width do
-                        local combination = field.search_combination({x = x, y = y})
-                        if combination ~= NotFound then
-                            for ____, info in ipairs(combination.elementsInfo) do
-                                field.set_element_state(info, ElementState.Busy)
-                                field.set_cell_state(info, CellState.Busy)
-                            end
-                            EventBus.send("RESPONSE_COMBINATE", combination)
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y - 1
-            end
-        end
-    end
-    function is_available_for_placed(pos)
-        local cell = field.get_cell(pos)
-        if cell == NotActiveCell then
-            return false
-        end
-        if not field.is_available_cell_type_for_move(cell) then
-            return false
-        end
-        local element = field.get_element(pos)
-        if element == NullElement then
-            return false
-        end
-        return true
     end
     function try_load_field()
         do
@@ -704,6 +589,55 @@ function ____exports.Game()
             end
         end
         return false
+    end
+    function get_step()
+        local steps = {}
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        local cell = field.get_cell({x = x, y = y})
+                        if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
+                            if is_valid_pos(x + 1, y, field_width, field_height) then
+                                local cell = field.get_cell({x = x + 1, y = y})
+                                if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
+                                    field.swap_elements({x = x, y = y}, {x = x + 1, y = y})
+                                    local resultA = field.search_combination({x = x, y = y})
+                                    local resultB = field.search_combination({x = x + 1, y = y})
+                                    field.swap_elements({x = x, y = y}, {x = x + 1, y = y})
+                                    if resultA ~= NotFound then
+                                        steps[#steps + 1] = {step = {from = {x = x + 1, y = y}, to = {x = x, y = y}}, combination = resultA}
+                                    end
+                                    if resultB ~= NotFound then
+                                        steps[#steps + 1] = {step = {from = {x = x, y = y}, to = {x = x + 1, y = y}}, combination = resultB}
+                                    end
+                                end
+                            end
+                            if is_valid_pos(x, y + 1, field_width, field_height) then
+                                local cell = field.get_cell({x = x, y = y + 1})
+                                if cell ~= NotActiveCell and field.is_available_cell_type_for_move(cell) then
+                                    field.swap_elements({x = x, y = y}, {x = x, y = y + 1})
+                                    local resultC = field.search_combination({x = x, y = y})
+                                    local resultD = field.search_combination({x = x, y = y + 1})
+                                    field.swap_elements({x = x, y = y}, {x = x, y = y + 1})
+                                    if resultC ~= NotFound then
+                                        steps[#steps + 1] = {step = {from = {x = x, y = y + 1}, to = {x = x, y = y}}, combination = resultC}
+                                    end
+                                    if resultD ~= NotFound then
+                                        steps[#steps + 1] = {step = {from = {x = x, y = y}, to = {x = x, y = y + 1}}, combination = resultD}
+                                    end
+                                end
+                            end
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        return steps[math.random(0, #steps - 1) + 1]
     end
     function revive()
         states = json.decode(json.encode(GAME_CONFIG.revive_states))
@@ -803,9 +737,9 @@ function ____exports.Game()
         return to_state
     end
     function generate_uid()
-        local ____game_item_counter_7 = game_item_counter
-        game_item_counter = ____game_item_counter_7 + 1
-        return ____game_item_counter_7
+        local ____game_item_counter_4 = game_item_counter
+        game_item_counter = ____game_item_counter_4 + 1
+        return ____game_item_counter_4
     end
     function make_cell(pos, id, under_cells)
         if id == NotActiveCell then
@@ -887,9 +821,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_8 = index
-                    index = ____index_8 - 1
-                    if ____index_8 == 0 then
+                    local ____index_5 = index
+                    index = ____index_5 - 1
+                    if ____index_5 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -925,8 +859,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
-                    local ____target_uids_9 = target.uids
-                    ____target_uids_9[#____target_uids_9 + 1] = element.uid
+                    local ____target_uids_6 = target.uids
+                    ____target_uids_6[#____target_uids_6 + 1] = element.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
                 end
                 i = i + 1
@@ -967,8 +901,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
-                    local ____target_uids_10 = target.uids
-                    ____target_uids_10[#____target_uids_10 + 1] = cell.uid
+                    local ____target_uids_7 = target.uids
+                    ____target_uids_7[#____target_uids_7 + 1] = cell.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
                 end
                 i = i + 1
@@ -1011,24 +945,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch213 = message.name
-            local ____cond213 = ____switch213 == "SPINNING"
-            if ____cond213 then
+            local ____switch204 = message.name
+            local ____cond204 = ____switch204 == "SPINNING"
+            if ____cond204 then
                 on_activate_spinning()
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == "HAMMER"
-            if ____cond213 then
+            ____cond204 = ____cond204 or ____switch204 == "HAMMER"
+            if ____cond204 then
                 on_activate_hammer()
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == "HORIZONTAL_ROCKET"
-            if ____cond213 then
+            ____cond204 = ____cond204 or ____switch204 == "HORIZONTAL_ROCKET"
+            if ____cond204 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond213 = ____cond213 or ____switch213 == "VERTICAL_ROCKET"
-            if ____cond213 then
+            ____cond204 = ____cond204 or ____switch204 == "VERTICAL_ROCKET"
+            if ____cond204 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1102,6 +1036,7 @@ function ____exports.Game()
         if is_block_input or is_tutorial() then
             return
         end
+        stop_helper()
         if busters.hammer.active then
             return try_hammer_damage(pos)
         end
@@ -1351,7 +1286,7 @@ function ____exports.Game()
             local elements = field.get_all_elements_by_id(element_id)
             for ____, element in ipairs(elements) do
                 local element_pos = field.get_element_pos(element)
-                local damage_info = field.try_damage(element_pos, false, true)
+                local damage_info = field.try_damage(element_pos, false, false)
                 field.set_element_state(damage_info.pos, ElementState.Busy)
                 field.set_cell_state(damage_info.pos, CellState.Busy)
                 damages[#damages + 1] = damage_info
@@ -1410,25 +1345,25 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_13 = cell ~= NotActiveCell
-                        if ____temp_13 then
-                            local ____opt_11 = exclude
-                            ____temp_13 = (____opt_11 and __TS__ArrayFindIndex(
+                        local ____temp_10 = cell ~= NotActiveCell
+                        if ____temp_10 then
+                            local ____opt_8 = exclude
+                            ____temp_10 = (____opt_8 and __TS__ArrayFindIndex(
                                 exclude,
                                 function(____, uid) return uid == cell.uid end
                             )) == -1
                         end
-                        local ____temp_13_16 = ____temp_13
-                        if ____temp_13_16 then
-                            local ____opt_14 = targets
-                            ____temp_13_16 = (____opt_14 and __TS__ArrayFindIndex(
+                        local ____temp_10_13 = ____temp_10
+                        if ____temp_10_13 then
+                            local ____opt_11 = targets
+                            ____temp_10_13 = (____opt_11 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
                                     return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids and cell.strength ~= nil and cell.strength < GAME_CONFIG.cell_strength[cell.id]
                                 end
                             )) ~= -1
                         end
-                        local is_valid_cell = ____temp_13_16
+                        local is_valid_cell = ____temp_10_13
                         if is_valid_cell then
                             if element ~= NullElement then
                                 available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1451,44 +1386,44 @@ function ____exports.Game()
                         while x < field_width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_19 = cell ~= NotActiveCell
-                            if ____temp_19 then
-                                local ____opt_17 = exclude
-                                ____temp_19 = (____opt_17 and __TS__ArrayFindIndex(
+                            local ____temp_16 = cell ~= NotActiveCell
+                            if ____temp_16 then
+                                local ____opt_14 = exclude
+                                ____temp_16 = (____opt_14 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == cell.uid end
                                 )) == -1
                             end
-                            local ____temp_19_22 = ____temp_19
-                            if ____temp_19_22 then
-                                local ____opt_20 = targets
-                                ____temp_19_22 = (____opt_20 and __TS__ArrayFindIndex(
+                            local ____temp_16_19 = ____temp_16
+                            if ____temp_16_19 then
+                                local ____opt_17 = targets
+                                ____temp_16_19 = (____opt_17 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_cell = ____temp_19_22
-                            local ____temp_25 = element ~= NullElement
-                            if ____temp_25 then
-                                local ____opt_23 = exclude
-                                ____temp_25 = (____opt_23 and __TS__ArrayFindIndex(
+                            local is_valid_cell = ____temp_16_19
+                            local ____temp_22 = element ~= NullElement
+                            if ____temp_22 then
+                                local ____opt_20 = exclude
+                                ____temp_22 = (____opt_20 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local ____temp_25_28 = ____temp_25
-                            if ____temp_25_28 then
-                                local ____opt_26 = targets
-                                ____temp_25_28 = (____opt_26 and __TS__ArrayFindIndex(
+                            local ____temp_22_25 = ____temp_22
+                            if ____temp_22_25 then
+                                local ____opt_23 = targets
+                                ____temp_22_25 = (____opt_23 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Element and target.id == element.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_element = ____temp_25_28
+                            local is_valid_element = ____temp_22_25
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1519,15 +1454,15 @@ function ____exports.Game()
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
-                            local ____temp_31 = element ~= NullElement
-                            if ____temp_31 then
-                                local ____opt_29 = exclude
-                                ____temp_31 = (____opt_29 and __TS__ArrayFindIndex(
+                            local ____temp_28 = element ~= NullElement
+                            if ____temp_28 then
+                                local ____opt_26 = exclude
+                                ____temp_28 = (____opt_26 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local is_valid_element = ____temp_31
+                            local is_valid_element = ____temp_28
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1581,6 +1516,7 @@ function ____exports.Game()
         if element_to ~= NullElement and element_to.state ~= ElementState.Idle then
             return
         end
+        stop_helper()
         if not field.try_swap(swap.from, swap.to) then
             EventBus.send("RESPONSE_WRONG_SWAP_ELEMENTS", {from = swap.from, to = swap.to, element_from = element_from, element_to = element_to})
             return
@@ -1698,29 +1634,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch368 = combination.type
-            local ____cond368 = ____switch368 == CombinationType.Comb4
-            if ____cond368 then
+            local ____switch359 = combination.type
+            local ____cond359 = ____switch359 == CombinationType.Comb4
+            if ____cond359 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond368 = ____cond368 or ____switch368 == CombinationType.Comb5
-            if ____cond368 then
+            ____cond359 = ____cond359 or ____switch359 == CombinationType.Comb5
+            if ____cond359 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond368 = ____cond368 or ____switch368 == CombinationType.Comb2x2
-            if ____cond368 then
+            ____cond359 = ____cond359 or ____switch359 == CombinationType.Comb2x2
+            if ____cond359 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond368 = ____cond368 or (____switch368 == CombinationType.Comb3x3a or ____switch368 == CombinationType.Comb3x3b)
-            if ____cond368 then
+            ____cond359 = ____cond359 or (____switch359 == CombinationType.Comb3x3a or ____switch359 == CombinationType.Comb3x3b)
+            if ____cond359 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond368 = ____cond368 or (____switch368 == CombinationType.Comb3x4 or ____switch368 == CombinationType.Comb3x5)
-            if ____cond368 then
+            ____cond359 = ____cond359 or (____switch359 == CombinationType.Comb3x4 or ____switch359 == CombinationType.Comb3x5)
+            if ____cond359 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
@@ -1843,6 +1779,8 @@ function ____exports.Game()
     is_block_input = false
     is_first_step = true
     start_game_time = 0
+    helper_timer = nil
+    helper_data = nil
     local function init()
         Log.log("INIT GAME")
         field.init()

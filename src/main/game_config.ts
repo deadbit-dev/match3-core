@@ -454,6 +454,7 @@ export const _STORAGE_CONFIG = {
     completed_tutorials: [] as number[]
 };
 
+export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
 export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
 export interface SwapElementsMessage extends SwapInfo { element_from: Element, element_to: Element | typeof NullElement }
 export interface CombinateMessage { combined_positions: Position[] }
@@ -548,8 +549,6 @@ export type _UserMessages = {
 
     GAME_TIMER: number,
 
-    SET_HELPER: VoidMessage,
-
     SWAP_ELEMENTS: SwapInfo,
 
     ACTIVATE_BUSTER: NameMessage,
@@ -557,8 +556,8 @@ export type _UserMessages = {
     // ON_ELEMENT_SELECTED: ItemInfo,
     // ON_ELEMENT_UNSELECTED: ItemInfo,
 
-    // ON_SET_STEP_HELPER: StepHelperMessage,
-    // ON_RESET_STEP_HELPER: StepHelperMessage,
+    SET_HELPER: HelperMessage,
+    STOP_HELPER: HelperMessage,
 
     UPDATED_BUTTONS: VoidMessage,
     UPDATED_TIMER: number,
@@ -581,5 +580,6 @@ export type _UserMessages = {
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
     FEED_ANIMAL: number,
-    SET_WIN_UI: VoidMessage
+    SET_WIN_UI: VoidMessage,
+    SET_SHUFFLE: VoidMessage
 };

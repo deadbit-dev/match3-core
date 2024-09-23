@@ -4,12 +4,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import * as flow from 'ludobits.m.flow';
 import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./match3_utils";
 import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, NotActiveCell, NotFound, NullElement, Position, SwapInfo } from "./core";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, SwapElementsMessage } from "../main/game_config";
+import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
 import { NameMessage } from "../modules/modules_const";
 import { Axis, is_valid_pos } from "../utils/math_utils";
 import { lang_data } from "../main/langs";
+import { shuffle_array } from "../utils/utils";
 
 
 export enum CellId {
@@ -133,6 +135,9 @@ export function Game() {
     let start_game_time = 0;
 
     let game_timer: hash;
+    let helper_timer: hash | null = null;
+
+    let helper_data: HelperMessage | null = null;
 
     function init() {
         Log.log("INIT GAME");
@@ -181,7 +186,7 @@ export function Game() {
         EventBus.on('REQUEST_HELICOPTER_ACTION', on_helicopter_action, false);
         EventBus.on('REQUEST_HELICOPTER_END', on_helicopter_end, false);
 
-        EventBus.on('REQUEST_SHUFFLE_END', on_shuffle_field_end);
+        EventBus.on('REQUEST_SHUFFLE_END', on_shuffle_end);
     }
 
     function set_element_chances() {
@@ -210,10 +215,6 @@ export function Game() {
             set_targets(level_config.targets);
             set_steps(level_config.steps);
             set_random();
-
-            if(is_tutorial()) {
-                set_tutorial();
-            }
         }
     
         EventBus.send('RESPONSE_LOAD_GAME', copy_state());
@@ -223,7 +224,7 @@ export function Game() {
         }
 
         GAME_CONFIG.is_revive = false;
-        game_timer = timer.delay(1, true, on_tick);
+        game_timer = timer.delay(0.5, true, on_tick);
     }
 
     function set_tutorial() {
@@ -257,6 +258,22 @@ export function Game() {
                     unlock_buster(buster);
                 }
             } else unlock_buster(tutorial_data.busters);
+        }
+
+        if(tutorial_data.step != undefined) {
+            const combined_element = field.get_element(tutorial_data.step.from);
+            const elements = [];
+            for(const info of lock_info) {
+                if(!info.is_locked && info.element != NullElement)
+                    elements.push(info.element);
+            }
+            if(combined_element != NullElement) {
+                set_helper({
+                    step: tutorial_data.step,
+                    combined_element,
+                    elements
+                });
+            }
         }
 
         EventBus.send('SET_TUTORIAL', lock_info);
@@ -307,11 +324,48 @@ export function Game() {
                 EventBus.send('UPDATED_BUTTONS');           
             }
 
-            if(busters.spinning.active || !has_step())
-                shuffle_field();
+            if(busters.spinning.active || !has_step()) {
+                stop_helper();
+                shuffle();
+            }
 
             busters.spinning.active = false;
+
+            if(!is_tutorial() && helper_timer == null)
+                helper_timer = timer.delay(5, false, () => { set_helper(); });
         }
+    }
+
+    function set_helper(message?: HelperMessage) {
+        if(message != undefined) helper_data = message;
+        else {
+            const info = get_step();
+            const combined_element = field.get_element(info.step.from);
+
+            const elements = [];
+            for(const pos of info.combination.elementsInfo) {
+                const element = field.get_element(pos);
+                if(element != NullElement)
+                    elements.push(element);
+            }
+
+            if(combined_element != NullElement) {
+                helper_data = { step: info.step, combined_element, elements };
+            }
+        }
+
+        if(helper_data != null) EventBus.send('SET_HELPER', helper_data);
+    }
+
+    function stop_helper() {
+        if(helper_timer == null || helper_data == null)
+            return;
+
+        timer.cancel(helper_timer);
+        EventBus.send('STOP_HELPER', helper_data);
+
+        helper_timer = null;
+        helper_data = null;
     }
     
     function update_timer() {
@@ -372,173 +426,93 @@ export function Game() {
         Scene.restart();
     }
 
-    function shuffle_field() {
-        Log.log("SHUFFLE FIELD");
+    function shuffle() {
+        is_block_input = true;
+        EventBus.send('SET_SHUFFLE');
+        
+        print("SET");
 
-        // collecting elements for shuffling
-        const elements = [];
-        for(let y = 0; y < field_height; y++) {
-            for(let x = 0; x < field_width; x++) {
-                const cell = field.get_cell({x, y});
-                if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
-                    const element = field.get_element({x, y});
-                    if(element != NullElement)
-                        elements.push(element);
-                    field.set_element({x, y}, NullElement);
-                }
-            }
-        }
+        shuffle_field(() => {
+            print("SHUFFLE");
+            update_core_state();        
+            EventBus.send('SHUFFLE', copy_state());
+        });       
+    }
 
-        // sorting elements by type
-        const elements_by_type: {[key in number]: Element[]} = {};
-        for(const element of elements) {
-            if(elements_by_type[element.type] == undefined) {
-                elements_by_type[element.type] = [];
-                for(const other_element of elements) {
-                    if(element.type == other_element.type) {
-                        elements_by_type[element.type].push(other_element);
-                    }
-                }
-            }
-        }
+    function on_shuffle_end() {
+        is_block_input = false;
+    }
 
-        // sorting by counts for minimum combination 3x1
-        const available_elements = [];
-        for(const elements of Object.values(elements_by_type)) {
-            if(elements.length >= 3) {
-                const idx = available_elements.push([] as Element[]) - 1;
-                for(let i = 0; i < 3; i++) {
-                    available_elements[idx].push(elements.splice(math.random(0, elements.length - 1), 1)[0]);
-                }
-            }
-        }
+    function shuffle_field(on_end: () => void) {
+        return flow.start(() => {
+            Log.log("SHUFFLE FIELD");
 
-        // pick random elements if can
-        const combo_elements = (available_elements.length > 0) ? available_elements[math.random(0, available_elements.length - 1)] : [];
-        for(const combo_element of combo_elements) {
-            elements.splice(elements.findIndex((elm) => elm.uid == combo_element.uid), 1);
-        }
-
-        // shuffling other elements
-        for(let y = field_height - 1; y >= 0 && elements.length > 0; y--) {
-            for(let x = 0; x < field_width && elements.length > 0; x++) {
-                const cell = field.get_cell({x, y});
-                if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
-                    const exclude_ids: number[] = [];
-                    const neighbors = field.get_neighbor_elements({x, y});
-                    for(const neighbor of neighbors) {
-                        exclude_ids.push(neighbor.type);
-                    }
-                    
-                    let element_idx = elements.findIndex((elm) => {
-                        return (combo_elements.findIndex((combo_elm) => combo_elm.uid == elm.uid) == -1) && !exclude_ids.includes(elm.type);
-                    });
-
-                    if(element_idx == -1) element_idx = math.random(0, elements.length - 1);
-
-                    const element = elements.splice(element_idx, 1)[0];
-                    field.set_element({x, y}, element);
-                }
-            }
-        }
-
-        // searching available place for 3x1 combo
-        const available_combo_positions = [];
-        for(let y = 1; y < field_height; y++) {
-            for(let x = 0; x < field_width - 2; x++) {
-                let available = true;
-                for(let i = 0; i < 3 && available; i++) {
-                    if(!is_available_for_placed({x: x + i, y}) || (i == 2 && !is_available_for_placed({x: x + i, y: y - 1})))
-                        available = false;
-                }
-                if(available)
-                    available_combo_positions.push({x, y});
-            }
-        }
-
-        for(let y = field_height - 1; y >= 0 && available_combo_positions.length == 0; y--) {
-            for(let x = 0; x < field_width && available_combo_positions.length == 0; x++) {
-                let available = true;
-                for(let i = 0; i < 3 && available; i++) {
-                    const cell = field.get_cell({x: x + i, y});
-                    if(cell == NotActiveCell || !field.is_available_cell_type_for_move(cell))
-                        available = false;
-                    
-                    if(i == 2) {
-                        const top_cell = field.get_cell({x: x + i, y: y - 1});
-                        if(top_cell == NotActiveCell || !field.is_available_cell_type_for_move(top_cell))
-                            available = false;
-                    }
-                }
-                if(available) {
-                    available_combo_positions.push({x, y});
-                    for(let i = x; i <= x+3; i++) {
-                        for(let j = y - ((i == x+3) ? 0 : 1); j < field_height; j++) {
-                            const cell = field.get_cell({x: i, y: j});
-                            if(cell == NotActiveCell || !field.is_available_cell_type_for_move(cell))
-                                break;
-                            const element = field.get_element({x: i, y: j});
-                            if(element != NullElement)
-                                break;
-                            make_element({x: i, y: j}, GAME_CONFIG.base_elements[math.random(0, GAME_CONFIG.base_elements.length - 1)]);
+            // collecting elements for shuffling
+            const positions = [];
+            const elements = [];
+            for(let y = 0; y < field_height; y++) {
+                for(let x = 0; x < field_width; x++) {
+                    const cell = field.get_cell({x, y});
+                    if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
+                        const element = field.get_element({x, y});
+                        if(element != NullElement) {
+                            print("GRAB: ", x, y);
+                            positions.push({x, y});
+                            elements.push(element);
+                            field.set_element({x, y}, NullElement);
                         }
                     }
                 }
             }
-        }
-
-        // placed 3x1 combo
-        const swaped_elements: (Element | typeof NullElement)[] = [];
-        const combo_pos = available_combo_positions[math.random(0, available_combo_positions.length - 1)];
-        const rand_id = GAME_CONFIG.base_elements[math.random(0, GAME_CONFIG.base_elements.length - 1)];
-        for(let i = 0; i < 3; i++) {
-            const element_to = json.decode(json.encode(field.get_element({x: combo_pos.x + i, y: (i == 2 ? combo_pos.y - 1 : combo_pos.y)})));
-            swaped_elements.push(element_to);
-            if(combo_elements.length != 0) {
-                const element_from = combo_elements.splice(math.random(0, combo_elements.length - 1), 1)[0];
-                field.set_element({x: combo_pos.x + i, y: (i == 2 ? combo_pos.y - 1 : combo_pos.y)}, element_from);
-            } else make_element({x: combo_pos.x + i, y: (i == 2 ? combo_pos.y - 1 : combo_pos.y)}, rand_id);
-        }
-
-        // fill empty cell
-        for(let y = field_height - 1; y >= 0 && swaped_elements.length > 0; y--) {
-            for(let x = 0; x < field_width && swaped_elements.length > 0; x++) {
-                const cell = field.get_cell({x, y});
-                if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
-                    const element = field.get_element({x, y});
-                    if(element == NullElement)
-                        field.set_element({x, y}, swaped_elements.splice(math.random(0, swaped_elements.length - 1), 1)[0]);
+    
+            shuffle_array(elements);
+    
+            let counter = 0;
+            const optimize_count = 5;
+    
+            // filling the field available elements by got positions
+            let element_assigned = false;
+            for(const position of positions) {
+    
+                if(counter >= optimize_count) {
+                    counter = 0;
+                    flow.frames(1);
                 }
-            }
-        }
-
-        update_core_state();        
-        EventBus.send('SHUFFLE', copy_state());
-    }
-
-    function on_shuffle_field_end() {
-        for(let y = field_height - 1; y >= 0; y--) {
-            for(let x = 0; x < field_width; x++) {
-                const combination = field.search_combination({x, y});
-                if(combination != NotFound) {
-                    for(const info of combination.elementsInfo) {
-                        field.set_element_state(info, ElementState.Busy);
-                        field.set_cell_state(info, CellState.Busy);
+    
+                for(let i = 0; i < elements.length; i++) {
+                    const elementIndex = Math.floor(Math.random() * elements.length);
+                    const element = elements[elementIndex];
+                    field.set_element(position, element);
+                    if(field.search_combination(position) == NotFound) {
+                        elements.splice(elementIndex, 1);
+                        element_assigned = true;
+    
+                        print("ASSIGNED: ", element.id, element.uid, position.x, position.y);
+    
+                        break;
                     }
-
-                    EventBus.send('RESPONSE_COMBINATE', combination);
                 }
+    
+                // if not found right element from availables
+                if(!element_assigned) {
+                    // maybe make this more randomize
+                    print("TRY-MAKE: ", position.x, position.y);
+                    for(const element_id of GAME_CONFIG.base_elements) {
+                        if(elements.find((element) => element.id == element_id) == undefined) {
+                            const elem = make_element(position, element_id);
+                            if(elem != NullElement)
+                                print("MAKED: ", elem.id, elem.uid, position.x, position.y);
+                        }
+                    }
+                }
+    
+                counter++;
             }
-        }
-    }
-
-    function is_available_for_placed(pos: Position) {
-        const cell = field.get_cell(pos);
-        if(cell == NotActiveCell) return false;
-        if(!field.is_available_cell_type_for_move(cell)) return false;
-        const element = field.get_element(pos);
-        if(element == NullElement) return false;
-        return true;
+    
+            // if not available steps
+            if(!has_step()) shuffle_field(on_end);
+            else return on_end();
+        }, {parallel: true});
     }
 
     function try_load_field() {
@@ -613,6 +587,77 @@ export function Game() {
         }
 
         return false;
+    }
+
+    function get_step() {
+        const steps = [];
+
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const cell = field.get_cell({x, y});
+                if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
+                    if(is_valid_pos(x+1, y, field_width, field_height)) {
+                        const cell = field.get_cell({x: x+1, y});
+                        if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
+                            // swap element to right
+                            field.swap_elements({x, y}, {x: x+1, y});
+                            
+                            // chech for combinations
+                            const resultA = field.search_combination({x, y});
+                            const resultB = field.search_combination({x: x+1, y});
+                            
+                            // swap element back
+                            field.swap_elements({x, y}, {x: x+1, y});
+
+                            if(resultA != NotFound) {
+                                steps.push({
+                                    step: {from: {x: x+1, y}, to: {x, y}},
+                                    combination: resultA
+                                });
+                            }
+
+                            if(resultB != NotFound) {
+                                steps.push({
+                                    step: {from: {x, y}, to: {x: x+1, y}},
+                                    combination: resultB
+                                });
+                            }
+                        }
+                    }
+
+                    if(is_valid_pos(x, y+1, field_width, field_height)) {
+                        const cell = field.get_cell({x, y: y+1});
+                        if(cell != NotActiveCell && field.is_available_cell_type_for_move(cell)) {
+                            // swap element down
+                            field.swap_elements({x, y}, {x, y: y+1});
+
+                            // check for combination
+                            const resultC = field.search_combination({x, y});
+                            const resultD = field.search_combination({x, y: y+1});
+                            
+                            // swap element back
+                            field.swap_elements({x, y}, {x, y: y+1});
+                            
+                            if(resultC != NotFound) {
+                                steps.push({
+                                    step: {from: {x, y: y+1}, to: {x, y}},
+                                    combination: resultC
+                                });
+                            }
+                            
+                            if(resultD != NotFound) {
+                                steps.push({
+                                    step: {from: {x, y}, to: {x, y: y+1}},
+                                    combination: resultD
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return steps[math.random(0, steps.length-1)];
     }
 
     function revive() {
@@ -979,6 +1024,8 @@ export function Game() {
     function on_click(pos: Position) {
         if(is_block_input || is_tutorial()) return;
 
+        stop_helper();
+
         if(busters.hammer.active) return try_hammer_damage(pos);
         if(busters.horizontal_rocket.active) return try_horizontal_damage(pos);
         if(busters.vertical_rocket.active) return try_vertical_damage(pos);
@@ -1168,7 +1215,7 @@ export function Game() {
             const elements = field.get_all_elements_by_id(element_id);
             for(const element of elements) {
                 const element_pos = field.get_element_pos(element);
-                const damage_info = field.try_damage(element_pos, false, true);
+                const damage_info = field.try_damage(element_pos, false, false);
                 field.set_element_state(damage_info.pos, ElementState.Busy);
                 field.set_cell_state(damage_info.pos, CellState.Busy);
                 damages.push(damage_info);
@@ -1318,6 +1365,8 @@ export function Game() {
         
         if(element_from == NullElement || element_from.state != ElementState.Idle) return;
         if(element_to != NullElement && element_to.state != ElementState.Idle) return;
+
+        stop_helper();
 
         if(!field.try_swap(swap.from, swap.to)) {
             EventBus.send('RESPONSE_WRONG_SWAP_ELEMENTS', {

@@ -347,6 +347,8 @@ function set_events(instance: props) {
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN', on_win);
     EventBus.on('ON_GAME_OVER', (state) => { timer.delay(GAME_CONFIG.delay_before_gameover, false, () => set_gameover(instance, state)); }, true);
+    EventBus.on('SET_SHUFFLE', on_shuffle_set);
+    EventBus.on('SHUFFLE', on_shuffle_end);
 }
 
 function update_targets(data: TargetMessage) {
@@ -653,4 +655,32 @@ function disable_game_ui() {
     gui.set_enabled(gui.get_node('substrate'), false);
     gui.set_enabled(gui.get_node('buster_buttons'), false);
     gui.set_enabled(gui.get_node('system_buttons'), false);
+}
+
+function on_shuffle_set() {
+    const shuffle = gui.get_node('shuffle');
+    // const init_scale = gui.get_scale(shuffle);
+    // gui.set_scale(shuffle, vmath.vector3());
+    
+    const lock = gui.get_node('lock1');
+    gui.set_enabled(lock, true);
+    gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
+        gui.set_enabled(shuffle, true);
+    });
+    // gui.animate(shuffle, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INCUBIC, 0.3);
+}
+
+function on_shuffle_end() {
+    timer.delay(0.7, false, () => {
+        const shuffle = gui.get_node('shuffle');
+        // const init_scale = gui.get_scale(shuffle);
+        const lock = gui.get_node('lock1');
+        gui.set_enabled(shuffle, false);
+        gui.animate(lock, gui.PROP_COLOR, vmath.vector4(), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(lock, false);
+        });
+        // gui.animate(shuffle, gui.PROP_COLOR, vmath.vector4(), gui.EASING_INCUBIC, 0.3, 0, () => {
+            
+        // });
+    });
 }

@@ -182,4 +182,16 @@ end
 function ____exports.is_equal_game_items(cell1, cell2)
     return cell1._hash == cell2._hash
 end
+function ____exports.shuffle_array(array)
+    do
+        local i = #array - 1
+        while i > 0 do
+            local j = math.floor(math.random() * (i + 1))
+            local ____temp_0 = {array[j + 1], array[i + 1]}
+            array[i + 1] = ____temp_0[1]
+            array[j + 1] = ____temp_0[2]
+            i = i - 1
+        end
+    end
+end
 return ____exports

@@ -556,7 +556,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "buster_buttons"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   alpha: 0.0
   enabled: false
 }
@@ -577,7 +577,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "hammer/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "hammer"
   overridden_fields: 3
   overridden_fields: 13
@@ -620,7 +620,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "spinning/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "spinning"
   overridden_fields: 3
   overridden_fields: 13
@@ -663,7 +663,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "horizontal_rocket/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "horizontal_rocket"
   overridden_fields: 3
   overridden_fields: 13
@@ -712,7 +712,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "vertical_rocket/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "vertical_rocket"
   overridden_fields: 3
   overridden_fields: 13
@@ -750,7 +750,7 @@ nodes {
   type: TYPE_BOX
   texture: "ui/substrate"
   id: "system_buttons"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   layer: "top"
 }
 nodes {
@@ -776,7 +776,7 @@ nodes {
   type: TYPE_BOX
   texture: "ui/system_button"
   id: "restart/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "restart"
   overridden_fields: 3
   overridden_fields: 9
@@ -834,7 +834,7 @@ nodes {
   type: TYPE_BOX
   texture: "ui/system_button"
   id: "back/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "back"
   overridden_fields: 3
   overridden_fields: 9
@@ -892,7 +892,7 @@ nodes {
   type: TYPE_BOX
   texture: "ui/system_button"
   id: "revert_step/button"
-  yanchor: YANCHOR_TOP
+  yanchor: YANCHOR_BOTTOM
   parent: "revert_step"
   overridden_fields: 3
   overridden_fields: 9
@@ -1867,6 +1867,40 @@ nodes {
   layer: "top"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 270.0
+    y: 480.0
+  }
+  type: TYPE_BOX
+  texture: "ui/whirligig"
+  id: "shuffle"
+  layer: "top"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 270.0
+    y: 480.0
+  }
+  size {
+    x: 540.0
+    y: 960.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "lock1"
+  layer: "back"
+  inherit_alpha: true
+  alpha: 0.7
   enabled: false
 }
 layers {
