@@ -890,6 +890,7 @@ nodes {
   parent: "coins"
   overridden_fields: 12
   overridden_fields: 13
+  overridden_fields: 14
   template_node_child: true
 }
 nodes {
@@ -927,22 +928,24 @@ nodes {
 }
 nodes {
   position {
-    x: 12.0
+    x: -78.0
   }
   type: TYPE_BOX
   id: "lifes/button"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
+  pivot: PIVOT_W
   parent: "lifes"
   overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 12
   overridden_fields: 13
+  overridden_fields: 14
   template_node_child: true
 }
 nodes {
   position {
-    x: -98.0
+    x: -4.0
     y: 8.0
   }
   rotation {
@@ -951,15 +954,19 @@ nodes {
   type: TYPE_BOX
   texture: "ui/life_icon"
   id: "lifes/icon"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
   parent: "lifes/button"
   overridden_fields: 1
   overridden_fields: 2
   overridden_fields: 9
+  overridden_fields: 12
+  overridden_fields: 13
   template_node_child: true
 }
 nodes {
   position {
-    x: -2.0
+    x: 92.0
     y: 4.0
   }
   size {
@@ -968,17 +975,30 @@ nodes {
   }
   type: TYPE_TEXT
   id: "lifes/text"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
   parent: "lifes/button"
   overridden_fields: 1
   overridden_fields: 4
   overridden_fields: 8
+  overridden_fields: 12
+  overridden_fields: 13
   overridden_fields: 14
   template_node_child: true
 }
 nodes {
+  position {
+    x: 170.0
+    y: 4.0
+  }
   type: TYPE_BOX
   id: "lifes/plus"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
   parent: "lifes/button"
+  overridden_fields: 1
+  overridden_fields: 12
+  overridden_fields: 13
   template_node_child: true
 }
 nodes {

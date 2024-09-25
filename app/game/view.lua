@@ -4,6 +4,7 @@ local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__Delete = ____lualib.__TS__Delete
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
+local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local ____exports = {}
 local flow = require("ludobits.m.flow")
@@ -14,20 +15,21 @@ local Axis = ____math_utils.Axis
 local Direction = ____math_utils.Direction
 local is_valid_pos = ____math_utils.is_valid_pos
 local rotateMatrix = ____math_utils.rotateMatrix
-local ____match3_utils = require("game.match3_utils")
-local get_current_level = ____match3_utils.get_current_level
-local get_field_cell_size = ____match3_utils.get_field_cell_size
-local get_field_height = ____match3_utils.get_field_height
-local get_field_max_height = ____match3_utils.get_field_max_height
-local get_field_max_width = ____match3_utils.get_field_max_width
-local get_field_offset_border = ____match3_utils.get_field_offset_border
-local get_field_width = ____match3_utils.get_field_width
-local get_move_direction = ____match3_utils.get_move_direction
-local is_animal_level = ____match3_utils.is_animal_level
-local is_tutorial = ____match3_utils.is_tutorial
+local ____utils = require("game.utils")
+local get_current_level = ____utils.get_current_level
+local get_field_cell_size = ____utils.get_field_cell_size
+local get_field_height = ____utils.get_field_height
+local get_field_max_height = ____utils.get_field_max_height
+local get_field_max_width = ____utils.get_field_max_width
+local get_field_offset_border = ____utils.get_field_offset_border
+local get_field_width = ____utils.get_field_width
+local get_move_direction = ____utils.get_move_direction
+local is_animal_level = ____utils.is_animal_level
+local is_tutorial = ____utils.is_tutorial
 local ____core = require("game.core")
 local NotActiveCell = ____core.NotActiveCell
 local NullElement = ____core.NullElement
+local is_available_cell_type_for_move = ____core.is_available_cell_type_for_move
 local ____game = require("game.game")
 local base_cell = ____game.base_cell
 local CellId = ____game.CellId
@@ -69,8 +71,31 @@ ____exports.SubstrateId[____exports.SubstrateId.InsideAngle] = "InsideAngle"
 ____exports.SubstrateId.Full = 10
 ____exports.SubstrateId[____exports.SubstrateId.Full] = "Full"
 ____exports.EMPTY_SUBSTRATE = -1
+____exports.Action = Action or ({})
+____exports.Action.Swap = 0
+____exports.Action[____exports.Action.Swap] = "Swap"
+____exports.Action.Combination = 1
+____exports.Action[____exports.Action.Combination] = "Combination"
+____exports.Action.ActivateBuster = 2
+____exports.Action[____exports.Action.ActivateBuster] = "ActivateBuster"
+____exports.Action.ActivateBusterAfterSwap = 3
+____exports.Action[____exports.Action.ActivateBusterAfterSwap] = "ActivateBusterAfterSwap"
+____exports.Action.CombinateBusters = 4
+____exports.Action[____exports.Action.CombinateBusters] = "CombinateBusters"
+____exports.Action.HelicopterFly = 5
+____exports.Action[____exports.Action.HelicopterFly] = "HelicopterFly"
+____exports.Action.DiskosphereActivation = 6
+____exports.Action[____exports.Action.DiskosphereActivation] = "DiskosphereActivation"
+____exports.Action.DiskosphereTrace = 7
+____exports.Action[____exports.Action.DiskosphereTrace] = "DiskosphereTrace"
+____exports.Action.DynamiteActivation = 8
+____exports.Action[____exports.Action.DynamiteActivation] = "DynamiteActivation"
+____exports.Action.RocketActivation = 9
+____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
+____exports.Action.Falling = 10
+____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, dispatch_messages, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, recalculate_cell_offset, recalculate_sizes, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, on_combinate_busters, damage_element_animation, damage_cell_animation, on_combinate_animation, on_combined_animation, on_combo_animation, on_requested_element_animation, on_falling_animation, on_fall_end_animation, request_falling, on_damage_animation, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, down_item, locks
+    local set_events, dispatch_messages, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, recalculate_cell_offset, recalculate_sizes, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, down_item, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -102,8 +127,10 @@ function ____exports.View(resources)
         EventBus.on("RESPONSE_WRONG_SWAP_ELEMENTS", wrong_swap_elements_animation, false)
         EventBus.on("RESPONSE_COMBINATE_BUSTERS", on_combinate_busters, false)
         EventBus.on("RESPONSE_COMBINATE", on_combinate_animation, false)
+        EventBus.on("RESPONSE_COMBINATE_NOT_FOUND", on_combinate_not_found, false)
         EventBus.on("RESPONSE_COMBINATION", on_combined_animation, false)
         EventBus.on("RESPONSE_FALLING", on_falling_animation, false)
+        EventBus.on("RESPONSE_FALLING_NOT_FOUND", on_falling_not_found, false)
         EventBus.on("RESPONSE_FALL_END", on_fall_end_animation, false)
         EventBus.on("REQUESTED_ELEMENT", on_requested_element_animation, false)
         EventBus.on("RESPONSE_HAMMER_DAMAGE", on_hammer_damage_animation, false)
@@ -666,8 +693,7 @@ function ____exports.View(resources)
                 go.PLAYBACK_ONCE_FORWARD,
                 to_world_pos,
                 GAME_CONFIG.spawn_element_easing,
-                GAME_CONFIG.swap_element_time,
-                0.1
+                GAME_CONFIG.swap_element_time
             )
         end
         if element_to ~= NullElement then
@@ -679,23 +705,28 @@ function ____exports.View(resources)
                     go.PLAYBACK_ONCE_FORWARD,
                     from_world_pos,
                     GAME_CONFIG.spawn_element_easing,
-                    GAME_CONFIG.swap_element_time,
-                    0.1
+                    GAME_CONFIG.swap_element_time
                 )
             end
         end
         Sound.play("swap")
+        record_action(____exports.Action.Swap)
         timer.delay(
             GAME_CONFIG.swap_element_time,
             false,
             function()
+                remove_action(____exports.Action.Swap)
                 EventBus.send("REQUEST_SWAP_ELEMENTS_END", message)
+                record_action(____exports.Action.Combination)
+                record_action(____exports.Action.Combination)
+                EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.from, message.to}})
                 timer.delay(
                     0.1,
                     false,
-                    function() return EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message) end
+                    function()
+                        EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
+                    end
                 )
-                EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.from, message.to}})
             end
         )
     end
@@ -752,26 +783,21 @@ function ____exports.View(resources)
         end
         Sound.play("swap")
     end
-    function on_combinate_busters(message)
-        local view_from_buster = get_view_item_by_uid(message.buster_from.element.uid)
-        if view_from_buster == nil then
-            return
-        end
-        local to_world_pos = get_world_pos(message.buster_to.pos)
-        go.animate(
-            view_from_buster._hash,
-            "position",
-            go.PLAYBACK_ONCE_FORWARD,
-            to_world_pos,
-            GAME_CONFIG.squash_easing,
-            GAME_CONFIG.squash_time,
-            0,
-            function()
-                delete_view_item_by_uid(message.buster_from.element.uid)
-                request_falling(message.buster_from.pos)
-                EventBus.send("REQUEST_COMBINED_BUSTERS", message)
-            end
+    function record_action(action)
+        actions[#actions + 1] = action
+    end
+    function remove_action(action)
+        __TS__ArraySplice(
+            actions,
+            __TS__ArrayFindIndex(
+                actions,
+                function(____, a) return a == action end
+            ),
+            1
         )
+    end
+    function has_actions()
+        return #actions > 0
     end
     function damage_element_animation(element)
         local element_view = get_view_item_by_uid(element.uid)
@@ -871,6 +897,29 @@ function ____exports.View(resources)
             end
         )
     end
+    function on_combinate_busters(message)
+        local view_from_buster = get_view_item_by_uid(message.buster_from.element.uid)
+        if view_from_buster == nil then
+            return
+        end
+        remove_action(____exports.Action.ActivateBusterAfterSwap)
+        local to_world_pos = get_world_pos(message.buster_to.pos)
+        go.animate(
+            view_from_buster._hash,
+            "position",
+            go.PLAYBACK_ONCE_FORWARD,
+            to_world_pos,
+            GAME_CONFIG.squash_easing,
+            GAME_CONFIG.squash_time,
+            0,
+            function()
+                delete_view_item_by_uid(message.buster_from.element.uid)
+                request_falling(message.buster_from.pos)
+                record_action(____exports.Action.CombinateBusters)
+                EventBus.send("REQUEST_COMBINED_BUSTERS", message)
+            end
+        )
+    end
     function on_combinate_animation(combination)
         timer.delay(
             GAME_CONFIG.combination_delay,
@@ -881,11 +930,12 @@ function ____exports.View(resources)
         )
     end
     function on_combined_animation(message)
+        remove_action(____exports.Action.Combination)
         if message.maked_element ~= nil then
             return on_combo_animation(message)
         end
         for ____, damage_info in ipairs(message.damages) do
-            on_damage_animation(damage_info)
+            on_damage(damage_info)
             request_falling(damage_info.pos)
         end
         EventBus.send("REQUEST_COMBINATION_END", message.damages)
@@ -933,12 +983,19 @@ function ____exports.View(resources)
             end
         )
     end
+    function on_combinate_not_found()
+        remove_action(____exports.Action.Combination)
+        if not has_actions() then
+            EventBus.send("REQUEST_IDLE")
+        end
+    end
     function on_requested_element_animation(message)
         make_element_view(message.pos.x, message.pos.y, message.element)
     end
     function on_falling_animation(message)
         local element_view = get_view_item_by_uid(message.element.uid)
         if element_view ~= nil then
+            request_falling(message.start_pos)
             local to_world_pos = get_world_pos(message.next_pos)
             go.animate(
                 element_view._hash,
@@ -946,30 +1003,34 @@ function ____exports.View(resources)
                 go.PLAYBACK_ONCE_FORWARD,
                 to_world_pos,
                 go.EASING_LINEAR,
-                GAME_CONFIG.falling_time
-            )
-            timer.delay(
                 GAME_CONFIG.falling_time,
-                false,
+                0,
                 function()
                     EventBus.send("REQUEST_FALL_END", message.next_pos)
-                    timer.delay(
-                        GAME_CONFIG.combination_delay,
-                        false,
-                        function()
-                            EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.next_pos}})
-                        end
-                    )
                 end
             )
-            request_falling(message.start_pos)
         end
     end
-    function on_fall_end_animation(element)
-        local element_view = get_view_item_by_uid(element.uid)
+    function on_falling_not_found()
+        remove_action(____exports.Action.Falling)
+        if not has_actions() then
+            EventBus.send("REQUEST_IDLE")
+        end
+    end
+    function on_fall_end_animation(info)
+        local element_view = get_view_item_by_uid(info.element.uid)
         if element_view == nil then
             return
         end
+        remove_action(____exports.Action.Falling)
+        record_action(____exports.Action.Combination)
+        timer.delay(
+            GAME_CONFIG.combination_delay,
+            false,
+            function()
+                EventBus.send("REQUEST_COMBINATE", {combined_positions = {info.pos}})
+            end
+        )
         local world_pos = go.get_position(element_view._hash)
         world_pos.y = world_pos.y + 5
         go.animate(
@@ -997,6 +1058,7 @@ function ____exports.View(resources)
         if delay == nil then
             delay = GAME_CONFIG.falling_dalay
         end
+        record_action(____exports.Action.Falling)
         timer.delay(
             delay,
             false,
@@ -1005,7 +1067,7 @@ function ____exports.View(resources)
             end
         )
     end
-    function on_damage_animation(damage_info)
+    function on_damage(damage_info)
         if damage_info.element ~= nil then
             Sound.play("broke_element")
             damage_element_animation(damage_info.element)
@@ -1020,34 +1082,36 @@ function ____exports.View(resources)
         end
     end
     function on_hammer_damage_animation(damage_info)
-        on_damage_animation(damage_info)
+        on_damage(damage_info)
         request_falling(damage_info.pos)
     end
     function on_horizontal_damage_animation(damages)
         for ____, damage_info in ipairs(damages) do
-            on_damage_animation(damage_info)
+            on_damage(damage_info)
             request_falling(damage_info.pos)
         end
     end
     function on_vertical_damage_animation(damages)
         for ____, damage_info in ipairs(damages) do
-            on_damage_animation(damage_info)
+            on_damage(damage_info)
             request_falling(damage_info.pos)
         end
     end
     function on_dynamite_activated_animation(messages)
         Sound.play("dynamite")
+        record_action(____exports.Action.DynamiteActivation)
         activate_dynamite_animation(
             messages.pos,
             messages.big_range and 1.5 or 1,
             function()
+                remove_action(____exports.Action.DynamiteActivation)
                 EventBus.send("REQUEST_DYNAMITE_ACTION", messages)
             end
         )
     end
     function on_dynamite_action_animation(message)
         for ____, damage_info in ipairs(message.damages) do
-            on_damage_animation(damage_info)
+            on_damage(damage_info)
             request_falling(damage_info.pos)
         end
     end
@@ -1080,25 +1144,27 @@ function ____exports.View(resources)
     end
     function on_rocket_activated_animation(message)
         local world_pos = get_world_pos(message.pos, GAME_CONFIG.default_element_z_index + 2.1)
+        record_action(____exports.Action.RocketActivation)
         rocket_effect(
             message,
             world_pos,
             message.axis,
             function()
+                remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch188 = message.axis
-                    local ____cond188 = ____switch188 == Axis.Horizontal
-                    if ____cond188 then
+                    local ____switch196 = message.axis
+                    local ____cond196 = ____switch196 == Axis.Horizontal
+                    if ____cond196 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond188 = ____cond188 or ____switch188 == Axis.Vertical
-                    if ____cond188 then
+                    ____cond196 = ____cond196 or ____switch196 == Axis.Vertical
+                    if ____cond196 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond188 = ____cond188 or ____switch188 == Axis.All
-                    if ____cond188 then
+                    ____cond196 = ____cond196 or ____switch196 == Axis.All
+                    if ____cond196 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1127,14 +1193,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch191 = axis
-            local ____cond191 = ____switch191 == Axis.Vertical
-            if ____cond191 then
+            local ____switch199 = axis
+            local ____cond199 = ____switch199 == Axis.Vertical
+            if ____cond199 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond191 = ____cond191 or ____switch191 == Axis.Horizontal
-            if ____cond191 then
+            ____cond199 = ____cond199 or ____switch199 == Axis.Horizontal
+            if ____cond199 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break
@@ -1241,6 +1307,7 @@ function ____exports.View(resources)
             msg.url(nil, _go, "diskosphere_light"),
             "enable"
         )
+        record_action(____exports.Action.DiskosphereActivation)
         local anim_props = {blend_duration = 0, playback_rate = 1.25}
         spine.play_anim(
             msg.url(nil, _go, "diskosphere"),
@@ -1249,19 +1316,22 @@ function ____exports.View(resources)
             anim_props,
             function(____self, message_id, message, sender)
                 if message_id == hash("spine_animation_done") then
+                    remove_action(____exports.Action.DiskosphereActivation)
                     local anim_props = {blend_duration = 0, playback_rate = 1.25}
                     if message.animation_id == hash("light_ball_intro") then
+                        record_action(____exports.Action.DiskosphereTrace)
                         trace_animation(
                             worldPos,
                             _go,
                             damages,
                             #damages,
                             function(damage_info)
+                                remove_action(____exports.Action.DiskosphereTrace)
                                 local ____opt_2 = damage_info.element
                                 if (____opt_2 and ____opt_2.uid) == uid then
                                     return request_falling(damage_info.pos)
                                 end
-                                on_damage_animation(damage_info)
+                                on_damage(damage_info)
                                 request_falling(damage_info.pos)
                                 EventBus.send("REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END", {damage_info = damage_info, buster = buster})
                             end,
@@ -1367,7 +1437,7 @@ function ____exports.View(resources)
     end
     function on_helicopter_activated_animation(message)
         for ____, damage_info in ipairs(message.damages) do
-            on_damage_animation(damage_info)
+            on_damage(damage_info)
             request_falling(damage_info.pos)
         end
         EventBus.send("REQUEST_HELICOPTER_ACTION", message)
@@ -1408,6 +1478,7 @@ function ____exports.View(resources)
                 )
                 local damage_info = message.damages[i + 1]
                 local target_world_pos = get_world_pos(damage_info.pos, 3)
+                record_action(____exports.Action.HelicopterFly)
                 go.animate(
                     helicopter,
                     "position",
@@ -1417,8 +1488,9 @@ function ____exports.View(resources)
                     GAME_CONFIG.helicopter_fly_duration,
                     0,
                     function()
+                        remove_action(____exports.Action.HelicopterFly)
                         go.delete(helicopter)
-                        on_damage_animation(damage_info)
+                        on_damage(damage_info)
                         request_falling(damage_info.pos)
                         EventBus.send("REQUEST_HELICOPTER_END", message)
                     end
@@ -1441,13 +1513,6 @@ function ____exports.View(resources)
                         if element ~= NullElement then
                             local element_view = get_view_item_by_uid(element.uid)
                             if element_view ~= nil then
-                                print(
-                                    "SET-VIEW: ",
-                                    element.id,
-                                    element.uid,
-                                    x,
-                                    y
-                                )
                                 local to_world_pos = get_world_pos({x = x, y = y}, GAME_CONFIG.default_element_z_index)
                                 go.animate(
                                     element_view._hash,
@@ -1458,13 +1523,6 @@ function ____exports.View(resources)
                                     0.5
                                 )
                             else
-                                print(
-                                    "MAKE-VIEW: ",
-                                    element.id,
-                                    element.uid,
-                                    x,
-                                    y
-                                )
                                 make_element_view(x, y, element, true)
                             end
                         end
@@ -1495,13 +1553,7 @@ function ____exports.View(resources)
                             0.01 * (y * get_field_width() + x),
                             false,
                             function()
-                                if cell ~= NotActiveCell then
-                                    if __TS__ArrayIncludes(GAME_CONFIG.sounded_cells, cell.id) then
-                                        Sound.play(GAME_CONFIG.cell_sound[cell.id])
-                                    end
-                                    damage_cell_animation(cell)
-                                end
-                                if element ~= NullElement then
+                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
                                     Sound.play("broke_element")
                                     damage_element_animation(element)
                                 end
@@ -1613,6 +1665,7 @@ function ____exports.View(resources)
     cells_offset = calculate_cell_offset()
     down_item = nil
     locks = {}
+    actions = {}
     local function init()
         Log.log("INIT VIEW")
         set_scene_art()

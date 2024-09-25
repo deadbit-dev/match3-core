@@ -5,8 +5,8 @@ local ____Ads = require("modules.Ads")
 local BannerPos = ____Ads.BannerPos
 local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
-local ____match3_level = require("game.match3_level")
-local load_levels_config = ____match3_level.load_levels_config
+local ____level = require("game.level")
+local load_levels_config = ____level.load_levels_config
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()

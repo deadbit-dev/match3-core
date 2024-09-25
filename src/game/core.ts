@@ -443,6 +443,7 @@ export function Field(size_x: number, size_y: number) {
 
     function search_combination(combined_pos: Position): CombinationInfo | NotFound {
         // проходимся по всем маскам с конца
+
         for(let mask_index = CombinationMasks.length - 1; mask_index >= 0; mask_index--) {
             // берем все варианты вращений маски
             const masks = rotated_masks[mask_index];
@@ -460,7 +461,7 @@ export function Field(size_x: number, size_y: number) {
                                 angle: m * 90,
                                 type: mask_index as CombinationType
                             };
-                            // проходимся маской по полю где элемент будет в этой позиции
+                            // выставляем маску чтобы элемент оказался в этой позиции
                             const start_y = combined_pos.y - my;
                             const end_y = combined_pos.y + (mask.length - my);
                             if(start_y >= 0 && end_y < size_y) {
@@ -469,11 +470,13 @@ export function Field(size_x: number, size_y: number) {
                                 if(start_x >= 0 && end_x < size_x) {
                                     let is_combined = true;
                                     let last_element: Element | typeof NullElement = NullElement;
+
                                     // проходимся маской по элементам в текущей позиции
                                     for(let i = 0; i < mask.length && is_combined; i++) {
                                         for(let j = 0; j < mask[i].length && is_combined; j++) {
                                             if(mask[i][j] == 1) {
                                                 const pos = {x: start_x + j, y: start_y + i};
+
                                                 const cell = get_cell(pos);
                                                 const element = get_element(pos);
 
@@ -754,7 +757,7 @@ export function Field(size_x: number, size_y: number) {
             return false;
 
         const element_to = get_element(to);
-        if(element_to == NullElement || !is_movable_element(element_to) || element_to.state != ElementState.Idle)
+        if(element_to != NullElement && (!is_movable_element(element_to) || element_to.state != ElementState.Idle))
             return false;
 
         swap_elements(from, to);
@@ -785,20 +788,6 @@ export function Field(size_x: number, size_y: number) {
     // проверяет доступна ли клетка для активации
     function is_available_cell_type_for_activation(cell: Cell): boolean {
         if(is_type_cell(cell, CellType.Disabled)) return false;
-        return true;
-    }
-
-    // проверяет тип клетки
-    function is_type_cell(cell: Cell, type: CellType): boolean {
-        return bit.band(cell.type, type) == type;
-    }
-
-    // проверяет доступна ли клетка для движения
-    function is_available_cell_type_for_move(cell: Cell): boolean {
-        const is_not_moved = is_type_cell(cell, CellType.NotMoved);
-        const is_locked = is_type_cell(cell, CellType.Locked);
-        const is_disabled = is_type_cell(cell, CellType.Disabled);
-        if(is_not_moved || is_locked || is_disabled) return false;
         return true;
     }
 
@@ -877,8 +866,22 @@ export function Field(size_x: number, size_y: number) {
         set_callback_on_cell_damaged, on_cell_damaged_base,
         set_callback_on_near_cells_damaged, on_near_cells_damaged_base,
         set_callback_on_request_element, request_element,
-        is_available_cell_type_for_activation, is_available_cell_type_for_move,
+        is_available_cell_type_for_activation,
         is_movable_element, is_clickable_element, is_type_cell, is_type_element,
         is_outside_pos_in_column, get_first_pos_in_column, get_last_pos_in_column, is_pos_empty
     };
+}
+
+// проверяет тип клетки
+export function is_type_cell(cell: Cell, type: CellType): boolean {
+    return bit.band(cell.type, type) == type;
+}
+
+// проверяет доступна ли клетка для движения
+export function is_available_cell_type_for_move(cell: Cell): boolean {
+    const is_not_moved = is_type_cell(cell, CellType.NotMoved);
+    const is_locked = is_type_cell(cell, CellType.Locked);
+    const is_disabled = is_type_cell(cell, CellType.Disabled);
+    if(is_not_moved || is_locked || is_disabled) return false;
+    return true;
 }

@@ -11,9 +11,9 @@ import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { TargetMessage } from '../main/game_config';
 import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
-import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, remove_coins, remove_lifes } from './match3_utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
-import { Level } from './match3_level';
+import { Level } from './level';
 
 const presets = {
     targets: [
@@ -346,7 +346,7 @@ function set_events(instance: props) {
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN', on_win);
-    EventBus.on('ON_GAME_OVER', (state) => { timer.delay(GAME_CONFIG.delay_before_gameover, false, () => set_gameover(instance, state)); }, true);
+    EventBus.on('ON_GAME_OVER', (data) => { timer.delay(GAME_CONFIG.delay_before_gameover, false, () => set_gameover(instance, data.state, data.revive)); }, true);
     EventBus.on('SET_SHUFFLE', on_shuffle_set);
     EventBus.on('SHUFFLE', on_shuffle_end);
 }
@@ -511,7 +511,7 @@ function on_win() {
 }
 
 // TODO: make presets for gameover
-function set_gameover(instance: props, state: GameState) {
+function set_gameover(instance: props, state: GameState, revive: boolean) {
     disable_game_ui();
     
     gui.set_enabled(gui.get_node('gameover'), true);
@@ -629,7 +629,7 @@ function set_gameover(instance: props, state: GameState) {
         gui.set_enabled(target_3, true);
     }
 
-    if(instance.level.steps != undefined) set_gameover_offer();
+    if(revive) set_gameover_offer();
     else disabled_gameover_offer();
 }
 

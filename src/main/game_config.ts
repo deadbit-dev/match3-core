@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { NullElement, SwapInfo, CombinationInfo, MoveInfo, Element, DamageInfo, Position, ElementInfo } from "../game/core";
-import { Level } from "../game/match3_level";
+import { Level } from "../game/level";
 import { CellId, ElementId, TargetType, GameState, TutorialData, LockInfo, UnlockInfo } from "../game/game";
 import { SubstrateId } from "../game/view";
 import { NameMessage, VoidMessage } from "../modules/modules_const";
@@ -76,6 +76,8 @@ export const _GAME_CONFIG = {
 
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
+
+    shuffle_max_attempt: 2,
 
     default_substrate_z_index: -2,
     default_cell_z_index: -1,
@@ -491,6 +493,7 @@ export type _UserMessages = {
 
     REQUEST_COMBINATE: CombinateMessage,
     RESPONSE_COMBINATE: CombinationInfo,
+    RESPONSE_COMBINATE_NOT_FOUND: VoidMessage,
     REQUEST_COMBINATION: CombinationInfo,
     RESPONSE_COMBINATION: CombinedMessage,
     REQUEST_COMBINATION_END: DamageInfo[],
@@ -498,7 +501,8 @@ export type _UserMessages = {
     REQUEST_FALLING: Position,
     REQUEST_FALL_END: Position,
     RESPONSE_FALLING: MoveInfo,
-    RESPONSE_FALL_END: Element,
+    RESPONSE_FALLING_NOT_FOUND: VoidMessage;
+    RESPONSE_FALL_END: ElementInfo,
 
     REQUESTED_ELEMENT: RequestElementMessage,
 
@@ -541,7 +545,7 @@ export type _UserMessages = {
     NOT_ENOUGH_LIFE: VoidMessage,
 
     ON_WIN: GameState,
-    ON_GAME_OVER: GameState,
+    ON_GAME_OVER: {state: GameState, revive: boolean},
 
     MOVIE_END: VoidMessage,
 
@@ -581,5 +585,7 @@ export type _UserMessages = {
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
     FEED_ANIMAL: number,
     SET_WIN_UI: VoidMessage,
-    SET_SHUFFLE: VoidMessage
+    SET_SHUFFLE: VoidMessage,
+
+    REQUEST_IDLE: VoidMessage
 };

@@ -11,7 +11,7 @@ import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
 import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
-import { load_levels_config } from '../game/match3_level';
+import { load_levels_config } from '../game/level';
 
 
 interface props {

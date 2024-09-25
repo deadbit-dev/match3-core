@@ -1,6 +1,18 @@
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local rotateMatrix = ____math_utils.rotateMatrix
+function ____exports.is_type_cell(cell, ____type)
+    return bit.band(cell.type, ____type) == ____type
+end
+function ____exports.is_available_cell_type_for_move(cell)
+    local is_not_moved = ____exports.is_type_cell(cell, ____exports.CellType.NotMoved)
+    local is_locked = ____exports.is_type_cell(cell, ____exports.CellType.Locked)
+    local is_disabled = ____exports.is_type_cell(cell, ____exports.CellType.Disabled)
+    if is_not_moved or is_locked or is_disabled then
+        return false
+    end
+    return true
+end
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
 ____exports.CombinationType[____exports.CombinationType.Comb3] = "Comb3"
@@ -89,7 +101,7 @@ ____exports.ElementState[____exports.ElementState.Busy] = "Busy"
 ____exports.NullElement = -1
 ____exports.NotFound = nil
 function ____exports.Field(size_x, size_y)
-    local rotate_all_masks, set_cell, get_cell, get_cell_pos, set_element, get_element, get_element_pos, swap_elements, get_neighbor_cells, search_combination, on_element_damaged, on_cell_damaged, on_cell_damaged_base, on_near_cells_damaged, on_near_cells_damaged_base, is_combined_elements, is_combined_elements_base, falling_down, falling_through_corner, is_can_swap, is_can_swap_base, on_request_element, is_available_cell_type_for_activation, is_type_cell, is_available_cell_type_for_move, is_available_cell_type_for_click, is_type_element, is_movable_element, is_clickable_element, get_last_pos_in_column, is_pos_empty, state, rotated_masks, cb_is_can_swap, cb_is_combined_elements, cb_on_element_damaged, cb_on_cell_damaged, cb_on_near_cells_damaged, cb_on_request_element
+    local rotate_all_masks, set_cell, get_cell, get_cell_pos, set_element, get_element, get_element_pos, swap_elements, get_neighbor_cells, search_combination, on_element_damaged, on_cell_damaged, on_cell_damaged_base, on_near_cells_damaged, on_near_cells_damaged_base, is_combined_elements, is_combined_elements_base, falling_down, falling_through_corner, is_can_swap, is_can_swap_base, on_request_element, is_available_cell_type_for_activation, is_available_cell_type_for_click, is_type_element, is_movable_element, is_clickable_element, get_last_pos_in_column, is_pos_empty, state, rotated_masks, cb_is_can_swap, cb_is_combined_elements, cb_on_element_damaged, cb_on_cell_damaged, cb_on_near_cells_damaged, cb_on_request_element
     function rotate_all_masks()
         do
             local mask_index = #____exports.CombinationMasks - 1
@@ -290,7 +302,7 @@ function ____exports.Field(size_x, size_y)
         if cell.strength == nil then
             return nil
         end
-        if not is_type_cell(cell, ____exports.CellType.ActionLocked) and not is_type_cell(cell, ____exports.CellType.ActionLockedNear) then
+        if not ____exports.is_type_cell(cell, ____exports.CellType.ActionLocked) and not ____exports.is_type_cell(cell, ____exports.CellType.ActionLockedNear) then
             return nil
         end
         cell.strength = cell.strength - 1
@@ -309,7 +321,7 @@ function ____exports.Field(size_x, size_y)
     function on_near_cells_damaged_base(cells)
         local near_damaged_cells = {}
         for ____, cell in ipairs(cells) do
-            if cell.strength ~= nil and is_type_cell(cell, ____exports.CellType.ActionLockedNear) then
+            if cell.strength ~= nil and ____exports.is_type_cell(cell, ____exports.CellType.ActionLockedNear) then
                 cell.strength = cell.strength - 1
                 near_damaged_cells[#near_damaged_cells + 1] = {
                     pos = get_cell_pos(cell),
@@ -344,7 +356,7 @@ function ____exports.Field(size_x, size_y)
         end
         local bottom_cell = get_cell({x = pos.x, y = next_y})
         if bottom_cell ~= ____exports.NotActiveCell then
-            if not is_available_cell_type_for_move(bottom_cell) or bottom_cell.state ~= ____exports.CellState.Idle then
+            if not ____exports.is_available_cell_type_for_move(bottom_cell) or bottom_cell.state ~= ____exports.CellState.Idle then
                 return false
             end
         end
@@ -371,7 +383,7 @@ function ____exports.Field(size_x, size_y)
         local pos = get_element_pos(element)
         local neighbor_cells = get_neighbor_cells(pos, {{0, 0, 0}, {0, 0, 0}, {1, 0, 1}})
         for ____, neighbor_cell in ipairs(neighbor_cells) do
-            if is_available_cell_type_for_move(neighbor_cell) and neighbor_cell.state == ____exports.CellState.Idle then
+            if ____exports.is_available_cell_type_for_move(neighbor_cell) and neighbor_cell.state == ____exports.CellState.Idle then
                 local neighbor_cell_pos = get_cell_pos(neighbor_cell)
                 local element = get_element(neighbor_cell_pos)
                 if element == ____exports.NullElement then
@@ -380,7 +392,7 @@ function ____exports.Field(size_x, size_y)
                         local y = neighbor_cell_pos.y - 1
                         while y > 0 do
                             local top_cell = get_cell({x = neighbor_cell_pos.x, y = y})
-                            local is_not_available_cell = top_cell ~= ____exports.NotActiveCell and not is_available_cell_type_for_move(top_cell)
+                            local is_not_available_cell = top_cell ~= ____exports.NotActiveCell and not ____exports.is_available_cell_type_for_move(top_cell)
                             if is_not_available_cell then
                                 available = true
                                 break
@@ -412,11 +424,11 @@ function ____exports.Field(size_x, size_y)
     end
     function is_can_swap_base(from, to)
         local cell_from = get_cell(from)
-        if cell_from == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_from) or cell_from.state ~= ____exports.CellState.Idle then
+        if cell_from == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_move(cell_from) or cell_from.state ~= ____exports.CellState.Idle then
             return false
         end
         local cell_to = get_cell(to)
-        if cell_to == ____exports.NotActiveCell or not is_available_cell_type_for_move(cell_to) or cell_to.state ~= ____exports.CellState.Idle then
+        if cell_to == ____exports.NotActiveCell or not ____exports.is_available_cell_type_for_move(cell_to) or cell_to.state ~= ____exports.CellState.Idle then
             return false
         end
         local element_from = get_element(from)
@@ -424,7 +436,7 @@ function ____exports.Field(size_x, size_y)
             return false
         end
         local element_to = get_element(to)
-        if element_to == ____exports.NullElement or not is_movable_element(element_to) or element_to.state ~= ____exports.ElementState.Idle then
+        if element_to ~= ____exports.NullElement and (not is_movable_element(element_to) or element_to.state ~= ____exports.ElementState.Idle) then
             return false
         end
         swap_elements(from, to)
@@ -441,25 +453,13 @@ function ____exports.Field(size_x, size_y)
         return ____exports.NullElement
     end
     function is_available_cell_type_for_activation(cell)
-        if is_type_cell(cell, ____exports.CellType.Disabled) then
-            return false
-        end
-        return true
-    end
-    function is_type_cell(cell, ____type)
-        return bit.band(cell.type, ____type) == ____type
-    end
-    function is_available_cell_type_for_move(cell)
-        local is_not_moved = is_type_cell(cell, ____exports.CellType.NotMoved)
-        local is_locked = is_type_cell(cell, ____exports.CellType.Locked)
-        local is_disabled = is_type_cell(cell, ____exports.CellType.Disabled)
-        if is_not_moved or is_locked or is_disabled then
+        if ____exports.is_type_cell(cell, ____exports.CellType.Disabled) then
             return false
         end
         return true
     end
     function is_available_cell_type_for_click(cell)
-        return not is_type_cell(cell, ____exports.CellType.Disabled)
+        return not ____exports.is_type_cell(cell, ____exports.CellType.Disabled)
     end
     function is_type_element(element, ____type)
         return bit.band(element.type, ____type) == ____type
@@ -673,7 +673,7 @@ function ____exports.Field(size_x, size_y)
                 ____damage_info_damaged_cells_4[#____damage_info_damaged_cells_4 + 1] = near_activated_cell
             end
         end
-        if without_element and not is_available_cell_type_for_move(cell) then
+        if without_element and not ____exports.is_available_cell_type_for_move(cell) then
             return damage_info
         end
         local element = get_element(pos)
@@ -796,10 +796,9 @@ function ____exports.Field(size_x, size_y)
         set_callback_on_request_element = set_callback_on_request_element,
         request_element = request_element,
         is_available_cell_type_for_activation = is_available_cell_type_for_activation,
-        is_available_cell_type_for_move = is_available_cell_type_for_move,
         is_movable_element = is_movable_element,
         is_clickable_element = is_clickable_element,
-        is_type_cell = is_type_cell,
+        is_type_cell = ____exports.is_type_cell,
         is_type_element = is_type_element,
         is_outside_pos_in_column = is_outside_pos_in_column,
         get_first_pos_in_column = get_first_pos_in_column,

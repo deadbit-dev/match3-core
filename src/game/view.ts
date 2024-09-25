@@ -8,10 +8,10 @@ import * as flow from 'ludobits.m.flow';
 import { GoManager } from "../modules/GoManager";
 import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
-import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./match3_utils";
-import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo } from "./core";
+import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
+import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
+import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -104,9 +104,23 @@ export interface ViewState {
     targets: { [key in number]: number }
 }
 
-interface ViewResources {
+export interface ViewResources {
     default_sprite_material: hash,
     tutorial_sprite_material: hash
+}
+
+export enum Action {
+    Swap,
+    Combination,
+    ActivateBuster,
+    ActivateBusterAfterSwap,
+    CombinateBusters,
+    HelicopterFly,
+    DiskosphereActivation,
+    DiskosphereTrace,
+    DynamiteActivation,
+    RocketActivation,
+    Falling
 }
 
 export function View(resources: ViewResources) {
@@ -131,6 +145,8 @@ export function View(resources: ViewResources) {
     let down_item: IGameItem | null = null;
 
     const locks: hash[] = [];
+
+    const actions: Action[] = [];
 
     function init() {
         Log.log("INIT VIEW");
@@ -169,8 +185,10 @@ export function View(resources: ViewResources) {
         EventBus.on('RESPONSE_WRONG_SWAP_ELEMENTS', wrong_swap_elements_animation, false);
         EventBus.on('RESPONSE_COMBINATE_BUSTERS', on_combinate_busters, false);
         EventBus.on('RESPONSE_COMBINATE', on_combinate_animation, false);
+        EventBus.on('RESPONSE_COMBINATE_NOT_FOUND', on_combinate_not_found, false);
         EventBus.on('RESPONSE_COMBINATION', on_combined_animation, false);
         EventBus.on('RESPONSE_FALLING', on_falling_animation, false);
+        EventBus.on('RESPONSE_FALLING_NOT_FOUND', on_falling_not_found, false);
         EventBus.on('RESPONSE_FALL_END', on_fall_end_animation, false);
         EventBus.on('REQUESTED_ELEMENT', on_requested_element_animation, false);
         EventBus.on('RESPONSE_HAMMER_DAMAGE', on_hammer_damage_animation, false);
@@ -602,24 +620,33 @@ export function View(resources: ViewResources) {
         const element_to = message.element_to;
     
         const item_from = get_view_item_by_uid(element_from.uid);
-        if (item_from != undefined) {
-            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time, 0.1);
+        if (item_from != undefined) { 
+            go.animate(item_from._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time);
         }
     
         if (element_to != NullElement) {
             const item_to = get_view_item_by_uid(element_to.uid);
             if (item_to != undefined) {
-                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time, 0.1);
+                go.animate(item_to._hash, 'position', go.PLAYBACK_ONCE_FORWARD, from_world_pos, GAME_CONFIG.spawn_element_easing, GAME_CONFIG.swap_element_time);
             }
         }
 
         Sound.play('swap');
 
+        record_action(Action.Swap);
         timer.delay(GAME_CONFIG.swap_element_time, false, () => {
+            remove_action(Action.Swap);
             EventBus.send('REQUEST_SWAP_ELEMENTS_END', message);
-            timer.delay(0.1, false, () => EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message));
+
+            record_action(Action.Combination);
+            record_action(Action.Combination);
             EventBus.send('REQUEST_COMBINATE', {
                 combined_positions: [message.from, message.to]
+            });
+
+            // record_action(Action.ActivateBusterAfterSwap);
+            timer.delay(0.1, false, () => {
+                EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
             });
         });
     }
@@ -650,16 +677,18 @@ export function View(resources: ViewResources) {
         Sound.play('swap');
     }
 
-    function on_combinate_busters(message: CombinateBustersMessage) {
-        const view_from_buster = get_view_item_by_uid(message.buster_from.element.uid);
-        if(view_from_buster == undefined) return;
+    function record_action(action: Action) {
+        // print("RECORD: ", action);
+        actions.push(action);
+    }
 
-        const to_world_pos = get_world_pos(message.buster_to.pos);
-        go.animate(view_from_buster._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.squash_easing, GAME_CONFIG.squash_time, 0, () => {
-            delete_view_item_by_uid(message.buster_from.element.uid);
-            request_falling(message.buster_from.pos);
-            EventBus.send('REQUEST_COMBINED_BUSTERS', message);
-        });
+    function remove_action(action: Action) {
+        // print("REMOVE: ", action);
+        actions.splice(actions.findIndex((a) => a == action), 1);
+    }
+
+    function has_actions() {
+        return actions.length > 0;
     }
 
     function damage_element_animation(element: Element) {
@@ -730,6 +759,22 @@ export function View(resources: ViewResources) {
         });
     }
 
+    function on_combinate_busters(message: CombinateBustersMessage) {
+        const view_from_buster = get_view_item_by_uid(message.buster_from.element.uid);
+        if(view_from_buster == undefined) return;
+
+        remove_action(Action.ActivateBusterAfterSwap);
+
+        const to_world_pos = get_world_pos(message.buster_to.pos);
+        go.animate(view_from_buster._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.squash_easing, GAME_CONFIG.squash_time, 0, () => {
+            delete_view_item_by_uid(message.buster_from.element.uid);
+            request_falling(message.buster_from.pos);
+
+            record_action(Action.CombinateBusters);
+            EventBus.send('REQUEST_COMBINED_BUSTERS', message);
+        });
+    }
+
     function on_combinate_animation(combination: CombinationInfo) {
         timer.delay(GAME_CONFIG.combination_delay, false, () => {
             EventBus.send('REQUEST_COMBINATION', combination);
@@ -737,9 +782,11 @@ export function View(resources: ViewResources) {
     }
 
     function on_combined_animation(message: CombinedMessage) {
+        remove_action(Action.Combination);
+
         if(message.maked_element != undefined) return on_combo_animation(message);
         for (const damage_info of message.damages) {
-            on_damage_animation(damage_info);
+            on_damage(damage_info);
             request_falling(damage_info.pos);
         }
 
@@ -780,6 +827,14 @@ export function View(resources: ViewResources) {
         });
     }
 
+    function on_combinate_not_found() {
+        remove_action(Action.Combination);
+
+        // if not have actions
+        if(!has_actions())
+            EventBus.send('REQUEST_IDLE');
+    }
+
     function on_requested_element_animation(message: RequestElementMessage) {
         make_element_view(message.pos.x, message.pos.y, message.element);
     }
@@ -787,25 +842,33 @@ export function View(resources: ViewResources) {
     function on_falling_animation(message: MoveInfo) {
         const element_view = get_view_item_by_uid(message.element.uid);
         if(element_view != undefined) {
-            const to_world_pos = get_world_pos(message.next_pos);
-            go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, go.EASING_LINEAR, GAME_CONFIG.falling_time);
-
-            timer.delay(GAME_CONFIG.falling_time, false, () => {
-                EventBus.send('REQUEST_FALL_END', message.next_pos);
-                timer.delay(GAME_CONFIG.combination_delay, false, () => {
-                    EventBus.send('REQUEST_COMBINATE', {
-                        combined_positions: [message.next_pos]
-                    });
-                });
-            });
-
             request_falling(message.start_pos);
+
+            const to_world_pos = get_world_pos(message.next_pos);
+            go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, go.EASING_LINEAR, GAME_CONFIG.falling_time, 0, () => {
+                EventBus.send('REQUEST_FALL_END', message.next_pos);
+            });
         }
     }
 
-    function on_fall_end_animation(element: Element) {
-        const element_view = get_view_item_by_uid(element.uid);
+    function on_falling_not_found() {
+        remove_action(Action.Falling);
+
+        if(!has_actions())
+            EventBus.send('REQUEST_IDLE');
+    }
+
+    function on_fall_end_animation(info: ElementInfo) {
+        const element_view = get_view_item_by_uid(info.element.uid);
         if(element_view == undefined) return;
+
+        remove_action(Action.Falling);
+        record_action(Action.Combination);
+        timer.delay(GAME_CONFIG.combination_delay, false, () => {
+            EventBus.send('REQUEST_COMBINATE', {
+                combined_positions: [info.pos]
+            });
+        });
 
         const world_pos = go.get_position(element_view._hash);
         world_pos.y += 5;
@@ -816,14 +879,16 @@ export function View(resources: ViewResources) {
     }
 
     function request_falling(pos: Position, delay = GAME_CONFIG.falling_dalay) {
+        record_action(Action.Falling);
         timer.delay(delay, false, () => {
             EventBus.send('REQUEST_FALLING', pos);
         });
     }
 
-    function on_damage_animation(damage_info: DamageInfo) {
+    function on_damage(damage_info: DamageInfo) {
         if(damage_info.element != undefined) {
             Sound.play('broke_element');
+
             damage_element_animation(damage_info.element);
         }
 
@@ -837,34 +902,36 @@ export function View(resources: ViewResources) {
     }
 
     function on_hammer_damage_animation(damage_info: DamageInfo) {
-        on_damage_animation(damage_info);
+        on_damage(damage_info);
         request_falling(damage_info.pos);
     }
 
     function on_horizontal_damage_animation(damages: DamageInfo[]) {
         for(const damage_info of damages) {
-            on_damage_animation(damage_info);
+            on_damage(damage_info);
             request_falling(damage_info.pos);
         }
     }
 
     function on_vertical_damage_animation(damages: DamageInfo[]) {
         for(const damage_info of damages) {
-            on_damage_animation(damage_info);
+            on_damage(damage_info);
             request_falling(damage_info.pos);
         }
     }
 
     function on_dynamite_activated_animation(messages: DynamiteActivatedMessage) {
         Sound.play('dynamite');
+        record_action(Action.DynamiteActivation);
         activate_dynamite_animation(messages.pos, messages.big_range ? 1.5 : 1, () => {
+            remove_action(Action.DynamiteActivation);
             EventBus.send("REQUEST_DYNAMITE_ACTION", messages);
         });
     }
 
     function on_dynamite_action_animation(message: BusterActivatedMessage) {
         for(const damage_info of message.damages) {
-            on_damage_animation(damage_info);
+            on_damage(damage_info);
             request_falling(damage_info.pos);
         }
     }
@@ -888,7 +955,9 @@ export function View(resources: ViewResources) {
 
     function on_rocket_activated_animation(message: RocketActivatedMessage) {
         const world_pos = get_world_pos(message.pos, GAME_CONFIG.default_element_z_index + 2.1);
+        record_action(Action.RocketActivation);
         rocket_effect(message, world_pos, message.axis, () => {
+            remove_action(Action.RocketActivation);
             switch(message.axis) {
                 case Axis.Horizontal: on_horizontal_damage_animation(message.damages); break;
                 case Axis.Vertical: on_vertical_damage_animation(message.damages); break;
@@ -990,14 +1059,18 @@ export function View(resources: ViewResources) {
         msg.post(msg.url(undefined, _go, 'diskosphere'), 'enable');
         msg.post(msg.url(undefined, _go, 'diskosphere_light'), 'enable');
     
+        record_action(Action.DiskosphereActivation);
         const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'diskosphere'), 'light_ball_intro', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: object, message_id: hash, message: {animation_id: hash}, sender: hash) => {
             if (message_id == hash("spine_animation_done")) {
+                remove_action(Action.DiskosphereActivation);
                 const anim_props = { blend_duration: 0, playback_rate: 1.25 };
                 if (message.animation_id == hash('light_ball_intro')) {
+                    record_action(Action.DiskosphereTrace);
                     trace_animation(worldPos, _go, damages, damages.length, (damage_info: DamageInfo) => {
+                        remove_action(Action.DiskosphereTrace);
                         if(damage_info.element?.uid == uid) return request_falling(damage_info.pos);
-                        on_damage_animation(damage_info);
+                        on_damage(damage_info);
                         request_falling(damage_info.pos);
                         EventBus.send('REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END', { damage_info, buster});
                     }, () => {
@@ -1046,7 +1119,7 @@ export function View(resources: ViewResources) {
 
     function on_helicopter_activated_animation(message: HelicopterActivatedMessage) {
         for(const damage_info of message.damages) {
-            on_damage_animation(damage_info);
+            on_damage(damage_info);
             request_falling(damage_info.pos);
         }
 
@@ -1075,9 +1148,13 @@ export function View(resources: ViewResources) {
 
             const damage_info = message.damages[i];
             const target_world_pos = get_world_pos(damage_info.pos, 3);
+
+            record_action(Action.HelicopterFly);
+
             go.animate(helicopter, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, GAME_CONFIG.helicopter_fly_duration, 0, () => {
+                remove_action(Action.HelicopterFly);
                 go.delete(helicopter);
-                on_damage_animation(damage_info);
+                on_damage(damage_info);
                 request_falling(damage_info.pos);
                 EventBus.send('REQUEST_HELICOPTER_END', message);
             });
@@ -1097,13 +1174,9 @@ export function View(resources: ViewResources) {
                 if(element != NullElement) {
                     const element_view = get_view_item_by_uid(element.uid);
                     if (element_view != undefined) {
-                        print("SET-VIEW: ", element.id, element.uid, x, y);
                         const to_world_pos = get_world_pos({x, y}, GAME_CONFIG.default_element_z_index);
                         go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.swap_element_easing, 0.5);
-                    } else {
-                        print("MAKE-VIEW: ", element.id, element.uid, x, y);
-                        make_element_view(x, y, element, true);
-                    }
+                    } else make_element_view(x, y, element, true);
                 }
             }
         }
@@ -1119,13 +1192,7 @@ export function View(resources: ViewResources) {
                 const cell = state.cells[y][x];
                 const element = state.elements[y][x];
                 timer.delay(0.01 * (y * get_field_width() + x), false, () => {
-                    if(cell != NotActiveCell) {
-                        if(GAME_CONFIG.sounded_cells.includes(cell.id))
-                            Sound.play(GAME_CONFIG.cell_sound[cell.id]);
-                        damage_cell_animation(cell);
-                    }
-    
-                    if(element != NullElement) {
+                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
                         Sound.play('broke_element');
                         damage_element_animation(element);
                     }
