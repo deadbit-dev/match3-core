@@ -139,8 +139,6 @@ export function Game() {
 
     let is_idle = true;
 
-    let shuffle_attemtp = 0;
-
     function init() {
         Log.log("INIT GAME");
 
@@ -331,6 +329,10 @@ export function Game() {
 
         if(!is_tutorial() && helper_timer == null)
             helper_timer = timer.delay(5, false, () => { set_helper(); });
+
+        timer.delay(1, false, () => {
+            if(is_idle) on_idle();
+        });
     }
 
     function set_helper(message?: HelperMessage) {
@@ -419,8 +421,6 @@ export function Game() {
         is_block_input = true;
         EventBus.send('SET_SHUFFLE');
 
-        shuffle_attemtp = 0;
-
         function on_end() {
             update_core_state();        
             EventBus.send('SHUFFLE', copy_state());
@@ -431,7 +431,7 @@ export function Game() {
             EventBus.send('SHUFFLE', copy_state());
             timer.delay(0.5, false, () => on_gameover(false));
         }
-
+        
         shuffle_field(on_end, on_error);
     }
 
@@ -442,69 +442,71 @@ export function Game() {
     function shuffle_field(on_end: () => void, on_error: () => void) {
         return flow.start(() => {
             Log.log("SHUFFLE FIELD");
+        
+            let step = false;
+            let attempt = 0;
 
-            // collecting elements for shuffling
-            const positions = [];
-            const elements = [];
-            for(let y = 0; y < field_height; y++) {
-                for(let x = 0; x < field_width; x++) {
-                    const cell = field.get_cell({x, y});
-                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                        const element = field.get_element({x, y});
-                        if(element != NullElement) {
-                            positions.push({x, y});
-                            elements.push(element);
-                            field.set_element({x, y}, NullElement);
+            do {
+                // collecting elements for shuffling
+                const positions = [];
+                const elements = [];
+                for(let y = 0; y < field_height; y++) {
+                    for(let x = 0; x < field_width; x++) {
+                        const cell = field.get_cell({x, y});
+                        if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                            const element = field.get_element({x, y});
+                            if(element != NullElement) {
+                                positions.push({x, y});
+                                elements.push(element);
+                                field.set_element({x, y}, NullElement);
+                            }
                         }
                     }
                 }
-            }
-    
-            shuffle_array(elements);
-    
-            let counter = 0;
-            const optimize_count = 5;
-    
-            // filling the field available elements by got positions
-            let element_assigned = false;
-            for(const position of positions) {
-    
-                if(counter >= optimize_count) {
-                    counter = 0;
-                    flow.frames(1);
-                }
-    
-                for(let i = 0; i < elements.length; i++) {
-                    const elementIndex = Math.floor(Math.random() * elements.length);
-                    const element = elements[elementIndex];
-                    field.set_element(position, element);
-                    if(field.search_combination(position) == NotFound) {
-                        elements.splice(elementIndex, 1);
-                        element_assigned = true;    
-                        break;
+        
+                shuffle_array(elements);
+        
+                let counter = 0;
+                const optimize_count = 5;
+        
+                // filling the field available elements by got positions
+                let element_assigned = false;
+                for(const position of positions) {
+        
+                    if(counter >= optimize_count) {
+                        counter = 0;
+                        flow.frames(1);
                     }
-                }
-    
-                // if not found right element from availables
-                if(!element_assigned) {
-                    // maybe make this more randomize
-                    for(const element_id of GAME_CONFIG.base_elements) {
-                        if(elements.find((element) => element.id == element_id) == undefined) {
-                            make_element(position, element_id);
+        
+                    for(let i = 0; i < elements.length; i++) {
+                        const elementIndex = Math.floor(Math.random() * elements.length);
+                        const element = elements[elementIndex];
+                        field.set_element(position, element);
+                        if(field.search_combination(position) == NotFound) {
+                            elements.splice(elementIndex, 1);
+                            element_assigned = true;    
+                            break;
                         }
                     }
+        
+                    // if not found right element from availables
+                    if(!element_assigned) {
+                        // maybe make this more randomize
+                        for(const element_id of GAME_CONFIG.base_elements) {
+                            if(elements.find((element) => element.id == element_id) == undefined) {
+                                make_element(position, element_id);
+                            }
+                        }
+                    }
+        
+                    counter++;
                 }
-    
-                counter++;
-            }
-    
-            // if not available steps
-            if(!has_step()) {
-                if(++shuffle_attemtp < GAME_CONFIG.shuffle_max_attempt) {
-                    shuffle_field(on_end, on_error);
-                    return;
-                } else return on_error();
-            } else return on_end();
+
+                step = has_step();
+            } while (!step && ++attempt < GAME_CONFIG.shuffle_max_attempt);
+
+            if(step) on_end();
+            else on_error();
 
         }, {parallel: true});
     }

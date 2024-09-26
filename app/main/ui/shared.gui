@@ -869,139 +869,6 @@ nodes {
   template_node_child: true
 }
 nodes {
-  position {
-    x: 82.0
-    y: 928.0
-  }
-  scale {
-    x: 0.5
-    y: 0.5
-  }
-  type: TYPE_TEMPLATE
-  id: "coins"
-  inherit_alpha: true
-  template: "/main/ui/parts/lable_button.gui"
-}
-nodes {
-  type: TYPE_BOX
-  id: "coins/button"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  parent: "coins"
-  overridden_fields: 12
-  overridden_fields: 13
-  overridden_fields: 14
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "coins/icon"
-  parent: "coins/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "coins/text"
-  parent: "coins/button"
-  overridden_fields: 8
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "coins/plus"
-  parent: "coins/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 210.0
-    y: 928.0
-  }
-  scale {
-    x: 0.5
-    y: 0.5
-  }
-  type: TYPE_TEMPLATE
-  id: "lifes"
-  inherit_alpha: true
-  template: "/main/ui/parts/lable_button.gui"
-}
-nodes {
-  position {
-    x: -78.0
-  }
-  type: TYPE_BOX
-  id: "lifes/button"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  pivot: PIVOT_W
-  parent: "lifes"
-  overridden_fields: 1
-  overridden_fields: 3
-  overridden_fields: 12
-  overridden_fields: 13
-  overridden_fields: 14
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -4.0
-    y: 8.0
-  }
-  rotation {
-    z: 30.0
-  }
-  type: TYPE_BOX
-  texture: "ui/life_icon"
-  id: "lifes/icon"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  parent: "lifes/button"
-  overridden_fields: 1
-  overridden_fields: 2
-  overridden_fields: 9
-  overridden_fields: 12
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 92.0
-    y: 4.0
-  }
-  size {
-    x: 100.0
-    y: 50.0
-  }
-  type: TYPE_TEXT
-  id: "lifes/text"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  parent: "lifes/button"
-  overridden_fields: 1
-  overridden_fields: 4
-  overridden_fields: 8
-  overridden_fields: 12
-  overridden_fields: 13
-  overridden_fields: 14
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 170.0
-    y: 4.0
-  }
-  type: TYPE_BOX
-  id: "lifes/plus"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  parent: "lifes/button"
-  overridden_fields: 1
-  overridden_fields: 12
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
   type: TYPE_TEMPLATE
   id: "hammer"
   inherit_alpha: true
@@ -1571,8 +1438,158 @@ nodes {
 }
 nodes {
   position {
-    x: 496.0
-    y: 918.0
+    y: 917.0
+  }
+  size {
+    x: 300.0
+    y: 50.0
+  }
+  type: TYPE_BOX
+  id: "top_left_container"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_W
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    x: 88.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_TEMPLATE
+  id: "coins"
+  parent: "top_left_container"
+  inherit_alpha: true
+  template: "/main/ui/parts/lable_button.gui"
+}
+nodes {
+  type: TYPE_BOX
+  id: "coins/button"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
+  parent: "coins"
+  overridden_fields: 12
+  overridden_fields: 13
+  overridden_fields: 14
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "coins/icon"
+  parent: "coins/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "coins/text"
+  parent: "coins/button"
+  overridden_fields: 8
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "coins/plus"
+  parent: "coins/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 223.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_TEMPLATE
+  id: "lifes"
+  parent: "top_left_container"
+  inherit_alpha: true
+  template: "/main/ui/parts/lable_button.gui"
+}
+nodes {
+  position {
+    x: 4.0
+  }
+  type: TYPE_BOX
+  id: "lifes/button"
+  parent: "lifes"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 12
+  overridden_fields: 13
+  overridden_fields: 14
+  template_node_child: true
+}
+nodes {
+  position {
+    x: -90.0
+    y: 8.0
+  }
+  rotation {
+    z: 30.0
+  }
+  type: TYPE_BOX
+  texture: "ui/life_icon"
+  id: "lifes/icon"
+  parent: "lifes/button"
+  overridden_fields: 1
+  overridden_fields: 2
+  overridden_fields: 9
+  template_node_child: true
+}
+nodes {
+  position {
+    x: -8.0
+    y: 4.0
+  }
+  size {
+    x: 100.0
+    y: 50.0
+  }
+  type: TYPE_TEXT
+  id: "lifes/text"
+  parent: "lifes/button"
+  overridden_fields: 1
+  overridden_fields: 4
+  overridden_fields: 8
+  overridden_fields: 14
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 68.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  id: "lifes/plus"
+  parent: "lifes/button"
+  overridden_fields: 1
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 540.0
+    y: 910.0
+  }
+  size {
+    x: 150.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "top_right_container"
+  xanchor: XANCHOR_RIGHT
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_E
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    x: -50.0
   }
   scale {
     x: 0.6
@@ -1581,8 +1598,7 @@ nodes {
   type: TYPE_BOX
   texture: "ui/store"
   id: "store_button"
-  xanchor: XANCHOR_RIGHT
-  yanchor: YANCHOR_TOP
+  parent: "top_right_container"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
