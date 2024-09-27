@@ -186,9 +186,9 @@ export function Game() {
         EventBus.on('REQUEST_HELICOPTER_ACTION', on_helicopter_action, false);
         EventBus.on('REQUEST_HELICOPTER_END', on_helicopter_end, false);
 
-        EventBus.on('REQUEST_SHUFFLE_END', on_shuffle_end);
+        EventBus.on('SHUFFLE_END', on_shuffle_end, false);
 
-        EventBus.on('REQUEST_IDLE', on_idle);
+        EventBus.on('REQUEST_IDLE', on_idle, false);
     }
 
     function set_element_chances() {
@@ -205,7 +205,7 @@ export function Game() {
             }
         }
     }
-
+        
     function load() {
         Log.log("LOAD GAME");
 
@@ -290,21 +290,26 @@ export function Game() {
         }
     }
 
+    function is_gameover() {
+        return level_config.time != undefined ? is_timeout() : !is_have_steps();
+    }
+
     function on_tick() {
         if(level_config.time != undefined) update_timer();
 
         if(is_level_completed()) {
+            Log.log("WIN IN TICK");
             is_block_input = true;
-            
-            const completed_levels = GameStorage.get('completed_levels');
-            completed_levels.push(GameStorage.get('current_level'));
-            GameStorage.set('completed_levels', completed_levels);
-            add_coins(level_config.coins);
+            if(is_idle)
+                on_win();
         }
 
-        const gameover_condition = level_config.time != undefined ? is_timeout() : !is_have_steps();
-        if(gameover_condition)
+        if(is_gameover()) {
+            Log.log("GAMEOVER IN TICK");
             is_block_input = true;
+            if(is_idle)
+                on_gameover();
+        }
     }
 
     function on_idle() {
@@ -312,30 +317,31 @@ export function Game() {
 
         is_idle = true;
 
-        if(is_level_completed()) { 
-            update_core_state();
-            return EventBus.send('ON_WIN', copy_state());
+        if(is_level_completed()) {
+            return on_win();
         }
 
-        const gameover_condition = level_config.time != undefined ? is_timeout() : !is_have_steps();
-        if(gameover_condition) {
+        if(is_gameover()) {
             return on_gameover();
         }
 
         if(!has_step()) {
             stop_helper();
             shuffle();
+            return;
         }
 
         if(!is_tutorial() && helper_timer == null)
             helper_timer = timer.delay(5, false, () => { set_helper(); });
 
-        timer.delay(1, false, () => {
-            if(is_idle) on_idle();
-        });
+        // timer.delay(1, false, () => {
+        //     if(is_idle) on_idle();
+        // });
     }
 
     function set_helper(message?: HelperMessage) {
+        Log.log("SET_HELPER");
+
         if(message != undefined) helper_data = message;
         else {
             const info = get_step();
@@ -360,19 +366,23 @@ export function Game() {
     }
 
     function stop_helper() {
-        if(helper_timer == null || helper_data == null)
+        Log.log("STOP_HELPER");
+
+        if(helper_timer == null )
             return;
 
         timer.cancel(helper_timer);
-        EventBus.send('STOP_HELPER', helper_data);
-
         helper_timer = null;
+
+        if(helper_data == null)
+            return;
+        
+        EventBus.send('STOP_HELPER', helper_data);
         helper_data = null;
     }
     
     function update_timer() {
         if(start_game_time == 0) {
-            is_block_input = true;
             return;
         }
 
@@ -398,7 +408,21 @@ export function Game() {
         return get_state().steps > 0;
     } 
 
-    function on_gameover(revive = true) {
+    function on_win() {
+        timer.cancel(game_timer);
+
+        const completed_levels = GameStorage.get('completed_levels');
+        completed_levels.push(GameStorage.get('current_level'));
+        GameStorage.set('completed_levels', completed_levels);
+        add_coins(level_config.coins);
+        
+        update_core_state();
+        EventBus.send('ON_WIN', copy_state());
+    }
+
+    function on_gameover(revive = (level_config.time == undefined)) {
+        timer.cancel(game_timer);
+
         update_core_state();
         const state = copy_state();
         
@@ -419,20 +443,22 @@ export function Game() {
 
     function shuffle() {
         is_block_input = true;
-        EventBus.send('SET_SHUFFLE');
-
+        
         function on_end() {
             update_core_state();        
-            EventBus.send('SHUFFLE', copy_state());
+            EventBus.send('SHUFFLE_ACTION', copy_state());
         }
 
         function on_error() {
             update_core_state();
-            EventBus.send('SHUFFLE', copy_state());
+            EventBus.send('SHUFFLE_ACTION', copy_state());
             timer.delay(0.5, false, () => on_gameover(false));
         }
         
-        shuffle_field(on_end, on_error);
+        timer.delay(1, false, () => {
+            EventBus.send('SHUFFLE_START');
+            shuffle_field(on_end, on_error);
+        });
     }
 
     function on_shuffle_end() {
@@ -740,21 +766,6 @@ export function Game() {
     function copy_state(offset = 0) {
         const from_state = get_state(offset);
         const to_state = json.decode(json.encode(from_state)) as GameState;
-
-        // to_state.cells = [];
-        // to_state.elements = [];
-
-        // for(let y = 0; y < field_height; y++) {
-        //     to_state.cells[y] = [];
-        //     to_state.elements[y] = [];
-            
-        //     for(let x = 0; x < field_width; x++) {
-        //         to_state.cells[y][x] = from_state.cells[y][x];
-        //         to_state.elements[y][x] = from_state.elements[y][x];
-        //     }
-        // }
-        
-        // to_state.targets = Object.assign([], from_state.targets);
         return to_state;
     }
 
@@ -1026,6 +1037,7 @@ export function Game() {
 
         if(field.try_click(pos)) {
             if(try_activate_buster_element(pos)) {
+                Log.log("DIACTIVATE IDLE FROM CLICK");
                 is_idle = false;
 
                 if(level_config.steps != undefined) {
@@ -1373,6 +1385,7 @@ export function Game() {
             return;
         }
 
+        Log.log("DIACTIVATE IDLE FROM SWAP");
         is_idle = false;
 
         if(level_config.steps != undefined) {

@@ -7,17 +7,32 @@ function animal_init(options)
         go.set_position(pos)
     end
     idle()
-    timer.delay(
-        math.random(5, 10),
-        true,
-        function()
-            if options.walkable then
-                walk()
-            else
-                action(idle)
+    if options.walkable then
+        timer.delay(
+            math.random(5, 10),
+            false,
+            walk
+        )
+    else
+        timer.delay(
+            math.random(5, 10),
+            false,
+            function()
+                action(function()
+                    idle()
+                    timer.delay(
+                        math.random(5, 10),
+                        false,
+                        function()
+                            action(function()
+                                idle()
+                            end)
+                        end
+                    )
+                end)
             end
-        end
-    )
+        )
+    end
 end
 function walk()
     local to_pos = go.get_position()
@@ -28,7 +43,17 @@ function walk()
             action(function()
                 local back_pos = go.get_position()
                 back_pos.x = back_pos.x + 70
-                walk_back(back_pos, idle)
+                walk_back(
+                    back_pos,
+                    function()
+                        idle()
+                        timer.delay(
+                            math.random(5, 10),
+                            false,
+                            walk
+                        )
+                    end
+                )
             end)
         end
     )

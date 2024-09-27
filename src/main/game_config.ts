@@ -524,7 +524,9 @@ export type _UserMessages = {
     REQUEST_HELICOPTER_START_FLYING: BusterActivatedMessage,
     REQUEST_HELICOPTER_END: BusterActivatedMessage,
 
-    REQUEST_SHUFFLE_END: VoidMessage,
+    SHUFFLE_START: VoidMessage,
+    SHUFFLE_ACTION: GameState,
+    SHUFFLE_END: VoidMessage,
 
     //---------------------------------------------------------------
 
@@ -577,15 +579,12 @@ export type _UserMessages = {
     TRY_BUY_VERTICAL_ROCKET: VoidMessage,
 
     SET_LIFE_NOTIFICATION: VoidMessage,
-    REVIVE: number,
-
-    SHUFFLE: GameState,
+    REVIVE: number,    
 
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
     FEED_ANIMAL: number,
     SET_WIN_UI: VoidMessage,
-    SET_SHUFFLE: VoidMessage,
 
     REQUEST_IDLE: VoidMessage
 };

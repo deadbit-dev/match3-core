@@ -11,7 +11,7 @@ import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils
 import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
+import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -112,9 +112,7 @@ export interface ViewResources {
 export enum Action {
     Swap,
     Combination,
-    ActivateBuster,
-    ActivateBusterAfterSwap,
-    CombinateBusters,
+    Combo,
     HelicopterFly,
     DiskosphereActivation,
     DiskosphereTrace,
@@ -198,7 +196,7 @@ export function View(resources: ViewResources) {
         EventBus.on('RESPONSE_ACTIVATED_DISKOSPHERE', on_diskosphere_activated_animation, false);
         EventBus.on('RESPONSE_ACTIVATED_HELICOPTER', on_helicopter_activated_animation, false);
         EventBus.on('RESPONSE_HELICOPTER_ACTION', on_helicopter_action_animation, false);
-        EventBus.on('SHUFFLE', on_shuffle_animation, false);
+        EventBus.on('SHUFFLE_ACTION', on_shuffle_animation, false);
     }
 
     function dispatch_messages() {
@@ -260,6 +258,8 @@ export function View(resources: ViewResources) {
 
             EventBus.send('UPDATED_TARGET', {idx: i, amount, id: target.id, type: target.type});
         }
+
+        EventBus.send('REQUEST_IDLE');
     }
 
     function recalculate_cell_offset(game_state: GameState) {
@@ -638,13 +638,15 @@ export function View(resources: ViewResources) {
             remove_action(Action.Swap);
             EventBus.send('REQUEST_SWAP_ELEMENTS_END', message);
 
+            if(element_to == NullElement)
+                request_falling(message.from);
+
             record_action(Action.Combination);
             record_action(Action.Combination);
             EventBus.send('REQUEST_COMBINATE', {
                 combined_positions: [message.from, message.to]
             });
 
-            // record_action(Action.ActivateBusterAfterSwap);
             timer.delay(0.1, false, () => {
                 EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
             });
@@ -763,14 +765,11 @@ export function View(resources: ViewResources) {
         const view_from_buster = get_view_item_by_uid(message.buster_from.element.uid);
         if(view_from_buster == undefined) return;
 
-        remove_action(Action.ActivateBusterAfterSwap);
-
         const to_world_pos = get_world_pos(message.buster_to.pos);
         go.animate(view_from_buster._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.squash_easing, GAME_CONFIG.squash_time, 0, () => {
             delete_view_item_by_uid(message.buster_from.element.uid);
             request_falling(message.buster_from.pos);
 
-            record_action(Action.CombinateBusters);
             EventBus.send('REQUEST_COMBINED_BUSTERS', message);
         });
     }
@@ -818,7 +817,9 @@ export function View(resources: ViewResources) {
 
         Sound.play('combo');
 
+        record_action(Action.Combo);
         timer.delay(GAME_CONFIG.squash_time, false, () => {
+            remove_action(Action.Combo);
             if(message.maked_element != undefined) {
                 make_element_view(message.pos.x, message.pos.y, message.maked_element);
             }
@@ -830,7 +831,6 @@ export function View(resources: ViewResources) {
     function on_combinate_not_found() {
         remove_action(Action.Combination);
 
-        // if not have actions
         if(!has_actions())
             EventBus.send('REQUEST_IDLE');
     }
@@ -1182,7 +1182,7 @@ export function View(resources: ViewResources) {
         }
 
         timer.delay(0.5, false, () => {
-            EventBus.send('REQUEST_SHUFFLE_END');
+            EventBus.send('SHUFFLE_END');
         });
     }
 

@@ -95,7 +95,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, on_tick, on_idle, set_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, set_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -127,8 +127,8 @@ function ____exports.Game()
         EventBus.on("REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END", on_diskosphere_damage_element_end, false)
         EventBus.on("REQUEST_HELICOPTER_ACTION", on_helicopter_action, false)
         EventBus.on("REQUEST_HELICOPTER_END", on_helicopter_end, false)
-        EventBus.on("REQUEST_SHUFFLE_END", on_shuffle_end)
-        EventBus.on("REQUEST_IDLE", on_idle)
+        EventBus.on("SHUFFLE_END", on_shuffle_end, false)
+        EventBus.on("REQUEST_IDLE", on_idle, false)
     end
     function set_element_chances()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -253,51 +253,47 @@ function ____exports.Game()
             end
         until true
     end
-    function on_tick()
-        if level_config.time ~= nil then
-            update_timer()
-        end
-        if is_level_completed() then
-            is_block_input = true
-            local completed_levels = GameStorage.get("completed_levels")
-            completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
-            GameStorage.set("completed_levels", completed_levels)
-            add_coins(level_config.coins)
-        end
+    function is_gameover()
         local ____temp_0
         if level_config.time ~= nil then
             ____temp_0 = is_timeout()
         else
             ____temp_0 = not is_have_steps()
         end
-        local gameover_condition = ____temp_0
-        if gameover_condition then
+        return ____temp_0
+    end
+    function on_tick()
+        if level_config.time ~= nil then
+            update_timer()
+        end
+        if is_level_completed() then
+            Log.log("WIN IN TICK")
             is_block_input = true
+            if is_idle then
+                on_win()
+            end
+        end
+        if is_gameover() then
+            Log.log("GAMEOVER IN TICK")
+            is_block_input = true
+            if is_idle then
+                on_gameover()
+            end
         end
     end
     function on_idle()
         Log.log("IDLE")
         is_idle = true
         if is_level_completed() then
-            update_core_state()
-            return EventBus.send(
-                "ON_WIN",
-                copy_state()
-            )
+            return on_win()
         end
-        local ____temp_1
-        if level_config.time ~= nil then
-            ____temp_1 = is_timeout()
-        else
-            ____temp_1 = not is_have_steps()
-        end
-        local gameover_condition = ____temp_1
-        if gameover_condition then
+        if is_gameover() then
             return on_gameover()
         end
         if not has_step() then
             stop_helper()
             shuffle()
+            return
         end
         if not is_tutorial() and helper_timer == nil then
             helper_timer = timer.delay(
@@ -308,17 +304,9 @@ function ____exports.Game()
                 end
             )
         end
-        timer.delay(
-            1,
-            false,
-            function()
-                if is_idle then
-                    on_idle()
-                end
-            end
-        )
     end
     function set_helper(message)
+        Log.log("SET_HELPER")
         if message ~= nil then
             helper_data = message
         else
@@ -343,17 +331,20 @@ function ____exports.Game()
         end
     end
     function stop_helper()
-        if helper_timer == nil or helper_data == nil then
+        Log.log("STOP_HELPER")
+        if helper_timer == nil then
             return
         end
         timer.cancel(helper_timer)
-        EventBus.send("STOP_HELPER", helper_data)
         helper_timer = nil
+        if helper_data == nil then
+            return
+        end
+        EventBus.send("STOP_HELPER", helper_data)
         helper_data = nil
     end
     function update_timer()
         if start_game_time == 0 then
-            is_block_input = true
             return
         end
         local dt = System.now() - start_game_time
@@ -375,40 +366,52 @@ function ____exports.Game()
     function is_have_steps()
         return get_state().steps > 0
     end
+    function on_win()
+        timer.cancel(game_timer)
+        local completed_levels = GameStorage.get("completed_levels")
+        completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
+        GameStorage.set("completed_levels", completed_levels)
+        add_coins(level_config.coins)
+        update_core_state()
+        EventBus.send(
+            "ON_WIN",
+            copy_state()
+        )
+    end
     function on_gameover(revive)
         if revive == nil then
-            revive = true
+            revive = level_config.time == nil
         end
+        timer.cancel(game_timer)
         update_core_state()
         local state = copy_state()
         if revive then
             GAME_CONFIG.revive_states = {}
-            local ____GAME_CONFIG_revive_states_2 = GAME_CONFIG.revive_states
-            ____GAME_CONFIG_revive_states_2[#____GAME_CONFIG_revive_states_2 + 1] = state
+            local ____GAME_CONFIG_revive_states_1 = GAME_CONFIG.revive_states
+            ____GAME_CONFIG_revive_states_1[#____GAME_CONFIG_revive_states_1 + 1] = state
         end
         EventBus.send("ON_GAME_OVER", {state = state, revive = revive})
     end
     function on_revive(steps)
-        local ____GAME_CONFIG_revive_states_index_3, ____steps_4 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "steps"
-        ____GAME_CONFIG_revive_states_index_3[____steps_4] = ____GAME_CONFIG_revive_states_index_3[____steps_4] + steps
+        local ____GAME_CONFIG_revive_states_index_2, ____steps_3 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "steps"
+        ____GAME_CONFIG_revive_states_index_2[____steps_3] = ____GAME_CONFIG_revive_states_index_2[____steps_3] + steps
         GAME_CONFIG.is_revive = true
         GAME_CONFIG.is_restart = true
         Scene.restart()
     end
     function shuffle()
         is_block_input = true
-        EventBus.send("SET_SHUFFLE")
         local function on_end()
             update_core_state()
             EventBus.send(
-                "SHUFFLE",
+                "SHUFFLE_ACTION",
                 copy_state()
             )
         end
         local function on_error()
             update_core_state()
             EventBus.send(
-                "SHUFFLE",
+                "SHUFFLE_ACTION",
                 copy_state()
             )
             timer.delay(
@@ -417,7 +420,14 @@ function ____exports.Game()
                 function() return on_gameover(false) end
             )
         end
-        shuffle_field(on_end, on_error)
+        timer.delay(
+            1,
+            false,
+            function()
+                EventBus.send("SHUFFLE_START")
+                shuffle_field(on_end, on_error)
+            end
+        )
     end
     function on_shuffle_end()
         is_block_input = false
@@ -490,12 +500,12 @@ function ____exports.Game()
                         end
                         step = has_step()
                     end
-                    local ____temp_5 = not step
-                    if ____temp_5 then
+                    local ____temp_4 = not step
+                    if ____temp_4 then
                         attempt = attempt + 1
-                        ____temp_5 = attempt < GAME_CONFIG.shuffle_max_attempt
+                        ____temp_4 = attempt < GAME_CONFIG.shuffle_max_attempt
                     end
-                    if not ____temp_5 then
+                    if not ____temp_4 then
                         break
                     end
                 until false
@@ -740,9 +750,9 @@ function ____exports.Game()
         return to_state
     end
     function generate_uid()
-        local ____game_item_counter_6 = game_item_counter
-        game_item_counter = ____game_item_counter_6 + 1
-        return ____game_item_counter_6
+        local ____game_item_counter_5 = game_item_counter
+        game_item_counter = ____game_item_counter_5 + 1
+        return ____game_item_counter_5
     end
     function make_cell(pos, id, under_cells)
         if id == NotActiveCell then
@@ -824,9 +834,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_7 = index
-                    index = ____index_7 - 1
-                    if ____index_7 == 0 then
+                    local ____index_6 = index
+                    index = ____index_6 - 1
+                    if ____index_6 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -862,8 +872,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
-                    local ____target_uids_8 = target.uids
-                    ____target_uids_8[#____target_uids_8 + 1] = element.uid
+                    local ____target_uids_7 = target.uids
+                    ____target_uids_7[#____target_uids_7 + 1] = element.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
                 end
                 i = i + 1
@@ -904,8 +914,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
-                    local ____target_uids_9 = target.uids
-                    ____target_uids_9[#____target_uids_9 + 1] = cell.uid
+                    local ____target_uids_8 = target.uids
+                    ____target_uids_8[#____target_uids_8 + 1] = cell.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
                 end
                 i = i + 1
@@ -948,24 +958,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch205 = message.name
-            local ____cond205 = ____switch205 == "SPINNING"
-            if ____cond205 then
+            local ____switch209 = message.name
+            local ____cond209 = ____switch209 == "SPINNING"
+            if ____cond209 then
                 on_activate_spinning()
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == "HAMMER"
-            if ____cond205 then
+            ____cond209 = ____cond209 or ____switch209 == "HAMMER"
+            if ____cond209 then
                 on_activate_hammer()
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == "HORIZONTAL_ROCKET"
-            if ____cond205 then
+            ____cond209 = ____cond209 or ____switch209 == "HORIZONTAL_ROCKET"
+            if ____cond209 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == "VERTICAL_ROCKET"
-            if ____cond205 then
+            ____cond209 = ____cond209 or ____switch209 == "VERTICAL_ROCKET"
+            if ____cond209 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1055,6 +1065,7 @@ function ____exports.Game()
         end
         if field.try_click(pos) then
             if try_activate_buster_element(pos) then
+                Log.log("DIACTIVATE IDLE FROM CLICK")
                 is_idle = false
                 if level_config.steps ~= nil then
                     local state = get_state()
@@ -1352,25 +1363,25 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_12 = cell ~= NotActiveCell
-                        if ____temp_12 then
-                            local ____opt_10 = exclude
-                            ____temp_12 = (____opt_10 and __TS__ArrayFindIndex(
+                        local ____temp_11 = cell ~= NotActiveCell
+                        if ____temp_11 then
+                            local ____opt_9 = exclude
+                            ____temp_11 = (____opt_9 and __TS__ArrayFindIndex(
                                 exclude,
                                 function(____, uid) return uid == cell.uid end
                             )) == -1
                         end
-                        local ____temp_12_15 = ____temp_12
-                        if ____temp_12_15 then
-                            local ____opt_13 = targets
-                            ____temp_12_15 = (____opt_13 and __TS__ArrayFindIndex(
+                        local ____temp_11_14 = ____temp_11
+                        if ____temp_11_14 then
+                            local ____opt_12 = targets
+                            ____temp_11_14 = (____opt_12 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
                                     return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids and cell.strength ~= nil and cell.strength < GAME_CONFIG.cell_strength[cell.id]
                                 end
                             )) ~= -1
                         end
-                        local is_valid_cell = ____temp_12_15
+                        local is_valid_cell = ____temp_11_14
                         if is_valid_cell then
                             if element ~= NullElement then
                                 available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1393,44 +1404,44 @@ function ____exports.Game()
                         while x < field_width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_18 = cell ~= NotActiveCell
-                            if ____temp_18 then
-                                local ____opt_16 = exclude
-                                ____temp_18 = (____opt_16 and __TS__ArrayFindIndex(
+                            local ____temp_17 = cell ~= NotActiveCell
+                            if ____temp_17 then
+                                local ____opt_15 = exclude
+                                ____temp_17 = (____opt_15 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == cell.uid end
                                 )) == -1
                             end
-                            local ____temp_18_21 = ____temp_18
-                            if ____temp_18_21 then
-                                local ____opt_19 = targets
-                                ____temp_18_21 = (____opt_19 and __TS__ArrayFindIndex(
+                            local ____temp_17_20 = ____temp_17
+                            if ____temp_17_20 then
+                                local ____opt_18 = targets
+                                ____temp_17_20 = (____opt_18 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_cell = ____temp_18_21
-                            local ____temp_24 = element ~= NullElement
-                            if ____temp_24 then
-                                local ____opt_22 = exclude
-                                ____temp_24 = (____opt_22 and __TS__ArrayFindIndex(
+                            local is_valid_cell = ____temp_17_20
+                            local ____temp_23 = element ~= NullElement
+                            if ____temp_23 then
+                                local ____opt_21 = exclude
+                                ____temp_23 = (____opt_21 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local ____temp_24_27 = ____temp_24
-                            if ____temp_24_27 then
-                                local ____opt_25 = targets
-                                ____temp_24_27 = (____opt_25 and __TS__ArrayFindIndex(
+                            local ____temp_23_26 = ____temp_23
+                            if ____temp_23_26 then
+                                local ____opt_24 = targets
+                                ____temp_23_26 = (____opt_24 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Element and target.id == element.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_element = ____temp_24_27
+                            local is_valid_element = ____temp_23_26
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1461,15 +1472,15 @@ function ____exports.Game()
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
-                            local ____temp_30 = element ~= NullElement
-                            if ____temp_30 then
-                                local ____opt_28 = exclude
-                                ____temp_30 = (____opt_28 and __TS__ArrayFindIndex(
+                            local ____temp_29 = element ~= NullElement
+                            if ____temp_29 then
+                                local ____opt_27 = exclude
+                                ____temp_29 = (____opt_27 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local is_valid_element = ____temp_30
+                            local is_valid_element = ____temp_29
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1528,6 +1539,7 @@ function ____exports.Game()
             EventBus.send("RESPONSE_WRONG_SWAP_ELEMENTS", {from = swap.from, to = swap.to, element_from = element_from, element_to = element_to})
             return
         end
+        Log.log("DIACTIVATE IDLE FROM SWAP")
         is_idle = false
         if level_config.steps ~= nil then
             local state = get_state()
@@ -1643,29 +1655,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch361 = combination.type
-            local ____cond361 = ____switch361 == CombinationType.Comb4
-            if ____cond361 then
+            local ____switch365 = combination.type
+            local ____cond365 = ____switch365 == CombinationType.Comb4
+            if ____cond365 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond361 = ____cond361 or ____switch361 == CombinationType.Comb5
-            if ____cond361 then
+            ____cond365 = ____cond365 or ____switch365 == CombinationType.Comb5
+            if ____cond365 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond361 = ____cond361 or ____switch361 == CombinationType.Comb2x2
-            if ____cond361 then
+            ____cond365 = ____cond365 or ____switch365 == CombinationType.Comb2x2
+            if ____cond365 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond361 = ____cond361 or (____switch361 == CombinationType.Comb3x3a or ____switch361 == CombinationType.Comb3x3b)
-            if ____cond361 then
+            ____cond365 = ____cond365 or (____switch365 == CombinationType.Comb3x3a or ____switch365 == CombinationType.Comb3x3b)
+            if ____cond365 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond361 = ____cond361 or (____switch361 == CombinationType.Comb3x4 or ____switch361 == CombinationType.Comb3x5)
-            if ____cond361 then
+            ____cond365 = ____cond365 or (____switch365 == CombinationType.Comb3x4 or ____switch365 == CombinationType.Comb3x5)
+            if ____cond365 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

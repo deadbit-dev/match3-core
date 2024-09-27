@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_set, on_shuffle_end, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -429,13 +429,15 @@ function set_events(instance)
             timer.delay(
                 GAME_CONFIG.delay_before_gameover,
                 false,
-                function() return set_gameover(instance, data.state, data.revive) end
+                function()
+                    set_gameover(instance, data.state, data.revive)
+                end
             )
         end,
         true
     )
-    EventBus.on("SET_SHUFFLE", on_shuffle_set)
-    EventBus.on("SHUFFLE", on_shuffle_end)
+    EventBus.on("SHUFFLE_START", on_shuffle_start)
+    EventBus.on("SHUFFLE_ACTION", on_shuffle_action)
 end
 function update_targets(data)
     repeat
@@ -962,7 +964,7 @@ function disable_game_ui()
         false
     )
 end
-function on_shuffle_set()
+function on_shuffle_start()
     local shuffle = gui.get_node("shuffle")
     local lock = gui.get_node("lock1")
     gui.set_enabled(lock, true)
@@ -978,7 +980,7 @@ function on_shuffle_set()
         end
     )
 end
-function on_shuffle_end()
+function on_shuffle_action()
     timer.delay(
         0.7,
         false,

@@ -29,10 +29,20 @@ function animal_init(options: AnimalOptions) {
     }
 
     idle();
-    timer.delay(math.random(5, 10), true, () => {
-        if(options.walkable) walk();
-        else action(idle);
-    });
+
+    if(options.walkable) timer.delay(math.random(5, 10), false, walk);
+    else {
+        timer.delay(math.random(5, 10), false, () => {
+            action(() => {
+                idle();
+                timer.delay(math.random(5, 10), false, () => {
+                    action(() => {
+                        idle();
+                    });
+                });
+            });
+        });
+    }
 }
 
 function walk() {
@@ -42,7 +52,10 @@ function walk() {
         action(() => {
             const back_pos = go.get_position();
             back_pos.x += 70;
-            walk_back(back_pos, idle);
+            walk_back(back_pos, () => {
+                idle();
+                timer.delay(math.random(5, 10), false, walk);
+            });
         });
     });
 }

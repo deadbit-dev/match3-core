@@ -346,9 +346,13 @@ function set_events(instance: props) {
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN', on_win);
-    EventBus.on('ON_GAME_OVER', (data) => { timer.delay(GAME_CONFIG.delay_before_gameover, false, () => set_gameover(instance, data.state, data.revive)); }, true);
-    EventBus.on('SET_SHUFFLE', on_shuffle_set);
-    EventBus.on('SHUFFLE', on_shuffle_end);
+    EventBus.on('ON_GAME_OVER', (data) => {
+        timer.delay(GAME_CONFIG.delay_before_gameover, false, () => {
+            set_gameover(instance, data.state, data.revive);
+        });
+    }, true);
+    EventBus.on('SHUFFLE_START', on_shuffle_start);
+    EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
 }
 
 function update_targets(data: TargetMessage) {
@@ -657,7 +661,7 @@ function disable_game_ui() {
     gui.set_enabled(gui.get_node('system_buttons'), false);
 }
 
-function on_shuffle_set() {
+function on_shuffle_start() {
     const shuffle = gui.get_node('shuffle');
     // const init_scale = gui.get_scale(shuffle);
     // gui.set_scale(shuffle, vmath.vector3());
@@ -670,7 +674,7 @@ function on_shuffle_set() {
     // gui.animate(shuffle, gui.PROP_COLOR, vmath.vector4(0, 0, 0, 1), gui.EASING_INCUBIC, 0.3);
 }
 
-function on_shuffle_end() {
+function on_shuffle_action() {
     timer.delay(0.7, false, () => {
         const shuffle = gui.get_node('shuffle');
         // const init_scale = gui.get_scale(shuffle);

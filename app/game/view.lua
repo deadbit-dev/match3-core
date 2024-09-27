@@ -76,23 +76,19 @@ ____exports.Action.Swap = 0
 ____exports.Action[____exports.Action.Swap] = "Swap"
 ____exports.Action.Combination = 1
 ____exports.Action[____exports.Action.Combination] = "Combination"
-____exports.Action.ActivateBuster = 2
-____exports.Action[____exports.Action.ActivateBuster] = "ActivateBuster"
-____exports.Action.ActivateBusterAfterSwap = 3
-____exports.Action[____exports.Action.ActivateBusterAfterSwap] = "ActivateBusterAfterSwap"
-____exports.Action.CombinateBusters = 4
-____exports.Action[____exports.Action.CombinateBusters] = "CombinateBusters"
-____exports.Action.HelicopterFly = 5
+____exports.Action.Combo = 2
+____exports.Action[____exports.Action.Combo] = "Combo"
+____exports.Action.HelicopterFly = 3
 ____exports.Action[____exports.Action.HelicopterFly] = "HelicopterFly"
-____exports.Action.DiskosphereActivation = 6
+____exports.Action.DiskosphereActivation = 4
 ____exports.Action[____exports.Action.DiskosphereActivation] = "DiskosphereActivation"
-____exports.Action.DiskosphereTrace = 7
+____exports.Action.DiskosphereTrace = 5
 ____exports.Action[____exports.Action.DiskosphereTrace] = "DiskosphereTrace"
-____exports.Action.DynamiteActivation = 8
+____exports.Action.DynamiteActivation = 6
 ____exports.Action[____exports.Action.DynamiteActivation] = "DynamiteActivation"
-____exports.Action.RocketActivation = 9
+____exports.Action.RocketActivation = 7
 ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
-____exports.Action.Falling = 10
+____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
     local set_events, dispatch_messages, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, recalculate_cell_offset, recalculate_sizes, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, down_item, locks, actions
@@ -140,7 +136,7 @@ function ____exports.View(resources)
         EventBus.on("RESPONSE_ACTIVATED_DISKOSPHERE", on_diskosphere_activated_animation, false)
         EventBus.on("RESPONSE_ACTIVATED_HELICOPTER", on_helicopter_activated_animation, false)
         EventBus.on("RESPONSE_HELICOPTER_ACTION", on_helicopter_action_animation, false)
-        EventBus.on("SHUFFLE", on_shuffle_animation, false)
+        EventBus.on("SHUFFLE_ACTION", on_shuffle_animation, false)
     end
     function dispatch_messages()
         while true do
@@ -217,6 +213,7 @@ function ____exports.View(resources)
                 i = i + 1
             end
         end
+        EventBus.send("REQUEST_IDLE")
     end
     function recalculate_cell_offset(game_state)
         local min_y_active_cell = get_field_height()
@@ -717,6 +714,9 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.Swap)
                 EventBus.send("REQUEST_SWAP_ELEMENTS_END", message)
+                if element_to == NullElement then
+                    request_falling(message.from)
+                end
                 record_action(____exports.Action.Combination)
                 record_action(____exports.Action.Combination)
                 EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.from, message.to}})
@@ -902,7 +902,6 @@ function ____exports.View(resources)
         if view_from_buster == nil then
             return
         end
-        remove_action(____exports.Action.ActivateBusterAfterSwap)
         local to_world_pos = get_world_pos(message.buster_to.pos)
         go.animate(
             view_from_buster._hash,
@@ -915,7 +914,6 @@ function ____exports.View(resources)
             function()
                 delete_view_item_by_uid(message.buster_from.element.uid)
                 request_falling(message.buster_from.pos)
-                record_action(____exports.Action.CombinateBusters)
                 EventBus.send("REQUEST_COMBINED_BUSTERS", message)
             end
         )
@@ -972,10 +970,12 @@ function ____exports.View(resources)
             end
         end
         Sound.play("combo")
+        record_action(____exports.Action.Combo)
         timer.delay(
             GAME_CONFIG.squash_time,
             false,
             function()
+                remove_action(____exports.Action.Combo)
                 if message.maked_element ~= nil then
                     make_element_view(message.pos.x, message.pos.y, message.maked_element)
                 end
@@ -1152,19 +1152,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch196 = message.axis
-                    local ____cond196 = ____switch196 == Axis.Horizontal
-                    if ____cond196 then
+                    local ____switch197 = message.axis
+                    local ____cond197 = ____switch197 == Axis.Horizontal
+                    if ____cond197 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond196 = ____cond196 or ____switch196 == Axis.Vertical
-                    if ____cond196 then
+                    ____cond197 = ____cond197 or ____switch197 == Axis.Vertical
+                    if ____cond197 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond196 = ____cond196 or ____switch196 == Axis.All
-                    if ____cond196 then
+                    ____cond197 = ____cond197 or ____switch197 == Axis.All
+                    if ____cond197 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1193,14 +1193,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch199 = axis
-            local ____cond199 = ____switch199 == Axis.Vertical
-            if ____cond199 then
+            local ____switch200 = axis
+            local ____cond200 = ____switch200 == Axis.Vertical
+            if ____cond200 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond199 = ____cond199 or ____switch199 == Axis.Horizontal
-            if ____cond199 then
+            ____cond200 = ____cond200 or ____switch200 == Axis.Horizontal
+            if ____cond200 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break
@@ -1536,7 +1536,7 @@ function ____exports.View(resources)
             0.5,
             false,
             function()
-                EventBus.send("REQUEST_SHUFFLE_END")
+                EventBus.send("SHUFFLE_END")
             end
         )
     end
