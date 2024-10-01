@@ -8,7 +8,6 @@ local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
-local flow = require("ludobits.m.flow")
 local ____utils = require("game.utils")
 local get_field_width = ____utils.get_field_width
 local get_field_height = ____utils.get_field_height
@@ -129,6 +128,17 @@ function ____exports.Game()
         EventBus.on("REQUEST_HELICOPTER_END", on_helicopter_end, false)
         EventBus.on("SHUFFLE_END", on_shuffle_end, false)
         EventBus.on("REQUEST_IDLE", on_idle, false)
+        EventBus.on(
+            "REQUEST_RELOAD_FIELD",
+            function()
+                update_core_state()
+                EventBus.send(
+                    "RESPONSE_RELOAD_FIELD",
+                    copy_state()
+                )
+            end,
+            false
+        )
     end
     function set_element_chances()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -230,24 +240,24 @@ function ____exports.Game()
     end
     function unlock_buster(name)
         repeat
-            local ____switch34 = name
-            local ____cond34 = ____switch34 == "hammer"
-            if ____cond34 then
+            local ____switch35 = name
+            local ____cond35 = ____switch35 == "hammer"
+            if ____cond35 then
                 busters.hammer.block = false
                 break
             end
-            ____cond34 = ____cond34 or ____switch34 == "spinning"
-            if ____cond34 then
+            ____cond35 = ____cond35 or ____switch35 == "spinning"
+            if ____cond35 then
                 busters.spinning.block = false
                 break
             end
-            ____cond34 = ____cond34 or ____switch34 == "horizontal_rocket"
-            if ____cond34 then
+            ____cond35 = ____cond35 or ____switch35 == "horizontal_rocket"
+            if ____cond35 then
                 busters.horizontal_rocket.block = false
                 break
             end
-            ____cond34 = ____cond34 or ____switch34 == "vertical_rocket"
-            if ____cond34 then
+            ____cond35 = ____cond35 or ____switch35 == "vertical_rocket"
+            if ____cond35 then
                 busters.vertical_rocket.block = false
                 break
             end
@@ -285,9 +295,11 @@ function ____exports.Game()
         Log.log("IDLE")
         is_idle = true
         if is_level_completed() then
+            Log.log("WIN IN IDLE")
             return on_win()
         end
         if is_gameover() then
+            Log.log("GAMEOVER IN IDLE")
             return on_gameover()
         end
         if not has_step() then
@@ -420,11 +432,11 @@ function ____exports.Game()
                 function() return on_gameover(false) end
             )
         end
+        EventBus.send("SHUFFLE_START")
         timer.delay(
             1,
             false,
             function()
-                EventBus.send("SHUFFLE_START")
                 shuffle_field(on_end, on_error)
             end
         )
@@ -433,90 +445,78 @@ function ____exports.Game()
         is_block_input = false
     end
     function shuffle_field(on_end, on_error)
-        return flow.start(
-            function()
-                Log.log("SHUFFLE FIELD")
-                local step = false
-                local attempt = 0
-                repeat
-                    do
-                        local positions = {}
-                        local elements = {}
+        Log.log("SHUFFLE FIELD")
+        local step = false
+        local attempt = 0
+        repeat
+            do
+                local positions = {}
+                local elements = {}
+                do
+                    local y = 0
+                    while y < field_height do
                         do
-                            local y = 0
-                            while y < field_height do
-                                do
-                                    local x = 0
-                                    while x < field_width do
-                                        local cell = field.get_cell({x = x, y = y})
-                                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                                            local element = field.get_element({x = x, y = y})
-                                            if element ~= NullElement then
-                                                positions[#positions + 1] = {x = x, y = y}
-                                                elements[#elements + 1] = element
-                                                field.set_element({x = x, y = y}, NullElement)
-                                            end
-                                        end
-                                        x = x + 1
+                            local x = 0
+                            while x < field_width do
+                                local cell = field.get_cell({x = x, y = y})
+                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
+                                    local element = field.get_element({x = x, y = y})
+                                    if element ~= NullElement then
+                                        positions[#positions + 1] = {x = x, y = y}
+                                        elements[#elements + 1] = element
+                                        field.set_element({x = x, y = y}, NullElement)
                                     end
                                 end
-                                y = y + 1
+                                x = x + 1
                             end
                         end
-                        shuffle_array(elements)
-                        local counter = 0
-                        local optimize_count = 5
-                        local element_assigned = false
-                        for ____, position in ipairs(positions) do
-                            if counter >= optimize_count then
-                                counter = 0
-                                flow.frames(1)
-                            end
-                            do
-                                local i = 0
-                                while i < #elements do
-                                    local elementIndex = math.floor(math.random() * #elements)
-                                    local element = elements[elementIndex + 1]
-                                    field.set_element(position, element)
-                                    if field.search_combination(position) == NotFound then
-                                        __TS__ArraySplice(elements, elementIndex, 1)
-                                        element_assigned = true
-                                        break
-                                    end
-                                    i = i + 1
-                                end
-                            end
-                            if not element_assigned then
-                                for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
-                                    if __TS__ArrayFind(
-                                        elements,
-                                        function(____, element) return element.id == element_id end
-                                    ) == nil then
-                                        make_element(position, element_id)
-                                    end
-                                end
-                            end
-                            counter = counter + 1
-                        end
-                        step = has_step()
+                        y = y + 1
                     end
-                    local ____temp_4 = not step
-                    if ____temp_4 then
-                        attempt = attempt + 1
-                        ____temp_4 = attempt < GAME_CONFIG.shuffle_max_attempt
-                    end
-                    if not ____temp_4 then
-                        break
-                    end
-                until false
-                if step then
-                    on_end()
-                else
-                    on_error()
                 end
-            end,
-            {parallel = true}
-        )
+                shuffle_array(elements)
+                local element_assigned = false
+                for ____, position in ipairs(positions) do
+                    do
+                        local i = 0
+                        while i < #elements do
+                            local elementIndex = math.floor(math.random() * #elements)
+                            local element = elements[elementIndex + 1]
+                            field.set_element(position, element)
+                            if field.search_combination(position) == NotFound then
+                                __TS__ArraySplice(elements, elementIndex, 1)
+                                element_assigned = true
+                                break
+                            end
+                            i = i + 1
+                        end
+                    end
+                    if not element_assigned then
+                        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                            if __TS__ArrayFind(
+                                elements,
+                                function(____, element) return element.id == element_id end
+                            ) == nil then
+                                make_element(position, element_id)
+                            end
+                        end
+                    end
+                end
+                step = has_step()
+            end
+            local ____temp_4 = not step
+            if ____temp_4 then
+                attempt = attempt + 1
+                ____temp_4 = attempt < GAME_CONFIG.shuffle_max_attempt
+            end
+            if not ____temp_4 then
+                break
+            end
+        until false
+        if step then
+            on_end()
+        else
+            on_error()
+        end
     end
     function try_load_field()
         do
@@ -958,24 +958,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch209 = message.name
-            local ____cond209 = ____switch209 == "SPINNING"
-            if ____cond209 then
+            local ____switch208 = message.name
+            local ____cond208 = ____switch208 == "SPINNING"
+            if ____cond208 then
                 on_activate_spinning()
                 break
             end
-            ____cond209 = ____cond209 or ____switch209 == "HAMMER"
-            if ____cond209 then
+            ____cond208 = ____cond208 or ____switch208 == "HAMMER"
+            if ____cond208 then
                 on_activate_hammer()
                 break
             end
-            ____cond209 = ____cond209 or ____switch209 == "HORIZONTAL_ROCKET"
-            if ____cond209 then
+            ____cond208 = ____cond208 or ____switch208 == "HORIZONTAL_ROCKET"
+            if ____cond208 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond209 = ____cond209 or ____switch209 == "VERTICAL_ROCKET"
-            if ____cond209 then
+            ____cond208 = ____cond208 or ____switch208 == "VERTICAL_ROCKET"
+            if ____cond208 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1363,7 +1363,7 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_11 = cell ~= NotActiveCell
+                        local ____temp_11 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
                         if ____temp_11 then
                             local ____opt_9 = exclude
                             ____temp_11 = (____opt_9 and __TS__ArrayFindIndex(
@@ -1404,7 +1404,7 @@ function ____exports.Game()
                         while x < field_width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_17 = cell ~= NotActiveCell
+                            local ____temp_17 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
                             if ____temp_17 then
                                 local ____opt_15 = exclude
                                 ____temp_17 = (____opt_15 and __TS__ArrayFindIndex(
@@ -1655,29 +1655,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch365 = combination.type
-            local ____cond365 = ____switch365 == CombinationType.Comb4
-            if ____cond365 then
+            local ____switch364 = combination.type
+            local ____cond364 = ____switch364 == CombinationType.Comb4
+            if ____cond364 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond365 = ____cond365 or ____switch365 == CombinationType.Comb5
-            if ____cond365 then
+            ____cond364 = ____cond364 or ____switch364 == CombinationType.Comb5
+            if ____cond364 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond365 = ____cond365 or ____switch365 == CombinationType.Comb2x2
-            if ____cond365 then
+            ____cond364 = ____cond364 or ____switch364 == CombinationType.Comb2x2
+            if ____cond364 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond365 = ____cond365 or (____switch365 == CombinationType.Comb3x3a or ____switch365 == CombinationType.Comb3x3b)
-            if ____cond365 then
+            ____cond364 = ____cond364 or (____switch364 == CombinationType.Comb3x3a or ____switch364 == CombinationType.Comb3x3b)
+            if ____cond364 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond365 = ____cond365 or (____switch365 == CombinationType.Comb3x4 or ____switch365 == CombinationType.Comb3x5)
-            if ____cond365 then
+            ____cond364 = ____cond364 or (____switch364 == CombinationType.Comb3x4 or ____switch364 == CombinationType.Comb3x5)
+            if ____cond364 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

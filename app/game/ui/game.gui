@@ -552,386 +552,6 @@ nodes {
 nodes {
   position {
     x: 270.0
-    y: 185.0
-  }
-  type: TYPE_BOX
-  id: "buster_buttons"
-  yanchor: YANCHOR_BOTTOM
-  alpha: 0.0
-  enabled: false
-}
-nodes {
-  position {
-    x: -59.0
-  }
-  type: TYPE_TEMPLATE
-  id: "hammer"
-  parent: "buster_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  id: "hammer/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "hammer"
-  overridden_fields: 3
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  texture: "ui/hammer_icon"
-  id: "hammer/icon"
-  parent: "hammer/button"
-  overridden_fields: 9
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "hammer/lock"
-  parent: "hammer/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "hammer/counts"
-  parent: "hammer/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -177.0
-  }
-  type: TYPE_TEMPLATE
-  id: "spinning"
-  parent: "buster_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  id: "spinning/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "spinning"
-  overridden_fields: 3
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  texture: "ui/spinning_icon"
-  id: "spinning/icon"
-  parent: "spinning/button"
-  overridden_fields: 9
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "spinning/lock"
-  parent: "spinning/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "spinning/counts"
-  parent: "spinning/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 59.0
-  }
-  type: TYPE_TEMPLATE
-  id: "horizontal_rocket"
-  parent: "buster_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  id: "horizontal_rocket/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "horizontal_rocket"
-  overridden_fields: 3
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  rotation {
-    z: -90.0
-  }
-  type: TYPE_BOX
-  texture: "ui/rocket_icon"
-  id: "horizontal_rocket/icon"
-  parent: "horizontal_rocket/button"
-  overridden_fields: 2
-  overridden_fields: 9
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_BOX
-  id: "horizontal_rocket/lock"
-  parent: "horizontal_rocket/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "horizontal_rocket/counts"
-  parent: "horizontal_rocket/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 177.0
-  }
-  type: TYPE_TEMPLATE
-  id: "vertical_rocket"
-  parent: "buster_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  id: "vertical_rocket/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "vertical_rocket"
-  overridden_fields: 3
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  texture: "ui/rocket_icon"
-  id: "vertical_rocket/icon"
-  parent: "vertical_rocket/button"
-  overridden_fields: 9
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "vertical_rocket/lock"
-  parent: "vertical_rocket/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "vertical_rocket/counts"
-  parent: "vertical_rocket/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 270.0
-    y: -100.0
-  }
-  size {
-    x: 400.0
-    y: 110.0
-  }
-  type: TYPE_BOX
-  texture: "ui/substrate"
-  id: "system_buttons"
-  yanchor: YANCHOR_BOTTOM
-  layer: "top"
-}
-nodes {
-  position {
-    x: -47.0
-    y: 4.0
-  }
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_TEMPLATE
-  id: "restart"
-  parent: "system_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/system_button"
-  id: "restart/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "restart"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  scale {
-    x: 2.0
-    y: 2.0
-  }
-  type: TYPE_BOX
-  texture: "ui/restart_icon"
-  id: "restart/icon"
-  parent: "restart/button"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "restart/lock"
-  parent: "restart/button"
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "restart/counts"
-  parent: "restart/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -141.0
-    y: 4.0
-  }
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_TEMPLATE
-  id: "back"
-  parent: "system_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/system_button"
-  id: "back/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "back"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 13
-  template_node_child: true
-}
-nodes {
-  scale {
-    x: 2.0
-    y: 2.0
-  }
-  type: TYPE_BOX
-  texture: "ui/arrow_icon"
-  id: "back/icon"
-  parent: "back/button"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "back/lock"
-  parent: "back/button"
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "back/counts"
-  parent: "back/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 135.0
-    y: 4.0
-  }
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_TEMPLATE
-  id: "revert_step"
-  parent: "system_buttons"
-  inherit_alpha: true
-  template: "/game/ui/button.gui"
-}
-nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/system_button"
-  id: "revert_step/button"
-  yanchor: YANCHOR_BOTTOM
-  parent: "revert_step"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 13
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  scale {
-    x: 2.0
-    y: 2.0
-  }
-  type: TYPE_BOX
-  texture: "ui/arrow_icon"
-  id: "revert_step/icon"
-  parent: "revert_step/button"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "revert_step/lock"
-  parent: "revert_step/button"
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "revert_step/counts"
-  parent: "revert_step/button"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 270.0
     y: 480.0
   }
   size {
@@ -1902,6 +1522,402 @@ nodes {
   inherit_alpha: true
   alpha: 0.7
   enabled: false
+}
+nodes {
+  position {
+    x: 270.0
+    y: 100.0
+  }
+  size {
+    x: 540.0
+    y: 200.0
+  }
+  type: TYPE_BOX
+  id: "bottom_container"
+  yanchor: YANCHOR_BOTTOM
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  visible: false
+}
+nodes {
+  position {
+    y: 85.0
+  }
+  type: TYPE_BOX
+  id: "buster_buttons"
+  yanchor: YANCHOR_BOTTOM
+  parent: "bottom_container"
+  alpha: 0.0
+  enabled: false
+}
+nodes {
+  position {
+    x: -59.0
+  }
+  type: TYPE_TEMPLATE
+  id: "hammer"
+  parent: "buster_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  id: "hammer/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "hammer"
+  overridden_fields: 3
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/hammer_icon"
+  id: "hammer/icon"
+  parent: "hammer/button"
+  overridden_fields: 9
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "hammer/lock"
+  parent: "hammer/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hammer/counts"
+  parent: "hammer/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: -177.0
+  }
+  type: TYPE_TEMPLATE
+  id: "spinning"
+  parent: "buster_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  id: "spinning/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "spinning"
+  overridden_fields: 3
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/spinning_icon"
+  id: "spinning/icon"
+  parent: "spinning/button"
+  overridden_fields: 9
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "spinning/lock"
+  parent: "spinning/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "spinning/counts"
+  parent: "spinning/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 59.0
+  }
+  type: TYPE_TEMPLATE
+  id: "horizontal_rocket"
+  parent: "buster_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  id: "horizontal_rocket/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "horizontal_rocket"
+  overridden_fields: 3
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  rotation {
+    z: -90.0
+  }
+  type: TYPE_BOX
+  texture: "ui/rocket_icon"
+  id: "horizontal_rocket/icon"
+  parent: "horizontal_rocket/button"
+  overridden_fields: 2
+  overridden_fields: 9
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  type: TYPE_BOX
+  id: "horizontal_rocket/lock"
+  parent: "horizontal_rocket/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "horizontal_rocket/counts"
+  parent: "horizontal_rocket/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 177.0
+  }
+  type: TYPE_TEMPLATE
+  id: "vertical_rocket"
+  parent: "buster_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  id: "vertical_rocket/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "vertical_rocket"
+  overridden_fields: 3
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/rocket_icon"
+  id: "vertical_rocket/icon"
+  parent: "vertical_rocket/button"
+  overridden_fields: 9
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "vertical_rocket/lock"
+  parent: "vertical_rocket/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "vertical_rocket/counts"
+  parent: "vertical_rocket/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    y: -200.0
+  }
+  size {
+    x: 400.0
+    y: 110.0
+  }
+  type: TYPE_BOX
+  texture: "ui/substrate"
+  id: "system_buttons"
+  yanchor: YANCHOR_BOTTOM
+  parent: "bottom_container"
+  layer: "top"
+}
+nodes {
+  position {
+    x: -47.0
+    y: 4.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_TEMPLATE
+  id: "restart"
+  parent: "system_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  texture: "ui/system_button"
+  id: "restart/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "restart"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  type: TYPE_BOX
+  texture: "ui/restart_icon"
+  id: "restart/icon"
+  parent: "restart/button"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "restart/lock"
+  parent: "restart/button"
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "restart/counts"
+  parent: "restart/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: -141.0
+    y: 4.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_TEMPLATE
+  id: "back"
+  parent: "system_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  texture: "ui/system_button"
+  id: "back/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "back"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 13
+  template_node_child: true
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  type: TYPE_BOX
+  texture: "ui/arrow_icon"
+  id: "back/icon"
+  parent: "back/button"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "back/lock"
+  parent: "back/button"
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "back/counts"
+  parent: "back/button"
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 135.0
+    y: 4.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_TEMPLATE
+  id: "revert_step"
+  parent: "system_buttons"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  texture: "ui/system_button"
+  id: "revert_step/button"
+  yanchor: YANCHOR_BOTTOM
+  parent: "revert_step"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 13
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  type: TYPE_BOX
+  texture: "ui/arrow_icon"
+  id: "revert_step/icon"
+  parent: "revert_step/button"
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "revert_step/lock"
+  parent: "revert_step/button"
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "revert_step/counts"
+  parent: "revert_step/button"
+  template_node_child: true
 }
 layers {
   name: "back"

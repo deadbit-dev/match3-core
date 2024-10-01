@@ -1,6 +1,4 @@
 local ____exports = {}
-local flow = require("ludobits.m.flow")
-local flux = require("utils.flux")
 local ____view = require("game.view")
 local View = ____view.View
 go.property(
@@ -12,19 +10,12 @@ go.property(
     resource.material("/assets/materials/tutorial_sprite.material")
 )
 function ____exports.init(self)
-    self.animator = flux.group()
     Manager.init_script()
     msg.post(".", "acquire_input_focus")
-    flow.start(
-        function() return View({default_sprite_material = self.default_sprite_material, tutorial_sprite_material = self.tutorial_sprite_material}) end,
-        {}
-    )
-end
-function ____exports.update(self, dt)
-    self.animator:update(dt)
+    self.view = View({default_sprite_material = self.default_sprite_material, tutorial_sprite_material = self.tutorial_sprite_material})
 end
 function ____exports.on_message(self, message_id, message, sender)
-    flow.on_message(message_id, message, sender)
+    self.view:on_message(message_id, message, sender)
     Manager.on_message(self, message_id, message, sender)
 end
 function ____exports.on_input(self, action_id, action)
@@ -33,12 +24,10 @@ function ____exports.on_input(self, action_id, action)
     end
 end
 function ____exports.final(self)
-    flow.stop()
     Scene.unload_all_resources("game")
     Manager.final_script()
 end
 init = ____exports.init
-update = ____exports.update
 on_message = ____exports.on_message
 on_input = ____exports.on_input
 final = ____exports.final

@@ -103,7 +103,7 @@ function setup(instance: props) {
     setup_gameover_ui(instance);
 
     gui.animate(gui.get_node('substrate'), 'position', vmath.vector3(270, 880, 0), gui.EASING_INCUBIC, 0.5);
-    gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(270, 65, 0), gui.EASING_INCUBIC, 0.5);
+    gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(0, -40, 0), gui.EASING_INCUBIC, 0.5);
 
     // gui.set_scale(gui.get_node('hammer/button'), vmath.vector3(0, 0, 0));
     // gui.set_scale(gui.get_node('spinning/button'), vmath.vector3(0, 0, 0));

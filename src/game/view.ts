@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-constant-condition */
 
-
-import * as flow from 'ludobits.m.flow';
+// import * as flow from 'ludobits.m.flow';
 import { GoManager } from "../modules/GoManager";
 import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
@@ -121,6 +121,10 @@ export enum Action {
     Falling
 }
 
+export interface View {
+    on_message: (this: any, message_id: hash, message: any, sender: hash) => void;
+}
+
 export function View(resources: ViewResources) {
 
     const go_manager = GoManager();
@@ -156,13 +160,12 @@ export function View(resources: ViewResources) {
         GAME_CONFIG.is_restart = false;
 
         EventBus.send('REQUEST_LOAD_GAME');
-
-        dispatch_messages();
     }
 
     function set_events() {
         EventBus.on("SYS_ON_RESIZED", on_resize);
         EventBus.on('RESPONSE_LOAD_GAME', on_load_game, false);
+        EventBus.on('RESPONSE_RELOAD_FIELD', load_field, false);
         EventBus.on('MSG_ON_DOWN_ITEM', on_down);
         EventBus.on('MSG_ON_UP_ITEM', on_up);
         EventBus.on('MSG_ON_MOVE', on_move);
@@ -199,11 +202,8 @@ export function View(resources: ViewResources) {
         EventBus.on('SHUFFLE_ACTION', on_shuffle_animation, false);
     }
 
-    function dispatch_messages() {
-        while (true) {
-            const [message_id, _message, sender] = flow.until_any_message();
-            go_manager.do_message(message_id, _message, sender);
-        }
+    function on_message(this: any, message_id: hash, message: any, sender: hash) {
+        go_manager.do_message(message_id, message, sender);
     }
 
     function set_scene_art() {
@@ -311,6 +311,9 @@ export function View(resources: ViewResources) {
             }
             Camera.set_zoom(zoom);
         }
+
+        recalculate_sizes();
+        reload_field();
     }
 
     function load_field(game_state: GameState, with_anim = true) {
@@ -365,6 +368,11 @@ export function View(resources: ViewResources) {
             for(let x = 0; x < get_field_width(); x++)
                 view_state.substrates[y][x] = EMPTY_SUBSTRATE;
         }
+    }
+
+    function reload_field() {
+        reset_field();
+        EventBus.send('REQUEST_RELOAD_FIELD');
     }
 
     function get_view_item_by_uid(uid: number) {
@@ -1003,7 +1011,6 @@ export function View(resources: ViewResources) {
         msg.post(msg.url(undefined, part1, 'rocket'), 'enable');
     
         const anim_props = { blend_duration: 0, playback_rate: 1 };
-    
         spine.play_anim(msg.url(undefined, part0, 'rocket'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props);
         spine.play_anim(msg.url(undefined, part1, 'rocket'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props);
     
@@ -1034,7 +1041,7 @@ export function View(resources: ViewResources) {
     }
 
     function on_diskosphere_activated_animation(message: DiskosphereActivatedMessage) {
-        return diskosphere_effect(message.pos, message.uid, message.damages, message.buster);
+        diskosphere_effect(message.pos, message.uid, message.damages, message.buster);
     }
 
     function diskosphere_effect(pos: Position, uid: number, damages: DamageInfo[], buster?: ElementId, on_complete?: () => void) {
@@ -1081,8 +1088,6 @@ export function View(resources: ViewResources) {
                 }
             }
         });
-        
-        return 1;
     }
     
     function trace_animation(world_pos: vmath.vector3, diskosphere: hash, damages: DamageInfo[], counter: number, on_trace_end: (damage_info: DamageInfo) => void, on_complete: () => void) {
@@ -1164,25 +1169,27 @@ export function View(resources: ViewResources) {
     }
 
     function on_shuffle_animation(game_state: GameState) {
-        flow.delay(1);
+        // flow.delay(1);
 
-        Sound.play('shuffle');
+        timer.delay(1, false, () => {
+            Sound.play('shuffle');
 
-        for(let y = 0; y < get_field_height(); y++) {
-            for(let x = 0; x < get_field_width(); x++) {
-                const element = game_state.elements[y][x];
-                if(element != NullElement) {
-                    const element_view = get_view_item_by_uid(element.uid);
-                    if (element_view != undefined) {
-                        const to_world_pos = get_world_pos({x, y}, GAME_CONFIG.default_element_z_index);
-                        go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.swap_element_easing, 0.5);
-                    } else make_element_view(x, y, element, true);
+            for(let y = 0; y < get_field_height(); y++) {
+                for(let x = 0; x < get_field_width(); x++) {
+                    const element = game_state.elements[y][x];
+                    if(element != NullElement) {
+                        const element_view = get_view_item_by_uid(element.uid);
+                        if (element_view != undefined) {
+                            const to_world_pos = get_world_pos({x, y}, GAME_CONFIG.default_element_z_index);
+                            go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.swap_element_easing, 0.5);
+                        } else make_element_view(x, y, element, true);
+                    }
                 }
             }
-        }
-
-        timer.delay(0.5, false, () => {
-            EventBus.send('SHUFFLE_END');
+    
+            timer.delay(0.5, false, () => {
+                EventBus.send('SHUFFLE_END');
+            });
         });
     }
 
@@ -1284,5 +1291,7 @@ export function View(resources: ViewResources) {
         }
     }
 
-    return init();
+    init();
+
+    return { on_message };
 }

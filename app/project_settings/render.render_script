@@ -31,11 +31,7 @@ end
 local use_only_projection = false
 local anchor_x = 0
 local anchor_y = 0
-local function width_projection(near, far, zoom)
-  if not Manager.is_ready() then
-    return fixed_fit_projection(near, far)
-  end
-
+local function width_projection(near, far, zoom) 
   return Camera.width_projection()
 end
 
@@ -65,7 +61,7 @@ function init(self)
   -- msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
   self.near = -1
   self.far = 1
-  self.projection_fn = width_projection
+  self.projection_fn = stretch_projection
 end
 
 function update(self)

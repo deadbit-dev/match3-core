@@ -34,7 +34,7 @@ function setup(instance)
     gui.animate(
         gui.get_node("system_buttons"),
         "position",
-        vmath.vector3(270, 65, 0),
+        vmath.vector3(0, -40, 0),
         gui.EASING_INCUBIC,
         0.5
     )

@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import * as flow from 'ludobits.m.flow';
+// import * as flow from 'ludobits.m.flow';
 import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./utils";
 import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotFound, NullElement, Position, SwapInfo } from "./core";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
@@ -189,6 +189,11 @@ export function Game() {
         EventBus.on('SHUFFLE_END', on_shuffle_end, false);
 
         EventBus.on('REQUEST_IDLE', on_idle, false);
+
+        EventBus.on('REQUEST_RELOAD_FIELD', () => {
+            update_core_state();
+            EventBus.send('RESPONSE_RELOAD_FIELD', copy_state());
+        }, false);
     }
 
     function set_element_chances() {
@@ -318,10 +323,12 @@ export function Game() {
         is_idle = true;
 
         if(is_level_completed()) {
+            Log.log("WIN IN IDLE");
             return on_win();
         }
 
         if(is_gameover()) {
+            Log.log("GAMEOVER IN IDLE");
             return on_gameover();
         }
 
@@ -333,10 +340,6 @@ export function Game() {
 
         if(!is_tutorial() && helper_timer == null)
             helper_timer = timer.delay(5, false, () => { set_helper(); });
-
-        // timer.delay(1, false, () => {
-        //     if(is_idle) on_idle();
-        // });
     }
 
     function set_helper(message?: HelperMessage) {
@@ -455,8 +458,9 @@ export function Game() {
             timer.delay(0.5, false, () => on_gameover(false));
         }
         
+        EventBus.send('SHUFFLE_START');
+        
         timer.delay(1, false, () => {
-            EventBus.send('SHUFFLE_START');
             shuffle_field(on_end, on_error);
         });
     }
@@ -466,7 +470,7 @@ export function Game() {
     }
 
     function shuffle_field(on_end: () => void, on_error: () => void) {
-        return flow.start(() => {
+        // return flow.start(() => {
             Log.log("SHUFFLE FIELD");
         
             let step = false;
@@ -492,17 +496,17 @@ export function Game() {
         
                 shuffle_array(elements);
         
-                let counter = 0;
-                const optimize_count = 5;
+                // let counter = 0;
+                // const optimize_count = 5;
         
                 // filling the field available elements by got positions
                 let element_assigned = false;
                 for(const position of positions) {
         
-                    if(counter >= optimize_count) {
-                        counter = 0;
-                        flow.frames(1);
-                    }
+                    // if(counter >= optimize_count) {
+                    //     counter = 0;
+                    //     flow.frames(1);
+                    // }
         
                     for(let i = 0; i < elements.length; i++) {
                         const elementIndex = Math.floor(Math.random() * elements.length);
@@ -525,7 +529,7 @@ export function Game() {
                         }
                     }
         
-                    counter++;
+                    // counter++;
                 }
 
                 step = has_step();
@@ -534,7 +538,7 @@ export function Game() {
             if(step) on_end();
             else on_error();
 
-        }, {parallel: true});
+        // }, {parallel: true});
     }
 
     function try_load_field() {
@@ -1282,7 +1286,7 @@ export function Game() {
                 const cell = field.get_cell({x, y});
                 const element = field.get_element({x, y});
 
-                const is_valid_cell = (cell != NotActiveCell) && (exclude?.findIndex((uid) => uid == cell.uid) == -1) && (targets?.findIndex((target) => {
+                const is_valid_cell = (cell != NotActiveCell) && (cell.state != CellState.Busy) && (exclude?.findIndex((uid) => uid == cell.uid) == -1) && (targets?.findIndex((target) => {
                     return (target.type == TargetType.Cell && target.id == cell.id && target.count > target.uids.length && cell.strength != undefined && cell.strength < GAME_CONFIG.cell_strength[cell.id as CellId]);
                 }) != -1);
                 
@@ -1299,7 +1303,7 @@ export function Game() {
                     const cell = field.get_cell({x, y});
                     const element = field.get_element({x, y});
 
-                    const is_valid_cell = (cell != NotActiveCell) && (exclude?.findIndex((uid) => uid == cell.uid) == -1) && (targets?.findIndex((target) => {
+                    const is_valid_cell = (cell != NotActiveCell) && (cell.state != CellState.Busy) && (exclude?.findIndex((uid) => uid == cell.uid) == -1) && (targets?.findIndex((target) => {
                         return (target.type == TargetType.Cell && target.id == cell.id && target.count > target.uids.length);
                     }) != -1);
                     

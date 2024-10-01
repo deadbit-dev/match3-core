@@ -7,7 +7,6 @@ local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local ____exports = {}
-local flow = require("ludobits.m.flow")
 local ____GoManager = require("modules.GoManager")
 local GoManager = ____GoManager.GoManager
 local ____math_utils = require("utils.math_utils")
@@ -91,10 +90,11 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, dispatch_messages, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, recalculate_cell_offset, recalculate_sizes, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, down_item, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, recalculate_cell_offset, recalculate_sizes, on_resize, load_field, reset_field, reload_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, prev_game_width, prev_game_height, cell_size, scale_ratio, cells_offset, down_item, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
+        EventBus.on("RESPONSE_RELOAD_FIELD", load_field, false)
         EventBus.on("MSG_ON_DOWN_ITEM", on_down)
         EventBus.on("MSG_ON_UP_ITEM", on_up)
         EventBus.on("MSG_ON_MOVE", on_move)
@@ -137,12 +137,6 @@ function ____exports.View(resources)
         EventBus.on("RESPONSE_ACTIVATED_HELICOPTER", on_helicopter_activated_animation, false)
         EventBus.on("RESPONSE_HELICOPTER_ACTION", on_helicopter_action_animation, false)
         EventBus.on("SHUFFLE_ACTION", on_shuffle_animation, false)
-    end
-    function dispatch_messages()
-        while true do
-            local message_id, _message, sender = flow.until_any_message()
-            go_manager.do_message(message_id, _message, sender)
-        end
     end
     function set_scene_art()
         local scene_name = Scene.get_current_name()
@@ -270,6 +264,8 @@ function ____exports.View(resources)
             end
             Camera.set_zoom(zoom)
         end
+        recalculate_sizes()
+        reload_field()
     end
     function load_field(game_state, with_anim)
         if with_anim == nil then
@@ -350,6 +346,10 @@ function ____exports.View(resources)
                 y = y + 1
             end
         end
+    end
+    function reload_field()
+        reset_field()
+        EventBus.send("REQUEST_RELOAD_FIELD")
     end
     function get_view_item_by_uid(uid)
         local indices = view_state.game_id_to_view_index[uid]
@@ -1274,7 +1274,7 @@ function ____exports.View(resources)
         timer.delay(0.3, false, on_end)
     end
     function on_diskosphere_activated_animation(message)
-        return diskosphere_effect(message.pos, message.uid, message.damages, message.buster)
+        diskosphere_effect(message.pos, message.uid, message.damages, message.buster)
     end
     function diskosphere_effect(pos, uid, damages, buster, on_complete)
         local damage_info = __TS__ArrayFind(
@@ -1355,7 +1355,6 @@ function ____exports.View(resources)
                 end
             end
         )
-        return 1
     end
     function trace_animation(world_pos, diskosphere, damages, counter, on_trace_end, on_complete)
         local anim_props = {blend_duration = 0, playback_rate = 1}
@@ -1501,42 +1500,47 @@ function ____exports.View(resources)
         request_falling(message.pos)
     end
     function on_shuffle_animation(game_state)
-        flow.delay(1)
-        Sound.play("shuffle")
-        do
-            local y = 0
-            while y < get_field_height() do
-                do
-                    local x = 0
-                    while x < get_field_width() do
-                        local element = game_state.elements[y + 1][x + 1]
-                        if element ~= NullElement then
-                            local element_view = get_view_item_by_uid(element.uid)
-                            if element_view ~= nil then
-                                local to_world_pos = get_world_pos({x = x, y = y}, GAME_CONFIG.default_element_z_index)
-                                go.animate(
-                                    element_view._hash,
-                                    "position",
-                                    go.PLAYBACK_ONCE_FORWARD,
-                                    to_world_pos,
-                                    GAME_CONFIG.swap_element_easing,
-                                    0.5
-                                )
-                            else
-                                make_element_view(x, y, element, true)
-                            end
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
         timer.delay(
-            0.5,
+            1,
             false,
             function()
-                EventBus.send("SHUFFLE_END")
+                Sound.play("shuffle")
+                do
+                    local y = 0
+                    while y < get_field_height() do
+                        do
+                            local x = 0
+                            while x < get_field_width() do
+                                local element = game_state.elements[y + 1][x + 1]
+                                if element ~= NullElement then
+                                    local element_view = get_view_item_by_uid(element.uid)
+                                    if element_view ~= nil then
+                                        local to_world_pos = get_world_pos({x = x, y = y}, GAME_CONFIG.default_element_z_index)
+                                        go.animate(
+                                            element_view._hash,
+                                            "position",
+                                            go.PLAYBACK_ONCE_FORWARD,
+                                            to_world_pos,
+                                            GAME_CONFIG.swap_element_easing,
+                                            0.5
+                                        )
+                                    else
+                                        make_element_view(x, y, element, true)
+                                    end
+                                end
+                                x = x + 1
+                            end
+                        end
+                        y = y + 1
+                    end
+                end
+                timer.delay(
+                    0.5,
+                    false,
+                    function()
+                        EventBus.send("SHUFFLE_END")
+                    end
+                )
             end
         )
     end
@@ -1675,8 +1679,11 @@ function ____exports.View(resources)
         end
         GAME_CONFIG.is_restart = false
         EventBus.send("REQUEST_LOAD_GAME")
-        dispatch_messages()
     end
-    return init()
+    local function on_message(self, message_id, message, sender)
+        go_manager.do_message(message_id, message, sender)
+    end
+    init()
+    return {on_message = on_message}
 end
 return ____exports

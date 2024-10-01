@@ -586,5 +586,8 @@ export type _UserMessages = {
     FEED_ANIMAL: number,
     SET_WIN_UI: VoidMessage,
 
-    REQUEST_IDLE: VoidMessage
+    REQUEST_IDLE: VoidMessage,
+
+    REQUEST_RELOAD_FIELD: VoidMessage,
+    RESPONSE_RELOAD_FIELD: GameState
 };
