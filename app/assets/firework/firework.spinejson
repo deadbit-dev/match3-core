@@ -1,14 +1,14 @@
 {
 "skeleton": {
-	"hash": "j4V+7SGACCk",
-	"spine": "4.1.24",
+	"hash": "hxMLv9iZKU8",
+	"spine": "4.2.33",
 	"x": -389.85,
 	"y": -170.61,
 	"width": 906.71,
 	"height": 368.94,
 	"fps": 26.4,
-	"images": "",
-	"audio": ""
+	"images": "./Animations/Firework/Firework/images/",
+	"audio": "./audio"
 },
 "bones": [
 	{ "name": "root" },
@@ -1995,15 +1995,6 @@
 					{ "time": 1.1364, "x": 1.106, "y": 1.106 }
 				]
 			},
-			"f2": {
-				"translate": [
-					{ "x": 179.02, "y": 1123.19 }
-				],
-				"scale": [
-					{ "x": 0.935, "y": 0.935 },
-					{ "time": 1.3258, "x": 1.672, "y": 1.672 }
-				]
-			},
 			"f3": {
 				"rotate": [
 					{ "value": 25.73 }
@@ -2014,6 +2005,15 @@
 				"scale": [
 					{},
 					{ "time": 1.2879, "x": 1.594, "y": 1.594 }
+				]
+			},
+			"f2": {
+				"translate": [
+					{ "x": 179.02, "y": 1123.19 }
+				],
+				"scale": [
+					{ "x": 0.935, "y": 0.935 },
+					{ "time": 1.3258, "x": 1.672, "y": 1.672 }
 				]
 			},
 			"f4": {
