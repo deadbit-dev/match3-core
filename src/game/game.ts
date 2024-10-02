@@ -1250,13 +1250,15 @@ export function Game() {
         if(helicopter == NullElement || helicopter.id != ElementId.Helicopter)
             return false;
 
-        field.try_damage(pos);
+        const under_damage = field.try_damage(pos, false, false, true);
 
         const damages = damage_element_by_mask(pos, [
             [0, 1, 0],
             [1, 0, 1],
             [0, 1, 0]
         ]);
+
+        damages.push(under_damage);
 
         EventBus.send('RESPONSE_ACTIVATED_HELICOPTER', {pos, uid: helicopter.uid, damages, triple});
 

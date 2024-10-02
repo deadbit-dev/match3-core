@@ -1329,8 +1329,9 @@ function ____exports.Game()
         if helicopter == NullElement or helicopter.id ~= ____exports.ElementId.Helicopter then
             return false
         end
-        field.try_damage(pos)
+        local under_damage = field.try_damage(pos, false, false, true)
         local damages = damage_element_by_mask(pos, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+        damages[#damages + 1] = under_damage
         EventBus.send("RESPONSE_ACTIVATED_HELICOPTER", {pos = pos, uid = helicopter.uid, damages = damages, triple = triple})
         return true
     end
@@ -1655,29 +1656,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch364 = combination.type
-            local ____cond364 = ____switch364 == CombinationType.Comb4
-            if ____cond364 then
+            local ____switch370 = combination.type
+            local ____cond370 = ____switch370 == CombinationType.Comb4
+            if ____cond370 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond364 = ____cond364 or ____switch364 == CombinationType.Comb5
-            if ____cond364 then
+            ____cond370 = ____cond370 or ____switch370 == CombinationType.Comb5
+            if ____cond370 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond364 = ____cond364 or ____switch364 == CombinationType.Comb2x2
-            if ____cond364 then
+            ____cond370 = ____cond370 or ____switch370 == CombinationType.Comb2x2
+            if ____cond370 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond364 = ____cond364 or (____switch364 == CombinationType.Comb3x3a or ____switch364 == CombinationType.Comb3x3b)
-            if ____cond364 then
+            ____cond370 = ____cond370 or (____switch370 == CombinationType.Comb3x3a or ____switch370 == CombinationType.Comb3x3b)
+            if ____cond370 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond364 = ____cond364 or (____switch364 == CombinationType.Comb3x4 or ____switch364 == CombinationType.Comb3x5)
-            if ____cond364 then
+            ____cond370 = ____cond370 or (____switch370 == CombinationType.Comb3x4 or ____switch370 == CombinationType.Comb3x5)
+            if ____cond370 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

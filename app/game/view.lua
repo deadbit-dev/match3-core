@@ -1152,19 +1152,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch197 = message.axis
-                    local ____cond197 = ____switch197 == Axis.Horizontal
-                    if ____cond197 then
+                    local ____switch196 = message.axis
+                    local ____cond196 = ____switch196 == Axis.Horizontal
+                    if ____cond196 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond197 = ____cond197 or ____switch197 == Axis.Vertical
-                    if ____cond197 then
+                    ____cond196 = ____cond196 or ____switch196 == Axis.Vertical
+                    if ____cond196 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond197 = ____cond197 or ____switch197 == Axis.All
-                    if ____cond197 then
+                    ____cond196 = ____cond196 or ____switch196 == Axis.All
+                    if ____cond196 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1193,14 +1193,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch200 = axis
-            local ____cond200 = ____switch200 == Axis.Vertical
-            if ____cond200 then
+            local ____switch199 = axis
+            local ____cond199 = ____switch199 == Axis.Vertical
+            if ____cond199 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond200 = ____cond200 or ____switch200 == Axis.Horizontal
-            if ____cond200 then
+            ____cond199 = ____cond199 or ____switch199 == Axis.Horizontal
+            if ____cond199 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break
@@ -1445,7 +1445,6 @@ function ____exports.View(resources)
         Sound.play("helicopter")
         local helicopter_world_pos = get_world_pos(message.pos)
         helicopter_world_pos.z = 3
-        delete_view_item_by_uid(message.uid)
         local helicopters = {}
         do
             local i = 0

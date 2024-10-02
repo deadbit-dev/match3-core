@@ -1136,8 +1136,6 @@ export function View(resources: ViewResources) {
 
         const helicopter_world_pos = get_world_pos(message.pos);
         helicopter_world_pos.z = 3;
-
-        delete_view_item_by_uid(message.uid);
         
         const helicopters: hash[] = [];
         for(let i = 0; i < message.damages.length; i++) {
