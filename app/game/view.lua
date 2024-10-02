@@ -983,11 +983,9 @@ function ____exports.View(resources)
             end
         )
     end
-    function on_combinate_not_found()
+    function on_combinate_not_found(pos)
         remove_action(____exports.Action.Combination)
-        if not has_actions() then
-            EventBus.send("REQUEST_IDLE")
-        end
+        request_falling(pos)
     end
     function on_requested_element_animation(message)
         make_element_view(message.pos.x, message.pos.y, message.element)

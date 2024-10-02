@@ -1547,6 +1547,20 @@ function ____exports.Game()
             state.steps = state.steps - 1
             EventBus.send("UPDATED_STEP_COUNTER", state.steps)
         end
+        local comb1 = field.search_combination(swap.from)
+        if comb1 ~= NotFound then
+            for ____, info in ipairs(comb1.elementsInfo) do
+                field.set_element_state(info, ElementState.Busy)
+                field.set_cell_state(info, CellState.Busy)
+            end
+        end
+        local comb2 = field.search_combination(swap.to)
+        if comb2 ~= NotFound then
+            for ____, info in ipairs(comb2.elementsInfo) do
+                field.set_element_state(info, ElementState.Busy)
+                field.set_cell_state(info, CellState.Busy)
+            end
+        end
         EventBus.send("RESPONSE_SWAP_ELEMENTS", {from = swap.from, to = swap.to, element_from = element_from, element_to = element_to})
         if is_tutorial() then
             complete_tutorial()
@@ -1639,7 +1653,7 @@ function ____exports.Game()
                 end
                 EventBus.send("RESPONSE_COMBINATE", combination)
             else
-                EventBus.send("RESPONSE_COMBINATE_NOT_FOUND")
+                EventBus.send("RESPONSE_COMBINATE_NOT_FOUND", pos)
             end
         end
     end

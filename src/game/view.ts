@@ -836,11 +836,9 @@ export function View(resources: ViewResources) {
         });
     }
 
-    function on_combinate_not_found() {
+    function on_combinate_not_found(pos: Position) {
         remove_action(Action.Combination);
-
-        if(!has_actions())
-            EventBus.send('REQUEST_IDLE');
+        request_falling(pos);
     }
 
     function on_requested_element_animation(message: RequestElementMessage) {

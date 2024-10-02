@@ -493,7 +493,7 @@ export type _UserMessages = {
 
     REQUEST_COMBINATE: CombinateMessage,
     RESPONSE_COMBINATE: CombinationInfo,
-    RESPONSE_COMBINATE_NOT_FOUND: VoidMessage,
+    RESPONSE_COMBINATE_NOT_FOUND: Position,
     REQUEST_COMBINATION: CombinationInfo,
     RESPONSE_COMBINATION: CombinedMessage,
     REQUEST_COMBINATION_END: DamageInfo[],

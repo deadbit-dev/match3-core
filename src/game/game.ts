@@ -1400,6 +1400,25 @@ export function Game() {
             EventBus.send('UPDATED_STEP_COUNTER', state.steps);
         }
 
+
+        //TODO: don`t check again
+
+        const comb1 = field.search_combination(swap.from);
+        if(comb1 != NotFound) {
+            for(const info of comb1.elementsInfo) {
+                field.set_element_state(info, ElementState.Busy);
+                field.set_cell_state(info, CellState.Busy);
+            }
+        }
+
+        const comb2 = field.search_combination(swap.to);
+        if(comb2 != NotFound) {
+            for(const info of comb2.elementsInfo) {
+                field.set_element_state(info, ElementState.Busy);
+                field.set_cell_state(info, CellState.Busy);
+            }
+        }
+        
         EventBus.send('RESPONSE_SWAP_ELEMENTS', {
             from: swap.from,
             to: swap.to,
@@ -1491,7 +1510,7 @@ export function Game() {
                     field.set_cell_state(info, CellState.Busy);
                 }
                 EventBus.send('RESPONSE_COMBINATE', combination);
-            } else EventBus.send('RESPONSE_COMBINATE_NOT_FOUND');
+            } else EventBus.send('RESPONSE_COMBINATE_NOT_FOUND', pos);
         }
     }
 
