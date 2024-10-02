@@ -469,52 +469,68 @@ function update_targets(data)
     until true
 end
 function feed_animation()
-    flow.start(function()
-        local level_config = get_current_level_config()
-        local item_id = 0
-        for ____, target in ipairs(level_config.targets) do
-            if target.type == TargetType.Element and __TS__ArrayIncludes(GAME_CONFIG.feed_elements, target.id) then
-                item_id = target.id
-            end
+    local level_config = get_current_level_config()
+    local item_id = 0
+    for ____, target in ipairs(level_config.targets) do
+        if target.type == TargetType.Element and __TS__ArrayIncludes(GAME_CONFIG.feed_elements, target.id) then
+            item_id = target.id
         end
-        local element = gui.new_box_node(
-            vmath.vector3(420, 870, 0),
-            vmath.vector3(40, 40, 1)
-        )
-        local view = GAME_CONFIG.element_view[item_id]
-        gui.set_texture(element, "graphics")
-        gui.play_flipbook(element, view)
-        local ltrb = Camera.get_ltrb()
-        local width = 540
-        local height = math.abs(ltrb.w)
-        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.2}}
-        local result = vmath.vector3()
-        do
-            local i = 0
-            while i < 100 do
-                local p = get_point_curve(i / 100, points, result)
-                gui.animate(
-                    element,
-                    gui.PROP_POSITION,
-                    p,
-                    gui.EASING_LINEAR,
-                    0.01
-                )
-                flow.delay(0.01)
-                i = i + 1
-            end
+    end
+    do
+        local i = 0
+        while i < 5 do
+            timer.delay(
+                0.05 * i,
+                false,
+                function()
+                    flow.start(function()
+                        local element = gui.new_box_node(
+                            vmath.vector3(420, 870, 0),
+                            vmath.vector3(40, 40, 1)
+                        )
+                        local view = GAME_CONFIG.element_view[item_id]
+                        gui.set_texture(element, "graphics")
+                        gui.play_flipbook(element, view)
+                        local ltrb = Camera.get_ltrb()
+                        local width = 540
+                        local height = math.abs(ltrb.w)
+                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.2}}
+                        local result = vmath.vector3()
+                        do
+                            local i = 0
+                            while i < 100 do
+                                local p = get_point_curve(i / 100, points, result)
+                                gui.animate(
+                                    element,
+                                    gui.PROP_POSITION,
+                                    p,
+                                    gui.EASING_LINEAR,
+                                    0.01
+                                )
+                                flow.delay(0.01)
+                                i = i + 1
+                            end
+                        end
+                        local scale = gui.get_scale(element)
+                        scale.x = scale.x * 2
+                        scale.y = scale.y * 2
+                        gui.animate(
+                            element,
+                            gui.PROP_SCALE,
+                            scale,
+                            gui.EASING_INCUBIC,
+                            0.5,
+                            0,
+                            function()
+                                gui.delete_node(element)
+                            end
+                        )
+                    end)
+                end
+            )
+            i = i + 1
         end
-        local scale = gui.get_scale(element)
-        scale.x = scale.x * 2
-        scale.y = scale.y * 2
-        gui.animate(
-            element,
-            gui.PROP_SCALE,
-            scale,
-            gui.EASING_INCUBIC,
-            0.5
-        )
-    end)
+    end
 end
 function update_buttons(instance)
     local spinning = GameStorage.get("spinning_counts")

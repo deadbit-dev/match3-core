@@ -364,41 +364,47 @@ function update_targets(data: TargetMessage) {
 }
 
 function feed_animation() {
-    flow.start(() => {
-        const level_config = get_current_level_config();
-        let item_id = 0;
-        for(const target of level_config.targets) {
-            if(target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id))
-                item_id = target.id;
-        }
+    const level_config = get_current_level_config();
+    let item_id = 0;
+    for(const target of level_config.targets) {
+        if(target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id))
+            item_id = target.id;
+    }
 
-        const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
-        const view = GAME_CONFIG.element_view[item_id as ElementId];
-        gui.set_texture(element, 'graphics');
-        gui.play_flipbook(element, view);
+    for(let i = 0; i < 5; i++) {
+        timer.delay(0.05 * i, false, () => {
+            flow.start(() => {
+                const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
+                const view = GAME_CONFIG.element_view[item_id as ElementId];
+                gui.set_texture(element, 'graphics');
+                gui.play_flipbook(element, view);
 
-        const ltrb = Camera.get_ltrb();
-        const width = 540;
-        const height = math.abs(ltrb.w);
-        const points = [
-            {x: 420, y: 870},
-            {x: width * 0.3, y: height * 0.5},
-            {x: width * 0.5, y: height * 0.2}
-        ];
+                const ltrb = Camera.get_ltrb();
+                const width = 540;
+                const height = math.abs(ltrb.w);
+                const points = [
+                    {x: 420, y: 870},
+                    {x: width * 0.3, y: height * 0.5},
+                    {x: width * 0.5, y: height * 0.2}
+                ];
 
-        let result = vmath.vector3();
-        for (let i = 0; i < 100; i++) {
-            const p = get_point_curve(i / 100, points, result);
-            gui.animate(element, gui.PROP_POSITION, p, gui.EASING_LINEAR, 0.01);
+                let result = vmath.vector3();
+                for (let i = 0; i < 100; i++) {
+                    const p = get_point_curve(i / 100, points, result);
+                    gui.animate(element, gui.PROP_POSITION, p, gui.EASING_LINEAR, 0.01);
 
-            flow.delay(0.01);
-        }
+                    flow.delay(0.01);
+                }
 
-        const scale = gui.get_scale(element);
-        scale.x *= 2;
-        scale.y *= 2;
-        gui.animate(element, gui.PROP_SCALE, scale, gui.EASING_INCUBIC, 0.5);
-    });
+                const scale = gui.get_scale(element);
+                scale.x *= 2;
+                scale.y *= 2;
+                gui.animate(element, gui.PROP_SCALE, scale, gui.EASING_INCUBIC, 0.5, 0, () => {
+                    gui.delete_node(element);
+                });
+            });
+        });
+    }
 }
 
 function update_buttons(instance: props) {
