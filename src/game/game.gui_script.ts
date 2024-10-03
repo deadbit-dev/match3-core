@@ -385,7 +385,7 @@ function feed_animation() {
                 const points = [
                     {x: 420, y: 870},
                     {x: width * 0.3, y: height * 0.5},
-                    {x: width * 0.5, y: height * 0.2}
+                    {x: width * 0.5, y: height * 0.4}
                 ];
 
                 let result = vmath.vector3();

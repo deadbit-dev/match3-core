@@ -494,7 +494,7 @@ function feed_animation()
                         local ltrb = Camera.get_ltrb()
                         local width = 540
                         local height = math.abs(ltrb.w)
-                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.2}}
+                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.4}}
                         local result = vmath.vector3()
                         do
                             local i = 0
