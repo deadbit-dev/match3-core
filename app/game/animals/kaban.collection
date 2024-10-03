@@ -5,41 +5,6 @@ embedded_instances {
   data: "components {\n"
   "  id: \"logic\"\n"
   "  component: \"/game/animals/animal.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
-  "}\n"
-  "components {\n"
-  "  id: \"adaptol\"\n"
-  "  component: \"/main/adaptol.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  properties {\n"
-  "    id: \"with_x_position\"\n"
-  "    value: \"true\"\n"
-  "    type: PROPERTY_TYPE_BOOLEAN\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"spinemodel\"\n"
@@ -47,37 +12,19 @@ embedded_instances {
   "  data: \"spine_scene: \\\"/assets/kaban/kaban.spinescene\\\"\\n"
   "default_animation: \\\"idle\\\"\\n"
   "skin: \\\"\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "material: \\\"/defold-spine/assets/spine.material\\\"\\n"
-  "create_go_bones: false\\n"
   "\"\n"
   "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
   "    z: 1.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
   "  }\n"
   "}\n"
   ""
   position {
     x: 420.0
-    y: -920.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
+    y: -400.0
   }
   scale3 {
     x: 0.2
     y: 0.2
-    z: 1.0
   }
 }

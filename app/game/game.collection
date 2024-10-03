@@ -5,36 +5,10 @@ embedded_instances {
   data: "components {\n"
   "  id: \"game\"\n"
   "  component: \"/game/ui/game.gui\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   ""
   position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    y: -470.0
   }
 }
 embedded_instances {
@@ -42,37 +16,8 @@ embedded_instances {
   data: "components {\n"
   "  id: \"game\"\n"
   "  component: \"/game/game.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }
 embedded_instances {
   id: "prefabs"
@@ -80,130 +25,39 @@ embedded_instances {
   "  id: \"element_view\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/prefabs/element_view.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"cell_view\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/prefabs/cell_view.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"substrate_view\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/prefabs/substrate_view.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"effect_view\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/prefabs/effect_view.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"field_view\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/prefabs/field_view.go\\\"\\n"
+  "\"\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }
 embedded_instances {
   id: "game_view"
   data: "components {\n"
   "  id: \"view\"\n"
   "  component: \"/game/view.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }

@@ -511,8 +511,6 @@ export function Field(size_x: number, size_y: number) {
 
     // попытка нанести урон клетке
     function try_damage(pos: Position, is_near_activation = false, without_element = false, force = false): DamageInfo {
-        // вызываем on_near_activation для соседей если свойство is_near_activation = true
-
         const damage_info = {} as DamageInfo;
         damage_info.pos = pos;
         damage_info.damaged_cells = [];

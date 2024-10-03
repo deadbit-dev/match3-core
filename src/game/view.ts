@@ -137,12 +137,9 @@ export function View(resources: ViewResources) {
     const original_game_width = 540;
     const original_game_height = 960;
     
-    let prev_game_width = original_game_width;
-    let prev_game_height = original_game_height;
-    
-    let cell_size = calculate_cell_size();
-    let scale_ratio = calculate_scale_ratio();
-    let cells_offset = calculate_cell_offset();
+    const cell_size = calculate_cell_size();
+    const scale_ratio = calculate_scale_ratio();
+    const cells_offset = calculate_cell_offset();
 
     let down_item: IGameItem | null = null;
 
@@ -152,6 +149,9 @@ export function View(resources: ViewResources) {
 
     function init() {
         Log.log("INIT VIEW");
+
+        Camera.set_dynamic_orientation(false);
+        Camera.set_go_prjection(-1, 0, -3, 3);
 
         set_scene_art();
         set_events();
@@ -234,18 +234,16 @@ export function View(resources: ViewResources) {
     }
 
     function calculate_cell_offset(height_delta = 0, changes_coff = 1) {
-        const offset_y = height_delta > 0 ? (-(original_game_height / 2 - (get_field_max_height() / 2 * calculate_cell_size())) - (height_delta / 2)) + 100 : (-(original_game_height / 2 - (get_field_max_height() / 2 * calculate_cell_size())) + 100) * changes_coff;
+        const offset_x = original_game_width / 2 - (get_field_width() / 2 * cell_size);
+        const offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
         return vmath.vector3(
-            original_game_width / 2 - (get_field_width() / 2 * cell_size),
+            offset_x,
             offset_y,
             0
         );
     }
 
     function on_load_game(game_state: GameState) {
-        recalculate_cell_offset(game_state);
-        recalculate_sizes();
-
         load_field(game_state);
 
         EventBus.send('INIT_UI');
@@ -262,42 +260,6 @@ export function View(resources: ViewResources) {
         EventBus.send('REQUEST_IDLE');
     }
 
-    function recalculate_cell_offset(game_state: GameState) {
-        let min_y_active_cell = get_field_height();
-        let max_y_active_cell = 0;
-        for(let y = 0; y < get_field_height(); y++) {
-            for(let x = 0; x < get_field_width(); x++) {
-                if(game_state.cells[y][x] != NotActiveCell) {
-                    if(y < min_y_active_cell) min_y_active_cell = y;
-                    if(y > max_y_active_cell) max_y_active_cell = y;
-                }
-            }
-        }
-
-        cells_offset.y += min_y_active_cell * cell_size * 0.5;
-        cells_offset.y -= math.abs(get_field_max_height() - max_y_active_cell) * cell_size * 0.5;
-    }
-
-    function recalculate_sizes() {
-        const ltrb = Camera.get_ltrb();
-        if(ltrb.z == prev_game_width && ltrb.w == prev_game_height) return;
-
-        Log.log("RESIZE VIEW");
-
-        prev_game_width = ltrb.z;
-        prev_game_height = ltrb.w;
-
-        const width_ratio = math.abs(ltrb.z) / original_game_width;
-        const height_ratio = math.abs(ltrb.w) / original_game_height;
-
-        const changes_coff = math.min(width_ratio, height_ratio);
-        const height_delta = math.abs(ltrb.w) - original_game_height;
-
-        cell_size = calculate_cell_size() * changes_coff;
-        scale_ratio = calculate_scale_ratio();
-        cells_offset = calculate_cell_offset(height_delta, height_ratio);
-    }
-
     function on_resize(data: { width: number, height: number }) {
         const display_height = 960;
         const window_aspect = data.width / data.height;
@@ -311,9 +273,6 @@ export function View(resources: ViewResources) {
             }
             Camera.set_zoom(zoom);
         }
-
-        recalculate_sizes();
-        reload_field();
     }
 
     function load_field(game_state: GameState, with_anim = true) {
@@ -368,11 +327,6 @@ export function View(resources: ViewResources) {
             for(let x = 0; x < get_field_width(); x++)
                 view_state.substrates[y][x] = EMPTY_SUBSTRATE;
         }
-    }
-
-    function reload_field() {
-        reset_field();
-        EventBus.send('REQUEST_RELOAD_FIELD');
     }
 
     function get_view_item_by_uid(uid: number) {
@@ -467,6 +421,9 @@ export function View(resources: ViewResources) {
                 if (is_valid) {
                     const worldPos = get_world_pos(pos, z_index);
                     const _go = go_manager.make_go('substrate_view', worldPos);
+
+                    // go.set_parent(_go, field_go);
+                    
                     go_manager.set_rotation_hash(_go, -angle);
                     sprite.play_flipbook(msg.url(undefined, _go, 'sprite'), GAME_CONFIG.substrate_view[mask_index as SubstrateId]);
                     go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
@@ -519,7 +476,7 @@ export function View(resources: ViewResources) {
             go.set_scale(vmath.vector3(0.01, 0.01, 1), _go);
             go.animate(_go, 'scale', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(scale_ratio, scale_ratio, 1), GAME_CONFIG.spawn_element_easing, GAME_CONFIG.spawn_element_time);
         } else go.set_scale(vmath.vector3(scale_ratio, scale_ratio, 1), _go);
-    
+
         const item = { _hash: _go, is_clickable: true };
         const index = go_manager.add_game_item(item);
         if (view_state.game_id_to_view_index[element.uid] == undefined) view_state.game_id_to_view_index[element.uid] = [];
@@ -688,12 +645,10 @@ export function View(resources: ViewResources) {
     }
 
     function record_action(action: Action) {
-        // print("RECORD: ", action);
         actions.push(action);
     }
 
     function remove_action(action: Action) {
-        // print("REMOVE: ", action);
         actions.splice(actions.findIndex((a) => a == action), 1);
     }
 
@@ -1165,8 +1120,6 @@ export function View(resources: ViewResources) {
     }
 
     function on_shuffle_animation(game_state: GameState) {
-        // flow.delay(1);
-
         timer.delay(1, false, () => {
             Sound.play('shuffle');
 

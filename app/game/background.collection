@@ -2,44 +2,18 @@ name: "background"
 scale_along_z: 0
 embedded_instances {
   id: "background"
-  data: "components {\n"
-  "  id: \"adaptol\"\n"
-  "  component: \"/main/adaptol.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
-  "}\n"
-  "embedded_components {\n"
+  data: "embedded_components {\n"
   "  id: \"sprite\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"background\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"
   "  texture: \\\"/assets/background.atlas\\\"\\n"
   "}\\n"
   "\"\n"
   "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
+  "    y: 960.0\n"
   "  }\n"
   "}\n"
   ""
@@ -48,15 +22,8 @@ embedded_instances {
     y: -480.0
     z: -3.0
   }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
   scale3 {
     x: 0.5
     y: 0.5
-    z: 1.0
   }
 }
