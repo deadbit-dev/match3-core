@@ -306,14 +306,14 @@ export function Game() {
             Log.log("WIN IN TICK");
             is_block_input = true;
             if(is_idle)
-                on_win();
+                return on_win();
         }
 
         if(is_gameover()) {
             Log.log("GAMEOVER IN TICK");
             is_block_input = true;
             if(is_idle)
-                on_gameover();
+                return on_gameover();
         }
     }
 
@@ -887,6 +887,9 @@ export function Game() {
                 EventBus.send('UPDATED_TARGET', {idx: i, amount: target.count - target.uids.length, id: target.id, type: target.type});
             }
         }
+
+        if(is_level_completed())
+            is_block_input = true;
     }
 
     function on_cell_damaged(cell: Cell): CellDamageInfo | null {
@@ -901,6 +904,9 @@ export function Game() {
                 update_cell_targets(cell_damage_info.cell);
             }
         }
+
+        if(is_level_completed())
+            is_block_input = true;
 
         return cell_damage_info;
     }
@@ -1049,6 +1055,9 @@ export function Game() {
                     state.steps--;
                     EventBus.send('UPDATED_STEP_COUNTER', state.steps);
                 }
+
+                if(is_gameover())
+                    is_block_input = true;
             }
         }
     }
@@ -1400,6 +1409,8 @@ export function Game() {
             EventBus.send('UPDATED_STEP_COUNTER', state.steps);
         }
 
+        if(is_gameover())
+            is_block_input = true;
 
         //TODO: don`t check again
 

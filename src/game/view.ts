@@ -9,7 +9,7 @@ import { GoManager } from "../modules/GoManager";
 import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
 import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
-import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo } from "./core";
+import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo, ElementState } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, UnlockInfo } from "./game";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
 
@@ -849,6 +849,9 @@ export function View(resources: ViewResources) {
     function on_damage(damage_info: DamageInfo) {
         if(damage_info.element != undefined) {
             Sound.play('broke_element');
+
+            if(damage_info.element.state == ElementState.Fall)
+                remove_action(Action.Falling);
 
             damage_element_animation(damage_info.element);
         }
