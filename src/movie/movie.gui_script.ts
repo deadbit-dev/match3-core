@@ -23,6 +23,11 @@ export function init(this: props): void {
     this.druid.new_button('btn', () => {
         Scene.load("map");
     });
+
+    Camera.set_dynamic_orientation(false);
+    Camera.set_go_prjection(-1, 0, -3, 3);
+
+    EventBus.on("SYS_ON_RESIZED", on_resize);
     
     EventBus.on('MOVIE_END', () => {
         const window = gui.get_node('window');
@@ -47,4 +52,19 @@ export function final(this: props): void {
     this.druid.final();
     EventBus.off_all_current_script();
     Manager.final_script();
+}
+
+function on_resize(data: { width: number, height: number }) {
+    const display_height = 960;
+    const window_aspect = data.width / data.height;
+    const display_width = tonumber(sys.get_config("display.width"));
+    if (display_width) {
+        const aspect = display_width / display_height;
+        let zoom = 1;
+        if (window_aspect >= aspect) {
+            const height = display_width / window_aspect;
+            zoom = height / display_height;
+        }
+        Camera.set_zoom(zoom);
+    }
 }

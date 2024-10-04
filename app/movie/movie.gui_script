@@ -1,5 +1,20 @@
 local ____exports = {}
+local on_resize
 local druid = require("druid.druid")
+function on_resize(data)
+    local display_height = 960
+    local window_aspect = data.width / data.height
+    local display_width = tonumber(sys.get_config("display.width"))
+    if display_width then
+        local aspect = display_width / display_height
+        local zoom = 1
+        if window_aspect >= aspect then
+            local height = display_width / window_aspect
+            zoom = height / display_height
+        end
+        Camera.set_zoom(zoom)
+    end
+end
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)
@@ -17,6 +32,9 @@ function ____exports.init(self)
             Scene.load("map")
         end
     )
+    Camera.set_dynamic_orientation(false)
+    Camera.set_go_prjection(-1, 0, -3, 3)
+    EventBus.on("SYS_ON_RESIZED", on_resize)
     EventBus.on(
         "MOVIE_END",
         function()
