@@ -26,6 +26,7 @@ local ElementType = ____core.ElementType
 local Field = ____core.Field
 local is_available_cell_type_for_move = ____core.is_available_cell_type_for_move
 local NotActiveCell = ____core.NotActiveCell
+local NotDamage = ____core.NotDamage
 local NotFound = ____core.NotFound
 local NullElement = ____core.NullElement
 local ____math_utils = require("utils.math_utils")
@@ -277,14 +278,12 @@ function ____exports.Game()
             update_timer()
         end
         if is_level_completed() then
-            Log.log("WIN IN TICK")
             is_block_input = true
             if is_idle then
                 return on_win()
             end
         end
         if is_gameover() then
-            Log.log("GAMEOVER IN TICK")
             is_block_input = true
             if is_idle then
                 return on_gameover()
@@ -295,11 +294,9 @@ function ____exports.Game()
         Log.log("IDLE")
         is_idle = true
         if is_level_completed() then
-            Log.log("WIN IN IDLE")
             return on_win()
         end
         if is_gameover() then
-            Log.log("GAMEOVER IN IDLE")
             return on_gameover()
         end
         if not has_step() then
@@ -845,7 +842,15 @@ function ____exports.Game()
         return NullElement
     end
     function is_buster(pos)
-        return field.try_click(pos)
+        local cell = field.get_cell(pos)
+        if cell == NotActiveCell or not field.is_available_cell_type_for_click(cell) then
+            return false
+        end
+        local element = field.get_element(pos)
+        if element == NullElement or not field.is_clickable_element(element) then
+            return false
+        end
+        return true
     end
     function is_can_swap(from, to)
         if field.is_can_swap_base(from, to) then
@@ -885,8 +890,8 @@ function ____exports.Game()
     end
     function on_cell_damaged(cell)
         local cell_damage_info = field.on_cell_damaged_base(cell)
-        if cell_damage_info == nil then
-            return nil
+        if cell_damage_info == NotDamage then
+            return NotDamage
         end
         if field.is_type_cell(cell, CellType.ActionLocked) or field.is_type_cell(cell, CellType.ActionLockedNear) then
             if cell_damage_info.cell.strength ~= nil and cell_damage_info.cell.strength == 0 then
@@ -964,24 +969,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch210 = message.name
-            local ____cond210 = ____switch210 == "SPINNING"
-            if ____cond210 then
+            local ____switch212 = message.name
+            local ____cond212 = ____switch212 == "SPINNING"
+            if ____cond212 then
                 on_activate_spinning()
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == "HAMMER"
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == "HAMMER"
+            if ____cond212 then
                 on_activate_hammer()
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == "HORIZONTAL_ROCKET"
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == "HORIZONTAL_ROCKET"
+            if ____cond212 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond210 = ____cond210 or ____switch210 == "VERTICAL_ROCKET"
-            if ____cond210 then
+            ____cond212 = ____cond212 or ____switch212 == "VERTICAL_ROCKET"
+            if ____cond212 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1071,7 +1076,6 @@ function ____exports.Game()
         end
         if field.try_click(pos) then
             if try_activate_buster_element(pos) then
-                Log.log("DIACTIVATE IDLE FROM CLICK")
                 is_idle = false
                 if level_config.steps ~= nil then
                     local state = get_state()
@@ -1089,6 +1093,9 @@ function ____exports.Game()
             return try_activate_buster_element(pos)
         end
         local damage_info = field.try_damage(pos, false, true)
+        if damage_info == NotDamage then
+            return
+        end
         EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info)
         GameStorage.set(
             "hammer_counts",
@@ -1106,7 +1113,9 @@ function ____exports.Game()
                     try_activate_buster_element({x = x, y = pos.y})
                 else
                     local damage_info = field.try_damage({x = x, y = pos.y})
-                    damages[#damages + 1] = damage_info
+                    if damage_info ~= NotDamage then
+                        damages[#damages + 1] = damage_info
+                    end
                 end
                 x = x + 1
             end
@@ -1128,7 +1137,9 @@ function ____exports.Game()
                     try_activate_buster_element({x = pos.x, y = y})
                 else
                     local damage_info = field.try_damage({x = pos.x, y = y})
-                    damages[#damages + 1] = damage_info
+                    if damage_info ~= NotDamage then
+                        damages[#damages + 1] = damage_info
+                    end
                 end
                 y = y + 1
             end
@@ -1176,7 +1187,9 @@ function ____exports.Game()
                                     try_activate_buster_element({x = j, y = i})
                                 else
                                     local damage_info = field.try_damage({x = j, y = i}, is_near_activation)
-                                    damages[#damages + 1] = damage_info
+                                    if damage_info ~= NotDamage then
+                                        damages[#damages + 1] = damage_info
+                                    end
                                 end
                             end
                         end
@@ -1239,10 +1252,13 @@ function ____exports.Game()
                 1
             }
         }
-        local damages = {field.try_damage(message.pos, false, false, true)}
+        local damage = field.try_damage(message.pos, false, false, true)
+        local damages = damage ~= NotDamage and ({damage}) or ({})
         local range_damages = damage_element_by_mask(message.pos, message.big_range and big_damage_mask or damage_mask)
         for ____, damage_info in ipairs(range_damages) do
-            damages[#damages + 1] = damage_info
+            if damage_info ~= NotDamage then
+                damages[#damages + 1] = damage_info
+            end
         end
         EventBus.send("RESPONSE_DYNAMITE_ACTION", {pos = message.pos, uid = message.uid, damages = damages, big_range = message.big_range})
     end
@@ -1254,7 +1270,8 @@ function ____exports.Game()
         if rocket == NullElement or not __TS__ArrayIncludes(GAME_CONFIG.rockets, rocket.id) then
             return false
         end
-        local damages = {field.try_damage(pos)}
+        local damage = field.try_damage(pos)
+        local damages = damage ~= NotDamage and ({damage}) or ({})
         if rocket.id == ____exports.ElementId.VerticalRocket or rocket.id == ____exports.ElementId.AllAxisRocket or all_axis then
             do
                 local y = 0
@@ -1264,9 +1281,11 @@ function ____exports.Game()
                             try_activate_buster_element({x = pos.x, y = y})
                         else
                             local damage_info = field.try_damage({x = pos.x, y = y})
-                            field.set_element_state(damage_info.pos, ElementState.Busy)
-                            field.set_cell_state(damage_info.pos, CellState.Busy)
-                            damages[#damages + 1] = damage_info
+                            if damage_info ~= NotDamage then
+                                field.set_element_state(damage_info.pos, ElementState.Busy)
+                                field.set_cell_state(damage_info.pos, CellState.Busy)
+                                damages[#damages + 1] = damage_info
+                            end
                         end
                     end
                     y = y + 1
@@ -1282,9 +1301,11 @@ function ____exports.Game()
                             try_activate_buster_element({x = x, y = pos.y})
                         else
                             local damage_info = field.try_damage({x = x, y = pos.y})
-                            field.set_element_state(damage_info.pos, ElementState.Busy)
-                            field.set_cell_state(damage_info.pos, CellState.Busy)
-                            damages[#damages + 1] = damage_info
+                            if damage_info ~= NotDamage then
+                                field.set_element_state(damage_info.pos, ElementState.Busy)
+                                field.set_cell_state(damage_info.pos, CellState.Busy)
+                                damages[#damages + 1] = damage_info
+                            end
                         end
                     end
                     x = x + 1
@@ -1308,15 +1329,18 @@ function ____exports.Game()
         if diskosphere == NullElement or diskosphere.id ~= ____exports.ElementId.Diskosphere then
             return false
         end
-        local damages = {field.try_damage(pos)}
+        local damage = field.try_damage(pos)
+        local damages = damage ~= NotDamage and ({damage}) or ({})
         for ____, element_id in ipairs(ids) do
             local elements = field.get_all_elements_by_id(element_id)
             for ____, element in ipairs(elements) do
                 local element_pos = field.get_element_pos(element)
                 local damage_info = field.try_damage(element_pos, false, false)
-                field.set_element_state(damage_info.pos, ElementState.Busy)
-                field.set_cell_state(damage_info.pos, CellState.Busy)
-                damages[#damages + 1] = damage_info
+                if damage_info ~= NotDamage then
+                    field.set_element_state(damage_info.pos, ElementState.Busy)
+                    field.set_cell_state(damage_info.pos, CellState.Busy)
+                    damages[#damages + 1] = damage_info
+                end
             end
         end
         EventBus.send("RESPONSE_ACTIVATED_DISKOSPHERE", {pos = pos, uid = diskosphere.uid, damages = damages, buster = buster})
@@ -1340,7 +1364,9 @@ function ____exports.Game()
         end
         local under_damage = field.try_damage(pos, false, false, true)
         local damages = damage_element_by_mask(pos, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
-        damages[#damages + 1] = under_damage
+        if under_damage ~= NotDamage then
+            damages[#damages + 1] = under_damage
+        end
         EventBus.send("RESPONSE_ACTIVATED_HELICOPTER", {pos = pos, uid = helicopter.uid, damages = damages, triple = triple})
         return true
     end
@@ -1513,7 +1539,8 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_targets[math.random(0, #available_targets - 1) + 1]
-        return field.try_damage(target.pos)
+        local damage_info = field.try_damage(target.pos)
+        return damage_info ~= NotDamage and damage_info or NullElement
     end
     function on_helicopter_end(message)
         for ____, damage_info in ipairs(message.damages) do
@@ -1549,7 +1576,6 @@ function ____exports.Game()
             EventBus.send("RESPONSE_WRONG_SWAP_ELEMENTS", {from = swap.from, to = swap.to, element_from = element_from, element_to = element_to})
             return
         end
-        Log.log("DIACTIVATE IDLE FROM SWAP")
         is_idle = false
         if level_config.steps ~= nil then
             local state = get_state()
@@ -1682,29 +1708,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch374 = combination.type
-            local ____cond374 = ____switch374 == CombinationType.Comb4
-            if ____cond374 then
+            local ____switch385 = combination.type
+            local ____cond385 = ____switch385 == CombinationType.Comb4
+            if ____cond385 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond374 = ____cond374 or ____switch374 == CombinationType.Comb5
-            if ____cond374 then
+            ____cond385 = ____cond385 or ____switch385 == CombinationType.Comb5
+            if ____cond385 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond374 = ____cond374 or ____switch374 == CombinationType.Comb2x2
-            if ____cond374 then
+            ____cond385 = ____cond385 or ____switch385 == CombinationType.Comb2x2
+            if ____cond385 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond374 = ____cond374 or (____switch374 == CombinationType.Comb3x3a or ____switch374 == CombinationType.Comb3x3b)
-            if ____cond374 then
+            ____cond385 = ____cond385 or (____switch385 == CombinationType.Comb3x3a or ____switch385 == CombinationType.Comb3x3b)
+            if ____cond385 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond374 = ____cond374 or (____switch374 == CombinationType.Comb3x4 or ____switch374 == CombinationType.Comb3x5)
-            if ____cond374 then
+            ____cond385 = ____cond385 or (____switch385 == CombinationType.Comb3x4 or ____switch385 == CombinationType.Comb3x5)
+            if ____cond385 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

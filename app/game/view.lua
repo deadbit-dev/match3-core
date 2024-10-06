@@ -91,7 +91,7 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -970,13 +970,6 @@ function ____exports.View(resources)
         end
         remove_action(____exports.Action.Falling)
         record_action(____exports.Action.Combination)
-        timer.delay(
-            GAME_CONFIG.combination_delay,
-            false,
-            function()
-                EventBus.send("REQUEST_COMBINATE", {combined_positions = {info.pos}})
-            end
-        )
         local world_pos = go.get_position(element_view._hash)
         world_pos.y = world_pos.y + 5
         go.animate(
@@ -997,6 +990,13 @@ function ____exports.View(resources)
                     go.EASING_OUTBOUNCE,
                     0.25
                 )
+            end
+        )
+        timer.delay(
+            0.25,
+            false,
+            function()
+                EventBus.send("REQUEST_COMBINATE", {combined_positions = {info.pos}})
             end
         )
     end
@@ -1493,6 +1493,7 @@ function ____exports.View(resources)
         )
     end
     function on_win(state)
+        is_block_input = true
         do
             local y = 0
             while y < get_field_height() do
@@ -1524,6 +1525,7 @@ function ____exports.View(resources)
         )
     end
     function on_gameover()
+        is_block_input = true
         timer.delay(GAME_CONFIG.delay_before_gameover, false, clear_field)
     end
     function clear_field()
@@ -1614,6 +1616,7 @@ function ____exports.View(resources)
     scale_ratio = calculate_scale_ratio()
     cells_offset = calculate_cell_offset()
     down_item = nil
+    is_block_input = false
     locks = {}
     actions = {}
     local function init()

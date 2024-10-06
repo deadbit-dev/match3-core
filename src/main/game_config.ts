@@ -44,8 +44,6 @@ export const _GAME_CONFIG = {
     swap_element_time: 0.15,
 
     combination_delay: 0.2,
-    // combination_delay_after_swap: 0.1,
-    // combination_delay_after_falling: 0.25,
 
     squash_easing: go.EASING_INCUBIC,
     squash_time: 0.25,

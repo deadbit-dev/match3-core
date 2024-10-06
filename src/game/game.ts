@@ -6,7 +6,7 @@
 
 // import * as flow from 'ludobits.m.flow';
 import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./utils";
-import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotFound, NullElement, Position, SwapInfo } from "./core";
+import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotDamage, NotFound, NullElement, Position, SwapInfo } from "./core";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
 import { NameMessage } from "../modules/modules_const";
 import { Axis, is_valid_pos } from "../utils/math_utils";
@@ -303,14 +303,12 @@ export function Game() {
         if(level_config.time != undefined) update_timer();
 
         if(is_level_completed()) {
-            Log.log("WIN IN TICK");
             is_block_input = true;
             if(is_idle)
                 return on_win();
         }
 
         if(is_gameover()) {
-            Log.log("GAMEOVER IN TICK");
             is_block_input = true;
             if(is_idle)
                 return on_gameover();
@@ -323,12 +321,10 @@ export function Game() {
         is_idle = true;
 
         if(is_level_completed()) {
-            Log.log("WIN IN IDLE");
             return on_win();
         }
 
         if(is_gameover()) {
-            Log.log("GAMEOVER IN IDLE");
             return on_gameover();
         }
 
@@ -859,7 +855,15 @@ export function Game() {
     }
 
     function is_buster(pos: Position) {
-        return field.try_click(pos);
+        const cell = field.get_cell(pos);
+        if(cell == NotActiveCell || !field.is_available_cell_type_for_click(cell))
+            return false;
+        
+        const element = field.get_element(pos);
+        if(element == NullElement || !field.is_clickable_element(element))
+            return false;
+
+        return true;
     }
 
     function is_can_swap(from: Position, to: Position) {
@@ -892,10 +896,10 @@ export function Game() {
             is_block_input = true;
     }
 
-    function on_cell_damaged(cell: Cell): CellDamageInfo | null {
+    function on_cell_damaged(cell: Cell): CellDamageInfo | NotDamage {
         const cell_damage_info = field.on_cell_damaged_base(cell);
-        if(cell_damage_info == null)
-            return null;
+        if(cell_damage_info == NotDamage)
+            return NotDamage;
 
         if(field.is_type_cell(cell, CellType.ActionLocked) || field.is_type_cell(cell, CellType.ActionLockedNear)) {
             if(cell_damage_info.cell.strength != undefined && cell_damage_info.cell.strength == 0) {
@@ -1047,7 +1051,6 @@ export function Game() {
 
         if(field.try_click(pos)) {
             if(try_activate_buster_element(pos)) {
-                Log.log("DIACTIVATE IDLE FROM CLICK");
                 is_idle = false;
 
                 if(level_config.steps != undefined) {
@@ -1066,6 +1069,9 @@ export function Game() {
         if(is_buster(pos)) return try_activate_buster_element(pos);
 
         const damage_info = field.try_damage(pos, false, true);
+        if(damage_info == NotDamage)
+            return;
+        
         EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
 
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') - 1);
@@ -1080,7 +1086,8 @@ export function Game() {
             if(is_buster({x, y: pos.y})) try_activate_buster_element({x, y: pos.y});
             else {
                 const damage_info = field.try_damage({x, y: pos.y});
-                damages.push(damage_info);
+                if(damage_info != NotDamage)
+                    damages.push(damage_info);
             }
         }
 
@@ -1098,7 +1105,8 @@ export function Game() {
             if(is_buster({x: pos.x, y})) try_activate_buster_element({x: pos.x, y});
             else {
                 const damage_info = field.try_damage({x: pos.x, y});
-                damages.push(damage_info);
+                if(damage_info != NotDamage)
+                    damages.push(damage_info);
             }
         }
 
@@ -1131,7 +1139,8 @@ export function Game() {
                         if(is_buster({x: j, y: i})) try_activate_buster_element({x: j, y: i});
                         else {
                             const damage_info = field.try_damage({x: j, y: i}, is_near_activation);
-                            damages.push(damage_info);
+                            if(damage_info != NotDamage)
+                                damages.push(damage_info);
                         }
                     }
                 }
@@ -1169,11 +1178,14 @@ export function Game() {
         ];
 
         // сначала удаляем бустер чтоб его потом уже нельзя было активровать повтороно и попасть в бесконечный цикл
-        const damages = [field.try_damage(message.pos, false, false, true)];
+        const damage = field.try_damage(message.pos, false, false, true);
+        const damages = damage != NotDamage ? [damage] : [];
         const range_damages = damage_element_by_mask(message.pos, message.big_range ? big_damage_mask : damage_mask);
         
-        for(const damage_info of range_damages)
-            damages.push(damage_info);
+        for(const damage_info of range_damages) {
+            if(damage_info != NotDamage)
+                damages.push(damage_info);
+        }
 
         EventBus.send('RESPONSE_DYNAMITE_ACTION', {pos: message.pos, uid: message.uid, damages, big_range: message.big_range});
     }
@@ -1183,7 +1195,8 @@ export function Game() {
         if(rocket == NullElement || !GAME_CONFIG.rockets.includes(rocket.id))
             return false;
         
-        const damages = [field.try_damage(pos)];
+        const damage = field.try_damage(pos);
+        const damages = damage != NotDamage ? [damage] : [];
 
         if(rocket.id == ElementId.VerticalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
             for(let y = 0; y < field_height; y++) {
@@ -1191,9 +1204,11 @@ export function Game() {
                     if(is_buster({x: pos.x, y})) try_activate_buster_element({x: pos.x, y});
                     else {
                         const damage_info = field.try_damage({x: pos.x, y});
-                        field.set_element_state(damage_info.pos, ElementState.Busy);
-                        field.set_cell_state(damage_info.pos, CellState.Busy);
-                        damages.push(damage_info);
+                        if(damage_info != NotDamage) {
+                            field.set_element_state(damage_info.pos, ElementState.Busy);
+                            field.set_cell_state(damage_info.pos, CellState.Busy);
+                            damages.push(damage_info);
+                        }
                     }
                 }
             }
@@ -1205,9 +1220,11 @@ export function Game() {
                     if(is_buster({x, y: pos.y})) try_activate_buster_element({x, y: pos.y});
                     else {
                         const damage_info = field.try_damage({x, y: pos.y});
-                        field.set_element_state(damage_info.pos, ElementState.Busy);
-                        field.set_cell_state(damage_info.pos, CellState.Busy);
-                        damages.push(damage_info);
+                        if(damage_info != NotDamage) {
+                            field.set_element_state(damage_info.pos, ElementState.Busy);
+                            field.set_cell_state(damage_info.pos, CellState.Busy);
+                            damages.push(damage_info);
+                        }
                     }
                 }
             }
@@ -1220,8 +1237,9 @@ export function Game() {
     }
 
     function on_rocket_end(damages: DamageInfo[]) {
-        for(const damage_info of damages)
+        for(const damage_info of damages) {
             field.set_cell_state(damage_info.pos, CellState.Idle);
+        }
     }
 
     function try_activate_diskosphere(pos: Position, ids = [get_random_element_id()], buster ?: ElementId) {
@@ -1229,15 +1247,18 @@ export function Game() {
         if(diskosphere == NullElement || diskosphere.id != ElementId.Diskosphere)
             return false;
     
-        const damages = [field.try_damage(pos)];
+        const damage = field.try_damage(pos);
+        const damages = damage != NotDamage ? [damage]: [];
         for(const element_id of ids) {
             const elements = field.get_all_elements_by_id(element_id);
             for(const element of elements) {
                 const element_pos = field.get_element_pos(element);
                 const damage_info = field.try_damage(element_pos, false, false);
-                field.set_element_state(damage_info.pos, ElementState.Busy);
-                field.set_cell_state(damage_info.pos, CellState.Busy);
-                damages.push(damage_info);
+                if(damage_info != NotDamage) {
+                    field.set_element_state(damage_info.pos, ElementState.Busy);
+                    field.set_cell_state(damage_info.pos, CellState.Busy);
+                    damages.push(damage_info);
+                }
             }
         }
 
@@ -1267,7 +1288,8 @@ export function Game() {
             [0, 1, 0]
         ]);
 
-        damages.push(under_damage);
+        if(under_damage != NotDamage)
+            damages.push(under_damage);
 
         EventBus.send('RESPONSE_ACTIVATED_HELICOPTER', {pos, uid: helicopter.uid, damages, triple});
 
@@ -1356,7 +1378,8 @@ export function Game() {
         if(available_targets.length == 0) return NullElement;
 
         const target = available_targets[math.random(0, available_targets.length - 1)];
-        return field.try_damage(target.pos);
+        const damage_info = field.try_damage(target.pos);
+        return (damage_info != NotDamage) ? damage_info : NullElement;
     }
 
     function on_helicopter_end(message: BusterActivatedMessage) {
@@ -1400,7 +1423,6 @@ export function Game() {
             return;
         }
 
-        Log.log("DIACTIVATE IDLE FROM SWAP");
         is_idle = false;
 
         if(level_config.steps != undefined) {
@@ -1449,7 +1471,7 @@ export function Game() {
     function on_buster_activate_after_swap(message: SwapElementsMessage) {
         if(!is_buster(message.from) && !is_buster(message.to)) return;
 
-        // revers becouse this after swap
+        // revers because this after swap
         const buster_from = message.element_to;
         const buster_to = message.element_from;
 

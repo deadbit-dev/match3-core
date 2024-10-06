@@ -142,6 +142,7 @@ export function View(resources: ViewResources) {
     const cells_offset = calculate_cell_offset();
 
     let down_item: IGameItem | null = null;
+    let is_block_input = false;
 
     const locks: hash[] = [];
 
@@ -825,17 +826,18 @@ export function View(resources: ViewResources) {
 
         remove_action(Action.Falling);
         record_action(Action.Combination);
-        timer.delay(GAME_CONFIG.combination_delay, false, () => {
-            EventBus.send('REQUEST_COMBINATE', {
-                combined_positions: [info.pos]
-            });
-        });
-
+        
         const world_pos = go.get_position(element_view._hash);
         world_pos.y += 5;
         go.animate(element_view._hash, "position", go.PLAYBACK_ONCE_FORWARD, world_pos, go.EASING_OUTQUAD, 0.25, 0, () => {
             world_pos.y -= 5;
             go.animate(element_view._hash, "position", go.PLAYBACK_ONCE_FORWARD, world_pos, go.EASING_OUTBOUNCE, 0.25);
+        });
+
+        timer.delay(0.25, false, () => {
+            EventBus.send('REQUEST_COMBINATE', {
+                combined_positions: [info.pos]
+            });
         });
     }
 
@@ -1146,6 +1148,8 @@ export function View(resources: ViewResources) {
     }
 
     function on_win(state: GameState) {
+        is_block_input = true;
+
         for(let y = 0; y < get_field_height(); y++) {
             for(let x = 0; x < get_field_width(); x++) {
                 const cell = state.cells[y][x];
@@ -1163,6 +1167,7 @@ export function View(resources: ViewResources) {
     }
 
     function on_gameover() {
+        is_block_input = true;
         timer.delay(GAME_CONFIG.delay_before_gameover, false, clear_field);
     }
 

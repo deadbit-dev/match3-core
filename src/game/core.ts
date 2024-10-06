@@ -168,6 +168,9 @@ export interface ElementInfo {
 export type NotFound = undefined;
 export const NotFound = undefined;
 
+export type NotDamage = undefined;
+export const NotDamage = undefined;
+
 // наши все клетки, полностью заполненная прямоугольная/квадратная структура
 export type Cells = (Cell | typeof NotActiveCell)[][];
 
@@ -184,7 +187,7 @@ export interface CoreState {
 type FncIsCanSwap = (from: Position, to: Position) => boolean;
 type FncIsCombined = (e1: Element, e2: Element) => boolean;
 type FncOnElementDamaged = (pos: Position, element: Element) => void;
-type FncOnCellDamaged = (cell: Cell) => CellDamageInfo | null;
+type FncOnCellDamaged = (cell: Cell) => CellDamageInfo | NotDamage;
 type FncOnNearCellsDamaged = (cells: Cell[]) => CellDamageInfo[];
 type FncOnRequestElement = (pos: Position) => Element | typeof NullElement;
 
@@ -508,20 +511,21 @@ export function Field(size_x: number, size_y: number) {
 
         return NotFound;
     }
-
+ 
     // попытка нанести урон клетке
-    function try_damage(pos: Position, is_near_activation = false, without_element = false, force = false): DamageInfo {
+    function try_damage(pos: Position, is_near_activation = false, without_element = false, force = false): DamageInfo | NotDamage {
         const damage_info = {} as DamageInfo;
         damage_info.pos = pos;
         damage_info.damaged_cells = [];
 
         const cell = get_cell(pos);
         if(cell == NotActiveCell || (!force && cell.state == CellState.Busy))
-            return damage_info;
+            return NotDamage;
 
         const damaged_cell = on_cell_damaged(cell);
-        if(damaged_cell != null)
+        if(damaged_cell != NotDamage) {
             damage_info.damaged_cells.push(damaged_cell);
+        }
         
         if(is_near_activation) {
             const near_activated_cells = on_near_cells_damaged(get_neighbor_cells(pos));
@@ -529,17 +533,21 @@ export function Field(size_x: number, size_y: number) {
                 damage_info.damaged_cells.push(near_activated_cell);
         }
 
-        if(without_element && !is_available_cell_type_for_move(cell))
+        if(without_element && !is_available_cell_type_for_move(cell)) {
+            if(damage_info.damaged_cells.length == 0)
+                return NotDamage;
             return damage_info;
+        }
 
         const element = get_element(pos);
-        if(element == NullElement || (!force && element.state == ElementState.Busy))
+        if(element == NullElement || (!force && element.state == ElementState.Busy)) {
+            if(damage_info.damaged_cells.length == 0)
+                return NotDamage;
             return damage_info;
-
+        }
+            
         damage_info.element = element;
-
         set_element(pos, NullElement);
-
         on_element_damaged(pos, element);
 
         return damage_info;
@@ -554,18 +562,18 @@ export function Field(size_x: number, size_y: number) {
     }
 
     // функция активации ячейки
-    function on_cell_damaged(cell: Cell): CellDamageInfo | null {
-        if (cb_on_cell_damaged != null) return cb_on_cell_damaged(cell);
+    function on_cell_damaged(cell: Cell): CellDamageInfo | NotFound {
+        if (cb_on_cell_damaged != NotDamage) return cb_on_cell_damaged(cell);
         else return on_cell_damaged_base(cell);
     }
 
     // базовая функция активации ячеки
-    function on_cell_damaged_base(cell: Cell): CellDamageInfo | null {    
+    function on_cell_damaged_base(cell: Cell): CellDamageInfo | NotDamage {    
         if(cell.strength == undefined)
-            return null;
+            return NotDamage;
 
         if(!is_type_cell(cell, CellType.ActionLocked) && !is_type_cell(cell, CellType.ActionLockedNear))
-            return null;
+            return NotDamage;
 
         cell.strength--;
         return {pos: get_cell_pos(cell), cell};
@@ -607,7 +615,9 @@ export function Field(size_x: number, size_y: number) {
         const damages_info = [] as DamageInfo[];
         for(const elementInfo of combination.elementsInfo) {
             const damage_info = try_damage(elementInfo, true, false, true);
-            damages_info.push(damage_info);
+            if(damage_info != NotDamage) {
+                damages_info.push(damage_info);
+            }
         }
 
         return damages_info;
@@ -677,7 +687,7 @@ export function Field(size_x: number, size_y: number) {
 
         swap_elements(pos, {x: pos.x, y: next_y});
         moveInfo.next_pos = {x: pos.x, y: next_y};
-
+        
         return true;
     }
 
@@ -865,6 +875,7 @@ export function Field(size_x: number, size_y: number) {
         set_callback_on_near_cells_damaged, on_near_cells_damaged_base,
         set_callback_on_request_element, request_element,
         is_available_cell_type_for_activation,
+        is_available_cell_type_for_click,
         is_movable_element, is_clickable_element, is_type_cell, is_type_element,
         is_outside_pos_in_column, get_first_pos_in_column, get_last_pos_in_column, is_pos_empty
     };

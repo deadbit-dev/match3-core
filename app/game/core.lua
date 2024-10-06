@@ -100,6 +100,7 @@ ____exports.ElementState.Busy = 3
 ____exports.ElementState[____exports.ElementState.Busy] = "Busy"
 ____exports.NullElement = -1
 ____exports.NotFound = nil
+____exports.NotDamage = nil
 function ____exports.Field(size_x, size_y)
     local rotate_all_masks, set_cell, get_cell, get_cell_pos, set_element, get_element, get_element_pos, swap_elements, get_neighbor_cells, search_combination, on_element_damaged, on_cell_damaged, on_cell_damaged_base, on_near_cells_damaged, on_near_cells_damaged_base, is_combined_elements, is_combined_elements_base, falling_down, falling_through_corner, is_can_swap, is_can_swap_base, on_request_element, is_available_cell_type_for_activation, is_available_cell_type_for_click, is_type_element, is_movable_element, is_clickable_element, get_last_pos_in_column, is_pos_empty, state, rotated_masks, cb_is_can_swap, cb_is_combined_elements, cb_on_element_damaged, cb_on_cell_damaged, cb_on_near_cells_damaged, cb_on_request_element
     function rotate_all_masks()
@@ -292,7 +293,7 @@ function ____exports.Field(size_x, size_y)
         end
     end
     function on_cell_damaged(cell)
-        if cb_on_cell_damaged ~= nil then
+        if cb_on_cell_damaged ~= ____exports.NotDamage then
             return cb_on_cell_damaged(cell)
         else
             return on_cell_damaged_base(cell)
@@ -300,10 +301,10 @@ function ____exports.Field(size_x, size_y)
     end
     function on_cell_damaged_base(cell)
         if cell.strength == nil then
-            return nil
+            return ____exports.NotDamage
         end
         if not ____exports.is_type_cell(cell, ____exports.CellType.ActionLocked) and not ____exports.is_type_cell(cell, ____exports.CellType.ActionLockedNear) then
-            return nil
+            return ____exports.NotDamage
         end
         cell.strength = cell.strength - 1
         return {
@@ -659,10 +660,10 @@ function ____exports.Field(size_x, size_y)
         damage_info.damaged_cells = {}
         local cell = get_cell(pos)
         if cell == ____exports.NotActiveCell or not force and cell.state == ____exports.CellState.Busy then
-            return damage_info
+            return ____exports.NotDamage
         end
         local damaged_cell = on_cell_damaged(cell)
-        if damaged_cell ~= nil then
+        if damaged_cell ~= ____exports.NotDamage then
             local ____damage_info_damaged_cells_3 = damage_info.damaged_cells
             ____damage_info_damaged_cells_3[#____damage_info_damaged_cells_3 + 1] = damaged_cell
         end
@@ -674,10 +675,16 @@ function ____exports.Field(size_x, size_y)
             end
         end
         if without_element and not ____exports.is_available_cell_type_for_move(cell) then
+            if #damage_info.damaged_cells == 0 then
+                return ____exports.NotDamage
+            end
             return damage_info
         end
         local element = get_element(pos)
         if element == ____exports.NullElement or not force and element.state == ____exports.ElementState.Busy then
+            if #damage_info.damaged_cells == 0 then
+                return ____exports.NotDamage
+            end
             return damage_info
         end
         damage_info.element = element
@@ -698,7 +705,9 @@ function ____exports.Field(size_x, size_y)
         local damages_info = {}
         for ____, elementInfo in ipairs(combination.elementsInfo) do
             local damage_info = try_damage(elementInfo, true, false, true)
-            damages_info[#damages_info + 1] = damage_info
+            if damage_info ~= ____exports.NotDamage then
+                damages_info[#damages_info + 1] = damage_info
+            end
         end
         return damages_info
     end
@@ -796,6 +805,7 @@ function ____exports.Field(size_x, size_y)
         set_callback_on_request_element = set_callback_on_request_element,
         request_element = request_element,
         is_available_cell_type_for_activation = is_available_cell_type_for_activation,
+        is_available_cell_type_for_click = is_available_cell_type_for_click,
         is_movable_element = is_movable_element,
         is_clickable_element = is_clickable_element,
         is_type_cell = ____exports.is_type_cell,
