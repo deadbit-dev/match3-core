@@ -617,9 +617,7 @@ export function View(resources: ViewResources) {
                 combined_positions: [message.from, message.to]
             });
 
-            timer.delay(0.1, false, () => {
-                EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
-            });
+            EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
         });
     }
 

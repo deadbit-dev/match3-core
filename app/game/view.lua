@@ -670,13 +670,7 @@ function ____exports.View(resources)
                 record_action(____exports.Action.Combination)
                 record_action(____exports.Action.Combination)
                 EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.from, message.to}})
-                timer.delay(
-                    0.1,
-                    false,
-                    function()
-                        EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
-                    end
-                )
+                EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
             end
         )
     end
@@ -1103,19 +1097,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch188 = message.axis
-                    local ____cond188 = ____switch188 == Axis.Horizontal
-                    if ____cond188 then
+                    local ____switch187 = message.axis
+                    local ____cond187 = ____switch187 == Axis.Horizontal
+                    if ____cond187 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond188 = ____cond188 or ____switch188 == Axis.Vertical
-                    if ____cond188 then
+                    ____cond187 = ____cond187 or ____switch187 == Axis.Vertical
+                    if ____cond187 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond188 = ____cond188 or ____switch188 == Axis.All
-                    if ____cond188 then
+                    ____cond187 = ____cond187 or ____switch187 == Axis.All
+                    if ____cond187 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1144,14 +1138,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch191 = axis
-            local ____cond191 = ____switch191 == Axis.Vertical
-            if ____cond191 then
+            local ____switch190 = axis
+            local ____cond190 = ____switch190 == Axis.Vertical
+            if ____cond190 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond191 = ____cond191 or ____switch191 == Axis.Horizontal
-            if ____cond191 then
+            ____cond190 = ____cond190 or ____switch190 == Axis.Horizontal
+            if ____cond190 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break
