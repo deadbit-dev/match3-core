@@ -334,8 +334,12 @@ export function Game() {
             return;
         }
 
-        if(!is_tutorial() && helper_timer == null)
-            helper_timer = timer.delay(5, false, () => { set_helper(); });
+        if(!is_tutorial() && helper_timer == null) {
+            helper_timer = timer.delay(5, true, () => { 
+                reset_helper();
+                set_helper();
+            });
+        }
     }
 
     function set_helper(message?: HelperMessage) {
@@ -362,6 +366,17 @@ export function Game() {
         }
 
         if(helper_data != null) EventBus.send('SET_HELPER', helper_data);
+    }
+
+    function reset_helper() {
+        if(helper_timer == null )
+            return;
+
+        if(helper_data == null)
+            return;
+
+        EventBus.send('RESET_HELPER', helper_data);
+        helper_data = null;
     }
 
     function stop_helper() {
@@ -680,7 +695,7 @@ export function Game() {
         }
 
         if(steps.length == 0) return NotFound;
-        return steps[math.random(0, steps.length-1)];
+        return steps[math.random(0, steps.length - 1)];
     }
 
     function revive() {

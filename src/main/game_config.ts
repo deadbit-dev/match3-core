@@ -561,6 +561,7 @@ export type _UserMessages = {
     // ON_ELEMENT_UNSELECTED: ItemInfo,
 
     SET_HELPER: HelperMessage,
+    RESET_HELPER: HelperMessage,
     STOP_HELPER: HelperMessage,
 
     UPDATED_BUTTONS: VoidMessage,

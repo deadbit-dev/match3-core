@@ -609,6 +609,10 @@ function set_enabled_store(state)
     if state and gui.is_enabled(store, false) then
         return
     end
+    if Scene.get_current_name() == "game" then
+        set_enabled_coins(state)
+        set_enabled_lifes(state)
+    end
     if state then
         gui.set_enabled(store, state)
         gui.animate(
@@ -735,6 +739,8 @@ function set_enabled_not_enough_coins(state)
 end
 function set_enabled_hammer(data, state)
     local hammer = gui.get_node("hammer/manager")
+    set_enabled_coins(state)
+    set_enabled_lifes(state)
     if state then
         gui.set_enabled(hammer, state)
         gui.animate(
@@ -777,6 +783,8 @@ function set_enabled_hammer(data, state)
 end
 function set_enabled_spinning(data, state)
     local spinning = gui.get_node("spinning/manager")
+    set_enabled_coins(state)
+    set_enabled_lifes(state)
     if state then
         gui.set_enabled(spinning, state)
         gui.animate(
@@ -819,6 +827,8 @@ function set_enabled_spinning(data, state)
 end
 function set_enabled_horizontall_rocket(data, state)
     local horizontal_rocket = gui.get_node("horizontal_rocket/manager")
+    set_enabled_coins(state)
+    set_enabled_lifes(state)
     if state then
         gui.set_enabled(horizontal_rocket, state)
         gui.animate(
@@ -861,6 +871,8 @@ function set_enabled_horizontall_rocket(data, state)
 end
 function set_enabled_vertical_rocket(data, state)
     local vertical_rocket = gui.get_node("vertical_rocket/manager")
+    set_enabled_coins(state)
+    set_enabled_lifes(state)
     if state then
         gui.set_enabled(vertical_rocket, state)
         gui.animate(

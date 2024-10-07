@@ -480,6 +480,11 @@ function set_enabled_store(state: boolean) {
 
     if(state && gui.is_enabled(store, false) ) return;
 
+    if(Scene.get_current_name() == "game") {
+        set_enabled_coins(state);
+        set_enabled_lifes(state);
+    }
+
     if(state) {
         gui.set_enabled(store, state);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
@@ -535,6 +540,9 @@ function set_enabled_not_enough_coins(state: boolean) {
 function set_enabled_hammer(data: props, state: boolean) {
     const hammer = gui.get_node('hammer/manager');
 
+    set_enabled_coins(state);
+    set_enabled_lifes(state);
+
     if(state) {
         gui.set_enabled(hammer, state);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
@@ -553,6 +561,9 @@ function set_enabled_hammer(data: props, state: boolean) {
 
 function set_enabled_spinning(data: props, state: boolean) {
     const spinning = gui.get_node('spinning/manager');
+
+    set_enabled_coins(state);
+    set_enabled_lifes(state);
     
     if(state) {
         gui.set_enabled(spinning, state);
@@ -573,6 +584,9 @@ function set_enabled_spinning(data: props, state: boolean) {
 function set_enabled_horizontall_rocket(data: props, state: boolean) {
     const horizontal_rocket = gui.get_node('horizontal_rocket/manager');
    
+    set_enabled_coins(state);
+    set_enabled_lifes(state);
+
     if(state) {
         gui.set_enabled(horizontal_rocket, state);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
@@ -591,6 +605,9 @@ function set_enabled_horizontall_rocket(data: props, state: boolean) {
 
 function set_enabled_vertical_rocket(data: props, state: boolean) {
     const vertical_rocket = gui.get_node('vertical_rocket/manager');
+
+    set_enabled_coins(state);
+    set_enabled_lifes(state);
 
     if(state) {
         gui.set_enabled(vertical_rocket, state);

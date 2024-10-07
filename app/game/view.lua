@@ -91,7 +91,7 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -118,6 +118,7 @@ function ____exports.View(resources)
             end
         )
         EventBus.on("SET_HELPER", on_set_helper, false)
+        EventBus.on("RESET_HELPER", on_reset_helper, false)
         EventBus.on("STOP_HELPER", on_stop_helper, false)
         EventBus.on("REMOVE_TUTORIAL", on_remove_tutorial)
         EventBus.on("RESPONSE_SWAP_ELEMENTS", swap_elements_animation, false)
@@ -576,7 +577,7 @@ function ____exports.View(resources)
                 go.PLAYBACK_LOOP_PINGPONG,
                 from_pos.x + (to_pos.x - from_pos.x) * 0.1,
                 go.EASING_INCUBIC,
-                1.5
+                2.5
             )
             go.animate(
                 combined_item._hash,
@@ -584,7 +585,7 @@ function ____exports.View(resources)
                 go.PLAYBACK_LOOP_PINGPONG,
                 from_pos.y + (to_pos.y - from_pos.y) * 0.1,
                 go.EASING_INCUBIC,
-                1.5
+                2.5
             )
         end
         for ____, element in ipairs(data.elements) do
@@ -596,7 +597,26 @@ function ____exports.View(resources)
                     go.PLAYBACK_LOOP_PINGPONG,
                     vmath.vector4(0.75, 0.75, 0.75, 1),
                     go.EASING_INCUBIC,
-                    1.5
+                    2.5
+                )
+            end
+        end
+    end
+    function on_reset_helper(data)
+        local combined_item = get_view_item_by_uid(data.combined_element.uid)
+        if combined_item ~= nil then
+            go.cancel_animations(combined_item._hash)
+            local from_pos = get_world_pos(data.step.from, GAME_CONFIG.default_element_z_index)
+            go.set(combined_item._hash, "position", from_pos)
+        end
+        for ____, element in ipairs(data.elements) do
+            local item = get_view_item_by_uid(element.uid)
+            if item ~= nil then
+                go.cancel_animations(msg.url(nil, item._hash, "sprite"))
+                go.set(
+                    msg.url(nil, item._hash, "sprite"),
+                    "tint",
+                    vmath.vector4(1, 1, 1, 1)
                 )
             end
         end
@@ -1097,19 +1117,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch187 = message.axis
-                    local ____cond187 = ____switch187 == Axis.Horizontal
-                    if ____cond187 then
+                    local ____switch192 = message.axis
+                    local ____cond192 = ____switch192 == Axis.Horizontal
+                    if ____cond192 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond187 = ____cond187 or ____switch187 == Axis.Vertical
-                    if ____cond187 then
+                    ____cond192 = ____cond192 or ____switch192 == Axis.Vertical
+                    if ____cond192 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond187 = ____cond187 or ____switch187 == Axis.All
-                    if ____cond187 then
+                    ____cond192 = ____cond192 or ____switch192 == Axis.All
+                    if ____cond192 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1138,14 +1158,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch190 = axis
-            local ____cond190 = ____switch190 == Axis.Vertical
-            if ____cond190 then
+            local ____switch195 = axis
+            local ____cond195 = ____switch195 == Axis.Vertical
+            if ____cond195 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond190 = ____cond190 or ____switch190 == Axis.Horizontal
-            if ____cond190 then
+            ____cond195 = ____cond195 or ____switch195 == Axis.Horizontal
+            if ____cond195 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break

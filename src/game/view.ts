@@ -183,6 +183,7 @@ export function View(resources: ViewResources) {
             } else on_set_tutorial(lock_info);
         });
         EventBus.on('SET_HELPER', on_set_helper, false);
+        EventBus.on('RESET_HELPER', on_reset_helper, false);
         EventBus.on('STOP_HELPER', on_stop_helper, false);
         EventBus.on('REMOVE_TUTORIAL', on_remove_tutorial);
         EventBus.on('RESPONSE_SWAP_ELEMENTS', swap_elements_animation, false);
@@ -552,14 +553,32 @@ export function View(resources: ViewResources) {
             const to_pos = get_world_pos(data.step.to, GAME_CONFIG.default_element_z_index);
 
             go.set_position(from_pos, combined_item._hash);
-            go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 1.5);
-            go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 1.5);
+            go.animate(combined_item._hash, 'position.x', go.PLAYBACK_LOOP_PINGPONG, from_pos.x + (to_pos.x - from_pos.x) * 0.1, go.EASING_INCUBIC, 2.5);
+            go.animate(combined_item._hash, 'position.y', go.PLAYBACK_LOOP_PINGPONG, from_pos.y + (to_pos.y - from_pos.y) * 0.1, go.EASING_INCUBIC, 2.5);
         }
 
         for (const element of data.elements) {
             const item = get_view_item_by_uid(element.uid);
             if (item != undefined) {
-                go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 1.5);
+                go.animate(msg.url(undefined, item._hash, 'sprite'), 'tint', go.PLAYBACK_LOOP_PINGPONG, vmath.vector4(0.75, 0.75, 0.75, 1), go.EASING_INCUBIC, 2.5);
+            }
+        }
+    }
+
+    function on_reset_helper(data: HelperMessage) {
+        const combined_item = get_view_item_by_uid(data.combined_element.uid);
+        if (combined_item != undefined) {
+            go.cancel_animations(combined_item._hash);
+            
+            const from_pos = get_world_pos(data.step.from, GAME_CONFIG.default_element_z_index);
+            go.set(combined_item._hash, 'position', from_pos);
+        }
+
+        for (const element of data.elements) {
+            const item = get_view_item_by_uid(element.uid);
+            if (item != undefined) {
+                go.cancel_animations(msg.url(undefined, item._hash, 'sprite'));
+                go.set(msg.url(undefined, item._hash, 'sprite'), 'tint', vmath.vector4(1, 1, 1, 1));
             }
         }
     }
