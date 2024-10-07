@@ -260,5 +260,5 @@ function CameraModule() {
 
     init();
 
-    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window, width_projection, set_auto_zoom, set_dynamic_orientation, is_dynamic_orientation };
+    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window, width_projection, set_auto_zoom, set_dynamic_orientation, is_dynamic_orientation, update_window_size };
 }

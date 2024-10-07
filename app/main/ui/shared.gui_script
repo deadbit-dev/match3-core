@@ -619,7 +619,7 @@ function set_enabled_store(state)
             0.3
         )
         gui.animate(
-            gui.get_node("store/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -629,7 +629,7 @@ function set_enabled_store(state)
         Sound.play("store")
     else
         gui.animate(
-            gui.get_node("store/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -662,7 +662,7 @@ function set_enabled_life_notification(state)
             0.3
         )
         gui.animate(
-            gui.get_node("life_notification/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -671,7 +671,7 @@ function set_enabled_life_notification(state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("life_notification/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -704,7 +704,7 @@ function set_enabled_not_enough_coins(state)
             0.3
         )
         gui.animate(
-            gui.get_node("not_enough_coins/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -713,7 +713,7 @@ function set_enabled_not_enough_coins(state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("not_enough_coins/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -745,7 +745,7 @@ function set_enabled_hammer(data, state)
             0.3
         )
         gui.animate(
-            gui.get_node("hammer/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -754,7 +754,7 @@ function set_enabled_hammer(data, state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("hammer/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -787,7 +787,7 @@ function set_enabled_spinning(data, state)
             0.3
         )
         gui.animate(
-            gui.get_node("spinning/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -796,7 +796,7 @@ function set_enabled_spinning(data, state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("spinning/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -829,7 +829,7 @@ function set_enabled_horizontall_rocket(data, state)
             0.3
         )
         gui.animate(
-            gui.get_node("horizontal_rocket/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -838,7 +838,7 @@ function set_enabled_horizontall_rocket(data, state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("horizontal_rocket/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,
@@ -871,7 +871,7 @@ function set_enabled_vertical_rocket(data, state)
             0.3
         )
         gui.animate(
-            gui.get_node("vertical_rocket/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
             gui.EASING_INCUBIC,
@@ -880,7 +880,7 @@ function set_enabled_vertical_rocket(data, state)
         EventBus.send("OPENED_DLG")
     else
         gui.animate(
-            gui.get_node("vertical_rocket/fade"),
+            gui.get_node("fade"),
             "color",
             vmath.vector4(0, 0, 0, 0),
             gui.EASING_INCUBIC,

@@ -206,6 +206,7 @@ function ____exports.View(resources)
         EventBus.send("REQUEST_IDLE")
     end
     function on_resize(data)
+        Log.log("RESIZE")
         local display_height = 960
         local window_aspect = data.width / data.height
         local display_width = tonumber(sys.get_config("display.width"))
@@ -216,6 +217,7 @@ function ____exports.View(resources)
                 local height = display_width / window_aspect
                 zoom = height / display_height
             end
+            Log.log("ZOOM")
             Camera.set_zoom(zoom)
         end
     end
@@ -1625,6 +1627,7 @@ function ____exports.View(resources)
         Camera.set_go_prjection(-1, 0, -3, 3)
         set_scene_art()
         set_events()
+        Camera.update_window_size()
         if not GAME_CONFIG.is_restart then
             Sound.play("game")
         end

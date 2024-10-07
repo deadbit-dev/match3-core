@@ -671,6 +671,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "win"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -688,7 +689,7 @@ nodes {
   texture: "ui/game_title_substrate"
   id: "title"
   parent: "win"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -715,6 +716,7 @@ nodes {
     z: 1.0
   }
   parent: "title"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
 }
@@ -729,7 +731,7 @@ nodes {
   type: TYPE_CUSTOM
   id: "win_avatar"
   parent: "win"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   spine_scene: "cat_win"
@@ -748,7 +750,7 @@ nodes {
   texture: "ui/long_button"
   id: "continue_button"
   parent: "win"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -775,27 +777,10 @@ nodes {
     z: 1.0
   }
   parent: "continue_button"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
   shadow_alpha: 0.0
-}
-nodes {
-  size {
-    x: 540.0
-    y: 960.0
-  }
-  color {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  type: TYPE_BOX
-  id: "win_fade"
-  adjust_mode: ADJUST_MODE_STRETCH
-  parent: "win"
-  layer: "back"
-  inherit_alpha: true
-  alpha: 0.7
 }
 nodes {
   position {
@@ -809,7 +794,7 @@ nodes {
   type: TYPE_CUSTOM
   id: "firework"
   parent: "win"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   spine_scene: "firework"
@@ -829,7 +814,7 @@ nodes {
   texture: "ui/close_button"
   id: "win_close"
   parent: "win"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -966,6 +951,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "gameover"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -983,7 +969,7 @@ nodes {
   texture: "ui/game_title_substrate"
   id: "gameover_title"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -1014,6 +1000,7 @@ nodes {
     z: 1.0
   }
   parent: "gameover_title"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
 }
@@ -1029,7 +1016,7 @@ nodes {
   type: TYPE_CUSTOM
   id: "gameover_avatar"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   spine_scene: "cat_fail"
@@ -1048,7 +1035,7 @@ nodes {
   texture: "ui/long_button"
   id: "restart_button"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1076,29 +1063,9 @@ nodes {
     z: 1.0
   }
   parent: "restart_button"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
-}
-nodes {
-  position {
-    z: -1.0
-  }
-  size {
-    x: 540.0
-    y: 960.0
-  }
-  color {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  type: TYPE_BOX
-  id: "gameover_fade"
-  adjust_mode: ADJUST_MODE_STRETCH
-  parent: "gameover"
-  layer: "back"
-  inherit_alpha: true
-  alpha: 0.7
 }
 nodes {
   position {
@@ -1112,7 +1079,7 @@ nodes {
   texture: "ui/long_button"
   id: "map_button"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1140,6 +1107,7 @@ nodes {
     z: 1.0
   }
   parent: "map_button"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
 }
@@ -1154,7 +1122,7 @@ nodes {
   type: TYPE_BOX
   id: "missing_targets"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1185,6 +1153,7 @@ nodes {
     z: 1.0
   }
   parent: "missing_targets"
+  layer: "ontop"
   inherit_alpha: true
 }
 nodes {
@@ -1196,6 +1165,7 @@ nodes {
   texture: "graphics/element_sunflower"
   id: "target_1"
   parent: "missing_targets"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1213,6 +1183,7 @@ nodes {
   texture: "ui/fail_icon"
   id: "target_1_fail_icon"
   parent: "target_1"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -1237,6 +1208,7 @@ nodes {
     z: 1.0
   }
   parent: "target_1"
+  layer: "ontop"
   inherit_alpha: true
 }
 nodes {
@@ -1248,6 +1220,7 @@ nodes {
   texture: "graphics/element_sunflower"
   id: "target_2"
   parent: "missing_targets"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1265,6 +1238,7 @@ nodes {
   texture: "ui/fail_icon"
   id: "target_2_fail_icon"
   parent: "target_2"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -1289,6 +1263,7 @@ nodes {
     z: 1.0
   }
   parent: "target_2"
+  layer: "ontop"
   inherit_alpha: true
 }
 nodes {
@@ -1300,6 +1275,7 @@ nodes {
   texture: "graphics/element_sunflower"
   id: "target_3"
   parent: "missing_targets"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1317,6 +1293,7 @@ nodes {
   texture: "ui/fail_icon"
   id: "target_3_fail_icon"
   parent: "target_3"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -1341,6 +1318,7 @@ nodes {
     z: 1.0
   }
   parent: "target_3"
+  layer: "ontop"
   inherit_alpha: true
 }
 nodes {
@@ -1350,7 +1328,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "steps_by_ad"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   template: "/main/ui/parts/buy_button.gui"
 }
@@ -1363,8 +1341,10 @@ nodes {
   texture: "ui/long_button"
   id: "steps_by_ad/button"
   parent: "steps_by_ad"
+  layer: "ontop"
   overridden_fields: 3
   overridden_fields: 9
+  overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
   enabled: false
@@ -1378,8 +1358,10 @@ nodes {
   text: "+3 \321\205\320\276\320\264\320\260"
   id: "steps_by_ad/text"
   parent: "steps_by_ad/button"
+  layer: "ontop"
   overridden_fields: 1
   overridden_fields: 8
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1395,9 +1377,11 @@ nodes {
   texture: "ui/ad_icon"
   id: "steps_by_ad/icon"
   parent: "steps_by_ad/button"
+  layer: "ontop"
   overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 9
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1407,7 +1391,7 @@ nodes {
   type: TYPE_TEMPLATE
   id: "steps_by_coins"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   template: "/main/ui/parts/buy_button.gui"
 }
@@ -1423,9 +1407,11 @@ nodes {
   texture: "ui/long_button"
   id: "steps_by_coins/button"
   parent: "steps_by_coins"
+  layer: "ontop"
   overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 9
+  overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
   enabled: false
@@ -1439,8 +1425,10 @@ nodes {
   text: "+5 \321\205\320\276\320\264\320\276\320\262         500"
   id: "steps_by_coins/text"
   parent: "steps_by_coins/button"
+  layer: "ontop"
   overridden_fields: 1
   overridden_fields: 8
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1456,9 +1444,11 @@ nodes {
   texture: "ui/coin_btn"
   id: "steps_by_coins/icon"
   parent: "steps_by_coins/button"
+  layer: "ontop"
   overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 9
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1470,7 +1460,7 @@ nodes {
   texture: "ui/close_button"
   id: "gameover_close"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1484,7 +1474,7 @@ nodes {
   texture: "ui/close_button"
   id: "gameover_offer_close"
   parent: "gameover"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1493,11 +1483,12 @@ nodes {
   position {
     x: 270.0
     y: 480.0
+    z: 1.0
   }
   type: TYPE_BOX
   texture: "ui/whirligig"
   id: "shuffle"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -1518,7 +1509,8 @@ nodes {
   }
   type: TYPE_BOX
   id: "lock1"
-  layer: "back"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "top"
   inherit_alpha: true
   alpha: 0.7
   enabled: false
@@ -1569,8 +1561,10 @@ nodes {
   id: "hammer/button"
   yanchor: YANCHOR_BOTTOM
   parent: "hammer"
+  layer: "back"
   overridden_fields: 3
   overridden_fields: 13
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1612,8 +1606,10 @@ nodes {
   id: "spinning/button"
   yanchor: YANCHOR_BOTTOM
   parent: "spinning"
+  layer: "back"
   overridden_fields: 3
   overridden_fields: 13
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1655,8 +1651,10 @@ nodes {
   id: "horizontal_rocket/button"
   yanchor: YANCHOR_BOTTOM
   parent: "horizontal_rocket"
+  layer: "back"
   overridden_fields: 3
   overridden_fields: 13
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1704,8 +1702,10 @@ nodes {
   id: "vertical_rocket/button"
   yanchor: YANCHOR_BOTTOM
   parent: "vertical_rocket"
+  layer: "back"
   overridden_fields: 3
   overridden_fields: 13
+  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1924,6 +1924,9 @@ layers {
 }
 layers {
   name: "top"
+}
+layers {
+  name: "ontop"
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

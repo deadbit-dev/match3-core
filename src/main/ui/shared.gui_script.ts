@@ -483,11 +483,11 @@ function set_enabled_store(state: boolean) {
     if(state) {
         gui.set_enabled(store, state);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
         Sound.play('store');
     } else {
-        gui.animate(gui.get_node('store/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 1500, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(store, state);
         });
@@ -502,10 +502,10 @@ function set_enabled_life_notification(state: boolean) {
     if(state) {
         gui.set_enabled(life, state);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('life_notification/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(life, state);
         });
@@ -521,10 +521,10 @@ function set_enabled_not_enough_coins(state: boolean) {
     if(state) {
         gui.set_enabled(coins, state);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('not_enough_coins/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('not_enough_coins/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(coins, state);
         });
@@ -538,10 +538,10 @@ function set_enabled_hammer(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(hammer, state);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('hammer/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(hammer, state);
         });
@@ -557,10 +557,10 @@ function set_enabled_spinning(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(spinning, state);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('spinning/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(spinning, state);
         });
@@ -576,10 +576,10 @@ function set_enabled_horizontall_rocket(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(horizontal_rocket, state);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('horizontal_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(horizontal_rocket, state);
         });
@@ -595,10 +595,10 @@ function set_enabled_vertical_rocket(data: props, state: boolean) {
     if(state) {
         gui.set_enabled(vertical_rocket, state);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG');
     } else {
-        gui.animate(gui.get_node('vertical_rocket/fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(vertical_rocket, state);
         });

@@ -28,6 +28,8 @@ export function init(this: props): void {
     Camera.set_go_prjection(-1, 0, -3, 3);
 
     EventBus.on("SYS_ON_RESIZED", on_resize);
+
+    Camera.update_window_size();
     
     EventBus.on('MOVIE_END', () => {
         const window = gui.get_node('window');

@@ -717,6 +717,10 @@ function on_win()
         function()
             disable_game_ui()
             gui.set_enabled(
+                gui.get_node("lock1"),
+                true
+            )
+            gui.set_enabled(
                 gui.get_node("win"),
                 true
             )
@@ -733,6 +737,10 @@ function on_win()
 end
 function set_gameover(instance, state, revive)
     disable_game_ui()
+    gui.set_enabled(
+        gui.get_node("lock1"),
+        true
+    )
     gui.set_enabled(
         gui.get_node("gameover"),
         true

@@ -35,6 +35,7 @@ function ____exports.init(self)
     Camera.set_dynamic_orientation(false)
     Camera.set_go_prjection(-1, 0, -3, 3)
     EventBus.on("SYS_ON_RESIZED", on_resize)
+    Camera.update_window_size()
     EventBus.on(
         "MOVIE_END",
         function()

@@ -153,9 +153,11 @@ export function View(resources: ViewResources) {
 
         Camera.set_dynamic_orientation(false);
         Camera.set_go_prjection(-1, 0, -3, 3);
-
+        
         set_scene_art();
         set_events();
+
+        Camera.update_window_size();
 
         if(!GAME_CONFIG.is_restart) Sound.play('game');
         GAME_CONFIG.is_restart = false;
@@ -262,6 +264,7 @@ export function View(resources: ViewResources) {
     }
 
     function on_resize(data: { width: number, height: number }) {
+        Log.log("RESIZE");
         const display_height = 960;
         const window_aspect = data.width / data.height;
         const display_width = tonumber(sys.get_config("display.width"));
@@ -272,6 +275,7 @@ export function View(resources: ViewResources) {
                 const height = display_width / window_aspect;
                 zoom = height / display_height;
             }
+            Log.log("ZOOM");
             Camera.set_zoom(zoom);
         }
     }
