@@ -556,6 +556,10 @@ function set_tutorial()
         Lang.get_text(tutorial_data.text.data)
     )
     gui.set_enabled(tutorial, true)
+    gui.set_enabled(
+        gui.get_node("lock1"),
+        true
+    )
     if tutorial_data.arrow_pos ~= nil then
         local arrow = gui.get_node("arrow")
         gui.set_enabled(arrow, true)
@@ -702,6 +706,10 @@ function remove_tutorial()
     if hand_timer ~= nil then
         timer.cancel(hand_timer)
     end
+    gui.set_enabled(
+        gui.get_node("lock1"),
+        true
+    )
     gui.set_enabled(
         gui.get_node("tutorial"),
         false

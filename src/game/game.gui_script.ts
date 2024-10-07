@@ -430,9 +430,12 @@ function set_tutorial() {
     const tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1];
     const tutorial = gui.get_node('tutorial');
     const tutorial_text = gui.get_node('tutorial_text');
+
     gui.set_position(tutorial_text, tutorial_data.text.pos);
     gui.set_text(tutorial_text, Lang.get_text(tutorial_data.text.data));
     gui.set_enabled(tutorial, true);
+
+    gui.set_enabled(gui.get_node('lock1'), true);
 
     if(tutorial_data.arrow_pos != undefined) {
         const arrow = gui.get_node('arrow');
@@ -502,6 +505,7 @@ function set_tutorial() {
 
 function remove_tutorial() {
     if(hand_timer != null) timer.cancel(hand_timer);
+    gui.set_enabled(gui.get_node('lock1'), true);
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 

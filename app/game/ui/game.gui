@@ -560,6 +560,7 @@ nodes {
   }
   type: TYPE_BOX
   id: "tutorial"
+  layer: "ontop"
   inherit_alpha: true
   enabled: false
   visible: false
@@ -579,25 +580,8 @@ nodes {
   }
   line_break: true
   parent: "tutorial"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
-}
-nodes {
-  size {
-    x: 540.0
-    y: 960.0
-  }
-  color {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  type: TYPE_BOX
-  id: "lock"
-  parent: "tutorial"
-  layer: "back"
-  inherit_alpha: true
-  alpha: 0.7
 }
 nodes {
   position {
@@ -611,7 +595,7 @@ nodes {
   texture: "ui/arrow"
   id: "arrow"
   parent: "tutorial"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
@@ -620,6 +604,7 @@ nodes {
   type: TYPE_BOX
   id: "buster"
   parent: "tutorial"
+  layer: "ontop"
   inherit_alpha: true
   enabled: false
   visible: false
@@ -633,7 +618,7 @@ nodes {
   texture: "ui/light"
   id: "light"
   parent: "buster"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -646,7 +631,7 @@ nodes {
   texture: "ui/rocket_icon"
   id: "buster_icon"
   parent: "buster"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -655,7 +640,7 @@ nodes {
   texture: "ui/finger"
   id: "hand"
   parent: "tutorial"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
