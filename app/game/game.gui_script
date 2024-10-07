@@ -708,7 +708,7 @@ function remove_tutorial()
     end
     gui.set_enabled(
         gui.get_node("lock1"),
-        true
+        false
     )
     gui.set_enabled(
         gui.get_node("tutorial"),

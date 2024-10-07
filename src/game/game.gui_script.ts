@@ -505,7 +505,7 @@ function set_tutorial() {
 
 function remove_tutorial() {
     if(hand_timer != null) timer.cancel(hand_timer);
-    gui.set_enabled(gui.get_node('lock1'), true);
+    gui.set_enabled(gui.get_node('lock1'), false);
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
