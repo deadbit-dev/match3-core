@@ -182,6 +182,8 @@ export function Game() {
         EventBus.on('REQUEST_ROCKET_END', on_rocket_end, false);
 
         EventBus.on('REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END', on_diskosphere_damage_element_end, false);
+
+        EventBus.on('DISKOSPHERE_ACTIVATED_END', on_diskosphere_activated_end, false);
         
         EventBus.on('REQUEST_HELICOPTER_ACTION', on_helicopter_action, false);
         EventBus.on('REQUEST_HELICOPTER_END', on_helicopter_end, false);
@@ -1262,7 +1264,12 @@ export function Game() {
         if(diskosphere == NullElement || diskosphere.id != ElementId.Diskosphere)
             return false;
     
-        const damage = field.try_damage(pos);
+        const damage = field.try_damage(pos, false, false, true);
+        if(damage != NotDamage) {
+            field.set_element_state(damage.pos, ElementState.Busy);
+            field.set_cell_state(damage.pos, CellState.Busy);
+        }
+
         const damages = damage != NotDamage ? [damage]: [];
         for(const element_id of ids) {
             const elements = field.get_all_elements_by_id(element_id);
@@ -1288,6 +1295,10 @@ export function Game() {
 
         make_element(message.damage_info.pos, message.buster);
         try_activate_buster_element(message.damage_info.pos);
+    }
+
+    function on_diskosphere_activated_end(pos: Position) {
+        field.set_cell_state(pos, CellState.Idle);
     }
 
     function try_activate_helicopter(pos: Position, triple = false) {
@@ -1507,6 +1518,7 @@ export function Game() {
         const is_combinate_to_diskosphere = is_from_other_element && is_to_diskosphere;
 
         if(is_combinate_dynamites || is_combinate_rockets || is_combinate_helicopters || is_combinate_to_diskosphere) {
+            field.set_element_state(message.to, ElementState.Busy);
             field.set_element(message.from, NullElement);
             EventBus.send('RESPONSE_COMBINATE_BUSTERS', {
                 buster_from: { pos: message.from, element: buster_from },

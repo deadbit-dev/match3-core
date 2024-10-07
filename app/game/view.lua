@@ -1282,6 +1282,7 @@ function ____exports.View(resources)
             function(____self, message_id, message, sender)
                 if message_id == hash("spine_animation_done") then
                     remove_action(____exports.Action.DiskosphereActivation)
+                    EventBus.send("DISKOSPHERE_ACTIVATED_END", pos)
                     local anim_props = {blend_duration = 0, playback_rate = 1.25}
                     if message.animation_id == hash("light_ball_intro") then
                         record_action(____exports.Action.DiskosphereTrace)

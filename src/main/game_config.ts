@@ -515,6 +515,7 @@ export type _UserMessages = {
 
     RESPONSE_ACTIVATED_DISKOSPHERE: DiskosphereActivatedMessage,
     REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END: DiskosphereDamageElementMessage,
+    DISKOSPHERE_ACTIVATED_END: Position,
 
     RESPONSE_ACTIVATED_HELICOPTER: HelicopterActivatedMessage,
     REQUEST_HELICOPTER_ACTION: HelicopterActivatedMessage,

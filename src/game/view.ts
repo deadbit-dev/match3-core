@@ -1050,6 +1050,7 @@ export function View(resources: ViewResources) {
         spine.play_anim(msg.url(undefined, _go, 'diskosphere'), 'light_ball_intro', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: object, message_id: hash, message: {animation_id: hash}, sender: hash) => {
             if (message_id == hash("spine_animation_done")) {
                 remove_action(Action.DiskosphereActivation);
+                EventBus.send("DISKOSPHERE_ACTIVATED_END", pos);
                 const anim_props = { blend_duration: 0, playback_rate: 1.25 };
                 if (message.animation_id == hash('light_ball_intro')) {
                     record_action(Action.DiskosphereTrace);

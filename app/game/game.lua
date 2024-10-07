@@ -95,7 +95,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -125,6 +125,7 @@ function ____exports.Game()
         EventBus.on("REQUEST_DYNAMITE_ACTION", on_dynamite_action, false)
         EventBus.on("REQUEST_ROCKET_END", on_rocket_end, false)
         EventBus.on("REQUEST_DISKOSPHERE_DAMAGE_ELEMENT_END", on_diskosphere_damage_element_end, false)
+        EventBus.on("DISKOSPHERE_ACTIVATED_END", on_diskosphere_activated_end, false)
         EventBus.on("REQUEST_HELICOPTER_ACTION", on_helicopter_action, false)
         EventBus.on("REQUEST_HELICOPTER_END", on_helicopter_end, false)
         EventBus.on("SHUFFLE_END", on_shuffle_end, false)
@@ -1340,7 +1341,11 @@ function ____exports.Game()
         if diskosphere == NullElement or diskosphere.id ~= ____exports.ElementId.Diskosphere then
             return false
         end
-        local damage = field.try_damage(pos)
+        local damage = field.try_damage(pos, false, false, true)
+        if damage ~= NotDamage then
+            field.set_element_state(damage.pos, ElementState.Busy)
+            field.set_cell_state(damage.pos, CellState.Busy)
+        end
         local damages = damage ~= NotDamage and ({damage}) or ({})
         for ____, element_id in ipairs(ids) do
             local elements = field.get_all_elements_by_id(element_id)
@@ -1364,6 +1369,9 @@ function ____exports.Game()
         end
         make_element(message.damage_info.pos, message.buster)
         try_activate_buster_element(message.damage_info.pos)
+    end
+    function on_diskosphere_activated_end(pos)
+        field.set_cell_state(pos, CellState.Idle)
     end
     function try_activate_helicopter(pos, triple)
         if triple == nil then
@@ -1638,6 +1646,7 @@ function ____exports.Game()
         local is_to_diskosphere = buster_to.id == ____exports.ElementId.Diskosphere
         local is_combinate_to_diskosphere = is_from_other_element and is_to_diskosphere
         if is_combinate_dynamites or is_combinate_rockets or is_combinate_helicopters or is_combinate_to_diskosphere then
+            field.set_element_state(message.to, ElementState.Busy)
             field.set_element(message.from, NullElement)
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.from, element = buster_from}, buster_to = {pos = message.to, element = buster_to}})
             return
@@ -1719,29 +1728,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch388 = combination.type
-            local ____cond388 = ____switch388 == CombinationType.Comb4
-            if ____cond388 then
+            local ____switch390 = combination.type
+            local ____cond390 = ____switch390 == CombinationType.Comb4
+            if ____cond390 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond388 = ____cond388 or ____switch388 == CombinationType.Comb5
-            if ____cond388 then
+            ____cond390 = ____cond390 or ____switch390 == CombinationType.Comb5
+            if ____cond390 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond388 = ____cond388 or ____switch388 == CombinationType.Comb2x2
-            if ____cond388 then
+            ____cond390 = ____cond390 or ____switch390 == CombinationType.Comb2x2
+            if ____cond390 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond388 = ____cond388 or (____switch388 == CombinationType.Comb3x3a or ____switch388 == CombinationType.Comb3x3b)
-            if ____cond388 then
+            ____cond390 = ____cond390 or (____switch390 == CombinationType.Comb3x3a or ____switch390 == CombinationType.Comb3x3b)
+            if ____cond390 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond388 = ____cond388 or (____switch388 == CombinationType.Comb3x4 or ____switch388 == CombinationType.Comb3x5)
-            if ____cond388 then
+            ____cond390 = ____cond390 or (____switch390 == CombinationType.Comb3x4 or ____switch390 == CombinationType.Comb3x5)
+            if ____cond390 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
