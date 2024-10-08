@@ -1511,6 +1511,7 @@ function ____exports.View(resources)
     end
     function on_win(state)
         is_block_input = true
+        local counts = 0
         do
             local y = 0
             while y < get_field_height() do
@@ -1519,26 +1520,37 @@ function ____exports.View(resources)
                     while x < get_field_width() do
                         local cell = state.cells[y + 1][x + 1]
                         local element = state.elements[y + 1][x + 1]
-                        timer.delay(
-                            0.01 * (y * get_field_width() + x),
-                            false,
-                            function()
-                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
+                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
+                            local ____timer_delay_10 = timer.delay
+                            local ____counts_9 = counts
+                            counts = ____counts_9 + 1
+                            ____timer_delay_10(
+                                0.05 * ____counts_9,
+                                false,
+                                function()
                                     Sound.play("broke_element")
                                     damage_element_animation(element)
                                 end
-                            end
-                        )
+                            )
+                        end
                         x = x + 1
                     end
                 end
                 y = y + 1
             end
         end
+        timer.delay(0.05 * counts, false, reset_field)
         timer.delay(
             is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,
             false,
-            clear_field
+            function()
+                if __TS__ArrayIncludes(
+                    GAME_CONFIG.animal_levels,
+                    get_current_level() + 1
+                ) then
+                    remove_animals()
+                end
+            end
         )
     end
     function on_gameover()

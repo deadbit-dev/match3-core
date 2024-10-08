@@ -522,7 +522,13 @@ function feed_animation()
                             0.5,
                             0,
                             function()
-                                gui.delete_node(element)
+                                timer.delay(
+                                    2,
+                                    false,
+                                    function()
+                                        gui.delete_node(element)
+                                    end
+                                )
                             end
                         )
                     end)

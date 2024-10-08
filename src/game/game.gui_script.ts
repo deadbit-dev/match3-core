@@ -400,7 +400,9 @@ function feed_animation() {
                 scale.x *= 2;
                 scale.y *= 2;
                 gui.animate(element, gui.PROP_SCALE, scale, gui.EASING_INCUBIC, 0.5, 0, () => {
-                    gui.delete_node(element);
+                    timer.delay(2, false, () => {
+                        gui.delete_node(element);
+                    });
                 });
             });
         });
