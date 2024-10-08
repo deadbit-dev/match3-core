@@ -22,7 +22,7 @@ function SoundModule() {
 
     function init() {
         set_active(is_active());
-        play('empty');
+        //  play('empty');
     }
 
     function attach_druid_click(name = 'btn') {
@@ -30,13 +30,18 @@ function SoundModule() {
     }
 
     function _on_message(_this: any, message_id: hash, _message: any, sender: hash) {
-        if (message_id == to_hash('SYS_STOP_SND')) {
-            const message = _message as Messages['SYS_STOP_SND'];
+        if (message_id == to_hash('STOP_SND')) {
+            const message = _message as Messages['STOP_SND'];
             sound.stop('/sounds#' + message.name);
         }
-        if (message_id == to_hash('SYS_PLAY_SND')) {
-            const message = _message as Messages['SYS_PLAY_SND'];
+        if (message_id == to_hash('PLAY_SND')) {
+            const message = _message as Messages['PLAY_SND'];
+            //sound.stop('/sounds#' + message.name);
             sound.play('/sounds#' + message.name, { speed: message.speed, gain: message.volume });
+        }
+        if (message_id == to_hash('SET_GAIN')) {
+            const message = _message as Messages['SET_GAIN'];
+            sound.set_gain('/sounds#' + message.name, message.val);
         }
     }
 
@@ -50,24 +55,30 @@ function SoundModule() {
     }
 
     function play(name: string, speed = 1, volume = 1) {
-        Manager.send('SYS_PLAY_SND', { name, speed, volume });
+        Manager.send('PLAY_SND', { name, speed, volume });
     }
 
     function stop(name: string) {
-        Manager.send('SYS_STOP_SND', { name });
+        Manager.send('STOP_SND', { name });
     }
 
     function set_pause(val: boolean) {
         const scene_name = Scene.get_current_name();
         if (scene_name != '')
-            EventBus.trigger('ON_SOUND_PAUSE', { val }, false);
+            Manager.send('ON_SOUND_PAUSE', { val }, scene_name + ':/ui#' + scene_name);
         if (!is_active())
             return;
         sound.set_group_gain('master', val ? 0 : 1);
     }
 
+    function set_gain(name: string, val: number) {
+        Manager.send('SET_GAIN', { name, val });
+    }
+
+
+
 
     init();
 
-    return { _on_message, is_active, set_active, play, stop, set_pause, attach_druid_click };
+    return { _on_message, is_active, set_active, play, stop, set_pause, attach_druid_click, set_gain };
 }

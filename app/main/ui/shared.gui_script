@@ -1,5 +1,5 @@
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, setup, setup_coins, setup_life, setup_store, setup_settings, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_settings_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_settings, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -10,6 +10,8 @@ local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
+local ____game_config = require("main.game_config")
+local Dlg = ____game_config.Dlg
 function set_events(data)
     EventBus.on("ON_SCENE_LOADED", on_scene_loaded, true)
     EventBus.on("ON_GAME_OVER", on_gameover, true)
@@ -76,6 +78,7 @@ function setup(data)
     setup_coins(data)
     setup_life(data)
     setup_store(data)
+    setup_settings(data)
     setup_life_notification(data)
     setup_not_enough_coins(data)
     setup_busters(data)
@@ -301,6 +304,113 @@ function setup_store(data)
             GameStorage.set("horizontal_rocket_counts", 0)
             GameStorage.set("vertical_rocket_counts", 0)
         end
+    )
+end
+function setup_settings(data)
+    data.druid:new_button(
+        "settings_button",
+        function()
+            set_enabled_settings(data, true)
+        end
+    )
+    data.druid:new_button(
+        "sound_button",
+        function()
+            local sound_on = gui.get_node("sound_on")
+            local sound_off = gui.get_node("sound_off")
+            Sound.set_active(not Sound.is_active())
+            GameStorage.set(
+                "sound_bg",
+                Sound.is_active()
+            )
+            gui.set_enabled(
+                sound_on,
+                Sound.is_active()
+            )
+            gui.set_enabled(
+                sound_off,
+                not Sound.is_active()
+            )
+            Sound.set_gain(
+                "map",
+                Sound.is_active() and 1 or 0
+            )
+            Sound.set_gain(
+                "game",
+                Sound.is_active() and 1 or 0
+            )
+            Sound.set_gain(
+                "store",
+                Sound.is_active() and 1 or 0
+            )
+            local music_on = gui.get_node("music_on")
+            local music_off = gui.get_node("music_off")
+            gui.set_enabled(
+                music_on,
+                Sound.is_active()
+            )
+            gui.set_enabled(
+                music_off,
+                not Sound.is_active()
+            )
+        end
+    )
+    data.druid:new_button(
+        "music_button",
+        function()
+            local music_on = gui.get_node("music_on")
+            local music_off = gui.get_node("music_off")
+            GameStorage.set(
+                "sound_bg",
+                not GameStorage.get("sound_bg")
+            )
+            gui.set_enabled(
+                music_on,
+                GameStorage.get("sound_bg")
+            )
+            gui.set_enabled(
+                music_off,
+                not GameStorage.get("sound_bg")
+            )
+            Sound.set_gain(
+                "map",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
+            Sound.set_gain(
+                "game",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
+            Sound.set_gain(
+                "store",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
+        end
+    )
+    data.druid:new_button(
+        "ok_button",
+        function()
+            set_enabled_settings(data, false)
+        end
+    )
+    local sound_on = gui.get_node("sound_on")
+    local sound_off = gui.get_node("sound_off")
+    gui.set_enabled(
+        sound_on,
+        Sound.is_active()
+    )
+    gui.set_enabled(
+        sound_off,
+        not Sound.is_active()
+    )
+    local music_on = gui.get_node("music_on")
+    local music_off = gui.get_node("music_off")
+    gui.set_enabled(
+        music_on,
+        GameStorage.get("sound_bg")
+    )
+    gui.set_enabled(
+        music_off,
+        not GameStorage.get("sound_bg")
     )
 end
 function setup_busters(data)
@@ -541,6 +651,10 @@ function set_enabled_store_button(state)
     local store_button = gui.get_node("store_button")
     gui.set_enabled(store_button, state)
 end
+function set_enabled_settings_button(state)
+    local settings_button = gui.get_node("settings_button")
+    gui.set_enabled(settings_button, state)
+end
 function on_add_coins()
     local coins_text = gui.get_node("coins/text")
     gui.set_text(
@@ -577,19 +691,21 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch92 = scene.name
-        local ____cond92 = ____switch92 == "game"
-        if ____cond92 then
+        local ____switch98 = scene.name
+        local ____cond98 = ____switch98 == "game"
+        if ____cond98 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
+            set_enabled_settings_button(false)
             break
         end
-        ____cond92 = ____cond92 or ____switch92 == "map"
-        if ____cond92 then
+        ____cond98 = ____cond98 or ____switch98 == "map"
+        if ____cond98 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
+            set_enabled_settings_button(false)
             break
         end
     until true
@@ -613,6 +729,14 @@ function set_enabled_store(state)
         set_enabled_coins(state)
         set_enabled_lifes(state)
     end
+    gui.set_enabled(
+        gui.get_node("store_button"),
+        not state
+    )
+    gui.set_enabled(
+        gui.get_node("settings_button"),
+        not state
+    )
     if state then
         gui.set_enabled(store, state)
         gui.animate(
@@ -629,7 +753,7 @@ function set_enabled_store(state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.Store)
         Sound.play("store")
     else
         gui.animate(
@@ -650,9 +774,54 @@ function set_enabled_store(state)
                 gui.set_enabled(store, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.Store)
         Sound.stop("store")
     end
+end
+function set_enabled_settings(data, state)
+    local settings = gui.get_node("settings")
+    if state and gui.is_enabled(settings, false) then
+        return
+    end
+    if state then
+        gui.set_enabled(settings, state)
+        gui.animate(
+            gui.get_node("settings"),
+            "position",
+            vmath.vector3(270, 480, 0),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        gui.animate(
+            gui.get_node("fade"),
+            "color",
+            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        EventBus.send("OPENED_DLG", Dlg.Settings)
+    else
+        gui.animate(
+            gui.get_node("fade"),
+            "color",
+            vmath.vector4(0, 0, 0, 0),
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        gui.animate(
+            gui.get_node("settings"),
+            "position",
+            vmath.vector3(270, 1150, 0),
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(settings, state)
+            end
+        )
+        EventBus.send("CLOSED_DLG", Dlg.Settings)
+    end
+    data.dlg_opened = state
 end
 function set_enabled_life_notification(state)
     local life = gui.get_node("life_notification/manager")
@@ -672,7 +841,7 @@ function set_enabled_life_notification(state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.LifeNotification)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -692,7 +861,7 @@ function set_enabled_life_notification(state)
                 gui.set_enabled(life, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.LifeNotification)
     end
     EventBus.send("LIFE_NOTIFICATION", state)
 end
@@ -714,7 +883,7 @@ function set_enabled_not_enough_coins(state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.NotEnoughCoins)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -734,7 +903,7 @@ function set_enabled_not_enough_coins(state)
                 gui.set_enabled(coins, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.NotEnoughCoins)
     end
 end
 function set_enabled_hammer(data, state)
@@ -757,7 +926,7 @@ function set_enabled_hammer(data, state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.Hammer)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -777,7 +946,7 @@ function set_enabled_hammer(data, state)
                 gui.set_enabled(hammer, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.Hammer)
     end
     data.dlg_opened = state
 end
@@ -801,7 +970,7 @@ function set_enabled_spinning(data, state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.Spinning)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -821,7 +990,7 @@ function set_enabled_spinning(data, state)
                 gui.set_enabled(spinning, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.Spinning)
     end
     data.dlg_opened = state
 end
@@ -845,7 +1014,7 @@ function set_enabled_horizontall_rocket(data, state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.HorizontalRocket)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -865,7 +1034,7 @@ function set_enabled_horizontall_rocket(data, state)
                 gui.set_enabled(horizontal_rocket, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.HorizontalRocket)
     end
     data.dlg_opened = state
 end
@@ -889,7 +1058,7 @@ function set_enabled_vertical_rocket(data, state)
             gui.EASING_INCUBIC,
             0.3
         )
-        EventBus.send("OPENED_DLG")
+        EventBus.send("OPENED_DLG", Dlg.VerticalRocket)
     else
         gui.animate(
             gui.get_node("fade"),
@@ -909,7 +1078,7 @@ function set_enabled_vertical_rocket(data, state)
                 gui.set_enabled(vertical_rocket, state)
             end
         )
-        EventBus.send("CLOSED_DLG")
+        EventBus.send("CLOSED_DLG", Dlg.VerticalRocket)
     end
     data.dlg_opened = state
 end

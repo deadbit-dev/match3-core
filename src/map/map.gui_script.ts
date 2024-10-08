@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { Dlg } from '../main/game_config';
 
 
 interface props {
@@ -91,22 +92,21 @@ function on_drag(action: any) {
     
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
-    pos.y = math.max(-2800, math.min(0, pos.y + action.dy));
+    pos.y = math.max(-3990, math.min(0, pos.y + action.dy));
     gui.set_position(map, pos);
 
     GameStorage.set('map_last_pos_y', pos.y);
 }
 
 function set_events(instace: props) {
-    EventBus.on('OPENED_DLG', () => {
+    EventBus.on('OPENED_DLG', (dlg: Dlg) => {
         instace.block_input = true;
-        Sound.stop('map');
+        if(dlg == Dlg.Store) Sound.stop('map');
     });
 
-    EventBus.on('CLOSED_DLG', () => {
+    EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
         instace.block_input = false;
-        Sound.play('map');
-        
+        if(dlg == Dlg.Store) Sound.play('map');
     });
 
     EventBus.on('LIFE_NOTIFICATION', (state) => {

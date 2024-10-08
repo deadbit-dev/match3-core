@@ -423,6 +423,8 @@ export const _GAME_CONFIG = {
 export const _STORAGE_CONFIG = {
     current_level: 0,
     completed_levels: [] as number[],
+
+    sound_bg: true,
     
     move_showed: false,
     
@@ -468,6 +470,17 @@ export interface RocketActivatedMessage extends BusterActivatedMessage { axis: A
 export interface HelicopterActivatedMessage extends BusterActivatedMessage { triple: boolean }
 export interface DiskosphereActivatedMessage extends BusterActivatedMessage { buster?: ElementId }
 export interface DiskosphereDamageElementMessage { damage_info: DamageInfo, buster?: ElementId }
+
+export enum Dlg {
+    Store,
+    NotEnoughCoins,
+    LifeNotification,
+    Settings,
+    Hammer,
+    VerticalRocket,
+    HorizontalRocket,
+    Spinning
+}
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
@@ -539,8 +552,8 @@ export type _UserMessages = {
     ADDED_COIN: VoidMessage,
     REMOVED_COIN: VoidMessage,
 
-    OPENED_DLG: VoidMessage,
-    CLOSED_DLG: VoidMessage,
+    OPENED_DLG: Dlg,
+    CLOSED_DLG: Dlg,
 
     LIFE_NOTIFICATION: boolean,
     NOT_ENOUGH_LIFE: VoidMessage,

@@ -595,8 +595,12 @@ nodes {
     x: -34.0
     y: 31.0
   }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
   type: TYPE_BOX
-  texture: "ui/life_icon"
+  texture: "ui/Life"
   id: "x1_life_icon"
   parent: "life_1"
   inherit_alpha: true
@@ -698,8 +702,12 @@ nodes {
     x: -34.0
     y: 31.0
   }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
   type: TYPE_BOX
-  texture: "ui/life_icon"
+  texture: "ui/Life"
   id: "x2_life_icon"
   parent: "life_2"
   inherit_alpha: true
@@ -802,8 +810,12 @@ nodes {
     x: -34.0
     y: 31.0
   }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
   type: TYPE_BOX
-  texture: "ui/life_icon"
+  texture: "ui/Life"
   id: "x3_life_icon"
   parent: "life_3"
   inherit_alpha: true

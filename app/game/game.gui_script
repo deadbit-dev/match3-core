@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_sound_button, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -20,6 +20,7 @@ local ____game = require("game.game")
 local TargetType = ____game.TargetType
 function setup(instance)
     setup_info_ui(instance)
+    setup_sound_button(instance)
     setup_busters(instance)
     setup_sustem_ui(instance)
     setup_win_ui(instance)
@@ -43,6 +44,25 @@ function setup_info_ui(instance)
     setup_step_or_time(instance)
     setup_avatar_or_clock(instance)
     setup_targets(instance)
+end
+function setup_sound_button(instace)
+    local on = "ui/BtnSoundOn"
+    local off = "ui/BtnSoundOff"
+    local sound = gui.get_node("sound_button")
+    gui.set_texture(
+        sound,
+        Sound.is_active() and on or off
+    )
+    instace.druid:new_button(
+        "sound_button",
+        function()
+            Sound.set_active(Sound.is_active())
+            gui.set_texture(
+                sound,
+                Sound.is_active() and on or off
+            )
+        end
+    )
 end
 function setup_avatar_or_clock(instance)
     if __TS__ArrayIncludes(
@@ -441,25 +461,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch71 = data.idx
-        local ____cond71 = ____switch71 == 0
-        if ____cond71 then
+        local ____switch73 = data.idx
+        local ____cond73 = ____switch73 == 0
+        if ____cond73 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond71 = ____cond71 or ____switch71 == 1
-        if ____cond71 then
+        ____cond73 = ____cond73 or ____switch73 == 1
+        if ____cond73 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond71 = ____cond71 or ____switch71 == 2
-        if ____cond71 then
+        ____cond73 = ____cond73 or ____switch73 == 2
+        if ____cond73 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

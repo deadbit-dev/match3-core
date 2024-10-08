@@ -26,6 +26,18 @@ function ____exports.init(self)
             if System.platform == "HTML5" and HtmlBridge.get_platform() == "ok" then
                 HtmlBridge.start_resize_monitor()
             end
+            Sound.set_gain(
+                "map",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
+            Sound.set_gain(
+                "game",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
+            Sound.set_gain(
+                "store",
+                GameStorage.get("sound_bg") and 1 or 0
+            )
             default_style.scroll.WHEEL_SCROLL_SPEED = 10
             druid.set_default_style(default_style)
             Sound.attach_druid_click("btn")

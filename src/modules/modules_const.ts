@@ -28,8 +28,9 @@ export interface InputMessage { pressed: boolean, released: boolean, x: number, 
 
 export type _SystemMessages = {
     MANAGER_READY: VoidMessage,
-    SYS_PLAY_SND: SndMessage,
-    SYS_STOP_SND: NameMessage,
+    PLAY_SND: SndMessage,
+    STOP_SND: NameMessage,
+    SET_GAIN: {name: String, val: number}
     ON_SOUND_PAUSE: ValMessage,
     SYS_LOAD_SCENE: NameMessage,
     SYS_RESTART_SCENE: VoidMessage,

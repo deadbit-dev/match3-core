@@ -119,7 +119,7 @@ images {
   image: "/assets/ui/btn_2.png"
 }
 images {
-  image: "/assets/ui/coin_icon.png"
+  image: "/assets/ui/Coin.png"
 }
 images {
   image: "/assets/ui/coin_icon_1.png"
@@ -137,7 +137,7 @@ images {
   image: "/assets/ui/store_title_substrate.png"
 }
 images {
-  image: "/assets/ui/life_icon.png"
+  image: "/assets/ui/Life.png"
 }
 images {
   image: "/assets/ui/remove_ad_icon.png"
@@ -146,7 +146,7 @@ images {
   image: "/assets/ui/infinite_life_icon.png"
 }
 images {
-  image: "/assets/ui/btn_1.png"
+  image: "/assets/ui/BTNMain.png"
 }
 images {
   image: "/assets/ui/damaged_life_icon.png"
@@ -176,10 +176,10 @@ images {
   image: "/assets/ui/pig.png"
 }
 images {
-  image: "/assets/ui/plus.png"
+  image: "/assets/ui/BtnPlus.png"
 }
 images {
-  image: "/assets/ui/store.png"
+  image: "/assets/ui/BtnShop.png"
 }
 images {
   image: "/assets/ui/arrow.png"
@@ -207,5 +207,29 @@ images {
 }
 images {
   image: "/assets/ui/whirligig.png"
+}
+images {
+  image: "/assets/ui/BtnON.png"
+}
+images {
+  image: "/assets/ui/BtnOFF.png"
+}
+images {
+  image: "/assets/ui/BtnONBack.png"
+}
+images {
+  image: "/assets/ui/BtnSet.png"
+}
+images {
+  image: "/assets/ui/iconSound.png"
+}
+images {
+  image: "/assets/ui/iconMusic.png"
+}
+images {
+  image: "/assets/ui/BtnSoundOn.png"
+}
+images {
+  image: "/assets/ui/BtnSoundOff.png"
 }
 extrude_borders: 2

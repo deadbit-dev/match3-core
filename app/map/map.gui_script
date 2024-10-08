@@ -1,6 +1,8 @@
 local ____exports = {}
 local set_level_buttons, load_level, set_last_map_position, set_completed_levels, on_drag, set_events
 local druid = require("druid.druid")
+local ____game_config = require("main.game_config")
+local Dlg = ____game_config.Dlg
 function set_level_buttons(data)
     do
         local i = 0
@@ -45,7 +47,7 @@ function on_drag(action)
     local map = gui.get_node("map")
     local pos = gui.get_position(map)
     pos.y = math.max(
-        -2800,
+        -3990,
         math.min(0, pos.y + action.dy)
     )
     gui.set_position(map, pos)
@@ -54,16 +56,20 @@ end
 function set_events(instace)
     EventBus.on(
         "OPENED_DLG",
-        function()
+        function(dlg)
             instace.block_input = true
-            Sound.stop("map")
+            if dlg == Dlg.Store then
+                Sound.stop("map")
+            end
         end
     )
     EventBus.on(
         "CLOSED_DLG",
-        function()
+        function(dlg)
             instace.block_input = false
-            Sound.play("map")
+            if dlg == Dlg.Store then
+                Sound.play("map")
+            end
         end
     )
     EventBus.on(

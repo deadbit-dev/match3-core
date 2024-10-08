@@ -10,7 +10,7 @@ import * as druid from 'druid.druid';
 import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes } from '../../game/utils';
 import { NameMessage } from '../../modules/modules_const';
 import { parse_time } from '../../utils/utils';
-
+import { Dlg } from '../game_config';
 
 interface props {
     druid: DruidClass
@@ -86,6 +86,7 @@ function setup(data: props) {
     setup_coins(data);
     setup_life(data);
     setup_store(data);
+    setup_settings(data);
     setup_life_notification(data);
     setup_not_enough_coins(data);
     setup_busters(data);
@@ -241,6 +242,63 @@ function setup_store(data: props) {
         GameStorage.set('horizontal_rocket_counts', 0);
         GameStorage.set('vertical_rocket_counts', 0);
     });
+}
+
+function setup_settings(data: props) {
+    data.druid.new_button('settings_button', () => {
+        set_enabled_settings(data, true);
+    });
+
+    data.druid.new_button('sound_button', () => {
+        const sound_on = gui.get_node('sound_on');
+        const sound_off = gui.get_node('sound_off');
+
+        Sound.set_active(!Sound.is_active());
+        GameStorage.set('sound_bg', Sound.is_active());
+
+        gui.set_enabled(sound_on, Sound.is_active());
+        gui.set_enabled(sound_off, !Sound.is_active());
+
+        Sound.set_gain('map', Sound.is_active() ? 1 : 0);
+        Sound.set_gain('game', Sound.is_active() ? 1 : 0);
+        Sound.set_gain('store', Sound.is_active() ? 1 : 0);
+
+        const music_on = gui.get_node('music_on');
+        const music_off = gui.get_node('music_off');
+
+        gui.set_enabled(music_on, Sound.is_active());
+        gui.set_enabled(music_off, !Sound.is_active());
+    });
+
+    data.druid.new_button('music_button', () => {
+        const music_on = gui.get_node('music_on');
+        const music_off = gui.get_node('music_off');
+
+        GameStorage.set('sound_bg', !GameStorage.get('sound_bg'));
+
+        gui.set_enabled(music_on, GameStorage.get('sound_bg'));
+        gui.set_enabled(music_off, !GameStorage.get('sound_bg'));
+
+        Sound.set_gain('map', GameStorage.get('sound_bg') ? 1 : 0);
+        Sound.set_gain('game', GameStorage.get('sound_bg') ? 1 : 0);
+        Sound.set_gain('store', GameStorage.get('sound_bg') ? 1 : 0);
+    });
+
+    data.druid.new_button('ok_button', () => {
+        set_enabled_settings(data, false);
+    });
+
+    const sound_on = gui.get_node('sound_on');
+    const sound_off = gui.get_node('sound_off');
+
+    gui.set_enabled(sound_on, Sound.is_active());
+    gui.set_enabled(sound_off, !Sound.is_active());
+
+    const music_on = gui.get_node('music_on');
+    const music_off = gui.get_node('music_off');
+
+    gui.set_enabled(music_on, GameStorage.get('sound_bg'));
+    gui.set_enabled(music_off, !GameStorage.get('sound_bg'));
 }
 
 function setup_busters(data: props) {
@@ -428,6 +486,11 @@ function set_enabled_store_button(state: boolean) {
     gui.set_enabled(store_button, state);
 }
 
+function set_enabled_settings_button(state: boolean) {
+    const settings_button = gui.get_node('settings_button');
+    gui.set_enabled(settings_button, state);
+}
+
 function on_add_coins() {
     const coins_text = gui.get_node('coins/text');
     gui.set_text(coins_text, tostring(GameStorage.get('coins')));
@@ -459,11 +522,13 @@ function on_scene_loaded(scene: NameMessage) {
             set_enabled_coins(false);
             set_enabled_lifes(false);
             set_enabled_store_button(false);
+            set_enabled_settings_button(false);
         break;
         case 'map':
             set_enabled_coins(true);
             set_enabled_lifes(true);
             set_enabled_store_button(true);
+            set_enabled_settings_button(false);
         break;
     }
 }
@@ -478,27 +543,53 @@ function on_gameover() {
 function set_enabled_store(state: boolean) {
     const store = gui.get_node('store/manager');
 
-    if(state && gui.is_enabled(store, false) ) return;
+    if(state && gui.is_enabled(store, false))
+        return;
 
     if(Scene.get_current_name() == "game") {
         set_enabled_coins(state);
         set_enabled_lifes(state);
     }
 
+    gui.set_enabled(gui.get_node('store_button'), !state);
+    gui.set_enabled(gui.get_node('settings_button'), !state);
+
     if(state) {
         gui.set_enabled(store, state);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.Store);
         Sound.play('store');
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('store/dlg'), 'position', vmath.vector3(270, 1500, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(store, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.Store);
         Sound.stop('store');
     }
+}
+
+function set_enabled_settings(data: props, state: boolean) {
+    const settings = gui.get_node('settings');
+
+    if(state && gui.is_enabled(settings, false))
+        return;
+
+    if(state) {
+        gui.set_enabled(settings, state);
+        gui.animate(gui.get_node('settings'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        EventBus.send('OPENED_DLG', Dlg.Settings);
+    } else {
+        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        gui.animate(gui.get_node('settings'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(settings, state);
+        });
+        EventBus.send('CLOSED_DLG', Dlg.Settings);
+    }
+
+    data.dlg_opened = state;
 }
 
 function set_enabled_life_notification(state: boolean) {
@@ -508,13 +599,13 @@ function set_enabled_life_notification(state: boolean) {
         gui.set_enabled(life, state);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.LifeNotification);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('life_notification/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(life, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.LifeNotification);
     }
 
     EventBus.send('LIFE_NOTIFICATION', state);
@@ -527,13 +618,13 @@ function set_enabled_not_enough_coins(state: boolean) {
         gui.set_enabled(coins, state);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.NotEnoughCoins);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(coins, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.NotEnoughCoins);
     }
 }
 
@@ -547,13 +638,13 @@ function set_enabled_hammer(data: props, state: boolean) {
         gui.set_enabled(hammer, state);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.Hammer);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('hammer/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(hammer, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.Hammer);
     }
 
     data.dlg_opened = state;
@@ -569,13 +660,13 @@ function set_enabled_spinning(data: props, state: boolean) {
         gui.set_enabled(spinning, state);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.Spinning);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('spinning/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(spinning, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.Spinning);
     }
 
     data.dlg_opened = state;
@@ -591,13 +682,13 @@ function set_enabled_horizontall_rocket(data: props, state: boolean) {
         gui.set_enabled(horizontal_rocket, state);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.HorizontalRocket);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('horizontal_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(horizontal_rocket, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.HorizontalRocket);
     }
 
     data.dlg_opened = state;
@@ -613,13 +704,13 @@ function set_enabled_vertical_rocket(data: props, state: boolean) {
         gui.set_enabled(vertical_rocket, state);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG');
+        EventBus.send('OPENED_DLG', Dlg.VerticalRocket);
     } else {
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('vertical_rocket/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(vertical_rocket, state);
         });
-        EventBus.send('CLOSED_DLG');
+        EventBus.send('CLOSED_DLG', Dlg.VerticalRocket);
     }
 
     data.dlg_opened = state;
