@@ -97,7 +97,6 @@ export function final(this: props): void {
 
 function setup(instance: props) {
     setup_info_ui(instance);
-    setup_sound_button(instance);
     setup_busters(instance);
     setup_sustem_ui(instance);
     setup_win_ui(instance);
@@ -121,18 +120,6 @@ function setup_info_ui(instance: props) {
     setup_step_or_time(instance);
     setup_avatar_or_clock(instance);
     setup_targets(instance);
-}
-
-function setup_sound_button(instace: props) {
-    const on = 'ui/BtnSoundOn';
-    const off = 'ui/BtnSoundOff';
-    const sound = gui.get_node('sound_button');
-    gui.set_texture(sound, Sound.is_active() ? on : off);
-
-    instace.druid.new_button('sound_button', () => {
-        Sound.set_active(Sound.is_active());
-        gui.set_texture(sound, Sound.is_active() ? on : off);
-    });
 }
 
 function setup_avatar_or_clock(instance: props) {

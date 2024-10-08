@@ -16,6 +16,8 @@ interface AnimalOptions {
 }
 
 export function init(this: props) {
+    Manager.init_script();
+    EventBus.on('ON_WIN', idle);
     animal_init({
         walkable: this.walkable
     });
@@ -86,4 +88,9 @@ function walk_back(pos: vmath.vector3, callback?: () => void) {
     go.animate(go.get_id(), 'position', go.PLAYBACK_ONCE_FORWARD, pos, go.EASING_LINEAR, 1, 0, () => {
         if(callback != undefined) callback();
     });
+}
+
+export function final() {
+    EventBus.off_all_current_script();
+    Manager.final_script();
 }

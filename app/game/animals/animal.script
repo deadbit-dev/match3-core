@@ -114,7 +114,14 @@ function walk_back(pos, callback)
 end
 go.property("walkable", true)
 function ____exports.init(self)
+    Manager.init_script()
+    EventBus.on("ON_WIN", idle)
     animal_init({walkable = self.walkable})
 end
+function ____exports.final()
+    EventBus.off_all_current_script()
+    Manager.final_script()
+end
 init = ____exports.init
+final = ____exports.final
 
