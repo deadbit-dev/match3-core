@@ -14,6 +14,10 @@ fonts {
   name: "60_medium"
   font: "/assets/fonts/60_medium.font"
 }
+fonts {
+  name: "42"
+  font: "/assets/fonts/42.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"

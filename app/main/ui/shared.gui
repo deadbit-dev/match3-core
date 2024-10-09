@@ -1801,13 +1801,18 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 12.0
+  }
   type: TYPE_TEXT
-  font: "60_medium"
+  font: "42"
   id: "coins/text"
   parent: "coins/button"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 8
   overridden_fields: 10
+  overridden_fields: 14
   overridden_fields: 20
   template_node_child: true
 }

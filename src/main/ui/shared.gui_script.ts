@@ -63,7 +63,7 @@ function set_events(data: props) {
     EventBus.on('ADDED_COIN', on_add_coins, true);
     EventBus.on('REMOVED_COIN', on_remove_coins, true);
     EventBus.on('NOT_ENOUGH_LIFE', () => set_enabled_life_notification(true), true);
-    EventBus.on('REQUEST_OPEN_STORE', () => set_enabled_store(true));
+    EventBus.on('REQUEST_OPEN_STORE', () => set_enabled_store(data, true));
     EventBus.on('TRY_BUY_HAMMER', () => {
         if(data.dlg_opened) return;
         set_enabled_hammer(data, true);
@@ -93,19 +93,19 @@ function setup(data: props) {
 }
 
 function setup_coins(data: props) {
-    data.druid.new_button('coins/button', () => set_enabled_store(true));
+    data.druid.new_button('coins/button', () => set_enabled_store(data, true));
     gui.set_text(gui.get_node('coins/text'), tostring(GameStorage.get('coins')));
 }
 
 function setup_life(data: props) {
-    data.druid.new_button('lifes/button', () => set_enabled_store(true));
+    data.druid.new_button('lifes/button', () => set_enabled_store(data, true));
     gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
 }
 
 function setup_store(data: props) {
-    data.druid.new_button('store_button', () => set_enabled_store(true));
+    data.druid.new_button('store_button', () => set_enabled_store(data, true));
 
-    data.druid.new_button('store/close', () => set_enabled_store(false));
+    data.druid.new_button('store/close', () => set_enabled_store(data, false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
     
@@ -421,7 +421,7 @@ function setup_not_enough_coins(data: props) {
         }
 
         set_enabled_not_enough_coins(false);
-        set_enabled_store(true);
+        set_enabled_store(data, true);
     });
 }
 
@@ -528,7 +528,7 @@ function on_scene_loaded(scene: NameMessage) {
             set_enabled_coins(true);
             set_enabled_lifes(true);
             set_enabled_store_button(true);
-            set_enabled_settings_button(false);
+            set_enabled_settings_button(true);
         break;
     }
 }
@@ -540,19 +540,27 @@ function on_gameover() {
     });
 }
 
-function set_enabled_store(state: boolean) {
+function set_enabled_store(data: props, state: boolean) {
     const store = gui.get_node('store/manager');
 
     if(state && gui.is_enabled(store, false))
         return;
 
-    if(Scene.get_current_name() == "game") {
-        set_enabled_coins(state);
-        set_enabled_lifes(state);
+    switch(Scene.get_current_name()) {
+        case "game":
+            set_enabled_coins(state);
+            set_enabled_lifes(state);
+            
+            set_enabled_hammer(data, false);
+            set_enabled_spinning(data, false);
+            set_enabled_horizontall_rocket(data, false);
+            set_enabled_vertical_rocket(data, false);
+        break;
+        case "map":
+            gui.set_enabled(gui.get_node('store_button'), !state);
+            gui.set_enabled(gui.get_node('settings_button'), !state);
+        break;
     }
-
-    gui.set_enabled(gui.get_node('store_button'), !state);
-    gui.set_enabled(gui.get_node('settings_button'), !state);
 
     if(state) {
         gui.set_enabled(store, state);

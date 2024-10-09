@@ -31,7 +31,7 @@ function set_events(data)
     )
     EventBus.on(
         "REQUEST_OPEN_STORE",
-        function() return set_enabled_store(true) end
+        function() return set_enabled_store(data, true) end
     )
     EventBus.on(
         "TRY_BUY_HAMMER",
@@ -86,7 +86,7 @@ end
 function setup_coins(data)
     data.druid:new_button(
         "coins/button",
-        function() return set_enabled_store(true) end
+        function() return set_enabled_store(data, true) end
     )
     gui.set_text(
         gui.get_node("coins/text"),
@@ -96,7 +96,7 @@ end
 function setup_life(data)
     data.druid:new_button(
         "lifes/button",
-        function() return set_enabled_store(true) end
+        function() return set_enabled_store(data, true) end
     )
     gui.set_text(
         gui.get_node("lifes/text"),
@@ -106,11 +106,11 @@ end
 function setup_store(data)
     data.druid:new_button(
         "store_button",
-        function() return set_enabled_store(true) end
+        function() return set_enabled_store(data, true) end
     )
     data.druid:new_button(
         "store/close",
-        function() return set_enabled_store(false) end
+        function() return set_enabled_store(data, false) end
     )
     gui.set_text(
         gui.get_node("store/store_title_text"),
@@ -584,7 +584,7 @@ function setup_not_enough_coins(data)
                 return
             end
             set_enabled_not_enough_coins(false)
-            set_enabled_store(true)
+            set_enabled_store(data, true)
         end
     )
 end
@@ -705,7 +705,7 @@ function on_scene_loaded(scene)
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
-            set_enabled_settings_button(false)
+            set_enabled_settings_button(true)
             break
         end
     until true
@@ -720,23 +720,36 @@ function on_gameover()
         end
     )
 end
-function set_enabled_store(state)
+function set_enabled_store(data, state)
     local store = gui.get_node("store/manager")
     if state and gui.is_enabled(store, false) then
         return
     end
-    if Scene.get_current_name() == "game" then
-        set_enabled_coins(state)
-        set_enabled_lifes(state)
-    end
-    gui.set_enabled(
-        gui.get_node("store_button"),
-        not state
-    )
-    gui.set_enabled(
-        gui.get_node("settings_button"),
-        not state
-    )
+    repeat
+        local ____switch103 = Scene.get_current_name()
+        local ____cond103 = ____switch103 == "game"
+        if ____cond103 then
+            set_enabled_coins(state)
+            set_enabled_lifes(state)
+            set_enabled_hammer(data, false)
+            set_enabled_spinning(data, false)
+            set_enabled_horizontall_rocket(data, false)
+            set_enabled_vertical_rocket(data, false)
+            break
+        end
+        ____cond103 = ____cond103 or ____switch103 == "map"
+        if ____cond103 then
+            gui.set_enabled(
+                gui.get_node("store_button"),
+                not state
+            )
+            gui.set_enabled(
+                gui.get_node("settings_button"),
+                not state
+            )
+            break
+        end
+    until true
     if state then
         gui.set_enabled(store, state)
         gui.animate(
