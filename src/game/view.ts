@@ -627,9 +627,12 @@ export function View(resources: ViewResources) {
             remove_action(Action.Swap);
             EventBus.send('REQUEST_SWAP_ELEMENTS_END', message);
 
-            if(element_to == NullElement)
+            if(element_to == NullElement) {
+                print("REQUEST FALLING SWAP: ", message.from.x, message.from.y);
                 request_falling(message.from);
+            }
 
+            // maybe request separetly ?
             record_action(Action.Combination);
             record_action(Action.Combination);
             EventBus.send('REQUEST_COMBINATE', {
@@ -716,7 +719,10 @@ export function View(resources: ViewResources) {
         make_cell_view(pos, base_cell(cell.uid));
 
         if(cell.strength != undefined && cell.strength > 0) make_cell_view(pos, cell);
-        else if(GAME_CONFIG.not_moved_cells.includes(cell.id)) request_falling(pos);
+        else if(GAME_CONFIG.not_moved_cells.includes(cell.id)) {
+            print("REQUEST FALLING DAMAGE CELL: ", pos.x, pos.y);
+            request_falling(pos);
+        }
     
         const type = cell.id as CellId;
         if(!GAME_CONFIG.explodable_cells.includes(type))
@@ -753,6 +759,7 @@ export function View(resources: ViewResources) {
         const to_world_pos = get_world_pos(message.buster_to.pos);
         go.animate(view_from_buster._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.squash_easing, GAME_CONFIG.squash_time, 0, () => {
             delete_view_item_by_uid(message.buster_from.element.uid);
+            print("REQUEST FALLING COMBINATE: ", message.buster_from.pos.x, message.buster_from.pos.y);
             request_falling(message.buster_from.pos);
 
             EventBus.send('REQUEST_COMBINED_BUSTERS', message);
@@ -771,6 +778,7 @@ export function View(resources: ViewResources) {
         if(message.maked_element != undefined) return on_combo_animation(message);
         for (const damage_info of message.damages) {
             on_damage(damage_info);
+            print("REQUEST FALLING COMBINED: ", damage_info.pos.x, damage_info.pos.y);
             request_falling(damage_info.pos);
         }
 
@@ -795,6 +803,7 @@ export function View(resources: ViewResources) {
                         }
                     });
 
+                    print("REQUEST FALLING COMBO: ", damage_info.pos.x, damage_info.pos.y);
                     request_falling(damage_info.pos, GAME_CONFIG.squash_time + 0.1);
                 }
             }
@@ -806,7 +815,9 @@ export function View(resources: ViewResources) {
         timer.delay(GAME_CONFIG.squash_time, false, () => {
             remove_action(Action.Combo);
             if(message.maked_element != undefined) {
+                print("MAKE ELEMENT: ", message.pos.x, message.pos.y);
                 make_element_view(message.pos.x, message.pos.y, message.maked_element);
+                EventBus.send("MAKED_ELEMENT", message.pos);
             }
 
             EventBus.send('REQUEST_COMBINATION_END', message.damages);
@@ -815,6 +826,7 @@ export function View(resources: ViewResources) {
 
     function on_combinate_not_found(pos: Position) {
         remove_action(Action.Combination);
+        print("REQUEST FALLING COMBINATE NOT FOUND: ", pos.x, pos.y);
         request_falling(pos);
     }
 
@@ -825,13 +837,14 @@ export function View(resources: ViewResources) {
     function on_falling_animation(message: MoveInfo) {
         const element_view = get_view_item_by_uid(message.element.uid);
         if(element_view != undefined) {
+            print("REQUEST FALLING ANIMATION: ", message.start_pos.x, message.start_pos.y);
             request_falling(message.start_pos);
 
             const to_world_pos = get_world_pos(message.next_pos);
             go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, go.EASING_LINEAR, GAME_CONFIG.falling_time, 0, () => {
                 EventBus.send('REQUEST_FALL_END', message.next_pos);
             });
-        }
+        } else print("FAIL FALL ANIMATION: ", message.start_pos.x, message.start_pos.y);
     }
 
     function on_falling_not_found() {
@@ -865,6 +878,7 @@ export function View(resources: ViewResources) {
     function request_falling(pos: Position, delay = GAME_CONFIG.falling_dalay) {
         record_action(Action.Falling);
         timer.delay(delay, false, () => {
+            Log.log("REQUEST FALLING: ", pos.x, pos.y);
             EventBus.send('REQUEST_FALLING', pos);
         });
     }

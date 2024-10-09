@@ -95,7 +95,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -141,6 +141,7 @@ function ____exports.Game()
             end,
             false
         )
+        EventBus.on("MAKED_ELEMENT", on_maked_element, false)
     end
     function set_element_chances()
         for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
@@ -1718,7 +1719,13 @@ function ____exports.Game()
     function on_combination(combination)
         local damages_info = field.combinate(combination)
         local maked_element = try_combo(combination.combined_pos, combination)
+        if maked_element ~= nil then
+            field.set_element_state(combination.combined_pos, ElementState.Busy)
+        end
         EventBus.send("RESPONSE_COMBINATION", {pos = combination.combined_pos, damages = damages_info, maked_element = maked_element})
+    end
+    function on_maked_element(pos)
+        field.set_element_state(pos, ElementState.Idle)
     end
     function on_combination_end(damages)
         for ____, damage_info in ipairs(damages) do
@@ -1728,29 +1735,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch390 = combination.type
-            local ____cond390 = ____switch390 == CombinationType.Comb4
-            if ____cond390 then
+            local ____switch392 = combination.type
+            local ____cond392 = ____switch392 == CombinationType.Comb4
+            if ____cond392 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond390 = ____cond390 or ____switch390 == CombinationType.Comb5
-            if ____cond390 then
+            ____cond392 = ____cond392 or ____switch392 == CombinationType.Comb5
+            if ____cond392 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond390 = ____cond390 or ____switch390 == CombinationType.Comb2x2
-            if ____cond390 then
+            ____cond392 = ____cond392 or ____switch392 == CombinationType.Comb2x2
+            if ____cond392 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond390 = ____cond390 or (____switch390 == CombinationType.Comb3x3a or ____switch390 == CombinationType.Comb3x3b)
-            if ____cond390 then
+            ____cond392 = ____cond392 or (____switch392 == CombinationType.Comb3x3a or ____switch392 == CombinationType.Comb3x3b)
+            if ____cond392 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond390 = ____cond390 or (____switch390 == CombinationType.Comb3x4 or ____switch390 == CombinationType.Comb3x5)
-            if ____cond390 then
+            ____cond392 = ____cond392 or (____switch392 == CombinationType.Comb3x4 or ____switch392 == CombinationType.Comb3x5)
+            if ____cond392 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
@@ -1764,6 +1771,7 @@ function ____exports.Game()
         if result ~= NotFound then
             local move_info = field.fell_element(result)
             if move_info ~= NotFound then
+                print("RESPONSE FALLING: ", move_info.start_pos.x, move_info.start_pos.y)
                 return EventBus.send("RESPONSE_FALLING", move_info)
             end
         end

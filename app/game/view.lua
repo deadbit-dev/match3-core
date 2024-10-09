@@ -685,6 +685,7 @@ function ____exports.View(resources)
                 remove_action(____exports.Action.Swap)
                 EventBus.send("REQUEST_SWAP_ELEMENTS_END", message)
                 if element_to == NullElement then
+                    print("REQUEST FALLING SWAP: ", message.from.x, message.from.y)
                     request_falling(message.from)
                 end
                 record_action(____exports.Action.Combination)
@@ -814,6 +815,7 @@ function ____exports.View(resources)
         if cell.strength ~= nil and cell.strength > 0 then
             make_cell_view(pos, cell)
         elseif __TS__ArrayIncludes(GAME_CONFIG.not_moved_cells, cell.id) then
+            print("REQUEST FALLING DAMAGE CELL: ", pos.x, pos.y)
             request_falling(pos)
         end
         local ____type = cell.id
@@ -877,6 +879,7 @@ function ____exports.View(resources)
             0,
             function()
                 delete_view_item_by_uid(message.buster_from.element.uid)
+                print("REQUEST FALLING COMBINATE: ", message.buster_from.pos.x, message.buster_from.pos.y)
                 request_falling(message.buster_from.pos)
                 EventBus.send("REQUEST_COMBINED_BUSTERS", message)
             end
@@ -898,6 +901,7 @@ function ____exports.View(resources)
         end
         for ____, damage_info in ipairs(message.damages) do
             on_damage(damage_info)
+            print("REQUEST FALLING COMBINED: ", damage_info.pos.x, damage_info.pos.y)
             request_falling(damage_info.pos)
         end
         EventBus.send("REQUEST_COMBINATION_END", message.damages)
@@ -929,6 +933,7 @@ function ____exports.View(resources)
                             end
                         end
                     )
+                    print("REQUEST FALLING COMBO: ", damage_info.pos.x, damage_info.pos.y)
                     request_falling(damage_info.pos, GAME_CONFIG.squash_time + 0.1)
                 end
             end
@@ -941,7 +946,9 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.Combo)
                 if message.maked_element ~= nil then
+                    print("MAKE ELEMENT: ", message.pos.x, message.pos.y)
                     make_element_view(message.pos.x, message.pos.y, message.maked_element)
+                    EventBus.send("MAKED_ELEMENT", message.pos)
                 end
                 EventBus.send("REQUEST_COMBINATION_END", message.damages)
             end
@@ -949,6 +956,7 @@ function ____exports.View(resources)
     end
     function on_combinate_not_found(pos)
         remove_action(____exports.Action.Combination)
+        print("REQUEST FALLING COMBINATE NOT FOUND: ", pos.x, pos.y)
         request_falling(pos)
     end
     function on_requested_element_animation(message)
@@ -957,6 +965,7 @@ function ____exports.View(resources)
     function on_falling_animation(message)
         local element_view = get_view_item_by_uid(message.element.uid)
         if element_view ~= nil then
+            print("REQUEST FALLING ANIMATION: ", message.start_pos.x, message.start_pos.y)
             request_falling(message.start_pos)
             local to_world_pos = get_world_pos(message.next_pos)
             go.animate(
@@ -971,6 +980,8 @@ function ____exports.View(resources)
                     EventBus.send("REQUEST_FALL_END", message.next_pos)
                 end
             )
+        else
+            print("FAIL FALL ANIMATION: ", message.start_pos.x, message.start_pos.y)
         end
     end
     function on_falling_not_found()
@@ -1025,6 +1036,7 @@ function ____exports.View(resources)
             delay,
             false,
             function()
+                Log.log("REQUEST FALLING: ", pos.x, pos.y)
                 EventBus.send("REQUEST_FALLING", pos)
             end
         )
@@ -1117,19 +1129,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch192 = message.axis
-                    local ____cond192 = ____switch192 == Axis.Horizontal
-                    if ____cond192 then
+                    local ____switch193 = message.axis
+                    local ____cond193 = ____switch193 == Axis.Horizontal
+                    if ____cond193 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond192 = ____cond192 or ____switch192 == Axis.Vertical
-                    if ____cond192 then
+                    ____cond193 = ____cond193 or ____switch193 == Axis.Vertical
+                    if ____cond193 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond192 = ____cond192 or ____switch192 == Axis.All
-                    if ____cond192 then
+                    ____cond193 = ____cond193 or ____switch193 == Axis.All
+                    if ____cond193 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1158,14 +1170,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch195 = axis
-            local ____cond195 = ____switch195 == Axis.Vertical
-            if ____cond195 then
+            local ____switch196 = axis
+            local ____cond196 = ____switch196 == Axis.Vertical
+            if ____cond196 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond195 = ____cond195 or ____switch195 == Axis.Horizontal
-            if ____cond195 then
+            ____cond196 = ____cond196 or ____switch196 == Axis.Horizontal
+            if ____cond196 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break

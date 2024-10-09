@@ -602,5 +602,7 @@ export type _UserMessages = {
     REQUEST_IDLE: VoidMessage,
 
     REQUEST_RELOAD_FIELD: VoidMessage,
-    RESPONSE_RELOAD_FIELD: GameState
+    RESPONSE_RELOAD_FIELD: GameState,
+
+    MAKED_ELEMENT: Position
 };

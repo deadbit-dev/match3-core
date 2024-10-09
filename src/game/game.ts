@@ -196,6 +196,8 @@ export function Game() {
             update_core_state();
             EventBus.send('RESPONSE_RELOAD_FIELD', copy_state());
         }, false);
+
+        EventBus.on('MAKED_ELEMENT', on_maked_element, false);
     }
 
     function set_element_chances() {
@@ -1577,11 +1579,17 @@ export function Game() {
     function on_combination(combination: CombinationInfo) {
         const damages_info = field.combinate(combination);
         const maked_element = try_combo(combination.combined_pos, combination);
+        if(maked_element != undefined)
+            field.set_element_state(combination.combined_pos, ElementState.Busy);
         EventBus.send('RESPONSE_COMBINATION', {
             pos: combination.combined_pos,
             damages: damages_info,
             maked_element
         });
+    }
+
+    function on_maked_element(pos: Position) {
+        field.set_element_state(pos, ElementState.Idle);
     }
 
     function on_combination_end(damages: DamageInfo[]) {
@@ -1619,8 +1627,10 @@ export function Game() {
         const result = search_fall_element(pos);
         if(result != NotFound) {
             const move_info = field.fell_element(result);
-            if(move_info != NotFound)
+            if(move_info != NotFound) {
+                print("RESPONSE FALLING: ", move_info.start_pos.x, move_info.start_pos.y);
                 return EventBus.send('RESPONSE_FALLING', move_info);
+            }
         }
 
         EventBus.send('RESPONSE_FALLING_NOT_FOUND');
