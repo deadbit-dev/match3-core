@@ -1383,7 +1383,7 @@ function ____exports.Game()
             return false
         end
         local under_damage = field.try_damage(pos, false, false, true)
-        local damages = damage_element_by_mask(pos, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
+        local damages = damage_element_by_mask(pos, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}})
         if under_damage ~= NotDamage then
             damages[#damages + 1] = under_damage
         end

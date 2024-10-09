@@ -1311,9 +1311,9 @@ export function Game() {
         const under_damage = field.try_damage(pos, false, false, true);
 
         const damages = damage_element_by_mask(pos, [
-            [0, 1, 0],
-            [1, 0, 1],
-            [0, 1, 0]
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
         ]);
 
         if(under_damage != NotDamage)

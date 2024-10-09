@@ -485,8 +485,9 @@ function ____exports.Field(size_x, size_y)
         return size_y - 1
     end
     function is_pos_empty(pos)
+        local cell = get_cell(pos)
         local element = get_element(pos)
-        return element == ____exports.NullElement
+        return (cell == ____exports.NotActiveCell or cell.state == ____exports.CellState.Idle) and element == ____exports.NullElement
     end
     state = {cells = {}, elements = {}}
     rotated_masks = {}

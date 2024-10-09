@@ -856,8 +856,9 @@ export function Field(size_x: number, size_y: number) {
 
     // проверка нет ли элемента в переданной позиции
     function is_pos_empty(pos: Position) {
+        const cell = get_cell(pos);
         const element = get_element(pos);
-        return (element == NullElement);
+        return (cell == NotActiveCell || cell.state == CellState.Idle) && (element == NullElement);
     }
 
     return {
