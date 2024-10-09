@@ -177,7 +177,6 @@ function setup_store(data: props) {
         set_infinit_life(1);
         
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
-        GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 1);
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
 
         EventBus.send('UPDATED_BUTTONS');
@@ -195,10 +194,9 @@ function setup_store(data: props) {
 
         set_infinit_life(24);
         
-        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
+        GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 2);
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') + 1);
-        GameStorage.set('horizontal_rocket_counts', GameStorage.get('horizontal_rocket_counts') + 1);
-        GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
+        GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 2);
 
         EventBus.send('UPDATED_BUTTONS');
     });
@@ -236,6 +234,12 @@ function setup_store(data: props) {
         infinit_life.start_time = System.now() - infinit_life.duration;
         GameStorage.set('infinit_life', infinit_life);
         on_infinit_life_tick();
+
+        const coins = gui.get_node('coins/text');
+        gui.set_font(coins, '42');
+
+        const lifes = gui.get_node('lifes/text');
+        gui.set_font(lifes, '60_medium');
 
         GameStorage.set('hammer_counts', 0);
         GameStorage.set('spinning_counts', 0);
@@ -458,7 +462,7 @@ function on_infinit_life_tick() {
     gui.play_flipbook(gui.get_node('lifes/icon'), 'infinite_life_icon');
     const text = gui.get_node('lifes/text');
     gui.set_text(text, parse_time(life.duration - delta));
-    gui.set_font(text, life.duration > (1 * 60 * 60) ? '18' : '27');
+    gui.set_font(text, life.duration > (1 * 60 * 60) ? '32' : '42');
     
     if(delta >= life.duration) {
         life.is_active = false;
@@ -548,13 +552,13 @@ function set_enabled_store(data: props, state: boolean) {
 
     switch(Scene.get_current_name()) {
         case "game":
-            set_enabled_coins(state);
-            set_enabled_lifes(state);
-            
             set_enabled_hammer(data, false);
             set_enabled_spinning(data, false);
             set_enabled_horizontall_rocket(data, false);
             set_enabled_vertical_rocket(data, false);
+
+            set_enabled_coins(state);
+            set_enabled_lifes(state);
         break;
         case "map":
             gui.set_enabled(gui.get_node('store_button'), !state);

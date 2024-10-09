@@ -232,4 +232,7 @@ images {
 images {
   image: "/assets/ui/BtnSoundOff.png"
 }
+images {
+  image: "/assets/ui/life_icon.png"
+}
 extrude_borders: 2

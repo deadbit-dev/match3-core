@@ -1866,19 +1866,24 @@ nodes {
 }
 nodes {
   position {
-    x: -118.0
+    x: -124.0
     y: 8.0
   }
   rotation {
     z: -9.256
   }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
   type: TYPE_BOX
-  texture: "ui/Life"
+  texture: "ui/life_icon"
   id: "lifes/icon"
   parent: "lifes/button"
   layer: "top"
   overridden_fields: 1
   overridden_fields: 2
+  overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 20
   template_node_child: true
