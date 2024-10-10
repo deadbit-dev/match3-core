@@ -1,5 +1,5 @@
 local ____exports = {}
-local animal_init, walk, idle, walk_to, action, walk_back
+local animal_init, start_action, walk, idle, walk_to, action, walk_back
 function animal_init(options)
     if GAME_CONFIG.animal_offset then
         local pos = go.get_position()
@@ -7,6 +7,8 @@ function animal_init(options)
         go.set_position(pos)
     end
     idle()
+end
+function start_action(options)
     if options.walkable then
         timer.delay(
             math.random(5, 10),
@@ -116,6 +118,12 @@ go.property("walkable", true)
 function ____exports.init(self)
     Manager.init_script()
     EventBus.on("ON_WIN", idle)
+    EventBus.on(
+        "HIDED_ANIMAL_TUTORIAL_TIP",
+        function()
+            start_action({walkable = self.walkable})
+        end
+    )
     animal_init({walkable = self.walkable})
 end
 function ____exports.final()

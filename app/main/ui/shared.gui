@@ -1090,14 +1090,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 470.0
+    y: 766.0
+  }
   scale {
-    x: 2.0
-    y: 2.0
+    x: 4.0
+    y: 4.0
   }
   type: TYPE_BOX
   id: "store/close"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 20
   template_node_child: true

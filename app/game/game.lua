@@ -294,6 +294,9 @@ function ____exports.Game()
     end
     function on_idle()
         Log.log("IDLE")
+        if is_idle then
+            return
+        end
         is_idle = true
         if is_level_completed() then
             return on_win()
@@ -422,6 +425,7 @@ function ____exports.Game()
         Scene.restart()
     end
     function shuffle()
+        Log.log("SHUFFLE")
         is_block_input = true
         local function on_end()
             update_core_state()
@@ -982,24 +986,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch215 = message.name
-            local ____cond215 = ____switch215 == "SPINNING"
-            if ____cond215 then
+            local ____switch216 = message.name
+            local ____cond216 = ____switch216 == "SPINNING"
+            if ____cond216 then
                 on_activate_spinning()
                 break
             end
-            ____cond215 = ____cond215 or ____switch215 == "HAMMER"
-            if ____cond215 then
+            ____cond216 = ____cond216 or ____switch216 == "HAMMER"
+            if ____cond216 then
                 on_activate_hammer()
                 break
             end
-            ____cond215 = ____cond215 or ____switch215 == "HORIZONTAL_ROCKET"
-            if ____cond215 then
+            ____cond216 = ____cond216 or ____switch216 == "HORIZONTAL_ROCKET"
+            if ____cond216 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond215 = ____cond215 or ____switch215 == "VERTICAL_ROCKET"
-            if ____cond215 then
+            ____cond216 = ____cond216 or ____switch216 == "VERTICAL_ROCKET"
+            if ____cond216 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1383,7 +1387,7 @@ function ____exports.Game()
             return false
         end
         local under_damage = field.try_damage(pos, false, false, true)
-        local damages = damage_element_by_mask(pos, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}})
+        local damages = damage_element_by_mask(pos, {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}})
         if under_damage ~= NotDamage then
             damages[#damages + 1] = under_damage
         end
@@ -1736,29 +1740,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch392 = combination.type
-            local ____cond392 = ____switch392 == CombinationType.Comb4
-            if ____cond392 then
+            local ____switch393 = combination.type
+            local ____cond393 = ____switch393 == CombinationType.Comb4
+            if ____cond393 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond392 = ____cond392 or ____switch392 == CombinationType.Comb5
-            if ____cond392 then
+            ____cond393 = ____cond393 or ____switch393 == CombinationType.Comb5
+            if ____cond393 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond392 = ____cond392 or ____switch392 == CombinationType.Comb2x2
-            if ____cond392 then
+            ____cond393 = ____cond393 or ____switch393 == CombinationType.Comb2x2
+            if ____cond393 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond392 = ____cond392 or (____switch392 == CombinationType.Comb3x3a or ____switch392 == CombinationType.Comb3x3b)
-            if ____cond392 then
+            ____cond393 = ____cond393 or (____switch393 == CombinationType.Comb3x3a or ____switch393 == CombinationType.Comb3x3b)
+            if ____cond393 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond392 = ____cond392 or (____switch392 == CombinationType.Comb3x4 or ____switch392 == CombinationType.Comb3x5)
-            if ____cond392 then
+            ____cond393 = ____cond393 or (____switch393 == CombinationType.Comb3x4 or ____switch393 == CombinationType.Comb3x5)
+            if ____cond393 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
@@ -1776,7 +1780,7 @@ function ____exports.Game()
                 return EventBus.send("RESPONSE_FALLING", move_info)
             end
         end
-        EventBus.send("RESPONSE_FALLING_NOT_FOUND")
+        EventBus.send("RESPONSE_FALLING_NOT_FOUND", pos)
     end
     function search_fall_element(pos)
         local top_pos = {x = pos.x, y = pos.y - 1}

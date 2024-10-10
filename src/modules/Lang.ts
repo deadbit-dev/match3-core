@@ -68,7 +68,7 @@ function LangModule() {
     }
 
     function get_text(code: keyof typeof lang_data) {
-        const data = langs_data[cur_lang];
+        const data = langs_data['ru'];
         if (!data) {
             Log.warn('нет языкового набора:', cur_lang);
             return '';

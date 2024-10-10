@@ -1504,7 +1504,7 @@ nodes {
   adjust_mode: ADJUST_MODE_STRETCH
   layer: "top"
   inherit_alpha: true
-  alpha: 0.7
+  alpha: 0.9
   enabled: false
 }
 nodes {
@@ -1941,4 +1941,8 @@ resources {
 materials {
   name: "font_top"
   material: "/assets/materials/font_top.material"
+}
+materials {
+  name: "tutorial_sprite"
+  material: "/assets/materials/tutorial_sprite.material"
 }

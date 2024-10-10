@@ -41,7 +41,7 @@ ____exports._GAME_CONFIG = {
     delay_before_gameover = 3,
     animal_offset = true,
     animal_level_delay_before_win = 5,
-    fade_value = 0.7,
+    fade_value = 0.9,
     helicopter_spin_duration = 0.5 + 2,
     helicopter_fly_duration = 2,
     damaged_element_easing = go.EASING_INOUTBACK,
@@ -261,15 +261,17 @@ ____exports._GAME_CONFIG = {
             busters = "hammer",
             text = {
                 data = "tutorial_hammer",
-                pos = vmath.vector3(0, 50, 0)
-            }
+                pos = vmath.vector3(0, 390, 0)
+            },
+            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
         },
         [9] = {
             busters = "spinning",
             text = {
                 data = "tutorial_spinning",
-                pos = vmath.vector3(0, 50, 0)
-            }
+                pos = vmath.vector3(0, 390, 0)
+            },
+            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
         },
         [10] = {
             cells = {
@@ -302,8 +304,9 @@ ____exports._GAME_CONFIG = {
             busters = {"horizontal_rocket", "vertical_rocket"},
             text = {
                 data = "tutorial_rockets",
-                pos = vmath.vector3(0, 50, 0)
-            }
+                pos = vmath.vector3(0, 390, 0)
+            },
+            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
         }
     },
     levels = {},

@@ -847,8 +847,10 @@ export function View(resources: ViewResources) {
         } else print("FAIL FALL ANIMATION: ", message.start_pos.x, message.start_pos.y);
     }
 
-    function on_falling_not_found() {
+    function on_falling_not_found(pos: Position) {
         remove_action(Action.Falling);
+
+        Log.log("REMOVE ACTION BY NOT FOUND: ", pos.x, pos.y);
 
         if(!has_actions())
             EventBus.send('REQUEST_IDLE');
@@ -859,6 +861,8 @@ export function View(resources: ViewResources) {
         if(element_view == undefined) return;
 
         remove_action(Action.Falling);
+        Log.log("REMOVE ACTION BY END: ", info.pos.x, info.pos.y);
+
         record_action(Action.Combination);
         
         const world_pos = go.get_position(element_view._hash);
@@ -877,6 +881,7 @@ export function View(resources: ViewResources) {
 
     function request_falling(pos: Position, delay = GAME_CONFIG.falling_dalay) {
         record_action(Action.Falling);
+        Log.log("ACTION: ", pos.x, pos.y);
         timer.delay(delay, false, () => {
             Log.log("REQUEST FALLING: ", pos.x, pos.y);
             EventBus.send('REQUEST_FALLING', pos);
@@ -887,8 +892,10 @@ export function View(resources: ViewResources) {
         if(damage_info.element != undefined) {
             Sound.play('broke_element');
 
-            if(damage_info.element.state == ElementState.Fall)
+            if(damage_info.element.state == ElementState.Fall) {
+                Log.log("REMOVE ACTION BY DAMAGE: ", damage_info.pos.x, damage_info.pos.y);
                 remove_action(Action.Falling);
+            }
 
             damage_element_animation(damage_info.element);
         }

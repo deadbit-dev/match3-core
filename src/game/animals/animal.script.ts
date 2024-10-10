@@ -18,6 +18,11 @@ interface AnimalOptions {
 export function init(this: props) {
     Manager.init_script();
     EventBus.on('ON_WIN', idle);
+    
+    EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
+        start_action({walkable: this.walkable});
+    });
+
     animal_init({
         walkable: this.walkable
     });
@@ -31,7 +36,9 @@ function animal_init(options: AnimalOptions) {
     }
 
     idle();
+}
 
+function start_action(options: AnimalOptions) {
     if(options.walkable) timer.delay(math.random(5, 10), false, walk);
     else {
         timer.delay(math.random(5, 10), false, () => {

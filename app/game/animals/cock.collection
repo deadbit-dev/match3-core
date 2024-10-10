@@ -17,7 +17,7 @@ embedded_instances {
   "  data: \"spine_scene: \\\"/assets/cock/cockerel.spinescene\\\"\\n"
   "default_animation: \\\"idle\\\"\\n"
   "skin: \\\"\\\"\\n"
-  "material: \\\"/assets/materials/spine_field.material\\\"\\n"
+  "material: \\\"/defold-spine/assets/spine.material\\\"\\n"
   "\"\n"
   "  position {\n"
   "    z: 1.0\n"

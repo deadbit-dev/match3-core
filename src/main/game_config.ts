@@ -60,7 +60,7 @@ export const _GAME_CONFIG = {
     animal_offset: true,
     animal_level_delay_before_win: 5,
 
-    fade_value: 0.7,
+    fade_value: 0.9,
 
     helicopter_spin_duration: 0.5 + 2,
     helicopter_fly_duration: 2,
@@ -352,14 +352,22 @@ export const _GAME_CONFIG = {
             busters: 'hammer',
             text: {
                 data: "tutorial_hammer",
-                pos: vmath.vector3(0, 50, 0)
+                pos: vmath.vector3(0, 390, 0)
+            },
+            bounds: {
+                from: {x:0, y: 0},
+                to: {x:10, y: 10}
             }
         },
         9: {
             busters: 'spinning',
             text: {
                 data: "tutorial_spinning",
-                pos: vmath.vector3(0, 50, 0)
+                pos: vmath.vector3(0, 390, 0)
+            },
+            bounds: {
+                from: {x:0, y: 0},
+                to: {x:10, y: 10}
             }
         },
         10: {
@@ -402,7 +410,11 @@ export const _GAME_CONFIG = {
             busters: ['horizontal_rocket', 'vertical_rocket'],
             text: {
                 data: "tutorial_rockets",
-                pos: vmath.vector3(0, 50, 0)
+                pos: vmath.vector3(0, 390, 0)
+            },
+            bounds: {
+                from: {x:0, y: 0},
+                to: {x:10, y: 10}
             }
         }
     } as TutorialData,
@@ -512,7 +524,7 @@ export type _UserMessages = {
     REQUEST_FALLING: Position,
     REQUEST_FALL_END: Position,
     RESPONSE_FALLING: MoveInfo,
-    RESPONSE_FALLING_NOT_FOUND: VoidMessage;
+    RESPONSE_FALLING_NOT_FOUND: Position;
     RESPONSE_FALL_END: ElementInfo,
 
     REQUESTED_ELEMENT: RequestElementMessage,
@@ -604,5 +616,5 @@ export type _UserMessages = {
     REQUEST_RELOAD_FIELD: VoidMessage,
     RESPONSE_RELOAD_FIELD: GameState,
 
-    MAKED_ELEMENT: Position
+    MAKED_ELEMENT: Position,
 };

@@ -322,6 +322,9 @@ export function Game() {
     function on_idle() {
         Log.log("IDLE");
 
+        if(is_idle)
+            return;
+
         is_idle = true;
 
         if(is_level_completed()) {
@@ -460,6 +463,8 @@ export function Game() {
     }
 
     function shuffle() {
+        Log.log("SHUFFLE");
+
         is_block_input = true;
         
         function on_end() {
@@ -1311,9 +1316,9 @@ export function Game() {
         const under_damage = field.try_damage(pos, false, false, true);
 
         const damages = damage_element_by_mask(pos, [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
+            [0, 1, 0],
+            [1, 0, 1],
+            [0, 1, 0]
         ]);
 
         if(under_damage != NotDamage)
@@ -1634,7 +1639,7 @@ export function Game() {
             }
         }
 
-        EventBus.send('RESPONSE_FALLING_NOT_FOUND');
+        EventBus.send('RESPONSE_FALLING_NOT_FOUND', pos);
     }
 
     function search_fall_element(pos: Position): Element | NotFound {
