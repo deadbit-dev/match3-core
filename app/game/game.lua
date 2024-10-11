@@ -293,10 +293,28 @@ function ____exports.Game()
         end
     end
     function on_idle()
-        Log.log("IDLE")
         if is_idle then
             return
         end
+        do
+            local y = 0
+            while y < field_height do
+                do
+                    local x = 0
+                    while x < field_width do
+                        local pos = {x = x, y = y}
+                        local cell = field.get_cell(pos)
+                        local element = field.get_element(pos)
+                        if element ~= NullElement and element.state ~= ElementState.Idle or cell ~= NotActiveCell and cell.state ~= CellState.Idle then
+                            return
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        Log.log("IDLE")
         is_idle = true
         if is_level_completed() then
             return on_win()
@@ -986,24 +1004,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch216 = message.name
-            local ____cond216 = ____switch216 == "SPINNING"
-            if ____cond216 then
+            local ____switch219 = message.name
+            local ____cond219 = ____switch219 == "SPINNING"
+            if ____cond219 then
                 on_activate_spinning()
                 break
             end
-            ____cond216 = ____cond216 or ____switch216 == "HAMMER"
-            if ____cond216 then
+            ____cond219 = ____cond219 or ____switch219 == "HAMMER"
+            if ____cond219 then
                 on_activate_hammer()
                 break
             end
-            ____cond216 = ____cond216 or ____switch216 == "HORIZONTAL_ROCKET"
-            if ____cond216 then
+            ____cond219 = ____cond219 or ____switch219 == "HORIZONTAL_ROCKET"
+            if ____cond219 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond216 = ____cond216 or ____switch216 == "VERTICAL_ROCKET"
-            if ____cond216 then
+            ____cond219 = ____cond219 or ____switch219 == "VERTICAL_ROCKET"
+            if ____cond219 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1740,29 +1758,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch393 = combination.type
-            local ____cond393 = ____switch393 == CombinationType.Comb4
-            if ____cond393 then
+            local ____switch396 = combination.type
+            local ____cond396 = ____switch396 == CombinationType.Comb4
+            if ____cond396 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond393 = ____cond393 or ____switch393 == CombinationType.Comb5
-            if ____cond393 then
+            ____cond396 = ____cond396 or ____switch396 == CombinationType.Comb5
+            if ____cond396 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond393 = ____cond393 or ____switch393 == CombinationType.Comb2x2
-            if ____cond393 then
+            ____cond396 = ____cond396 or ____switch396 == CombinationType.Comb2x2
+            if ____cond396 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond393 = ____cond393 or (____switch393 == CombinationType.Comb3x3a or ____switch393 == CombinationType.Comb3x3b)
-            if ____cond393 then
+            ____cond396 = ____cond396 or (____switch396 == CombinationType.Comb3x3a or ____switch396 == CombinationType.Comb3x3b)
+            if ____cond396 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond393 = ____cond393 or (____switch393 == CombinationType.Comb3x4 or ____switch393 == CombinationType.Comb3x5)
-            if ____cond393 then
+            ____cond396 = ____cond396 or (____switch396 == CombinationType.Comb3x4 or ____switch396 == CombinationType.Comb3x5)
+            if ____cond396 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
@@ -1792,6 +1810,7 @@ function ____exports.Game()
             return element
         end
         if field.is_outside_pos_in_column(top_pos) and field.is_pos_empty(top_pos) and field.is_pos_empty(pos) then
+            Log.log("REQUEST ELEMENT IN: ", pos)
             local element = field.request_element(top_pos)
             if element ~= NullElement then
                 EventBus.send("REQUESTED_ELEMENT", {pos = top_pos, element = element})

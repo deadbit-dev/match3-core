@@ -320,10 +320,20 @@ export function Game() {
     }
 
     function on_idle() {
-        Log.log("IDLE");
-
         if(is_idle)
             return;
+
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const pos = {x, y};
+                const cell = field.get_cell(pos);
+                const element = field.get_element(pos);
+                if(element != NullElement && element.state != ElementState.Idle || cell != NotActiveCell && cell.state != CellState.Idle)
+                    return;
+            }
+        }
+
+        Log.log("IDLE");
 
         is_idle = true;
 
@@ -1651,6 +1661,7 @@ export function Game() {
             return element;
 
         if(field.is_outside_pos_in_column(top_pos) && field.is_pos_empty(top_pos) && field.is_pos_empty(pos)) {
+        Log.log("REQUEST ELEMENT IN: ", pos);
             const element = field.request_element(top_pos);
             if(element != NullElement) {
                 EventBus.send('REQUESTED_ELEMENT', {pos: top_pos, element});
