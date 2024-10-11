@@ -5,10 +5,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import { is_tutorial } from "../utils";
+
 go.property('walkable', true);
 
 interface props {
     walkable: boolean
+    timers: hash[]
 }
 
 interface AnimalOptions {
@@ -17,11 +20,20 @@ interface AnimalOptions {
 
 export function init(this: props) {
     Manager.init_script();
-    EventBus.on('ON_WIN', idle);
-    
-    EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
-        start_action({walkable: this.walkable});
+
+    this.timers = [];
+
+    EventBus.on('ON_WIN', () => {
+        for(const t of this.timers)
+            timer.cancel(t);
+        idle();
     });
+    
+    if(is_tutorial()) {
+        EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
+            start_action(this, {walkable: this.walkable});
+        });
+    } else start_action(this, {walkable: this.walkable});
 
     animal_init({
         walkable: this.walkable
@@ -38,19 +50,20 @@ function animal_init(options: AnimalOptions) {
     idle();
 }
 
-function start_action(options: AnimalOptions) {
-    if(options.walkable) timer.delay(math.random(5, 10), false, walk);
+function start_action(props: props, options: AnimalOptions) {
+
+    if(options.walkable) props.timers.push(timer.delay(math.random(5, 10), false, walk));
     else {
-        timer.delay(math.random(5, 10), false, () => {
+        props.timers.push(timer.delay(math.random(5, 10), false, () => {
             action(() => {
                 idle();
-                timer.delay(math.random(5, 10), false, () => {
+                props.timers.push(timer.delay(math.random(5, 10), false, () => {
                     action(() => {
                         idle();
                     });
-                });
+                }));
             });
-        });
+        }));
     }
 }
 
