@@ -1004,24 +1004,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch219 = message.name
-            local ____cond219 = ____switch219 == "SPINNING"
-            if ____cond219 then
+            local ____switch220 = message.name
+            local ____cond220 = ____switch220 == "SPINNING"
+            if ____cond220 then
                 on_activate_spinning()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "HAMMER"
-            if ____cond219 then
+            ____cond220 = ____cond220 or ____switch220 == "HAMMER"
+            if ____cond220 then
                 on_activate_hammer()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "HORIZONTAL_ROCKET"
-            if ____cond219 then
+            ____cond220 = ____cond220 or ____switch220 == "HORIZONTAL_ROCKET"
+            if ____cond220 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "VERTICAL_ROCKET"
-            if ____cond219 then
+            ____cond220 = ____cond220 or ____switch220 == "VERTICAL_ROCKET"
+            if ____cond220 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1305,7 +1305,7 @@ function ____exports.Game()
         if rocket == NullElement or not __TS__ArrayIncludes(GAME_CONFIG.rockets, rocket.id) then
             return false
         end
-        local damage = field.try_damage(pos)
+        local damage = field.try_damage(pos, false, false, true)
         local damages = damage ~= NotDamage and ({damage}) or ({})
         if rocket.id == ____exports.ElementId.VerticalRocket or rocket.id == ____exports.ElementId.AllAxisRocket or all_axis then
             do

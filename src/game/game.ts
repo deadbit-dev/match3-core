@@ -1229,7 +1229,7 @@ export function Game() {
         if(rocket == NullElement || !GAME_CONFIG.rockets.includes(rocket.id))
             return false;
         
-        const damage = field.try_damage(pos);
+        const damage = field.try_damage(pos, false, false, true);
         const damages = damage != NotDamage ? [damage] : [];
 
         if(rocket.id == ElementId.VerticalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
