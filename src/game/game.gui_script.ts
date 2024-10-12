@@ -517,8 +517,12 @@ function on_win() {
 
     timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
         disable_game_ui();
-        gui.set_enabled(gui.get_node('lock1'), true);
-        gui.set_enabled(gui.get_node('win'), true);
+        
+        const lock = gui.get_node('lock1');
+        gui.set_enabled(lock, true);
+        gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(gui.get_node('win'), true);
+        });
 
         Sound.play('passed');
     
@@ -531,9 +535,13 @@ function on_win() {
 function set_gameover(instance: props, state: GameState, revive: boolean) {
     disable_game_ui();
     
-    gui.set_enabled(gui.get_node('lock1'), true);
-    gui.set_enabled(gui.get_node('gameover'), true);
-    gui.set_enabled(gui.get_node('missing_targets'), true);
+    const lock = gui.get_node('lock1');
+    gui.set_enabled(lock, true);
+    gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
+        gui.set_enabled(gui.get_node('gameover'), true);
+        gui.set_enabled(gui.get_node('missing_targets'), true);
+    });
+    
 
     Sound.play('failed');
 
