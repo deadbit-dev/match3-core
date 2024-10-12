@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-// import * as flow from 'ludobits.m.flow';
+import * as flow from 'ludobits.m.flow';
 import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./utils";
 import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotDamage, NotFound, NullElement, Position, SwapInfo } from "./core";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
@@ -500,7 +500,7 @@ export function Game() {
     }
 
     function shuffle_field(on_end: () => void, on_error: () => void) {
-        // return flow.start(() => {
+        return flow.start(() => {
             Log.log("SHUFFLE FIELD");
         
             let step = false;
@@ -526,17 +526,17 @@ export function Game() {
         
                 shuffle_array(elements);
         
-                // let counter = 0;
-                // const optimize_count = 5;
+                let counter = 0;
+                const optimize_count = 5;
         
                 // filling the field available elements by got positions
                 let element_assigned = false;
                 for(const position of positions) {
         
-                    // if(counter >= optimize_count) {
-                    //     counter = 0;
-                    //     flow.frames(1);
-                    // }
+                    if(counter >= optimize_count) {
+                        counter = 0;
+                        flow.frames(1);
+                    }
         
                     for(let i = 0; i < elements.length; i++) {
                         const elementIndex = Math.floor(Math.random() * elements.length);
@@ -559,7 +559,7 @@ export function Game() {
                         }
                     }
         
-                    // counter++;
+                    counter++;
                 }
 
                 step = has_step();
@@ -568,7 +568,7 @@ export function Game() {
             if(step) on_end();
             else on_error();
 
-        // }, {parallel: true});
+        }, {parallel: true});
     }
 
     function try_load_field() {

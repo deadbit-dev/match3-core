@@ -8,6 +8,7 @@ local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
 local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
+local flow = require("ludobits.m.flow")
 local ____utils = require("game.utils")
 local get_field_width = ____utils.get_field_width
 local get_field_height = ____utils.get_field_height
@@ -477,78 +478,90 @@ function ____exports.Game()
         is_block_input = false
     end
     function shuffle_field(on_end, on_error)
-        Log.log("SHUFFLE FIELD")
-        local step = false
-        local attempt = 0
-        repeat
-            do
-                local positions = {}
-                local elements = {}
-                do
-                    local y = 0
-                    while y < field_height do
+        return flow.start(
+            function()
+                Log.log("SHUFFLE FIELD")
+                local step = false
+                local attempt = 0
+                repeat
+                    do
+                        local positions = {}
+                        local elements = {}
                         do
-                            local x = 0
-                            while x < field_width do
-                                local cell = field.get_cell({x = x, y = y})
-                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    local element = field.get_element({x = x, y = y})
-                                    if element ~= NullElement then
-                                        positions[#positions + 1] = {x = x, y = y}
-                                        elements[#elements + 1] = element
-                                        field.set_element({x = x, y = y}, NullElement)
+                            local y = 0
+                            while y < field_height do
+                                do
+                                    local x = 0
+                                    while x < field_width do
+                                        local cell = field.get_cell({x = x, y = y})
+                                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
+                                            local element = field.get_element({x = x, y = y})
+                                            if element ~= NullElement then
+                                                positions[#positions + 1] = {x = x, y = y}
+                                                elements[#elements + 1] = element
+                                                field.set_element({x = x, y = y}, NullElement)
+                                            end
+                                        end
+                                        x = x + 1
                                     end
                                 end
-                                x = x + 1
+                                y = y + 1
                             end
                         end
-                        y = y + 1
+                        shuffle_array(elements)
+                        local counter = 0
+                        local optimize_count = 5
+                        local element_assigned = false
+                        for ____, position in ipairs(positions) do
+                            if counter >= optimize_count then
+                                counter = 0
+                                flow.frames(1)
+                            end
+                            do
+                                local i = 0
+                                while i < #elements do
+                                    local elementIndex = math.floor(math.random() * #elements)
+                                    local element = elements[elementIndex + 1]
+                                    field.set_element(position, element)
+                                    if field.search_combination(position) == NotFound then
+                                        __TS__ArraySplice(elements, elementIndex, 1)
+                                        element_assigned = true
+                                        break
+                                    end
+                                    i = i + 1
+                                end
+                            end
+                            if not element_assigned then
+                                for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                                    if __TS__ArrayFind(
+                                        elements,
+                                        function(____, element) return element.id == element_id end
+                                    ) == nil then
+                                        make_element(position, element_id)
+                                    end
+                                end
+                            end
+                            counter = counter + 1
+                        end
+                        step = has_step()
                     end
+                    local ____temp_4 = not step
+                    if ____temp_4 then
+                        attempt = attempt + 1
+                        ____temp_4 = attempt < GAME_CONFIG.shuffle_max_attempt
+                    end
+                    if not ____temp_4 then
+                        break
+                    end
+                until false
+                if step then
+                    on_end()
+                else
+                    on_error()
                 end
-                shuffle_array(elements)
-                local element_assigned = false
-                for ____, position in ipairs(positions) do
-                    do
-                        local i = 0
-                        while i < #elements do
-                            local elementIndex = math.floor(math.random() * #elements)
-                            local element = elements[elementIndex + 1]
-                            field.set_element(position, element)
-                            if field.search_combination(position) == NotFound then
-                                __TS__ArraySplice(elements, elementIndex, 1)
-                                element_assigned = true
-                                break
-                            end
-                            i = i + 1
-                        end
-                    end
-                    if not element_assigned then
-                        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
-                            if __TS__ArrayFind(
-                                elements,
-                                function(____, element) return element.id == element_id end
-                            ) == nil then
-                                make_element(position, element_id)
-                            end
-                        end
-                    end
-                end
-                step = has_step()
-            end
-            local ____temp_4 = not step
-            if ____temp_4 then
-                attempt = attempt + 1
-                ____temp_4 = attempt < GAME_CONFIG.shuffle_max_attempt
-            end
-            if not ____temp_4 then
-                break
-            end
-        until false
-        if step then
-            on_end()
-        else
-            on_error()
-        end
+            end,
+            {parallel = true}
+        )
     end
     function try_load_field()
         do
@@ -1004,24 +1017,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch219 = message.name
-            local ____cond219 = ____switch219 == "SPINNING"
-            if ____cond219 then
+            local ____switch221 = message.name
+            local ____cond221 = ____switch221 == "SPINNING"
+            if ____cond221 then
                 on_activate_spinning()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "HAMMER"
-            if ____cond219 then
+            ____cond221 = ____cond221 or ____switch221 == "HAMMER"
+            if ____cond221 then
                 on_activate_hammer()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "HORIZONTAL_ROCKET"
-            if ____cond219 then
+            ____cond221 = ____cond221 or ____switch221 == "HORIZONTAL_ROCKET"
+            if ____cond221 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond219 = ____cond219 or ____switch219 == "VERTICAL_ROCKET"
-            if ____cond219 then
+            ____cond221 = ____cond221 or ____switch221 == "VERTICAL_ROCKET"
+            if ____cond221 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1758,29 +1771,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch396 = combination.type
-            local ____cond396 = ____switch396 == CombinationType.Comb4
-            if ____cond396 then
+            local ____switch398 = combination.type
+            local ____cond398 = ____switch398 == CombinationType.Comb4
+            if ____cond398 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond396 = ____cond396 or ____switch396 == CombinationType.Comb5
-            if ____cond396 then
+            ____cond398 = ____cond398 or ____switch398 == CombinationType.Comb5
+            if ____cond398 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond396 = ____cond396 or ____switch396 == CombinationType.Comb2x2
-            if ____cond396 then
+            ____cond398 = ____cond398 or ____switch398 == CombinationType.Comb2x2
+            if ____cond398 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond396 = ____cond396 or (____switch396 == CombinationType.Comb3x3a or ____switch396 == CombinationType.Comb3x3b)
-            if ____cond396 then
+            ____cond398 = ____cond398 or (____switch398 == CombinationType.Comb3x3a or ____switch398 == CombinationType.Comb3x3b)
+            if ____cond398 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond396 = ____cond396 or (____switch396 == CombinationType.Comb3x4 or ____switch396 == CombinationType.Comb3x5)
-            if ____cond396 then
+            ____cond398 = ____cond398 or (____switch398 == CombinationType.Comb3x4 or ____switch398 == CombinationType.Comb3x5)
+            if ____cond398 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
