@@ -10,8 +10,8 @@ import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
 import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo, ElementState } from "./core";
-import { base_cell, CellId, ElementId, GameState, LockInfo, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage } from '../main/game_config';
+import { base_cell, CellId, ElementId, GameState, LockInfo, Target, TargetState, UnlockInfo } from "./game";
+import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -101,7 +101,7 @@ export const EMPTY_SUBSTRATE = -1;
 export interface ViewState {
     game_id_to_view_index: { [key in string]: number[] },
     substrates: hash[][],
-    targets: { [key in number]: number }
+    targets: { [key in number]: TargetState }
 }
 
 export interface ViewResources {
@@ -204,6 +204,9 @@ export function View(resources: ViewResources) {
         EventBus.on('RESPONSE_ACTIVATED_HELICOPTER', on_helicopter_activated_animation, false);
         EventBus.on('RESPONSE_HELICOPTER_ACTION', on_helicopter_action_animation, false);
         EventBus.on('SHUFFLE_ACTION', on_shuffle_animation, false);
+        EventBus.on('UPDATED_TARGET', (message: {idx: number, target: TargetState}) => {
+            view_state.targets[message.idx] = message.target;
+        }, false);
     }
 
     function on_message(this: any, message_id: hash, message: any, sender: hash) {
@@ -256,9 +259,9 @@ export function View(resources: ViewResources) {
         for(let i = 0; i < game_state.targets.length; i++) {
             const target = game_state.targets[i];
             const amount = target.count - target.uids.length;
-            view_state.targets[i] = amount;
+            view_state.targets[i] = target;
 
-            EventBus.send('UPDATED_TARGET', {idx: i, amount, id: target.id, type: target.type});
+            EventBus.send('UPDATED_TARGET_UI', {idx: i, amount, id: target.id, type: target.type});
         }
 
         EventBus.send('REQUEST_IDLE');
@@ -360,7 +363,7 @@ export function View(resources: ViewResources) {
             return;
         }
 
-        // if(update_target) update_target_by_uid(uid);
+        update_targets_by_uid(uid);
 
         go_manager.delete_item(item, true);
         view_state.game_id_to_view_index[uid].splice(0, 1);
@@ -370,13 +373,23 @@ export function View(resources: ViewResources) {
         const items = get_all_view_items_by_uid(uid);
         if (items == undefined) return;
     
-        // if(update_target) update_target_by_uid(uid);
-        
         for (const item of items) {
             go_manager.delete_item(item, true);
         }
-    
+
+        update_targets_by_uid(uid);
+
         delete view_state.game_id_to_view_index[uid];
+    }
+
+    function update_targets_by_uid(uid: number) {
+        for(let i = 0; i < Object.entries(view_state.targets).length; i++) {
+            const target = view_state.targets[i];
+            if(target.uids.includes(uid)) {
+                const amount = target.count - target.uids.length;
+                EventBus.send('UPDATED_TARGET_UI', {idx: i, amount, id: target.id, type: target.type});
+            }
+        }
     }
 
     function get_world_pos(pos: Position, z = 0) {

@@ -4,7 +4,7 @@
 
 import { NullElement, SwapInfo, CombinationInfo, MoveInfo, Element, DamageInfo, Position, ElementInfo } from "../game/core";
 import { Level } from "../game/level";
-import { CellId, ElementId, TargetType, GameState, TutorialData, LockInfo, UnlockInfo } from "../game/game";
+import { CellId, ElementId, TargetType, GameState, TutorialData, LockInfo, UnlockInfo, TargetState } from "../game/game";
 import { SubstrateId } from "../game/view";
 import { NameMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
@@ -556,7 +556,8 @@ export type _UserMessages = {
 
     INIT_UI: VoidMessage,
     UPDATED_STEP_COUNTER: number,
-    UPDATED_TARGET: TargetMessage,
+    UPDATED_TARGET: { idx: number, target: TargetState },
+    UPDATED_TARGET_UI: TargetMessage,
 
     ADDED_LIFE: VoidMessage,
     REMOVED_LIFE: VoidMessage,

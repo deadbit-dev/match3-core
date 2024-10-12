@@ -340,7 +340,7 @@ function set_events(instance: props) {
     EventBus.on('SET_ANIMAL_TUTORIAL_TIP', set_animal_tutorial_tip, true);
     EventBus.on('INIT_UI', () => setup(instance));
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
-    EventBus.on('UPDATED_TARGET', (data) => update_targets(data), true);
+    EventBus.on('UPDATED_TARGET_UI', (data) => update_targets(data), true);
     EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
     EventBus.on('SET_TUTORIAL', set_tutorial, true);

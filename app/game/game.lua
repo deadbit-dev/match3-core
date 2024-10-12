@@ -914,7 +914,7 @@ function ____exports.Game()
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
                     local ____target_uids_7 = target.uids
                     ____target_uids_7[#____target_uids_7 + 1] = element.uid
-                    EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
+                    EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
             end
@@ -962,7 +962,7 @@ function ____exports.Game()
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
                     local ____target_uids_8 = target.uids
                     ____target_uids_8[#____target_uids_8 + 1] = cell.uid
-                    EventBus.send("UPDATED_TARGET", {idx = i, amount = target.count - #target.uids, id = target.id, type = target.type})
+                    EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
             end
@@ -1004,24 +1004,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch220 = message.name
-            local ____cond220 = ____switch220 == "SPINNING"
-            if ____cond220 then
+            local ____switch219 = message.name
+            local ____cond219 = ____switch219 == "SPINNING"
+            if ____cond219 then
                 on_activate_spinning()
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == "HAMMER"
-            if ____cond220 then
+            ____cond219 = ____cond219 or ____switch219 == "HAMMER"
+            if ____cond219 then
                 on_activate_hammer()
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == "HORIZONTAL_ROCKET"
-            if ____cond220 then
+            ____cond219 = ____cond219 or ____switch219 == "HORIZONTAL_ROCKET"
+            if ____cond219 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond220 = ____cond220 or ____switch220 == "VERTICAL_ROCKET"
-            if ____cond220 then
+            ____cond219 = ____cond219 or ____switch219 == "VERTICAL_ROCKET"
+            if ____cond219 then
                 on_activate_vertical_rocket()
                 break
             end

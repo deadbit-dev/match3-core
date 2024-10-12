@@ -922,7 +922,7 @@ export function Game() {
             const target = targets[i];
             if(target.type == TargetType.Element && target.id == element.id) {
                 target.uids.push(element.uid);
-                EventBus.send('UPDATED_TARGET', {idx: i, amount: target.count - target.uids.length, id: target.id, type: target.type});
+                EventBus.send('UPDATED_TARGET', {idx: i, target});
             }
         }
 
@@ -970,7 +970,7 @@ export function Game() {
             const target = targets[i];
             if(target.type == TargetType.Cell && target.id == cell.id) {
                 target.uids.push(cell.uid);
-                EventBus.send('UPDATED_TARGET', {idx: i, amount: target.count - target.uids.length, id: target.id, type: target.type});
+                EventBus.send('UPDATED_TARGET', {idx: i, target});
             }
         }
     }

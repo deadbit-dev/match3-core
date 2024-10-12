@@ -403,7 +403,7 @@ function set_events(instance)
         true
     )
     EventBus.on(
-        "UPDATED_TARGET",
+        "UPDATED_TARGET_UI",
         function(data) return update_targets(data) end,
         true
     )
