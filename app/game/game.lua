@@ -3,9 +3,9 @@ local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ObjectEntries = ____lualib.__TS__ObjectEntries
 local __TS__ArrayFind = ____lualib.__TS__ArrayFind
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
+local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArraySplice = ____lualib.__TS__ArraySplice
 local __TS__ArrayEntries = ____lualib.__TS__ArrayEntries
-local __TS__Iterator = ____lualib.__TS__Iterator
 local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
 local flow = require("ludobits.m.flow")
@@ -454,6 +454,42 @@ function ____exports.Game()
             )
         end
         local function on_error()
+            Log.log("SHUFFLE DIFFICULT CASE")
+            do
+                local y = field_height - 1
+                while y > 0 do
+                    do
+                        local x = 0
+                        while x < field_width do
+                            local pos = {x = x, y = y}
+                            local cell = field.get_cell(pos)
+                            if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
+                                local element = field.get_element(pos)
+                                if element == NullElement then
+                                    local available_elements = json.decode(json.encode(GAME_CONFIG.base_elements))
+                                    shuffle_array(available_elements)
+                                    for ____, element_id in __TS__Iterator(available_elements) do
+                                        make_element(pos, element_id)
+                                        if field.search_combination(pos) == NotFound then
+                                            if has_step() then
+                                                update_core_state()
+                                                return EventBus.send(
+                                                    "SHUFFLE_ACTION",
+                                                    copy_state()
+                                                )
+                                            end
+                                            break
+                                        end
+                                    end
+                                end
+                            end
+                            x = x + 1
+                        end
+                    end
+                    flow.frames(1)
+                    y = y - 1
+                end
+            end
             update_core_state()
             EventBus.send(
                 "SHUFFLE_ACTION",
@@ -518,17 +554,16 @@ function ____exports.Game()
                                 flow.frames(1)
                             end
                             do
-                                local i = 0
-                                while i < #elements do
-                                    local elementIndex = math.floor(math.random() * #elements)
-                                    local element = elements[elementIndex + 1]
+                                local i = #elements - 1
+                                while i >= 0 do
+                                    local element = elements[i + 1]
                                     field.set_element(position, element)
                                     if field.search_combination(position) == NotFound then
-                                        __TS__ArraySplice(elements, elementIndex, 1)
+                                        __TS__ArraySplice(elements, i, 1)
                                         element_assigned = true
                                         break
                                     end
-                                    i = i + 1
+                                    i = i - 1
                                 end
                             end
                             if not element_assigned then
@@ -538,8 +573,15 @@ function ____exports.Game()
                                         function(____, element) return element.id == element_id end
                                     ) == nil then
                                         make_element(position, element_id)
+                                        if field.search_combination(position) == NotFound then
+                                            element_assigned = true
+                                        end
+                                        break
                                     end
                                 end
+                            end
+                            if not element_assigned then
+                                field.set_element(position, NullElement)
                             end
                             counter = counter + 1
                         end
@@ -725,6 +767,9 @@ function ____exports.Game()
                 end
                 y = y + 1
             end
+        end
+        if not has_step() then
+            shuffle()
         end
     end
     function load_cell(pos)
@@ -1017,24 +1062,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch221 = message.name
-            local ____cond221 = ____switch221 == "SPINNING"
-            if ____cond221 then
+            local ____switch232 = message.name
+            local ____cond232 = ____switch232 == "SPINNING"
+            if ____cond232 then
                 on_activate_spinning()
                 break
             end
-            ____cond221 = ____cond221 or ____switch221 == "HAMMER"
-            if ____cond221 then
+            ____cond232 = ____cond232 or ____switch232 == "HAMMER"
+            if ____cond232 then
                 on_activate_hammer()
                 break
             end
-            ____cond221 = ____cond221 or ____switch221 == "HORIZONTAL_ROCKET"
-            if ____cond221 then
+            ____cond232 = ____cond232 or ____switch232 == "HORIZONTAL_ROCKET"
+            if ____cond232 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond221 = ____cond221 or ____switch221 == "VERTICAL_ROCKET"
-            if ____cond221 then
+            ____cond232 = ____cond232 or ____switch232 == "VERTICAL_ROCKET"
+            if ____cond232 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1771,29 +1816,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch398 = combination.type
-            local ____cond398 = ____switch398 == CombinationType.Comb4
-            if ____cond398 then
+            local ____switch409 = combination.type
+            local ____cond409 = ____switch409 == CombinationType.Comb4
+            if ____cond409 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond398 = ____cond398 or ____switch398 == CombinationType.Comb5
-            if ____cond398 then
+            ____cond409 = ____cond409 or ____switch409 == CombinationType.Comb5
+            if ____cond409 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond398 = ____cond398 or ____switch398 == CombinationType.Comb2x2
-            if ____cond398 then
+            ____cond409 = ____cond409 or ____switch409 == CombinationType.Comb2x2
+            if ____cond409 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond398 = ____cond398 or (____switch398 == CombinationType.Comb3x3a or ____switch398 == CombinationType.Comb3x3b)
-            if ____cond398 then
+            ____cond409 = ____cond409 or (____switch409 == CombinationType.Comb3x3a or ____switch409 == CombinationType.Comb3x3b)
+            if ____cond409 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond398 = ____cond398 or (____switch398 == CombinationType.Comb3x4 or ____switch398 == CombinationType.Comb3x5)
-            if ____cond398 then
+            ____cond409 = ____cond409 or (____switch409 == CombinationType.Comb3x4 or ____switch409 == CombinationType.Comb3x5)
+            if ____cond409 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

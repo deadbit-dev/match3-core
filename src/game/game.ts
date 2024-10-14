@@ -483,6 +483,34 @@ export function Game() {
         }
 
         function on_error() {
+            Log.log("SHUFFLE DIFFICULT CASE");
+            for(let y = field_height - 1; y > 0; y--) {
+                for(let x = 0; x < field_width; x++) {
+                    const pos = {x, y};
+                    const cell = field.get_cell(pos);
+                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                        const element = field.get_element(pos);
+                        if(element == NullElement) {
+                            const available_elements = json.decode(json.encode(GAME_CONFIG.base_elements));
+                            shuffle_array(available_elements);
+                            for(const element_id of available_elements) {
+                                make_element(pos, element_id);
+                                if(field.search_combination(pos) == NotFound) {
+                                    if(has_step()) {
+                                        update_core_state();
+                                        return EventBus.send('SHUFFLE_ACTION', copy_state());
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                flow.frames(1);
+            }
+
             update_core_state();
             EventBus.send('SHUFFLE_ACTION', copy_state());
             timer.delay(0.5, false, () => on_gameover(false));
@@ -538,12 +566,11 @@ export function Game() {
                         flow.frames(1);
                     }
         
-                    for(let i = 0; i < elements.length; i++) {
-                        const elementIndex = Math.floor(Math.random() * elements.length);
-                        const element = elements[elementIndex];
+                    for(let i = elements.length - 1; i >= 0; i--) {
+                        const element = elements[i];
                         field.set_element(position, element);
                         if(field.search_combination(position) == NotFound) {
-                            elements.splice(elementIndex, 1);
+                            elements.splice(i, 1);
                             element_assigned = true;    
                             break;
                         }
@@ -555,8 +582,15 @@ export function Game() {
                         for(const element_id of GAME_CONFIG.base_elements) {
                             if(elements.find((element) => element.id == element_id) == undefined) {
                                 make_element(position, element_id);
+                                if(field.search_combination(position) == NotFound)
+                                    element_assigned = true;
+                                    break;
                             }
                         }
+                    }
+
+                    if(!element_assigned) {
+                        field.set_element(position, NullElement);
                     }
         
                     counter++;
@@ -735,6 +769,9 @@ export function Game() {
                 } else field.set_element({x, y}, NullElement);
             }
         }
+
+        if(!has_step())
+            shuffle();
     }
 
     function load_cell(pos: Position) {
