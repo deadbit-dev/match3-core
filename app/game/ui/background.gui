@@ -1,0 +1,26 @@
+textures {
+  name: "background"
+  texture: "/assets/background.atlas"
+}
+nodes {
+  position {
+    x: 270.0
+    y: 480.0
+  }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
+  type: TYPE_BOX
+  texture: "background/background"
+  id: "bg"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  material: "bg"
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+materials {
+  name: "bg"
+  material: "/assets/materials/bg.material"
+}

@@ -40,6 +40,7 @@ local function get_projection(self)
 end
 
 function init(self)
+  self.bg_pred = render.predicate({"bg"})
   self.tile_pred = render.predicate({ "tile" })
   self.gui_pred = render.predicate({ "gui" })
   self.field_pred = render.predicate({ "field" })
@@ -80,6 +81,11 @@ function update(self)
 
   -- render world (sprites, tilemaps, particles etc)
   --
+  render_in_gui(self, window_width, window_height,
+    function(self, frustum_gui)
+      render.draw(self.bg_pred, {frustum = frustum_gui})
+    end
+  )
 
   render_in_game(self, window_width, window_height,
     function(self, frustrum)

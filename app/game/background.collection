@@ -1,29 +1,10 @@
 name: "background"
 scale_along_z: 0
 embedded_instances {
-  id: "background"
-  data: "embedded_components {\n"
-  "  id: \"sprite\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"background\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/assets/background.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
-  "  position {\n"
-  "    y: 960.0\n"
-  "  }\n"
+  id: "ui"
+  data: "components {\n"
+  "  id: \"background\"\n"
+  "  component: \"/game/ui/background.gui\"\n"
   "}\n"
   ""
-  position {
-    x: 270.0
-    y: -480.0
-    z: -3.0
-  }
-  scale3 {
-    x: 0.6
-    y: 0.6
-  }
 }
