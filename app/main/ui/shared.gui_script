@@ -408,6 +408,18 @@ function setup_settings(data)
         music_off,
         not GameStorage.get("sound_bg")
     )
+    gui.set_text(
+        gui.get_node("title_text"),
+        Lang.get_text("settings")
+    )
+    gui.set_text(
+        gui.get_node("sound_lable"),
+        Lang.get_text("sound")
+    )
+    gui.set_text(
+        gui.get_node("music_lable"),
+        Lang.get_text("music")
+    )
 end
 function setup_busters(data)
     setup_hammer(data)

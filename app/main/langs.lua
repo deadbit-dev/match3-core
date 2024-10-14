@@ -37,6 +37,9 @@ ____exports.lang_data = {
     remove_ad = {["Русский-ru"] = "Отключить рекламу", ["Английский-en"] = "Remove ad"},
     next_life = {["Русский-ru"] = "Следующая жизнь через", ["Английский-en"] = "Next life through"},
     movie_description = {["Русский-ru"] = "Кошка потерялась, помоги ей преодолеть препятствия и вернуться домой", ["Английский-en"] = "The cat is lost, help her overcome obstacles and return home"},
-    play = {["Русский-ru"] = "Играть", ["Английский-en"] = "Play"}
+    play = {["Русский-ru"] = "Играть", ["Английский-en"] = "Play"},
+    settings = {["Русский-ru"] = "Настройки", ["Английский-en"] = "Settings"},
+    sound = {["Русский-ru"] = "Звуки", ["Английский-en"] = "Sound"},
+    music = {["Русский-ru"] = "Музыка", ["Английский-en"] = "Music"}
 }
 return ____exports

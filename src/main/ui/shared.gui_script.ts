@@ -303,6 +303,10 @@ function setup_settings(data: props) {
 
     gui.set_enabled(music_on, GameStorage.get('sound_bg'));
     gui.set_enabled(music_off, !GameStorage.get('sound_bg'));
+
+    gui.set_text(gui.get_node('title_text'), Lang.get_text('settings'));
+    gui.set_text(gui.get_node('sound_lable'), Lang.get_text('sound'));
+    gui.set_text(gui.get_node('music_lable'), Lang.get_text('music'));
 }
 
 function setup_busters(data: props) {

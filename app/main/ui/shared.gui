@@ -1903,7 +1903,7 @@ nodes {
     y: 50.0
   }
   type: TYPE_TEXT
-  font: "60_medium"
+  font: "42"
   id: "lifes/text"
   parent: "lifes/button"
   layer: "top"
@@ -2094,7 +2094,7 @@ nodes {
 }
 nodes {
   position {
-    x: -138.0
+    x: -168.0
     y: 68.0
   }
   scale {
@@ -2111,7 +2111,7 @@ nodes {
 }
 nodes {
   position {
-    x: -138.0
+    x: -168.0
     y: -56.0
   }
   scale {
@@ -2128,7 +2128,7 @@ nodes {
 }
 nodes {
   position {
-    x: -8.0
+    x: -106.0
     y: 67.0
   }
   size {
@@ -2144,6 +2144,7 @@ nodes {
   text: "\320\227\320\262\321\203\320\272\320\270"
   font: "42"
   id: "sound_lable"
+  pivot: PIVOT_W
   outline {
     x: 1.0
     y: 1.0
@@ -2163,7 +2164,7 @@ nodes {
 }
 nodes {
   position {
-    x: -6.0
+    x: -106.0
     y: -59.0
   }
   size {
@@ -2179,6 +2180,7 @@ nodes {
   text: "\320\234\321\203\320\267\321\213\320\272\320\260"
   font: "42"
   id: "music_lable"
+  pivot: PIVOT_W
   outline {
     x: 1.0
     y: 1.0
