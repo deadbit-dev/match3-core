@@ -20,6 +20,9 @@ export function init(this: props): void {
     
     this.druid = druid.new(this);
 
+    Camera.set_dynamic_orientation(false);
+    Camera.set_go_prjection(-1, 0, -3, 3);
+
     set_last_map_position();
     set_completed_levels();
     
@@ -92,7 +95,8 @@ function on_drag(action: any) {
     
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
-    pos.y = math.max(-3990, math.min(0, pos.y + action.dy));
+    const offset = get_offset();
+    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y + action.dy));
     gui.set_position(map, pos);
 
     GameStorage.set('map_last_pos_y', pos.y);
@@ -112,4 +116,26 @@ function set_events(instace: props) {
     EventBus.on('LIFE_NOTIFICATION', (state) => {
         instace.block_input = state;
     });
+
+    EventBus.on("SYS_ON_RESIZED", on_resize);
+}
+
+function on_resize(data: { width: number, height: number }) {
+    Log.log("RESIZE");
+    const offset = get_offset();
+    const map = gui.get_node('map');
+    const pos = gui.get_position(map);
+    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y));
+    gui.set_position(map, pos);
+}
+
+function get_offset() {
+    const height = Camera.get_ltrb().w;
+    if(height >= -480)
+        return 0;
+
+    const delta = math.abs(480 - math.abs(height));
+    print(delta);
+
+    return delta;
 }
