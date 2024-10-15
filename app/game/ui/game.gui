@@ -1861,7 +1861,7 @@ nodes {
     y: 0.9
   }
   type: TYPE_TEMPLATE
-  id: "revert_step"
+  id: "rewind"
   parent: "system_buttons"
   inherit_alpha: true
   template: "/game/ui/button.gui"
@@ -1873,15 +1873,14 @@ nodes {
   }
   type: TYPE_BOX
   texture: "ui/system_button"
-  id: "revert_step/button"
+  id: "rewind/button"
   yanchor: YANCHOR_BOTTOM
-  parent: "revert_step"
+  parent: "rewind"
   overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 13
   overridden_fields: 45
   template_node_child: true
-  enabled: false
 }
 nodes {
   scale {
@@ -1890,8 +1889,8 @@ nodes {
   }
   type: TYPE_BOX
   texture: "ui/arrow_icon"
-  id: "revert_step/icon"
-  parent: "revert_step/button"
+  id: "rewind/icon"
+  parent: "rewind/button"
   overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 45
@@ -1899,16 +1898,16 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  id: "revert_step/lock"
-  parent: "revert_step/button"
+  id: "rewind/lock"
+  parent: "rewind/button"
   overridden_fields: 45
   template_node_child: true
   enabled: false
 }
 nodes {
   type: TYPE_TEXT
-  id: "revert_step/counts"
-  parent: "revert_step/button"
+  id: "rewind/counts"
+  parent: "rewind/button"
   template_node_child: true
 }
 layers {

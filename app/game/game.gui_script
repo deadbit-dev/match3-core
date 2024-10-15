@@ -284,6 +284,10 @@ function setup_sustem_ui(instance)
             Scene.restart()
         end
     )
+    instance.druid:new_button(
+        "rewind/button",
+        function() return EventBus.send("REQUEST_REWIND") end
+    )
     set_text(
         "current_level",
         "Уровень " .. tostring(GameStorage.get("current_level") + 1)
@@ -441,25 +445,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch71 = data.idx
-        local ____cond71 = ____switch71 == 0
-        if ____cond71 then
+        local ____switch72 = data.idx
+        local ____cond72 = ____switch72 == 0
+        if ____cond72 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond71 = ____cond71 or ____switch71 == 1
-        if ____cond71 then
+        ____cond72 = ____cond72 or ____switch72 == 1
+        if ____cond72 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond71 = ____cond71 or ____switch71 == 2
-        if ____cond71 then
+        ____cond72 = ____cond72 or ____switch72 == 2
+        if ____cond72 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

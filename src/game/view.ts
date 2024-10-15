@@ -207,6 +207,7 @@ export function View(resources: ViewResources) {
         EventBus.on('UPDATED_TARGET', (message: {idx: number, target: TargetState}) => {
             view_state.targets[message.idx] = message.target;
         }, false);
+        EventBus.on('RESPONSE_REWIND', on_rewind_animation, false);
     }
 
     function on_message(this: any, message_id: hash, message: any, sender: hash) {
@@ -335,6 +336,18 @@ export function View(resources: ViewResources) {
             view_state.substrates[y] = [];
             for(let x = 0; x < get_field_width(); x++)
                 view_state.substrates[y][x] = EMPTY_SUBSTRATE;
+        }
+    }
+
+    function on_rewind_animation(state: GameState) {
+        reset_field();
+        load_field(state);
+
+        for(let i = 0; i < state.targets.length; i++) {
+            const target = state.targets[i];
+            const amount = target.count - target.uids.length;
+            view_state.targets[i] = target;
+            EventBus.send('UPDATED_TARGET_UI', {idx: i, amount, id: target.id, type: target.type});
         }
     }
 

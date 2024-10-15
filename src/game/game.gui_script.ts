@@ -261,7 +261,8 @@ function setup_sustem_ui(instance: props) {
         GAME_CONFIG.is_restart = true;
         Scene.restart();
     });
-    // instance.druid.new_button('revert_step/button', () => EventBus.send('REVERT_STEP'));
+    
+    instance.druid.new_button('rewind/button', () => EventBus.send('REQUEST_REWIND'));
 
     set_text('current_level', 'Уровень ' + (GameStorage.get('current_level') + 1));
 }

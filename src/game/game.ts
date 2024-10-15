@@ -137,7 +137,7 @@ export function Game() {
 
     let helper_data: HelperMessage | null = null;
 
-    let is_idle = true;
+    let is_idle = false;
 
     function init() {
         Log.log("INIT GAME");
@@ -198,6 +198,8 @@ export function Game() {
         }, false);
 
         EventBus.on('MAKED_ELEMENT', on_maked_element, false);
+
+        EventBus.on('REQUEST_REWIND', on_rewind, false);
     }
 
     function set_element_chances() {
@@ -220,7 +222,7 @@ export function Game() {
 
         if(GAME_CONFIG.is_revive) revive();
         else {
-            states.push({} as GameState);
+            new_state();
             try_load_field();
             update_core_state();
             set_targets(level_config.targets);
@@ -236,6 +238,8 @@ export function Game() {
 
         GAME_CONFIG.is_revive = false;
         game_timer = timer.delay(1, true, on_tick);
+
+        on_idle();
     }
 
     function set_tutorial() {
@@ -351,12 +355,70 @@ export function Game() {
             return;
         }
 
+        update_core_state();
+        
+        new_state();
+        update_core_state();
+
+        const last_state = get_state(1);
+        set_targets(last_state.targets);
+        set_steps(last_state.steps);
+        set_random();
+
         if(!is_tutorial() && helper_timer == null) {
             helper_timer = timer.delay(5, true, () => { 
                 reset_helper();
                 set_helper();
             });
         }
+    }
+
+    function on_rewind() {
+        if(!is_idle)
+            return;
+
+        is_idle = false;
+
+        stop_helper();
+        try_rewind();
+        
+        on_idle();
+    }
+
+    function try_rewind(): boolean {
+        if(states.length < 3)
+            return false;
+
+        Log.log("REWIND: ", states.length);
+
+        states.pop(); // new state
+        states.pop(); // current state
+
+        let previous_state = get_state();
+        if(previous_state == undefined) return false;
+
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const cell = previous_state.cells[y][x];
+                if(cell != NotActiveCell) {
+                    cell.uid = generate_uid();
+                    field.set_cell({x, y}, cell);
+                } else field.set_cell({x, y}, NotActiveCell);
+
+                const element = previous_state.elements[y][x];
+                if(element != NullElement) {
+                    element.uid = generate_uid();
+                    field.set_element({x, y}, element);
+                } else field.set_element({x, y}, NullElement);
+            }
+        }
+
+        update_core_state();
+        set_random(previous_state.randomseed);
+
+        EventBus.send('RESPONSE_REWIND', previous_state);
+
+        return true;
     }
 
     function set_helper(message?: HelperMessage) {
@@ -455,14 +517,10 @@ export function Game() {
         timer.cancel(game_timer);
 
         update_core_state();
-        const state = copy_state();
         
-        if(revive) {
-            GAME_CONFIG.revive_states = [];
-            GAME_CONFIG.revive_states.push(state);
-        }
+        if(revive) GAME_CONFIG.revive_states = json.decode(json.encode(states));
 
-        EventBus.send('ON_GAME_OVER', {state, revive});
+        EventBus.send('ON_GAME_OVER', {state: copy_state(), revive});
     }
 
     function on_revive(steps: number) {
@@ -480,37 +538,16 @@ export function Game() {
         function on_end() {
             update_core_state();        
             EventBus.send('SHUFFLE_ACTION', copy_state());
+
+            if(helper_timer == null) {
+                helper_timer = timer.delay(5, true, () => { 
+                    reset_helper();
+                    set_helper();
+                });
+            }
         }
 
         function on_error() {
-            Log.log("SHUFFLE DIFFICULT CASE");
-            for(let y = field_height - 1; y > 0; y--) {
-                for(let x = 0; x < field_width; x++) {
-                    const pos = {x, y};
-                    const cell = field.get_cell(pos);
-                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                        const element = field.get_element(pos);
-                        if(element == NullElement) {
-                            const available_elements = json.decode(json.encode(GAME_CONFIG.base_elements));
-                            shuffle_array(available_elements);
-                            for(const element_id of available_elements) {
-                                make_element(pos, element_id);
-                                if(field.search_combination(pos) == NotFound) {
-                                    if(has_step()) {
-                                        update_core_state();
-                                        return EventBus.send('SHUFFLE_ACTION', copy_state());
-                                    }
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                flow.frames(1);
-            }
-
             update_core_state();
             EventBus.send('SHUFFLE_ACTION', copy_state());
             timer.delay(0.5, false, () => on_gameover(false));
@@ -598,6 +635,32 @@ export function Game() {
 
                 step = has_step();
             } while (!step && ++attempt < GAME_CONFIG.shuffle_max_attempt);
+
+            if(step) return on_end();
+
+            Log.log("SHUFFLE DIFFICULT CASE");
+            for(let y = field_height - 1; y > 0; y--) {
+                for(let x = 0; x < field_width; x++) {
+                    const pos = {x, y};
+                    const cell = field.get_cell(pos);
+                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                        const element = field.get_element(pos);
+                        if(element == NullElement) {
+                            const available_elements = json.decode(json.encode(GAME_CONFIG.base_elements));
+                            shuffle_array(available_elements);
+                            for(const element_id of available_elements) {
+                                make_element(pos, element_id);
+                                if(field.search_combination(pos) == NotFound) {
+                                    if(has_step()) return on_end();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                flow.frames(1);
+            }
 
             if(step) on_end();
             else on_error();
@@ -817,12 +880,8 @@ export function Game() {
         return states[states.length - (1 + offset)];
     }
 
-    function new_state(last_state: GameState) {
+    function new_state() {
         states.push({} as GameState);
-
-        set_targets(last_state.targets);
-        set_steps(last_state.steps);
-        set_random();
     }
 
     function update_core_state() {

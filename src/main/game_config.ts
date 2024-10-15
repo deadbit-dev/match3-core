@@ -618,4 +618,7 @@ export type _UserMessages = {
     RESPONSE_RELOAD_FIELD: GameState,
 
     MAKED_ELEMENT: Position,
+
+    REQUEST_REWIND: VoidMessage
+    RESPONSE_REWIND: GameState
 };
