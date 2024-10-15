@@ -251,35 +251,20 @@ function setup_settings(data: props) {
         const sound_on = gui.get_node('sound_on');
         const sound_off = gui.get_node('sound_off');
 
-        Sound.set_active(!Sound.is_active());
-        GameStorage.set('sound_bg', Sound.is_active());
+        Sound.set_sfx_active(!Sound.is_sfx_active());
 
-        gui.set_enabled(sound_on, Sound.is_active());
-        gui.set_enabled(sound_off, !Sound.is_active());
-
-        Sound.set_gain('map', Sound.is_active() ? 1 : 0);
-        Sound.set_gain('game', Sound.is_active() ? 1 : 0);
-        Sound.set_gain('store', Sound.is_active() ? 1 : 0);
-
-        const music_on = gui.get_node('music_on');
-        const music_off = gui.get_node('music_off');
-
-        gui.set_enabled(music_on, Sound.is_active());
-        gui.set_enabled(music_off, !Sound.is_active());
+        gui.set_enabled(sound_on, Sound.is_sfx_active());
+        gui.set_enabled(sound_off, !Sound.is_sfx_active());
     });
 
     data.druid.new_button('music_button', () => {
         const music_on = gui.get_node('music_on');
         const music_off = gui.get_node('music_off');
 
-        GameStorage.set('sound_bg', !GameStorage.get('sound_bg'));
+        Sound.set_music_active(!Sound.is_music_active());
 
-        gui.set_enabled(music_on, GameStorage.get('sound_bg'));
-        gui.set_enabled(music_off, !GameStorage.get('sound_bg'));
-
-        Sound.set_gain('map', GameStorage.get('sound_bg') ? 1 : 0);
-        Sound.set_gain('game', GameStorage.get('sound_bg') ? 1 : 0);
-        Sound.set_gain('store', GameStorage.get('sound_bg') ? 1 : 0);
+        gui.set_enabled(music_on, Sound.is_music_active());
+        gui.set_enabled(music_off, !Sound.is_music_active());
     });
 
     data.druid.new_button('ok_button', () => {
@@ -289,14 +274,14 @@ function setup_settings(data: props) {
     const sound_on = gui.get_node('sound_on');
     const sound_off = gui.get_node('sound_off');
 
-    gui.set_enabled(sound_on, Sound.is_active());
-    gui.set_enabled(sound_off, !Sound.is_active());
+    gui.set_enabled(sound_on, Sound.is_sfx_active());
+    gui.set_enabled(sound_off, !Sound.is_sfx_active());
 
     const music_on = gui.get_node('music_on');
     const music_off = gui.get_node('music_off');
 
-    gui.set_enabled(music_on, GameStorage.get('sound_bg'));
-    gui.set_enabled(music_off, !GameStorage.get('sound_bg'));
+    gui.set_enabled(music_on, Sound.is_music_active());
+    gui.set_enabled(music_off, !Sound.is_music_active());
 
     gui.set_text(gui.get_node('title_text'), Lang.get_text('settings'));
     gui.set_text(gui.get_node('sound_lable'), Lang.get_text('sound'));

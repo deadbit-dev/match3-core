@@ -22,6 +22,8 @@ function SoundModule() {
 
     function init() {
         set_active(is_active());
+        set_sfx_active(is_sfx_active());
+        set_music_active(is_music_active());
         //  play('empty');
     }
 
@@ -49,9 +51,27 @@ function SoundModule() {
         return Storage.get_bool('is_sound', true);
     }
 
+    function is_sfx_active() {
+        return Storage.get_bool('is_sfx', true);
+    }
+
+    function is_music_active() {
+        return Storage.get_bool('is_music', true);
+    }
+
     function set_active(active: boolean) {
         Storage.set('is_sound', active);
         sound.set_group_gain('master', active ? 1 : 0);
+    }
+
+    function set_sfx_active(state: boolean) {
+        Storage.set('is_sfx', state);
+        sound.set_group_gain('sfx', state ? 1 : 0);
+    }
+
+    function set_music_active(state: boolean) {
+        Storage.set('is_music', state);
+        sound.set_group_gain('music', state ? 1 : 0);
     }
 
     function play(name: string, speed = 1, volume = 1) {
@@ -80,5 +100,5 @@ function SoundModule() {
 
     init();
 
-    return { _on_message, is_active, set_active, play, stop, set_pause, attach_druid_click, set_gain };
+    return { _on_message, is_active, set_active, is_sfx_active, set_sfx_active, is_music_active, set_music_active, play, stop, set_pause, attach_druid_click, set_gain };
 }

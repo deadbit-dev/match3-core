@@ -310,40 +310,14 @@ function setup_settings(data)
         function()
             local sound_on = gui.get_node("sound_on")
             local sound_off = gui.get_node("sound_off")
-            Sound.set_active(not Sound.is_active())
-            GameStorage.set(
-                "sound_bg",
-                Sound.is_active()
-            )
+            Sound.set_sfx_active(not Sound.is_sfx_active())
             gui.set_enabled(
                 sound_on,
-                Sound.is_active()
+                Sound.is_sfx_active()
             )
             gui.set_enabled(
                 sound_off,
-                not Sound.is_active()
-            )
-            Sound.set_gain(
-                "map",
-                Sound.is_active() and 1 or 0
-            )
-            Sound.set_gain(
-                "game",
-                Sound.is_active() and 1 or 0
-            )
-            Sound.set_gain(
-                "store",
-                Sound.is_active() and 1 or 0
-            )
-            local music_on = gui.get_node("music_on")
-            local music_off = gui.get_node("music_off")
-            gui.set_enabled(
-                music_on,
-                Sound.is_active()
-            )
-            gui.set_enabled(
-                music_off,
-                not Sound.is_active()
+                not Sound.is_sfx_active()
             )
         end
     )
@@ -352,29 +326,14 @@ function setup_settings(data)
         function()
             local music_on = gui.get_node("music_on")
             local music_off = gui.get_node("music_off")
-            GameStorage.set(
-                "sound_bg",
-                not GameStorage.get("sound_bg")
-            )
+            Sound.set_music_active(not Sound.is_music_active())
             gui.set_enabled(
                 music_on,
-                GameStorage.get("sound_bg")
+                Sound.is_music_active()
             )
             gui.set_enabled(
                 music_off,
-                not GameStorage.get("sound_bg")
-            )
-            Sound.set_gain(
-                "map",
-                GameStorage.get("sound_bg") and 1 or 0
-            )
-            Sound.set_gain(
-                "game",
-                GameStorage.get("sound_bg") and 1 or 0
-            )
-            Sound.set_gain(
-                "store",
-                GameStorage.get("sound_bg") and 1 or 0
+                not Sound.is_music_active()
             )
         end
     )
@@ -388,21 +347,21 @@ function setup_settings(data)
     local sound_off = gui.get_node("sound_off")
     gui.set_enabled(
         sound_on,
-        Sound.is_active()
+        Sound.is_sfx_active()
     )
     gui.set_enabled(
         sound_off,
-        not Sound.is_active()
+        not Sound.is_sfx_active()
     )
     local music_on = gui.get_node("music_on")
     local music_off = gui.get_node("music_off")
     gui.set_enabled(
         music_on,
-        GameStorage.get("sound_bg")
+        Sound.is_music_active()
     )
     gui.set_enabled(
         music_off,
-        not GameStorage.get("sound_bg")
+        not Sound.is_music_active()
     )
     gui.set_text(
         gui.get_node("title_text"),

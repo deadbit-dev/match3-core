@@ -36,10 +36,6 @@ export function init(this: props) {
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')
             HtmlBridge.start_resize_monitor();
 
-        Sound.set_gain('map', GameStorage.get('sound_bg') ? 1 : 0);
-        Sound.set_gain('game', GameStorage.get('sound_bg') ? 1 : 0);
-        Sound.set_gain('store', GameStorage.get('sound_bg') ? 1 : 0);
-
         default_style.scroll.WHEEL_SCROLL_SPEED = 10;
         druid.set_default_style(default_style);
         Sound.attach_druid_click('btn');
