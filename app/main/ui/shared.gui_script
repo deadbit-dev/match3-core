@@ -291,10 +291,6 @@ function setup_store(data)
             infinit_life.start_time = System.now() - infinit_life.duration
             GameStorage.set("infinit_life", infinit_life)
             on_infinit_life_tick()
-            local coins = gui.get_node("coins/text")
-            gui.set_font(coins, "42")
-            local lifes = gui.get_node("lifes/text")
-            gui.set_font(lifes, "60_medium")
             GameStorage.set("hammer_counts", 0)
             GameStorage.set("spinning_counts", 0)
             GameStorage.set("horizontal_rocket_counts", 0)
@@ -632,7 +628,6 @@ function on_infinit_life_tick()
         text,
         parse_time(life.duration - delta)
     )
-    gui.set_font(text, life.duration > 1 * 60 * 60 and "32" or "42")
     if delta >= life.duration then
         life.is_active = false
         GameStorage.set("infinit_life", life)
@@ -644,7 +639,6 @@ function on_infinit_life_tick()
             text,
             tostring(GameStorage.get("life").amount)
         )
-        gui.set_font(text, "32")
     end
 end
 function set_enabled_coins(state)

@@ -235,12 +235,6 @@ function setup_store(data: props) {
         GameStorage.set('infinit_life', infinit_life);
         on_infinit_life_tick();
 
-        const coins = gui.get_node('coins/text');
-        gui.set_font(coins, '42');
-
-        const lifes = gui.get_node('lifes/text');
-        gui.set_font(lifes, '60_medium');
-
         GameStorage.set('hammer_counts', 0);
         GameStorage.set('spinning_counts', 0);
         GameStorage.set('horizontal_rocket_counts', 0);
@@ -466,14 +460,14 @@ function on_infinit_life_tick() {
     gui.play_flipbook(gui.get_node('lifes/icon'), 'infinite_life_icon');
     const text = gui.get_node('lifes/text');
     gui.set_text(text, parse_time(life.duration - delta));
-    gui.set_font(text, life.duration > (1 * 60 * 60) ? '32' : '42');
+    //gui.set_font(text, life.duration > (1 * 60 * 60) ? '32' : '42');
     
     if(delta >= life.duration) {
         life.is_active = false;
         GameStorage.set('infinit_life', life);
         gui.play_flipbook(gui.get_node('lifes/icon'), 'life_icon');
         gui.set_text(text, tostring(GameStorage.get('life').amount));
-        gui.set_font(text, '32');
+        //gui.set_font(text, '32');
     }
 }
 

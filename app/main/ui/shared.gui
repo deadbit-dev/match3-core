@@ -3,6 +3,10 @@ fonts {
   name: "42"
   font: "/assets/fonts/42.font"
 }
+fonts {
+  name: "48"
+  font: "/assets/fonts/48.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"
@@ -1764,6 +1768,7 @@ nodes {
 nodes {
   position {
     x: 112.0
+    y: -11.0
   }
   scale {
     x: 0.5
@@ -1777,6 +1782,10 @@ nodes {
   template: "/main/ui/parts/lable_button.gui"
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   texture: "ui/BTNMain"
   id: "coins/button"
@@ -1784,6 +1793,7 @@ nodes {
   yanchor: YANCHOR_TOP
   parent: "coins"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 12
   overridden_fields: 13
@@ -1793,7 +1803,12 @@ nodes {
 }
 nodes {
   position {
-    x: -130.0
+    x: -148.44444
+    y: 53.77778
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_BOX
   texture: "ui/Coin"
@@ -1801,20 +1816,27 @@ nodes {
   parent: "coins/button"
   layer: "top"
   overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
   position {
-    x: 12.0
+    x: -0.444445
+    y: 2.0
+  }
+  size {
+    x: 150.0
+    y: 50.0
   }
   type: TYPE_TEXT
-  font: "42"
+  font: "48"
   id: "coins/text"
   parent: "coins/button"
   layer: "top"
   overridden_fields: 1
+  overridden_fields: 4
   overridden_fields: 8
   overridden_fields: 10
   overridden_fields: 14
@@ -1823,7 +1845,7 @@ nodes {
 }
 nodes {
   position {
-    x: 140.0
+    x: 155.55554
     y: 4.0
   }
   type: TYPE_BOX
@@ -1839,6 +1861,7 @@ nodes {
 nodes {
   position {
     x: 305.0
+    y: -11.0
   }
   scale {
     x: 0.5
@@ -1854,6 +1877,10 @@ nodes {
 nodes {
   position {
     x: 4.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_BOX
   texture: "ui/BTNMain"
@@ -1871,15 +1898,15 @@ nodes {
 }
 nodes {
   position {
-    x: -124.0
-    y: 8.0
+    x: -135.11111
+    y: 53.555557
   }
   rotation {
     z: -9.256
   }
   scale {
-    x: 1.5
-    y: 1.5
+    x: 1.1
+    y: 1.1
   }
   type: TYPE_BOX
   texture: "ui/life_icon"
@@ -1895,15 +1922,15 @@ nodes {
 }
 nodes {
   position {
-    x: 14.0
-    y: 4.0
+    x: 0.666666
+    y: 6.222222
   }
   size {
-    x: 100.0
+    x: 150.0
     y: 50.0
   }
   type: TYPE_TEXT
-  font: "42"
+  font: "48"
   id: "lifes/text"
   parent: "lifes/button"
   layer: "top"
@@ -1917,7 +1944,7 @@ nodes {
 }
 nodes {
   position {
-    x: 140.0
+    x: 160.22223
     y: 4.0
   }
   type: TYPE_BOX
@@ -1951,10 +1978,11 @@ nodes {
 nodes {
   position {
     x: -51.0
+    y: -7.0
   }
   scale {
-    x: 0.6
-    y: 0.6
+    x: 0.5
+    y: 0.5
   }
   type: TYPE_BOX
   texture: "ui/BtnShop"
@@ -1970,8 +1998,8 @@ nodes {
     y: -93.0
   }
   scale {
-    x: 0.6
-    y: 0.6
+    x: 0.5
+    y: 0.5
   }
   type: TYPE_BOX
   texture: "ui/BtnSet"
