@@ -297,8 +297,10 @@ function ____exports.Game()
     end
     function on_idle()
         if is_idle then
+            Log.log("RETURN")
             return
         end
+        Log.log("TRY IDLE")
         do
             local y = 0
             while y < field_height do
@@ -654,9 +656,6 @@ function ____exports.Game()
                                         for ____, element_id in __TS__Iterator(available_elements) do
                                             make_element(pos, element_id)
                                             if field.search_combination(pos) == NotFound then
-                                                if has_step() then
-                                                    return on_end()
-                                                end
                                                 break
                                             end
                                         end
@@ -669,7 +668,7 @@ function ____exports.Game()
                         y = y - 1
                     end
                 end
-                if step then
+                if has_step() then
                     on_end()
                 else
                     on_error()
@@ -1138,24 +1137,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch246 = message.name
-            local ____cond246 = ____switch246 == "SPINNING"
-            if ____cond246 then
+            local ____switch245 = message.name
+            local ____cond245 = ____switch245 == "SPINNING"
+            if ____cond245 then
                 on_activate_spinning()
                 break
             end
-            ____cond246 = ____cond246 or ____switch246 == "HAMMER"
-            if ____cond246 then
+            ____cond245 = ____cond245 or ____switch245 == "HAMMER"
+            if ____cond245 then
                 on_activate_hammer()
                 break
             end
-            ____cond246 = ____cond246 or ____switch246 == "HORIZONTAL_ROCKET"
-            if ____cond246 then
+            ____cond245 = ____cond245 or ____switch245 == "HORIZONTAL_ROCKET"
+            if ____cond245 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond246 = ____cond246 or ____switch246 == "VERTICAL_ROCKET"
-            if ____cond246 then
+            ____cond245 = ____cond245 or ____switch245 == "VERTICAL_ROCKET"
+            if ____cond245 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1235,13 +1234,19 @@ function ____exports.Game()
         end
         stop_helper()
         if busters.hammer.active then
-            return try_hammer_damage(pos)
+            try_hammer_damage(pos)
+            is_idle = false
+            return
         end
         if busters.horizontal_rocket.active then
-            return try_horizontal_damage(pos)
+            try_horizontal_damage(pos)
+            is_idle = false
+            return
         end
         if busters.vertical_rocket.active then
-            return try_vertical_damage(pos)
+            try_vertical_damage(pos)
+            is_idle = false
+            return
         end
         if field.try_click(pos) then
             if try_activate_buster_element(pos) then
@@ -1892,29 +1897,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch423 = combination.type
-            local ____cond423 = ____switch423 == CombinationType.Comb4
-            if ____cond423 then
+            local ____switch422 = combination.type
+            local ____cond422 = ____switch422 == CombinationType.Comb4
+            if ____cond422 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond423 = ____cond423 or ____switch423 == CombinationType.Comb5
-            if ____cond423 then
+            ____cond422 = ____cond422 or ____switch422 == CombinationType.Comb5
+            if ____cond422 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond423 = ____cond423 or ____switch423 == CombinationType.Comb2x2
-            if ____cond423 then
+            ____cond422 = ____cond422 or ____switch422 == CombinationType.Comb2x2
+            if ____cond422 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond423 = ____cond423 or (____switch423 == CombinationType.Comb3x3a or ____switch423 == CombinationType.Comb3x3b)
-            if ____cond423 then
+            ____cond422 = ____cond422 or (____switch422 == CombinationType.Comb3x3a or ____switch422 == CombinationType.Comb3x3b)
+            if ____cond422 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond423 = ____cond423 or (____switch423 == CombinationType.Comb3x4 or ____switch423 == CombinationType.Comb3x5)
-            if ____cond423 then
+            ____cond422 = ____cond422 or (____switch422 == CombinationType.Comb3x4 or ____switch422 == CombinationType.Comb3x5)
+            if ____cond422 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

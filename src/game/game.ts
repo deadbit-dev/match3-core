@@ -324,8 +324,12 @@ export function Game() {
     }
 
     function on_idle() {
-        if(is_idle)
+        if(is_idle) {
+            Log.log("RETURN");
             return;
+        }
+
+        Log.log("TRY IDLE");
 
         for(let y = 0; y < field_height; y++) {
             for(let x = 0; x < field_width; x++) {
@@ -651,10 +655,8 @@ export function Game() {
                             shuffle_array(available_elements);
                             for(const element_id of available_elements) {
                                 make_element(pos, element_id);
-                                if(field.search_combination(pos) == NotFound) {
-                                    if(has_step()) return on_end();
+                                if(field.search_combination(pos) == NotFound)
                                     break;
-                                }
                             }
                         }
                     }
@@ -663,7 +665,7 @@ export function Game() {
                 flow.frames(1);
             }
 
-            if(step) on_end();
+            if(has_step()) on_end();
             else on_error();
 
         }, {parallel: true});
@@ -1176,9 +1178,23 @@ export function Game() {
 
         stop_helper();
 
-        if(busters.hammer.active) return try_hammer_damage(pos);
-        if(busters.horizontal_rocket.active) return try_horizontal_damage(pos);
-        if(busters.vertical_rocket.active) return try_vertical_damage(pos);
+        if(busters.hammer.active) {
+            try_hammer_damage(pos);
+            is_idle = false;
+            return;
+        }
+
+        if(busters.horizontal_rocket.active) {
+            try_horizontal_damage(pos);
+            is_idle = false;
+            return;
+        }
+
+        if(busters.vertical_rocket.active) {
+            try_vertical_damage(pos);
+            is_idle = false;
+            return;
+        }
 
         if(field.try_click(pos)) {
             if(try_activate_buster_element(pos)) {

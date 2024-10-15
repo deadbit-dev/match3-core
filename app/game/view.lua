@@ -799,6 +799,7 @@ function ____exports.View(resources)
         )
     end
     function has_actions()
+        Log.log("ACTIONS: ", #actions)
         return #actions > 0
     end
     function damage_element_animation(element)

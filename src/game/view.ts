@@ -704,6 +704,7 @@ export function View(resources: ViewResources) {
     }
 
     function has_actions() {
+        Log.log("ACTIONS: ", actions.length);
         return actions.length > 0;
     }
 
