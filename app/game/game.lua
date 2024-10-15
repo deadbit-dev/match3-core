@@ -397,6 +397,7 @@ function ____exports.Game()
         update_core_state()
         set_random(previous_state.randomseed)
         EventBus.send("RESPONSE_REWIND", previous_state)
+        EventBus.send("UPDATED_STEP_COUNTER", previous_state.steps)
         return true
     end
     function set_helper(message)
