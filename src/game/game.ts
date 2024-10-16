@@ -7,7 +7,7 @@
 import * as flow from 'ludobits.m.flow';
 import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./utils";
 import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotDamage, NotFound, NullElement, Position, SwapInfo } from "./core";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
+import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
 import { NameMessage } from "../modules/modules_const";
 import { Axis, is_valid_pos } from "../utils/math_utils";
 import { lang_data } from "../main/langs";
@@ -545,9 +545,7 @@ export function Game() {
             update_core_state();        
             EventBus.send('SHUFFLE_ACTION', copy_state());
 
-            print("TRY");
             if(helper_timer == null) {
-                print("SET");
                 helper_timer = timer.delay(5, true, () => { 
                     reset_helper();
                     set_helper();
@@ -1437,7 +1435,7 @@ export function Game() {
         field.set_cell_state(pos, CellState.Idle);
     }
 
-    function try_activate_helicopter(pos: Position, triple = false) {
+    function try_activate_helicopter(pos: Position, triple = false, buster?: ElementId) {
         const helicopter = field.get_element(pos);
         if(helicopter == NullElement || helicopter.id != ElementId.Helicopter)
             return false;
@@ -1453,14 +1451,14 @@ export function Game() {
         if(under_damage != NotDamage)
             damages.push(under_damage);
 
-        EventBus.send('RESPONSE_ACTIVATED_HELICOPTER', {pos, uid: helicopter.uid, damages, triple});
+        EventBus.send('RESPONSE_ACTIVATED_HELICOPTER', {pos, uid: helicopter.uid, damages, triple, buster});
 
         return true;
     }
 
     function on_helicopter_action(message: HelicopterActivatedMessage) {
         const damages = [];
-        for(let i = 0; i <(message.triple ? 3 : 1); i++) {
+        for(let i = 0; i < (message.triple ? 3 : 1); i++) {
             const damage_info = remove_random_target([message.uid]);
             if(damage_info != NullElement) {
                 field.set_cell_state(damage_info.pos, CellState.Busy);
@@ -1468,7 +1466,17 @@ export function Game() {
             }
         }
         
-        EventBus.send('RESPONSE_HELICOPTER_ACTION', {pos: message.pos, uid: message.uid, damages});
+        EventBus.send('RESPONSE_HELICOPTER_ACTION', {pos: message.pos, uid: message.uid, damages, buster: message.buster});
+    }
+
+    function on_helicopter_end(message: HelicopterActionMessage) {
+        for(const damage_info of message.damages) {
+            field.set_cell_state(damage_info.pos, CellState.Idle);
+            if(message.buster != undefined) {
+                make_element(damage_info.pos, message.buster);
+                try_activate_buster_element(damage_info.pos);
+            }
+        }
     }
 
     function remove_random_target(exclude?: number[], only_base_elements = true) {
@@ -1542,11 +1550,6 @@ export function Game() {
         const target = available_targets[math.random(0, available_targets.length - 1)];
         const damage_info = field.try_damage(target.pos);
         return (damage_info != NotDamage) ? damage_info : NullElement;
-    }
-
-    function on_helicopter_end(message: BusterActivatedMessage) {
-        for(const damage_info of message.damages)
-            field.set_cell_state(damage_info.pos, CellState.Idle);
     }
 
     function on_swap_elements(swap: SwapInfo) {
@@ -1665,7 +1668,7 @@ export function Game() {
 
         const is_from_diskosphere = buster_from != NullElement && buster_from.id == ElementId.Diskosphere;
 
-        if(is_from_diskosphere) {
+        if(is_from_diskosphere && GAME_CONFIG.buster_elements.includes(buster_to.id)) {
             field.set_element_state(message.from, ElementState.Busy);
             field.set_element(message.to, NullElement);
             EventBus.send('RESPONSE_COMBINATE_BUSTERS', {
@@ -1675,22 +1678,61 @@ export function Game() {
             return;
         }
 
+        if(is_from_helicopter) {
+            field.set_element_state(message.from, ElementState.Busy);
+            field.set_element(message.to, NullElement);
+            EventBus.send('RESPONSE_COMBINATE_BUSTERS', {
+                buster_from: { pos: message.to, element: buster_to },
+                buster_to: { pos: message.from, element: buster_from}
+            });
+            return;
+        }
+
+        if(is_to_helicopter && buster_from != NullElement) {
+            field.set_element_state(message.to, ElementState.Busy);
+            field.set_element(message.from, NullElement);
+            EventBus.send('RESPONSE_COMBINATE_BUSTERS', {
+                buster_from: { pos: message.from, element: buster_from },
+                buster_to: { pos: message.to, element: buster_to}
+            });
+            return;
+        }
+
         if(is_buster(message.from)) try_activate_buster_element(message.from);
         if(is_buster(message.to)) try_activate_buster_element(message.to);
     }
 
     function on_combined_busters(message: CombinateBustersMessage) {
+        // Dynamite with Dynamite
         if(message.buster_from.element.id == ElementId.Dynamite && message.buster_to.element.id == ElementId.Dynamite)
             return try_activate_dynamite(message.buster_to.pos, true);
+        
+        // Rocket with Rocket
         if(GAME_CONFIG.rockets.includes(message.buster_from.element.id) && GAME_CONFIG.rockets.includes(message.buster_to.element.id))
             return try_activate_rocket(message.buster_to.pos, true);
+
+        // Helicopter with Helicopter
         if(message.buster_from.element.id == ElementId.Helicopter && message.buster_to.element.id == ElementId.Helicopter)
             return try_activate_helicopter(message.buster_to.pos, true);
+
+        // Buster with Helicopter
+        if(message.buster_to.element.id == ElementId.Helicopter) {
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id);
+        }
+
+        // Helicopter with Buster
+        if(message.buster_from.element.id == ElementId.Helicopter) {
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id);
+        }
+
+        // Diskosphere from
         if(message.buster_from.element.id == ElementId.Diskosphere) {
             if(message.buster_to.element.id == ElementId.Diskosphere) return try_activate_diskosphere(message.buster_to.pos, GAME_CONFIG.base_elements);
             else if(GAME_CONFIG.buster_elements.includes(message.buster_to.element.id)) return try_activate_diskosphere(message.buster_from.pos, [get_random_element_id()], message.buster_to.element.id);
             else return try_activate_diskosphere(message.buster_from.pos, [message.buster_to.element.id]);
         }
+
+        // Diskosphere to
         if(message.buster_to.element.id == ElementId.Diskosphere) {
             if(message.buster_from.element.id == ElementId.Diskosphere) return try_activate_diskosphere(message.buster_to.pos, GAME_CONFIG.base_elements);
             else if(GAME_CONFIG.buster_elements.includes(message.buster_from.element.id)) return try_activate_diskosphere(message.buster_to.pos, [get_random_element_id()], message.buster_from.element.id);
@@ -1759,6 +1801,7 @@ export function Game() {
     }
 
     function on_falling(pos: Position) {
+        print("FALL: ", pos.x, pos.y);
         const result = search_fall_element(pos);
         if(result != NotFound) {
             const move_info = field.fell_element(result);

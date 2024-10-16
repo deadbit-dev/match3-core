@@ -97,9 +97,7 @@ function get_offset()
     if height >= -480 then
         return 0
     end
-    local delta = math.abs(480 - math.abs(height))
-    print(delta)
-    return delta
+    return math.abs(480 - math.abs(height))
 end
 function ____exports.init(self)
     Manager.init_script()

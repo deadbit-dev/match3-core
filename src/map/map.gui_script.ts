@@ -134,8 +134,5 @@ function get_offset() {
     if(height >= -480)
         return 0;
 
-    const delta = math.abs(480 - math.abs(height));
-    print(delta);
-
-    return delta;
+    return math.abs(480 - math.abs(height));
 }

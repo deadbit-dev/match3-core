@@ -11,7 +11,7 @@ import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils
 import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo, ElementState } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, Target, TargetState, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
+import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -704,7 +704,6 @@ export function View(resources: ViewResources) {
     }
 
     function has_actions() {
-        Log.log("ACTIONS: ", actions.length);
         return actions.length > 0;
     }
 
@@ -877,8 +876,6 @@ export function View(resources: ViewResources) {
     function on_falling_not_found(pos: Position) {
         remove_action(Action.Falling);
 
-        Log.log("REMOVE ACTION BY NOT FOUND: ", pos.x, pos.y);
-
         if(!has_actions())
             EventBus.send('REQUEST_IDLE');
     }
@@ -888,8 +885,6 @@ export function View(resources: ViewResources) {
         if(element_view == undefined) return;
 
         remove_action(Action.Falling);
-        Log.log("REMOVE ACTION BY END: ", info.pos.x, info.pos.y);
-
         record_action(Action.Combination);
         
         const world_pos = go.get_position(element_view._hash);
@@ -908,7 +903,6 @@ export function View(resources: ViewResources) {
 
     function request_falling(pos: Position, delay = GAME_CONFIG.falling_dalay) {
         record_action(Action.Falling);
-        Log.log("ACTION: ", pos.x, pos.y);
         timer.delay(delay, false, () => {
             Log.log("REQUEST FALLING: ", pos.x, pos.y);
             EventBus.send('REQUEST_FALLING', pos);
@@ -920,7 +914,6 @@ export function View(resources: ViewResources) {
             Sound.play('broke_element');
 
             if(damage_info.element.state == ElementState.Fall) {
-                Log.log("REMOVE ACTION BY DAMAGE: ", damage_info.pos.x, damage_info.pos.y);
                 remove_action(Action.Falling);
             }
 
@@ -1159,11 +1152,12 @@ export function View(resources: ViewResources) {
         EventBus.send('REQUEST_HELICOPTER_ACTION', message);
     }
 
-    function on_helicopter_action_animation(message: BusterActivatedMessage) {
+    function on_helicopter_action_animation(message: HelicopterActionMessage) {
         Sound.play('helicopter');
 
         const helicopter_world_pos = get_world_pos(message.pos);
         helicopter_world_pos.z = 3;
+
         
         const helicopters: hash[] = [];
         for(let i = 0; i < message.damages.length; i++) {
@@ -1186,7 +1180,9 @@ export function View(resources: ViewResources) {
                 remove_action(Action.HelicopterFly);
                 go.delete(helicopter);
                 on_damage(damage_info);
-                request_falling(damage_info.pos);
+                if(message.buster == undefined)
+                    request_falling(damage_info.pos);
+                
                 EventBus.send('REQUEST_HELICOPTER_END', message);
             });
         }

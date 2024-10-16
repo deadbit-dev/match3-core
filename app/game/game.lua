@@ -96,7 +96,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, remove_random_target, on_helicopter_end, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, helper_data, is_idle
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -519,9 +519,7 @@ function ____exports.Game()
                 "SHUFFLE_ACTION",
                 copy_state()
             )
-            print("TRY")
             if helper_timer == nil then
-                print("SET")
                 helper_timer = timer.delay(
                     5,
                     true,
@@ -1540,7 +1538,7 @@ function ____exports.Game()
     function on_diskosphere_activated_end(pos)
         field.set_cell_state(pos, CellState.Idle)
     end
-    function try_activate_helicopter(pos, triple)
+    function try_activate_helicopter(pos, triple, buster)
         if triple == nil then
             triple = false
         end
@@ -1553,7 +1551,13 @@ function ____exports.Game()
         if under_damage ~= NotDamage then
             damages[#damages + 1] = under_damage
         end
-        EventBus.send("RESPONSE_ACTIVATED_HELICOPTER", {pos = pos, uid = helicopter.uid, damages = damages, triple = triple})
+        EventBus.send("RESPONSE_ACTIVATED_HELICOPTER", {
+            pos = pos,
+            uid = helicopter.uid,
+            damages = damages,
+            triple = triple,
+            buster = buster
+        })
         return true
     end
     function on_helicopter_action(message)
@@ -1569,7 +1573,16 @@ function ____exports.Game()
                 i = i + 1
             end
         end
-        EventBus.send("RESPONSE_HELICOPTER_ACTION", {pos = message.pos, uid = message.uid, damages = damages})
+        EventBus.send("RESPONSE_HELICOPTER_ACTION", {pos = message.pos, uid = message.uid, damages = damages, buster = message.buster})
+    end
+    function on_helicopter_end(message)
+        for ____, damage_info in ipairs(message.damages) do
+            field.set_cell_state(damage_info.pos, CellState.Idle)
+            if message.buster ~= nil then
+                make_element(damage_info.pos, message.buster)
+                try_activate_buster_element(damage_info.pos)
+            end
+        end
     end
     function remove_random_target(exclude, only_base_elements)
         if only_base_elements == nil then
@@ -1728,11 +1741,6 @@ function ____exports.Game()
         local damage_info = field.try_damage(target.pos)
         return damage_info ~= NotDamage and damage_info or NullElement
     end
-    function on_helicopter_end(message)
-        for ____, damage_info in ipairs(message.damages) do
-            field.set_cell_state(damage_info.pos, CellState.Idle)
-        end
-    end
     function on_swap_elements(swap)
         if is_block_input or is_tutorial() and not is_tutorial_step(swap) then
             return
@@ -1819,10 +1827,22 @@ function ____exports.Game()
             return
         end
         local is_from_diskosphere = buster_from ~= NullElement and buster_from.id == ____exports.ElementId.Diskosphere
-        if is_from_diskosphere then
+        if is_from_diskosphere and __TS__ArrayIncludes(GAME_CONFIG.buster_elements, buster_to.id) then
             field.set_element_state(message.from, ElementState.Busy)
             field.set_element(message.to, NullElement)
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.to, element = buster_to}, buster_to = {pos = message.from, element = buster_from}})
+            return
+        end
+        if is_from_helicopter then
+            field.set_element_state(message.from, ElementState.Busy)
+            field.set_element(message.to, NullElement)
+            EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.to, element = buster_to}, buster_to = {pos = message.from, element = buster_from}})
+            return
+        end
+        if is_to_helicopter and buster_from ~= NullElement then
+            field.set_element_state(message.to, ElementState.Busy)
+            field.set_element(message.from, NullElement)
+            EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.from, element = buster_from}, buster_to = {pos = message.to, element = buster_to}})
             return
         end
         if is_buster(message.from) then
@@ -1841,6 +1861,12 @@ function ____exports.Game()
         end
         if message.buster_from.element.id == ____exports.ElementId.Helicopter and message.buster_to.element.id == ____exports.ElementId.Helicopter then
             return try_activate_helicopter(message.buster_to.pos, true)
+        end
+        if message.buster_to.element.id == ____exports.ElementId.Helicopter then
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id)
+        end
+        if message.buster_from.element.id == ____exports.ElementId.Helicopter then
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id)
         end
         if message.buster_from.element.id == ____exports.ElementId.Diskosphere then
             if message.buster_to.element.id == ____exports.ElementId.Diskosphere then
@@ -1902,29 +1928,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch422 = combination.type
-            local ____cond422 = ____switch422 == CombinationType.Comb4
-            if ____cond422 then
+            local ____switch427 = combination.type
+            local ____cond427 = ____switch427 == CombinationType.Comb4
+            if ____cond427 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond422 = ____cond422 or ____switch422 == CombinationType.Comb5
-            if ____cond422 then
+            ____cond427 = ____cond427 or ____switch427 == CombinationType.Comb5
+            if ____cond427 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond422 = ____cond422 or ____switch422 == CombinationType.Comb2x2
-            if ____cond422 then
+            ____cond427 = ____cond427 or ____switch427 == CombinationType.Comb2x2
+            if ____cond427 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond422 = ____cond422 or (____switch422 == CombinationType.Comb3x3a or ____switch422 == CombinationType.Comb3x3b)
-            if ____cond422 then
+            ____cond427 = ____cond427 or (____switch427 == CombinationType.Comb3x3a or ____switch427 == CombinationType.Comb3x3b)
+            if ____cond427 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond422 = ____cond422 or (____switch422 == CombinationType.Comb3x4 or ____switch422 == CombinationType.Comb3x5)
-            if ____cond422 then
+            ____cond427 = ____cond427 or (____switch427 == CombinationType.Comb3x4 or ____switch427 == CombinationType.Comb3x5)
+            if ____cond427 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
@@ -1934,6 +1960,7 @@ function ____exports.Game()
         end
     end
     function on_falling(pos)
+        print("FALL: ", pos.x, pos.y)
         local result = search_fall_element(pos)
         if result ~= NotFound then
             local move_info = field.fell_element(result)

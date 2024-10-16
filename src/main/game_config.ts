@@ -479,7 +479,10 @@ export interface RequestElementMessage { pos: Position, element: Element }
 export interface BusterActivatedMessage { pos: Position, uid: number, damages: DamageInfo[] }
 export interface DynamiteActivatedMessage extends BusterActivatedMessage { big_range: boolean }
 export interface RocketActivatedMessage extends BusterActivatedMessage { axis: Axis }
-export interface HelicopterActivatedMessage extends BusterActivatedMessage { triple: boolean }
+
+// TODO: refactor
+export interface HelicopterActivatedMessage extends BusterActivatedMessage { triple: boolean, buster?: ElementId }
+export interface HelicopterActionMessage extends BusterActivatedMessage { buster?: ElementId }
 export interface DiskosphereActivatedMessage extends BusterActivatedMessage { buster?: ElementId }
 export interface DiskosphereDamageElementMessage { damage_info: DamageInfo, buster?: ElementId }
 
@@ -544,7 +547,7 @@ export type _UserMessages = {
 
     RESPONSE_ACTIVATED_HELICOPTER: HelicopterActivatedMessage,
     REQUEST_HELICOPTER_ACTION: HelicopterActivatedMessage,
-    RESPONSE_HELICOPTER_ACTION: BusterActivatedMessage,
+    RESPONSE_HELICOPTER_ACTION: HelicopterActionMessage,
     REQUEST_HELICOPTER_START_FLYING: BusterActivatedMessage,
     REQUEST_HELICOPTER_END: BusterActivatedMessage,
 

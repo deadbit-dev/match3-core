@@ -649,6 +649,11 @@ export function Field(size_x: number, size_y: number) {
         moveInfo.start_pos = get_element_pos(element);
         moveInfo.next_pos = moveInfo.start_pos;
 
+        // TODO: fall problem here
+        // if(moveInfo.element.state != ElementState.Idle) {
+        //     return NotFound;
+        // }
+
         let was = true;
         if(!falling_down(element, moveInfo))
             was = falling_through_corner(element, moveInfo);

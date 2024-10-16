@@ -799,7 +799,6 @@ function ____exports.View(resources)
         )
     end
     function has_actions()
-        Log.log("ACTIONS: ", #actions)
         return #actions > 0
     end
     function damage_element_animation(element)
@@ -1024,7 +1023,6 @@ function ____exports.View(resources)
     end
     function on_falling_not_found(pos)
         remove_action(____exports.Action.Falling)
-        Log.log("REMOVE ACTION BY NOT FOUND: ", pos.x, pos.y)
         if not has_actions() then
             EventBus.send("REQUEST_IDLE")
         end
@@ -1035,7 +1033,6 @@ function ____exports.View(resources)
             return
         end
         remove_action(____exports.Action.Falling)
-        Log.log("REMOVE ACTION BY END: ", info.pos.x, info.pos.y)
         record_action(____exports.Action.Combination)
         local world_pos = go.get_position(element_view._hash)
         world_pos.y = world_pos.y + 5
@@ -1072,7 +1069,6 @@ function ____exports.View(resources)
             delay = GAME_CONFIG.falling_dalay
         end
         record_action(____exports.Action.Falling)
-        Log.log("ACTION: ", pos.x, pos.y)
         timer.delay(
             delay,
             false,
@@ -1086,7 +1082,6 @@ function ____exports.View(resources)
         if damage_info.element ~= nil then
             Sound.play("broke_element")
             if damage_info.element.state == ElementState.Fall then
-                Log.log("REMOVE ACTION BY DAMAGE: ", damage_info.pos.x, damage_info.pos.y)
                 remove_action(____exports.Action.Falling)
             end
             damage_element_animation(damage_info.element)
@@ -1509,7 +1504,9 @@ function ____exports.View(resources)
                         remove_action(____exports.Action.HelicopterFly)
                         go.delete(helicopter)
                         on_damage(damage_info)
-                        request_falling(damage_info.pos)
+                        if message.buster == nil then
+                            request_falling(damage_info.pos)
+                        end
                         EventBus.send("REQUEST_HELICOPTER_END", message)
                     end
                 )
