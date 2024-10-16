@@ -1516,7 +1516,7 @@ function ____exports.Game()
             local elements = field.get_all_elements_by_id(element_id)
             for ____, element in ipairs(elements) do
                 local element_pos = field.get_element_pos(element)
-                local damage_info = field.try_damage(element_pos, false, false)
+                local damage_info = field.try_damage(element_pos, true, false)
                 if damage_info ~= NotDamage then
                     field.set_element_state(damage_info.pos, ElementState.Busy)
                     field.set_cell_state(damage_info.pos, CellState.Busy)

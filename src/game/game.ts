@@ -1408,7 +1408,7 @@ export function Game() {
             const elements = field.get_all_elements_by_id(element_id);
             for(const element of elements) {
                 const element_pos = field.get_element_pos(element);
-                const damage_info = field.try_damage(element_pos, false, false);
+                const damage_info = field.try_damage(element_pos, true, false);
                 if(damage_info != NotDamage) {
                     field.set_element_state(damage_info.pos, ElementState.Busy);
                     field.set_cell_state(damage_info.pos, CellState.Busy);
