@@ -523,6 +523,11 @@ function on_win() {
         gui.set_enabled(lock, true);
         gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(gui.get_node('win'), true);
+            const coins = get_current_level_config().coins;
+            if(coins > 0) {
+                gui.set_enabled(gui.get_node('reward'), true);
+                gui.set_text(gui.get_node('coins_count'), tostring(coins));
+            }
         });
 
         Sound.play('passed');

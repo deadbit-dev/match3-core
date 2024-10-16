@@ -748,6 +748,17 @@ function on_win()
                         gui.get_node("win"),
                         true
                     )
+                    local coins = get_current_level_config().coins
+                    if coins > 0 then
+                        gui.set_enabled(
+                            gui.get_node("reward"),
+                            true
+                        )
+                        gui.set_text(
+                            gui.get_node("coins_count"),
+                            tostring(coins)
+                        )
+                    end
                 end
             )
             Sound.play("passed")

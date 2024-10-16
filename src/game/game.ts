@@ -513,6 +513,7 @@ export function Game() {
         completed_levels.push(GameStorage.get('current_level'));
         GameStorage.set('completed_levels', completed_levels);
         add_coins(level_config.coins);
+        print("ADDED COINS: ", level_config.coins);
         
         update_core_state();
         EventBus.send('ON_WIN', copy_state());
