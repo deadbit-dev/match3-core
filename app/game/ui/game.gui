@@ -69,8 +69,8 @@ nodes {
     y: 1050.0
   }
   scale {
-    x: 0.5
-    y: 0.5
+    x: 0.6
+    y: 0.6
   }
   type: TYPE_BOX
   texture: "ui/substrate"
