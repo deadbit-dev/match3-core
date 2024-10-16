@@ -26,6 +26,7 @@ nodes {
   overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   position {
