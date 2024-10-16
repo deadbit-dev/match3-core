@@ -617,12 +617,13 @@ function ____exports.Game()
                                         make_element(position, element_id)
                                         if field.search_combination(position) == NotFound then
                                             element_assigned = true
+                                            break
                                         end
-                                        break
                                     end
                                 end
                             end
                             if not element_assigned then
+                                Log.log("BAD CASE: ", position.x, position.y)
                                 field.set_element(position, NullElement)
                             end
                             counter = counter + 1

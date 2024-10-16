@@ -626,14 +626,16 @@ export function Game() {
                         for(const element_id of GAME_CONFIG.base_elements) {
                             if(elements.find((element) => element.id == element_id) == undefined) {
                                 make_element(position, element_id);
-                                if(field.search_combination(position) == NotFound)
+                                if(field.search_combination(position) == NotFound) {
                                     element_assigned = true;
                                     break;
+                                }
                             }
                         }
                     }
 
                     if(!element_assigned) {
+                        Log.log("BAD CASE: ", position.x, position.y);
                         field.set_element(position, NullElement);
                     }
         
