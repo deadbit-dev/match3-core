@@ -26,7 +26,6 @@ nodes {
   overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
-  enabled: false
 }
 nodes {
   position {
@@ -1099,8 +1098,8 @@ nodes {
     y: 766.0
   }
   scale {
-    x: 4.0
-    y: 4.0
+    x: 2.0
+    y: 2.0
   }
   type: TYPE_BOX
   id: "store/close"

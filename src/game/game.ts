@@ -544,7 +544,9 @@ export function Game() {
             update_core_state();        
             EventBus.send('SHUFFLE_ACTION', copy_state());
 
+            print("TRY");
             if(helper_timer == null) {
+                print("SET");
                 helper_timer = timer.delay(5, true, () => { 
                     reset_helper();
                     set_helper();
@@ -1112,6 +1114,7 @@ export function Game() {
 
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
 
+        stop_helper();
         shuffle();
 
         busters.hammer.active = false;

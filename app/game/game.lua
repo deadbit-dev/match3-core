@@ -518,7 +518,9 @@ function ____exports.Game()
                 "SHUFFLE_ACTION",
                 copy_state()
             )
+            print("TRY")
             if helper_timer == nil then
+                print("SET")
                 helper_timer = timer.delay(
                     5,
                     true,
@@ -1171,6 +1173,7 @@ function ____exports.Game()
             "spinning_counts",
             GameStorage.get("spinning_counts") - 1
         )
+        stop_helper()
         shuffle()
         busters.hammer.active = false
         busters.horizontal_rocket.active = false
