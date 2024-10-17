@@ -1527,7 +1527,11 @@ function ____exports.View(resources)
                             remove_action(____exports.Action.HelicopterFly)
                             go.delete(helicopter, true)
                             on_damage(damage_info)
-                            EventBus.send("REQUEST_HELICOPTER_END", message)
+                            timer.delay(
+                                0.1,
+                                false,
+                                function() return EventBus.send("REQUEST_HELICOPTER_END", message) end
+                            )
                         end
                     )
                     return
