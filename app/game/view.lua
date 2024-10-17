@@ -1492,6 +1492,46 @@ function ____exports.View(resources)
                 local damage_info = message.damages[i + 1]
                 local target_world_pos = get_world_pos(damage_info.pos, 3)
                 record_action(____exports.Action.HelicopterFly)
+                if message.buster ~= nil then
+                    local pos = vmath.vector3(helicopter_world_pos.x, helicopter_world_pos.y, helicopter_world_pos.z - 0.1)
+                    local icon = go_manager.make_go("element_view", pos)
+                    sprite.play_flipbook(
+                        msg.url(nil, icon, "sprite"),
+                        GAME_CONFIG.element_view[message.buster]
+                    )
+                    go.set_scale(
+                        go.get_scale(helicopter),
+                        icon
+                    )
+                    go.animate(
+                        icon,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        target_world_pos,
+                        go.EASING_INCUBIC,
+                        GAME_CONFIG.helicopter_fly_duration,
+                        0.1,
+                        function()
+                            go.delete(icon, true)
+                        end
+                    )
+                    go.animate(
+                        helicopter,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        target_world_pos,
+                        go.EASING_INCUBIC,
+                        GAME_CONFIG.helicopter_fly_duration,
+                        0,
+                        function()
+                            remove_action(____exports.Action.HelicopterFly)
+                            go.delete(helicopter, true)
+                            on_damage(damage_info)
+                            EventBus.send("REQUEST_HELICOPTER_END", message)
+                        end
+                    )
+                    return
+                end
                 go.animate(
                     helicopter,
                     "position",
@@ -1502,11 +1542,9 @@ function ____exports.View(resources)
                     0,
                     function()
                         remove_action(____exports.Action.HelicopterFly)
-                        go.delete(helicopter)
+                        go.delete(helicopter, true)
                         on_damage(damage_info)
-                        if message.buster == nil then
-                            request_falling(damage_info.pos)
-                        end
+                        request_falling(damage_info.pos)
                         EventBus.send("REQUEST_HELICOPTER_END", message)
                     end
                 )

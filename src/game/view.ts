@@ -1176,12 +1176,36 @@ export function View(resources: ViewResources) {
 
             record_action(Action.HelicopterFly);
 
+            if(message.buster != undefined) {
+                const pos = vmath.vector3(helicopter_world_pos.x, helicopter_world_pos.y, helicopter_world_pos.z - 0.1);
+                const icon = go_manager.make_go("element_view", pos);
+                sprite.play_flipbook(msg.url(undefined, icon, 'sprite'), GAME_CONFIG.element_view[message.buster]);
+                go.set_scale(go.get_scale(helicopter), icon);
+                // go.set_parent(icon, helicopter, true);
+                // const chain_pos = vmath.vector3(helicopter_world_pos.x + 20, helicopter_world_pos.y - 20, helicopter_world_pos.z - 0.1);
+                // go.animate(icon, 'position', go.PLAYBACK_ONCE_FORWARD, chain_pos, go.EASING_INELASTIC, 0.2, 0, () => {
+                    // const target_pos = vmath.vector3(target_world_pos.x + 25, target_world_pos.y + 25, target_world_pos.z - 0.1);
+                    go.animate(icon, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, GAME_CONFIG.helicopter_fly_duration, 0.1, () => {
+                        go.delete(icon, true);
+                    });                    
+                // });
+
+                go.animate(helicopter, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, GAME_CONFIG.helicopter_fly_duration, 0, () => {
+                    remove_action(Action.HelicopterFly);
+                    go.delete(helicopter, true);
+                    on_damage(damage_info);
+                    
+                    EventBus.send('REQUEST_HELICOPTER_END', message);
+                });
+
+                return;
+            }
+
             go.animate(helicopter, 'position', go.PLAYBACK_ONCE_FORWARD, target_world_pos, go.EASING_INCUBIC, GAME_CONFIG.helicopter_fly_duration, 0, () => {
                 remove_action(Action.HelicopterFly);
-                go.delete(helicopter);
+                go.delete(helicopter, true);
                 on_damage(damage_info);
-                if(message.buster == undefined)
-                    request_falling(damage_info.pos);
+                request_falling(damage_info.pos);
                 
                 EventBus.send('REQUEST_HELICOPTER_END', message);
             });
