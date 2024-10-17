@@ -1678,7 +1678,7 @@ export function Game() {
             return;
         }
 
-        if(is_from_helicopter) {
+        if(is_from_helicopter && GAME_CONFIG.buster_elements.includes(buster_to.id)) {
             field.set_element_state(message.from, ElementState.Busy);
             field.set_element(message.to, NullElement);
             EventBus.send('RESPONSE_COMBINATE_BUSTERS', {
@@ -1688,7 +1688,7 @@ export function Game() {
             return;
         }
 
-        if(is_to_helicopter && buster_from != NullElement) {
+        if(is_to_helicopter && buster_from != NullElement && GAME_CONFIG.buster_elements.includes(buster_from.id)) {
             field.set_element_state(message.to, ElementState.Busy);
             field.set_element(message.from, NullElement);
             EventBus.send('RESPONSE_COMBINATE_BUSTERS', {

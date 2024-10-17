@@ -1833,13 +1833,13 @@ function ____exports.Game()
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.to, element = buster_to}, buster_to = {pos = message.from, element = buster_from}})
             return
         end
-        if is_from_helicopter then
+        if is_from_helicopter and __TS__ArrayIncludes(GAME_CONFIG.buster_elements, buster_to.id) then
             field.set_element_state(message.from, ElementState.Busy)
             field.set_element(message.to, NullElement)
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.to, element = buster_to}, buster_to = {pos = message.from, element = buster_from}})
             return
         end
-        if is_to_helicopter and buster_from ~= NullElement then
+        if is_to_helicopter and buster_from ~= NullElement and __TS__ArrayIncludes(GAME_CONFIG.buster_elements, buster_from.id) then
             field.set_element_state(message.to, ElementState.Busy)
             field.set_element(message.from, NullElement)
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.from, element = buster_from}, buster_to = {pos = message.to, element = buster_to}})
