@@ -1796,7 +1796,7 @@ export function Game() {
             case CombinationType.Comb3x3a: case CombinationType.Comb3x3b:
                 element = make_element(pos, ElementId.Dynamite);
             break;
-            case CombinationType.Comb3x4: case CombinationType.Comb3x5:
+            case CombinationType.Comb3x4a: case CombinationType.Comb3x4b: case CombinationType.Comb3x5:
                 element = make_element(pos, ElementId.AllAxisRocket);
             break;
         }

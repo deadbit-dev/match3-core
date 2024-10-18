@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { get_debug_intersect_points, rotateMatrix } from "../utils/math_utils";
+import { rotateMatrix } from "../utils/math_utils";
 
 // тип комбинации
 export enum CombinationType {
@@ -10,7 +10,8 @@ export enum CombinationType {
     Comb2x2,
     Comb3x3a,
     Comb3x3b,
-    Comb3x4,
+    Comb3x4a,
+    Comb3x4b,
     Comb3x5
 }
 

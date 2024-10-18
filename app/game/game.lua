@@ -1953,7 +1953,7 @@ function ____exports.Game()
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond429 = ____cond429 or (____switch429 == CombinationType.Comb3x4 or ____switch429 == CombinationType.Comb3x5)
+            ____cond429 = ____cond429 or (____switch429 == CombinationType.Comb3x4a or ____switch429 == CombinationType.Comb3x4b or ____switch429 == CombinationType.Comb3x5)
             if ____cond429 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break

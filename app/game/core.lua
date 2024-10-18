@@ -26,9 +26,11 @@ ____exports.CombinationType.Comb3x3a = 4
 ____exports.CombinationType[____exports.CombinationType.Comb3x3a] = "Comb3x3a"
 ____exports.CombinationType.Comb3x3b = 5
 ____exports.CombinationType[____exports.CombinationType.Comb3x3b] = "Comb3x3b"
-____exports.CombinationType.Comb3x4 = 6
-____exports.CombinationType[____exports.CombinationType.Comb3x4] = "Comb3x4"
-____exports.CombinationType.Comb3x5 = 7
+____exports.CombinationType.Comb3x4a = 6
+____exports.CombinationType[____exports.CombinationType.Comb3x4a] = "Comb3x4a"
+____exports.CombinationType.Comb3x4b = 7
+____exports.CombinationType[____exports.CombinationType.Comb3x4b] = "Comb3x4b"
+____exports.CombinationType.Comb3x5 = 8
 ____exports.CombinationType[____exports.CombinationType.Comb3x5] = "Comb3x5"
 ____exports.CombinationMasks = {
     {{1, 1, 1}},
