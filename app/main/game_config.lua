@@ -35,7 +35,6 @@ ____exports._GAME_CONFIG = {
     squash_time = 0.25,
     falling_dalay = 0.05,
     falling_time = 0.15,
-    min_lifes = 0,
     max_lifes = 3,
     delay_before_win = 3,
     delay_before_gameover = 2,

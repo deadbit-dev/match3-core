@@ -27,7 +27,12 @@ export function init(this: props): void {
     setup(this);
     set_events(this);
 
-    timer.delay(1200, true, () => add_lifes(1));
+    // timer.delay(1200, true, () => {
+    //     if(is_max_lifes())
+    //         return;
+
+    //     add_lifes(1);
+    // });
     
     on_life_tick();
     timer.delay(1, true, on_life_tick);
@@ -129,7 +134,7 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
 
     data.druid.new_button('store/buy_x1_btn', () => {
-        if(is_max_lifes()) return;
+        // if(is_max_lifes()) return;
         if(!is_enough_coins(30)) {
             return set_enabled_not_enough_coins(true);
         }
@@ -141,7 +146,7 @@ function setup_store(data: props) {
     });
 
     data.druid.new_button('store/buy_x2_btn', () => {
-        if(is_max_lifes()) return;
+        // if(is_max_lifes()) return;
         if(!is_enough_coins(50)) {
             return set_enabled_not_enough_coins(true);
         }
@@ -153,7 +158,7 @@ function setup_store(data: props) {
     });
 
     data.druid.new_button('store/buy_x3_btn', () => {
-        if(is_max_lifes()) return;
+        // if(is_max_lifes()) return;
         if(!is_enough_coins(70)) {
             return set_enabled_not_enough_coins(true);
         }

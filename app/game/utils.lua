@@ -63,7 +63,7 @@ function ____exports.get_move_direction(dir)
 end
 function ____exports.add_lifes(amount)
     local life = GameStorage.get("life")
-    life.amount = math.min(life.amount + amount, GAME_CONFIG.max_lifes)
+    life.amount = life.amount + amount
     GameStorage.set("life", life)
     EventBus.send("ADDED_LIFE")
 end
@@ -73,7 +73,7 @@ function ____exports.is_max_lifes()
 end
 function ____exports.remove_lifes(amount)
     local life = GameStorage.get("life")
-    life.amount = math.max(life.amount - amount, GAME_CONFIG.min_lifes)
+    life.amount = math.max(0, life.amount - amount)
     GameStorage.set("life", life)
     EventBus.send("REMOVED_LIFE")
 end

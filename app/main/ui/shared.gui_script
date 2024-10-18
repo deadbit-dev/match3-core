@@ -4,7 +4,6 @@ local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
 local add_coins = ____utils.add_coins
-local is_max_lifes = ____utils.is_max_lifes
 local is_enough_coins = ____utils.is_enough_coins
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
@@ -151,9 +150,6 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x1_btn",
         function()
-            if is_max_lifes() then
-                return
-            end
             if not is_enough_coins(30) then
                 return set_enabled_not_enough_coins(true)
             end
@@ -165,9 +161,6 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x2_btn",
         function()
-            if is_max_lifes() then
-                return
-            end
             if not is_enough_coins(50) then
                 return set_enabled_not_enough_coins(true)
             end
@@ -179,9 +172,6 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_x3_btn",
         function()
-            if is_max_lifes() then
-                return
-            end
             if not is_enough_coins(70) then
                 return set_enabled_not_enough_coins(true)
             end
@@ -650,17 +640,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch98 = scene.name
-        local ____cond98 = ____switch98 == "game"
-        if ____cond98 then
+        local ____switch94 = scene.name
+        local ____cond94 = ____switch94 == "game"
+        if ____cond94 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond98 = ____cond98 or ____switch98 == "map"
-        if ____cond98 then
+        ____cond94 = ____cond94 or ____switch94 == "map"
+        if ____cond94 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -685,9 +675,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch103 = Scene.get_current_name()
-        local ____cond103 = ____switch103 == "game"
-        if ____cond103 then
+        local ____switch99 = Scene.get_current_name()
+        local ____cond99 = ____switch99 == "game"
+        if ____cond99 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -696,8 +686,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond103 = ____cond103 or ____switch103 == "map"
-        if ____cond103 then
+        ____cond99 = ____cond99 or ____switch99 == "map"
+        if ____cond99 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -1060,11 +1050,6 @@ function ____exports.init(self)
     gui.set_render_order(10)
     setup(self)
     set_events(self)
-    timer.delay(
-        1200,
-        true,
-        function() return add_lifes(1) end
-    )
     on_life_tick()
     timer.delay(1, true, on_life_tick)
     on_infinit_life_tick()

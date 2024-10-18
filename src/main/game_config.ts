@@ -51,7 +51,6 @@ export const _GAME_CONFIG = {
     falling_dalay: 0.05,
     falling_time: 0.15,
 
-    min_lifes: 0,
     max_lifes: 3,
 
     delay_before_win: 3,
