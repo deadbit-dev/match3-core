@@ -658,14 +658,14 @@ export function View(resources: ViewResources) {
                 request_falling(message.from);
             }
 
+            EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
+
             // maybe request separetly ?
             record_action(Action.Combination);
             record_action(Action.Combination);
             EventBus.send('REQUEST_COMBINATE', {
                 combined_positions: [message.from, message.to]
             });
-
-            EventBus.send('REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP', message);
         });
     }
 

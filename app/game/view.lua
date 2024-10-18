@@ -725,10 +725,10 @@ function ____exports.View(resources)
                     print("REQUEST FALLING SWAP: ", message.from.x, message.from.y)
                     request_falling(message.from)
                 end
+                EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
                 record_action(____exports.Action.Combination)
                 record_action(____exports.Action.Combination)
                 EventBus.send("REQUEST_COMBINATE", {combined_positions = {message.from, message.to}})
-                EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
             end
         )
     end

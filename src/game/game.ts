@@ -1668,7 +1668,7 @@ export function Game() {
 
         const is_from_diskosphere = buster_from != NullElement && buster_from.id == ElementId.Diskosphere;
 
-        if(is_from_diskosphere && GAME_CONFIG.buster_elements.includes(buster_to.id)) {
+        if(is_from_diskosphere) {
             field.set_element_state(message.from, ElementState.Busy);
             field.set_element(message.to, NullElement);
             EventBus.send('RESPONSE_COMBINATE_BUSTERS', {

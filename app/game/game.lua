@@ -1827,7 +1827,7 @@ function ____exports.Game()
             return
         end
         local is_from_diskosphere = buster_from ~= NullElement and buster_from.id == ____exports.ElementId.Diskosphere
-        if is_from_diskosphere and __TS__ArrayIncludes(GAME_CONFIG.buster_elements, buster_to.id) then
+        if is_from_diskosphere then
             field.set_element_state(message.from, ElementState.Busy)
             field.set_element(message.to, NullElement)
             EventBus.send("RESPONSE_COMBINATE_BUSTERS", {buster_from = {pos = message.to, element = buster_to}, buster_to = {pos = message.from, element = buster_from}})
