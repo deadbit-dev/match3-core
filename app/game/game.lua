@@ -1862,12 +1862,6 @@ function ____exports.Game()
         if message.buster_from.element.id == ____exports.ElementId.Helicopter and message.buster_to.element.id == ____exports.ElementId.Helicopter then
             return try_activate_helicopter(message.buster_to.pos, true)
         end
-        if message.buster_to.element.id == ____exports.ElementId.Helicopter then
-            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id)
-        end
-        if message.buster_from.element.id == ____exports.ElementId.Helicopter then
-            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id)
-        end
         if message.buster_from.element.id == ____exports.ElementId.Diskosphere then
             if message.buster_to.element.id == ____exports.ElementId.Diskosphere then
                 return try_activate_diskosphere(message.buster_to.pos, GAME_CONFIG.base_elements)
@@ -1893,6 +1887,12 @@ function ____exports.Game()
             else
                 return try_activate_diskosphere(message.buster_to.pos, {message.buster_from.element.id})
             end
+        end
+        if message.buster_to.element.id == ____exports.ElementId.Helicopter then
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id)
+        end
+        if message.buster_from.element.id == ____exports.ElementId.Helicopter then
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id)
         end
     end
     function on_combinate(message)

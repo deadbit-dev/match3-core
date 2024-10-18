@@ -1715,16 +1715,6 @@ export function Game() {
         if(message.buster_from.element.id == ElementId.Helicopter && message.buster_to.element.id == ElementId.Helicopter)
             return try_activate_helicopter(message.buster_to.pos, true);
 
-        // Buster with Helicopter
-        if(message.buster_to.element.id == ElementId.Helicopter) {
-            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id);
-        }
-
-        // Helicopter with Buster
-        if(message.buster_from.element.id == ElementId.Helicopter) {
-            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id);
-        }
-
         // Diskosphere from
         if(message.buster_from.element.id == ElementId.Diskosphere) {
             if(message.buster_to.element.id == ElementId.Diskosphere) return try_activate_diskosphere(message.buster_to.pos, GAME_CONFIG.base_elements);
@@ -1737,6 +1727,16 @@ export function Game() {
             if(message.buster_from.element.id == ElementId.Diskosphere) return try_activate_diskosphere(message.buster_to.pos, GAME_CONFIG.base_elements);
             else if(GAME_CONFIG.buster_elements.includes(message.buster_from.element.id)) return try_activate_diskosphere(message.buster_to.pos, [get_random_element_id()], message.buster_from.element.id);
             else return try_activate_diskosphere(message.buster_to.pos, [message.buster_from.element.id]);
+        }
+
+        // Buster with Helicopter
+        if(message.buster_to.element.id == ElementId.Helicopter) {
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_from.element.id);
+        }
+
+        // Helicopter with Buster
+        if(message.buster_from.element.id == ElementId.Helicopter) {
+            return try_activate_helicopter(message.buster_to.pos, false, message.buster_to.element.id);
         }
     }
 
