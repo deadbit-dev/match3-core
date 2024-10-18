@@ -235,4 +235,7 @@ images {
 images {
   image: "/assets/ui/life_icon.png"
 }
+images {
+  image: "/assets/ui/coins_large.png"
+}
 extrude_borders: 2

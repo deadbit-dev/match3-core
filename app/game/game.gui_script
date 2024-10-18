@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -754,9 +754,33 @@ function on_win()
                             gui.get_node("reward"),
                             true
                         )
-                        gui.set_text(
-                            gui.get_node("coins_count"),
-                            tostring(coins)
+                        drop_coins(
+                            coins,
+                            function(idx)
+                                gui.set_text(
+                                    gui.get_node("coins_count"),
+                                    "+" .. tostring(idx)
+                                )
+                                local icon = gui.get_node("coin_icon")
+                                local init_scale = gui.get_scale(icon)
+                                gui.animate(
+                                    icon,
+                                    gui.PROP_SCALE,
+                                    vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z),
+                                    gui.EASING_INELASTIC,
+                                    0.01,
+                                    0,
+                                    function()
+                                        gui.animate(
+                                            icon,
+                                            gui.PROP_SCALE,
+                                            init_scale,
+                                            gui.EASING_INELASTIC,
+                                            0.01
+                                        )
+                                    end
+                                )
+                            end
                         )
                     end
                 end
@@ -771,6 +795,51 @@ function on_win()
             )
         end
     )
+end
+function drop_coins(amount, on_each_drop)
+    do
+        local i = 0
+        while i < amount do
+            timer.delay(
+                0.1 * i,
+                false,
+                function()
+                    flow.start(function()
+                        local coin = gui.new_box_node(
+                            vmath.vector3(420, 870, 0),
+                            vmath.vector3(40, 40, 1)
+                        )
+                        gui.set_layer(coin, "ontop")
+                        gui.set_texture(coin, "ui")
+                        gui.play_flipbook(coin, "coin_icon_1")
+                        local ltrb = Camera.get_ltrb()
+                        local width = 540
+                        local height = math.abs(ltrb.w)
+                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
+                        local result = vmath.vector3()
+                        do
+                            local i = 0
+                            while i < 100 do
+                                local p = get_point_curve(i / 100, points, result)
+                                gui.animate(
+                                    coin,
+                                    gui.PROP_POSITION,
+                                    p,
+                                    gui.EASING_LINEAR,
+                                    0.01
+                                )
+                                flow.delay(0.01)
+                                i = i + 1
+                            end
+                        end
+                        gui.delete_node(coin)
+                        on_each_drop(i)
+                    end)
+                end
+            )
+            i = i + 1
+        end
+    end
 end
 function set_gameover(instance, state, revive)
     disable_game_ui()

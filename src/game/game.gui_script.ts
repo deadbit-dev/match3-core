@@ -526,7 +526,14 @@ function on_win() {
             const coins = get_current_level_config().coins;
             if(coins > 0) {
                 gui.set_enabled(gui.get_node('reward'), true);
-                gui.set_text(gui.get_node('coins_count'), tostring(coins));
+                drop_coins(coins, (idx: number) => {
+                    gui.set_text(gui.get_node('coins_count'), "+" + tostring(idx));
+                    const icon = gui.get_node('coin_icon');
+                    const init_scale = gui.get_scale(icon);
+                    gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
+                        gui.animate(icon, gui.PROP_SCALE, init_scale, gui.EASING_INELASTIC, 0.01);
+                    });
+                });
             }
         });
 
@@ -535,6 +542,39 @@ function on_win() {
         const anim_props = { blend_duration: 0, playback_rate: 1 };
         gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
     });
+}
+
+function drop_coins(amount: number, on_each_drop: (idx: number) => void) {
+    for(let i = 0; i < amount; i++) {
+        timer.delay(0.1 * i, false, () => {
+            flow.start(() => {
+                const coin = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
+                gui.set_layer(coin, 'ontop');
+                gui.set_texture(coin, 'ui');
+                gui.play_flipbook(coin, 'coin_icon_1');
+
+                const ltrb = Camera.get_ltrb();
+                const width = 540;
+                const height = math.abs(ltrb.w);
+                const points = [
+                    {x: 420, y: 870},
+                    {x: width * 0.3, y: height * 0.5},
+                    {x: 270+25, y: 480-200}
+                ];
+
+                let result = vmath.vector3();
+                for (let i = 0; i < 100; i++) {
+                    const p = get_point_curve(i / 100, points, result);
+                    gui.animate(coin, gui.PROP_POSITION, p, gui.EASING_LINEAR, 0.01);
+
+                    flow.delay(0.01);
+                }
+
+                gui.delete_node(coin);
+                on_each_drop(i);
+            });
+        });
+    }
 }
 
 // TODO: make presets for gameover

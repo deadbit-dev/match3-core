@@ -55,6 +55,10 @@ fonts {
   name: "32_bold_outline"
   font: "/assets/fonts/32_bold_outline.font"
 }
+fonts {
+  name: "70"
+  font: "/assets/fonts/70.font"
+}
 textures {
   name: "ui"
   texture: "/assets/ui.atlas"
@@ -808,8 +812,11 @@ nodes {
 }
 nodes {
   position {
-    x: 112.0
-    y: -201.0
+    y: -200.0
+  }
+  scale {
+    x: 0.8
+    y: 0.8
   }
   size {
     x: 400.0
@@ -825,11 +832,14 @@ nodes {
 }
 nodes {
   position {
-    x: -150.0
-    y: 1.0
+    x: 25.0
+  }
+  scale {
+    x: 0.3
+    y: 0.3
   }
   type: TYPE_BOX
-  texture: "ui/coin_icon_3"
+  texture: "ui/coins_large"
   id: "coin_icon"
   parent: "reward"
   inherit_alpha: true
@@ -837,17 +847,22 @@ nodes {
 }
 nodes {
   position {
-    x: -99.0
+    x: -25.0
   }
   size {
     x: 200.0
     y: 50.0
   }
   type: TYPE_TEXT
-  text: "0"
-  font: "18"
+  text: "+0"
+  font: "70"
   id: "coins_count"
-  pivot: PIVOT_W
+  pivot: PIVOT_E
+  outline {
+    x: 0.675
+    y: 0.102
+    z: 0.004
+  }
   parent: "reward"
   inherit_alpha: true
 }
