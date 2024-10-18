@@ -202,7 +202,6 @@ function setup_store(data)
             end
             Sound.play("purchase")
             remove_coins(80)
-            add_coins(150)
             set_infinit_life(1)
             GameStorage.set(
                 "hammer_counts",
@@ -227,7 +226,6 @@ function setup_store(data)
             end
             Sound.play("purchase")
             remove_coins(160)
-            add_coins(300)
             set_infinit_life(24)
             GameStorage.set(
                 "hammer_counts",

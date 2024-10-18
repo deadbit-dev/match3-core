@@ -172,7 +172,7 @@ function setup_store(data: props) {
         Sound.play('purchase');
 
         remove_coins(80);
-        add_coins(150);
+        // add_coins(150);
         
         set_infinit_life(1);
         
@@ -190,7 +190,7 @@ function setup_store(data: props) {
         Sound.play('purchase');
 
         remove_coins(160);
-        add_coins(300);
+        // add_coins(300);
 
         set_infinit_life(24);
         

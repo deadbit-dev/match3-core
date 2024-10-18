@@ -439,7 +439,9 @@ nodes {
   parent: "store/junior_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -458,10 +460,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -4.0
+    y: 70.0
+  }
   type: TYPE_BOX
   id: "store/junior_box/life"
   parent: "store/junior_box/items"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
   template_node_child: true
 }
@@ -482,10 +489,20 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -94.0
+    y: -54.0
+  }
+  scale {
+    x: 1.1
+    y: 1.1
+  }
   type: TYPE_BOX
   id: "store/junior_box/vertical_rocket"
   parent: "store/junior_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -506,10 +523,20 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 93.0
+    y: -50.0
+  }
+  scale {
+    x: 1.1
+    y: 1.1
+  }
   type: TYPE_BOX
   id: "store/junior_box/hammer"
   parent: "store/junior_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -535,7 +562,9 @@ nodes {
   parent: "store/junior_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -703,7 +732,9 @@ nodes {
   parent: "store/catlover_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -722,10 +753,16 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -4.0
+    y: 74.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/life"
   parent: "store/catlover_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -746,10 +783,16 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 3.0
+    y: -77.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/vertical_rocket"
   parent: "store/catlover_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -772,10 +815,16 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 107.0
+    y: -18.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/hammer"
   parent: "store/catlover_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -803,7 +852,9 @@ nodes {
   parent: "store/catlover_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -822,10 +873,16 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -114.0
+    y: -10.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/spinning"
   parent: "store/catlover_box/items"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -851,7 +908,9 @@ nodes {
   parent: "store/catlover_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -875,7 +934,9 @@ nodes {
   parent: "store/catlover_box/items"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
