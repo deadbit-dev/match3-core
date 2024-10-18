@@ -1449,13 +1449,14 @@ function ____exports.Game()
         end
         local damage = field.try_damage(pos, false, false, true)
         local damages = damage ~= NotDamage and ({damage}) or ({})
+        local busters = {}
         if rocket.id == ____exports.ElementId.VerticalRocket or rocket.id == ____exports.ElementId.AllAxisRocket or all_axis then
             do
                 local y = 0
                 while y < field_height do
                     if y ~= pos.y then
                         if is_buster({x = pos.x, y = y}) then
-                            try_activate_buster_element({x = pos.x, y = y})
+                            busters[#busters + 1] = {x = pos.x, y = y}
                         else
                             local damage_info = field.try_damage({x = pos.x, y = y})
                             if damage_info ~= NotDamage then
@@ -1475,7 +1476,7 @@ function ____exports.Game()
                 while x < field_width do
                     if x ~= pos.x then
                         if is_buster({x = x, y = pos.y}) then
-                            try_activate_buster_element({x = x, y = pos.y})
+                            busters[#busters + 1] = {x = x, y = pos.y}
                         else
                             local damage_info = field.try_damage({x = x, y = pos.y})
                             if damage_info ~= NotDamage then
@@ -1488,6 +1489,9 @@ function ____exports.Game()
                     x = x + 1
                 end
             end
+        end
+        for ____, buster in ipairs(busters) do
+            try_activate_buster_element(buster)
         end
         local axis = (rocket.id == ____exports.ElementId.AllAxisRocket or all_axis) and Axis.All or (rocket.id == ____exports.ElementId.VerticalRocket and Axis.Vertical or Axis.Horizontal)
         EventBus.send("RESPONSE_ACTIVATED_ROCKET", {pos = pos, uid = rocket.uid, damages = damages, axis = axis})
@@ -1928,29 +1932,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch427 = combination.type
-            local ____cond427 = ____switch427 == CombinationType.Comb4
-            if ____cond427 then
+            local ____switch429 = combination.type
+            local ____cond429 = ____switch429 == CombinationType.Comb4
+            if ____cond429 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond427 = ____cond427 or ____switch427 == CombinationType.Comb5
-            if ____cond427 then
+            ____cond429 = ____cond429 or ____switch429 == CombinationType.Comb5
+            if ____cond429 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond427 = ____cond427 or ____switch427 == CombinationType.Comb2x2
-            if ____cond427 then
+            ____cond429 = ____cond429 or ____switch429 == CombinationType.Comb2x2
+            if ____cond429 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond427 = ____cond427 or (____switch427 == CombinationType.Comb3x3a or ____switch427 == CombinationType.Comb3x3b)
-            if ____cond427 then
+            ____cond429 = ____cond429 or (____switch429 == CombinationType.Comb3x3a or ____switch429 == CombinationType.Comb3x3b)
+            if ____cond429 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond427 = ____cond427 or (____switch427 == CombinationType.Comb3x4 or ____switch427 == CombinationType.Comb3x5)
-            if ____cond427 then
+            ____cond429 = ____cond429 or (____switch429 == CombinationType.Comb3x4 or ____switch429 == CombinationType.Comb3x5)
+            if ____cond429 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

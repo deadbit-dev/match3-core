@@ -1349,10 +1349,11 @@ export function Game() {
         const damage = field.try_damage(pos, false, false, true);
         const damages = damage != NotDamage ? [damage] : [];
 
+        const busters = [];
         if(rocket.id == ElementId.VerticalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
             for(let y = 0; y < field_height; y++) {
                 if(y != pos.y) {
-                    if(is_buster({x: pos.x, y})) try_activate_buster_element({x: pos.x, y});
+                    if(is_buster({x: pos.x, y})) busters.push({x: pos.x, y}); //try_activate_buster_element({x: pos.x, y});
                     else {
                         const damage_info = field.try_damage({x: pos.x, y});
                         if(damage_info != NotDamage) {
@@ -1368,7 +1369,7 @@ export function Game() {
         if(rocket.id == ElementId.HorizontalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
             for(let x = 0; x < field_width; x++) {
                 if(x != pos.x) {
-                    if(is_buster({x, y: pos.y})) try_activate_buster_element({x, y: pos.y});
+                    if(is_buster({x, y: pos.y})) busters.push({x, y: pos.y}); //try_activate_buster_element({x, y: pos.y});
                     else {
                         const damage_info = field.try_damage({x, y: pos.y});
                         if(damage_info != NotDamage) {
@@ -1379,6 +1380,10 @@ export function Game() {
                     }
                 }
             }
+        }
+
+        for(const buster of busters) {
+            try_activate_buster_element(buster);
         }
         
         const axis = rocket.id == ElementId.AllAxisRocket || all_axis ? Axis.All : rocket.id == ElementId.VerticalRocket ? Axis.Vertical : Axis.Horizontal;
