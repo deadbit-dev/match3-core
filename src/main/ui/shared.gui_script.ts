@@ -85,6 +85,10 @@ function set_events(data: props) {
         if(data.dlg_opened) return;
         set_enabled_vertical_rocket(data, true);
     }, true);
+    EventBus.on('OPEN_SETTINGS', () => {
+        if(data.dlg_opened) return;
+        set_enabled_settings(data, true);
+    });
 }
 
 function setup(data: props) {

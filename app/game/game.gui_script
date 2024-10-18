@@ -267,6 +267,12 @@ function setup_busters(instance)
             true
         )
     end
+    instance.druid:new_button(
+        "settings_button",
+        function()
+            EventBus.send("OPEN_SETTINGS")
+        end
+    )
     update_buttons(instance)
 end
 function setup_sustem_ui(instance)
@@ -445,25 +451,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch72 = data.idx
-        local ____cond72 = ____switch72 == 0
-        if ____cond72 then
+        local ____switch73 = data.idx
+        local ____cond73 = ____switch73 == 0
+        if ____cond73 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond72 = ____cond72 or ____switch72 == 1
-        if ____cond72 then
+        ____cond73 = ____cond73 or ____switch73 == 1
+        if ____cond73 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond72 = ____cond72 or ____switch72 == 2
-        if ____cond72 then
+        ____cond73 = ____cond73 or ____switch73 == 2
+        if ____cond73 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

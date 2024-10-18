@@ -621,6 +621,7 @@ export type _UserMessages = {
 
     MAKED_ELEMENT: Position,
 
-    REQUEST_REWIND: VoidMessage
-    RESPONSE_REWIND: GameState
+    REQUEST_REWIND: VoidMessage,
+    RESPONSE_REWIND: GameState,
+    OPEN_SETTINGS: VoidMessage
 };
