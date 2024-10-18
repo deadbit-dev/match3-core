@@ -1074,8 +1074,11 @@ export function View(resources: ViewResources) {
         });
         
         // если нашли то удаляем визуал
-        if(damage_info != undefined && damage_info.element)
+        if(damage_info != undefined && damage_info.element) {
             delete_view_item_by_uid(damage_info.element.uid);
+            damage_info.element = undefined;
+            on_damage(damage_info);
+        }
         
         const worldPos = get_world_pos(pos, GAME_CONFIG.default_element_z_index + 2.1);
         const _go = go_manager.make_go('effect_view', worldPos);

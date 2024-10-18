@@ -1302,6 +1302,8 @@ function ____exports.View(resources)
         )
         if damage_info ~= nil and damage_info.element then
             delete_view_item_by_uid(damage_info.element.uid)
+            damage_info.element = nil
+            on_damage(damage_info)
         end
         local worldPos = get_world_pos(pos, GAME_CONFIG.default_element_z_index + 2.1)
         local _go = go_manager.make_go("effect_view", worldPos)
