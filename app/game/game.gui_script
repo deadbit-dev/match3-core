@@ -268,7 +268,7 @@ function setup_busters(instance)
         )
     end
     instance.druid:new_button(
-        "settings_button",
+        "settings/button",
         function()
             EventBus.send("OPEN_SETTINGS")
         end

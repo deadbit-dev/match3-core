@@ -651,6 +651,7 @@ nodes {
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
+  material: "dlg"
 }
 nodes {
   position {
@@ -1596,7 +1597,12 @@ nodes {
 }
 nodes {
   position {
-    x: -95.0
+    x: -102.0
+    y: -5.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_TEMPLATE
   id: "hammer"
@@ -1641,7 +1647,12 @@ nodes {
 }
 nodes {
   position {
-    x: -205.0
+    x: -203.0
+    y: -3.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_TEMPLATE
   id: "spinning"
@@ -1686,7 +1697,12 @@ nodes {
 }
 nodes {
   position {
-    x: 16.0
+    x: -1.0
+    y: -6.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_TEMPLATE
   id: "horizontal_rocket"
@@ -1737,7 +1753,12 @@ nodes {
 }
 nodes {
   position {
-    x: 126.0
+    x: 99.0
+    y: -6.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_TEMPLATE
   id: "vertical_rocket"
@@ -1782,20 +1803,59 @@ nodes {
 }
 nodes {
   position {
-    x: 226.0
-    y: 1.0
+    x: 200.0
+    y: -5.0
   }
   scale {
-    x: 0.5
-    y: 0.5
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_TEMPLATE
+  id: "settings"
+  parent: "buster_buttons"
+  layer: "ontop"
+  inherit_alpha: true
+  template: "/game/ui/button.gui"
+}
+nodes {
+  scale {
+    x: 0.9
+    y: 0.9
   }
   type: TYPE_BOX
-  texture: "ui/BtnSet"
-  id: "settings_button"
+  id: "settings/button"
   yanchor: YANCHOR_BOTTOM
-  parent: "buster_buttons"
-  layer: "back"
-  size_mode: SIZE_MODE_AUTO
+  parent: "settings"
+  layer: "ontop"
+  overridden_fields: 3
+  overridden_fields: 13
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/set"
+  id: "settings/icon"
+  parent: "settings/button"
+  layer: "ontop"
+  overridden_fields: 9
+  overridden_fields: 20
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "settings/lock"
+  parent: "settings/button"
+  overridden_fields: 45
+  template_node_child: true
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "settings/counts"
+  parent: "settings/button"
+  template_node_child: true
 }
 nodes {
   position {
@@ -2021,4 +2081,8 @@ materials {
 materials {
   name: "tutorial_sprite"
   material: "/assets/materials/tutorial_sprite.material"
+}
+materials {
+  name: "dlg"
+  material: "/assets/materials/dlg.material"
 }

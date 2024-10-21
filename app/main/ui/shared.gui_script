@@ -340,6 +340,14 @@ function setup_settings(data)
             set_enabled_settings(data, false)
         end
     )
+    data.druid:new_button(
+        "map_button",
+        function()
+            set_enabled_settings(data, false)
+            Sound.stop("game")
+            Scene.load("map")
+        end
+    )
     local sound_on = gui.get_node("sound_on")
     local sound_off = gui.get_node("sound_off")
     gui.set_enabled(
@@ -649,17 +657,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch96 = scene.name
-        local ____cond96 = ____switch96 == "game"
-        if ____cond96 then
+        local ____switch97 = scene.name
+        local ____cond97 = ____switch97 == "game"
+        if ____cond97 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond96 = ____cond96 or ____switch96 == "map"
-        if ____cond96 then
+        ____cond97 = ____cond97 or ____switch97 == "map"
+        if ____cond97 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -684,9 +692,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch101 = Scene.get_current_name()
-        local ____cond101 = ____switch101 == "game"
-        if ____cond101 then
+        local ____switch102 = Scene.get_current_name()
+        local ____cond102 = ____switch102 == "game"
+        if ____cond102 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -695,8 +703,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond101 = ____cond101 or ____switch101 == "map"
-        if ____cond101 then
+        ____cond102 = ____cond102 or ____switch102 == "map"
+        if ____cond102 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -755,6 +763,32 @@ function set_enabled_settings(data, state)
         return
     end
     if state then
+        repeat
+            local ____switch109 = Scene.get_current_name()
+            local ____cond109 = ____switch109 == "game"
+            if ____cond109 then
+                gui.set_enabled(
+                    gui.get_node("map_button"),
+                    true
+                )
+                gui.set_position(
+                    gui.get_node("ok_button"),
+                    vmath.vector3(120, -210, 0)
+                )
+                break
+            end
+            do
+                gui.set_enabled(
+                    gui.get_node("map_button"),
+                    false
+                )
+                gui.set_position(
+                    gui.get_node("ok_button"),
+                    vmath.vector3(0, -210, 0)
+                )
+                break
+            end
+        until true
         gui.set_enabled(settings, state)
         gui.animate(
             gui.get_node("settings"),

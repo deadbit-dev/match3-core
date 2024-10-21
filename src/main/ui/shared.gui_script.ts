@@ -280,6 +280,12 @@ function setup_settings(data: props) {
         set_enabled_settings(data, false);
     });
 
+    data.druid.new_button('map_button', () => {
+        set_enabled_settings(data, false);
+        Sound.stop('game');
+        Scene.load('map');
+    });
+
     const sound_on = gui.get_node('sound_on');
     const sound_off = gui.get_node('sound_off');
 
@@ -581,6 +587,17 @@ function set_enabled_settings(data: props, state: boolean) {
         return;
 
     if(state) {
+        switch(Scene.get_current_name()) {
+            case 'game':
+                gui.set_enabled(gui.get_node('map_button'), true);
+                gui.set_position(gui.get_node('ok_button'), vmath.vector3(120, -210, 0));
+            break;
+            default:
+                gui.set_enabled(gui.get_node('map_button'), false);
+                gui.set_position(gui.get_node('ok_button'), vmath.vector3(0, -210, 0));
+            break;
+        } 
+
         gui.set_enabled(settings, state);
         gui.animate(gui.get_node('settings'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);

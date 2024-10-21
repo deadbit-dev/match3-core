@@ -44,6 +44,8 @@ function init(self)
   self.tile_pred = render.predicate({ "tile" })
   self.gui_pred = render.predicate({ "gui" })
   self.field_pred = render.predicate({ "field" })
+  self.dlg_pred = render.predicate({"dlg"})
+  self.dlg_part_pred = render.predicate({"dlg_part"})
   self.text_pred = render.predicate({ "text" })
   self.particle_pred = render.predicate({ "particle" })
 
@@ -109,6 +111,8 @@ function update(self)
 
   render_in_gui(self, window_width, window_height,
     function (self, frustum_gui)
+      render.draw(self.dlg_pred, { frustum = frustum_gui })
+      render.draw(self.dlg_part_pred, { frustum = frustum_gui })
       render.draw(self.text_pred, { frustum = frustum_gui })
     end
   )

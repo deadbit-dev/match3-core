@@ -249,7 +249,7 @@ function setup_busters(instance: props) {
         gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
     }
 
-    instance.druid.new_button('settings_button', () => {
+    instance.druid.new_button('settings/button', () => {
         EventBus.send('OPEN_SETTINGS');
     });
 

@@ -2103,10 +2103,11 @@ nodes {
   type: TYPE_BOX
   texture: "ui/complete_window"
   id: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
+  material: "dlg"
 }
 nodes {
   position {
@@ -2135,8 +2136,9 @@ nodes {
     z: 1.0
   }
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
+  material: "font_top"
 }
 nodes {
   position {
@@ -2146,9 +2148,10 @@ nodes {
   texture: "ui/btn_2"
   id: "ok_button"
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg"
 }
 nodes {
   position {
@@ -2180,11 +2183,12 @@ nodes {
   parent: "ok_button"
   layer: "top"
   inherit_alpha: true
+  material: "font_top"
 }
 nodes {
   position {
     x: -168.0
-    y: 68.0
+    y: 66.666664
   }
   scale {
     x: 1.5
@@ -2194,14 +2198,15 @@ nodes {
   texture: "ui/iconSound"
   id: "sound_icon"
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg"
 }
 nodes {
   position {
     x: -168.0
-    y: -56.0
+    y: -57.333332
   }
   scale {
     x: 1.5
@@ -2211,14 +2216,15 @@ nodes {
   texture: "ui/iconMusic"
   id: "music_icon"
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg"
 }
 nodes {
   position {
     x: -106.0
-    y: 67.0
+    y: 65.666664
   }
   size {
     x: 300.0
@@ -2246,15 +2252,16 @@ nodes {
   }
   line_break: true
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
   text_leading: 0.9
+  material: "font_top"
 }
 nodes {
   position {
     x: -106.0
-    y: -59.0
+    y: -60.333332
   }
   size {
     x: 300.0
@@ -2282,23 +2289,25 @@ nodes {
   }
   line_break: true
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
   text_leading: 0.9
+  material: "font_top"
 }
 nodes {
   position {
     x: 140.0
-    y: 66.0
+    y: 64.666664
   }
   type: TYPE_BOX
   texture: "ui/BtnONBack"
   id: "sound_button"
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg"
 }
 nodes {
   position {
@@ -2312,6 +2321,7 @@ nodes {
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
+  material: "dlg_part"
 }
 nodes {
   position {
@@ -2324,19 +2334,21 @@ nodes {
   layer: "top"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg_part"
 }
 nodes {
   position {
     x: 140.0
-    y: -62.0
+    y: -63.333332
   }
   type: TYPE_BOX
   texture: "ui/BtnONBack"
   id: "music_button"
   parent: "settings"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg"
 }
 nodes {
   position {
@@ -2346,10 +2358,11 @@ nodes {
   texture: "ui/BtnOFF"
   id: "music_off"
   parent: "music_button"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
+  material: "dlg_part"
 }
 nodes {
   position {
@@ -2359,9 +2372,58 @@ nodes {
   texture: "ui/BtnON"
   id: "music_on"
   parent: "music_button"
-  layer: "top"
+  layer: "ontop"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  material: "dlg_part"
+}
+nodes {
+  position {
+    x: -120.0
+    y: -210.0
+  }
+  type: TYPE_BOX
+  texture: "ui/btn_2"
+  id: "map_button"
+  parent: "settings"
+  layer: "ontop"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+  material: "dlg"
+}
+nodes {
+  position {
+    x: -1.0
+    y: 6.0
+  }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
+  size {
+    x: 250.0
+    y: 50.0
+  }
+  type: TYPE_TEXT
+  text: "\320\275\320\260 \320\272\320\260\321\200\321\202\321\203\n"
+  ""
+  font: "42"
+  id: "buy_button_text1"
+  outline {
+    x: 0.169
+    y: 0.38
+    z: 0.063
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "map_button"
+  layer: "top"
+  inherit_alpha: true
+  material: "font_top"
 }
 layers {
   name: "back"
@@ -2372,5 +2434,20 @@ layers {
 layers {
   name: "top"
 }
+layers {
+  name: "ontop"
+}
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT
+materials {
+  name: "dlg"
+  material: "/assets/materials/dlg.material"
+}
+materials {
+  name: "font_top"
+  material: "/assets/materials/font_top.material"
+}
+materials {
+  name: "dlg_part"
+  material: "/assets/materials/dlg_part.material"
+}

@@ -238,4 +238,7 @@ images {
 images {
   image: "/assets/ui/coins_large.png"
 }
+images {
+  image: "/assets/ui/set.png"
+}
 extrude_borders: 2
