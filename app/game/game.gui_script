@@ -270,6 +270,17 @@ function setup_busters(instance)
     instance.druid:new_button(
         "settings/button",
         function()
+            if __TS__ArrayIncludes(
+                GAME_CONFIG.tutorial_levels,
+                GameStorage.get("current_level") + 1
+            ) then
+                if not __TS__ArrayIncludes(
+                    GameStorage.get("completed_tutorials"),
+                    GameStorage.get("current_level") + 1
+                ) then
+                    return
+                end
+            end
             EventBus.send("OPEN_SETTINGS")
         end
     )
@@ -451,25 +462,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch73 = data.idx
-        local ____cond73 = ____switch73 == 0
-        if ____cond73 then
+        local ____switch75 = data.idx
+        local ____cond75 = ____switch75 == 0
+        if ____cond75 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond73 = ____cond73 or ____switch73 == 1
-        if ____cond73 then
+        ____cond75 = ____cond75 or ____switch75 == 1
+        if ____cond75 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond73 = ____cond73 or ____switch73 == 2
-        if ____cond73 then
+        ____cond75 = ____cond75 or ____switch75 == 2
+        if ____cond75 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

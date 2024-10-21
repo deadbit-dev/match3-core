@@ -1813,7 +1813,6 @@ nodes {
   type: TYPE_TEMPLATE
   id: "settings"
   parent: "buster_buttons"
-  layer: "ontop"
   inherit_alpha: true
   template: "/game/ui/button.gui"
 }
@@ -1826,7 +1825,7 @@ nodes {
   id: "settings/button"
   yanchor: YANCHOR_BOTTOM
   parent: "settings"
-  layer: "ontop"
+  layer: "back"
   overridden_fields: 3
   overridden_fields: 13
   overridden_fields: 20
@@ -1837,7 +1836,7 @@ nodes {
   texture: "ui/set"
   id: "settings/icon"
   parent: "settings/button"
-  layer: "ontop"
+  layer: "back"
   overridden_fields: 9
   overridden_fields: 20
   overridden_fields: 45

@@ -250,6 +250,11 @@ function setup_busters(instance: props) {
     }
 
     instance.druid.new_button('settings/button', () => {
+        if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+            if(!GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+                return;
+        }
+        
         EventBus.send('OPEN_SETTINGS');
     });
 
@@ -529,7 +534,7 @@ function on_win() {
             const coins = get_current_level_config().coins;
             const current_coins = GameStorage.get('coins');
             const before_reward = current_coins - coins;
-            
+
             gui.set_enabled(gui.get_node('win'), true);
             gui.set_enabled(gui.get_node('reward'), true);
             gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
