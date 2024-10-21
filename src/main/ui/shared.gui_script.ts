@@ -13,8 +13,9 @@ import { parse_time } from '../../utils/utils';
 import { Dlg } from '../game_config';
 
 interface props {
-    druid: DruidClass
-    dlg_opened: boolean
+    druid: DruidClass,
+    dlg_opened: boolean,
+    is_store_open: boolean
 }
 
 export function init(this: props): void {
@@ -140,7 +141,7 @@ function setup_store(data: props) {
     data.druid.new_button('store/buy_x1_btn', () => {
         // if(is_max_lifes()) return;
         if(!is_enough_coins(30)) {
-            return set_enabled_not_enough_coins(true);
+            return set_enabled_not_enough_coins(data, true);
         }
 
         Sound.play('purchase');
@@ -152,7 +153,7 @@ function setup_store(data: props) {
     data.druid.new_button('store/buy_x2_btn', () => {
         // if(is_max_lifes()) return;
         if(!is_enough_coins(50)) {
-            return set_enabled_not_enough_coins(true);
+            return set_enabled_not_enough_coins(data, true);
         }
 
         Sound.play('purchase');
@@ -164,7 +165,7 @@ function setup_store(data: props) {
     data.druid.new_button('store/buy_x3_btn', () => {
         // if(is_max_lifes()) return;
         if(!is_enough_coins(70)) {
-            return set_enabled_not_enough_coins(true);
+            return set_enabled_not_enough_coins(data, true);
         }
 
         Sound.play('purchase');
@@ -176,7 +177,7 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
 
     data.druid.new_button('store/junior_box/buy_button/button', () => {
-        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(data, true);
 
         Sound.play('purchase');
 
@@ -194,7 +195,7 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
     
     data.druid.new_button('store/catlover_box/buy_button/button', () => {
-        if(!is_enough_coins(160)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(160)) return set_enabled_not_enough_coins(data, true);
 
         Sound.play('purchase');
 
@@ -213,19 +214,19 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
 
     data.druid.new_button('store/buy_ad_1_btn', () => {
-        if(!is_enough_coins(100)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(100)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(100);
     });
 
     data.druid.new_button('store/buy_ad_7_btn', () => {
-        if(!is_enough_coins(250)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(250)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(250);
     });
 
     data.druid.new_button('store/buy_ad_30_btn', () => {
-        if(!is_enough_coins(600)) return set_enabled_not_enough_coins(true);
+        if(!is_enough_coins(600)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(600);
     });
@@ -318,7 +319,7 @@ function setup_hammer(data: props) {
     data.druid.new_button('hammer/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_hammer(data, false);
-            set_enabled_not_enough_coins(true);
+            set_enabled_not_enough_coins(data, true);
             return;
         }
         remove_coins(30);
@@ -340,7 +341,7 @@ function setup_spinning(data: props) {
     data.druid.new_button('spinning/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_spinning(data, false);
-            set_enabled_not_enough_coins(true);
+            set_enabled_not_enough_coins(data, true);
             return;
         }
         remove_coins(30);
@@ -362,7 +363,7 @@ function setup_horizontal_rocket(data: props) {
     data.druid.new_button('horizontal_rocket/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_horizontall_rocket(data, false);
-            set_enabled_not_enough_coins(true);
+            set_enabled_not_enough_coins(data, true);
             return;
         }
         remove_coins(30);
@@ -384,7 +385,7 @@ function setup_vertical_rocket(data: props) {
     data.druid.new_button('vertical_rocket/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_vertical_rocket(data, false);
-            set_enabled_not_enough_coins(true);
+            set_enabled_not_enough_coins(data, true);
             return;
         }
         remove_coins(30);
@@ -402,7 +403,7 @@ function setup_life_notification(data: props) {
     data.druid.new_button('life_notification/buy_button', () => {
         if(!is_enough_coins(30)) {
             set_enabled_life_notification(false);
-            set_enabled_not_enough_coins(true);
+            set_enabled_not_enough_coins(data, true);
             return;
         }
 
@@ -418,11 +419,11 @@ function setup_not_enough_coins(data: props) {
     data.druid.new_button('not_enough_coins/buy_button', () => {
         const store = gui.get_node('store/manager');
         if(gui.is_enabled(store, false)) {
-            set_enabled_not_enough_coins(false);
+            set_enabled_not_enough_coins(data, false);
             return;
         }
 
-        set_enabled_not_enough_coins(false);
+        set_enabled_not_enough_coins(data, false);
         set_enabled_store(data, true);
     });
 }
@@ -578,6 +579,8 @@ function set_enabled_store(data: props, state: boolean) {
         EventBus.send('CLOSED_DLG', Dlg.Store);
         Sound.stop('store');
     }
+
+    data.is_store_open = state;
 }
 
 function set_enabled_settings(data: props, state: boolean) {
@@ -632,16 +635,18 @@ function set_enabled_life_notification(state: boolean) {
     EventBus.send('LIFE_NOTIFICATION', state);
 }
 
-function set_enabled_not_enough_coins(state: boolean) {
+function set_enabled_not_enough_coins(data: props, state: boolean) {
     const coins = gui.get_node('not_enough_coins/manager');
 
     if(state) {
         gui.set_enabled(coins, state);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        if(!data.is_store_open)
+            gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
         EventBus.send('OPENED_DLG', Dlg.NotEnoughCoins);
     } else {
-        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
+        if(!data.is_store_open)
+            gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(coins, state);
         });

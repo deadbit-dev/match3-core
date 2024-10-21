@@ -1772,16 +1772,22 @@ nodes {
   id: "not_enough_coins/manager"
   parent: "not_enough_coins"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.5
+    y: 0.5
+  }
   type: TYPE_BOX
   id: "not_enough_coins/dlg"
   parent: "not_enough_coins/manager"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }

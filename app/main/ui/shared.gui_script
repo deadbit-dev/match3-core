@@ -160,7 +160,7 @@ function setup_store(data)
         "store/buy_x1_btn",
         function()
             if not is_enough_coins(30) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             add_lifes(1)
@@ -171,7 +171,7 @@ function setup_store(data)
         "store/buy_x2_btn",
         function()
             if not is_enough_coins(50) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             add_lifes(2)
@@ -182,7 +182,7 @@ function setup_store(data)
         "store/buy_x3_btn",
         function()
             if not is_enough_coins(70) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             add_lifes(3)
@@ -197,7 +197,7 @@ function setup_store(data)
         "store/junior_box/buy_button/button",
         function()
             if not is_enough_coins(80) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             remove_coins(80)
@@ -221,7 +221,7 @@ function setup_store(data)
         "store/catlover_box/buy_button/button",
         function()
             if not is_enough_coins(160) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             remove_coins(160)
@@ -249,7 +249,7 @@ function setup_store(data)
         "store/buy_ad_1_btn",
         function()
             if not is_enough_coins(100) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             remove_coins(100)
@@ -259,7 +259,7 @@ function setup_store(data)
         "store/buy_ad_7_btn",
         function()
             if not is_enough_coins(250) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             remove_coins(250)
@@ -269,7 +269,7 @@ function setup_store(data)
         "store/buy_ad_30_btn",
         function()
             if not is_enough_coins(600) then
-                return set_enabled_not_enough_coins(true)
+                return set_enabled_not_enough_coins(data, true)
             end
             Sound.play("purchase")
             remove_coins(600)
@@ -405,7 +405,7 @@ function setup_hammer(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_hammer(data, false)
-                set_enabled_not_enough_coins(true)
+                set_enabled_not_enough_coins(data, true)
                 return
             end
             remove_coins(30)
@@ -439,7 +439,7 @@ function setup_spinning(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_spinning(data, false)
-                set_enabled_not_enough_coins(true)
+                set_enabled_not_enough_coins(data, true)
                 return
             end
             remove_coins(30)
@@ -473,7 +473,7 @@ function setup_horizontal_rocket(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_horizontall_rocket(data, false)
-                set_enabled_not_enough_coins(true)
+                set_enabled_not_enough_coins(data, true)
                 return
             end
             remove_coins(30)
@@ -507,7 +507,7 @@ function setup_vertical_rocket(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_vertical_rocket(data, false)
-                set_enabled_not_enough_coins(true)
+                set_enabled_not_enough_coins(data, true)
                 return
             end
             remove_coins(30)
@@ -529,7 +529,7 @@ function setup_life_notification(data)
         function()
             if not is_enough_coins(30) then
                 set_enabled_life_notification(false)
-                set_enabled_not_enough_coins(true)
+                set_enabled_not_enough_coins(data, true)
                 return
             end
             set_enabled_life_notification(false)
@@ -548,10 +548,10 @@ function setup_not_enough_coins(data)
         function()
             local store = gui.get_node("store/manager")
             if gui.is_enabled(store, false) then
-                set_enabled_not_enough_coins(false)
+                set_enabled_not_enough_coins(data, false)
                 return
             end
-            set_enabled_not_enough_coins(false)
+            set_enabled_not_enough_coins(data, false)
             set_enabled_store(data, true)
         end
     )
@@ -756,6 +756,7 @@ function set_enabled_store(data, state)
         EventBus.send("CLOSED_DLG", Dlg.Store)
         Sound.stop("store")
     end
+    data.is_store_open = state
 end
 function set_enabled_settings(data, state)
     local settings = gui.get_node("settings")
@@ -870,7 +871,7 @@ function set_enabled_life_notification(state)
     end
     EventBus.send("LIFE_NOTIFICATION", state)
 end
-function set_enabled_not_enough_coins(state)
+function set_enabled_not_enough_coins(data, state)
     local coins = gui.get_node("not_enough_coins/manager")
     if state then
         gui.set_enabled(coins, state)
@@ -881,22 +882,26 @@ function set_enabled_not_enough_coins(state)
             gui.EASING_INCUBIC,
             0.3
         )
-        gui.animate(
-            gui.get_node("fade"),
-            "color",
-            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
-            gui.EASING_INCUBIC,
-            0.3
-        )
+        if not data.is_store_open then
+            gui.animate(
+                gui.get_node("fade"),
+                "color",
+                vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
+                gui.EASING_INCUBIC,
+                0.3
+            )
+        end
         EventBus.send("OPENED_DLG", Dlg.NotEnoughCoins)
     else
-        gui.animate(
-            gui.get_node("fade"),
-            "color",
-            vmath.vector4(0, 0, 0, 0),
-            gui.EASING_INCUBIC,
-            0.3
-        )
+        if not data.is_store_open then
+            gui.animate(
+                gui.get_node("fade"),
+                "color",
+                vmath.vector4(0, 0, 0, 0),
+                gui.EASING_INCUBIC,
+                0.3
+            )
+        end
         gui.animate(
             gui.get_node("not_enough_coins/dlg"),
             "position",
