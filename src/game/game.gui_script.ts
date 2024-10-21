@@ -529,9 +529,11 @@ function on_win() {
             gui.set_enabled(gui.get_node('win'), true);
             const coins = get_current_level_config().coins;
             if(coins > 0) {
-                gui.set_enabled(gui.get_node('reward'), true);
                 drop_coins(coins, (idx: number) => {
-                    gui.set_text(gui.get_node('coins_count'), "+" + tostring(idx));
+                    print(idx);
+                    if(idx == 0)
+                        gui.set_enabled(gui.get_node('reward'), true);
+                    gui.set_text(gui.get_node('coins_count'), "+" + tostring(idx+1));
                     const icon = gui.get_node('coin_icon');
                     const init_scale = gui.get_scale(icon);
                     gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
@@ -550,6 +552,7 @@ function on_win() {
 
 function drop_coins(amount: number, on_each_drop: (idx: number) => void) {
     for(let i = 0; i < amount; i++) {
+        const idx = i;
         timer.delay(0.1 * i, false, () => {
             flow.start(() => {
                 const coin = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
@@ -575,7 +578,7 @@ function drop_coins(amount: number, on_each_drop: (idx: number) => void) {
                 }
 
                 gui.delete_node(coin);
-                on_each_drop(i);
+                on_each_drop(idx);
             });
         });
     }

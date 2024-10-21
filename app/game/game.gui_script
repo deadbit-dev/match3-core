@@ -756,16 +756,19 @@ function on_win()
                     )
                     local coins = get_current_level_config().coins
                     if coins > 0 then
-                        gui.set_enabled(
-                            gui.get_node("reward"),
-                            true
-                        )
                         drop_coins(
                             coins,
                             function(idx)
+                                print(idx)
+                                if idx == 0 then
+                                    gui.set_enabled(
+                                        gui.get_node("reward"),
+                                        true
+                                    )
+                                end
                                 gui.set_text(
                                     gui.get_node("coins_count"),
-                                    "+" .. tostring(idx)
+                                    "+" .. tostring(idx + 1)
                                 )
                                 local icon = gui.get_node("coin_icon")
                                 local init_scale = gui.get_scale(icon)
@@ -806,6 +809,7 @@ function drop_coins(amount, on_each_drop)
     do
         local i = 0
         while i < amount do
+            local idx = i
             timer.delay(
                 0.1 * i,
                 false,
@@ -839,7 +843,7 @@ function drop_coins(amount, on_each_drop)
                             end
                         end
                         gui.delete_node(coin)
-                        on_each_drop(i)
+                        on_each_drop(idx)
                     end)
                 end
             )
