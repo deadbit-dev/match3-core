@@ -138,6 +138,8 @@ export function Game() {
     let helper_data: HelperMessage | null = null;
 
     let is_idle = false;
+    let is_win = false;
+    let is_win_action = false;
 
     function init() {
         Log.log("INIT GAME");
@@ -341,6 +343,9 @@ export function Game() {
             }
         }
 
+        if(is_win_action)
+            return;
+
         Log.log("IDLE");
 
         is_idle = true;
@@ -504,19 +509,48 @@ export function Game() {
 
     function is_have_steps() {
         return get_state().steps > 0;
-    } 
+    }
 
     function on_win() {
+        if(!is_win) {
+            is_win = true;
+            const completed_levels = GameStorage.get('completed_levels');
+            completed_levels.push(GameStorage.get('current_level'));
+            GameStorage.set('completed_levels', completed_levels);
+            add_coins(level_config.coins);
+            win_action();
+            return;
+        }
+
         timer.cancel(game_timer);
 
-        const completed_levels = GameStorage.get('completed_levels');
-        completed_levels.push(GameStorage.get('current_level'));
-        GameStorage.set('completed_levels', completed_levels);
-        add_coins(level_config.coins);
-        print("ADDED COINS: ", level_config.coins);
-        
         update_core_state();
         EventBus.send('ON_WIN', copy_state());
+    }
+
+    function win_action() {
+        is_idle = false;
+
+        is_win_action = true;
+        for(let y = 0; y < field_height; y++) {
+            for(let x = 0; x < field_width; x++) {
+                const pos = {x, y};
+                const delay = (y * field_width + x) * 0.05;
+                timer.delay(delay, false, () => {
+                    if(is_buster(pos)) return try_activate_buster_element(pos);
+                    
+                    const damage_info = field.try_damage(pos, false, true);
+                    if(damage_info == NotDamage)
+                        return;
+        
+                    EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
+                });
+            }
+        }
+
+        timer.delay(field_width * field_height * 0.05, false, () => {
+            is_win_action = false;
+        });
     }
 
     function on_gameover(revive = (level_config.time == undefined)) {
@@ -1015,6 +1049,8 @@ export function Game() {
     }
 
     function on_request_element(pos: Position): Element | typeof NullElement {
+        if(is_win)
+            return NullElement;
         return make_element(pos, get_random_element_id());
     }
     

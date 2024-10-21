@@ -85,6 +85,7 @@ function ____exports.add_coins(amount)
     coins = math.min(coins + amount, 10000)
     GameStorage.set("coins", coins)
     EventBus.send("ADDED_COIN")
+    print("ADDED COINS: ", amount)
 end
 function ____exports.remove_coins(amount)
     local coins = GameStorage.get("coins")

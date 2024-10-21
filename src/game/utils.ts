@@ -90,6 +90,8 @@ export function add_coins(amount: number) {
     coins = math.min(coins + amount, 10000);
     GameStorage.set('coins', coins);
     EventBus.send('ADDED_COIN');
+
+    print("ADDED COINS: ", amount);
 }
 
 export function remove_coins(amount: number) {

@@ -53,7 +53,7 @@ export const _GAME_CONFIG = {
 
     max_lifes: 3,
 
-    delay_before_win: 3,
+    delay_before_win: 0.5,
     delay_before_gameover: 2,
 
     animal_offset: true,

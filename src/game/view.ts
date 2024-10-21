@@ -1238,22 +1238,23 @@ export function View(resources: ViewResources) {
     function on_win(state: GameState) {
         is_block_input = true;
 
-        let counts = 0;
-        for(let y = 0; y < get_field_height(); y++) {
-            for(let x = 0; x < get_field_width(); x++) {
-                const cell = state.cells[y][x];
-                const element = state.elements[y][x];
+        // let counts = 0;
+        // for(let y = 0; y < get_field_height(); y++) {
+        //     for(let x = 0; x < get_field_width(); x++) {
+        //         const cell = state.cells[y][x];
+        //         const element = state.elements[y][x];
                 
-                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
-                    timer.delay(0.05 * counts++, false, () => {
-                        Sound.play('broke_element');
-                        damage_element_animation(element);
-                    });
-                }
-            }
-        }
+        //         if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
+        //             timer.delay(0.05 * counts++, false, () => {
+        //                 Sound.play('broke_element');
+        //                 damage_element_animation(element);
+        //             });
+        //         }
+        //     }
+        // }
 
-        timer.delay(0.05 * counts, false, reset_field);
+        // timer.delay(0.05 * counts, false, reset_field);
+        reset_field();
         timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
             if(GAME_CONFIG.animal_levels.includes(get_current_level() + 1))
                 remove_animals();

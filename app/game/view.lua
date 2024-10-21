@@ -28,7 +28,6 @@ local is_tutorial = ____utils.is_tutorial
 local ____core = require("game.core")
 local NotActiveCell = ____core.NotActiveCell
 local NullElement = ____core.NullElement
-local is_available_cell_type_for_move = ____core.is_available_cell_type_for_move
 local ElementState = ____core.ElementState
 local ____game = require("game.game")
 local base_cell = ____game.base_cell
@@ -1606,35 +1605,7 @@ function ____exports.View(resources)
     end
     function on_win(state)
         is_block_input = true
-        local counts = 0
-        do
-            local y = 0
-            while y < get_field_height() do
-                do
-                    local x = 0
-                    while x < get_field_width() do
-                        local cell = state.cells[y + 1][x + 1]
-                        local element = state.elements[y + 1][x + 1]
-                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
-                            local ____timer_delay_10 = timer.delay
-                            local ____counts_9 = counts
-                            counts = ____counts_9 + 1
-                            ____timer_delay_10(
-                                0.05 * ____counts_9,
-                                false,
-                                function()
-                                    Sound.play("broke_element")
-                                    damage_element_animation(element)
-                                end
-                            )
-                        end
-                        x = x + 1
-                    end
-                end
-                y = y + 1
-            end
-        end
-        timer.delay(0.05 * counts, false, reset_field)
+        reset_field()
         timer.delay(
             is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,
             false,
