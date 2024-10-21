@@ -750,25 +750,29 @@ function on_win()
                 0.3,
                 0,
                 function()
+                    local coins = get_current_level_config().coins
+                    local current_coins = GameStorage.get("coins")
+                    local before_reward = current_coins - coins
                     gui.set_enabled(
                         gui.get_node("win"),
                         true
                     )
-                    local coins = get_current_level_config().coins
+                    gui.set_enabled(
+                        gui.get_node("reward"),
+                        true
+                    )
+                    gui.set_text(
+                        gui.get_node("coins_count"),
+                        tostring(before_reward)
+                    )
                     if coins > 0 then
                         drop_coins(
                             coins,
                             function(idx)
                                 print(idx)
-                                if idx == 0 then
-                                    gui.set_enabled(
-                                        gui.get_node("reward"),
-                                        true
-                                    )
-                                end
                                 gui.set_text(
                                     gui.get_node("coins_count"),
-                                    "+" .. tostring(idx + 1)
+                                    tostring(before_reward + idx + 1)
                                 )
                                 local icon = gui.get_node("coin_icon")
                                 local init_scale = gui.get_scale(icon)
