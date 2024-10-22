@@ -550,6 +550,8 @@ export function Game() {
 
         timer.delay(field_width * field_height * 0.05, false, () => {
             is_win_action = false;
+            print("HERE");
+            on_idle();
         });
     }
 

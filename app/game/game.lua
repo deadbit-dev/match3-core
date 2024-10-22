@@ -529,6 +529,8 @@ function ____exports.Game()
             false,
             function()
                 is_win_action = false
+                print("HERE")
+                on_idle()
             end
         )
     end
