@@ -307,7 +307,7 @@ function setup_sustem_ui(instance)
     )
     set_text(
         "current_level",
-        "Уровень " .. tostring(GameStorage.get("current_level") + 1)
+        (Lang.get_text("level") .. " ") .. tostring(GameStorage.get("current_level") + 1)
     )
 end
 function setup_win_ui(instance)
@@ -418,6 +418,14 @@ end
 function set_animal_tutorial_tip()
     local window = gui.get_node("window")
     gui.set_enabled(window, true)
+    gui.set_text(
+        gui.get_node("description"),
+        Lang.get_text("animal_tutorial_description")
+    )
+    gui.set_text(
+        gui.get_node("description1"),
+        Lang.get_text("animal_tutorial_description1")
+    )
 end
 function set_events(instance)
     EventBus.on("SET_ANIMAL_TUTORIAL_TIP", set_animal_tutorial_tip, true)

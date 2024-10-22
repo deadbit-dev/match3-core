@@ -281,6 +281,7 @@ function setup_settings(data: props) {
         set_enabled_settings(data, false);
     });
 
+    gui.set_text(gui.get_node('buy_button_text1'), Lang.get_text('on_map'));
     data.druid.new_button('map_button', () => {
         set_enabled_settings(data, false);
         Sound.stop('game');

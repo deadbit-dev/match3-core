@@ -162,5 +162,21 @@ export const lang_data = {
   "music": {
     "Русский-ru": "Музыка",
     "Английский-en": "Music"
+  },
+  "animal_tutorial_description": {
+    "Русский-ru": "Собери все подсолнухи чтобы задобрить петуха.",
+    "Английский-en": "Collect all the sunflowers to appease the chicken."
+  },
+  "animal_tutorial_description1": {
+    "Русский-ru": "Накорми его и продложи путь!",
+    "Английский-en": "Feed him and continue his journey!"
+  },
+  "on_map": {
+    "Русский-ru": "на карту",
+    "Английский-en": "on map"
+  },
+  "level": {
+    "Русский-ru": "Уровень",
+    "Английский-en": "Level"
   }
 };

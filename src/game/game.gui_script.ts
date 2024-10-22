@@ -273,7 +273,7 @@ function setup_sustem_ui(instance: props) {
     
     instance.druid.new_button('rewind/button', () => EventBus.send('REQUEST_REWIND'));
 
-    set_text('current_level', 'Уровень ' + (GameStorage.get('current_level') + 1));
+    set_text('current_level', Lang.get_text('level') + ' ' + (GameStorage.get('current_level') + 1));
 }
 
 function setup_win_ui(instance: props) {
@@ -347,6 +347,8 @@ function setup_gameover_ui(instance: props) {
 function set_animal_tutorial_tip() {
     const window = gui.get_node('window');
     gui.set_enabled(window, true);
+    gui.set_text(gui.get_node('description'), Lang.get_text('animal_tutorial_description'));
+    gui.set_text(gui.get_node('description1'), Lang.get_text('animal_tutorial_description1'));
 }
 
 // TODO: get data from game load event instead read config
