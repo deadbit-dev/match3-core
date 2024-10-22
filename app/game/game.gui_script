@@ -311,10 +311,17 @@ function setup_sustem_ui(instance)
     )
 end
 function setup_win_ui(instance)
-    instance.druid:new_button("continue_button", next_level)
+    instance.druid:new_button(
+        "continue_button",
+        function()
+            Sound.stop("animalwin")
+            next_level()
+        end
+    )
     instance.druid:new_button(
         "win_close",
         function()
+            Sound.stop("animalwin")
             Sound.stop("game")
             Scene.load("map")
         end
@@ -462,25 +469,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch75 = data.idx
-        local ____cond75 = ____switch75 == 0
-        if ____cond75 then
+        local ____switch76 = data.idx
+        local ____cond76 = ____switch76 == 0
+        if ____cond76 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond75 = ____cond75 or ____switch75 == 1
-        if ____cond75 then
+        ____cond76 = ____cond76 or ____switch76 == 1
+        if ____cond76 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond75 = ____cond75 or ____switch75 == 2
-        if ____cond75 then
+        ____cond76 = ____cond76 or ____switch76 == 2
+        if ____cond76 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

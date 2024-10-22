@@ -277,8 +277,12 @@ function setup_sustem_ui(instance: props) {
 }
 
 function setup_win_ui(instance: props) {
-    instance.druid.new_button('continue_button', next_level);
+    instance.druid.new_button('continue_button', () => {
+        Sound.stop('animalwin');
+        next_level();
+    });
     instance.druid.new_button('win_close', () => {
+        Sound.stop('animalwin');
         Sound.stop('game');
         Scene.load('map');
     });
