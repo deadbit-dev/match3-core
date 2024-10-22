@@ -624,5 +624,6 @@ export type _UserMessages = {
 
     REQUEST_REWIND: VoidMessage,
     RESPONSE_REWIND: GameState,
-    OPEN_SETTINGS: VoidMessage
+    OPEN_SETTINGS: VoidMessage,
+    FORCE_REMOVE_ELEMENT: number
 };

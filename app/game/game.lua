@@ -516,6 +516,11 @@ function ____exports.Game()
                                 false,
                                 function()
                                     if is_buster(pos) then
+                                        if element.id == ____exports.ElementId.Helicopter then
+                                            EventBus.send("FORCE_REMOVE_ELEMENT", element.uid)
+                                            make_element(pos, ____exports.ElementId.Dynamite)
+                                            return try_activate_dynamite(pos, true)
+                                        end
                                         return try_activate_buster_element(pos)
                                     end
                                     local damage_info = field.try_damage(pos, false, true)
@@ -1197,24 +1202,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch256 = message.name
-            local ____cond256 = ____switch256 == "SPINNING"
-            if ____cond256 then
+            local ____switch257 = message.name
+            local ____cond257 = ____switch257 == "SPINNING"
+            if ____cond257 then
                 on_activate_spinning()
                 break
             end
-            ____cond256 = ____cond256 or ____switch256 == "HAMMER"
-            if ____cond256 then
+            ____cond257 = ____cond257 or ____switch257 == "HAMMER"
+            if ____cond257 then
                 on_activate_hammer()
                 break
             end
-            ____cond256 = ____cond256 or ____switch256 == "HORIZONTAL_ROCKET"
-            if ____cond256 then
+            ____cond257 = ____cond257 or ____switch257 == "HORIZONTAL_ROCKET"
+            if ____cond257 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond256 = ____cond256 or ____switch256 == "VERTICAL_ROCKET"
-            if ____cond256 then
+            ____cond257 = ____cond257 or ____switch257 == "VERTICAL_ROCKET"
+            if ____cond257 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1990,29 +1995,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch440 = combination.type
-            local ____cond440 = ____switch440 == CombinationType.Comb4
-            if ____cond440 then
+            local ____switch441 = combination.type
+            local ____cond441 = ____switch441 == CombinationType.Comb4
+            if ____cond441 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond440 = ____cond440 or ____switch440 == CombinationType.Comb5
-            if ____cond440 then
+            ____cond441 = ____cond441 or ____switch441 == CombinationType.Comb5
+            if ____cond441 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond440 = ____cond440 or ____switch440 == CombinationType.Comb2x2
-            if ____cond440 then
+            ____cond441 = ____cond441 or ____switch441 == CombinationType.Comb2x2
+            if ____cond441 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond440 = ____cond440 or (____switch440 == CombinationType.Comb3x3a or ____switch440 == CombinationType.Comb3x3b)
-            if ____cond440 then
+            ____cond441 = ____cond441 or (____switch441 == CombinationType.Comb3x3a or ____switch441 == CombinationType.Comb3x3b)
+            if ____cond441 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond440 = ____cond440 or (____switch440 == CombinationType.Comb3x4a or ____switch440 == CombinationType.Comb3x4b or ____switch440 == CombinationType.Comb3x5)
-            if ____cond440 then
+            ____cond441 = ____cond441 or (____switch441 == CombinationType.Comb3x4a or ____switch441 == CombinationType.Comb3x4b or ____switch441 == CombinationType.Comb3x5)
+            if ____cond441 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

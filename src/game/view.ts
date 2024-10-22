@@ -208,6 +208,9 @@ export function View(resources: ViewResources) {
             view_state.targets[message.idx] = message.target;
         }, false);
         EventBus.on('RESPONSE_REWIND', on_rewind_animation, false);
+        EventBus.on('FORCE_REMOVE_ELEMENT', (uid: number) => {
+            delete_view_item_by_uid(uid);
+        }, false);
     }
 
     function on_message(this: any, message_id: hash, message: any, sender: hash) {

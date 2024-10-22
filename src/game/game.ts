@@ -543,7 +543,16 @@ export function Game() {
                 
                 if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
                     timer.delay(0.05 * counts++, false, () => {
-                        if(is_buster(pos)) return try_activate_buster_element(pos);
+                        if(is_buster(pos)) {
+                            if(element.id == ElementId.Helicopter) {
+                                EventBus.send('FORCE_REMOVE_ELEMENT', element.uid);
+                                
+                                make_element(pos, ElementId.Dynamite);
+                                
+                                return try_activate_dynamite(pos, true);
+                            }
+                            return try_activate_buster_element(pos);
+                        }
                         
                         const damage_info = field.try_damage(pos, false, true);
                         if(damage_info == NotDamage)
