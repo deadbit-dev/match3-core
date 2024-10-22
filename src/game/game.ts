@@ -533,23 +533,29 @@ export function Game() {
         is_idle = false;
 
         is_win_action = true;
+
+        let counts = 0;
         for(let y = 0; y < field_height; y++) {
             for(let x = 0; x < field_width; x++) {
                 const pos = {x, y};
-                const delay = (y * field_width + x) * 0.05;
-                timer.delay(delay, false, () => {
-                    if(is_buster(pos)) return try_activate_buster_element(pos);
-                    
-                    const damage_info = field.try_damage(pos, false, true);
-                    if(damage_info == NotDamage)
-                        return;
-        
-                    EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
-                });
+                const cell = field.get_cell(pos);
+                const element = field.get_element(pos);
+                
+                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
+                    timer.delay(0.05 * counts++, false, () => {
+                        if(is_buster(pos)) return try_activate_buster_element(pos);
+                        
+                        const damage_info = field.try_damage(pos, false, true);
+                        if(damage_info == NotDamage)
+                            return;
+            
+                        EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
+                    });
+                }
             }
         }
 
-        timer.delay(field_width * field_height * 0.05, false, () => {
+        timer.delay(0.05 * counts, false, () => {
             is_win_action = false;
             on_idle();
         });
