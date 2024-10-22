@@ -90,7 +90,7 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win_end, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -98,7 +98,7 @@ function ____exports.View(resources)
         EventBus.on("MSG_ON_DOWN_ITEM", on_down)
         EventBus.on("MSG_ON_UP_ITEM", on_up)
         EventBus.on("MSG_ON_MOVE", on_move)
-        EventBus.on("ON_WIN", on_win)
+        EventBus.on("ON_WIN_END", on_win_end)
         EventBus.on("ON_GAME_OVER", on_gameover)
         EventBus.on(
             "SET_TUTORIAL",
@@ -1603,7 +1603,7 @@ function ____exports.View(resources)
             end
         )
     end
-    function on_win(state)
+    function on_win_end(state)
         is_block_input = true
         reset_field()
         timer.delay(

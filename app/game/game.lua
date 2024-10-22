@@ -483,13 +483,14 @@ function ____exports.Game()
             completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
             GameStorage.set("completed_levels", completed_levels)
             add_coins(level_config.coins)
+            EventBus.send("ON_WIN")
             win_action()
             return
         end
         timer.cancel(game_timer)
         update_core_state()
         EventBus.send(
-            "ON_WIN",
+            "ON_WIN_END",
             copy_state()
         )
     end
@@ -529,7 +530,6 @@ function ____exports.Game()
             false,
             function()
                 is_win_action = false
-                print("HERE")
                 on_idle()
             end
         )

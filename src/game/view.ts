@@ -172,7 +172,7 @@ export function View(resources: ViewResources) {
         EventBus.on('MSG_ON_DOWN_ITEM', on_down);
         EventBus.on('MSG_ON_UP_ITEM', on_up);
         EventBus.on('MSG_ON_MOVE', on_move);
-        EventBus.on('ON_WIN', on_win);
+        EventBus.on('ON_WIN_END', on_win_end);
         EventBus.on('ON_GAME_OVER', on_gameover);
         EventBus.on('SET_TUTORIAL', (lock_info: LockInfo) => {
             if(is_animal_level() && is_tutorial()) {
@@ -1235,7 +1235,7 @@ export function View(resources: ViewResources) {
         });
     }
 
-    function on_win(state: GameState) {
+    function on_win_end(state: GameState) {
         is_block_input = true;
 
         // let counts = 0;

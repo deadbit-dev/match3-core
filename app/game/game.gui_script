@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -450,7 +450,7 @@ function set_events(instance)
     )
     EventBus.on("SET_TUTORIAL", set_tutorial, true)
     EventBus.on("REMOVE_TUTORIAL", remove_tutorial, true)
-    EventBus.on("ON_WIN", on_win)
+    EventBus.on("ON_WIN_END", on_win_end)
     EventBus.on(
         "ON_GAME_OVER",
         function(data)
@@ -749,7 +749,7 @@ function remove_tutorial()
         false
     )
 end
-function on_win()
+function on_win_end()
     if is_animal_level() then
         feed_animation()
     end
@@ -787,7 +787,6 @@ function on_win()
                         drop_coins(
                             coins,
                             function(idx)
-                                print(idx)
                                 gui.set_text(
                                     gui.get_node("coins_count"),
                                     tostring(before_reward + idx + 1)

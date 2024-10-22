@@ -573,7 +573,8 @@ export type _UserMessages = {
     LIFE_NOTIFICATION: boolean,
     NOT_ENOUGH_LIFE: VoidMessage,
 
-    ON_WIN: GameState,
+    ON_WIN: VoidMessage,
+    ON_WIN_END: GameState,
     ON_GAME_OVER: {state: GameState, revive: boolean},
 
     MOVIE_END: VoidMessage,

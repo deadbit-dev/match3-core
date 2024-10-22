@@ -11,7 +11,7 @@ go.property('walkable', true);
 
 interface props {
     walkable: boolean,
-    timers: hash[]
+    is_win: boolean
 }
 
 interface AnimalOptions {
@@ -21,13 +21,10 @@ interface AnimalOptions {
 export function init(this: props) {
     Manager.init_script();
 
-    this.timers = [];
-
     EventBus.on('ON_WIN', () => {
-        for(const t of this.timers)
-            timer.cancel(t);
+        this.is_win = true;
         idle();
-    });
+    }, false);
     
     if(is_tutorial()) {
         EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
@@ -49,20 +46,27 @@ function animal_init() {
 }
 
 function start_action(props: props, options: AnimalOptions) {
-
     if(options.walkable) {
-        props.timers.push(timer.delay(math.random(5, 10), false, walk));
+        timer.delay(math.random(5, 10), false, () => {
+            if(props.is_win)
+                return;
+            walk();
+        });
     } else {
-        props.timers.push(timer.delay(math.random(5, 10), false, () => {
+        timer.delay(math.random(5, 10), false, () => {
+            if(props.is_win)
+                return;
             action(() => {
                 idle();
-                props.timers.push(timer.delay(math.random(5, 10), false, () => {
+                timer.delay(math.random(5, 10), false, () => {
+                    if(props.is_win)
+                        return;
                     action(() => {
                         idle();
                     });
-                }));
+                });
             });
-        }));
+        });
     }
 }
 

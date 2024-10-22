@@ -13,25 +13,33 @@ function animal_init()
 end
 function start_action(props, options)
     if options.walkable then
-        local ____props_timers_0 = props.timers
-        ____props_timers_0[#____props_timers_0 + 1] = timer.delay(
-            math.random(5, 10),
-            false,
-            walk
-        )
-    else
-        local ____props_timers_2 = props.timers
-        ____props_timers_2[#____props_timers_2 + 1] = timer.delay(
+        timer.delay(
             math.random(5, 10),
             false,
             function()
+                if props.is_win then
+                    return
+                end
+                walk()
+            end
+        )
+    else
+        timer.delay(
+            math.random(5, 10),
+            false,
+            function()
+                if props.is_win then
+                    return
+                end
                 action(function()
                     idle()
-                    local ____props_timers_1 = props.timers
-                    ____props_timers_1[#____props_timers_1 + 1] = timer.delay(
+                    timer.delay(
                         math.random(5, 10),
                         false,
                         function()
+                            if props.is_win then
+                                return
+                            end
                             action(function()
                                 idle()
                             end)
@@ -156,15 +164,13 @@ end
 go.property("walkable", true)
 function ____exports.init(self)
     Manager.init_script()
-    self.timers = {}
     EventBus.on(
         "ON_WIN",
         function()
-            for ____, t in ipairs(self.timers) do
-                timer.cancel(t)
-            end
+            self.is_win = true
             idle()
-        end
+        end,
+        false
     )
     if is_tutorial() then
         EventBus.on(

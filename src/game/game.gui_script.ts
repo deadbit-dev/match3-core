@@ -359,7 +359,7 @@ function set_events(instance: props) {
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
-    EventBus.on('ON_WIN', on_win);
+    EventBus.on('ON_WIN_END', on_win_end);
     EventBus.on('ON_GAME_OVER', (data) => {
         timer.delay(GAME_CONFIG.delay_before_gameover, false, () => {
             set_gameover(instance, data.state, data.revive);
@@ -525,7 +525,7 @@ function remove_tutorial() {
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
-function on_win() {
+function on_win_end() {
     if(is_animal_level())
         feed_animation();
 
@@ -545,7 +545,6 @@ function on_win() {
 
             if(coins > 0) {
                 drop_coins(coins, (idx: number) => {
-                    print(idx);
                     gui.set_text(gui.get_node('coins_count'), tostring(before_reward + idx + 1));
                     const icon = gui.get_node('coin_icon');
                     const init_scale = gui.get_scale(icon);

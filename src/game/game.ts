@@ -518,6 +518,7 @@ export function Game() {
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
             add_coins(level_config.coins);
+            EventBus.send('ON_WIN');
             win_action();
             return;
         }
@@ -525,7 +526,7 @@ export function Game() {
         timer.cancel(game_timer);
 
         update_core_state();
-        EventBus.send('ON_WIN', copy_state());
+        EventBus.send('ON_WIN_END', copy_state());
     }
 
     function win_action() {
@@ -550,7 +551,6 @@ export function Game() {
 
         timer.delay(field_width * field_height * 0.05, false, () => {
             is_win_action = false;
-            print("HERE");
             on_idle();
         });
     }
