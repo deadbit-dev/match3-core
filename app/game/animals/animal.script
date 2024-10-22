@@ -33,18 +33,7 @@ function start_action(props, options)
                 end
                 action(function()
                     idle()
-                    timer.delay(
-                        math.random(5, 10),
-                        false,
-                        function()
-                            if props.is_win then
-                                return
-                            end
-                            action(function()
-                                idle()
-                            end)
-                        end
-                    )
+                    start_action(props, options)
                 end)
             end
         )
@@ -90,6 +79,13 @@ function idle()
                         false,
                         function()
                             Sound.play(name)
+                            timer.delay(
+                                0.5,
+                                false,
+                                function()
+                                    Sound.play("cat")
+                                end
+                            )
                         end
                     )
                 end
@@ -103,6 +99,13 @@ function idle()
             false,
             function()
                 Sound.play(name)
+                timer.delay(
+                    0.5,
+                    false,
+                    function()
+                        Sound.play("cat")
+                    end
+                )
             end
         )
     end
@@ -129,6 +132,13 @@ function action(callback)
     local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
     if name ~= "kozel" then
         Sound.play(name)
+        timer.delay(
+            0.5,
+            false,
+            function()
+                Sound.play("cat")
+            end
+        )
     end
     local anim_props = {blend_duration = 0.3, playback_rate = 1}
     spine.play_anim(

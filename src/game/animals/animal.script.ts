@@ -58,13 +58,7 @@ function start_action(props: props, options: AnimalOptions) {
                 return;
             action(() => {
                 idle();
-                timer.delay(math.random(5, 10), false, () => {
-                    if(props.is_win)
-                        return;
-                    action(() => {
-                        idle();
-                    });
-                });
+                start_action(props, options);
             });
         });
     }
@@ -93,6 +87,9 @@ function idle() {
             if(name == 'kozel') {
                 timer.delay(3.25, false, () => {
                     Sound.play(name);
+                    timer.delay(0.5, false, () => {
+                        Sound.play('cat');
+                    });
                 });
             }
         }
@@ -102,6 +99,9 @@ function idle() {
     if(name == 'kozel') {
         timer.delay(3.25, false, () => {
             Sound.play(name);
+            timer.delay(0.5, false, () => {
+                Sound.play('cat');
+            });
         });
     }
 }
@@ -116,7 +116,12 @@ function walk_to(pos: vmath.vector3, callback?: () => void) {
 
 function action(callback?: () => void) {
     const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
-    if(name != 'kozel') Sound.play(name);
+    if(name != 'kozel') {
+        Sound.play(name);
+        timer.delay(0.5, false, () => {
+            Sound.play('cat');
+        });
+    }
 
     const anim_props = { blend_duration: 0.3, playback_rate: 1 };
     spine.play_anim('#spinemodel', 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {

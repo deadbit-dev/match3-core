@@ -314,14 +314,12 @@ function setup_win_ui(instance)
     instance.druid:new_button(
         "continue_button",
         function()
-            Sound.stop("animalwin")
             next_level()
         end
     )
     instance.druid:new_button(
         "win_close",
         function()
-            Sound.stop("animalwin")
             Sound.stop("game")
             Scene.load("map")
         end
