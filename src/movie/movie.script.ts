@@ -12,6 +12,21 @@ export function init(this: props) {
     Manager.init_script();
 
     msg.post('.', 'acquire_input_focus');
+
+    Sound.play('car');
+    timer.delay(1, false, () => {
+        Sound.play('crash');
+    });
+    timer.delay(2, false, () => {
+        Sound.play('crash');
+    });
+    timer.delay(2.5, false, () => {
+        Sound.play('vcat');
+    });
+    timer.delay(5, false, () => {
+        Sound.play('meay');
+    });
+
     
     const anim_props = { blend_duration: 0, playback_rate: 1 };
     spine.play_anim('#spinemodel', 'start', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {

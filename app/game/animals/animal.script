@@ -1,8 +1,9 @@
 local ____exports = {}
 local animal_init, start_action, walk, idle, walk_to, action, walk_back
 local ____utils = require("game.utils")
+local get_current_level = ____utils.get_current_level
 local is_tutorial = ____utils.is_tutorial
-function animal_init(options)
+function animal_init()
     if GAME_CONFIG.animal_offset then
         local pos = go.get_position()
         pos.y = pos.y + 100
@@ -67,7 +68,36 @@ function walk()
 end
 function idle()
     local anim_props = {blend_duration = 0.1, playback_rate = 1}
-    spine.play_anim("#spinemodel", "idle", go.PLAYBACK_LOOP_FORWARD, anim_props)
+    spine.play_anim(
+        "#spinemodel",
+        "idle",
+        go.PLAYBACK_LOOP_FORWARD,
+        anim_props,
+        function(____self, message_id, message, sender)
+            if message_id == hash("spine_animation_done") then
+                local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
+                if name == "kozel" then
+                    timer.delay(
+                        3.25,
+                        false,
+                        function()
+                            Sound.play(name)
+                        end
+                    )
+                end
+            end
+        end
+    )
+    local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
+    if name == "kozel" then
+        timer.delay(
+            3.25,
+            false,
+            function()
+                Sound.play(name)
+            end
+        )
+    end
 end
 function walk_to(pos, callback)
     local anim_props = {blend_duration = 0.5, playback_rate = 1}
@@ -88,6 +118,10 @@ function walk_to(pos, callback)
     )
 end
 function action(callback)
+    local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
+    if name ~= "kozel" then
+        Sound.play(name)
+    end
     local anim_props = {blend_duration = 0.3, playback_rate = 1}
     spine.play_anim(
         "#spinemodel",
@@ -142,7 +176,7 @@ function ____exports.init(self)
     else
         start_action(self, {walkable = self.walkable})
     end
-    animal_init({walkable = self.walkable})
+    animal_init()
 end
 function ____exports.final()
     EventBus.off_all_current_script()

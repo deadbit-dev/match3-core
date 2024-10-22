@@ -810,6 +810,7 @@ function on_win()
                 end
             )
             Sound.play("passed")
+            Sound.play("animalwin")
             local anim_props = {blend_duration = 0, playback_rate = 1}
             gui.play_spine_anim(
                 gui.get_node("firework"),
@@ -889,6 +890,7 @@ function set_gameover(instance, state, revive)
         end
     )
     Sound.play("failed")
+    Sound.play("animallose")
     local target_1 = gui.get_node("target_1")
     local target_2 = gui.get_node("target_2")
     local target_3 = gui.get_node("target_3")

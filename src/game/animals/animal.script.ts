@@ -5,12 +5,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { is_tutorial } from "../utils";
+import { get_current_level, is_tutorial } from "../utils";
 
 go.property('walkable', true);
 
 interface props {
-    walkable: boolean
+    walkable: boolean,
     timers: hash[]
 }
 
@@ -35,12 +35,10 @@ export function init(this: props) {
         });
     } else start_action(this, {walkable: this.walkable});
 
-    animal_init({
-        walkable: this.walkable
-    });
+    animal_init();
 }
 
-function animal_init(options: AnimalOptions) {
+function animal_init() {
     if(GAME_CONFIG.animal_offset) {
         const pos = go.get_position();
         pos.y += 100; 
@@ -52,8 +50,9 @@ function animal_init(options: AnimalOptions) {
 
 function start_action(props: props, options: AnimalOptions) {
 
-    if(options.walkable) props.timers.push(timer.delay(math.random(5, 10), false, walk));
-    else {
+    if(options.walkable) {
+        props.timers.push(timer.delay(math.random(5, 10), false, walk));
+    } else {
         props.timers.push(timer.delay(math.random(5, 10), false, () => {
             action(() => {
                 idle();
@@ -84,7 +83,23 @@ function walk() {
 
 function idle() {
     const anim_props = { blend_duration: 0.1, playback_rate: 1 };
-    spine.play_anim('#spinemodel', 'idle', go.PLAYBACK_LOOP_FORWARD, anim_props);
+    spine.play_anim('#spinemodel', 'idle', go.PLAYBACK_LOOP_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
+        if (message_id == hash("spine_animation_done")) {
+            const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
+            if(name == 'kozel') {
+                timer.delay(3.25, false, () => {
+                    Sound.play(name);
+                });
+            }
+        }
+    });
+
+    const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
+    if(name == 'kozel') {
+        timer.delay(3.25, false, () => {
+            Sound.play(name);
+        });
+    }
 }
 
 function walk_to(pos: vmath.vector3, callback?: () => void) {
@@ -96,6 +111,9 @@ function walk_to(pos: vmath.vector3, callback?: () => void) {
 }
 
 function action(callback?: () => void) {
+    const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
+    if(name != 'kozel') Sound.play(name);
+
     const anim_props = { blend_duration: 0.3, playback_rate: 1 };
     spine.play_anim('#spinemodel', 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
         if (message_id == hash("spine_animation_done") && callback != undefined) callback();

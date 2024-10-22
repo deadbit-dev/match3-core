@@ -71,7 +71,7 @@ function SoundModule() {
 
     function set_music_active(state: boolean) {
         Storage.set('is_music', state);
-        sound.set_group_gain('music', state ? 1 : 0);
+        sound.set_group_gain('music', state ? 0.5 : 0);
     }
 
     function play(name: string, speed = 1, volume = 1) {

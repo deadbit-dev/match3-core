@@ -254,7 +254,7 @@ function setup_busters(instance: props) {
             if(!GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                 return;
         }
-        
+
         EventBus.send('OPEN_SETTINGS');
     });
 
@@ -553,6 +553,7 @@ function on_win() {
         });
 
         Sound.play('passed');
+        Sound.play('animalwin');
     
         const anim_props = { blend_duration: 0, playback_rate: 1 };
         gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
@@ -606,6 +607,7 @@ function set_gameover(instance: props, state: GameState, revive: boolean) {
     
 
     Sound.play('failed');
+    Sound.play('animallose');
 
     const target_1 = gui.get_node('target_1');
     const target_2 = gui.get_node('target_2');
