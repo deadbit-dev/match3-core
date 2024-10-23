@@ -774,22 +774,22 @@ function on_win_end()
                 0.3,
                 0,
                 function()
-                    local coins = get_current_level_config().coins
-                    local current_coins = GameStorage.get("coins")
-                    local before_reward = current_coins - coins
                     gui.set_enabled(
                         gui.get_node("win"),
                         true
                     )
-                    gui.set_enabled(
-                        gui.get_node("reward"),
-                        true
-                    )
-                    gui.set_text(
-                        gui.get_node("coins_count"),
-                        tostring(before_reward)
-                    )
+                    local coins = get_current_level_config().coins
                     if coins > 0 then
+                        local current_coins = GameStorage.get("coins")
+                        local before_reward = current_coins - coins
+                        gui.set_enabled(
+                            gui.get_node("reward"),
+                            true
+                        )
+                        gui.set_text(
+                            gui.get_node("coins_count"),
+                            tostring(before_reward)
+                        )
                         drop_coins(
                             coins,
                             function(idx)

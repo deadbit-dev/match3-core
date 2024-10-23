@@ -535,15 +535,13 @@ function on_win_end() {
         const lock = gui.get_node('lock1');
         gui.set_enabled(lock, true);
         gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
-            const coins = get_current_level_config().coins;
-            const current_coins = GameStorage.get('coins');
-            const before_reward = current_coins - coins;
-
             gui.set_enabled(gui.get_node('win'), true);
-            gui.set_enabled(gui.get_node('reward'), true);
-            gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
-
+            const coins = get_current_level_config().coins;
             if(coins > 0) {
+                const current_coins = GameStorage.get('coins');
+                const before_reward = current_coins - coins;
+                gui.set_enabled(gui.get_node('reward'), true);
+                gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
                 drop_coins(coins, (idx: number) => {
                     gui.set_text(gui.get_node('coins_count'), tostring(before_reward + idx + 1));
                     const icon = gui.get_node('coin_icon');
