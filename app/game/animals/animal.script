@@ -13,8 +13,9 @@ function animal_init()
 end
 function start_action(props, options)
     if options.walkable then
+        local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
         timer.delay(
-            math.random(5, 10),
+            math.random(5, name == "kozel" and 6 or 10),
             false,
             function()
                 if props.is_win then
@@ -24,7 +25,6 @@ function start_action(props, options)
             end
         )
     else
-        print("HERE1")
         timer.delay(
             math.random(5, 10),
             false,
@@ -53,8 +53,9 @@ function walk()
                     back_pos,
                     function()
                         idle()
+                        local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
                         timer.delay(
-                            math.random(5, 10),
+                            math.random(5, name == "kozel" and 6 or 10),
                             false,
                             walk
                         )
@@ -73,23 +74,7 @@ function idle()
         anim_props,
         function(____self, message_id, message, sender)
             if message_id == hash("spine_animation_done") then
-                local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
-                if name == "kozel" then
-                    timer.delay(
-                        3.25,
-                        false,
-                        function()
-                            Sound.play(name)
-                            timer.delay(
-                                2,
-                                false,
-                                function()
-                                    Sound.play("cat")
-                                end
-                            )
-                        end
-                    )
-                end
+                idle()
             end
         end
     )
@@ -131,16 +116,14 @@ function walk_to(pos, callback)
 end
 function action(callback)
     local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
-    if name ~= "kozel" then
-        Sound.play(name)
-        timer.delay(
-            2,
-            false,
-            function()
-                Sound.play("cat")
-            end
-        )
-    end
+    Sound.play(name)
+    timer.delay(
+        2,
+        false,
+        function()
+            Sound.play("cat")
+        end
+    )
     local anim_props = {blend_duration = 0.3, playback_rate = 1}
     spine.play_anim(
         "#spinemodel",

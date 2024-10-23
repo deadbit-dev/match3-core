@@ -48,13 +48,13 @@ function animal_init() {
 
 function start_action(props: props, options: AnimalOptions) {
     if(options.walkable) {
-        timer.delay(math.random(5, 10), false, () => {
+        const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
+        timer.delay(math.random(5, name == 'kozel' ? 6 : 10), false, () => {
             if(props.is_win)
                 return;
             walk();
         });
     } else {
-        print("HERE1");
         timer.delay(math.random(5, 10), false, () => {
             if(props.is_win)
                 return;
@@ -75,7 +75,8 @@ function walk() {
             back_pos.x += 70;
             walk_back(back_pos, () => {
                 idle();
-                timer.delay(math.random(5, 10), false, walk);
+                const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
+                timer.delay(math.random(5, name == 'kozel' ? 6 : 10), false, walk);
             });
         });
     });
@@ -85,15 +86,7 @@ function idle() {
     const anim_props = { blend_duration: 0.1, playback_rate: 1 };
     spine.play_anim('#spinemodel', 'idle', go.PLAYBACK_LOOP_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
         if (message_id == hash("spine_animation_done")) {
-            const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
-            if(name == 'kozel') {
-                timer.delay(3.25, false, () => {
-                    Sound.play(name);
-                    timer.delay(2, false, () => {
-                        Sound.play('cat');
-                    });
-                });
-            }
+            idle();
         }
     });
 
@@ -118,12 +111,10 @@ function walk_to(pos: vmath.vector3, callback?: () => void) {
 
 function action(callback?: () => void) {
     const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
-    if(name != 'kozel') {
-        Sound.play(name);
-        timer.delay(2, false, () => {
-            Sound.play('cat');
-        });
-    }
+    Sound.play(name);
+    timer.delay(2, false, () => {
+        Sound.play('cat');
+    });
 
     const anim_props = { blend_duration: 0.3, playback_rate: 1 };
     spine.play_anim('#spinemodel', 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, (self: any, message_id: any, message: any, sender: any) => {
