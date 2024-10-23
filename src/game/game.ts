@@ -458,6 +458,7 @@ export function Game() {
     }
 
     function reset_helper() {
+        Log.log("RESET_HELPER");
         if(helper_timer == null )
             return;
 
@@ -471,11 +472,13 @@ export function Game() {
     function stop_helper() {
         Log.log("STOP_HELPER");
 
-        if(helper_timer == null )
-            return;
+        if(!is_tutorial()) {
+            if(helper_timer == null )
+                return;
 
-        timer.cancel(helper_timer);
-        helper_timer = null;
+            timer.cancel(helper_timer);
+            helper_timer = null;
+        }
 
         if(helper_data == null)
             return;
@@ -1682,8 +1685,9 @@ export function Game() {
             element_to: element_to
         });
 
-        if(is_tutorial())
+        if(is_tutorial()) {
             complete_tutorial();
+        }
     }
 
     function on_swap_elements_end(message: SwapElementsMessage) {
