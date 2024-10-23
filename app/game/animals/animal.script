@@ -24,6 +24,7 @@ function start_action(props, options)
             end
         )
     else
+        print("HERE1")
         timer.delay(
             math.random(5, 10),
             false,
@@ -186,8 +187,10 @@ function ____exports.init(self)
         EventBus.on(
             "HIDED_ANIMAL_TUTORIAL_TIP",
             function()
+                print("HERE0")
                 start_action(self, {walkable = self.walkable})
-            end
+            end,
+            false
         )
     else
         start_action(self, {walkable = self.walkable})

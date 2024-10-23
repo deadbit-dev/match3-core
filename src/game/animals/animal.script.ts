@@ -28,8 +28,9 @@ export function init(this: props) {
     
     if(is_tutorial()) {
         EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
+            print("HERE0");
             start_action(this, {walkable: this.walkable});
-        });
+        }, false);
     } else start_action(this, {walkable: this.walkable});
 
     animal_init();
@@ -53,6 +54,7 @@ function start_action(props: props, options: AnimalOptions) {
             walk();
         });
     } else {
+        print("HERE1");
         timer.delay(math.random(5, 10), false, () => {
             if(props.is_win)
                 return;
