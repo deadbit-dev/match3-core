@@ -296,6 +296,7 @@ embedded_instances {
   "  type: \"sound\"\n"
   "  data: \"sound: \\\"/assets/sounds/animals/kaban.ogg\\\"\\n"
   "group: \\\"sfx\\\"\\n"
+  "gain: 3.0\\n"
   "\"\n"
   "}\n"
   "embedded_components {\n"
