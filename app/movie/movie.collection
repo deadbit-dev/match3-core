@@ -64,8 +64,8 @@ embedded_instances {
     y: 10.0
   }
   scale3 {
-    x: 0.5
-    y: 0.5
+    x: 0.6
+    y: 0.6
   }
 }
 embedded_instances {
