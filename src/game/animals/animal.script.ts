@@ -89,7 +89,7 @@ function idle() {
             if(name == 'kozel') {
                 timer.delay(3.25, false, () => {
                     Sound.play(name);
-                    timer.delay(0.5, false, () => {
+                    timer.delay(2, false, () => {
                         Sound.play('cat');
                     });
                 });
@@ -101,7 +101,7 @@ function idle() {
     if(name == 'kozel') {
         timer.delay(3.25, false, () => {
             Sound.play(name);
-            timer.delay(0.5, false, () => {
+            timer.delay(2, false, () => {
                 Sound.play('cat');
             });
         });
@@ -120,7 +120,7 @@ function action(callback?: () => void) {
     const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
     if(name != 'kozel') {
         Sound.play(name);
-        timer.delay(0.5, false, () => {
+        timer.delay(2, false, () => {
             Sound.play('cat');
         });
     }

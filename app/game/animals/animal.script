@@ -81,7 +81,7 @@ function idle()
                         function()
                             Sound.play(name)
                             timer.delay(
-                                0.5,
+                                2,
                                 false,
                                 function()
                                     Sound.play("cat")
@@ -101,7 +101,7 @@ function idle()
             function()
                 Sound.play(name)
                 timer.delay(
-                    0.5,
+                    2,
                     false,
                     function()
                         Sound.play("cat")
@@ -134,7 +134,7 @@ function action(callback)
     if name ~= "kozel" then
         Sound.play(name)
         timer.delay(
-            0.5,
+            2,
             false,
             function()
                 Sound.play("cat")
