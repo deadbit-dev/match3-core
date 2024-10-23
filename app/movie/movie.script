@@ -20,7 +20,7 @@ function ____exports.init(self)
         end
     )
     timer.delay(
-        2,
+        1.7,
         false,
         function()
             Sound.play("crash")

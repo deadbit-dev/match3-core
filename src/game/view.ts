@@ -952,7 +952,7 @@ export function View(resources: ViewResources) {
     }
 
     function on_dynamite_activated_animation(messages: DynamiteActivatedMessage) {
-        Sound.play('dynamite');
+        
         record_action(Action.DynamiteActivation);
         activate_dynamite_animation(messages.pos, messages.big_range ? 1.5 : 1, () => {
             remove_action(Action.DynamiteActivation);
@@ -976,6 +976,8 @@ export function View(resources: ViewResources) {
         msg.post(msg.url(undefined, _go, undefined), 'disable');
         msg.post(msg.url(undefined, _go, 'dynamite'), 'enable');
     
+        Sound.play('dynamite');
+
         const anim_props = { blend_duration: 0, playback_rate: 1.25 };
         spine.play_anim(msg.url(undefined, _go, 'dynamite'), 'action', go.PLAYBACK_ONCE_FORWARD, anim_props, () => {
             go_manager.delete_go(_go);

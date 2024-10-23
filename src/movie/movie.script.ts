@@ -17,7 +17,7 @@ export function init(this: props) {
     timer.delay(1, false, () => {
         Sound.play('crash');
     });
-    timer.delay(2, false, () => {
+    timer.delay(1.7, false, () => {
         Sound.play('crash');
     });
     timer.delay(2.5, false, () => {
