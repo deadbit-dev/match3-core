@@ -162,7 +162,6 @@ function ____exports.init(self)
         "ON_WIN",
         function()
             self.is_win = true
-            idle()
         end,
         false
     )

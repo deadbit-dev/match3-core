@@ -23,7 +23,7 @@ export function init(this: props) {
 
     EventBus.on('ON_WIN', () => {
         this.is_win = true;
-        idle();
+        // idle();
     }, false);
     
     if(is_tutorial()) {
