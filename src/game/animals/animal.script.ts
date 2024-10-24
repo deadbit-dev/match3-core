@@ -23,6 +23,11 @@ export function init(this: props) {
 
     EventBus.on('ON_WIN', () => {
         this.is_win = true;
+        if(this.walkable) {
+            const back_pos = go.get_position();
+            back_pos.x += 70;
+            walk_back(back_pos, idle);
+        }
         // idle();
     }, false);
     

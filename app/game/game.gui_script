@@ -757,7 +757,7 @@ function remove_tutorial()
 end
 function on_win_end()
     if is_animal_level() then
-        feed_animation()
+        timer.delay(0.1, false, feed_animation)
     end
     timer.delay(
         is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,

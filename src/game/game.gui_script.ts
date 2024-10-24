@@ -526,8 +526,9 @@ function remove_tutorial() {
 }
 
 function on_win_end() {
-    if(is_animal_level())
-        feed_animation();
+    if(is_animal_level()) {
+        timer.delay(0.1, false, feed_animation);
+    }
 
     timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
         disable_game_ui();

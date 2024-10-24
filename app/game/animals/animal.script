@@ -162,6 +162,11 @@ function ____exports.init(self)
         "ON_WIN",
         function()
             self.is_win = true
+            if self.walkable then
+                local back_pos = go.get_position()
+                back_pos.x = back_pos.x + 70
+                walk_back(back_pos, idle)
+            end
         end,
         false
     )
