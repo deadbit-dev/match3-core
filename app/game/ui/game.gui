@@ -715,24 +715,6 @@ nodes {
 }
 nodes {
   position {
-    y: -119.0
-  }
-  scale {
-    x: 0.3
-    y: 0.3
-  }
-  type: TYPE_CUSTOM
-  id: "win_avatar"
-  parent: "win"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  spine_scene: "cat_win"
-  spine_default_animation: "cat_win_idle"
-  custom_type: 405028931
-}
-nodes {
-  position {
     y: -300.0
   }
   scale {
@@ -833,7 +815,7 @@ nodes {
 }
 nodes {
   position {
-    x: 25.0
+    x: 76.25
   }
   scale {
     x: 0.3
@@ -848,7 +830,7 @@ nodes {
 }
 nodes {
   position {
-    x: -25.0
+    x: 17.5
   }
   size {
     x: 200.0
@@ -866,6 +848,24 @@ nodes {
   }
   parent: "reward"
   inherit_alpha: true
+}
+nodes {
+  position {
+    y: -119.0
+  }
+  scale {
+    x: 0.3
+    y: 0.3
+  }
+  type: TYPE_CUSTOM
+  id: "win_avatar"
+  parent: "win"
+  layer: "ontop"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  spine_scene: "cat_win"
+  spine_default_animation: "cat_win_idle"
+  custom_type: 405028931
 }
 nodes {
   position {

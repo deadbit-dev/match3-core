@@ -172,8 +172,8 @@ export const lang_data = {
     "Английский-en": "Feed him and continue his journey!"
   },
   "on_map": {
-    "Русский-ru": "на карту",
-    "Английский-en": "on map"
+    "Русский-ru": "Карта",
+    "Английский-en": "Map"
   },
   "level": {
     "Русский-ru": "Уровень",
