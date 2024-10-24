@@ -30,7 +30,14 @@ end
 function set_last_map_position()
     local map = gui.get_node("map")
     local pos = gui.get_position(map)
-    pos.y = GameStorage.get("map_last_pos_y")
+    local offset = get_offset()
+    pos.y = math.max(
+        -3990 + offset,
+        math.min(
+            0 - offset,
+            GameStorage.get("map_last_pos_y")
+        )
+    )
     gui.set_position(map, pos)
 end
 function set_completed_levels()
@@ -93,7 +100,7 @@ function on_resize(data)
     gui.set_position(map, pos)
 end
 function get_offset()
-    local height = Camera.get_ltrb().w
+    local height = Camera.get_ltrb(true).w
     if height >= -480 then
         return 0
     end

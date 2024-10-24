@@ -223,11 +223,11 @@ function CameraModule() {
     }
 
     // left top right bottom world coordinates in screen
-    function get_ltrb() {
+    function get_ltrb(win_space = false) {
         const inv = vmath.inv(width_projection() * _view_matrix as vmath.matrix4);
         const [bl_x, bl_y] = unproject_xyz(inv, 0, 0, 0);
-        const [br_x, br_y] = unproject_xyz(inv, DISPLAY_WIDTH, 0, 0);
-        const [tl_x, tl_y] = unproject_xyz(inv, 0, DISPLAY_HEIGHT, 0);
+        const [br_x, br_y] = unproject_xyz(inv, win_space ? WINDOW_WIDTH : DISPLAY_WIDTH, 0, 0);
+        const [tl_x, tl_y] = unproject_xyz(inv, 0, win_space ? WINDOW_HEIGHT : DISPLAY_HEIGHT, 0);
         return vmath.vector4(bl_x, tl_y, br_x, bl_y);
     }
 

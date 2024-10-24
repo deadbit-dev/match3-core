@@ -77,7 +77,8 @@ function load_level(level: number) {
 function set_last_map_position() {
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
-    pos.y = GameStorage.get('map_last_pos_y');
+    const offset = get_offset();
+    pos.y = math.max(-3990 + offset, math.min(0 - offset, GameStorage.get('map_last_pos_y')));
     gui.set_position(map, pos);
 }
 
@@ -130,7 +131,7 @@ function on_resize(data: { width: number, height: number }) {
 }
 
 function get_offset() {
-    const height = Camera.get_ltrb().w;
+    const height = Camera.get_ltrb(true).w;
     if(height >= -480)
         return 0;
 

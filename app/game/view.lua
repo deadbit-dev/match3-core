@@ -1118,7 +1118,6 @@ function ____exports.View(resources)
         end
     end
     function on_dynamite_activated_animation(messages)
-        Sound.play("dynamite")
         record_action(____exports.Action.DynamiteActivation)
         activate_dynamite_animation(
             messages.pos,
@@ -1150,6 +1149,7 @@ function ____exports.View(resources)
             msg.url(nil, _go, "dynamite"),
             "enable"
         )
+        Sound.play("dynamite")
         local anim_props = {blend_duration = 0, playback_rate = 1.25}
         spine.play_anim(
             msg.url(nil, _go, "dynamite"),
