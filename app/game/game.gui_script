@@ -1130,16 +1130,36 @@ function disabled_gameover_offer()
 end
 function disable_game_ui()
     gui.set_enabled(
-        gui.get_node("substrate"),
-        false
-    )
-    gui.set_enabled(
         gui.get_node("buster_buttons"),
         false
     )
-    gui.set_enabled(
+    gui.animate(
+        gui.get_node("substrate"),
+        "position",
+        vmath.vector3(270, 1050, 0),
+        gui.EASING_INCUBIC,
+        0.5
+    )
+    gui.animate(
         gui.get_node("system_buttons"),
-        false
+        "position",
+        vmath.vector3(0, -200, 0),
+        gui.EASING_INCUBIC,
+        0.5
+    )
+    timer.delay(
+        0.5,
+        false,
+        function()
+            gui.set_enabled(
+                gui.get_node("substrate"),
+                false
+            )
+            gui.set_enabled(
+                gui.get_node("system_buttons"),
+                false
+            )
+        end
     )
 end
 function on_shuffle_start()
