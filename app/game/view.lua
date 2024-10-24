@@ -1612,17 +1612,56 @@ function ____exports.View(resources)
     end
     function on_win_end(state)
         is_block_input = true
-        reset_field()
+        for ____, row in ipairs(view_state.substrates) do
+            for ____, substrate in ipairs(row) do
+                if substrate ~= ____exports.EMPTY_SUBSTRATE then
+                    local pos = go.get_position(substrate)
+                    go.animate(
+                        substrate,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        vmath.vector3(-1000, pos.y, pos.z),
+                        go.EASING_INCUBIC,
+                        0.5
+                    )
+                end
+            end
+        end
+        for ____, ____value in ipairs(__TS__ObjectEntries(view_state.game_id_to_view_index)) do
+            local uid = ____value[1]
+            local indecies = ____value[2]
+            for ____, index in ipairs(indecies) do
+                local view = go_manager.get_item_by_index(index)
+                if view ~= nil then
+                    local pos = go.get_position(view._hash)
+                    go.animate(
+                        view._hash,
+                        "position",
+                        go.PLAYBACK_ONCE_FORWARD,
+                        vmath.vector3(-1000, pos.y, pos.z),
+                        go.EASING_INCUBIC,
+                        0.5
+                    )
+                end
+            end
+        end
         timer.delay(
-            is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,
+            0.5,
             false,
             function()
-                if __TS__ArrayIncludes(
-                    GAME_CONFIG.animal_levels,
-                    get_current_level() + 1
-                ) then
-                    remove_animals()
-                end
+                reset_field()
+                timer.delay(
+                    is_animal_level() and GAME_CONFIG.animal_level_delay_before_win or GAME_CONFIG.delay_before_win,
+                    false,
+                    function()
+                        if __TS__ArrayIncludes(
+                            GAME_CONFIG.animal_levels,
+                            get_current_level() + 1
+                        ) then
+                            remove_animals()
+                        end
+                    end
+                )
             end
         )
     end

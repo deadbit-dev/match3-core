@@ -1243,26 +1243,32 @@ export function View(resources: ViewResources) {
     function on_win_end(state: GameState) {
         is_block_input = true;
 
-        // let counts = 0;
-        // for(let y = 0; y < get_field_height(); y++) {
-        //     for(let x = 0; x < get_field_width(); x++) {
-        //         const cell = state.cells[y][x];
-        //         const element = state.elements[y][x];
-                
-        //         if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
-        //             timer.delay(0.05 * counts++, false, () => {
-        //                 Sound.play('broke_element');
-        //                 damage_element_animation(element);
-        //             });
-        //         }
-        //     }
-        // }
 
-        // timer.delay(0.05 * counts, false, reset_field);
-        reset_field();
-        timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
-            if(GAME_CONFIG.animal_levels.includes(get_current_level() + 1))
-                remove_animals();
+        for(const row of view_state.substrates) {
+            for(const substrate of row) {
+                if(substrate != EMPTY_SUBSTRATE) {
+                    const pos = go.get_position(substrate);
+                    go.animate(substrate, 'position', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(-1000, pos.y, pos.z), go.EASING_INCUBIC, 0.5);
+                }
+            }
+        }
+
+        for(const [uid, indecies] of Object.entries(view_state.game_id_to_view_index)) {
+            for(const index of indecies) {
+                const view = go_manager.get_item_by_index(index);
+                if(view != undefined) {
+                    const pos = go.get_position(view._hash);
+                    go.animate(view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, vmath.vector3(-1000, pos.y, pos.z), go.EASING_INCUBIC, 0.5);
+                }
+            }
+        }
+
+        timer.delay(0.5, false, () => {
+            reset_field();
+            timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
+                if(GAME_CONFIG.animal_levels.includes(get_current_level() + 1))
+                    remove_animals();
+            });
         });
     }
 

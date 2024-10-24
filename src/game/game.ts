@@ -567,7 +567,7 @@ export function Game() {
             }
         }
 
-        timer.delay(0.05 * counts, false, () => {
+        timer.delay(0.05 * counts * 1.5, false, () => {
             is_win_action = false;
             on_idle();
         });

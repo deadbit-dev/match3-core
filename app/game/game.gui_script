@@ -766,6 +766,7 @@ function on_win_end()
             disable_game_ui()
             local lock = gui.get_node("lock1")
             gui.set_enabled(lock, true)
+            gui.set_alpha(lock, 0)
             gui.animate(
                 lock,
                 gui.PROP_COLOR,

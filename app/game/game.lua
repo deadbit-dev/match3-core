@@ -541,7 +541,7 @@ function ____exports.Game()
             end
         end
         timer.delay(
-            0.05 * counts,
+            0.05 * counts * 1.5,
             false,
             function()
                 is_win_action = false
