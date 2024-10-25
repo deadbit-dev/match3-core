@@ -21,7 +21,7 @@ function start_action(props, options)
                 if props.is_win then
                     return
                 end
-                walk()
+                walk(props)
             end
         )
     else
@@ -40,19 +40,31 @@ function start_action(props, options)
         )
     end
 end
-function walk()
+function walk(props)
+    if props.is_win then
+        return
+    end
     local to_pos = go.get_position()
     to_pos.x = to_pos.x - 70
     walk_to(
         to_pos,
         function()
+            if props.is_win then
+                return
+            end
             action(function()
+                if props.is_win then
+                    return
+                end
                 local back_pos = go.get_position()
                 back_pos.x = back_pos.x + 70
                 walk_back(
                     back_pos,
                     function()
                         idle()
+                        if props.is_win then
+                            return
+                        end
                         local name = GAME_CONFIG.level_to_animal[get_current_level() + 1]
                         timer.delay(
                             math.random(5, name == "kozel" and 6 or 10),
@@ -163,9 +175,14 @@ function ____exports.init(self)
         function()
             self.is_win = true
             if self.walkable then
-                local back_pos = go.get_position()
-                back_pos.x = back_pos.x + 70
-                walk_back(back_pos, idle)
+                if go.get(
+                    msg.url(nil, nil, "spinemodel"),
+                    "animation"
+                ) ~= hash("idle") then
+                    local back_pos = go.get_position()
+                    back_pos.x = back_pos.x + 70
+                    walk_back(back_pos, idle)
+                end
             end
         end,
         false

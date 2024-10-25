@@ -5,6 +5,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+// FIXME: REAFACTORING !!!
+
 import { get_current_level, is_tutorial } from "../utils";
 
 go.property('walkable', true);
@@ -24,11 +26,13 @@ export function init(this: props) {
     EventBus.on('ON_WIN', () => {
         this.is_win = true;
         if(this.walkable) {
-            const back_pos = go.get_position();
-            back_pos.x += 70;
-            walk_back(back_pos, idle);
+            
+            if(go.get(msg.url(undefined, undefined, "spinemodel"), 'animation') != hash("idle")) {
+                const back_pos = go.get_position();
+                back_pos.x += 70;
+                walk_back(back_pos, idle);
+            }
         }
-        // idle();
     }, false);
     
     if(is_tutorial()) {
@@ -57,7 +61,7 @@ function start_action(props: props, options: AnimalOptions) {
         timer.delay(math.random(5, name == 'kozel' ? 6 : 10), false, () => {
             if(props.is_win)
                 return;
-            walk();
+            walk(props);
         });
     } else {
         timer.delay(math.random(5, 10), false, () => {
@@ -71,15 +75,24 @@ function start_action(props: props, options: AnimalOptions) {
     }
 }
 
-function walk() {
+function walk(props: props) {
+    if(props.is_win)
+        return;
+
     const to_pos = go.get_position();
     to_pos.x -= 70;
     walk_to(to_pos, () => {
+        if(props.is_win)
+            return;
         action(() => {
+            if(props.is_win)
+                return;
             const back_pos = go.get_position();
             back_pos.x += 70;
             walk_back(back_pos, () => {
                 idle();
+                if(props.is_win)
+                    return;
                 const name = GAME_CONFIG.level_to_animal[get_current_level() + 1];
                 timer.delay(math.random(5, name == 'kozel' ? 6 : 10), false, walk);
             });
