@@ -2041,12 +2041,9 @@ function ____exports.Game()
         end
         EventBus.send("RESPONSE_FALLING_NOT_FOUND", pos)
     end
-    function search_fall_element(start_pos, pos, decay, depth)
+    function search_fall_element(start_pos, pos, decay)
         if decay == nil then
             decay = false
-        end
-        if depth == nil then
-            depth = 0
         end
         if decay then
             local neighbor_cells = field.get_neighbor_cells(pos, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
@@ -2083,24 +2080,20 @@ function ____exports.Game()
                 for ____, neighbor_cell in ipairs(neighbor_cells) do
                     if is_available_cell_type_for_move(neighbor_cell) then
                         local neighbor_cell_pos = field.get_cell_pos(neighbor_cell)
-                        local result = search_fall_element(start_pos, neighbor_cell_pos)
+                        local result = search_fall_element(start_pos, neighbor_cell_pos, decay)
                         if result ~= NotFound then
                             return result
                         end
                     end
                 end
-                if depth >= field_width then
+                if decay then
                     return NotFound
                 end
-                local ____search_fall_element_33 = search_fall_element
-                local ____start_pos_31 = start_pos
-                local ____start_pos_32 = start_pos
-                depth = depth + 1
-                return ____search_fall_element_33(____start_pos_31, ____start_pos_32, true, depth)
+                return search_fall_element(start_pos, start_pos, true)
             end
         end
         if field.is_pos_empty(top_pos) then
-            return search_fall_element(start_pos, top_pos, decay, depth)
+            return search_fall_element(start_pos, top_pos, decay)
         end
         local top_element = field.get_element(top_pos)
         if top_element ~= NullElement and top_element.state == ElementState.Idle then

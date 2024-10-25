@@ -1876,7 +1876,7 @@ export function Game() {
         EventBus.send('RESPONSE_FALLING_NOT_FOUND', pos);
     }
 
-    function search_fall_element(start_pos: Position, pos: Position, decay = false, depth = 0): Element | NotFound {
+    function search_fall_element(start_pos: Position, pos: Position, decay = false): Element | NotFound {
         if(decay) {
             const neighbor_cells = field.get_neighbor_cells(pos, [
                 [1, 0, 1],
@@ -1922,22 +1922,22 @@ export function Game() {
                 for(const neighbor_cell of neighbor_cells) {
                     if(is_available_cell_type_for_move(neighbor_cell)) {
                         const neighbor_cell_pos = field.get_cell_pos(neighbor_cell);
-                        const result = search_fall_element(start_pos, neighbor_cell_pos);
+                        const result = search_fall_element(start_pos, neighbor_cell_pos, decay);
                         if(result != NotFound)
                             return result;
                     }
                 }
 
                 // FOR NOW PREVENT INFINITE LOOP
-                if(depth >= field_width)
+                if(decay)
                     return NotFound;
-                
-                return search_fall_element(start_pos, start_pos, true, ++depth);
+
+                return search_fall_element(start_pos, start_pos, true); //, ++depth);
             }
         }
 
         if(field.is_pos_empty(top_pos)) {
-            return search_fall_element(start_pos, top_pos, decay, depth);
+            return search_fall_element(start_pos, top_pos, decay); //, depth);
         }
 
         const top_element = field.get_element(top_pos);
