@@ -1864,7 +1864,7 @@ export function Game() {
 
     function on_falling(pos: Position) {
         print("FALL: ", pos.x, pos.y);
-        const result = search_fall_element(pos);
+        const result = search_fall_element(pos, pos);
         if(result != NotFound) {
             const move_info = field.fell_element(result);
             if(move_info != NotFound) {
@@ -1876,7 +1876,24 @@ export function Game() {
         EventBus.send('RESPONSE_FALLING_NOT_FOUND', pos);
     }
 
-    function search_fall_element(pos: Position): Element | NotFound {
+    function search_fall_element(start_pos: Position, pos: Position, decay = false, depth = 0): Element | NotFound {
+        if(decay) {
+            const neighbor_cells = field.get_neighbor_cells(pos, [
+                [1, 0, 1],
+                [0, 0, 0],
+                [0, 0, 0]
+            ]);
+
+            for(const neighbor_cell of neighbor_cells) {
+                if(is_available_cell_type_for_move(neighbor_cell)) {
+                    const neighbor_cell_pos = field.get_cell_pos(neighbor_cell);
+                    const element = field.get_element(neighbor_cell_pos);
+                    if(element != NullElement && element.state == ElementState.Idle)
+                        return element;
+                }
+            }
+        }
+
         const top_pos = {x: pos.x, y: pos.y - 1};
         if(top_pos.y < 0) return NotFound;
 
@@ -1885,7 +1902,7 @@ export function Game() {
             return element;
 
         if(field.is_outside_pos_in_column(top_pos) && field.is_pos_empty(top_pos) && field.is_pos_empty(pos)) {
-        Log.log("REQUEST ELEMENT IN: ", pos);
+            Log.log("REQUEST ELEMENT IN: ", pos);
             const element = field.request_element(top_pos);
             if(element != NullElement) {
                 EventBus.send('REQUESTED_ELEMENT', {pos: top_pos, element});
@@ -1895,10 +1912,7 @@ export function Game() {
         
         const top_cell = field.get_cell(top_pos);
         if(top_cell != NotActiveCell) {
-            if(top_cell.state != CellState.Idle)
-                return NotFound;
-
-            if(!is_available_cell_type_for_move(top_cell)) {
+            if(!is_available_cell_type_for_move(top_cell) || top_cell.state != CellState.Idle) {
                 const neighbor_cells = field.get_neighbor_cells(pos, [
                     [1, 0, 1],
                     [0, 0, 0],
@@ -1908,18 +1922,22 @@ export function Game() {
                 for(const neighbor_cell of neighbor_cells) {
                     if(is_available_cell_type_for_move(neighbor_cell)) {
                         const neighbor_cell_pos = field.get_cell_pos(neighbor_cell);
-                        const result = search_fall_element(neighbor_cell_pos);
+                        const result = search_fall_element(start_pos, neighbor_cell_pos);
                         if(result != NotFound)
                             return result;
                     }
                 }
 
-                return NotFound;
+                // FOR NOW PREVENT INFINITE LOOP
+                if(depth >= field_width)
+                    return NotFound;
+                
+                return search_fall_element(start_pos, start_pos, true, ++depth);
             }
         }
 
         if(field.is_pos_empty(top_pos)) {
-            return search_fall_element(top_pos);
+            return search_fall_element(start_pos, top_pos, decay, depth);
         }
 
         const top_element = field.get_element(top_pos);

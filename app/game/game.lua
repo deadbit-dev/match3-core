@@ -2031,7 +2031,7 @@ function ____exports.Game()
     end
     function on_falling(pos)
         print("FALL: ", pos.x, pos.y)
-        local result = search_fall_element(pos)
+        local result = search_fall_element(pos, pos)
         if result ~= NotFound then
             local move_info = field.fell_element(result)
             if move_info ~= NotFound then
@@ -2041,7 +2041,25 @@ function ____exports.Game()
         end
         EventBus.send("RESPONSE_FALLING_NOT_FOUND", pos)
     end
-    function search_fall_element(pos)
+    function search_fall_element(start_pos, pos, decay, depth)
+        if decay == nil then
+            decay = false
+        end
+        if depth == nil then
+            depth = 0
+        end
+        if decay then
+            local neighbor_cells = field.get_neighbor_cells(pos, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
+            for ____, neighbor_cell in ipairs(neighbor_cells) do
+                if is_available_cell_type_for_move(neighbor_cell) then
+                    local neighbor_cell_pos = field.get_cell_pos(neighbor_cell)
+                    local element = field.get_element(neighbor_cell_pos)
+                    if element ~= NullElement and element.state == ElementState.Idle then
+                        return element
+                    end
+                end
+            end
+        end
         local top_pos = {x = pos.x, y = pos.y - 1}
         if top_pos.y < 0 then
             return NotFound
@@ -2060,25 +2078,29 @@ function ____exports.Game()
         end
         local top_cell = field.get_cell(top_pos)
         if top_cell ~= NotActiveCell then
-            if top_cell.state ~= CellState.Idle then
-                return NotFound
-            end
-            if not is_available_cell_type_for_move(top_cell) then
+            if not is_available_cell_type_for_move(top_cell) or top_cell.state ~= CellState.Idle then
                 local neighbor_cells = field.get_neighbor_cells(pos, {{1, 0, 1}, {0, 0, 0}, {0, 0, 0}})
                 for ____, neighbor_cell in ipairs(neighbor_cells) do
                     if is_available_cell_type_for_move(neighbor_cell) then
                         local neighbor_cell_pos = field.get_cell_pos(neighbor_cell)
-                        local result = search_fall_element(neighbor_cell_pos)
+                        local result = search_fall_element(start_pos, neighbor_cell_pos)
                         if result ~= NotFound then
                             return result
                         end
                     end
                 end
-                return NotFound
+                if depth >= field_width then
+                    return NotFound
+                end
+                local ____search_fall_element_33 = search_fall_element
+                local ____start_pos_31 = start_pos
+                local ____start_pos_32 = start_pos
+                depth = depth + 1
+                return ____search_fall_element_33(____start_pos_31, ____start_pos_32, true, depth)
             end
         end
         if field.is_pos_empty(top_pos) then
-            return search_fall_element(top_pos)
+            return search_fall_element(start_pos, top_pos, decay, depth)
         end
         local top_element = field.get_element(top_pos)
         if top_element ~= NullElement and top_element.state == ElementState.Idle then
