@@ -18,6 +18,7 @@ end
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)
+    self.is_started = false
     gui.set_text(
         gui.get_node("description"),
         Lang.get_text("movie_description")
@@ -32,6 +33,21 @@ function ____exports.init(self)
             Scene.load("map")
         end
     )
+    gui.set_text(
+        gui.get_node("start_lable"),
+        Lang.get_text("start")
+    )
+    self.druid:new_button(
+        "start_button",
+        function()
+            self.is_started = true
+            gui.set_enabled(
+                gui.get_node("start_button"),
+                false
+            )
+            EventBus.send("START_MOVIE")
+        end
+    )
     Camera.set_dynamic_orientation(false)
     Camera.set_go_prjection(-1, 0, -3, 3)
     EventBus.on("SYS_ON_RESIZED", on_resize)
@@ -39,6 +55,9 @@ function ____exports.init(self)
     EventBus.on(
         "MOVIE_END",
         function()
+            if not self.is_started then
+                return
+            end
             local window = gui.get_node("window")
             gui.set_enabled(window, true)
         end

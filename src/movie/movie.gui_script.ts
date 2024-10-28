@@ -11,17 +11,26 @@ import * as druid from 'druid.druid';
 
 interface props {
     druid: DruidClass;
+    is_started: boolean;
 }
 
 export function init(this: props): void {
     Manager.init_script();
     this.druid = druid.new(this);
+    this.is_started = false;
 
     gui.set_text(gui.get_node('description'), Lang.get_text('movie_description'));
     gui.set_text(gui.get_node('text'), Lang.get_text('play'));
 
     this.druid.new_button('btn', () => {
         Scene.load("map");
+    });
+
+    gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
+    this.druid.new_button('start_button', () => {
+        this.is_started = true;
+        gui.set_enabled(gui.get_node('start_button'), false);
+        EventBus.send('START_MOVIE');
     });
 
     Camera.set_dynamic_orientation(false);
@@ -32,6 +41,8 @@ export function init(this: props): void {
     Camera.update_window_size();
     
     EventBus.on('MOVIE_END', () => {
+        if(! this.is_started)
+            return;
         const window = gui.get_node('window');
         gui.set_enabled(window, true);
     });

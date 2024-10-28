@@ -241,4 +241,7 @@ images {
 images {
   image: "/assets/ui/set.png"
 }
+images {
+  image: "/assets/ui/start.png"
+}
 extrude_borders: 2

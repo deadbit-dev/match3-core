@@ -11,48 +11,58 @@ end
 function ____exports.init(self)
     Manager.init_script()
     msg.post(".", "acquire_input_focus")
-    Sound.play("car")
-    timer.delay(
-        1,
-        false,
+    local anim_props = {blend_duration = 0, playback_rate = 0}
+    spine.play_anim("#spinemodel", "start", go.PLAYBACK_ONCE_FORWARD, anim_props)
+    EventBus.on(
+        "START_MOVIE",
         function()
-            Sound.play("crash")
+            Sound.play("car")
+            timer.delay(
+                1,
+                false,
+                function()
+                    Sound.play("crash")
+                end
+            )
+            timer.delay(
+                1.7,
+                false,
+                function()
+                    Sound.play("crash")
+                end
+            )
+            timer.delay(
+                2.5,
+                false,
+                function()
+                    Sound.play("vcat")
+                end
+            )
+            timer.delay(
+                5,
+                false,
+                function()
+                    Sound.play("meay")
+                end
+            )
+            local anim_props = {blend_duration = 0, playback_rate = 1}
+            spine.play_anim(
+                "#spinemodel",
+                "start",
+                go.PLAYBACK_ONCE_FORWARD,
+                anim_props,
+                function(____self, message_id, message, sender)
+                    if message_id ~= hash("spine_animation_done") then
+                        return
+                    end
+                    on_end()
+                end
+            )
         end
     )
-    timer.delay(
-        1.7,
-        false,
-        function()
-            Sound.play("crash")
-        end
-    )
-    timer.delay(
-        2.5,
-        false,
-        function()
-            Sound.play("vcat")
-        end
-    )
-    timer.delay(
-        5,
-        false,
-        function()
-            Sound.play("meay")
-        end
-    )
-    local anim_props = {blend_duration = 0, playback_rate = 1}
-    spine.play_anim(
-        "#spinemodel",
-        "start",
-        go.PLAYBACK_ONCE_FORWARD,
-        anim_props,
-        function(____self, message_id, message, sender)
-            if message_id ~= hash("spine_animation_done") then
-                return
-            end
-            on_end()
-        end
-    )
+end
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
 end
 function ____exports.on_input(self, action_id, action)
     if action_id == hash("touch") and action.released then
@@ -61,9 +71,11 @@ function ____exports.on_input(self, action_id, action)
 end
 function ____exports.final(self)
     Scene.unload_all_resources("movie")
+    EventBus.off_all_current_script()
     Manager.final_script()
 end
 init = ____exports.init
+on_message = ____exports.on_message
 on_input = ____exports.on_input
 final = ____exports.final
 
