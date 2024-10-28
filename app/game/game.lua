@@ -657,8 +657,8 @@ function ____exports.Game()
                         shuffle_array(elements)
                         local counter = 0
                         local optimize_count = 5
-                        local element_assigned = false
                         for ____, position in ipairs(positions) do
+                            local element_assigned = false
                             if counter >= optimize_count then
                                 counter = 0
                                 flow.frames(1)
@@ -671,6 +671,7 @@ function ____exports.Game()
                                     if field.search_combination(position) == NotFound then
                                         __TS__ArraySplice(elements, i, 1)
                                         element_assigned = true
+                                        print("ASSIGNED FROM AVAILABLE IN POS: ", position.x, position.y)
                                         break
                                     end
                                     i = i - 1
@@ -684,6 +685,7 @@ function ____exports.Game()
                                     ) == nil then
                                         make_element(position, element_id)
                                         if field.search_combination(position) == NotFound then
+                                            print("ASSIGNED NEW ELEMENT IN POS: ", position.x, position.y)
                                             element_assigned = true
                                             break
                                         end
@@ -707,6 +709,7 @@ function ____exports.Game()
                         break
                     end
                 until false
+                print("SHUFFLE ATTEMPTS: ", attempt)
                 if step then
                     return on_end()
                 end
@@ -1190,7 +1193,7 @@ function ____exports.Game()
         end
         local spinning_counts = tonumber(level_config.busters.spinning.counts)
         if GameStorage.get("spinning_counts") <= 0 and spinning_counts ~= nil then
-            GameStorage.set("spinning_counts", spinning_counts)
+            GameStorage.set("spinning_counts", 100)
         end
         local hammer_counts = tonumber(level_config.busters.hammer.counts)
         if GameStorage.get("hammer_counts") <= 0 and hammer_counts ~= nil then

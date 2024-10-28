@@ -657,8 +657,8 @@ export function Game() {
                 const optimize_count = 5;
         
                 // filling the field available elements by got positions
-                let element_assigned = false;
                 for(const position of positions) {
+                    let element_assigned = false;
         
                     if(counter >= optimize_count) {
                         counter = 0;
@@ -670,7 +670,8 @@ export function Game() {
                         field.set_element(position, element);
                         if(field.search_combination(position) == NotFound) {
                             elements.splice(i, 1);
-                            element_assigned = true;    
+                            element_assigned = true;
+                            print("ASSIGNED FROM AVAILABLE IN POS: ", position.x, position.y);
                             break;
                         }
                     }
@@ -682,6 +683,7 @@ export function Game() {
                             if(elements.find((element) => element.id == element_id) == undefined) {
                                 make_element(position, element_id);
                                 if(field.search_combination(position) == NotFound) {
+                                    print("ASSIGNED NEW ELEMENT IN POS: ", position.x, position.y);
                                     element_assigned = true;
                                     break;
                                 }
@@ -699,6 +701,8 @@ export function Game() {
 
                 step = has_step();
             } while (!step && ++attempt < GAME_CONFIG.shuffle_max_attempt);
+
+            print('SHUFFLE ATTEMPTS: ', attempt);
 
             if(step) return on_end();
 
@@ -1142,7 +1146,7 @@ export function Game() {
         if(!GameStorage.get('vertical_rocket_opened') && level_config.busters.vertical_rocket.counts != 0) GameStorage.set('vertical_rocket_opened', true);
 
         const spinning_counts = tonumber(level_config.busters.spinning.counts);
-        if(GameStorage.get('spinning_counts') <= 0 && spinning_counts != undefined) GameStorage.set('spinning_counts', spinning_counts);
+        if(GameStorage.get('spinning_counts') <= 0 && spinning_counts != undefined) GameStorage.set('spinning_counts', 100); //spinning_counts);
 
         const hammer_counts = tonumber(level_config.busters.hammer.counts);
         if(GameStorage.get('hammer_counts') <= 0 && hammer_counts != undefined) GameStorage.set('hammer_counts', hammer_counts);
