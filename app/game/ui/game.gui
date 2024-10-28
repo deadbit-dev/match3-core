@@ -1597,7 +1597,7 @@ nodes {
 }
 nodes {
   position {
-    x: -102.0
+    x: -203.0
     y: -5.0
   }
   scale {
@@ -1647,8 +1647,8 @@ nodes {
 }
 nodes {
   position {
-    x: -203.0
-    y: -3.0
+    x: -102.0
+    y: -5.0
   }
   scale {
     x: 0.9
@@ -1698,7 +1698,7 @@ nodes {
 nodes {
   position {
     x: -1.0
-    y: -6.0
+    y: -5.0
   }
   scale {
     x: 0.9
@@ -1754,7 +1754,7 @@ nodes {
 nodes {
   position {
     x: 99.0
-    y: -6.0
+    y: -5.0
   }
   scale {
     x: 0.9
