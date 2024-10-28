@@ -30,7 +30,8 @@ function ____exports.init(self)
     self.druid:new_button(
         "btn",
         function()
-            Scene.load("map")
+            GameStorage.set("current_level", 0)
+            Scene.load("game")
         end
     )
     gui.set_text(

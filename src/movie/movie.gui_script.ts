@@ -23,7 +23,8 @@ export function init(this: props): void {
     gui.set_text(gui.get_node('text'), Lang.get_text('play'));
 
     this.druid.new_button('btn', () => {
-        Scene.load("map");
+        GameStorage.set('current_level', 0);
+        Scene.load('game');
     });
 
     gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
