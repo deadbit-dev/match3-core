@@ -648,7 +648,7 @@ function ____exports.Field(size_x, size_y)
         end
         return true
     end
-    local function try_damage(pos, is_near_activation, without_element, force)
+    local function try_damage(pos, is_near_activation, without_element, force, only_cell)
         if is_near_activation == nil then
             is_near_activation = false
         end
@@ -657,6 +657,9 @@ function ____exports.Field(size_x, size_y)
         end
         if force == nil then
             force = false
+        end
+        if only_cell == nil then
+            only_cell = false
         end
         local damage_info = {}
         damage_info.pos = pos
@@ -677,7 +680,7 @@ function ____exports.Field(size_x, size_y)
                 ____damage_info_damaged_cells_4[#____damage_info_damaged_cells_4 + 1] = near_activated_cell
             end
         end
-        if without_element and not ____exports.is_available_cell_type_for_move(cell) then
+        if without_element and not ____exports.is_available_cell_type_for_move(cell) or only_cell then
             if #damage_info.damaged_cells == 0 then
                 return ____exports.NotDamage
             end

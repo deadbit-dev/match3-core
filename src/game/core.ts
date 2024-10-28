@@ -514,7 +514,7 @@ export function Field(size_x: number, size_y: number) {
     }
  
     // попытка нанести урон клетке
-    function try_damage(pos: Position, is_near_activation = false, without_element = false, force = false): DamageInfo | NotDamage {
+    function try_damage(pos: Position, is_near_activation = false, without_element = false, force = false, only_cell = false): DamageInfo | NotDamage {
         const damage_info = {} as DamageInfo;
         damage_info.pos = pos;
         damage_info.damaged_cells = [];
@@ -534,7 +534,7 @@ export function Field(size_x: number, size_y: number) {
                 damage_info.damaged_cells.push(near_activated_cell);
         }
 
-        if(without_element && !is_available_cell_type_for_move(cell)) {
+        if(without_element && !is_available_cell_type_for_move(cell) || only_cell) {
             if(damage_info.damaged_cells.length == 0)
                 return NotDamage;
             return damage_info;

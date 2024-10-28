@@ -1538,6 +1538,9 @@ export function Game() {
 
     function on_helicopter_end(message: HelicopterActionMessage) {
         for(const damage_info of message.damages) {
+            if(damage_info.element == undefined && is_buster(damage_info.pos))
+                try_activate_buster_element(damage_info.pos);
+
             field.set_cell_state(damage_info.pos, CellState.Idle);
             if(message.buster != undefined) {
                 make_element(damage_info.pos, message.buster);
@@ -1615,7 +1618,8 @@ export function Game() {
         if(available_targets.length == 0) return NullElement;
 
         const target = available_targets[math.random(0, available_targets.length - 1)];
-        const damage_info = field.try_damage(target.pos);
+
+        const damage_info = field.try_damage(target.pos, false, false, false, ("cell" in target) ? true : false);
         return (damage_info != NotDamage) ? damage_info : NullElement;
     }
 

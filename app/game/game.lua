@@ -1656,6 +1656,9 @@ function ____exports.Game()
     end
     function on_helicopter_end(message)
         for ____, damage_info in ipairs(message.damages) do
+            if damage_info.element == nil and is_buster(damage_info.pos) then
+                try_activate_buster_element(damage_info.pos)
+            end
             field.set_cell_state(damage_info.pos, CellState.Idle)
             if message.buster ~= nil then
                 make_element(damage_info.pos, message.buster)
@@ -1817,7 +1820,21 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_targets[math.random(0, #available_targets - 1) + 1]
-        local damage_info = field.try_damage(target.pos)
+        local ____field_try_damage_33 = field.try_damage
+        local ____target_pos_32 = target.pos
+        local ____temp_31
+        if target.cell ~= nil then
+            ____temp_31 = true
+        else
+            ____temp_31 = false
+        end
+        local damage_info = ____field_try_damage_33(
+            ____target_pos_32,
+            false,
+            false,
+            false,
+            ____temp_31
+        )
         return damage_info ~= NotDamage and damage_info or NullElement
     end
     function on_swap_elements(swap)
@@ -2007,29 +2024,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch443 = combination.type
-            local ____cond443 = ____switch443 == CombinationType.Comb4
-            if ____cond443 then
+            local ____switch444 = combination.type
+            local ____cond444 = ____switch444 == CombinationType.Comb4
+            if ____cond444 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond443 = ____cond443 or ____switch443 == CombinationType.Comb5
-            if ____cond443 then
+            ____cond444 = ____cond444 or ____switch444 == CombinationType.Comb5
+            if ____cond444 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond443 = ____cond443 or ____switch443 == CombinationType.Comb2x2
-            if ____cond443 then
+            ____cond444 = ____cond444 or ____switch444 == CombinationType.Comb2x2
+            if ____cond444 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond443 = ____cond443 or (____switch443 == CombinationType.Comb3x3a or ____switch443 == CombinationType.Comb3x3b)
-            if ____cond443 then
+            ____cond444 = ____cond444 or (____switch444 == CombinationType.Comb3x3a or ____switch444 == CombinationType.Comb3x3b)
+            if ____cond444 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond443 = ____cond443 or (____switch443 == CombinationType.Comb3x4a or ____switch443 == CombinationType.Comb3x4b or ____switch443 == CombinationType.Comb3x5)
-            if ____cond443 then
+            ____cond444 = ____cond444 or (____switch444 == CombinationType.Comb3x4a or ____switch444 == CombinationType.Comb3x4b or ____switch444 == CombinationType.Comb3x5)
+            if ____cond444 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
