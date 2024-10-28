@@ -544,10 +544,10 @@ export function Game() {
                 const cell = field.get_cell(pos);
                 const element = field.get_element(pos);
                 
-                if(cell != NotActiveCell && is_available_cell_type_for_move(cell) && element != NullElement) {
+                if(cell != NotActiveCell) {
                     timer.delay(0.05 * counts++, false, () => {
                         if(is_buster(pos)) {
-                            if(element.id == ElementId.Helicopter) {
+                            if(element != NullElement && element.id == ElementId.Helicopter) {
                                 EventBus.send('FORCE_REMOVE_ELEMENT', element.uid);
                                 
                                 make_element(pos, ElementId.Dynamite);
@@ -557,11 +557,13 @@ export function Game() {
                             return try_activate_buster_element(pos);
                         }
                         
-                        const damage_info = field.try_damage(pos, false, true);
-                        if(damage_info == NotDamage)
-                            return;
-            
-                        EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
+                        for(let i = 0; i < 3; i++) {
+                            const damage_info = field.try_damage(pos, false, false);
+                            if(damage_info == NotDamage)
+                                return;
+                
+                            EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info);
+                        }
                     });
                 }
             }

@@ -510,7 +510,7 @@ function ____exports.Game()
                         local pos = {x = x, y = y}
                         local cell = field.get_cell(pos)
                         local element = field.get_element(pos)
-                        if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) and element ~= NullElement then
+                        if cell ~= NotActiveCell then
                             local ____timer_delay_2 = timer.delay
                             local ____counts_1 = counts
                             counts = ____counts_1 + 1
@@ -519,18 +519,24 @@ function ____exports.Game()
                                 false,
                                 function()
                                     if is_buster(pos) then
-                                        if element.id == ____exports.ElementId.Helicopter then
+                                        if element ~= NullElement and element.id == ____exports.ElementId.Helicopter then
                                             EventBus.send("FORCE_REMOVE_ELEMENT", element.uid)
                                             make_element(pos, ____exports.ElementId.Dynamite)
                                             return try_activate_dynamite(pos, true)
                                         end
                                         return try_activate_buster_element(pos)
                                     end
-                                    local damage_info = field.try_damage(pos, false, true)
-                                    if damage_info == NotDamage then
-                                        return
+                                    do
+                                        local i = 0
+                                        while i < 3 do
+                                            local damage_info = field.try_damage(pos, false, false)
+                                            if damage_info == NotDamage then
+                                                return
+                                            end
+                                            EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info)
+                                            i = i + 1
+                                        end
                                     end
-                                    EventBus.send("RESPONSE_HAMMER_DAMAGE", damage_info)
                                 end
                             )
                         end
@@ -1205,24 +1211,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch258 = message.name
-            local ____cond258 = ____switch258 == "SPINNING"
-            if ____cond258 then
+            local ____switch259 = message.name
+            local ____cond259 = ____switch259 == "SPINNING"
+            if ____cond259 then
                 on_activate_spinning()
                 break
             end
-            ____cond258 = ____cond258 or ____switch258 == "HAMMER"
-            if ____cond258 then
+            ____cond259 = ____cond259 or ____switch259 == "HAMMER"
+            if ____cond259 then
                 on_activate_hammer()
                 break
             end
-            ____cond258 = ____cond258 or ____switch258 == "HORIZONTAL_ROCKET"
-            if ____cond258 then
+            ____cond259 = ____cond259 or ____switch259 == "HORIZONTAL_ROCKET"
+            if ____cond259 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond258 = ____cond258 or ____switch258 == "VERTICAL_ROCKET"
-            if ____cond258 then
+            ____cond259 = ____cond259 or ____switch259 == "VERTICAL_ROCKET"
+            if ____cond259 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1998,29 +2004,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch442 = combination.type
-            local ____cond442 = ____switch442 == CombinationType.Comb4
-            if ____cond442 then
+            local ____switch443 = combination.type
+            local ____cond443 = ____switch443 == CombinationType.Comb4
+            if ____cond443 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond442 = ____cond442 or ____switch442 == CombinationType.Comb5
-            if ____cond442 then
+            ____cond443 = ____cond443 or ____switch443 == CombinationType.Comb5
+            if ____cond443 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond442 = ____cond442 or ____switch442 == CombinationType.Comb2x2
-            if ____cond442 then
+            ____cond443 = ____cond443 or ____switch443 == CombinationType.Comb2x2
+            if ____cond443 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond442 = ____cond442 or (____switch442 == CombinationType.Comb3x3a or ____switch442 == CombinationType.Comb3x3b)
-            if ____cond442 then
+            ____cond443 = ____cond443 or (____switch443 == CombinationType.Comb3x3a or ____switch443 == CombinationType.Comb3x3b)
+            if ____cond443 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond442 = ____cond442 or (____switch442 == CombinationType.Comb3x4a or ____switch442 == CombinationType.Comb3x4b or ____switch442 == CombinationType.Comb3x5)
-            if ____cond442 then
+            ____cond443 = ____cond443 or (____switch443 == CombinationType.Comb3x4a or ____switch443 == CombinationType.Comb3x4b or ____switch443 == CombinationType.Comb3x5)
+            if ____cond443 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
