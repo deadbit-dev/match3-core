@@ -310,7 +310,7 @@ export function Game() {
     }
 
     function on_tick() {
-        if(level_config.time != undefined) update_timer();
+        if(level_config.time != undefined && !is_win) update_timer();
 
         if(is_level_completed()) {
             is_block_input = true;
@@ -520,7 +520,10 @@ export function Game() {
             const completed_levels = GameStorage.get('completed_levels');
             completed_levels.push(GameStorage.get('current_level'));
             GameStorage.set('completed_levels', completed_levels);
+            const last_state = get_state();
             add_coins(level_config.coins);
+            if(last_state.steps != undefined) add_coins(last_state.steps);
+            if(last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
             EventBus.send('ON_WIN');
             win_action();
             return;
@@ -529,6 +532,7 @@ export function Game() {
         timer.cancel(game_timer);
 
         update_core_state();
+
         EventBus.send('ON_WIN_END', copy_state());
     }
 

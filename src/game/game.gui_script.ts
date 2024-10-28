@@ -525,7 +525,7 @@ function remove_tutorial() {
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
-function on_win_end() {
+function on_win_end(state: GameState) {
     if(is_animal_level()) {
         timer.delay(0.1, false, feed_animation);
     }
@@ -538,7 +538,9 @@ function on_win_end() {
         gui.set_alpha(lock, 0);
         gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(gui.get_node('win'), true);
-            const coins = get_current_level_config().coins;
+            let coins = get_current_level_config().coins;
+            if(state.steps != undefined) coins += state.steps;
+            if(state.remaining_time != undefined) coins += math.floor(state.remaining_time);
             if(coins > 0) {
                 const current_coins = GameStorage.get('coins');
                 const before_reward = current_coins - coins;

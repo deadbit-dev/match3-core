@@ -755,7 +755,7 @@ function remove_tutorial()
         false
     )
 end
-function on_win_end()
+function on_win_end(state)
     if is_animal_level() then
         timer.delay(0.1, false, feed_animation)
     end
@@ -780,6 +780,12 @@ function on_win_end()
                         true
                     )
                     local coins = get_current_level_config().coins
+                    if state.steps ~= nil then
+                        coins = coins + state.steps
+                    end
+                    if state.remaining_time ~= nil then
+                        coins = coins + math.floor(state.remaining_time)
+                    end
                     if coins > 0 then
                         local current_coins = GameStorage.get("coins")
                         local before_reward = current_coins - coins
