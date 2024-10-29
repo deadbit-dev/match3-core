@@ -1,5 +1,5 @@
 import { Direction } from "../utils/math_utils";
-import { SwapInfo } from "./core";
+import { Position, SwapInfo } from "./core";
 
 export function get_current_level() {
     return GameStorage.get('current_level');
@@ -108,13 +108,22 @@ export function is_tutorial() {
     return (is_tutorial_level && is_not_completed);
 }
 
-export function is_tutorial_step(swap_info: SwapInfo) {
+export function is_tutorial_swap(swap_info: SwapInfo) {
     const current_level = get_current_level();
     const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
     if(tutorial_data.step == undefined)
-        return true;
+        return false;
 
     const is_from = swap_info.from.x == tutorial_data.step.from.x && swap_info.from.y == tutorial_data.step.from.y;
     const is_to = swap_info.to.x == tutorial_data.step.to.x && swap_info.to.y == tutorial_data.step.to.y;
     return (is_from && is_to);
+}
+
+export function is_tutorial_click(pos: Position) {
+    const current_level = get_current_level();
+    const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+    if(tutorial_data.click == undefined)
+        return false;
+
+    return (tutorial_data.click.x == pos.x && tutorial_data.click.y == pos.y);
 }

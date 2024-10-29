@@ -102,14 +102,22 @@ function ____exports.is_tutorial()
     )
     return is_tutorial_level and is_not_completed
 end
-function ____exports.is_tutorial_step(swap_info)
+function ____exports.is_tutorial_swap(swap_info)
     local current_level = ____exports.get_current_level()
     local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
     if tutorial_data.step == nil then
-        return true
+        return false
     end
     local is_from = swap_info.from.x == tutorial_data.step.from.x and swap_info.from.y == tutorial_data.step.from.y
     local is_to = swap_info.to.x == tutorial_data.step.to.x and swap_info.to.y == tutorial_data.step.to.y
     return is_from and is_to
+end
+function ____exports.is_tutorial_click(pos)
+    local current_level = ____exports.get_current_level()
+    local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+    if tutorial_data.click == nil then
+        return false
+    end
+    return tutorial_data.click.x == pos.x and tutorial_data.click.y == pos.y
 end
 return ____exports

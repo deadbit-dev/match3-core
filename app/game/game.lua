@@ -17,7 +17,8 @@ local get_busters = ____utils.get_busters
 local add_coins = ____utils.add_coins
 local is_tutorial = ____utils.is_tutorial
 local get_current_level = ____utils.get_current_level
-local is_tutorial_step = ____utils.is_tutorial_step
+local is_tutorial_swap = ____utils.is_tutorial_swap
+local is_tutorial_click = ____utils.is_tutorial_click
 local ____core = require("game.core")
 local CellState = ____core.CellState
 local CellType = ____core.CellType
@@ -1279,9 +1280,6 @@ function ____exports.Game()
         busters.horizontal_rocket.active = false
         busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
-        if is_tutorial() then
-            complete_tutorial()
-        end
     end
     function on_activate_horizontal_rocket()
         if busters.horizontal_rocket.block then
@@ -1295,9 +1293,6 @@ function ____exports.Game()
         busters.spinning.active = false
         busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
-        if is_tutorial() then
-            complete_tutorial()
-        end
     end
     function on_activate_vertical_rocket()
         if busters.vertical_rocket.block then
@@ -1311,13 +1306,13 @@ function ____exports.Game()
         busters.spinning.active = false
         busters.horizontal_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
-        if is_tutorial() then
-            complete_tutorial()
-        end
     end
     function on_click(pos)
-        if is_block_input or is_tutorial() then
+        if is_block_input or is_tutorial() and not is_tutorial_click(pos) then
             return
+        end
+        if is_tutorial() then
+            complete_tutorial()
         end
         stop_helper()
         if busters.hammer.active then
@@ -1847,9 +1842,14 @@ function ____exports.Game()
         return damage_info ~= NotDamage and damage_info or NullElement
     end
     function on_swap_elements(swap)
-        if is_block_input or is_tutorial() and not is_tutorial_step(swap) then
+        if is_block_input or is_tutorial() and not is_tutorial_swap(swap) then
             return
         end
+        busters.hammer.active = false
+        busters.spinning.active = false
+        busters.horizontal_rocket.active = false
+        busters.vertical_rocket.active = false
+        EventBus.send("UPDATED_BUTTONS")
         if is_first_step then
             is_first_step = false
             set_timer()
@@ -2033,29 +2033,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch447 = combination.type
-            local ____cond447 = ____switch447 == CombinationType.Comb4
-            if ____cond447 then
+            local ____switch445 = combination.type
+            local ____cond445 = ____switch445 == CombinationType.Comb4
+            if ____cond445 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond447 = ____cond447 or ____switch447 == CombinationType.Comb5
-            if ____cond447 then
+            ____cond445 = ____cond445 or ____switch445 == CombinationType.Comb5
+            if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
-            ____cond447 = ____cond447 or ____switch447 == CombinationType.Comb2x2
-            if ____cond447 then
+            ____cond445 = ____cond445 or ____switch445 == CombinationType.Comb2x2
+            if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond447 = ____cond447 or (____switch447 == CombinationType.Comb3x3a or ____switch447 == CombinationType.Comb3x3b)
-            if ____cond447 then
+            ____cond445 = ____cond445 or (____switch445 == CombinationType.Comb3x3a or ____switch445 == CombinationType.Comb3x3b)
+            if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond447 = ____cond447 or (____switch447 == CombinationType.Comb3x4a or ____switch447 == CombinationType.Comb3x4b or ____switch447 == CombinationType.Comb3x5)
-            if ____cond447 then
+            ____cond445 = ____cond445 or (____switch445 == CombinationType.Comb3x4a or ____switch445 == CombinationType.Comb3x4b or ____switch445 == CombinationType.Comb3x5)
+            if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end

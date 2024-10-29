@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import * as flow from 'ludobits.m.flow';
-import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_step } from "./utils";
+import { get_field_width, get_field_height, get_current_level_config, get_busters, add_coins, is_tutorial, get_current_level, is_tutorial_swap, is_tutorial_click } from "./utils";
 import { Cell, CellDamageInfo, CellInfo, CellState, CellType, CombinationInfo, CombinationType, CoreState, DamageInfo, Element, ElementInfo, ElementState, ElementType, Field, is_available_cell_type_for_move, NotActiveCell, NotDamage, NotFound, NullElement, Position, SwapInfo } from "./core";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinateMessage, DiskosphereDamageElementMessage, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, SwapElementsMessage } from "../main/game_config";
 import { NameMessage } from "../modules/modules_const";
@@ -68,6 +68,7 @@ export type TutorialData = {
         cells?: Position[],
         bounds?: SwapInfo,
         step?: SwapInfo,
+        click?: Position,
         busters?: string | string[],
 
         text: {
@@ -1208,8 +1209,8 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
 
-        if(is_tutorial())
-            complete_tutorial();
+        // if(is_tutorial())
+        //     complete_tutorial();
     }
 
     function on_activate_horizontal_rocket() {
@@ -1224,8 +1225,8 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
 
-        if(is_tutorial())
-            complete_tutorial();
+        // if(is_tutorial())
+        //     complete_tutorial();
     }
 
     function on_activate_vertical_rocket() {
@@ -1240,13 +1241,16 @@ export function Game() {
 
         EventBus.send('UPDATED_BUTTONS');
 
-        if(is_tutorial())
-            complete_tutorial();
+        // if(is_tutorial())
+        //     complete_tutorial();
     }
         
 
     function on_click(pos: Position) {
-        if(is_block_input || is_tutorial()) return;
+        if(is_block_input || (is_tutorial() && !is_tutorial_click(pos))) return;
+
+        if(is_tutorial())
+            complete_tutorial();
 
         stop_helper();
 
@@ -1630,7 +1634,13 @@ export function Game() {
     }
 
     function on_swap_elements(swap: SwapInfo) {
-        if(is_block_input || (is_tutorial() && !is_tutorial_step(swap))) return;
+        if(is_block_input || (is_tutorial() && !is_tutorial_swap(swap))) return;
+
+        busters.hammer.active = false;
+        busters.spinning.active = false;
+        busters.horizontal_rocket.active = false;
+        busters.vertical_rocket.active = false;
+        EventBus.send('UPDATED_BUTTONS');
 
         if(is_first_step) {
             is_first_step = false;

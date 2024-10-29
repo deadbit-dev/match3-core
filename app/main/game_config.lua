@@ -262,6 +262,8 @@ ____exports._GAME_CONFIG = {
                 data = "tutorial_hammer",
                 pos = vmath.vector3(0, 390, 0)
             },
+            cells = {{x = 6, y = 3}},
+            click = {x = 6, y = 3},
             bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
         },
         [9] = {
@@ -305,7 +307,9 @@ ____exports._GAME_CONFIG = {
                 data = "tutorial_rockets",
                 pos = vmath.vector3(0, 390, 0)
             },
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
+            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}},
+            cells = {{x = 3, y = 4}},
+            click = {x = 3, y = 4}
         }
     },
     levels = {},
