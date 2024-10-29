@@ -14,6 +14,7 @@ import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils
 import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
+import { Position } from './core';
 
 const presets = {
     targets: [
@@ -536,23 +537,59 @@ function on_win_end(state: GameState) {
         const lock = gui.get_node('lock1');
         gui.set_enabled(lock, true);
         gui.set_alpha(lock, 0);
-        gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
+        gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.6, 0, () => {
             gui.set_enabled(gui.get_node('win'), true);
-            let coins = get_current_level_config().coins;
-            if(state.steps != undefined) coins += state.steps;
-            if(state.remaining_time != undefined) coins += math.floor(state.remaining_time);
-            if(coins > 0) {
+            let level_coins = get_current_level_config().coins;
+            let steps = (state.steps != undefined) ? state.steps : 0;
+            let remaining_time = (state.remaining_time != undefined) ? math.floor(state.remaining_time) : 0;
+            if(level_coins > 0 || steps > 0 || remaining_time > 0) {
                 const current_coins = GameStorage.get('coins');
-                const before_reward = current_coins - coins;
+                const before_reward = current_coins - level_coins - steps - remaining_time;
                 gui.set_enabled(gui.get_node('reward'), true);
                 gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
-                drop_coins(coins, (idx: number) => {
+
+                const on_each_coin_drop_end = (idx: number) => {
                     gui.set_text(gui.get_node('coins_count'), tostring(before_reward + idx + 1));
                     const icon = gui.get_node('coin_icon');
                     const init_scale = gui.get_scale(icon);
                     gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
                         gui.animate(icon, gui.PROP_SCALE, init_scale, gui.EASING_INELASTIC, 0.01);
                     });
+                };
+
+                drop_steptime(() => {
+                    const ltrb = Camera.get_ltrb();
+                    const width = 540;
+                    const height = math.abs(ltrb.w);
+                    const level_coin_points = [
+                        {x: 420 * math.random(), y: 1070},
+                        {x: width * 0.3, y: height * 0.5},
+                        {x: 270+25, y: 480-200}
+                    ];
+                    if(steps > 0 || remaining_time > 0) {
+                        const steptime_points = [
+                            {x: 100, y: 850},
+                            {x: width * 0.25, y: height * 0.5},
+                            {x: 270+25, y: 480-200}
+                        ];
+
+                        const on_each_coin_drop_start = (idx: number) => {
+                            if(steps > 0) {
+                                gui.set_text(gui.get_node('steps'), tostring(steps - (idx + 1)));
+                                return;
+                            }
+
+                            if(remaining_time > 0) {
+                                gui.set_text(gui.get_node('time'), parse_time(remaining_time - (idx + 1)));
+                                return;
+                            }
+                        };
+
+                        drop_coins(steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
+                            fade_steptime();
+                            drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
+                        });
+                    } else drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
                 });
             }
         });
@@ -565,24 +602,37 @@ function on_win_end(state: GameState) {
     });
 }
 
-function drop_coins(amount: number, on_each_drop: (idx: number) => void) {
+function drop_steptime(on_end: () => void) {
+    gui.set_enabled(gui.get_node('substrate'), true);
+    const steptime = gui.get_node('step_time');
+    gui.set_layer(steptime, 'ontop');
+    const pos = gui.get_position(steptime);
+    pos.y -= 300;
+    gui.animate(steptime, 'position', pos, gui.EASING_OUTBOUNCE, 0.5, 0, on_end);
+}
+
+function fade_steptime() {
+    const steptime = gui.get_node('step_time');
+    const pos = gui.get_position(steptime);
+    pos.y += 300;
+    gui.animate(steptime, 'position', pos, gui.EASING_OUTCUBIC, 0.5, 0, () => {
+        gui.set_layer(steptime, '');
+        gui.set_enabled(gui.get_node('substrate'), false);
+    });
+}
+
+function drop_coins(amount: number, points: Position[], on_each_drop_start?: (idx: number) => void, on_each_drop_end?: (idx: number) => void, on_end?: () => void) {
     for(let i = 0; i < amount; i++) {
         const idx = i;
         timer.delay(0.1 * i, false, () => {
             flow.start(() => {
-                const coin = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
+                const coin = gui.new_box_node(vmath.vector3(points[0].x, points[0].y, 0), vmath.vector3(40, 40, 1));
                 gui.set_layer(coin, 'ontop');
                 gui.set_texture(coin, 'ui');
                 gui.play_flipbook(coin, 'coin_icon_1');
 
-                const ltrb = Camera.get_ltrb();
-                const width = 540;
-                const height = math.abs(ltrb.w);
-                const points = [
-                    {x: 420, y: 870},
-                    {x: width * 0.3, y: height * 0.5},
-                    {x: 270+25, y: 480-200}
-                ];
+                if(on_each_drop_start != undefined)
+                    on_each_drop_start(idx);
 
                 let result = vmath.vector3();
                 for (let i = 0; i < 100; i++) {
@@ -593,10 +643,15 @@ function drop_coins(amount: number, on_each_drop: (idx: number) => void) {
                 }
 
                 gui.delete_node(coin);
-                on_each_drop(idx);
+
+                if(on_each_drop_end != undefined)
+                    on_each_drop_end(idx);
             });
         });
     }
+
+    if(on_end != undefined)
+        timer.delay((amount * 0.1) + (100 * 0.01), false, on_end);
 }
 
 // TODO: make presets for gameover

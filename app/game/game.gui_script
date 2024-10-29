@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, fade_steptime, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -772,23 +772,19 @@ function on_win_end(state)
                 gui.PROP_COLOR,
                 vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
                 gui.EASING_INCUBIC,
-                0.3,
+                0.6,
                 0,
                 function()
                     gui.set_enabled(
                         gui.get_node("win"),
                         true
                     )
-                    local coins = get_current_level_config().coins
-                    if state.steps ~= nil then
-                        coins = coins + state.steps
-                    end
-                    if state.remaining_time ~= nil then
-                        coins = coins + math.floor(state.remaining_time)
-                    end
-                    if coins > 0 then
+                    local level_coins = get_current_level_config().coins
+                    local steps = state.steps ~= nil and state.steps or 0
+                    local remaining_time = state.remaining_time ~= nil and math.floor(state.remaining_time) or 0
+                    if level_coins > 0 or steps > 0 or remaining_time > 0 then
                         local current_coins = GameStorage.get("coins")
-                        local before_reward = current_coins - coins
+                        local before_reward = current_coins - level_coins - steps - remaining_time
                         gui.set_enabled(
                             gui.get_node("reward"),
                             true
@@ -797,34 +793,75 @@ function on_win_end(state)
                             gui.get_node("coins_count"),
                             tostring(before_reward)
                         )
-                        drop_coins(
-                            coins,
-                            function(idx)
-                                gui.set_text(
-                                    gui.get_node("coins_count"),
-                                    tostring(before_reward + idx + 1)
-                                )
-                                local icon = gui.get_node("coin_icon")
-                                local init_scale = gui.get_scale(icon)
-                                gui.animate(
-                                    icon,
-                                    gui.PROP_SCALE,
-                                    vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z),
-                                    gui.EASING_INELASTIC,
-                                    0.01,
-                                    0,
-                                    function()
-                                        gui.animate(
-                                            icon,
-                                            gui.PROP_SCALE,
-                                            init_scale,
-                                            gui.EASING_INELASTIC,
-                                            0.01
+                        local function on_each_coin_drop_end(idx)
+                            gui.set_text(
+                                gui.get_node("coins_count"),
+                                tostring(before_reward + idx + 1)
+                            )
+                            local icon = gui.get_node("coin_icon")
+                            local init_scale = gui.get_scale(icon)
+                            gui.animate(
+                                icon,
+                                gui.PROP_SCALE,
+                                vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z),
+                                gui.EASING_INELASTIC,
+                                0.01,
+                                0,
+                                function()
+                                    gui.animate(
+                                        icon,
+                                        gui.PROP_SCALE,
+                                        init_scale,
+                                        gui.EASING_INELASTIC,
+                                        0.01
+                                    )
+                                end
+                            )
+                        end
+                        drop_steptime(function()
+                            local ltrb = Camera.get_ltrb()
+                            local width = 540
+                            local height = math.abs(ltrb.w)
+                            local level_coin_points = {
+                                {
+                                    x = 420 * math.random(),
+                                    y = 1070
+                                },
+                                {x = width * 0.3, y = height * 0.5},
+                                {x = 270 + 25, y = 480 - 200}
+                            }
+                            if steps > 0 or remaining_time > 0 then
+                                local steptime_points = {{x = 100, y = 850}, {x = width * 0.25, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
+                                local function on_each_coin_drop_start(idx)
+                                    if steps > 0 then
+                                        gui.set_text(
+                                            gui.get_node("steps"),
+                                            tostring(steps - (idx + 1))
                                         )
+                                        return
+                                    end
+                                    if remaining_time > 0 then
+                                        gui.set_text(
+                                            gui.get_node("time"),
+                                            parse_time(remaining_time - (idx + 1))
+                                        )
+                                        return
+                                    end
+                                end
+                                drop_coins(
+                                    steps + remaining_time,
+                                    steptime_points,
+                                    on_each_coin_drop_start,
+                                    on_each_coin_drop_end,
+                                    function()
+                                        fade_steptime()
+                                        drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
                                     end
                                 )
+                            else
+                                drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
                             end
-                        )
+                        end)
                     end
                 end
             )
@@ -840,7 +877,46 @@ function on_win_end(state)
         end
     )
 end
-function drop_coins(amount, on_each_drop)
+function drop_steptime(on_end)
+    gui.set_enabled(
+        gui.get_node("substrate"),
+        true
+    )
+    local steptime = gui.get_node("step_time")
+    gui.set_layer(steptime, "ontop")
+    local pos = gui.get_position(steptime)
+    pos.y = pos.y - 300
+    gui.animate(
+        steptime,
+        "position",
+        pos,
+        gui.EASING_OUTBOUNCE,
+        0.5,
+        0,
+        on_end
+    )
+end
+function fade_steptime()
+    local steptime = gui.get_node("step_time")
+    local pos = gui.get_position(steptime)
+    pos.y = pos.y + 300
+    gui.animate(
+        steptime,
+        "position",
+        pos,
+        gui.EASING_OUTCUBIC,
+        0.5,
+        0,
+        function()
+            gui.set_layer(steptime, "")
+            gui.set_enabled(
+                gui.get_node("substrate"),
+                false
+            )
+        end
+    )
+end
+function drop_coins(amount, points, on_each_drop_start, on_each_drop_end, on_end)
     do
         local i = 0
         while i < amount do
@@ -851,16 +927,15 @@ function drop_coins(amount, on_each_drop)
                 function()
                     flow.start(function()
                         local coin = gui.new_box_node(
-                            vmath.vector3(420, 870, 0),
+                            vmath.vector3(points[1].x, points[1].y, 0),
                             vmath.vector3(40, 40, 1)
                         )
                         gui.set_layer(coin, "ontop")
                         gui.set_texture(coin, "ui")
                         gui.play_flipbook(coin, "coin_icon_1")
-                        local ltrb = Camera.get_ltrb()
-                        local width = 540
-                        local height = math.abs(ltrb.w)
-                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
+                        if on_each_drop_start ~= nil then
+                            on_each_drop_start(idx)
+                        end
                         local result = vmath.vector3()
                         do
                             local i = 0
@@ -878,12 +953,17 @@ function drop_coins(amount, on_each_drop)
                             end
                         end
                         gui.delete_node(coin)
-                        on_each_drop(idx)
+                        if on_each_drop_end ~= nil then
+                            on_each_drop_end(idx)
+                        end
                     end)
                 end
             )
             i = i + 1
         end
+    end
+    if on_end ~= nil then
+        timer.delay(amount * 0.1 + 100 * 0.01, false, on_end)
     end
 end
 function set_gameover(instance, state, revive)
