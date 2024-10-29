@@ -5,14 +5,14 @@ import { rotateMatrix } from "../utils/math_utils";
 // тип комбинации
 export enum CombinationType {
     Comb3,
-    Comb4,
-    Comb5,
     Comb2x2,
+    Comb4,
     Comb3x3a,
     Comb3x3b,
     Comb3x4a,
     Comb3x4b,
-    Comb3x5
+    Comb3x5,
+    Comb5
 }
 
 // маски комбинации, для проверки надо также вращать(90,180,270)
@@ -22,18 +22,14 @@ export const CombinationMasks = [
     [
         [1, 1, 1]
     ],
-    // 4
-    [
-        [1, 1, 1, 1]
-    ],
-    // 5
-    [
-        [1, 1, 1, 1, 1]
-    ],
     // 2x2
     [
         [1, 1],
         [1, 1]
+    ],
+    // 4
+    [
+        [1, 1, 1, 1]
     ],
     // 3x3a
     [
@@ -63,6 +59,10 @@ export const CombinationMasks = [
     [
         [0, 0, 1, 0, 0],
         [0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1]
+    ],
+    // 5
+    [
         [1, 1, 1, 1, 1]
     ]
 ];

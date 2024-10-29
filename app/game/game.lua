@@ -2039,11 +2039,6 @@ function ____exports.Game()
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond445 = ____cond445 or ____switch445 == CombinationType.Comb5
-            if ____cond445 then
-                element = make_element(pos, ____exports.ElementId.Diskosphere)
-                break
-            end
             ____cond445 = ____cond445 or ____switch445 == CombinationType.Comb2x2
             if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
@@ -2057,6 +2052,11 @@ function ____exports.Game()
             ____cond445 = ____cond445 or (____switch445 == CombinationType.Comb3x4a or ____switch445 == CombinationType.Comb3x4b or ____switch445 == CombinationType.Comb3x5)
             if ____cond445 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
+                break
+            end
+            ____cond445 = ____cond445 or ____switch445 == CombinationType.Comb5
+            if ____cond445 then
+                element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
         until true

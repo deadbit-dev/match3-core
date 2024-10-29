@@ -1870,9 +1870,6 @@ export function Game() {
                 element = make_element(pos,
                     (combination.angle == 0) ? ElementId.HorizontalRocket : ElementId.VerticalRocket);
             break;
-            case CombinationType.Comb5:
-                element = make_element(pos, ElementId.Diskosphere);
-            break;
             case CombinationType.Comb2x2:
                 element = make_element(pos, ElementId.Helicopter);
             break;
@@ -1881,6 +1878,9 @@ export function Game() {
             break;
             case CombinationType.Comb3x4a: case CombinationType.Comb3x4b: case CombinationType.Comb3x5:
                 element = make_element(pos, ElementId.AllAxisRocket);
+            break;
+            case CombinationType.Comb5:
+                element = make_element(pos, ElementId.Diskosphere);
             break;
         }
 

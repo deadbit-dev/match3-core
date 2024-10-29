@@ -16,33 +16,26 @@ end
 ____exports.CombinationType = CombinationType or ({})
 ____exports.CombinationType.Comb3 = 0
 ____exports.CombinationType[____exports.CombinationType.Comb3] = "Comb3"
-____exports.CombinationType.Comb4 = 1
-____exports.CombinationType[____exports.CombinationType.Comb4] = "Comb4"
-____exports.CombinationType.Comb5 = 2
-____exports.CombinationType[____exports.CombinationType.Comb5] = "Comb5"
-____exports.CombinationType.Comb2x2 = 3
+____exports.CombinationType.Comb2x2 = 1
 ____exports.CombinationType[____exports.CombinationType.Comb2x2] = "Comb2x2"
-____exports.CombinationType.Comb3x3a = 4
+____exports.CombinationType.Comb4 = 2
+____exports.CombinationType[____exports.CombinationType.Comb4] = "Comb4"
+____exports.CombinationType.Comb3x3a = 3
 ____exports.CombinationType[____exports.CombinationType.Comb3x3a] = "Comb3x3a"
-____exports.CombinationType.Comb3x3b = 5
+____exports.CombinationType.Comb3x3b = 4
 ____exports.CombinationType[____exports.CombinationType.Comb3x3b] = "Comb3x3b"
-____exports.CombinationType.Comb3x4a = 6
+____exports.CombinationType.Comb3x4a = 5
 ____exports.CombinationType[____exports.CombinationType.Comb3x4a] = "Comb3x4a"
-____exports.CombinationType.Comb3x4b = 7
+____exports.CombinationType.Comb3x4b = 6
 ____exports.CombinationType[____exports.CombinationType.Comb3x4b] = "Comb3x4b"
-____exports.CombinationType.Comb3x5 = 8
+____exports.CombinationType.Comb3x5 = 7
 ____exports.CombinationType[____exports.CombinationType.Comb3x5] = "Comb3x5"
+____exports.CombinationType.Comb5 = 8
+____exports.CombinationType[____exports.CombinationType.Comb5] = "Comb5"
 ____exports.CombinationMasks = {
     {{1, 1, 1}},
-    {{1, 1, 1, 1}},
-    {{
-        1,
-        1,
-        1,
-        1,
-        1
-    }},
     {{1, 1}, {1, 1}},
+    {{1, 1, 1, 1}},
     {{0, 1, 0}, {0, 1, 0}, {1, 1, 1}},
     {{1, 0, 0}, {1, 0, 0}, {1, 1, 1}},
     {{0, 1, 0, 0}, {0, 1, 0, 0}, {1, 1, 1, 1}},
@@ -60,6 +53,13 @@ ____exports.CombinationMasks = {
         0,
         0
     }, {
+        1,
+        1,
+        1,
+        1,
+        1
+    }},
+    {{
         1,
         1,
         1,
