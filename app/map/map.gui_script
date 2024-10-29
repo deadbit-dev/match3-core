@@ -117,6 +117,16 @@ function ____exports.init(self)
     set_events(self)
     Sound.play("map")
     Scene.load_resource("map", "shared_gui")
+    timer.delay(
+        0,
+        false,
+        function()
+            if not GameStorage.get("move_showed") then
+                GameStorage.set("move_showed", true)
+                load_level(0)
+            end
+        end
+    )
 end
 function ____exports.on_input(self, action_id, action)
     if GAME_CONFIG.is_busy_input or self.block_input then

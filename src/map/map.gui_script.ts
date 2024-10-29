@@ -32,6 +32,13 @@ export function init(this: props): void {
 
     Sound.play('map');
     Scene.load_resource('map', 'shared_gui');
+
+    timer.delay(0, false, () => {
+        if(!GameStorage.get('move_showed')) {
+            GameStorage.set("move_showed", true);
+            load_level(0);
+        }
+    });
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {

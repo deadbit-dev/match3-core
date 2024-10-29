@@ -59,6 +59,5 @@ function on_end() {
     Sound.stop('crash');
     Sound.stop('vcat');
     Sound.stop('meay');
-    GameStorage.set("move_showed", true);
     EventBus.send('MOVIE_END');
 }

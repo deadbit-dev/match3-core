@@ -1150,7 +1150,7 @@ export function Game() {
         if(!GameStorage.get('vertical_rocket_opened') && level_config.busters.vertical_rocket.counts != 0) GameStorage.set('vertical_rocket_opened', true);
 
         const spinning_counts = tonumber(level_config.busters.spinning.counts);
-        if(GameStorage.get('spinning_counts') <= 0 && spinning_counts != undefined) GameStorage.set('spinning_counts', 100); //spinning_counts);
+        if(GameStorage.get('spinning_counts') <= 0 && spinning_counts != undefined) GameStorage.set('spinning_counts', spinning_counts);
 
         const hammer_counts = tonumber(level_config.busters.hammer.counts);
         if(GameStorage.get('hammer_counts') <= 0 && hammer_counts != undefined) GameStorage.set('hammer_counts', hammer_counts);

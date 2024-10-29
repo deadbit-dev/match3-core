@@ -1200,7 +1200,7 @@ function ____exports.Game()
         end
         local spinning_counts = tonumber(level_config.busters.spinning.counts)
         if GameStorage.get("spinning_counts") <= 0 and spinning_counts ~= nil then
-            GameStorage.set("spinning_counts", 100)
+            GameStorage.set("spinning_counts", spinning_counts)
         end
         local hammer_counts = tonumber(level_config.busters.hammer.counts)
         if GameStorage.get("hammer_counts") <= 0 and hammer_counts ~= nil then
