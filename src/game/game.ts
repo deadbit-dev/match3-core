@@ -522,8 +522,10 @@ export function Game() {
             GameStorage.set('completed_levels', completed_levels);
             const last_state = get_state();
             add_coins(level_config.coins);
-            if(last_state.steps != undefined) add_coins(last_state.steps);
-            if(last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
+            if(level_config.coins > 0) {
+                if(last_state.steps != undefined) add_coins(last_state.steps);
+                if(last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
+            }
             EventBus.send('ON_WIN');
             win_action();
             return;

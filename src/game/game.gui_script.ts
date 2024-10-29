@@ -542,7 +542,7 @@ function on_win_end(state: GameState) {
             let level_coins = get_current_level_config().coins;
             let steps = (state.steps != undefined) ? state.steps : 0;
             let remaining_time = (state.remaining_time != undefined) ? math.floor(state.remaining_time) : 0;
-            if(level_coins > 0 || steps > 0 || remaining_time > 0) {
+            if(level_coins > 0) {
                 const current_coins = GameStorage.get('coins');
                 const before_reward = current_coins - level_coins - steps - remaining_time;
                 gui.set_enabled(gui.get_node('reward'), true);
