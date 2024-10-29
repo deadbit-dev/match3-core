@@ -628,7 +628,7 @@ function set_tutorial()
                 function()
                     gui.set_position(
                         hand,
-                        vmath.vector3(-170, -350, 0)
+                        vmath.vector3(-90, -350, 0)
                     )
                     gui.set_enabled(hand, true)
                     gui.animate(
@@ -636,7 +636,7 @@ function set_tutorial()
                         gui.PROP_SCALE,
                         vmath.vector3(0.7, 0.7, 0.7),
                         gui.EASING_INCUBIC,
-                        0.5,
+                        1,
                         0,
                         function()
                             gui.set_enabled(hand, false)
@@ -654,7 +654,7 @@ function set_tutorial()
                 function()
                     gui.set_position(
                         hand,
-                        vmath.vector3(-60, -350, 0)
+                        vmath.vector3(-190, -350, 0)
                     )
                     gui.set_enabled(hand, true)
                     gui.animate(
@@ -701,7 +701,7 @@ function set_tutorial()
                 function()
                     gui.set_position(
                         hand,
-                        vmath.vector3(50, -350, 0)
+                        vmath.vector3(15, -350, 0)
                     )
                     gui.set_enabled(hand, true)
                     gui.animate(

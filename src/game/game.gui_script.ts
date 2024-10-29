@@ -478,9 +478,9 @@ function set_tutorial() {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
-                gui.set_position(hand, vmath.vector3(-170, -350, 0));
+                gui.set_position(hand, vmath.vector3(-90, -350, 0));
                 gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
+                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 1, 0, () => {
                     gui.set_enabled(hand, false);
                 }, gui.PLAYBACK_ONCE_PINGPONG);
             });
@@ -490,7 +490,7 @@ function set_tutorial() {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
-                gui.set_position(hand, vmath.vector3(-60, -350, 0));
+                gui.set_position(hand, vmath.vector3(-190, -350, 0));
                 gui.set_enabled(hand, true);
                 gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
                     gui.animate(hand, gui.PROP_POSITION, vmath.vector3(70, 70, 0), gui.EASING_INCUBIC, 1, 0, () => {
@@ -506,7 +506,7 @@ function set_tutorial() {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
-                gui.set_position(hand, vmath.vector3(50, -350, 0));
+                gui.set_position(hand, vmath.vector3(15, -350, 0));
                 gui.set_enabled(hand, true);
                 gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
                     gui.animate(hand, gui.PROP_POSITION, vmath.vector3(-100, 20, 0), gui.EASING_INCUBIC, 1, 0, () => {
