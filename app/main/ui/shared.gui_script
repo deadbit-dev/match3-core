@@ -93,7 +93,7 @@ function setup(data)
 end
 function setup_coins(data)
     data.druid:new_button(
-        "coins/button",
+        "coins/box",
         function() return set_enabled_store(data, true) end
     )
     gui.set_text(
@@ -103,7 +103,7 @@ function setup_coins(data)
 end
 function setup_life(data)
     data.druid:new_button(
-        "lifes/button",
+        "lifes/box",
         function() return set_enabled_store(data, true) end
     )
     gui.set_text(
@@ -610,11 +610,11 @@ function on_infinit_life_tick()
     end
 end
 function set_enabled_coins(state)
-    local coins = gui.get_node("coins/button")
+    local coins = gui.get_node("coins/box")
     gui.set_enabled(coins, state)
 end
 function set_enabled_lifes(state)
-    local coins = gui.get_node("lifes/button")
+    local coins = gui.get_node("lifes/box")
     gui.set_enabled(coins, state)
 end
 function set_enabled_store_button(state)

@@ -1853,80 +1853,48 @@ nodes {
   template: "/main/ui/parts/lable_button.gui"
 }
 nodes {
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/BTNMain"
-  id: "coins/button"
-  xanchor: XANCHOR_LEFT
-  yanchor: YANCHOR_TOP
-  parent: "coins"
-  layer: "top"
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 12
-  overridden_fields: 13
-  overridden_fields: 14
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
   position {
-    x: -148.44444
-    y: 53.77778
-  }
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/Coin"
-  id: "coins/icon"
-  parent: "coins/button"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -0.444445
-    y: 2.0
+    x: 1.0
   }
   size {
-    x: 150.0
-    y: 50.0
+    x: 310.0
+    y: 100.0
   }
-  type: TYPE_TEXT
-  font: "48"
-  id: "coins/text"
-  parent: "coins/button"
-  layer: "top"
+  type: TYPE_BOX
+  id: "coins/box"
+  parent: "coins"
   overridden_fields: 1
   overridden_fields: 4
-  overridden_fields: 8
-  overridden_fields: 10
-  overridden_fields: 14
-  overridden_fields: 20
+  overridden_fields: 46
   template_node_child: true
+  visible: false
 }
 nodes {
   position {
-    x: 155.55554
-    y: 4.0
+    x: -24.0
   }
   type: TYPE_BOX
-  texture: "ui/BtnPlus"
+  id: "coins/button"
+  parent: "coins/box"
+  overridden_fields: 1
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "coins/icon"
+  parent: "coins/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "coins/text"
+  parent: "coins/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
   id: "coins/plus"
   parent: "coins/button"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 9
-  overridden_fields: 20
   template_node_child: true
 }
 nodes {
@@ -1946,86 +1914,45 @@ nodes {
   template: "/main/ui/parts/lable_button.gui"
 }
 nodes {
-  position {
-    x: 4.0
-  }
-  scale {
-    x: 0.9
-    y: 0.9
-  }
-  type: TYPE_BOX
-  texture: "ui/BTNMain"
-  id: "lifes/button"
-  parent: "lifes"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 12
-  overridden_fields: 13
-  overridden_fields: 14
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -135.11111
-    y: 53.555557
-  }
-  rotation {
-    z: -9.256
-  }
-  scale {
-    x: 1.1
-    y: 1.1
-  }
-  type: TYPE_BOX
-  texture: "ui/life_icon"
-  id: "lifes/icon"
-  parent: "lifes/button"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 2
-  overridden_fields: 3
-  overridden_fields: 9
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 0.666666
-    y: 6.222222
-  }
   size {
-    x: 150.0
-    y: 50.0
+    x: 310.0
+    y: 100.0
   }
-  type: TYPE_TEXT
-  font: "48"
-  id: "lifes/text"
-  parent: "lifes/button"
-  layer: "top"
+  type: TYPE_BOX
+  id: "lifes/box"
+  parent: "lifes"
   overridden_fields: 1
   overridden_fields: 4
-  overridden_fields: 8
-  overridden_fields: 10
-  overridden_fields: 14
-  overridden_fields: 20
+  overridden_fields: 46
   template_node_child: true
+  visible: false
 }
 nodes {
   position {
-    x: 160.22223
-    y: 4.0
+    x: -30.0
   }
   type: TYPE_BOX
-  texture: "ui/BtnPlus"
+  id: "lifes/button"
+  parent: "lifes/box"
+  overridden_fields: 1
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "lifes/icon"
+  parent: "lifes/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "lifes/text"
+  parent: "lifes/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
   id: "lifes/plus"
   parent: "lifes/button"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 9
-  overridden_fields: 20
   template_node_child: true
 }
 nodes {

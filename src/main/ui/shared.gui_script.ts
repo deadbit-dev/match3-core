@@ -103,12 +103,12 @@ function setup(data: props) {
 }
 
 function setup_coins(data: props) {
-    data.druid.new_button('coins/button', () => set_enabled_store(data, true));
+    data.druid.new_button('coins/box', () => set_enabled_store(data, true));
     gui.set_text(gui.get_node('coins/text'), tostring(GameStorage.get('coins')));
 }
 
 function setup_life(data: props) {
-    data.druid.new_button('lifes/button', () => set_enabled_store(data, true));
+    data.druid.new_button('lifes/box', () => set_enabled_store(data, true));
     gui.set_text(gui.get_node('lifes/text'), tostring(GameStorage.get('life').amount));
 }
 
@@ -476,12 +476,12 @@ function on_infinit_life_tick() {
 // TODO: move set_enabled to utils with name and state args
 
 function set_enabled_coins(state: boolean) {
-    const coins = gui.get_node('coins/button');
+    const coins = gui.get_node('coins/box');
     gui.set_enabled(coins, state);
 }
 
 function set_enabled_lifes(state: boolean) {
-    const coins = gui.get_node('lifes/button');
+    const coins = gui.get_node('lifes/box');
     gui.set_enabled(coins, state);
 }
 
