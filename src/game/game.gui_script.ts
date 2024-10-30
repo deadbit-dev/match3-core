@@ -574,6 +574,8 @@ function on_win_end(state: GameState) {
                         ];
 
                         const on_each_coin_drop_start = (idx: number) => {
+                            Sound.play('coin');
+
                             if(steps > 0) {
                                 gui.set_text(gui.get_node('steps'), tostring(steps - (idx + 1)));
                                 return;
@@ -587,9 +589,9 @@ function on_win_end(state: GameState) {
 
                         drop_coins(steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
                             fade_steptime();
-                            drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
+                            drop_coins(level_coins, level_coin_points, (idx: number) => { Sound.play('coin'); }, on_each_coin_drop_end);
                         });
-                    } else drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
+                    } else drop_coins(level_coins, level_coin_points, (idx: number) => { Sound.play('coin'); }, on_each_coin_drop_end);
                 });
             }
         });

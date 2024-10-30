@@ -833,6 +833,7 @@ function on_win_end(state)
                             if steps > 0 or remaining_time > 0 then
                                 local steptime_points = {{x = 100, y = 850}, {x = width * 0.25, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
                                 local function on_each_coin_drop_start(idx)
+                                    Sound.play("coin")
                                     if steps > 0 then
                                         gui.set_text(
                                             gui.get_node("steps"),
@@ -855,11 +856,25 @@ function on_win_end(state)
                                     on_each_coin_drop_end,
                                     function()
                                         fade_steptime()
-                                        drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
+                                        drop_coins(
+                                            level_coins,
+                                            level_coin_points,
+                                            function(idx)
+                                                Sound.play("coin")
+                                            end,
+                                            on_each_coin_drop_end
+                                        )
                                     end
                                 )
                             else
-                                drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
+                                drop_coins(
+                                    level_coins,
+                                    level_coin_points,
+                                    function(idx)
+                                        Sound.play("coin")
+                                    end,
+                                    on_each_coin_drop_end
+                                )
                             end
                         end)
                     end

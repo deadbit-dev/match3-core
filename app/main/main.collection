@@ -358,5 +358,13 @@ embedded_instances {
   "gain: 3.0\\n"
   "\"\n"
   "}\n"
+  "embedded_components {\n"
+  "  id: \"coin\"\n"
+  "  type: \"sound\"\n"
+  "  data: \"sound: \\\"/assets/sounds/coins.ogg\\\"\\n"
+  "group: \\\"vfx\\\"\\n"
+  "gain: 0.8\\n"
+  "\"\n"
+  "}\n"
   ""
 }
