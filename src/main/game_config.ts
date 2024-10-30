@@ -74,7 +74,7 @@ export const _GAME_CONFIG = {
     spawn_element_easing: go.EASING_INCUBIC,
     spawn_element_time: 0.5,
 
-    shuffle_max_attempt: 2,
+    shuffle_max_attempt: 10,
 
     default_substrate_z_index: -2,
     default_cell_z_index: -1,

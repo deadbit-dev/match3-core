@@ -637,126 +637,129 @@ function ____exports.Game()
         return flow.start(
             function()
                 Log.log("SHUFFLE FIELD")
-                local step = false
-                local attempt = 0
+                local major_attempt = 0
                 repeat
                     do
-                        local positions = {}
-                        local elements = {}
+                        local attempt = 0
+                        repeat
+                            do
+                                Log.log("SHUFFLE - ATTEMPT: " .. tostring(attempt))
+                                local positions = {}
+                                local elements = {}
+                                do
+                                    local y = 0
+                                    while y < field_height do
+                                        do
+                                            local x = 0
+                                            while x < field_width do
+                                                local cell = field.get_cell({x = x, y = y})
+                                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
+                                                    local element = field.get_element({x = x, y = y})
+                                                    if element ~= NullElement then
+                                                        positions[#positions + 1] = {x = x, y = y}
+                                                        elements[#elements + 1] = element
+                                                        field.set_element({x = x, y = y}, NullElement)
+                                                    end
+                                                end
+                                                x = x + 1
+                                            end
+                                        end
+                                        y = y + 1
+                                    end
+                                end
+                                shuffle_array(elements)
+                                local counter = 0
+                                local optimize_count = 5
+                                for ____, position in ipairs(positions) do
+                                    local element_assigned = false
+                                    if counter >= optimize_count then
+                                        counter = 0
+                                        flow.frames(1)
+                                    end
+                                    do
+                                        local i = #elements - 1
+                                        while i >= 0 do
+                                            local element = elements[i + 1]
+                                            field.set_element(position, element)
+                                            if field.search_combination(position) == NotFound then
+                                                __TS__ArraySplice(elements, i, 1)
+                                                element_assigned = true
+                                                Log.log((("ASSIGNED FROM AVAILABLE IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
+                                                break
+                                            end
+                                            i = i - 1
+                                        end
+                                    end
+                                    if not element_assigned then
+                                        for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
+                                            if __TS__ArrayFind(
+                                                elements,
+                                                function(____, element) return element.id == element_id end
+                                            ) == nil then
+                                                make_element(position, element_id)
+                                                if field.search_combination(position) == NotFound then
+                                                    Log.log((("ASSIGNED NEW ELEMENT IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
+                                                    element_assigned = true
+                                                    break
+                                                end
+                                            end
+                                        end
+                                    end
+                                    if not element_assigned then
+                                        Log.log((("SHUFFLE - NOT FOUND RIGHT ELEMENT, SET EMPTY IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
+                                        field.set_element(position, NullElement)
+                                    end
+                                    counter = counter + 1
+                                end
+                                if has_step() then
+                                    return on_end()
+                                end
+                            end
+                            attempt = attempt + 1
+                            if not (attempt < GAME_CONFIG.shuffle_max_attempt) then
+                                break
+                            end
+                        until false
+                        Log.log("SHUFFLE - FILLED EMPTY CELLS")
                         do
-                            local y = 0
-                            while y < field_height do
+                            local y = field_height - 1
+                            while y > 0 do
                                 do
                                     local x = 0
                                     while x < field_width do
-                                        local cell = field.get_cell({x = x, y = y})
+                                        local pos = {x = x, y = y}
+                                        local cell = field.get_cell(pos)
                                         if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                                            local element = field.get_element({x = x, y = y})
-                                            if element ~= NullElement then
-                                                positions[#positions + 1] = {x = x, y = y}
-                                                elements[#elements + 1] = element
-                                                field.set_element({x = x, y = y}, NullElement)
+                                            local element = field.get_element(pos)
+                                            if element == NullElement then
+                                                local available_elements = json.decode(json.encode(GAME_CONFIG.base_elements))
+                                                shuffle_array(available_elements)
+                                                for ____, element_id in __TS__Iterator(available_elements) do
+                                                    make_element(pos, element_id)
+                                                    if field.search_combination(pos) == NotFound then
+                                                        break
+                                                    end
+                                                end
                                             end
                                         end
                                         x = x + 1
                                     end
                                 end
-                                y = y + 1
-                            end
-                        end
-                        shuffle_array(elements)
-                        local counter = 0
-                        local optimize_count = 5
-                        for ____, position in ipairs(positions) do
-                            local element_assigned = false
-                            if counter >= optimize_count then
-                                counter = 0
                                 flow.frames(1)
+                                y = y - 1
                             end
-                            do
-                                local i = #elements - 1
-                                while i >= 0 do
-                                    local element = elements[i + 1]
-                                    field.set_element(position, element)
-                                    if field.search_combination(position) == NotFound then
-                                        __TS__ArraySplice(elements, i, 1)
-                                        element_assigned = true
-                                        print("ASSIGNED FROM AVAILABLE IN POS: ", position.x, position.y)
-                                        break
-                                    end
-                                    i = i - 1
-                                end
-                            end
-                            if not element_assigned then
-                                for ____, element_id in ipairs(GAME_CONFIG.base_elements) do
-                                    if __TS__ArrayFind(
-                                        elements,
-                                        function(____, element) return element.id == element_id end
-                                    ) == nil then
-                                        make_element(position, element_id)
-                                        if field.search_combination(position) == NotFound then
-                                            print("ASSIGNED NEW ELEMENT IN POS: ", position.x, position.y)
-                                            element_assigned = true
-                                            break
-                                        end
-                                    end
-                                end
-                            end
-                            if not element_assigned then
-                                Log.log("BAD CASE: ", position.x, position.y)
-                                field.set_element(position, NullElement)
-                            end
-                            counter = counter + 1
                         end
-                        step = has_step()
+                        if has_step() then
+                            return on_end()
+                        end
                     end
-                    local ____temp_5 = not step
-                    if ____temp_5 then
-                        attempt = attempt + 1
-                        ____temp_5 = attempt < GAME_CONFIG.shuffle_max_attempt
-                    end
-                    if not ____temp_5 then
+                    major_attempt = major_attempt + 1
+                    if not (major_attempt >= GAME_CONFIG.shuffle_max_attempt) then
                         break
                     end
                 until false
-                print("SHUFFLE ATTEMPTS: ", attempt)
-                if step then
-                    return on_end()
-                end
-                Log.log("SHUFFLE DIFFICULT CASE")
-                do
-                    local y = field_height - 1
-                    while y > 0 do
-                        do
-                            local x = 0
-                            while x < field_width do
-                                local pos = {x = x, y = y}
-                                local cell = field.get_cell(pos)
-                                if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    local element = field.get_element(pos)
-                                    if element == NullElement then
-                                        local available_elements = json.decode(json.encode(GAME_CONFIG.base_elements))
-                                        shuffle_array(available_elements)
-                                        for ____, element_id in __TS__Iterator(available_elements) do
-                                            make_element(pos, element_id)
-                                            if field.search_combination(pos) == NotFound then
-                                                break
-                                            end
-                                        end
-                                    end
-                                end
-                                x = x + 1
-                            end
-                        end
-                        flow.frames(1)
-                        y = y - 1
-                    end
-                end
-                if has_step() then
-                    on_end()
-                else
-                    on_error()
-                end
+                Log.log("SHUFFLE FAILED")
+                on_error()
             end,
             {parallel = true}
         )
@@ -999,9 +1002,9 @@ function ____exports.Game()
         return to_state
     end
     function generate_uid()
-        local ____game_item_counter_6 = game_item_counter
-        game_item_counter = ____game_item_counter_6 + 1
-        return ____game_item_counter_6
+        local ____game_item_counter_5 = game_item_counter
+        game_item_counter = ____game_item_counter_5 + 1
+        return ____game_item_counter_5
     end
     function make_cell(pos, id, under_cells)
         if id == NotActiveCell then
@@ -1083,9 +1086,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_7 = index
-                    index = ____index_7 - 1
-                    if ____index_7 == 0 then
+                    local ____index_6 = index
+                    index = ____index_6 - 1
+                    if ____index_6 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1132,8 +1135,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
-                    local ____target_uids_8 = target.uids
-                    ____target_uids_8[#____target_uids_8 + 1] = element.uid
+                    local ____target_uids_7 = target.uids
+                    ____target_uids_7[#____target_uids_7 + 1] = element.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1180,8 +1183,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
-                    local ____target_uids_9 = target.uids
-                    ____target_uids_9[#____target_uids_9 + 1] = cell.uid
+                    local ____target_uids_8 = target.uids
+                    ____target_uids_8[#____target_uids_8 + 1] = cell.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1684,25 +1687,25 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_12 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                        if ____temp_12 then
-                            local ____opt_10 = exclude
-                            ____temp_12 = (____opt_10 and __TS__ArrayFindIndex(
+                        local ____temp_11 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                        if ____temp_11 then
+                            local ____opt_9 = exclude
+                            ____temp_11 = (____opt_9 and __TS__ArrayFindIndex(
                                 exclude,
                                 function(____, uid) return uid == cell.uid end
                             )) == -1
                         end
-                        local ____temp_12_15 = ____temp_12
-                        if ____temp_12_15 then
-                            local ____opt_13 = targets
-                            ____temp_12_15 = (____opt_13 and __TS__ArrayFindIndex(
+                        local ____temp_11_14 = ____temp_11
+                        if ____temp_11_14 then
+                            local ____opt_12 = targets
+                            ____temp_11_14 = (____opt_12 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
                                     return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids and cell.strength ~= nil and cell.strength < GAME_CONFIG.cell_strength[cell.id]
                                 end
                             )) ~= -1
                         end
-                        local is_valid_cell = ____temp_12_15
+                        local is_valid_cell = ____temp_11_14
                         if is_valid_cell then
                             if element ~= NullElement then
                                 available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1725,44 +1728,44 @@ function ____exports.Game()
                         while x < field_width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_18 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                            if ____temp_18 then
-                                local ____opt_16 = exclude
-                                ____temp_18 = (____opt_16 and __TS__ArrayFindIndex(
+                            local ____temp_17 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                            if ____temp_17 then
+                                local ____opt_15 = exclude
+                                ____temp_17 = (____opt_15 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == cell.uid end
                                 )) == -1
                             end
-                            local ____temp_18_21 = ____temp_18
-                            if ____temp_18_21 then
-                                local ____opt_19 = targets
-                                ____temp_18_21 = (____opt_19 and __TS__ArrayFindIndex(
+                            local ____temp_17_20 = ____temp_17
+                            if ____temp_17_20 then
+                                local ____opt_18 = targets
+                                ____temp_17_20 = (____opt_18 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_cell = ____temp_18_21
-                            local ____temp_24 = element ~= NullElement
-                            if ____temp_24 then
-                                local ____opt_22 = exclude
-                                ____temp_24 = (____opt_22 and __TS__ArrayFindIndex(
+                            local is_valid_cell = ____temp_17_20
+                            local ____temp_23 = element ~= NullElement
+                            if ____temp_23 then
+                                local ____opt_21 = exclude
+                                ____temp_23 = (____opt_21 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local ____temp_24_27 = ____temp_24
-                            if ____temp_24_27 then
-                                local ____opt_25 = targets
-                                ____temp_24_27 = (____opt_25 and __TS__ArrayFindIndex(
+                            local ____temp_23_26 = ____temp_23
+                            if ____temp_23_26 then
+                                local ____opt_24 = targets
+                                ____temp_23_26 = (____opt_24 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Element and target.id == element.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_element = ____temp_24_27
+                            local is_valid_element = ____temp_23_26
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1793,15 +1796,15 @@ function ____exports.Game()
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
-                            local ____temp_30 = element ~= NullElement
-                            if ____temp_30 then
-                                local ____opt_28 = exclude
-                                ____temp_30 = (____opt_28 and __TS__ArrayFindIndex(
+                            local ____temp_29 = element ~= NullElement
+                            if ____temp_29 then
+                                local ____opt_27 = exclude
+                                ____temp_29 = (____opt_27 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local is_valid_element = ____temp_30
+                            local is_valid_element = ____temp_29
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1824,20 +1827,20 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_targets[math.random(0, #available_targets - 1) + 1]
-        local ____field_try_damage_33 = field.try_damage
-        local ____target_pos_32 = target.pos
-        local ____temp_31
+        local ____field_try_damage_32 = field.try_damage
+        local ____target_pos_31 = target.pos
+        local ____temp_30
         if target.cell ~= nil then
-            ____temp_31 = true
+            ____temp_30 = true
         else
-            ____temp_31 = false
+            ____temp_30 = false
         end
-        local damage_info = ____field_try_damage_33(
-            ____target_pos_32,
+        local damage_info = ____field_try_damage_32(
+            ____target_pos_31,
             false,
             false,
             false,
-            ____temp_31
+            ____temp_30
         )
         return damage_info ~= NotDamage and damage_info or NullElement
     end

@@ -637,106 +637,111 @@ export function Game() {
         return flow.start(() => {
             Log.log("SHUFFLE FIELD");
         
-            let step = false;
-            let attempt = 0;
-
+            let major_attempt = 0;
             do {
-                // collecting elements for shuffling
-                const positions = [];
-                const elements = [];
-                for(let y = 0; y < field_height; y++) {
-                    for(let x = 0; x < field_width; x++) {
-                        const cell = field.get_cell({x, y});
-                        if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                            const element = field.get_element({x, y});
-                            if(element != NullElement) {
-                                positions.push({x, y});
-                                elements.push(element);
-                                field.set_element({x, y}, NullElement);
+                let attempt = 0;
+
+                do {
+                    Log.log(`SHUFFLE - ATTEMPT: ${attempt}`);
+
+                    // collecting elements for shuffling
+                    const positions = [];
+                    const elements = [];
+                    for(let y = 0; y < field_height; y++) {
+                        for(let x = 0; x < field_width; x++) {
+                            const cell = field.get_cell({x, y});
+                            if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                                const element = field.get_element({x, y});
+                                if(element != NullElement) {
+                                    positions.push({x, y});
+                                    elements.push(element);
+                                    field.set_element({x, y}, NullElement);
+                                }
                             }
                         }
                     }
-                }
-        
-                shuffle_array(elements);
-        
-                let counter = 0;
-                const optimize_count = 5;
-        
-                // filling the field available elements by got positions
-                for(const position of positions) {
-                    let element_assigned = false;
-        
-                    if(counter >= optimize_count) {
-                        counter = 0;
-                        flow.frames(1);
-                    }
-        
-                    for(let i = elements.length - 1; i >= 0; i--) {
-                        const element = elements[i];
-                        field.set_element(position, element);
-                        if(field.search_combination(position) == NotFound) {
-                            elements.splice(i, 1);
-                            element_assigned = true;
-                            print("ASSIGNED FROM AVAILABLE IN POS: ", position.x, position.y);
-                            break;
+            
+                    shuffle_array(elements);
+            
+                    let counter = 0;
+                    const optimize_count = 5;
+            
+                    // filling the field available elements by got positions
+                    for(const position of positions) {
+                        let element_assigned = false;
+            
+                        if(counter >= optimize_count) {
+                            counter = 0;
+                            flow.frames(1);
                         }
+            
+                        for(let i = elements.length - 1; i >= 0; i--) {
+                            const element = elements[i];
+                            field.set_element(position, element);
+                            if(field.search_combination(position) == NotFound) {
+                                elements.splice(i, 1);
+                                element_assigned = true;
+                                Log.log(`ASSIGNED FROM AVAILABLE IN POS: ${position.x}, ${position.y}`);
+                                break;
+                            }
+                        }
+            
+                        // if not found right element from availables
+                        if(!element_assigned) {
+                            // maybe make this more randomize
+                            for(const element_id of GAME_CONFIG.base_elements) {
+                                if(elements.find((element) => element.id == element_id) == undefined) {
+                                    make_element(position, element_id);
+                                    if(field.search_combination(position) == NotFound) {
+                                        Log.log(`ASSIGNED NEW ELEMENT IN POS: ${position.x}, ${position.y}`);
+                                        element_assigned = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(!element_assigned) {
+                        Log.log(`SHUFFLE - NOT FOUND RIGHT ELEMENT, SET EMPTY IN POS: ${position.x}, ${position.y}`);
+                            field.set_element(position, NullElement);
+                        }
+            
+                        counter++;
                     }
-        
-                    // if not found right element from availables
-                    if(!element_assigned) {
-                        // maybe make this more randomize
-                        for(const element_id of GAME_CONFIG.base_elements) {
-                            if(elements.find((element) => element.id == element_id) == undefined) {
-                                make_element(position, element_id);
-                                if(field.search_combination(position) == NotFound) {
-                                    print("ASSIGNED NEW ELEMENT IN POS: ", position.x, position.y);
-                                    element_assigned = true;
-                                    break;
+
+                    if(has_step()) {
+                        return on_end();
+                    }
+                } while (++attempt < GAME_CONFIG.shuffle_max_attempt);
+
+                Log.log("SHUFFLE - FILLED EMPTY CELLS");
+                for(let y = field_height - 1; y > 0; y--) {
+                    for(let x = 0; x < field_width; x++) {
+                        const pos = {x, y};
+                        const cell = field.get_cell(pos);
+                        if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                            const element = field.get_element(pos);
+                            if(element == NullElement) {
+                                const available_elements = json.decode(json.encode(GAME_CONFIG.base_elements));
+                                shuffle_array(available_elements);
+                                for(const element_id of available_elements) {
+                                    make_element(pos, element_id);
+                                    if(field.search_combination(pos) == NotFound)
+                                        break;
                                 }
                             }
                         }
                     }
 
-                    if(!element_assigned) {
-                        Log.log("BAD CASE: ", position.x, position.y);
-                        field.set_element(position, NullElement);
-                    }
-        
-                    counter++;
+                    flow.frames(1);
                 }
 
-                step = has_step();
-            } while (!step && ++attempt < GAME_CONFIG.shuffle_max_attempt);
-
-            print('SHUFFLE ATTEMPTS: ', attempt);
-
-            if(step) return on_end();
-
-            Log.log("SHUFFLE DIFFICULT CASE");
-            for(let y = field_height - 1; y > 0; y--) {
-                for(let x = 0; x < field_width; x++) {
-                    const pos = {x, y};
-                    const cell = field.get_cell(pos);
-                    if(cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                        const element = field.get_element(pos);
-                        if(element == NullElement) {
-                            const available_elements = json.decode(json.encode(GAME_CONFIG.base_elements));
-                            shuffle_array(available_elements);
-                            for(const element_id of available_elements) {
-                                make_element(pos, element_id);
-                                if(field.search_combination(pos) == NotFound)
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                flow.frames(1);
-            }
-
-            if(has_step()) on_end();
-            else on_error();
+                if(has_step()) return on_end();       
+            } while(++major_attempt >= GAME_CONFIG.shuffle_max_attempt);
+            
+             // TODO: make a step
+            Log.log("SHUFFLE FAILED");
+            on_error();
 
         }, {parallel: true});
     }
