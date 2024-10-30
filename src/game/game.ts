@@ -638,6 +638,7 @@ export function Game() {
             Log.log("SHUFFLE FIELD");
         
             let major_attempt = 0;
+            
             do {
                 let attempt = 0;
 
@@ -710,6 +711,9 @@ export function Game() {
                     }
 
                     if(has_step()) {
+                        for(const element of elements) {
+                            EventBus.send('FORCE_REMOVE_ELEMENT', element.uid);
+                        }
                         return on_end();
                     }
                 } while (++attempt < GAME_CONFIG.shuffle_max_attempt);
@@ -737,7 +741,7 @@ export function Game() {
                 }
 
                 if(has_step()) return on_end();       
-            } while(++major_attempt >= GAME_CONFIG.shuffle_max_attempt);
+            } while(++major_attempt < GAME_CONFIG.shuffle_max_attempt);
             
              // TODO: make a step
             Log.log("SHUFFLE FAILED");
