@@ -317,7 +317,9 @@ ____exports._GAME_CONFIG = {
     is_restart = false,
     revive_states = {},
     is_busy_input = false,
-    steps_by_ad = 0
+    steps_by_ad = 0,
+    products = {},
+    has_payments = false
 }
 ____exports._STORAGE_CONFIG = {
     current_level = 0,

@@ -1,5 +1,14 @@
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
+local Error = ____lualib.Error
+local RangeError = ____lualib.RangeError
+local ReferenceError = ____lualib.ReferenceError
+local SyntaxError = ____lualib.SyntaxError
+local TypeError = ____lualib.TypeError
+local URIError = ____lualib.URIError
+local __TS__New = ____lualib.__TS__New
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_settings, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_settings_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_settings, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, setup, setup_coins, setup_life, setup_store, setup_settings, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_settings_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_settings, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -124,32 +133,110 @@ function setup_store(data)
         gui.get_node("store/store_title_text"),
         Lang.get_text("store_title")
     )
+    if #GAME_CONFIG.products >= 4 then
+        local maney30 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "maney30" end
+        )[1]
+        local maney150 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "maney150" end
+        )[1]
+        local maney300 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "maney300" end
+        )[1]
+        local maney800 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "maney800" end
+        )[1]
+        set_text("store/buy_30_text", (maney30.priceValue .. " ") .. maney30.priceCurrencyCode)
+        set_text("store/buy_150_text", (maney150.priceValue .. " ") .. maney150.priceCurrencyCode)
+        set_text("store/buy_300_text", (maney300.priceValue .. " ") .. maney300.priceCurrencyCode)
+        set_text("store/buy_800_text", (maney800.priceValue .. " ") .. maney800.priceCurrencyCode)
+    end
     data.druid:new_button(
         "store/buy_30_btn",
         function()
-            Sound.play("purchase")
-            add_coins(30)
+            HtmlBridge.purchase(
+                {id = "maney30"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(30)
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
         "store/buy_150_btn",
         function()
-            Sound.play("purchase")
-            add_coins(150)
+            HtmlBridge.purchase(
+                {id = "maney150"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(150)
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
         "store/buy_300_btn",
         function()
-            Sound.play("purchase")
-            add_coins(300)
+            HtmlBridge.purchase(
+                {id = "maney300"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(300)
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
         "store/buy_800_btn",
         function()
-            Sound.play("purchase")
-            add_coins(800)
+            HtmlBridge.purchase(
+                {id = "maney800"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(800)
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     gui.set_text(
@@ -661,17 +748,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch97 = scene.name
-        local ____cond97 = ____switch97 == "game"
-        if ____cond97 then
+        local ____switch118 = scene.name
+        local ____cond118 = ____switch118 == "game"
+        if ____cond118 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond97 = ____cond97 or ____switch97 == "map"
-        if ____cond97 then
+        ____cond118 = ____cond118 or ____switch118 == "map"
+        if ____cond118 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -696,9 +783,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch102 = Scene.get_current_name()
-        local ____cond102 = ____switch102 == "game"
-        if ____cond102 then
+        local ____switch123 = Scene.get_current_name()
+        local ____cond123 = ____switch123 == "game"
+        if ____cond123 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -707,8 +794,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond102 = ____cond102 or ____switch102 == "map"
-        if ____cond102 then
+        ____cond123 = ____cond123 or ____switch123 == "map"
+        if ____cond123 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -769,9 +856,9 @@ function set_enabled_settings(data, state)
     end
     if state then
         repeat
-            local ____switch109 = Scene.get_current_name()
-            local ____cond109 = ____switch109 == "game"
-            if ____cond109 then
+            local ____switch130 = Scene.get_current_name()
+            local ____cond130 = ____switch130 == "game"
+            if ____cond130 then
                 gui.set_enabled(
                     gui.get_node("map_button"),
                     true
@@ -1095,6 +1182,12 @@ function set_enabled_vertical_rocket(data, state)
         EventBus.send("CLOSED_DLG", Dlg.VerticalRocket)
     end
     data.dlg_opened = state
+end
+function set_text(arg0, arg1)
+    error(
+        __TS__New(Error, "Function not implemented."),
+        0
+    )
 end
 function ____exports.init(self)
     Manager.init_script()

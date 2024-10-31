@@ -6,12 +6,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-empty-function */
 
 import * as druid from 'druid.druid';
 import * as default_style from "druid.styles.default.style";
 import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
 import { load_levels_config } from '../game/level';
+import { Product, Purchase } from '../modules/HtmlBridgeTypes';
+import { add_coins } from '../game/utils';
 
 
 interface props {
@@ -35,6 +38,53 @@ export function init(this: props) {
         // если это одноклассники
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')
             HtmlBridge.start_resize_monitor();
+
+        // yandex purchases
+        // получаем список возможных покупок(иды, цены)
+        if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'yandex') {
+            HtmlBridge.init_purchases((status, data) => {
+                if (!status) Log.error('Yandex init_purchases error');
+                else {
+                    const products: Product[] = data as Product[];
+                    GAME_CONFIG.products = products;
+                    GAME_CONFIG.has_payments = true;
+                    
+                    log('Yandex init_purchases success');
+
+                    // необработанные покупки, такое бывает когда юзер покупает например в яндексе
+                    // и тут же например обновит страницу, и нужно их обработать и начислить
+                    HtmlBridge.get_purchases((status, data) => {
+                        if (!status)
+                            return;
+                    
+                        const purchases: Purchase[] = data as Purchase[];
+                        log('Yandex get_purchases success', purchases);
+                        
+                        for (let i = 0; i < purchases.length; i++) {
+                            const purchase = purchases[i];
+                            const id_product = purchase.productID;
+                            log('process buyed:', purchase);
+                            if (id_product == 'maney30') {
+                                add_coins(30);
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            if (id_product == 'maney150') {
+                                add_coins(150);
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            else if (id_product == 'maney300') {
+                                add_coins(300);
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            else if (id_product == 'maney800') {
+                                add_coins(800);
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
         default_style.scroll.WHEEL_SCROLL_SPEED = 10;
         druid.set_default_style(default_style);

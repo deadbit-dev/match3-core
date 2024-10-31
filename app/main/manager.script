@@ -7,6 +7,8 @@ local ____Manager = require("modules.Manager")
 local register_manager = ____Manager.register_manager
 local ____level = require("game.level")
 local load_levels_config = ____level.load_levels_config
+local ____utils = require("game.utils")
+local add_coins = ____utils.add_coins
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -25,6 +27,64 @@ function ____exports.init(self)
             )
             if System.platform == "HTML5" and HtmlBridge.get_platform() == "ok" then
                 HtmlBridge.start_resize_monitor()
+            end
+            if System.platform == "HTML5" and HtmlBridge.get_platform() == "yandex" then
+                HtmlBridge.init_purchases(function(status, data)
+                    if not status then
+                        Log.error("Yandex init_purchases error")
+                    else
+                        local products = data
+                        GAME_CONFIG.products = products
+                        GAME_CONFIG.has_payments = true
+                        log("Yandex init_purchases success")
+                        HtmlBridge.get_purchases(function(status, data)
+                            if not status then
+                                return
+                            end
+                            local purchases = data
+                            log("Yandex get_purchases success", purchases)
+                            do
+                                local i = 0
+                                while i < #purchases do
+                                    local purchase = purchases[i + 1]
+                                    local id_product = purchase.productID
+                                    log("process buyed:", purchase)
+                                    if id_product == "maney30" then
+                                        add_coins(30)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    end
+                                    if id_product == "maney150" then
+                                        add_coins(150)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    elseif id_product == "maney300" then
+                                        add_coins(300)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    elseif id_product == "maney800" then
+                                        add_coins(800)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    end
+                                    i = i + 1
+                                end
+                            end
+                        end)
+                    end
+                end)
             end
             default_style.scroll.WHEEL_SCROLL_SPEED = 10
             druid.set_default_style(default_style)

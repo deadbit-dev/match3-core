@@ -118,22 +118,62 @@ function setup_store(data: props) {
     data.druid.new_button('store/close', () => set_enabled_store(data, false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
+
+    // products
+    if (GAME_CONFIG.products.length >= 4) {
+        const maney30 = GAME_CONFIG.products.filter(p => p.id == 'maney30')[0];
+        const maney150 = GAME_CONFIG.products.filter(p => p.id == 'maney150')[0];
+        const maney300 = GAME_CONFIG.products.filter(p => p.id == 'maney300')[0];
+        const maney800 = GAME_CONFIG.products.filter(p => p.id == 'maney800')[0];
+
+        set_text('store/buy_30_text', maney30.priceValue + ' ' + maney30.priceCurrencyCode);
+        set_text('store/buy_150_text', maney150.priceValue + ' ' + maney150.priceCurrencyCode);
+        set_text('store/buy_300_text', maney300.priceValue + ' ' + maney300.priceCurrencyCode);
+        set_text('store/buy_800_text', maney800.priceValue + ' ' + maney800.priceCurrencyCode);
+    }
     
     data.druid.new_button('store/buy_30_btn', () => {
-        Sound.play('purchase');
-        add_coins(30);
+        HtmlBridge.purchase({ id: 'maney30' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            add_coins(30);
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
+
     data.druid.new_button('store/buy_150_btn', () => {
-        Sound.play('purchase');
-        add_coins(150);
+        HtmlBridge.purchase({ id: 'maney150' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            add_coins(150);
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
+
     data.druid.new_button('store/buy_300_btn', () => {
-        Sound.play('purchase');
-        add_coins(300);
+        HtmlBridge.purchase({ id: 'maney300' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            add_coins(300);
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
+
     data.druid.new_button('store/buy_800_btn', () => {
-        Sound.play('purchase');
-        add_coins(800);
+        HtmlBridge.purchase({ id: 'maney800' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            add_coins(800);
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
 
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
@@ -741,4 +781,8 @@ function set_enabled_vertical_rocket(data: props, state: boolean) {
     }
 
     data.dlg_opened = state;
+}
+
+function set_text(arg0: string, arg1: string) {
+    throw new Error('Function not implemented.');
 }

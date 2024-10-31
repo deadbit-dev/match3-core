@@ -8,6 +8,7 @@ import { CellId, ElementId, TargetType, GameState, TutorialData, LockInfo, Unloc
 import { SubstrateId } from "../game/view";
 import { NameMessage, VoidMessage } from "../modules/modules_const";
 import { Axis } from "../utils/math_utils";
+import { Product } from "../modules/HtmlBridgeTypes";
 
 export const IS_DEBUG_MODE = true;
 export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_config("android.package").includes('huawei');
@@ -434,7 +435,10 @@ export const _GAME_CONFIG = {
 
     is_busy_input: false,
 
-    steps_by_ad: 0
+    steps_by_ad: 0,
+
+    products: [] as Product[],
+    has_payments: false,
 };
 
 
