@@ -1368,11 +1368,15 @@ export function Game() {
             for(let j = pos.x - (mask[0].length - 1) / 2; j <= pos.x + (mask[0].length - 1) / 2; j++) {
                 if(mask[i - (pos.y - (mask.length - 1) / 2)][j - (pos.x - (mask[0].length - 1) / 2)] == 1) {
                     if(is_valid_pos(j, i, field_width, field_height)) {
-                        if(is_buster({x: j, y: i})) try_activate_buster_element({x: j, y: i});
-                        else {
-                            const damage_info = field.try_damage({x: j, y: i}, is_near_activation);
-                            if(damage_info != NotDamage)
-                                damages.push(damage_info);
+                        const cell = field.get_cell({x: j, y: i});
+                        const element = field.get_element({x: j, y: i});
+                        if(cell != NotActiveCell && cell.state == CellState.Idle && ((element != NullElement && element.state == ElementState.Idle) || element == NullElement)) {
+                            if(is_buster({x: j, y: i})) try_activate_buster_element({x: j, y: i});
+                            else {
+                                const damage_info = field.try_damage({x: j, y: i}, is_near_activation);
+                                if(damage_info != NotDamage)
+                                    damages.push(damage_info);
+                            }
                         }
                     }
                 }
@@ -1434,13 +1438,17 @@ export function Game() {
         if(rocket.id == ElementId.VerticalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
             for(let y = 0; y < field_height; y++) {
                 if(y != pos.y) {
-                    if(is_buster({x: pos.x, y})) busters.push({x: pos.x, y}); //try_activate_buster_element({x: pos.x, y});
-                    else {
-                        const damage_info = field.try_damage({x: pos.x, y});
-                        if(damage_info != NotDamage) {
-                            field.set_element_state(damage_info.pos, ElementState.Busy);
-                            field.set_cell_state(damage_info.pos, CellState.Busy);
-                            damages.push(damage_info);
+                    const cell = field.get_cell({x: pos.x, y});
+                    const element = field.get_element({x: pos.x, y});
+                    if(cell != NotActiveCell && cell.state == CellState.Idle && ((element != NullElement && element.state == ElementState.Idle) || element == NullElement)) {
+                        if(is_buster({x: pos.x, y})) busters.push({x: pos.x, y}); //try_activate_buster_element({x: pos.x, y});
+                        else {
+                            const damage_info = field.try_damage({x: pos.x, y});
+                            if(damage_info != NotDamage) {
+                                field.set_element_state(damage_info.pos, ElementState.Busy);
+                                field.set_cell_state(damage_info.pos, CellState.Busy);
+                                damages.push(damage_info);
+                            }
                         }
                     }
                 }
@@ -1450,13 +1458,17 @@ export function Game() {
         if(rocket.id == ElementId.HorizontalRocket || rocket.id == ElementId.AllAxisRocket || all_axis) {
             for(let x = 0; x < field_width; x++) {
                 if(x != pos.x) {
-                    if(is_buster({x, y: pos.y})) busters.push({x, y: pos.y}); //try_activate_buster_element({x, y: pos.y});
-                    else {
-                        const damage_info = field.try_damage({x, y: pos.y});
-                        if(damage_info != NotDamage) {
-                            field.set_element_state(damage_info.pos, ElementState.Busy);
-                            field.set_cell_state(damage_info.pos, CellState.Busy);
-                            damages.push(damage_info);
+                    const cell = field.get_cell({x, y: pos.y});
+                    const element = field.get_element({x, y: pos.y});
+                    if(cell != NotActiveCell && cell.state == CellState.Idle && ((element != NullElement && element.state == ElementState.Idle) || element == NullElement)) {
+                        if(is_buster({x, y: pos.y})) busters.push({x, y: pos.y}); //try_activate_buster_element({x, y: pos.y});
+                        else {
+                            const damage_info = field.try_damage({x, y: pos.y});
+                            if(damage_info != NotDamage) {
+                                field.set_element_state(damage_info.pos, ElementState.Busy);
+                                field.set_cell_state(damage_info.pos, CellState.Busy);
+                                damages.push(damage_info);
+                            }
                         }
                     }
                 }

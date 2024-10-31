@@ -1445,12 +1445,16 @@ function ____exports.Game()
                     while j <= pos.x + (#mask[1] - 1) / 2 do
                         if mask[i - (pos.y - (#mask - 1) / 2) + 1][j - (pos.x - (#mask[1] - 1) / 2) + 1] == 1 then
                             if is_valid_pos(j, i, field_width, field_height) then
-                                if is_buster({x = j, y = i}) then
-                                    try_activate_buster_element({x = j, y = i})
-                                else
-                                    local damage_info = field.try_damage({x = j, y = i}, is_near_activation)
-                                    if damage_info ~= NotDamage then
-                                        damages[#damages + 1] = damage_info
+                                local cell = field.get_cell({x = j, y = i})
+                                local element = field.get_element({x = j, y = i})
+                                if cell ~= NotActiveCell and cell.state == CellState.Idle and (element ~= NullElement and element.state == ElementState.Idle or element == NullElement) then
+                                    if is_buster({x = j, y = i}) then
+                                        try_activate_buster_element({x = j, y = i})
+                                    else
+                                        local damage_info = field.try_damage({x = j, y = i}, is_near_activation)
+                                        if damage_info ~= NotDamage then
+                                            damages[#damages + 1] = damage_info
+                                        end
                                     end
                                 end
                             end
@@ -1540,14 +1544,18 @@ function ____exports.Game()
                 local y = 0
                 while y < field_height do
                     if y ~= pos.y then
-                        if is_buster({x = pos.x, y = y}) then
-                            busters[#busters + 1] = {x = pos.x, y = y}
-                        else
-                            local damage_info = field.try_damage({x = pos.x, y = y})
-                            if damage_info ~= NotDamage then
-                                field.set_element_state(damage_info.pos, ElementState.Busy)
-                                field.set_cell_state(damage_info.pos, CellState.Busy)
-                                damages[#damages + 1] = damage_info
+                        local cell = field.get_cell({x = pos.x, y = y})
+                        local element = field.get_element({x = pos.x, y = y})
+                        if cell ~= NotActiveCell and cell.state == CellState.Idle and (element ~= NullElement and element.state == ElementState.Idle or element == NullElement) then
+                            if is_buster({x = pos.x, y = y}) then
+                                busters[#busters + 1] = {x = pos.x, y = y}
+                            else
+                                local damage_info = field.try_damage({x = pos.x, y = y})
+                                if damage_info ~= NotDamage then
+                                    field.set_element_state(damage_info.pos, ElementState.Busy)
+                                    field.set_cell_state(damage_info.pos, CellState.Busy)
+                                    damages[#damages + 1] = damage_info
+                                end
                             end
                         end
                     end
@@ -1560,14 +1568,18 @@ function ____exports.Game()
                 local x = 0
                 while x < field_width do
                     if x ~= pos.x then
-                        if is_buster({x = x, y = pos.y}) then
-                            busters[#busters + 1] = {x = x, y = pos.y}
-                        else
-                            local damage_info = field.try_damage({x = x, y = pos.y})
-                            if damage_info ~= NotDamage then
-                                field.set_element_state(damage_info.pos, ElementState.Busy)
-                                field.set_cell_state(damage_info.pos, CellState.Busy)
-                                damages[#damages + 1] = damage_info
+                        local cell = field.get_cell({x = x, y = pos.y})
+                        local element = field.get_element({x = x, y = pos.y})
+                        if cell ~= NotActiveCell and cell.state == CellState.Idle and (element ~= NullElement and element.state == ElementState.Idle or element == NullElement) then
+                            if is_buster({x = x, y = pos.y}) then
+                                busters[#busters + 1] = {x = x, y = pos.y}
+                            else
+                                local damage_info = field.try_damage({x = x, y = pos.y})
+                                if damage_info ~= NotDamage then
+                                    field.set_element_state(damage_info.pos, ElementState.Busy)
+                                    field.set_cell_state(damage_info.pos, CellState.Busy)
+                                    damages[#damages + 1] = damage_info
+                                end
                             end
                         end
                     end
@@ -2039,29 +2051,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch447 = combination.type
-            local ____cond447 = ____switch447 == CombinationType.Comb4
-            if ____cond447 then
+            local ____switch450 = combination.type
+            local ____cond450 = ____switch450 == CombinationType.Comb4
+            if ____cond450 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond447 = ____cond447 or ____switch447 == CombinationType.Comb2x2
-            if ____cond447 then
+            ____cond450 = ____cond450 or ____switch450 == CombinationType.Comb2x2
+            if ____cond450 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond447 = ____cond447 or (____switch447 == CombinationType.Comb3x3a or ____switch447 == CombinationType.Comb3x3b)
-            if ____cond447 then
+            ____cond450 = ____cond450 or (____switch450 == CombinationType.Comb3x3a or ____switch450 == CombinationType.Comb3x3b)
+            if ____cond450 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond447 = ____cond447 or (____switch447 == CombinationType.Comb3x4a or ____switch447 == CombinationType.Comb3x4b or ____switch447 == CombinationType.Comb3x5)
-            if ____cond447 then
+            ____cond450 = ____cond450 or (____switch450 == CombinationType.Comb3x4a or ____switch450 == CombinationType.Comb3x4b or ____switch450 == CombinationType.Comb3x5)
+            if ____cond450 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond447 = ____cond447 or ____switch447 == CombinationType.Comb5
-            if ____cond447 then
+            ____cond450 = ____cond450 or ____switch450 == CombinationType.Comb5
+            if ____cond450 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
