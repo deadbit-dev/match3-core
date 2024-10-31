@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes } from '../../game/utils';
+import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes, get_current_level } from '../../game/utils';
 import { NameMessage } from '../../modules/modules_const';
 import { parse_time } from '../../utils/utils';
 import { Dlg } from '../game_config';
@@ -139,6 +139,9 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(30);
+
+            Metrica.report('data', { shop: {buy: 'maney30'}});
+
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
         });
     });
@@ -150,6 +153,9 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(150);
+
+            Metrica.report('data', { shop: {buy: 'maney150'}});
+
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
         });
     });
@@ -161,6 +167,9 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(300);
+
+            Metrica.report('data', { shop: {buy: 'maney300'}});
+
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
         });
     });
@@ -172,6 +181,9 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(800);
+
+            Metrica.report('data', { shop: {buy: 'maney800'}});
+
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
         });
     });
@@ -188,6 +200,8 @@ function setup_store(data: props) {
 
         add_lifes(1);
         remove_coins(30);
+
+        Metrica.report('data', { shop: {buy: 'life1'}});
     });
 
     data.druid.new_button('store/buy_x2_btn', () => {
@@ -200,6 +214,8 @@ function setup_store(data: props) {
 
         add_lifes(2);
         remove_coins(50);
+
+        Metrica.report('data', { shop: {buy: 'life2'}});
     });
 
     data.druid.new_button('store/buy_x3_btn', () => {
@@ -212,6 +228,8 @@ function setup_store(data: props) {
 
         add_lifes(3);
         remove_coins(70);
+
+        Metrica.report('data', { shop: {buy: 'life3'}});
     });
 
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
@@ -230,6 +248,10 @@ function setup_store(data: props) {
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
 
         EventBus.send('UPDATED_BUTTONS');
+
+        Metrica.report('data', { shop: {buy: 'set1'}});
+        Metrica.report('data', {buy: {level:0, id:'hammer'}});
+        Metrica.report('data', {buy: {level:0, id:'vertical_rocket'}});
     });
 
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
@@ -249,6 +271,14 @@ function setup_store(data: props) {
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 2);
 
         EventBus.send('UPDATED_BUTTONS');
+
+        Metrica.report('data', { shop: {buy: 'set2'}});
+
+        Metrica.report('data', {buy: {level:0, id:'hammer'}});
+        Metrica.report('data', {buy: {level:0, id:'hammer'}});
+        Metrica.report('data', {buy: {level:0, id:'spinning'}});
+        Metrica.report('data', {buy: {level:0, id:'vertical_rocket'}});
+        Metrica.report('data', {buy: {level:0, id:'vertical_rocket'}});
     });
 
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
@@ -257,18 +287,24 @@ function setup_store(data: props) {
         if(!is_enough_coins(100)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(100);
+
+        Metrica.report('data', { shop: {buy: 'noads1'}});
     });
 
     data.druid.new_button('store/buy_ad_7_btn', () => {
         if(!is_enough_coins(250)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(250);
+
+        Metrica.report('data', { shop: {buy: 'noads7'}});
     });
 
     data.druid.new_button('store/buy_ad_30_btn', () => {
         if(!is_enough_coins(600)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
         remove_coins(600);
+
+        Metrica.report('data', { shop: {buy: 'noads30'}});
     });
 
     data.druid.new_button('store/reset/button', () => {
@@ -367,6 +403,8 @@ function setup_hammer(data: props) {
         GameStorage.set('hammer_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_hammer(data, false);
+
+        Metrica.report('data', {buy: {level: get_current_level() + 1, id:'hammer'}});
     });
 
     data.druid.new_button('hammer/close', () => {
@@ -389,6 +427,8 @@ function setup_spinning(data: props) {
         GameStorage.set('spinning_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_spinning(data, false);
+
+        Metrica.report('data', {buy: {level: get_current_level() + 1, id:'spinning'}});
     });
 
     data.druid.new_button('spinning/close', () => {
@@ -411,6 +451,8 @@ function setup_horizontal_rocket(data: props) {
         GameStorage.set('horizontal_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_horizontall_rocket(data, false);
+
+        Metrica.report('data', {buy: {level: get_current_level() + 1, id:'horizontal_rocket'}});
     });
 
     data.druid.new_button('horizontal_rocket/close', () => {
@@ -433,6 +475,8 @@ function setup_vertical_rocket(data: props) {
         GameStorage.set('vertical_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_vertical_rocket(data, false);
+
+        Metrica.report('data', {buy: {level: get_current_level() + 1, id:'vertical_rocket'}});
     });
 
     data.druid.new_button('vertical_rocket/close', () => {

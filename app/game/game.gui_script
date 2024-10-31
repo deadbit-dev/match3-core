@@ -11,6 +11,7 @@ local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
 local set_text_colors = ____utils.set_text_colors
 local ____utils = require("game.utils")
+local get_current_level = ____utils.get_current_level
 local get_current_level_config = ____utils.get_current_level_config
 local is_animal_level = ____utils.is_animal_level
 local is_enough_coins = ____utils.is_enough_coins
@@ -410,6 +411,13 @@ function setup_gameover_ui(instance)
         "steps_by_ad/button",
         function()
             GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
+            Metrica.report(
+                "data",
+                {fail_level = {
+                    level = get_current_level() + 1,
+                    event = "3step_ads"
+                }}
+            )
             EventBus.send("REVIVE", 3)
         end
     )
@@ -425,6 +433,13 @@ function setup_gameover_ui(instance)
                 return
             end
             remove_coins(500)
+            Metrica.report(
+                "data",
+                {fail_level = {
+                    level = get_current_level() + 1,
+                    event = "5step_money"
+                }}
+            )
             EventBus.send("REVIVE", 5)
         end
     )

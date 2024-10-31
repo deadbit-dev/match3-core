@@ -243,6 +243,10 @@ export function Game() {
         game_timer = timer.delay(1, true, on_tick);
 
         on_idle();
+
+        Metrica.report('data', {
+            ['level_' + tostring(get_current_level() + 1)]: { type: 'start' }
+        });
     }
 
     function set_tutorial() {
@@ -527,6 +531,20 @@ export function Game() {
                 if(last_state.steps != undefined) add_coins(last_state.steps);
                 if(last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
             }
+            Metrica.report('data', {
+                ['level_' + tostring(get_current_level() + 1)]: {
+                    type:'end',
+                    time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
+                    steps: last_state.steps
+                }
+            });
+            Log.log({
+                ['level_' + tostring(get_current_level() + 1)]: {
+                    type:'end',
+                    time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
+                    steps: last_state.steps
+                }
+            });
             EventBus.send('ON_WIN');
             win_action();
             return;
@@ -590,6 +608,10 @@ export function Game() {
         if(revive) GAME_CONFIG.revive_states = json.decode(json.encode(states));
 
         EventBus.send('ON_GAME_OVER', {state: copy_state(), revive});
+
+        Metrica.report('data', {
+            ['level_' + tostring(get_current_level() + 1)]: { type: 'fail' }
+        });
     }
 
     function on_revive(steps: number) {
@@ -1195,6 +1217,8 @@ export function Game() {
 
         stop_helper();
         shuffle();
+        
+        Metrica.report('data', {use: {level: get_current_level() + 1, id:'spinning'}});
 
         busters.hammer.active = false;
         busters.horizontal_rocket.active = false;
@@ -1204,6 +1228,7 @@ export function Game() {
 
         if(is_tutorial())
             complete_tutorial();
+        
     }
 
     function on_activate_hammer() {
@@ -1264,18 +1289,21 @@ export function Game() {
         stop_helper();
 
         if(busters.hammer.active) {
+            Metrica.report('data', {use: {level: get_current_level() + 1, id:'hammer'}});
             try_hammer_damage(pos);
             is_idle = false;
             return;
         }
 
         if(busters.horizontal_rocket.active) {
+            Metrica.report('data', {use: {level: get_current_level() + 1, id:'horizontal_rocket'}});
             try_horizontal_damage(pos);
             is_idle = false;
             return;
         }
 
         if(busters.vertical_rocket.active) {
+            Metrica.report('data', {use: {level: get_current_level() + 1, id:'vertical_rocket'}});
             try_vertical_damage(pos);
             is_idle = false;
             return;

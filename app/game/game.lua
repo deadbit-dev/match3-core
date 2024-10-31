@@ -187,6 +187,10 @@ function ____exports.Game()
         GAME_CONFIG.is_revive = false
         game_timer = timer.delay(1, true, on_tick)
         on_idle()
+        Metrica.report(
+            "data",
+            {["level_" .. tostring(get_current_level() + 1)] = {type = "start"}}
+        )
     end
     function set_tutorial()
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]
@@ -496,6 +500,19 @@ function ____exports.Game()
                     add_coins(math.floor(last_state.remaining_time))
                 end
             end
+            Metrica.report(
+                "data",
+                {["level_" .. tostring(get_current_level() + 1)] = {
+                    type = "end",
+                    time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
+                    steps = last_state.steps
+                }}
+            )
+            Log.log({["level_" .. tostring(get_current_level() + 1)] = {
+                type = "end",
+                time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
+                steps = last_state.steps
+            }})
             EventBus.send("ON_WIN")
             win_action()
             return
@@ -580,6 +597,10 @@ function ____exports.Game()
                 state = copy_state(),
                 revive = revive
             }
+        )
+        Metrica.report(
+            "data",
+            {["level_" .. tostring(get_current_level() + 1)] = {type = "fail"}}
         )
     end
     function on_revive(steps)
@@ -1266,6 +1287,13 @@ function ____exports.Game()
         )
         stop_helper()
         shuffle()
+        Metrica.report(
+            "data",
+            {use = {
+                level = get_current_level() + 1,
+                id = "spinning"
+            }}
+        )
         busters.hammer.active = false
         busters.horizontal_rocket.active = false
         busters.vertical_rocket.active = false
@@ -1322,16 +1350,37 @@ function ____exports.Game()
         end
         stop_helper()
         if busters.hammer.active then
+            Metrica.report(
+                "data",
+                {use = {
+                    level = get_current_level() + 1,
+                    id = "hammer"
+                }}
+            )
             try_hammer_damage(pos)
             is_idle = false
             return
         end
         if busters.horizontal_rocket.active then
+            Metrica.report(
+                "data",
+                {use = {
+                    level = get_current_level() + 1,
+                    id = "horizontal_rocket"
+                }}
+            )
             try_horizontal_damage(pos)
             is_idle = false
             return
         end
         if busters.vertical_rocket.active then
+            Metrica.report(
+                "data",
+                {use = {
+                    level = get_current_level() + 1,
+                    id = "vertical_rocket"
+                }}
+            )
             try_vertical_damage(pos)
             is_idle = false
             return
