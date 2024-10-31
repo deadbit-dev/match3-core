@@ -45,6 +45,7 @@ ____exports.lang_data = {
     animal_tutorial_description1 = {["Русский-ru"] = "Накорми его и продложи путь!", ["Английский-en"] = "Feed him and continue his journey!"},
     on_map = {["Русский-ru"] = "Карта", ["Английский-en"] = "Map"},
     level = {["Русский-ru"] = "Уровень", ["Английский-en"] = "Level"},
-    start = {["Русский-ru"] = "Начать", ["Английский-en"] = "Start"}
+    start = {["Русский-ru"] = "Начать", ["Английский-en"] = "Start"},
+    last_level_text = {["Русский-ru"] = "Cпасибо за игру, ожидайте следующую главу в ближайшее время.", ["Английский-en"] = "Thanks for playing, stay tuned for the next chapter soon."}
 }
 return ____exports

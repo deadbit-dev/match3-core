@@ -14,6 +14,7 @@ local ____utils = require("game.utils")
 local get_current_level_config = ____utils.get_current_level_config
 local is_animal_level = ____utils.is_animal_level
 local is_enough_coins = ____utils.is_enough_coins
+local is_last_level = ____utils.is_last_level
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local ____game = require("game.game")
@@ -324,6 +325,13 @@ function setup_win_ui(instance)
             Scene.load("map")
         end
     )
+    instance.druid:new_button(
+        "last_level_btn",
+        function()
+            Sound.stop("game")
+            Scene.load("map")
+        end
+    )
     gui.set_enabled(
         gui.get_node("win"),
         false
@@ -335,6 +343,14 @@ function setup_win_ui(instance)
     gui.set_text(
         gui.get_node("continue_text"),
         Lang.get_text("continue")
+    )
+    gui.set_text(
+        gui.get_node("last_level_btn_text"),
+        Lang.get_text("on_map")
+    )
+    gui.set_text(
+        gui.get_node("last_level_text"),
+        Lang.get_text("last_level_text")
     )
 end
 function next_level()
@@ -475,25 +491,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch76 = data.idx
-        local ____cond76 = ____switch76 == 0
-        if ____cond76 then
+        local ____switch77 = data.idx
+        local ____cond77 = ____switch77 == 0
+        if ____cond77 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond76 = ____cond76 or ____switch76 == 1
-        if ____cond76 then
+        ____cond77 = ____cond77 or ____switch77 == 1
+        if ____cond77 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond76 = ____cond76 or ____switch76 == 2
-        if ____cond76 then
+        ____cond77 = ____cond77 or ____switch77 == 2
+        if ____cond77 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -779,6 +795,40 @@ function on_win_end(state)
                         gui.get_node("win"),
                         true
                     )
+                    if is_last_level() then
+                        gui.set_enabled(
+                            gui.get_node("win_close"),
+                            false
+                        )
+                        gui.set_enabled(
+                            gui.get_node("continue_button"),
+                            false
+                        )
+                    end
+                    local function on_end_for_last_level()
+                        if not is_last_level() then
+                            return
+                        end
+                        timer.delay(
+                            0.5,
+                            false,
+                            function()
+                                gui.set_enabled(
+                                    gui.get_node("win"),
+                                    false
+                                )
+                                local popup = gui.get_node("last_level_popup")
+                                gui.set_enabled(popup, true)
+                                gui.animate(
+                                    popup,
+                                    gui.PROP_POSITION,
+                                    vmath.vector3(270, 480, 0),
+                                    gui.EASING_INCUBIC,
+                                    0.5
+                                )
+                            end
+                        )
+                    end
                     local level_coins = get_current_level_config().coins
                     local steps = state.steps ~= nil and state.steps or 0
                     local remaining_time = state.remaining_time ~= nil and math.floor(state.remaining_time) or 0
@@ -856,13 +906,27 @@ function on_win_end(state)
                                     on_each_coin_drop_end,
                                     function()
                                         fade_steptime()
-                                        drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
+                                        drop_coins(
+                                            level_coins,
+                                            level_coin_points,
+                                            nil,
+                                            on_each_coin_drop_end,
+                                            on_end_for_last_level
+                                        )
                                     end
                                 )
                             else
-                                drop_coins(level_coins, level_coin_points, nil, on_each_coin_drop_end)
+                                drop_coins(
+                                    level_coins,
+                                    level_coin_points,
+                                    nil,
+                                    on_each_coin_drop_end,
+                                    on_end_for_last_level
+                                )
                             end
                         end)
+                    else
+                        on_end_for_last_level()
                     end
                 end
             )

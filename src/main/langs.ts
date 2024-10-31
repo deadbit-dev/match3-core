@@ -182,5 +182,10 @@ export const lang_data = {
   "start": {
     "Русский-ru": "Начать",
     "Английский-en": "Start"
+  },
+  "last_level_text": {
+    "Русский-ru": "Cпасибо за игру, ожидайте следующую главу в ближайшее время.",
+    "Английский-en": "Thanks for playing, stay tuned for the next chapter soon."
   }
+  
 };

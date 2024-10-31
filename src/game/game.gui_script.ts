@@ -11,7 +11,7 @@ import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { TargetMessage } from '../main/game_config';
 import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
-import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, remove_coins, remove_lifes } from './utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
@@ -285,9 +285,17 @@ function setup_win_ui(instance: props) {
         Sound.stop('game');
         Scene.load('map');
     });
+
+    instance.druid.new_button('last_level_btn', () => {
+        Sound.stop('game');
+        Scene.load('map');
+    });
+
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
     gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
+    gui.set_text(gui.get_node('last_level_btn_text'), Lang.get_text('on_map'));
+    gui.set_text(gui.get_node('last_level_text'), Lang.get_text('last_level_text'));
 }
 
 function next_level() {
@@ -539,6 +547,22 @@ function on_win_end(state: GameState) {
         gui.set_alpha(lock, 0);
         gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.6, 0, () => {
             gui.set_enabled(gui.get_node('win'), true);
+            if(is_last_level()) {
+                gui.set_enabled(gui.get_node('win_close'), false);
+                gui.set_enabled(gui.get_node('continue_button'), false);
+            }
+
+            const on_end_for_last_level = () => {
+                if(!is_last_level())
+                    return;
+                timer.delay(0.5, false, () => {
+                    gui.set_enabled(gui.get_node('win'), false);
+                    const popup = gui.get_node('last_level_popup');
+                    gui.set_enabled(popup, true);
+                    gui.animate(popup, gui.PROP_POSITION, vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.5);
+                });
+            };
+
             let level_coins = get_current_level_config().coins;
             let steps = (state.steps != undefined) ? state.steps : 0;
             let remaining_time = (state.remaining_time != undefined) ? math.floor(state.remaining_time) : 0;
@@ -589,11 +613,11 @@ function on_win_end(state: GameState) {
 
                         drop_coins(steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
                             fade_steptime();
-                            drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
+                            drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
                         });
-                    } else drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end);
+                    } else drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
                 });
-            }
+            } else on_end_for_last_level();
         });
 
         Sound.play('passed');

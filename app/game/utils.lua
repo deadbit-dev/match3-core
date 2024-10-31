@@ -6,6 +6,9 @@ local Direction = ____math_utils.Direction
 function ____exports.get_current_level()
     return GameStorage.get("current_level")
 end
+function ____exports.is_last_level()
+    return GameStorage.get("current_level") == #GAME_CONFIG.levels - 1
+end
 function ____exports.get_current_level_config()
     return GAME_CONFIG.levels[____exports.get_current_level() + 1]
 end

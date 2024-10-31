@@ -5,6 +5,10 @@ export function get_current_level() {
     return GameStorage.get('current_level');
 }
 
+export function is_last_level() {
+    return GameStorage.get('current_level') == (GAME_CONFIG.levels.length - 1);
+}
+
 export function get_current_level_config() {
     return GAME_CONFIG.levels[get_current_level()];
 }

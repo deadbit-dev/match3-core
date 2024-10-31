@@ -2046,6 +2046,99 @@ nodes {
   parent: "rewind/button"
   template_node_child: true
 }
+nodes {
+  position {
+    x: 270.0
+    y: 1394.0
+  }
+  scale {
+    x: 0.75
+    y: 0.75
+  }
+  type: TYPE_BOX
+  texture: "ui/start_window"
+  id: "last_level_popup"
+  layer: "ontop"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    y: 24.76923
+  }
+  size {
+    x: 350.0
+    y: 250.0
+  }
+  color {
+    x: 0.498
+    y: 0.271
+    z: 0.118
+  }
+  type: TYPE_TEXT
+  text: "C\320\277\320\260\321\201\320\270\320\261\320\276 \320\267\320\260 \320\270\320\263\321\200\321\203, \320\276\320\266\320\270\320\264\320\260\320\271\321\202\320\265 \321\201\320\273\320\265\320\264\321\203\321\216\321\211\321\203\321\216 \320\263\320\273\320\260\320\262\321\203 \320\262 \320\261\320\273\320\270\320\266\320\260\320\271\321\210\320\265\320\265 \320\262\321\200\320\265\320\274\321\217."
+  font: "36_medium"
+  id: "last_level_text"
+  outline {
+    x: 0.498
+    y: 0.271
+    z: 0.118
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  line_break: true
+  parent: "last_level_popup"
+  layer: "ontop"
+  inherit_alpha: true
+  outline_alpha: 0.2
+}
+nodes {
+  position {
+    y: -194.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "ui/btn_2"
+  id: "last_level_btn"
+  parent: "last_level_popup"
+  layer: "ontop"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 3.076924
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "\320\235\320\260 \320\272\320\260\321\200\321\202\321\203"
+  font: "27_medium"
+  id: "last_level_btn_text"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "last_level_btn"
+  layer: "ontop"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
 layers {
   name: "back"
 }
