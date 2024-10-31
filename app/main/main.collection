@@ -362,7 +362,7 @@ embedded_instances {
   "  id: \"coin\"\n"
   "  type: \"sound\"\n"
   "  data: \"sound: \\\"/assets/sounds/coin_drop.ogg\\\"\\n"
-  "group: \\\"vfx\\\"\\n"
+  "group: \\\"sfx\\\"\\n"
   "gain: 0.8\\n"
   "\"\n"
   "}\n"
