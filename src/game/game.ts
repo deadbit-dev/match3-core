@@ -523,8 +523,11 @@ export function Game() {
         if(!is_win) {
             is_win = true;
             const completed_levels = GameStorage.get('completed_levels');
-            completed_levels.push(GameStorage.get('current_level'));
-            GameStorage.set('completed_levels', completed_levels);
+            const current_level = GameStorage.get('current_level');
+            if(!completed_levels.includes(current_level)) {
+                completed_levels.push(current_level);
+                GameStorage.set('completed_levels', completed_levels);
+            }
             const last_state = get_state();
             add_coins(level_config.coins);
             if(level_config.coins > 0) {

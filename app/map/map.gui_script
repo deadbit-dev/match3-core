@@ -1,8 +1,6 @@
 local ____exports = {}
 local set_level_buttons, load_level, set_last_map_position, set_completed_levels, on_drag, set_events, on_resize, get_offset
 local druid = require("druid.druid")
-local ____utils = require("game.utils")
-local get_current_level = ____utils.get_current_level
 local ____game_config = require("main.game_config")
 local Dlg = ____game_config.Dlg
 function set_level_buttons(data)
@@ -129,7 +127,13 @@ function ____exports.init(self)
             end
         end
     )
-    local level = gui.get_node(tostring(get_current_level() + 1) .. "/level")
+    local max_level = 0
+    for ____, level in ipairs(GameStorage.get("completed_levels")) do
+        if level > max_level then
+            max_level = level
+        end
+    end
+    local level = gui.get_node(tostring(math.min(47, max_level + 1)) .. "/level")
     local pos = gui.get_position(level)
     gui.set_position(
         gui.get_node("cat"),

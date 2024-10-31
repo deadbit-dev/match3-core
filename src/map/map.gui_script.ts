@@ -41,7 +41,12 @@ export function init(this: props): void {
         }
     });
 
-    const level = gui.get_node(tostring(get_current_level() + 1) + "/level");
+    let max_level = 0;
+    for(const level of GameStorage.get('completed_levels')) {
+        if(level > max_level)
+            max_level = level;
+    }
+    const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");
     const pos = gui.get_position(level);
     gui.set_position(gui.get_node('cat'), pos);
 }

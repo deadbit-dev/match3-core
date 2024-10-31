@@ -488,8 +488,11 @@ function ____exports.Game()
         if not is_win then
             is_win = true
             local completed_levels = GameStorage.get("completed_levels")
-            completed_levels[#completed_levels + 1] = GameStorage.get("current_level")
-            GameStorage.set("completed_levels", completed_levels)
+            local current_level = GameStorage.get("current_level")
+            if not __TS__ArrayIncludes(completed_levels, current_level) then
+                completed_levels[#completed_levels + 1] = current_level
+                GameStorage.set("completed_levels", completed_levels)
+            end
             local last_state = get_state()
             add_coins(level_config.coins)
             if level_config.coins > 0 then
@@ -1251,24 +1254,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch264 = message.name
-            local ____cond264 = ____switch264 == "SPINNING"
-            if ____cond264 then
+            local ____switch265 = message.name
+            local ____cond265 = ____switch265 == "SPINNING"
+            if ____cond265 then
                 on_activate_spinning()
                 break
             end
-            ____cond264 = ____cond264 or ____switch264 == "HAMMER"
-            if ____cond264 then
+            ____cond265 = ____cond265 or ____switch265 == "HAMMER"
+            if ____cond265 then
                 on_activate_hammer()
                 break
             end
-            ____cond264 = ____cond264 or ____switch264 == "HORIZONTAL_ROCKET"
-            if ____cond264 then
+            ____cond265 = ____cond265 or ____switch265 == "HORIZONTAL_ROCKET"
+            if ____cond265 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond264 = ____cond264 or ____switch264 == "VERTICAL_ROCKET"
-            if ____cond264 then
+            ____cond265 = ____cond265 or ____switch265 == "VERTICAL_ROCKET"
+            if ____cond265 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -2100,29 +2103,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch450 = combination.type
-            local ____cond450 = ____switch450 == CombinationType.Comb4
-            if ____cond450 then
+            local ____switch451 = combination.type
+            local ____cond451 = ____switch451 == CombinationType.Comb4
+            if ____cond451 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond450 = ____cond450 or ____switch450 == CombinationType.Comb2x2
-            if ____cond450 then
+            ____cond451 = ____cond451 or ____switch451 == CombinationType.Comb2x2
+            if ____cond451 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond450 = ____cond450 or (____switch450 == CombinationType.Comb3x3a or ____switch450 == CombinationType.Comb3x3b)
-            if ____cond450 then
+            ____cond451 = ____cond451 or (____switch451 == CombinationType.Comb3x3a or ____switch451 == CombinationType.Comb3x3b)
+            if ____cond451 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond450 = ____cond450 or (____switch450 == CombinationType.Comb3x4a or ____switch450 == CombinationType.Comb3x4b or ____switch450 == CombinationType.Comb3x5)
-            if ____cond450 then
+            ____cond451 = ____cond451 or (____switch451 == CombinationType.Comb3x4a or ____switch451 == CombinationType.Comb3x4b or ____switch451 == CombinationType.Comb3x5)
+            if ____cond451 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond450 = ____cond450 or ____switch450 == CombinationType.Comb5
-            if ____cond450 then
+            ____cond451 = ____cond451 or ____switch451 == CombinationType.Comb5
+            if ____cond451 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
