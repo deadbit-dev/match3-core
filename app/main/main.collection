@@ -361,7 +361,7 @@ embedded_instances {
   "embedded_components {\n"
   "  id: \"coin\"\n"
   "  type: \"sound\"\n"
-  "  data: \"sound: \\\"/assets/sounds/coin_drop.ogg\\\"\\n"
+  "  data: \"sound: \\\"/assets/sounds/coin_drop_2.ogg\\\"\\n"
   "group: \\\"sfx\\\"\\n"
   "gain: 0.8\\n"
   "\"\n"
