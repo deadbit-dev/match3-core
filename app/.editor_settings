@@ -1,0 +1,175 @@
+{
+  :build {
+    :lint-code false
+    :texture-compression false
+  }
+  :bundle {
+    :android {
+      :architecture {
+        :arm64-android true
+        :armv7-android true
+      }
+      :format "apk"
+      :install false
+      :key-pass "D:\\Android\\Keys\\2023_games.txt"
+      :keystore "D:\\Android\\Keys\\2023_games.jks"
+      :keystore-pass "D:\\Android\\Keys\\2023_games.txt"
+      :launch true
+    }
+    :build-report true
+    :contentless false
+    :debug-symbols false
+    :html5 {
+      :architecture {
+        :js-web false
+        :wasm-web true
+      }
+    }
+    :liveupdate false
+    :output-directory "D:\\Defold\\projects\\builds"
+    :texture-compression "enabled"
+    :variant "release"
+    :windows {
+      :platform "x86_64-win32"
+    }
+  }
+  :code {
+    :find {
+      :case-sensitive true
+      :replacement "gameImage"
+      :term "use_height_projection"
+    }
+  }
+  :workflow {
+    :recent-files [
+      [
+        "/assets/cock/cock.spinescene"
+        :scene
+      ]
+      [
+        "/game/game.collection"
+        :scene
+      ]
+      [
+        "/main/adaptol.script"
+        :code
+      ]
+      [
+        "/game/animals/goose.collection"
+        :scene
+      ]
+      [
+        "/game/animals/cat.collection"
+        :scene
+      ]
+      [
+        "/game/animals/animal.script"
+        :code
+      ]
+      [
+        "/game/animals/cock.collection"
+        :scene
+      ]
+      [
+        "/project_settings/index.html"
+        :html
+      ]
+      [
+        "/project_settings/render.render_script"
+        :code
+      ]
+      [
+        "/main/main.collection"
+        :scene
+      ]
+      [
+        "/prefabs/element_view.go"
+        :scene
+      ]
+      [
+        "/prefabs/cell_view.go"
+        :scene
+      ]
+      [
+        "/prefabs/level.go"
+        :scene
+      ]
+      [
+        "/prefabs/substrate_view.go"
+        :scene
+      ]
+      [
+        "/prefabs/effect_view.go"
+        :scene
+      ]
+      [
+        "/modules/GoManager.lua"
+        :code
+      ]
+      [
+        "/assets/vfx/cells/grass/grass.spinescene"
+        :scene
+      ]
+      [
+        "/game/view.lua"
+        :code
+      ]
+      [
+        "/modules/Scene.lua"
+        :code
+      ]
+      [
+        "/assets/background.atlas"
+        :scene
+      ]
+      [
+        "/assets/background_old.atlas"
+        :scene
+      ]
+      [
+        "/assets/map.atlas"
+        :scene
+      ]
+      [
+        "/assets/bull/bull.spinescene"
+        :scene
+      ]
+      [
+        "/assets/vfx/cells/box/box.atlas"
+        :scene
+      ]
+      [
+        "/assets/vfx/dynamite/dynamite.atlas"
+        :scene
+      ]
+      [
+        "/assets/vfx/dynamite/dynamite.spinescene"
+        :scene
+      ]
+      [
+        "/assets/vfx/explode/explode.atlas"
+        :scene
+      ]
+      [
+        "/assets/vfx/explode/explode.spinescene"
+        :scene
+      ]
+      [
+        "/game/animals/bull.collection"
+        :scene
+      ]
+      [
+        "/map/map.gui"
+        :scene
+      ]
+      [
+        "/main/ui/parts/lable_button.gui"
+        :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
+      ]
+    ]
+  }
+}
