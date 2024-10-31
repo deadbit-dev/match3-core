@@ -1887,8 +1887,10 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "coins/text"
   parent: "coins/button"
+  overridden_fields: 10
   template_node_child: true
 }
 nodes {
@@ -1945,8 +1947,10 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "lifes/text"
   parent: "lifes/button"
+  overridden_fields: 10
   template_node_child: true
 }
 nodes {
