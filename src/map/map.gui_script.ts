@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { get_current_level } from '../game/utils';
 import { Dlg } from '../main/game_config';
 
 
@@ -39,6 +40,10 @@ export function init(this: props): void {
             load_level(0);
         }
     });
+
+    const level = gui.get_node(tostring(get_current_level() + 1) + "/level");
+    const pos = gui.get_position(level);
+    gui.set_position(gui.get_node('cat'), pos);
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {

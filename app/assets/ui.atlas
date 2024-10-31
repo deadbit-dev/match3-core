@@ -244,4 +244,7 @@ images {
 images {
   image: "/assets/ui/start.png"
 }
+images {
+  image: "/assets/ui/cat_icon.png"
+}
 extrude_borders: 2

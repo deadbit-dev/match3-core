@@ -1387,6 +1387,24 @@ nodes {
 }
 nodes {
   position {
+    x: 120.83332
+    y: 55.0
+  }
+  scale {
+    x: 0.1
+    y: 0.1
+  }
+  type: TYPE_BOX
+  texture: "ui/cat_icon"
+  id: "cat"
+  pivot: PIVOT_S
+  parent: "levels"
+  layer: "top"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
     x: 240.0
     y: 338.0
   }
