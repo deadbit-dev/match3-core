@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as js from 'defjs.defjs';
 import { _STORAGE_CONFIG } from '../main/game_config';
-import { CbBannerState, CbInterstitialState, CbLeaderboardList, CbResultData, CbResultVal, CbRewardedState, CbVisibleState } from './HtmlBridgeTypes';
+import { CbBannerState, CbInterstitialState, CbLeaderboardList, CbResultData, CbResultDataType, CbResultVal, CbRewardedState, CbVisibleState, IGetFlagsParams, Purchase } from './HtmlBridgeTypes';
 
 declare global {
     const HtmlBridge: ReturnType<typeof HtmlBridgeModule>;
@@ -66,7 +66,7 @@ function HtmlBridgeModule() {
     }
 
     function get_platform_device() {
-        return js.call_js('sdk.get_platform_device') as 'android' | 'ios' | 'mobile-web' | 'web';
+        return js.call_js('sdk.get_platform_device') as 'android' | 'ios' | 'pc';
     }
 
     function get_platform_tld() {
@@ -138,6 +138,25 @@ function HtmlBridgeModule() {
         js.call_js_with_callback('sdk.get_leaderboard_entries', params, cb);
     }
 
+    function init_purchases(cb: CbResultData) {
+        js.call_js_with_callback('sdk.init_purchases', {}, cb);
+    }
+
+    function get_purchases(cb: CbResultData) {
+        js.call_js_with_callback('sdk.get_purchases', {}, cb);
+    }
+
+    function purchase(params: { id: string, developerPayload?: string }, cb: CbResultDataType<Purchase>) {
+        js.call_js_with_callback('sdk.purchase', params, cb);
+    }
+
+    function consume_purchase(token: string, cb: CbResultData) {
+        js.call_js_with_callback('sdk.consume_purchase', { token }, cb);
+    }
+
+    function get_flags(params: IGetFlagsParams, cb: CbResultData) {
+        js.call_js_with_callback('sdk.get_flags', params, cb);
+    }
 
     function bind_visible_state(cb: CbVisibleState) {
         js.call_js_with_static_callback('sdk.bind_visible_state', {}, cb);
@@ -155,6 +174,14 @@ function HtmlBridgeModule() {
         js.call_js_with_static_callback('sdk.bind_rewarded_events', {}, cb);
     }
 
+    function open_url(url: string) {
+        js.call_js('window.open', url, '_blank');
+    }
+
+    function game_ready() {
+        js.call_js('sdk.game_ready');
+    }
+
 
     return {
         init, get_data_from_storage, set_data_to_storage, show_banner, hide_banner, show_interstitial, show_rewarded,
@@ -162,6 +189,6 @@ function HtmlBridgeModule() {
         bind_visible_state, bind_interstitial_events, bind_banner_events, bind_rewarded_events,
         get_language, get_payload, is_favorite_supported, is_share_supported, is_player_authorized,
         player_id, player_name, player_photos, share, rate, add_to_favorites, has_ad_block,
-        set_leaderboard_score, get_leaderboard_score, get_leaderboard_entries,
+        set_leaderboard_score, get_leaderboard_score, get_leaderboard_entries, init_purchases, get_purchases, purchase, consume_purchase, get_flags, open_url, game_ready
     };
 }
