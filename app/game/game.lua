@@ -1288,6 +1288,9 @@ function ____exports.Game()
             "spinning_counts",
             GameStorage.get("spinning_counts") - 1
         )
+        if is_tutorial() then
+            complete_tutorial()
+        end
         stop_helper()
         shuffle()
         Metrica.report(
@@ -1301,9 +1304,6 @@ function ____exports.Game()
         busters.horizontal_rocket.active = false
         busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
-        if is_tutorial() then
-            complete_tutorial()
-        end
     end
     function on_activate_hammer()
         if busters.hammer.block then

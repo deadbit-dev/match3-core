@@ -1218,6 +1218,9 @@ export function Game() {
 
         GameStorage.set('spinning_counts', GameStorage.get('spinning_counts') - 1);
 
+        if(is_tutorial())
+            complete_tutorial();
+
         stop_helper();
         shuffle();
         
@@ -1227,11 +1230,7 @@ export function Game() {
         busters.horizontal_rocket.active = false;
         busters.vertical_rocket.active = false;
 
-        EventBus.send('UPDATED_BUTTONS');
-
-        if(is_tutorial())
-            complete_tutorial();
-        
+        EventBus.send('UPDATED_BUTTONS');   
     }
 
     function on_activate_hammer() {
