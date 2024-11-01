@@ -423,16 +423,16 @@ function setup_gameover_ui(instance)
     )
     gui.set_text(
         gui.get_node("steps_by_coins/text"),
-        "+5 ходов         500"
+        "+5 ходов        30"
     )
     instance.druid:new_button(
         "steps_by_coins/button",
         function()
-            if not is_enough_coins(500) then
+            if not is_enough_coins(30) then
                 EventBus.send("REQUEST_OPEN_STORE")
                 return
             end
-            remove_coins(500)
+            remove_coins(30)
             Metrica.report(
                 "data",
                 {fail_level = {

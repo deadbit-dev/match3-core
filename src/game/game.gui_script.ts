@@ -341,13 +341,13 @@ function setup_gameover_ui(instance: props) {
         EventBus.send('REVIVE', 3);
     });
     
-    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов         500");
+    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов        30");
     instance.druid.new_button('steps_by_coins/button', () => {
-        if(!is_enough_coins(500)) {
+        if(!is_enough_coins(30)) {
             EventBus.send('REQUEST_OPEN_STORE');
             return;
         }
-        remove_coins(500);
+        remove_coins(30);
         Metrica.report('data', {fail_level: {level: get_current_level() + 1, event:'5step_money'}});
         EventBus.send('REVIVE', 5);
     });
