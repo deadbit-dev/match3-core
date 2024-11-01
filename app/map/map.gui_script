@@ -115,7 +115,7 @@ function ____exports.init(self)
     set_completed_levels()
     set_level_buttons(self)
     set_events(self)
-    Sound.play("map")
+    Sound.set_gain("map", 1)
     Scene.load_resource("map", "shared_gui")
     timer.delay(
         0,

@@ -91,6 +91,8 @@ export function init(this: props) {
         Sound.attach_druid_click('btn');
         Camera.set_go_prjection(-1, 1, -3, 3);
 
+        Sound.play('map', 1, 0.7);
+
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 
