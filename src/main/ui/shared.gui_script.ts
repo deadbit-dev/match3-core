@@ -133,6 +133,12 @@ function setup_store(data: props) {
     }
     
     data.druid.new_button('store/buy_30_btn', () => {
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            add_coins(30);
+            return;
+        }
+
         HtmlBridge.purchase({ id: 'maney30' }, (result, purchase) => {
             if (!result)
                 return () => {};
@@ -147,6 +153,12 @@ function setup_store(data: props) {
     });
 
     data.druid.new_button('store/buy_150_btn', () => {
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            add_coins(150);
+            return;
+        }
+
         HtmlBridge.purchase({ id: 'maney150' }, (result, purchase) => {
             if (!result)
                 return () => {};
@@ -161,6 +173,12 @@ function setup_store(data: props) {
     });
 
     data.druid.new_button('store/buy_300_btn', () => {
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            add_coins(300);
+            return;
+        }
+
         HtmlBridge.purchase({ id: 'maney300' }, (result, purchase) => {
             if (!result)
                 return () => {};
@@ -175,6 +193,12 @@ function setup_store(data: props) {
     });
 
     data.druid.new_button('store/buy_800_btn', () => {
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            add_coins(800);
+            return;
+        }
+
         HtmlBridge.purchase({ id: 'maney800' }, (result, purchase) => {
             if (!result)
                 return () => {};

@@ -159,6 +159,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_30_btn",
         function()
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                add_coins(30)
+                return
+            end
             HtmlBridge.purchase(
                 {id = "maney30"},
                 function(result, purchase)
@@ -181,6 +186,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_150_btn",
         function()
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                add_coins(150)
+                return
+            end
             HtmlBridge.purchase(
                 {id = "maney150"},
                 function(result, purchase)
@@ -203,6 +213,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_300_btn",
         function()
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                add_coins(300)
+                return
+            end
             HtmlBridge.purchase(
                 {id = "maney300"},
                 function(result, purchase)
@@ -225,6 +240,11 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_800_btn",
         function()
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                add_coins(800)
+                return
+            end
             HtmlBridge.purchase(
                 {id = "maney800"},
                 function(result, purchase)
@@ -796,17 +816,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch118 = scene.name
-        local ____cond118 = ____switch118 == "game"
-        if ____cond118 then
+        local ____switch122 = scene.name
+        local ____cond122 = ____switch122 == "game"
+        if ____cond122 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond118 = ____cond118 or ____switch118 == "map"
-        if ____cond118 then
+        ____cond122 = ____cond122 or ____switch122 == "map"
+        if ____cond122 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -831,9 +851,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch123 = Scene.get_current_name()
-        local ____cond123 = ____switch123 == "game"
-        if ____cond123 then
+        local ____switch127 = Scene.get_current_name()
+        local ____cond127 = ____switch127 == "game"
+        if ____cond127 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -842,8 +862,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond123 = ____cond123 or ____switch123 == "map"
-        if ____cond123 then
+        ____cond127 = ____cond127 or ____switch127 == "map"
+        if ____cond127 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -904,9 +924,9 @@ function set_enabled_settings(data, state)
     end
     if state then
         repeat
-            local ____switch130 = Scene.get_current_name()
-            local ____cond130 = ____switch130 == "game"
-            if ____cond130 then
+            local ____switch134 = Scene.get_current_name()
+            local ____cond134 = ____switch134 == "game"
+            if ____cond134 then
                 gui.set_enabled(
                     gui.get_node("map_button"),
                     true
