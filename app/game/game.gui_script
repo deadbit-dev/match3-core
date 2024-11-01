@@ -858,11 +858,11 @@ function on_win_end(state)
                             gui.get_node("coins_count"),
                             tostring(before_reward)
                         )
-                        local function on_each_coin_drop_end(idx)
+                        local function on_each_coin_drop_end(init_value, idx)
                             Sound.play("coin")
                             gui.set_text(
                                 gui.get_node("coins_count"),
-                                tostring(before_reward + idx + 1)
+                                tostring(init_value + idx + 1)
                             )
                             local icon = gui.get_node("coin_icon")
                             local init_scale = gui.get_scale(icon)
@@ -915,6 +915,7 @@ function on_win_end(state)
                                     end
                                 end
                                 drop_coins(
+                                    before_reward,
                                     steps + remaining_time,
                                     steptime_points,
                                     on_each_coin_drop_start,
@@ -922,6 +923,7 @@ function on_win_end(state)
                                     function()
                                         fade_steptime()
                                         drop_coins(
+                                            before_reward + steps + remaining_time,
                                             level_coins,
                                             level_coin_points,
                                             nil,
@@ -932,6 +934,7 @@ function on_win_end(state)
                                 )
                             else
                                 drop_coins(
+                                    before_reward,
                                     level_coins,
                                     level_coin_points,
                                     nil,
@@ -996,7 +999,7 @@ function fade_steptime()
         end
     )
 end
-function drop_coins(amount, points, on_each_drop_start, on_each_drop_end, on_end)
+function drop_coins(init_value, amount, points, on_each_drop_start, on_each_drop_end, on_end)
     do
         local i = 0
         while i < amount do
@@ -1034,7 +1037,7 @@ function drop_coins(amount, points, on_each_drop_start, on_each_drop_end, on_end
                         end
                         gui.delete_node(coin)
                         if on_each_drop_end ~= nil then
-                            on_each_drop_end(idx)
+                            on_each_drop_end(init_value, idx)
                         end
                     end)
                 end

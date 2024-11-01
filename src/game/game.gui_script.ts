@@ -574,10 +574,10 @@ function on_win_end(state: GameState) {
                 gui.set_enabled(gui.get_node('reward'), true);
                 gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
 
-                const on_each_coin_drop_end = (idx: number) => {
+                const on_each_coin_drop_end = (init_value: number, idx: number) => {
                     Sound.play('coin');
 
-                    gui.set_text(gui.get_node('coins_count'), tostring(before_reward + idx + 1));
+                    gui.set_text(gui.get_node('coins_count'), tostring(init_value + idx + 1));
                     const icon = gui.get_node('coin_icon');
                     const init_scale = gui.get_scale(icon);
                     gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
@@ -613,11 +613,11 @@ function on_win_end(state: GameState) {
                             }
                         };
 
-                        drop_coins(steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
+                        drop_coins(before_reward, steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
                             fade_steptime();
-                            drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
+                            drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
                         });
-                    } else drop_coins(level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
+                    } else drop_coins(before_reward, level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
                 });
             } else on_end_for_last_level();
         });
@@ -649,7 +649,7 @@ function fade_steptime() {
     });
 }
 
-function drop_coins(amount: number, points: Position[], on_each_drop_start?: (idx: number) => void, on_each_drop_end?: (idx: number) => void, on_end?: () => void) {
+function drop_coins(init_value: number, amount: number, points: Position[], on_each_drop_start?: (inidx: number) => void, on_each_drop_end?: (init_value: number, idx: number) => void, on_end?: () => void) {
     for(let i = 0; i < amount; i++) {
         const idx = i;
         timer.delay(0.1 * i, false, () => {
@@ -673,7 +673,7 @@ function drop_coins(amount: number, points: Position[], on_each_drop_start?: (id
                 gui.delete_node(coin);
 
                 if(on_each_drop_end != undefined)
-                    on_each_drop_end(idx);
+                    on_each_drop_end(init_value, idx);
             });
         });
     }
