@@ -42,8 +42,8 @@ export function init(this: props): void {
     });
 
     let max_level = 0;
-    for(const level of GameStorage.get('completed_levels')) {
-        if(level > max_level)
+    for(let level of GameStorage.get('completed_levels')) {
+        if(++level > max_level)
             max_level = level;
     }
     const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");

@@ -129,6 +129,7 @@ function ____exports.init(self)
     )
     local max_level = 0
     for ____, level in ipairs(GameStorage.get("completed_levels")) do
+        level = level + 1
         if level > max_level then
             max_level = level
         end
