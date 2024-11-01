@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { get_current_level } from '../game/utils';
 import { Dlg } from '../main/game_config';
 
 
@@ -55,6 +54,15 @@ export function on_input(this: props, action_id: string | hash, action: any): vo
     if(GAME_CONFIG.is_busy_input || this.block_input) return;
 
     this.druid.on_input(action_id, action);
+    
+    if(action_id == hash("scroll_up") && action.value == 1) {
+        return on_scroll(250);
+    }
+    
+    if(action_id == hash("scroll_down") && action.value == 1) {
+        return on_scroll(-250);
+    }
+
     if(action_id == ID_MESSAGES.MSG_TOUCH && !action.pressed && !action.released) on_drag(action);
 }
 
@@ -117,6 +125,15 @@ function on_drag(action: any) {
     pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y + action.dy));
     gui.set_position(map, pos);
 
+    GameStorage.set('map_last_pos_y', pos.y);
+}
+
+function on_scroll(value: number) {
+    const map = gui.get_node('map');
+    const pos = gui.get_position(map);
+    const offset = get_offset();
+    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y + value));
+    gui.animate(map, gui.PROP_POSITION, pos, gui.EASING_OUTQUAD, 0.5);
     GameStorage.set('map_last_pos_y', pos.y);
 }
 
