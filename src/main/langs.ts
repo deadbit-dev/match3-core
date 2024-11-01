@@ -101,19 +101,19 @@ export const lang_data = {
   },
   "hammer_description": {
     "Русский-ru": "Разбивает один любой предмет",
-    "Английский-en": "Hammer description"
+    "Английский-en": "Breaks any one item"
   },
   "spinning_description": {
     "Русский-ru": "Перемешивает предметы",
-    "Английский-en": "Spinning description"
+    "Английский-en": "Mixes objects"
   },
   "horizontal_rocket_description": {
     "Русский-ru": "Разрушает все предметы по горизонтали",
-    "Английский-en": "Hammer description"
+    "Английский-en": "Destroys all objects horizontally"
   },
   "vertical_rocket_description": {
     "Русский-ru": "Разрушает все предметы по вертикали",
-    "Английский-en": "Vertical Rocket description"
+    "Английский-en": "Destroys all objects vertically"
   },
   "buy": {
     "Русский-ru": "Купить",
@@ -128,7 +128,7 @@ export const lang_data = {
     "Английский-en": "Lifes"
   },
   "junior_box": {
-    "Русский-ru": "Набор новичкка",
+    "Русский-ru": "Набор новичка",
     "Английский-en": "Junior box"
   },
   "catlover_box": {
@@ -187,5 +187,4 @@ export const lang_data = {
     "Русский-ru": "Cпасибо за игру, ожидайте следующую главу в ближайшее время.",
     "Английский-en": "Thanks for playing, stay tuned for the next chapter soon."
   }
-  
 };

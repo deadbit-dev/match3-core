@@ -216,19 +216,33 @@ function setup_store(data: props) {
 
     data.druid.new_button('store/buy_x1_btn', () => {
         // if(is_max_lifes()) return;
-        if(!is_enough_coins(30)) {
+        if(!is_enough_coins(20)) {
             return set_enabled_not_enough_coins(data, true);
         }
 
         Sound.play('purchase');
 
         add_lifes(1);
-        remove_coins(30);
+        remove_coins(20);
 
         Metrica.report('data', { shop: {buy: 'life1'}});
     });
 
     data.druid.new_button('store/buy_x2_btn', () => {
+        // if(is_max_lifes()) return;
+        if(!is_enough_coins(35)) {
+            return set_enabled_not_enough_coins(data, true);
+        }
+
+        Sound.play('purchase');
+
+        add_lifes(2);
+        remove_coins(35);
+
+        Metrica.report('data', { shop: {buy: 'life2'}});
+    });
+
+    data.druid.new_button('store/buy_x3_btn', () => {
         // if(is_max_lifes()) return;
         if(!is_enough_coins(50)) {
             return set_enabled_not_enough_coins(data, true);
@@ -236,22 +250,8 @@ function setup_store(data: props) {
 
         Sound.play('purchase');
 
-        add_lifes(2);
-        remove_coins(50);
-
-        Metrica.report('data', { shop: {buy: 'life2'}});
-    });
-
-    data.druid.new_button('store/buy_x3_btn', () => {
-        // if(is_max_lifes()) return;
-        if(!is_enough_coins(70)) {
-            return set_enabled_not_enough_coins(data, true);
-        }
-
-        Sound.play('purchase');
-
         add_lifes(3);
-        remove_coins(70);
+        remove_coins(50);
 
         Metrica.report('data', { shop: {buy: 'life3'}});
     });
@@ -259,12 +259,11 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
 
     data.druid.new_button('store/junior_box/buy_button/button', () => {
-        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(data, true);
+        if(!is_enough_coins(60)) return set_enabled_not_enough_coins(data, true);
 
         Sound.play('purchase');
 
-        remove_coins(80);
-        // add_coins(150);
+        remove_coins(60);
         
         set_infinit_life(1);
         
@@ -281,12 +280,11 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
     
     data.druid.new_button('store/catlover_box/buy_button/button', () => {
-        if(!is_enough_coins(160)) return set_enabled_not_enough_coins(data, true);
+        if(!is_enough_coins(100)) return set_enabled_not_enough_coins(data, true);
 
         Sound.play('purchase');
 
-        remove_coins(160);
-        // add_coins(300);
+        remove_coins(100);
 
         set_infinit_life(24);
         
@@ -308,25 +306,25 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
 
     data.druid.new_button('store/buy_ad_1_btn', () => {
-        if(!is_enough_coins(100)) return set_enabled_not_enough_coins(data, true);
+        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
-        remove_coins(100);
+        remove_coins(80);
 
         Metrica.report('data', { shop: {buy: 'noads1'}});
     });
 
     data.druid.new_button('store/buy_ad_7_btn', () => {
-        if(!is_enough_coins(250)) return set_enabled_not_enough_coins(data, true);
+        if(!is_enough_coins(200)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
-        remove_coins(250);
+        remove_coins(200);
 
         Metrica.report('data', { shop: {buy: 'noads7'}});
     });
 
     data.druid.new_button('store/buy_ad_30_btn', () => {
-        if(!is_enough_coins(600)) return set_enabled_not_enough_coins(data, true);
+        if(!is_enough_coins(500)) return set_enabled_not_enough_coins(data, true);
         Sound.play('purchase');
-        remove_coins(600);
+        remove_coins(500);
 
         Metrica.report('data', { shop: {buy: 'noads30'}});
     });
