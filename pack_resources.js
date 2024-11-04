@@ -13,10 +13,13 @@ function main() {
 
 function load_config_async(on_loaded) {
     const program = new Command();
-    program.command('run').argument('[string]', 'resource file').action((path) => {
-        fs.readFile(path ? path : config_path, 'utf8', (err, data) => {
-            if(err) throw err;
-            on_loaded(JSON.parse(data));
+    program.command('run').argument('[string]', 'build_path').action((path) => {
+        fs.readFile(config_path, 'utf8', (err, data) => {
+            if(err)
+                throw err;
+            const config = JSON.parse(data);
+            if(path) config.build_path = path
+            on_loaded(config);
         });
     });
 
