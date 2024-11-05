@@ -707,6 +707,7 @@ function set_enabled_settings(data: props, state: boolean) {
                 gui.set_position(gui.get_node('ok_button'), vmath.vector3(0, -210, 0));
                 set_enabled_coins(false);
                 set_enabled_lifes(false);
+                set_enabled_settings_button(false);
                 set_enabled_store_button(false);
             break;
         } 
@@ -725,6 +726,7 @@ function set_enabled_settings(data: props, state: boolean) {
         if(Scene.get_current_name() == 'map') {
             set_enabled_coins(true);
             set_enabled_lifes(true);
+            set_enabled_settings_button(true);
             set_enabled_store_button(true);
         }
     }

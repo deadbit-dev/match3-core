@@ -948,6 +948,7 @@ function set_enabled_settings(data, state)
                 )
                 set_enabled_coins(false)
                 set_enabled_lifes(false)
+                set_enabled_settings_button(false)
                 set_enabled_store_button(false)
                 break
             end
@@ -991,6 +992,7 @@ function set_enabled_settings(data, state)
         if Scene.get_current_name() == "map" then
             set_enabled_coins(true)
             set_enabled_lifes(true)
+            set_enabled_settings_button(true)
             set_enabled_store_button(true)
         end
     end
