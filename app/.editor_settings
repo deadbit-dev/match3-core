@@ -25,7 +25,7 @@
         :wasm-web true
       }
     }
-    :liveupdate false
+    :liveupdate true
     :output-directory "D:\\Defold\\projects\\builds"
     :texture-compression "enabled"
     :variant "release"
@@ -43,70 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/cock/cock.spinescene"
-        :scene
-      ]
-      [
-        "/game/game.collection"
-        :scene
-      ]
-      [
-        "/main/adaptol.script"
-        :code
-      ]
-      [
-        "/game/animals/goose.collection"
-        :scene
-      ]
-      [
-        "/game/animals/cat.collection"
-        :scene
-      ]
-      [
-        "/game/animals/animal.script"
-        :code
-      ]
-      [
-        "/game/animals/cock.collection"
-        :scene
-      ]
-      [
-        "/project_settings/index.html"
-        :html
-      ]
-      [
-        "/project_settings/render.render_script"
-        :code
-      ]
-      [
-        "/main/main.collection"
-        :scene
-      ]
-      [
-        "/prefabs/element_view.go"
-        :scene
-      ]
-      [
-        "/prefabs/cell_view.go"
-        :scene
-      ]
-      [
-        "/prefabs/level.go"
-        :scene
-      ]
-      [
-        "/prefabs/substrate_view.go"
-        :scene
-      ]
-      [
-        "/prefabs/effect_view.go"
-        :scene
-      ]
-      [
-        "/modules/GoManager.lua"
-        :code
-      ]
-      [
         "/assets/vfx/cells/grass/grass.spinescene"
         :scene
       ]
@@ -120,10 +56,6 @@
       ]
       [
         "/assets/background.atlas"
-        :scene
-      ]
-      [
-        "/assets/background_old.atlas"
         :scene
       ]
       [
@@ -159,16 +91,84 @@
         :scene
       ]
       [
+        "/main/ui/parts/lable_button.gui"
+        :scene
+      ]
+      [
         "/map/map.gui"
         :scene
       ]
       [
-        "/main/ui/parts/lable_button.gui"
+        "/assets/background_old.atlas"
         :scene
       ]
       [
         "/game.project"
         :cljfx-form-view
+      ]
+      [
+        "/project_settings/TextureProfile.texture_profiles"
+        :cljfx-form-view
+      ]
+      [
+        "/assets/fonts/16.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/27.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/24.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/18.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/27_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32-top.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32_bold_outline.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/36_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/42.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/48.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/44.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/64.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/70.font"
+        :scene
       ]
     ]
   }

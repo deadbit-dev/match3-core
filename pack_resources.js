@@ -1,3 +1,10 @@
+/*
+1) делаем билд с галочкой "Publish live update content"
+2) из папки проекта(D:\Defold\projects\Match3-core\app\build\resources) берем архив ресурсов и переносим в папку куда билдился весь проект (D:\Defold\projects\builds\wasm-web\Matсh3)
+3) вызываем node pack_resources.js run "D:/Defold/projects/builds/wasm-web/Matсh3"
+4) удаляем архив ресурсов
+*/
+
 const fs = require('fs');
 const path = require('path');
 const decompress = require('decompress');
