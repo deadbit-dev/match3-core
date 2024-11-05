@@ -1,15 +1,7 @@
 script: "/main/ui/shared.gui_script"
 fonts {
-  name: "42"
-  font: "/assets/fonts/42.font"
-}
-fonts {
   name: "48"
   font: "/assets/fonts/48.font"
-}
-fonts {
-  name: "44"
-  font: "/assets/fonts/44.font"
 }
 textures {
   name: "ui"
@@ -2061,9 +2053,13 @@ nodes {
   position {
     y: 260.0
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
-    x: 370.0
-    y: 70.0
+    x: 296.0
+    y: 56.0
   }
   color {
     y: 0.855
@@ -2071,7 +2067,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270"
-  font: "42"
+  font: "48"
   id: "title_text"
   outline {
     x: 0.498
@@ -2107,16 +2103,16 @@ nodes {
     y: 5.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.63
+    y: 0.63
   }
   size {
     x: 250.0
-    y: 50.0
+    y: 45.0
   }
   type: TYPE_TEXT
   text: "O\320\272"
-  font: "44"
+  font: "48"
   id: "buy_button_text"
   outline {
     x: 0.169
@@ -2174,9 +2170,13 @@ nodes {
     x: -106.0
     y: 65.666664
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
-    x: 300.0
-    y: 100.0
+    x: 240.0
+    y: 80.0
   }
   color {
     x: 0.498
@@ -2185,7 +2185,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\227\320\262\321\203\320\272\320\270"
-  font: "42"
+  font: "48"
   id: "sound_lable"
   pivot: PIVOT_W
   outline {
@@ -2211,9 +2211,13 @@ nodes {
     x: -106.0
     y: -60.333332
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
-    x: 300.0
-    y: 100.0
+    x: 240.0
+    y: 80.0
   }
   color {
     x: 0.498
@@ -2222,7 +2226,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\234\321\203\320\267\321\213\320\272\320\260"
-  font: "42"
+  font: "48"
   id: "music_lable"
   pivot: PIVOT_W
   outline {
@@ -2346,17 +2350,17 @@ nodes {
     y: 5.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.63
+    y: 0.63
   }
   size {
-    x: 250.0
-    y: 50.0
+    x: 225.0
+    y: 45.0
   }
   type: TYPE_TEXT
   text: "\320\275\320\260 \320\272\320\260\321\200\321\202\321\203\n"
   ""
-  font: "44"
+  font: "48"
   id: "buy_button_text1"
   outline {
     x: 0.169

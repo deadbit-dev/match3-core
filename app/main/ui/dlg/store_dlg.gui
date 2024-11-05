@@ -3,8 +3,8 @@ fonts {
   font: "/assets/fonts/32.font"
 }
 fonts {
-  name: "42"
-  font: "/assets/fonts/42.font"
+  name: "48"
+  font: "/assets/fonts/48.font"
 }
 fonts {
   name: "18"
@@ -73,9 +73,13 @@ nodes {
   position {
     y: -22.0
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
-    x: 250.0
-    y: 50.0
+    x: 200.0
+    y: 40.0
   }
   color {
     y: 0.855
@@ -83,7 +87,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\233\320\260\320\262\320\272\320\260"
-  font: "42"
+  font: "48"
   id: "store_title_text"
   outline {
     x: 0.498

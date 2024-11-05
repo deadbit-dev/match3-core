@@ -8,8 +8,8 @@ fonts {
   font: "/assets/fonts/27_medium.font"
 }
 fonts {
-  name: "42"
-  font: "/assets/fonts/42.font"
+  name: "48"
+  font: "/assets/fonts/48.font"
 }
 textures {
   name: "ui"
@@ -125,13 +125,17 @@ nodes {
   position {
     y: 3.333333
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
-    x: 200.0
-    y: 100.0
+    x: 160.0
+    y: 80.0
   }
   type: TYPE_TEXT
   text: "\320\235\320\260\321\207\320\260\321\202\321\214"
-  font: "42"
+  font: "48"
   id: "start_lable"
   parent: "start_button"
   inherit_alpha: true

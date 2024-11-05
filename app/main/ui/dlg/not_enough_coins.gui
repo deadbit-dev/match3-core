@@ -1,6 +1,6 @@
 fonts {
-  name: "42"
-  font: "/assets/fonts/42.font"
+  name: "48"
+  font: "/assets/fonts/48.font"
 }
 fonts {
   name: "32"
@@ -45,12 +45,12 @@ nodes {
     y: 62.0
   }
   scale {
-    x: 1.5
-    y: 1.5
+    x: 1.2
+    y: 1.2
   }
   size {
-    x: 370.0
-    y: 70.0
+    x: 296.0
+    y: 56.0
   }
   color {
     x: 0.498
@@ -59,7 +59,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\235\320\265\320\264\320\276\321\201\321\202\320\260\321\202\320\276\321\207\320\275\320\276 \320\274\320\276\320\275\320\265\321\202"
-  font: "42"
+  font: "48"
   id: "title_text"
   outline {
     x: 0.498
@@ -97,7 +97,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\320\236\320\272"
-  font: "42"
+  font: "48"
   id: "buy_button_text"
   outline {
     x: 0.169

@@ -16,16 +16,12 @@ fonts {
   font: "/assets/fonts/18.font"
 }
 fonts {
-  name: "42"
-  font: "/assets/fonts/42.font"
+  name: "48"
+  font: "/assets/fonts/48.font"
 }
 fonts {
   name: "32-top"
   font: "/assets/fonts/32-top.font"
-}
-fonts {
-  name: "24"
-  font: "/assets/fonts/24.font"
 }
 fonts {
   name: "60"
@@ -124,12 +120,12 @@ nodes {
     y: 4.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.56
+    y: 0.56
   }
   size {
-    x: 150.0
-    y: 50.0
+    x: 120.0
+    y: 40.0
   }
   color {
     y: 0.855
@@ -137,7 +133,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\321\205\320\276\320\264\321\213"
-  font: "42"
+  font: "48"
   id: "step_time_box/text"
   outline {
     x: 0.498
@@ -204,6 +200,10 @@ nodes {
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   color {
     x: 0.988
     y: 0.969
@@ -211,7 +211,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "00:00"
-  font: "42"
+  font: "48"
   id: "time"
   outline {
     x: 0.388
@@ -267,12 +267,12 @@ nodes {
     y: 6.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.56
+    y: 0.56
   }
   size {
-    x: 150.0
-    y: 50.0
+    x: 120.0
+    y: 40.0
   }
   color {
     y: 0.855
@@ -280,7 +280,7 @@ nodes {
   }
   type: TYPE_TEXT
   text: "\321\206\320\265\320\273\321\214"
-  font: "42"
+  font: "48"
   id: "targets_box/text"
   outline {
     x: 0.498
@@ -1640,9 +1640,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "hammer/counts"
   parent: "hammer/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1690,9 +1700,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "spinning/counts"
   parent: "spinning/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1746,9 +1766,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "horizontal_rocket/counts"
   parent: "horizontal_rocket/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1796,9 +1826,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "vertical_rocket/counts"
   parent: "vertical_rocket/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1851,9 +1891,19 @@ nodes {
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "settings/counts"
   parent: "settings/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1924,9 +1974,19 @@ nodes {
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "restart/counts"
   parent: "restart/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -1982,9 +2042,19 @@ nodes {
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "back/counts"
   parent: "back/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
@@ -2041,9 +2111,19 @@ nodes {
   enabled: false
 }
 nodes {
+  scale {
+    x: 0.4
+    y: 0.4
+  }
+  size {
+    x: 40.0
+    y: 40.0
+  }
   type: TYPE_TEXT
   id: "rewind/counts"
   parent: "rewind/button"
+  overridden_fields: 3
+  overridden_fields: 4
   template_node_child: true
 }
 nodes {
