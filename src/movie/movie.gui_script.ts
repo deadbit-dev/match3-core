@@ -24,7 +24,10 @@ export function init(this: props): void {
 
     this.druid.new_button('btn', () => {
         gui.set_enabled(gui.get_node('window'), false);
-        Scene.load("map");
+        GAME_CONFIG.steps_by_ad = 0;
+        GameStorage.set('current_level', 0);
+        Sound.stop('map');
+        Scene.load('game');
     });
 
     gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));

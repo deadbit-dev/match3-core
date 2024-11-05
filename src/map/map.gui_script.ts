@@ -39,7 +39,6 @@ export function init(this: props): void {
     timer.delay(0, false, () => {
         if(!GameStorage.get('move_showed')) {
             GameStorage.set("move_showed", true);
-            load_level(0);
         }
     });
 

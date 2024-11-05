@@ -2,6 +2,7 @@
     "graph_path": "./app/build/default/game.graph.json",
     "build_path": "/Users/pavel/Dev/match3-core/app/build/wasm-web/Matсh3",
     "resources": [
+        "/map/map.collectionc",
         "/game/background.collectionc",
         "/game/animals/bull.collectionc",
         "/game/animals/cat.collectionc",

@@ -34,7 +34,10 @@ function ____exports.init(self)
                 gui.get_node("window"),
                 false
             )
-            Scene.load("map")
+            GAME_CONFIG.steps_by_ad = 0
+            GameStorage.set("current_level", 0)
+            Sound.stop("map")
+            Scene.load("game")
         end
     )
     gui.set_text(

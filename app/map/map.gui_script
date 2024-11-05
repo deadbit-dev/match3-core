@@ -143,7 +143,6 @@ function ____exports.init(self)
         function()
             if not GameStorage.get("move_showed") then
                 GameStorage.set("move_showed", true)
-                load_level(0)
             end
         end
     )
