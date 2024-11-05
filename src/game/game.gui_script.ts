@@ -68,6 +68,7 @@ export function init(this: props): void {
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
     this.busters = this.level['busters'];
 
+    set_text('text', Lang.get_text('play'));
     // FIXME: (for now) test animal tutorial tip
     this.druid.new_button('btn', () => {
         const window = gui.get_node('window');

@@ -1413,6 +1413,10 @@ function ____exports.init(self)
     self.druid = druid.new(self)
     self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     self.busters = self.level.busters
+    set_text(
+        "text",
+        Lang.get_text("play")
+    )
     self.druid:new_button(
         "btn",
         function()
