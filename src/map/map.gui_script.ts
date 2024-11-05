@@ -30,6 +30,9 @@ export function init(this: props): void {
 
     set_events(this);
 
+    if(GameStorage.get('move_showed'))
+        Sound.play('map');
+
     Sound.set_gain('map', 1);
     Scene.load_resource('map', 'shared_gui');
 
