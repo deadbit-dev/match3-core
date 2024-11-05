@@ -510,6 +510,7 @@ export enum Dlg {
 
 // пользовательские сообщения под конкретный проект, доступны типы через глобальную тип-переменную UserMessages
 export type _UserMessages = {
+    SYS_ASYNC_LOAD_RESOURCE: NameMessage,
     SYS_LOAD_RESOURCE: NameMessage,
     SYS_UNLOAD_RESOURCE: NameMessage,
 

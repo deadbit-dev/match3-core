@@ -38,6 +38,7 @@ function ____exports.init(self)
             GameStorage.set("current_level", 0)
             Sound.stop("map")
             Scene.load("game")
+            Scene.try_load_async("map")
         end
     )
     gui.set_text(

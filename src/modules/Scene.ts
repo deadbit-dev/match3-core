@@ -93,6 +93,10 @@ function SceneModule() {
         Manager.send('SYS_RESTART_SCENE');
     }
 
+    function try_load_async(name: string) {
+        Manager.send('SYS_ASYNC_LOAD_RESOURCE', { name });
+    }
+
     function try_load(name: string, on_loaded: () => void) {
         const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
         // const miss_resource = missing_resources != null;
@@ -170,6 +174,13 @@ function SceneModule() {
                 msg.post(receiver, "load");
             });
         }
+        if (message_id == hash('SYS_ASYNC_LOAD_RESOURCE')) {
+            const message = _message as Messages['SYS_ASYNC_LOAD_RESOURCE'];
+
+            try_load(message.name, () => {
+               Log.log(`RESOURCES FOR ${message.name} ASYNC LOADED`);
+            });
+        }
         if (message_id == hash('SYS_UNLOAD_RESOURCE')) {
             const message = _message as Messages['SYS_UNLOAD_RESOURCE'];
             msg.post(Manager.MANAGER_ID + "#" + message.name, "unload");
@@ -219,5 +230,5 @@ function SceneModule() {
 
     init();
 
-    return { _on_message, restart, load, load_resource, unload_resource, unload_all_resources, set_bg, get_current_name };
+    return { _on_message, restart, load, load_resource, unload_resource, unload_all_resources, try_load_async, set_bg, get_current_name };
 }

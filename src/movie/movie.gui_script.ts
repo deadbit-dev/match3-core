@@ -28,6 +28,7 @@ export function init(this: props): void {
         GameStorage.set('current_level', 0);
         Sound.stop('map');
         Scene.load('game');
+        Scene.try_load_async('map');
     });
 
     gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
