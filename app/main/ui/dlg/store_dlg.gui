@@ -956,30 +956,6 @@ nodes {
   template_node_child: true
 }
 nodes {
-  position {
-    x: -117.0
-    y: -72.0
-  }
-  type: TYPE_BOX
-  id: "junior_box/dynamite"
-  parent: "junior_box/items"
-  overridden_fields: 1
-  overridden_fields: 3
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "junior_box/dynamite_text"
-  parent: "junior_box/dynamite"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/dynamite_icon"
-  parent: "junior_box/dynamite"
-  template_node_child: true
-}
-nodes {
   type: TYPE_BOX
   id: "junior_box/spinning"
   parent: "junior_box/items"
@@ -995,42 +971,6 @@ nodes {
   type: TYPE_BOX
   id: "junior_box/spinning_icon"
   parent: "junior_box/spinning"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/diskosphere"
-  parent: "junior_box/items"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "junior_box/diskosphere_text"
-  parent: "junior_box/diskosphere"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/diskosphere_icon"
-  parent: "junior_box/diskosphere"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/helicopter"
-  parent: "junior_box/items"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "junior_box/helicopter_text"
-  parent: "junior_box/helicopter"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/helicopter_icon"
-  parent: "junior_box/helicopter"
   template_node_child: true
 }
 nodes {
@@ -1222,34 +1162,6 @@ nodes {
 }
 nodes {
   position {
-    x: -107.0
-    y: -84.0
-  }
-  scale {
-    x: 0.8
-    y: 0.8
-  }
-  type: TYPE_BOX
-  id: "catlover_box/dynamite"
-  parent: "catlover_box/items"
-  overridden_fields: 1
-  overridden_fields: 3
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "catlover_box/dynamite_text"
-  parent: "catlover_box/dynamite"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "catlover_box/dynamite_icon"
-  parent: "catlover_box/dynamite"
-  template_node_child: true
-}
-nodes {
-  position {
     x: -114.0
     y: 10.0
   }
@@ -1275,64 +1187,6 @@ nodes {
   type: TYPE_BOX
   id: "catlover_box/spinning_icon"
   parent: "catlover_box/spinning"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: -6.0
-    y: 8.0
-  }
-  scale {
-    x: 0.7
-    y: 0.7
-  }
-  type: TYPE_BOX
-  id: "catlover_box/diskosphere"
-  parent: "catlover_box/items"
-  overridden_fields: 1
-  overridden_fields: 3
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "catlover_box/diskosphere_text"
-  parent: "catlover_box/diskosphere"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "catlover_box/diskosphere_icon"
-  parent: "catlover_box/diskosphere"
-  template_node_child: true
-}
-nodes {
-  position {
-    x: 94.0
-    y: 8.0
-  }
-  scale {
-    x: 0.7
-    y: 0.7
-  }
-  type: TYPE_BOX
-  id: "catlover_box/helicopter"
-  parent: "catlover_box/items"
-  overridden_fields: 1
-  overridden_fields: 3
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "catlover_box/helicopter_text"
-  parent: "catlover_box/helicopter"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "catlover_box/helicopter_icon"
-  parent: "catlover_box/helicopter"
   template_node_child: true
 }
 nodes {

@@ -511,10 +511,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/junior_box/vertical_rocket_icon"
   parent: "store/junior_box/vertical_rocket"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -545,36 +550,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/junior_box/hammer_icon"
   parent: "store/junior_box/hammer"
   layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/dynamite"
-  parent: "store/junior_box/items"
-  layer: "top"
-  overridden_fields: 20
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/junior_box/dynamite_text"
-  parent: "store/junior_box/dynamite"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/dynamite_icon"
-  parent: "store/junior_box/dynamite"
-  layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -595,58 +579,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/junior_box/spinning_icon"
   parent: "store/junior_box/spinning"
   layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/diskosphere"
-  parent: "store/junior_box/items"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/junior_box/diskosphere_text"
-  parent: "store/junior_box/diskosphere"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/diskosphere_icon"
-  parent: "store/junior_box/diskosphere"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/helicopter"
-  parent: "store/junior_box/items"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/junior_box/helicopter_text"
-  parent: "store/junior_box/helicopter"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/helicopter_icon"
-  parent: "store/junior_box/helicopter"
-  layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -803,10 +744,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/catlover_box/vertical_rocket_icon"
   parent: "store/catlover_box/vertical_rocket"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -835,36 +781,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/catlover_box/hammer_icon"
   parent: "store/catlover_box/hammer"
   layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/dynamite"
-  parent: "store/catlover_box/items"
-  layer: "top"
-  overridden_fields: 20
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/catlover_box/dynamite_text"
-  parent: "store/catlover_box/dynamite"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/dynamite_icon"
-  parent: "store/catlover_box/dynamite"
-  layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -891,62 +816,15 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.95
+    y: 0.95
+  }
   type: TYPE_BOX
   id: "store/catlover_box/spinning_icon"
   parent: "store/catlover_box/spinning"
   layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/diskosphere"
-  parent: "store/catlover_box/items"
-  layer: "top"
-  overridden_fields: 20
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/catlover_box/diskosphere_text"
-  parent: "store/catlover_box/diskosphere"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/diskosphere_icon"
-  parent: "store/catlover_box/diskosphere"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/helicopter"
-  parent: "store/catlover_box/items"
-  layer: "top"
-  overridden_fields: 20
-  overridden_fields: 45
-  template_node_child: true
-  enabled: false
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/catlover_box/helicopter_text"
-  parent: "store/catlover_box/helicopter"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/helicopter_icon"
-  parent: "store/catlover_box/helicopter"
-  layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }

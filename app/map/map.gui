@@ -26,8 +26,8 @@ nodes {
     y: 1347.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.935
+    y: 0.935
   }
   type: TYPE_BOX
   texture: "map/bg1"
@@ -42,8 +42,8 @@ nodes {
     y: 4039.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.935
+    y: 0.935
   }
   type: TYPE_BOX
   texture: "map/bg2"
@@ -1391,8 +1391,8 @@ nodes {
     y: 55.0
   }
   scale {
-    x: 0.1
-    y: 0.1
+    x: 0.95
+    y: 0.95
   }
   type: TYPE_BOX
   texture: "ui/cat_icon"

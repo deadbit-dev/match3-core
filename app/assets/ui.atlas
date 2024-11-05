@@ -20,9 +20,6 @@ images {
   image: "/assets/ui/spinning_icon.png"
 }
 images {
-  image: "/assets/ui/time_substrate.png"
-}
-images {
   image: "/assets/ui/btn_b.png"
 }
 images {
@@ -189,9 +186,6 @@ images {
 }
 images {
   image: "/assets/elements/diskosphere_buster.png"
-}
-images {
-  image: "/assets/ui/diskosphere_icon.png"
 }
 images {
   image: "/assets/ui/clock.png"
