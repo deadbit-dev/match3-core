@@ -11,6 +11,7 @@
         "/game/animals/goose.collectionc",
         "/game/animals/kaban.collectionc",
         "/game/animals/kozel.collectionc",
-        "/game/animals/rats.collectionc"
+        "/game/animals/rats.collectionc",
+        "/game/animals/dog.collectionc"
     ]
 }
