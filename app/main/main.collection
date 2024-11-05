@@ -85,7 +85,6 @@ embedded_instances {
   "  id: \"map\"\n"
   "  type: \"collectionproxy\"\n"
   "  data: \"collection: \\\"/map/map.collection\\\"\\n"
-  "exclude: true\\n"
   "\"\n"
   "}\n"
   "embedded_components {\n"
