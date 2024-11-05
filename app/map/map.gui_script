@@ -132,20 +132,7 @@ function ____exports.init(self)
     set_completed_levels()
     set_level_buttons(self)
     set_events(self)
-    if GameStorage.get("move_showed") then
-        Sound.play("map")
-    end
-    Sound.set_gain("map", 1)
-    Scene.load_resource("map", "shared_gui")
-    timer.delay(
-        0,
-        false,
-        function()
-            if not GameStorage.get("move_showed") then
-                GameStorage.set("move_showed", true)
-            end
-        end
-    )
+    Sound.play("map")
     local max_level = 0
     for ____, level in ipairs(GameStorage.get("completed_levels")) do
         level = level + 1

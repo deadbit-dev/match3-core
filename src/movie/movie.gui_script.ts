@@ -23,6 +23,7 @@ export function init(this: props): void {
     gui.set_text(gui.get_node('text'), Lang.get_text('play'));
 
     this.druid.new_button('btn', () => {
+        GameStorage.set("move_showed", true);
         gui.set_enabled(gui.get_node('window'), false);
         GAME_CONFIG.steps_by_ad = 0;
         GameStorage.set('current_level', 0);

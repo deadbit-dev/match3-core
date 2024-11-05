@@ -34,7 +34,7 @@ export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
 export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
-export const MAIN_BUNDLE_SCENES = ['game'];
+export const MAIN_BUNDLE_SCENES = ['movie', 'game'];
 
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)

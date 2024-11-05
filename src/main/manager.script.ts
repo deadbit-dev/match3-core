@@ -93,6 +93,8 @@ export function init(this: props) {
 
         Sound.play('map', 1, 0.7);
 
+        Scene.load_resource('main', 'shared_gui');
+
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 

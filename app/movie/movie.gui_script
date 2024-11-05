@@ -30,6 +30,7 @@ function ____exports.init(self)
     self.druid:new_button(
         "btn",
         function()
+            GameStorage.set("move_showed", true)
             gui.set_enabled(
                 gui.get_node("window"),
                 false

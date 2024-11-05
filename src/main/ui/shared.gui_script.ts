@@ -27,19 +27,19 @@ export function init(this: props): void {
 
     setup(this);
     set_events(this);
-
-    // timer.delay(1200, true, () => {
-    //     if(is_max_lifes())
-    //         return;
-
-    //     add_lifes(1);
-    // });
     
     on_life_tick();
     timer.delay(1, true, on_life_tick);
 
     on_infinit_life_tick();
     timer.delay(1, true, on_infinit_life_tick);
+
+    if(Scene.get_current_name() == 'movie') {
+        set_enabled_coins(false);
+        set_enabled_lifes(false);
+        set_enabled_store_button(false);
+        set_enabled_settings_button(false);
+    }
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
@@ -628,7 +628,7 @@ function on_remove_lifes() {
 
 function on_scene_loaded(scene: NameMessage) {
     switch(scene.name) {
-        case 'game':
+        case 'movie': case 'game':
             set_enabled_coins(false);
             set_enabled_lifes(false);
             set_enabled_store_button(false);

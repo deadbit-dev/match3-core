@@ -29,7 +29,7 @@ function SceneModule() {
     let is_restarting_scene = false;
     let _wait_ready_manager = false;
     
-    const scene_resources: { [key in string]: string[] } = {};
+    const scene_resources: { [key in string]: string[] } = {'main': []};
     const sender_to_name: { [key in string]: hash } = {};
 
     function init() {

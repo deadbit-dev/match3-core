@@ -30,17 +30,7 @@ export function init(this: props): void {
 
     set_events(this);
 
-    if(GameStorage.get('move_showed'))
-        Sound.play('map');
-
-    Sound.set_gain('map', 1);
-    Scene.load_resource('map', 'shared_gui');
-
-    timer.delay(0, false, () => {
-        if(!GameStorage.get('move_showed')) {
-            GameStorage.set("move_showed", true);
-        }
-    });
+    Sound.play('map');
 
     let max_level = 0;
     for(let level of GameStorage.get('completed_levels')) {
