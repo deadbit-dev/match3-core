@@ -946,6 +946,9 @@ function set_enabled_settings(data, state)
                     gui.get_node("ok_button"),
                     vmath.vector3(0, -210, 0)
                 )
+                set_enabled_coins(false)
+                set_enabled_lifes(false)
+                set_enabled_store_button(false)
                 break
             end
         until true
@@ -985,6 +988,11 @@ function set_enabled_settings(data, state)
             end
         )
         EventBus.send("CLOSED_DLG", Dlg.Settings)
+        if Scene.get_current_name() == "map" then
+            set_enabled_coins(true)
+            set_enabled_lifes(true)
+            set_enabled_store_button(true)
+        end
     end
     data.dlg_opened = state
 end
