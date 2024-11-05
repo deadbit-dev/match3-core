@@ -30,6 +30,10 @@ function ____exports.init(self)
     self.druid:new_button(
         "btn",
         function()
+            gui.set_enabled(
+                gui.get_node("window"),
+                false
+            )
             Scene.load("map")
         end
     )

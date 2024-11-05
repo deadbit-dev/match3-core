@@ -23,6 +23,7 @@ export function init(this: props): void {
     gui.set_text(gui.get_node('text'), Lang.get_text('play'));
 
     this.druid.new_button('btn', () => {
+        gui.set_enabled(gui.get_node('window'), false);
         Scene.load("map");
     });
 
