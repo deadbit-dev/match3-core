@@ -91,7 +91,7 @@ export function is_enough_coins(amount: number) {
 
 export function add_coins(amount: number) {
     let coins = GameStorage.get('coins');
-    coins = math.min(coins + amount, 10000);
+    coins = math.min(coins + amount, GAME_CONFIG.max_coins);
     GameStorage.set('coins', coins);
     EventBus.send('ADDED_COIN');
 
