@@ -294,7 +294,7 @@ function setup_win_ui(instance: props) {
 
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
-    gui.set_text(gui.get_node('continue_text'), Lang.get_text('continue'));
+    gui.set_text(gui.get_node('continue_text'), Lang.get_text('next'));
     gui.set_text(gui.get_node('last_level_btn_text'), Lang.get_text('on_map'));
     gui.set_text(gui.get_node('last_level_text'), Lang.get_text('last_level_text'));
 }

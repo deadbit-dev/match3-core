@@ -1391,8 +1391,8 @@ nodes {
     y: 55.0
   }
   scale {
-    x: 0.95
-    y: 0.95
+    x: 0.5
+    y: 0.5
   }
   type: TYPE_BOX
   texture: "ui/cat_icon"

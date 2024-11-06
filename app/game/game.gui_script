@@ -343,7 +343,7 @@ function setup_win_ui(instance)
     )
     gui.set_text(
         gui.get_node("continue_text"),
-        Lang.get_text("continue")
+        Lang.get_text("next")
     )
     gui.set_text(
         gui.get_node("last_level_btn_text"),
