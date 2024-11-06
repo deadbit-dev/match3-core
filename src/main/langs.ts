@@ -13,46 +13,46 @@ export const lang_data = {
   },
   "tutorial_collect": {
     "Русский-ru": "Передвигайте одинаковые предметы в один ряд, чтобы собрать их!",
-    "Английский-en": "Collect elements"
+    "Английский-en": "Move identical objects in one row to collect them!"
   },
   "tutorial_collect_rocket": {
     "Русский-ru": "Соберите 4 одинаковых предмета в ряд, чтобы получить ракету!",
-    "Английский-en": "Collect rocket"
+    "Английский-en": "Match 4 identical items in a row to get a rocket!"
   },
   "tutorial_collect_diskosphere": {
     "Русский-ru": "Соберите 5 одинаковых предметов в ряд, чтобы получить дискошар!",
-    "Английский-en": "Collect diskosphere"
+    "Английский-en": "Match 5 identical items in a row to get a disco ball!"
   },
   "tutorial_timer": {
     "Русский-ru": "Накормите Петуха за отведённое время!",
-    "Английский-en": "Feed cock"
+    "Английский-en": "Feed the Cock within the allotted time!"
   },
   "tutorial_grass": {
     "Русский-ru": "Чтобы убрать траву, собирайте на ней предметы в один ряд!",
-    "Английский-en": "Remove grass"
+    "Английский-en": "To remove grass, collect objects on it in one row!"
   },
   "tutorial_hammer": {
     "Русский-ru": "Молоток убирает с поля один любой предмет!",
-    "Английский-en": "Hammer"
+    "Английский-en": "Hammer removes any item from the field!"
   },
   "tutorial_box": {
     "Русский-ru": "Собирайте предметы в ряд около коробки, чтобы сломать её!",
-    "Английский-en": "Remove box"
+    "Английский-en": "Collect items in a row near the box to break it!"
   },
   "tutorial_web": {
     "Русский-ru": "Собирайте предметы в ряд под паутиной, чтобы убрать её!",
-    "Английский-en": "Remove web"
+    "Английский-en": "Collect items in a row under the cobwebs to break it!"
   },
   "tutorial_spinning": {
     "Русский-ru": "Юла перемешивает все предметы на поле!",
-    "Английский-en": "Spinning"
+    "Английский-en": "Whirligig mixes all the items on the field!"
   },
   "tutorial_rockets": {
     "Русский-ru": "Ракеты взрывают все предметы на своём пути!",
-    "Английский-en": "Rockets"
+    "Английский-en": "Rockets explode everything in their path!"
   },
   "steps": {
-    "Русский-ru": "Ходов",
+    "Русский-ru": "Ходы",
     "Английский-en": "Steps"
   },
   "time": {
@@ -64,12 +64,12 @@ export const lang_data = {
     "Английский-en": "Targets"
   },
   "win_title": {
-    "Русский-ru": "Уровень пройден!",
-    "Английский-en": "Level completed!"
+    "Русский-ru": "Победа",
+    "Английский-en": "Victory"
   },
   "gameover_title": {
     "Русский-ru": "Уровень не пройден",
-    "Английский-en": "Gameover"
+    "Английский-en": "Level failed"
   },
   "continue": {
     "Русский-ru": "Продолжить",
@@ -77,23 +77,23 @@ export const lang_data = {
   },
   "restart": {
     "Русский-ru": "Повторить",
-    "Английский-en": "Restart"
+    "Английский-en": "Retry"
   },
   "map": {
     "Русский-ru": "На карту",
-    "Английский-en": "Go to map"
+    "Английский-en": "To the map"
   },
   "hammer": {
     "Русский-ru": "Молоток",
-    "Английский-en": "Hammer",
+    "Английский-en": "Hammer"
   },
   "spinning": {
     "Русский-ru": "Юла",
-    "Английский-en": "Spinning"
+    "Английский-en": "Whirligig"
   },
   "horizontal_rocket": {
     "Русский-ru": "Горизонтальная ракета",
-    "Английский-en": "Horizontal Rocket"
+    "Английский-en": "Horizontal rocket"
   },
   "vertical_rocket": {
     "Русский-ru": "Вертикальная ракета",
@@ -101,11 +101,11 @@ export const lang_data = {
   },
   "hammer_description": {
     "Русский-ru": "Разбивает один любой предмет",
-    "Английский-en": "Breaks any one item"
+    "Английский-en": "Breaks any object"
   },
   "spinning_description": {
     "Русский-ru": "Перемешивает предметы",
-    "Английский-en": "Mixes objects"
+    "Английский-en": "Shuffle items"
   },
   "horizontal_rocket_description": {
     "Русский-ru": "Разрушает все предметы по горизонтали",
@@ -157,7 +157,7 @@ export const lang_data = {
   },
   "sound": {
     "Русский-ru": "Звуки",
-    "Английский-en": "Sound"
+    "Английский-en": "Sounds"
   },
   "music": {
     "Русский-ru": "Музыка",
@@ -165,11 +165,11 @@ export const lang_data = {
   },
   "animal_tutorial_description": {
     "Русский-ru": "Собери все подсолнухи чтобы задобрить петуха.",
-    "Английский-en": "Collect all the sunflowers to appease the chicken."
+    "Английский-en": "Collect all the sunflowers to appease the cock."
   },
   "animal_tutorial_description1": {
     "Русский-ru": "Накорми его и продложи путь!",
-    "Английский-en": "Feed him and continue his journey!"
+    "Английский-en": "Feed him and pave the way!"
   },
   "on_map": {
     "Русский-ru": "Карта",
