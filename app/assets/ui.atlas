@@ -241,4 +241,7 @@ images {
 images {
   image: "/assets/ui/cat_icon.png"
 }
+images {
+  image: "/assets/ui/diskosphere_icon.png"
+}
 extrude_borders: 2

@@ -636,8 +636,8 @@ nodes {
 }
 nodes {
   scale {
-    x: 0.1
-    y: 0.1
+    x: 0.5
+    y: 0.5
   }
   type: TYPE_BOX
   texture: "ui/rocket_icon"
