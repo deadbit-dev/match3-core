@@ -866,7 +866,9 @@ nodes {
   parent: "store/dlg"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_BOX
@@ -902,19 +904,29 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  text: "5 \321\200\321\203\320\261."
   id: "store/buy_ad_1_text"
   parent: "store/buy_ad_1_btn"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 8
+  overridden_fields: 14
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 30.0
+  }
   type: TYPE_BOX
   id: "store/100_cash_icon"
   parent: "store/buy_ad_1_btn"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -950,19 +962,29 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  text: "15 \321\200\321\203\320\261."
   id: "store/buy_ad_7_text"
   parent: "store/buy_ad_7_btn"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 8
+  overridden_fields: 14
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 30.0
+  }
   type: TYPE_BOX
   id: "store/250_cash_icon"
   parent: "store/buy_ad_7_btn"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT
@@ -997,20 +1019,33 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 8.0
+  }
   type: TYPE_TEXT
+  text: "35 \321\200\321\203\320\261."
   id: "store/buy_ad_30_text"
   parent: "store/buy_ad_30_btn"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 8
+  overridden_fields: 14
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 38.0
+  }
   type: TYPE_BOX
   id: "store/600_cash_icon"
   parent: "store/buy_ad_30_btn"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT

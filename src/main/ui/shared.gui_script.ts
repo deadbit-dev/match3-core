@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
-import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes, get_current_level } from '../../game/utils';
+import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes, get_current_level, remove_ad } from '../../game/utils';
 import { NameMessage } from '../../modules/modules_const';
 import { parse_time } from '../../utils/utils';
 import { Dlg } from '../game_config';
@@ -120,7 +120,7 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
 
     // products
-    if (GAME_CONFIG.products.length >= 4) {
+    if (GAME_CONFIG.products.length >= 7) {
         const maney30 = GAME_CONFIG.products.filter(p => p.id == 'maney30')[0];
         const maney150 = GAME_CONFIG.products.filter(p => p.id == 'maney150')[0];
         const maney300 = GAME_CONFIG.products.filter(p => p.id == 'maney300')[0];
@@ -130,6 +130,14 @@ function setup_store(data: props) {
         set_text('store/buy_150_text', maney150.priceValue + ' ' + maney150.priceCurrencyCode);
         set_text('store/buy_300_text', maney300.priceValue + ' ' + maney300.priceCurrencyCode);
         set_text('store/buy_800_text', maney800.priceValue + ' ' + maney800.priceCurrencyCode);
+
+        const noads1 = GAME_CONFIG.products.filter(p => p.id == 'noads1')[0];
+        const noads7 = GAME_CONFIG.products.filter(p => p.id == 'noads7')[0];
+        const noads30 = GAME_CONFIG.products.filter(p => p.id == 'noads30')[0];
+
+        set_text('store/buy_ad_1_text', noads1.priceValue + ' ' + noads1.priceCurrencyCode);
+        set_text('store/buy_ad_7_text', noads7.priceValue + ' ' + noads7.priceCurrencyCode);
+        set_text('store/buy_ad_30_text', noads30.priceValue + ' ' + noads30.priceCurrencyCode);
     }
     
     data.druid.new_button('store/buy_30_btn', () => {
@@ -306,27 +314,63 @@ function setup_store(data: props) {
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
 
     data.druid.new_button('store/buy_ad_1_btn', () => {
-        if(!is_enough_coins(80)) return set_enabled_not_enough_coins(data, true);
-        Sound.play('purchase');
-        remove_coins(80);
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60); // one day
+            return;
+        }
 
-        Metrica.report('data', { shop: {buy: 'noads1'}});
+        HtmlBridge.purchase({ id: 'noads1' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60); // 1 day
+
+            Metrica.report('data', { shop: {buy: 'noads1'}});
+
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
 
     data.druid.new_button('store/buy_ad_7_btn', () => {
-        if(!is_enough_coins(200)) return set_enabled_not_enough_coins(data, true);
-        Sound.play('purchase');
-        remove_coins(200);
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60 * 7); // 7 day's
+            return;
+        }
 
-        Metrica.report('data', { shop: {buy: 'noads7'}});
+        HtmlBridge.purchase({ id: 'noads7' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60 * 7); // 7 day's
+
+            Metrica.report('data', { shop: {buy: 'noads7'}});
+
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
 
     data.druid.new_button('store/buy_ad_30_btn', () => {
-        if(!is_enough_coins(500)) return set_enabled_not_enough_coins(data, true);
-        Sound.play('purchase');
-        remove_coins(500);
+        if(HtmlBridge == null) {
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60 * 30); // 30 day's
+            return;
+        }
 
-        Metrica.report('data', { shop: {buy: 'noads30'}});
+        HtmlBridge.purchase({ id: 'noads30' }, (result, purchase) => {
+            if (!result)
+                return () => {};
+
+            Sound.play('purchase');
+            remove_ad(24 * 60 * 60 * 30); // 7 day's
+
+            Metrica.report('data', { shop: {buy: 'noads30'}});
+
+            HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+        });
     });
 
     data.druid.new_button('store/reset/button', () => {

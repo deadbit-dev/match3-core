@@ -339,7 +339,8 @@ ____exports._STORAGE_CONFIG = {
     coins = 0,
     life = {start_time = 0, amount = 2},
     infinit_life = {is_active = false, start_time = 0, duration = 0},
-    completed_tutorials = {}
+    completed_tutorials = {},
+    noads = {}
 }
 ____exports.Dlg = Dlg or ({})
 ____exports.Dlg.Store = 0

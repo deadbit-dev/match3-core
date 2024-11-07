@@ -3,6 +3,8 @@ local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
+local ____utils = require("utils.utils")
+local parse_time = ____utils.parse_time
 function ____exports.get_current_level()
     return GameStorage.get("current_level")
 end
@@ -122,5 +124,13 @@ function ____exports.is_tutorial_click(pos)
         return false
     end
     return tutorial_data.click.x == pos.x and tutorial_data.click.y == pos.y
+end
+function ____exports.remove_ad(time)
+    local current_date = System.now()
+    local data = GameStorage.get("noads")
+    local delta = math.min(0, data.end_data - current_date)
+    data.end_data = data.end_data + (current_date + time + delta)
+    GameStorage.set("noads", data)
+    Log.log("REMOVE AD FOR: " .. parse_time(data.end_data))
 end
 return ____exports

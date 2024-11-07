@@ -17,6 +17,7 @@ local is_enough_coins = ____utils.is_enough_coins
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local get_current_level = ____utils.get_current_level
+local remove_ad = ____utils.remove_ad
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
 local ____game_config = require("main.game_config")
@@ -134,7 +135,7 @@ function setup_store(data)
         gui.get_node("store/store_title_text"),
         Lang.get_text("store_title")
     )
-    if #GAME_CONFIG.products >= 4 then
+    if #GAME_CONFIG.products >= 7 then
         local maney30 = __TS__ArrayFilter(
             GAME_CONFIG.products,
             function(____, p) return p.id == "maney30" end
@@ -155,6 +156,21 @@ function setup_store(data)
         set_text("store/buy_150_text", (maney150.priceValue .. " ") .. maney150.priceCurrencyCode)
         set_text("store/buy_300_text", (maney300.priceValue .. " ") .. maney300.priceCurrencyCode)
         set_text("store/buy_800_text", (maney800.priceValue .. " ") .. maney800.priceCurrencyCode)
+        local noads1 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "noads1" end
+        )[1]
+        local noads7 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "noads7" end
+        )[1]
+        local noads30 = __TS__ArrayFilter(
+            GAME_CONFIG.products,
+            function(____, p) return p.id == "noads30" end
+        )[1]
+        set_text("store/buy_ad_1_text", (noads1.priceValue .. " ") .. noads1.priceCurrencyCode)
+        set_text("store/buy_ad_7_text", (noads7.priceValue .. " ") .. noads7.priceCurrencyCode)
+        set_text("store/buy_ad_30_text", (noads30.priceValue .. " ") .. noads30.priceCurrencyCode)
     end
     data.druid:new_button(
         "store/buy_30_btn",
@@ -372,34 +388,82 @@ function setup_store(data)
     data.druid:new_button(
         "store/buy_ad_1_btn",
         function()
-            if not is_enough_coins(80) then
-                return set_enabled_not_enough_coins(data, true)
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                remove_ad(24 * 60 * 60)
+                return
             end
-            Sound.play("purchase")
-            remove_coins(80)
-            Metrica.report("data", {shop = {buy = "noads1"}})
+            HtmlBridge.purchase(
+                {id = "noads1"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    remove_ad(24 * 60 * 60)
+                    Metrica.report("data", {shop = {buy = "noads1"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
         "store/buy_ad_7_btn",
         function()
-            if not is_enough_coins(200) then
-                return set_enabled_not_enough_coins(data, true)
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                remove_ad(24 * 60 * 60 * 7)
+                return
             end
-            Sound.play("purchase")
-            remove_coins(200)
-            Metrica.report("data", {shop = {buy = "noads7"}})
+            HtmlBridge.purchase(
+                {id = "noads7"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    remove_ad(24 * 60 * 60 * 7)
+                    Metrica.report("data", {shop = {buy = "noads7"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
         "store/buy_ad_30_btn",
         function()
-            if not is_enough_coins(500) then
-                return set_enabled_not_enough_coins(data, true)
+            if HtmlBridge == nil then
+                Sound.play("purchase")
+                remove_ad(24 * 60 * 60 * 30)
+                return
             end
-            Sound.play("purchase")
-            remove_coins(500)
-            Metrica.report("data", {shop = {buy = "noads30"}})
+            HtmlBridge.purchase(
+                {id = "noads30"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    remove_ad(24 * 60 * 60 * 30)
+                    Metrica.report("data", {shop = {buy = "noads30"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                end
+            )
         end
     )
     data.druid:new_button(
@@ -816,17 +880,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch123 = scene.name
-        local ____cond123 = ____switch123 == "movie" or ____switch123 == "game"
-        if ____cond123 then
+        local ____switch138 = scene.name
+        local ____cond138 = ____switch138 == "movie" or ____switch138 == "game"
+        if ____cond138 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond123 = ____cond123 or ____switch123 == "map"
-        if ____cond123 then
+        ____cond138 = ____cond138 or ____switch138 == "map"
+        if ____cond138 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -851,9 +915,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch128 = Scene.get_current_name()
-        local ____cond128 = ____switch128 == "game"
-        if ____cond128 then
+        local ____switch143 = Scene.get_current_name()
+        local ____cond143 = ____switch143 == "game"
+        if ____cond143 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -862,8 +926,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond128 = ____cond128 or ____switch128 == "map"
-        if ____cond128 then
+        ____cond143 = ____cond143 or ____switch143 == "map"
+        if ____cond143 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -924,9 +988,9 @@ function set_enabled_settings(data, state)
     end
     if state then
         repeat
-            local ____switch135 = Scene.get_current_name()
-            local ____cond135 = ____switch135 == "game"
-            if ____cond135 then
+            local ____switch150 = Scene.get_current_name()
+            local ____cond150 = ____switch150 == "game"
+            if ____cond150 then
                 gui.set_enabled(
                     gui.get_node("map_button"),
                     true

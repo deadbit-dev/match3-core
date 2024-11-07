@@ -14,7 +14,7 @@ import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
 import { load_levels_config } from '../game/level';
 import { Product, Purchase } from '../modules/HtmlBridgeTypes';
-import { add_coins } from '../game/utils';
+import { add_coins, remove_ad } from '../game/utils';
 
 
 interface props {
@@ -78,6 +78,18 @@ export function init(this: props) {
                             }
                             else if (id_product == 'maney800') {
                                 add_coins(800);
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            else if(id_product == 'noads1') {
+                                remove_ad(24 * 60 * 60); // 1 day
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            else if(id_product == 'noads7') {
+                                remove_ad(24 * 60 * 60 * 7); // 7 day's
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                            }
+                            else if(id_product == 'noads30') {
+                                remove_ad(24 * 60 * 60 * 30); // 30 day's
                                 HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
                             }
                         }

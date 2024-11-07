@@ -1,4 +1,5 @@
 import { Direction } from "../utils/math_utils";
+import { parse_time } from "../utils/utils";
 import { Position, SwapInfo } from "./core";
 
 export function get_current_level() {
@@ -130,4 +131,13 @@ export function is_tutorial_click(pos: Position) {
         return false;
 
     return (tutorial_data.click.x == pos.x && tutorial_data.click.y == pos.y);
+}
+
+export function remove_ad(time: number) {
+    const current_date = System.now();
+    const data = GameStorage.get('noads');
+    const delta = math.min(0, data.end_data - current_date);
+    data.end_data += current_date + time + delta;
+    GameStorage.set('noads', data);
+    Log.log(`REMOVE AD FOR: ${parse_time(data.end_data)}`);
 }

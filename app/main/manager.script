@@ -9,6 +9,7 @@ local ____level = require("game.level")
 local load_levels_config = ____level.load_levels_config
 local ____utils = require("game.utils")
 local add_coins = ____utils.add_coins
+local remove_ad = ____utils.remove_ad
 function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     register_manager()
@@ -73,6 +74,27 @@ function ____exports.init(self)
                                         )
                                     elseif id_product == "maney800" then
                                         add_coins(800)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    elseif id_product == "noads1" then
+                                        remove_ad(24 * 60 * 60)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    elseif id_product == "noads7" then
+                                        remove_ad(24 * 60 * 60 * 7)
+                                        HtmlBridge.consume_purchase(
+                                            purchase.purchaseToken,
+                                            function()
+                                            end
+                                        )
+                                    elseif id_product == "noads30" then
+                                        remove_ad(24 * 60 * 60 * 30)
                                         HtmlBridge.consume_purchase(
                                             purchase.purchaseToken,
                                             function()

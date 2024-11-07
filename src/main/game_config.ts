@@ -477,7 +477,9 @@ export const _STORAGE_CONFIG = {
         duration: 0
     },
 
-    completed_tutorials: [] as number[]
+    completed_tutorials: [] as number[],
+
+    noads: {} as {end_data: number}
 };
 
 export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
