@@ -1285,16 +1285,18 @@ export function Game() {
     function on_click(pos: Position) {
         if(is_block_input || (is_tutorial() && !is_tutorial_click(pos))) return;
 
-        const current_level = get_current_level();
-        const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-        if(tutorial_data.busters != undefined) {
-            if(!Array.isArray(tutorial_data.busters))
-                tutorial_data.busters = [tutorial_data.busters];
-            for(const buster of tutorial_data.busters) {
-                if(buster == 'hammer' && !busters.hammer.active)
-                    return;
-                if(buster == 'horizontal_rocket' && !busters.horizontal_rocket.active && !busters.vertical_rocket.active)
-                    return;
+        if(is_tutorial()) {
+            const current_level = get_current_level();
+            const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
+            if(tutorial_data.busters != undefined) {
+                if(!Array.isArray(tutorial_data.busters))
+                    tutorial_data.busters = [tutorial_data.busters];
+                for(const buster of tutorial_data.busters) {
+                    if(buster == 'hammer' && !busters.hammer.active)
+                        return;
+                    if(buster == 'horizontal_rocket' && !busters.horizontal_rocket.active && !busters.vertical_rocket.active)
+                        return;
+                }
             }
         }
 

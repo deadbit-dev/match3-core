@@ -1348,18 +1348,20 @@ function ____exports.Game()
         if is_block_input or is_tutorial() and not is_tutorial_click(pos) then
             return
         end
-        local current_level = get_current_level()
-        local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
-        if tutorial_data.busters ~= nil then
-            if not __TS__ArrayIsArray(tutorial_data.busters) then
-                tutorial_data.busters = {tutorial_data.busters}
-            end
-            for ____, buster in ipairs(tutorial_data.busters) do
-                if buster == "hammer" and not busters.hammer.active then
-                    return
+        if is_tutorial() then
+            local current_level = get_current_level()
+            local tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1]
+            if tutorial_data.busters ~= nil then
+                if not __TS__ArrayIsArray(tutorial_data.busters) then
+                    tutorial_data.busters = {tutorial_data.busters}
                 end
-                if buster == "horizontal_rocket" and not busters.horizontal_rocket.active and not busters.vertical_rocket.active then
-                    return
+                for ____, buster in ipairs(tutorial_data.busters) do
+                    if buster == "hammer" and not busters.hammer.active then
+                        return
+                    end
+                    if buster == "horizontal_rocket" and not busters.horizontal_rocket.active and not busters.vertical_rocket.active then
+                        return
+                    end
                 end
             end
         end
@@ -2118,29 +2120,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch457 = combination.type
-            local ____cond457 = ____switch457 == CombinationType.Comb4
-            if ____cond457 then
+            local ____switch458 = combination.type
+            local ____cond458 = ____switch458 == CombinationType.Comb4
+            if ____cond458 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond457 = ____cond457 or ____switch457 == CombinationType.Comb2x2
-            if ____cond457 then
+            ____cond458 = ____cond458 or ____switch458 == CombinationType.Comb2x2
+            if ____cond458 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond457 = ____cond457 or (____switch457 == CombinationType.Comb3x3a or ____switch457 == CombinationType.Comb3x3b)
-            if ____cond457 then
+            ____cond458 = ____cond458 or (____switch458 == CombinationType.Comb3x3a or ____switch458 == CombinationType.Comb3x3b)
+            if ____cond458 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond457 = ____cond457 or (____switch457 == CombinationType.Comb3x4a or ____switch457 == CombinationType.Comb3x4b or ____switch457 == CombinationType.Comb3x5)
-            if ____cond457 then
+            ____cond458 = ____cond458 or (____switch458 == CombinationType.Comb3x4a or ____switch458 == CombinationType.Comb3x4b or ____switch458 == CombinationType.Comb3x5)
+            if ____cond458 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond457 = ____cond457 or ____switch457 == CombinationType.Comb5
-            if ____cond457 then
+            ____cond458 = ____cond458 or ____switch458 == CombinationType.Comb5
+            if ____cond458 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
