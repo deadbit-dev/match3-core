@@ -603,7 +603,7 @@ end
 function setup_horizontal_rocket(data)
     gui.set_text(
         gui.get_node("horizontal_rocket/title_text"),
-        Lang.get_text("horizontal_rocket")
+        Lang.get_text("rocket")
     )
     gui.set_text(
         gui.get_node("horizontal_rocket/description"),
@@ -644,7 +644,7 @@ end
 function setup_vertical_rocket(data)
     gui.set_text(
         gui.get_node("vertical_rocket/title_text"),
-        Lang.get_text("vertical_rocket")
+        Lang.get_text("rocket")
     )
     gui.set_text(
         gui.get_node("vertical_rocket/description"),

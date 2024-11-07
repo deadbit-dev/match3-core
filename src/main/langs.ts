@@ -91,13 +91,9 @@ export const lang_data = {
     "Русский-ru": "Юла",
     "Английский-en": "Whirligig"
   },
-  "horizontal_rocket": {
-    "Русский-ru": "Горизонтальная ракета",
-    "Английский-en": "Horizontal rocket"
-  },
-  "vertical_rocket": {
-    "Русский-ru": "Вертикальная ракета",
-    "Английский-en": "Vertical Rocket"
+  "rocket": {
+    "Русский-ru": "Ракета",
+    "Английский-en": "Rocket"
   },
   "hammer_description": {
     "Русский-ru": "Разбивает один любой предмет",

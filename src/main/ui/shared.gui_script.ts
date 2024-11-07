@@ -459,7 +459,7 @@ function setup_spinning(data: props) {
 }
 
 function setup_horizontal_rocket(data: props) {
-    gui.set_text(gui.get_node('horizontal_rocket/title_text'), Lang.get_text('horizontal_rocket'));
+    gui.set_text(gui.get_node('horizontal_rocket/title_text'), Lang.get_text('rocket'));
     gui.set_text(gui.get_node('horizontal_rocket/description'), Lang.get_text('horizontal_rocket_description'));
     gui.set_text(gui.get_node('horizontal_rocket/buy_button_text'), Lang.get_text('buy') + " 30");
     
@@ -483,7 +483,7 @@ function setup_horizontal_rocket(data: props) {
 }
 
 function setup_vertical_rocket(data: props) {
-    gui.set_text(gui.get_node('vertical_rocket/title_text'), Lang.get_text('vertical_rocket'));
+    gui.set_text(gui.get_node('vertical_rocket/title_text'), Lang.get_text('rocket'));
     gui.set_text(gui.get_node('vertical_rocket/description'), Lang.get_text('vertical_rocket_description'));
     gui.set_text(gui.get_node('vertical_rocket/buy_button_text'), Lang.get_text('buy') + " 30");
     
