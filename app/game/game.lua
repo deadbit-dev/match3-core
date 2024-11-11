@@ -1295,10 +1295,7 @@ function ____exports.Game()
         shuffle()
         Metrica.report(
             "data",
-            {use = {
-                level = get_current_level() + 1,
-                id = "spinning"
-            }}
+            {["use_" .. tostring(get_current_level() + 1)] = {id = "spinning"}}
         )
         busters.hammer.active = false
         busters.horizontal_rocket.active = false
@@ -1372,10 +1369,7 @@ function ____exports.Game()
         if busters.hammer.active then
             Metrica.report(
                 "data",
-                {use = {
-                    level = get_current_level() + 1,
-                    id = "hammer"
-                }}
+                {["use_" .. tostring(get_current_level() + 1)] = {id = "hammer"}}
             )
             try_hammer_damage(pos)
             is_idle = false
@@ -1384,10 +1378,7 @@ function ____exports.Game()
         if busters.horizontal_rocket.active then
             Metrica.report(
                 "data",
-                {use = {
-                    level = get_current_level() + 1,
-                    id = "horizontal_rocket"
-                }}
+                {["use_" .. tostring(get_current_level() + 1)] = {id = "horizontal_rocket"}}
             )
             try_horizontal_damage(pos)
             is_idle = false
@@ -1396,10 +1387,7 @@ function ____exports.Game()
         if busters.vertical_rocket.active then
             Metrica.report(
                 "data",
-                {use = {
-                    level = get_current_level() + 1,
-                    id = "vertical_rocket"
-                }}
+                {["use_" .. tostring(get_current_level() + 1)] = {id = "vertical_rocket"}}
             )
             try_vertical_damage(pos)
             is_idle = false

@@ -135,7 +135,7 @@ function setup_store(data)
         gui.get_node("store/store_title_text"),
         Lang.get_text("store_title")
     )
-    if #GAME_CONFIG.products >= 7 then
+    if #GAME_CONFIG.products >= 4 then
         local maney30 = __TS__ArrayFilter(
             GAME_CONFIG.products,
             function(____, p) return p.id == "maney30" end
@@ -156,21 +156,6 @@ function setup_store(data)
         set_text("store/buy_150_text", (maney150.priceValue .. " ") .. maney150.priceCurrencyCode)
         set_text("store/buy_300_text", (maney300.priceValue .. " ") .. maney300.priceCurrencyCode)
         set_text("store/buy_800_text", (maney800.priceValue .. " ") .. maney800.priceCurrencyCode)
-        local noads1 = __TS__ArrayFilter(
-            GAME_CONFIG.products,
-            function(____, p) return p.id == "noads1" end
-        )[1]
-        local noads7 = __TS__ArrayFilter(
-            GAME_CONFIG.products,
-            function(____, p) return p.id == "noads7" end
-        )[1]
-        local noads30 = __TS__ArrayFilter(
-            GAME_CONFIG.products,
-            function(____, p) return p.id == "noads30" end
-        )[1]
-        set_text("store/buy_ad_1_text", (noads1.priceValue .. " ") .. noads1.priceCurrencyCode)
-        set_text("store/buy_ad_7_text", (noads7.priceValue .. " ") .. noads7.priceCurrencyCode)
-        set_text("store/buy_ad_30_text", (noads30.priceValue .. " ") .. noads30.priceCurrencyCode)
     end
     data.druid:new_button(
         "store/buy_30_btn",
@@ -343,8 +328,8 @@ function setup_store(data)
             )
             EventBus.send("UPDATED_BUTTONS")
             Metrica.report("data", {shop = {buy = "set1"}})
-            Metrica.report("data", {buy = {level = 0, id = "hammer"}})
-            Metrica.report("data", {buy = {level = 0, id = "vertical_rocket"}})
+            Metrica.report("data", {buy_0 = {id = "hammer"}})
+            Metrica.report("data", {buy_0 = {id = "vertical_rocket"}})
         end
     )
     gui.set_text(
@@ -374,11 +359,11 @@ function setup_store(data)
             )
             EventBus.send("UPDATED_BUTTONS")
             Metrica.report("data", {shop = {buy = "set2"}})
-            Metrica.report("data", {buy = {level = 0, id = "hammer"}})
-            Metrica.report("data", {buy = {level = 0, id = "hammer"}})
-            Metrica.report("data", {buy = {level = 0, id = "spinning"}})
-            Metrica.report("data", {buy = {level = 0, id = "vertical_rocket"}})
-            Metrica.report("data", {buy = {level = 0, id = "vertical_rocket"}})
+            Metrica.report("data", {buy_0 = {level = 0, id = "hammer"}})
+            Metrica.report("data", {buy_0 = {level = 0, id = "hammer"}})
+            Metrica.report("data", {buy_0 = {level = 0, id = "spinning"}})
+            Metrica.report("data", {buy_0 = {level = 0, id = "vertical_rocket"}})
+            Metrica.report("data", {buy_0 = {level = 0, id = "vertical_rocket"}})
         end
     )
     gui.set_text(
@@ -609,10 +594,7 @@ function setup_hammer(data)
             set_enabled_hammer(data, false)
             Metrica.report(
                 "data",
-                {buy = {
-                    level = get_current_level() + 1,
-                    id = "hammer"
-                }}
+                {["buy_" .. tostring(get_current_level() + 1)] = {id = "hammer"}}
             )
         end
     )
@@ -650,10 +632,7 @@ function setup_spinning(data)
             set_enabled_spinning(data, false)
             Metrica.report(
                 "data",
-                {buy = {
-                    level = get_current_level() + 1,
-                    id = "spinning"
-                }}
+                {["buy_" .. tostring(get_current_level() + 1)] = {id = "spinning"}}
             )
         end
     )
@@ -691,10 +670,7 @@ function setup_horizontal_rocket(data)
             set_enabled_horizontall_rocket(data, false)
             Metrica.report(
                 "data",
-                {buy = {
-                    level = get_current_level() + 1,
-                    id = "horizontal_rocket"
-                }}
+                {["buy_" .. tostring(get_current_level() + 1)] = {id = "horizontal_rocket"}}
             )
         end
     )
@@ -732,10 +708,7 @@ function setup_vertical_rocket(data)
             set_enabled_vertical_rocket(data, false)
             Metrica.report(
                 "data",
-                {buy = {
-                    level = get_current_level() + 1,
-                    id = "vertical_rocket"
-                }}
+                {["buy_" .. tostring(get_current_level() + 1)] = {id = "vertical_rocket"}}
             )
         end
     )
@@ -880,17 +853,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch138 = scene.name
-        local ____cond138 = ____switch138 == "movie" or ____switch138 == "game"
-        if ____cond138 then
+        local ____switch135 = scene.name
+        local ____cond135 = ____switch135 == "movie" or ____switch135 == "game"
+        if ____cond135 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == "map"
-        if ____cond138 then
+        ____cond135 = ____cond135 or ____switch135 == "map"
+        if ____cond135 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -915,9 +888,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch143 = Scene.get_current_name()
-        local ____cond143 = ____switch143 == "game"
-        if ____cond143 then
+        local ____switch140 = Scene.get_current_name()
+        local ____cond140 = ____switch140 == "game"
+        if ____cond140 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -926,8 +899,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond143 = ____cond143 or ____switch143 == "map"
-        if ____cond143 then
+        ____cond140 = ____cond140 or ____switch140 == "map"
+        if ____cond140 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -988,9 +961,9 @@ function set_enabled_settings(data, state)
     end
     if state then
         repeat
-            local ____switch150 = Scene.get_current_name()
-            local ____cond150 = ____switch150 == "game"
-            if ____cond150 then
+            local ____switch147 = Scene.get_current_name()
+            local ____cond147 = ____switch147 == "game"
+            if ____cond147 then
                 gui.set_enabled(
                     gui.get_node("map_button"),
                     true
