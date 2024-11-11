@@ -23,9 +23,16 @@ local TargetType = ____game.TargetType
 function setup(instance)
     setup_info_ui(instance)
     setup_busters(instance)
-    setup_sustem_ui(instance)
+    if GAME_CONFIG.debug_levels then
+        setup_sustem_ui(instance)
+    end
     setup_win_ui(instance)
     setup_gameover_ui(instance)
+end
+function setup_info_ui(instance)
+    setup_step_or_time(instance)
+    setup_avatar_or_clock(instance)
+    setup_targets(instance)
     gui.animate(
         gui.get_node("substrate"),
         "position",
@@ -33,18 +40,6 @@ function setup(instance)
         gui.EASING_INCUBIC,
         0.5
     )
-    gui.animate(
-        gui.get_node("system_buttons"),
-        "position",
-        vmath.vector3(0, -40, 0),
-        gui.EASING_INCUBIC,
-        0.5
-    )
-end
-function setup_info_ui(instance)
-    setup_step_or_time(instance)
-    setup_avatar_or_clock(instance)
-    setup_targets(instance)
 end
 function setup_avatar_or_clock(instance)
     if __TS__ArrayIncludes(
@@ -121,10 +116,14 @@ function setup_busters(instance)
     ) then
         return
     end
-    gui.set_enabled(
-        gui.get_node("buster_buttons"),
-        true
-    )
+    local busters = gui.get_node("buster_buttons")
+    gui.set_enabled(busters, true)
+    local pos = gui.get_position(busters)
+    pos.y = pos.y + GAME_CONFIG.bottom_offset
+    if GAME_CONFIG.debug_levels then
+        pos.y = pos.y + 125
+    end
+    gui.set_position(busters, pos)
     if GameStorage.get("spinning_opened") then
         instance.druid:new_button(
             "spinning/button",
@@ -310,6 +309,13 @@ function setup_sustem_ui(instance)
     set_text(
         "current_level",
         (Lang.get_text("level") .. " ") .. tostring(GameStorage.get("current_level") + 1)
+    )
+    gui.animate(
+        gui.get_node("system_buttons"),
+        "position",
+        vmath.vector3(0, -40, 0),
+        gui.EASING_INCUBIC,
+        0.5
     )
 end
 function setup_win_ui(instance)
@@ -500,25 +506,25 @@ function set_events(instance)
 end
 function update_targets(data)
     repeat
-        local ____switch77 = data.idx
-        local ____cond77 = ____switch77 == 0
-        if ____cond77 then
+        local ____switch79 = data.idx
+        local ____cond79 = ____switch79 == 0
+        if ____cond79 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond77 = ____cond77 or ____switch77 == 1
-        if ____cond77 then
+        ____cond79 = ____cond79 or ____switch79 == 1
+        if ____cond79 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond77 = ____cond77 or ____switch77 == 2
-        if ____cond77 then
+        ____cond79 = ____cond79 or ____switch79 == 2
+        if ____cond79 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

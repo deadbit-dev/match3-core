@@ -40,6 +40,9 @@ export const MAIN_BUNDLE_SCENES = ['movie', 'game'];
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    debug_levels: true,
+    bottom_offset: 0,
+
     min_swipe_distance: 32,
     swap_element_easing: go.EASING_INOUTQUAD,
     swap_element_time: 0.15,
@@ -58,7 +61,6 @@ export const _GAME_CONFIG = {
     delay_before_win: 0.5,
     delay_before_gameover: 2,
 
-    animal_offset: true,
     animal_level_delay_before_win: 5,
 
     fade_value: 0.9,

@@ -1590,7 +1590,7 @@ nodes {
 }
 nodes {
   position {
-    y: 85.0
+    y: -25.0
   }
   type: TYPE_BOX
   id: "buster_buttons"

@@ -4,11 +4,12 @@ local ____utils = require("game.utils")
 local get_current_level = ____utils.get_current_level
 local is_tutorial = ____utils.is_tutorial
 function animal_init()
-    if GAME_CONFIG.animal_offset then
-        local pos = go.get_position()
-        pos.y = pos.y + 100
-        go.set_position(pos)
+    local pos = go.get_position()
+    pos.y = pos.y + GAME_CONFIG.bottom_offset
+    if GAME_CONFIG.debug_levels then
+        pos.y = pos.y + 125
     end
+    go.set_position(pos)
     idle()
 end
 function start_action(props, options)
@@ -167,9 +168,14 @@ function walk_back(pos, callback)
         end
     )
 end
+go.property("cat", false)
 go.property("walkable", true)
 function ____exports.init(self)
     Manager.init_script()
+    if self.cat then
+        animal_init()
+        return
+    end
     EventBus.on(
         "ON_WIN",
         function()
@@ -191,7 +197,6 @@ function ____exports.init(self)
         EventBus.on(
             "HIDED_ANIMAL_TUTORIAL_TIP",
             function()
-                print("HERE0")
                 start_action(self, {walkable = self.walkable})
             end,
             false

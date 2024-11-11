@@ -19,6 +19,11 @@ function set_level_buttons(data)
     end
 end
 function load_level(level)
+    if not GAME_CONFIG.debug_levels then
+        if level > #GameStorage.get("completed_levels") then
+            return
+        end
+    end
     if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
         return EventBus.send("NOT_ENOUGH_LIFE")
     end

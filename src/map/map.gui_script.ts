@@ -82,6 +82,10 @@ function set_level_buttons(data: props) {
 }
 
 function load_level(level: number) {
+    if(!GAME_CONFIG.debug_levels) {
+        if(level > GameStorage.get('completed_levels').length)
+            return;
+    }
     if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
         return EventBus.send('NOT_ENOUGH_LIFE');
     }

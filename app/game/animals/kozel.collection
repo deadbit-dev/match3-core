@@ -21,7 +21,7 @@ embedded_instances {
   ""
   position {
     x: 400.0
-    y: -400.0
+    y: -460.0
   }
   scale3 {
     x: 0.35

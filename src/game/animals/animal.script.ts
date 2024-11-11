@@ -9,9 +9,11 @@
 
 import { get_current_level, is_tutorial } from "../utils";
 
+go.property('cat', false);
 go.property('walkable', true);
 
 interface props {
+    cat: boolean,
     walkable: boolean,
     is_win: boolean
 }
@@ -22,6 +24,11 @@ interface AnimalOptions {
 
 export function init(this: props) {
     Manager.init_script();
+
+    if(this.cat) {
+        animal_init();
+        return;
+    }
 
     EventBus.on('ON_WIN', () => {
         this.is_win = true;
@@ -37,7 +44,6 @@ export function init(this: props) {
     
     if(is_tutorial()) {
         EventBus.on('HIDED_ANIMAL_TUTORIAL_TIP', () => {
-            print("HERE0");
             start_action(this, {walkable: this.walkable});
         }, false);
     } else start_action(this, {walkable: this.walkable});
@@ -46,11 +52,10 @@ export function init(this: props) {
 }
 
 function animal_init() {
-    if(GAME_CONFIG.animal_offset) {
-        const pos = go.get_position();
-        pos.y += 100; 
-        go.set_position(pos);
-    }
+    const pos = go.get_position();
+    pos.y += GAME_CONFIG.bottom_offset; 
+    if(GAME_CONFIG.debug_levels) pos.y += 125;
+    go.set_position(pos);
 
     idle();
 }
