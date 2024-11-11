@@ -43,14 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/vfx/cells/box/box.atlas"
-        :scene
-      ]
-      [
-        "/assets/vfx/dynamite/dynamite.atlas"
-        :scene
-      ]
-      [
         "/assets/vfx/dynamite/dynamite.spinescene"
         :scene
       ]
@@ -83,43 +75,15 @@
         :scene
       ]
       [
-        "/assets/fonts/27_medium.font"
-        :scene
-      ]
-      [
         "/project_settings/TextureProfile.texture_profiles"
         :cljfx-form-view
-      ]
-      [
-        "/assets/fonts/32-top.font"
-        :scene
       ]
       [
         "/map/map.gui"
         :scene
       ]
       [
-        "/assets/fonts/32.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/32_bold_outline.font"
-        :scene
-      ]
-      [
         "/main/ui/parts/lable_button.gui"
-        :scene
-      ]
-      [
-        "/assets/fonts/32_medium.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/36_medium.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/48.font"
         :scene
       ]
       [
@@ -128,14 +92,6 @@
       ]
       [
         "/assets/fonts/70.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/27.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/18.font"
         :scene
       ]
       [
@@ -168,6 +124,50 @@
       ]
       [
         "/assets/fonts/16.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/18.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/27.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/27_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32-top.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32_bold_outline.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/32_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/36_medium.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/48.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/60.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/60_medium.font"
         :scene
       ]
     ]
