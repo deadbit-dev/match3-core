@@ -41,7 +41,7 @@ export const MAIN_BUNDLE_SCENES = ['movie', 'game'];
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
     debug_levels: false,
-    bottom_offset: 50,
+    bottom_offset: 0,
 
     min_swipe_distance: 32,
     swap_element_easing: go.EASING_INOUTQUAD,
@@ -116,7 +116,7 @@ export const _GAME_CONFIG = {
         [CellId.Grass]: 'grass',
         [CellId.Web]: 'web',
         [CellId.Stone]: 'stone'
-    } as { [key in number]: string},
+    } as { [key in number]: string },
 
     cell_strength: {
         [CellId.Box]: 1,
@@ -124,8 +124,8 @@ export const _GAME_CONFIG = {
         [CellId.Grass]: 2,
         [CellId.Stone]: 3,
         [CellId.Web]: 1
-    } as { [key in CellId]: number},
-    
+    } as { [key in CellId]: number },
+
     damage_cells: [
         CellId.Web,
         CellId.Grass,
@@ -136,7 +136,7 @@ export const _GAME_CONFIG = {
         CellId.Box,
         CellId.Stone,
     ],
-    
+
     disabled_cells: [
         CellId.Box,
         CellId.Stone
@@ -173,7 +173,7 @@ export const _GAME_CONFIG = {
         [ElementId.MediumMeat]: 'element_medium_meat',
         [ElementId.Chicken]: 'element_chicken',
         [ElementId.SunFlower]: 'element_sunflower',
-        [ElementId.Salad]: 'element_salad' ,
+        [ElementId.Salad]: 'element_salad',
         [ElementId.Hay]: 'element_hay',
     } as { [key in ElementId]: string },
 
@@ -190,9 +190,9 @@ export const _GAME_CONFIG = {
         [ElementId.MediumMeat]: 'red',
         [ElementId.Chicken]: 'red',
         [ElementId.SunFlower]: 'yellow',
-        [ElementId.Salad]: 'green' ,
+        [ElementId.Salad]: 'green',
         [ElementId.Hay]: 'yellow'
-    } as {[key in number]: string},
+    } as { [key in number]: string },
 
     explodable_cells: [
         CellId.Box,
@@ -244,23 +244,23 @@ export const _GAME_CONFIG = {
         32: 'rats',
         39: 'dog',
         47: 'bull'
-    } as {[key in number]: string},
+    } as { [key in number]: string },
 
     tutorial_levels: [1, 2, 3, 4, 5, 6, 9, 10, 13, 17],
     tutorials_data: {
         1: {
-            cells: 
-            [
-                                            {x: 5, y: 4},
-                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}
-            ],
+            cells:
+                [
+                    { x: 5, y: 4 },
+                    { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }
+                ],
             bounds: {
-                from: {x: 3, y: 4},
-                to: {x: 6, y: 6}
+                from: { x: 3, y: 4 },
+                to: { x: 6, y: 6 }
             },
             step: {
-                from: {x: 5, y: 4},
-                to: {x: 5, y: 5}
+                from: { x: 5, y: 4 },
+                to: { x: 5, y: 5 }
             },
             text: {
                 data: "tutorial_collect",
@@ -269,64 +269,64 @@ export const _GAME_CONFIG = {
         },
         2: {
             cells: [
-                {x: 3, y: 3},
-                {x: 3, y: 4}, {x: 4, y: 4},
-                {x: 3, y: 5},
-                {x: 3, y: 6},
+                { x: 3, y: 3 },
+                { x: 3, y: 4 }, { x: 4, y: 4 },
+                { x: 3, y: 5 },
+                { x: 3, y: 6 },
             ],
             bounds: {
-                from: {x: 3, y: 3},
-                to: {x: 5, y: 7}
+                from: { x: 3, y: 3 },
+                to: { x: 5, y: 7 }
             },
             step: {
-                from: {x: 4, y: 4},
-                to: {x: 3, y: 4}
+                from: { x: 4, y: 4 },
+                to: { x: 3, y: 4 }
             },
-            text: { 
+            text: {
                 data: "tutorial_collect_rocket",
                 pos: vmath.vector3(0, 320, 0)
             },
             arrow_pos: vmath.vector3(70, -85, 0),
-            buster_icon: { 
+            buster_icon: {
                 icon: "rocket_icon",
                 pos: vmath.vector3(-30, -190, 0)
             }
         },
         3: {
             cells: [
-                                            {x: 5, y: 3},
-                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4}
+                { x: 5, y: 3 },
+                { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 }
             ],
             bounds: {
-                from: {x: 3, y: 3},
-                to: {x: 8, y: 5}
+                from: { x: 3, y: 3 },
+                to: { x: 8, y: 5 }
             },
             step: {
-                from: {x: 5, y: 3},
-                to: {x: 5, y: 4}
+                from: { x: 5, y: 3 },
+                to: { x: 5, y: 4 }
             },
             text: {
                 data: "tutorial_collect_diskosphere",
                 pos: vmath.vector3(0, 320, 0)
             },
             arrow_pos: vmath.vector3(70, -85, 0),
-            buster_icon: { 
+            buster_icon: {
                 icon: "diskosphere_icon",
                 pos: vmath.vector3(-30, -190, 0)
             }
         },
         4: {
             cells: [
-                                            {x: 5, y: 3},
-                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}
+                { x: 5, y: 3 },
+                { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }
             ],
             bounds: {
-                from: {x: 3, y: 3},
-                to: {x: 6, y: 5}
+                from: { x: 3, y: 3 },
+                to: { x: 6, y: 5 }
             },
             step: {
-                from: {x: 5, y: 3},
-                to: {x: 5, y: 4}
+                from: { x: 5, y: 3 },
+                to: { x: 5, y: 4 }
             },
             text: {
                 data: "tutorial_timer",
@@ -335,16 +335,16 @@ export const _GAME_CONFIG = {
         },
         5: {
             cells: [
-                                            {x: 7, y: 3},
-                {x: 5, y: 4}, {x: 6, y: 4}, {x: 7, y: 4},
+                { x: 7, y: 3 },
+                { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 7, y: 4 },
             ],
             bounds: {
-                from: {x: 5, y: 3},
-                to: {x: 8, y: 5}
+                from: { x: 5, y: 3 },
+                to: { x: 8, y: 5 }
             },
             step: {
-                from: {x: 7, y: 3},
-                to: {x: 7, y: 4}
+                from: { x: 7, y: 3 },
+                to: { x: 7, y: 4 }
             },
             text: {
                 data: "tutorial_grass",
@@ -358,12 +358,12 @@ export const _GAME_CONFIG = {
                 pos: vmath.vector3(0, 390, 0)
             },
             cells: [
-                {x: 6, y: 3}
+                { x: 6, y: 3 }
             ],
-            click: {x: 6, y: 3},
+            click: { x: 6, y: 3 },
             bounds: {
-                from: {x:0, y: 0},
-                to: {x:10, y: 10}
+                from: { x: 0, y: 0 },
+                to: { x: 10, y: 10 }
             }
         },
         9: {
@@ -373,22 +373,22 @@ export const _GAME_CONFIG = {
                 pos: vmath.vector3(0, 390, 0)
             },
             bounds: {
-                from: {x:0, y: 0},
-                to: {x:10, y: 10}
+                from: { x: 0, y: 0 },
+                to: { x: 10, y: 10 }
             }
         },
         10: {
             cells: [
-                {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 6, y: 4},
-                {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
+                { x: 3, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 },
+                { x: 3, y: 5 }, { x: 4, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 5 }
             ],
             bounds: {
-                from: {x: 3, y: 4},
-                to: {x: 7, y: 6}
+                from: { x: 3, y: 4 },
+                to: { x: 7, y: 6 }
             },
             step: {
-                from: {x: 3, y: 4},
-                to: {x: 4, y: 4}
+                from: { x: 3, y: 4 },
+                to: { x: 4, y: 4 }
             },
             text: {
                 data: "tutorial_box",
@@ -397,16 +397,16 @@ export const _GAME_CONFIG = {
         },
         13: {
             cells: [
-                {x: 6, y: 4}, 
-                {x: 6, y: 5}, {x: 7, y: 5}, {x: 8, y: 5},
+                { x: 6, y: 4 },
+                { x: 6, y: 5 }, { x: 7, y: 5 }, { x: 8, y: 5 },
             ],
             bounds: {
-                from: {x: 6, y: 4},
-                to: {x: 9, y: 6}
+                from: { x: 6, y: 4 },
+                to: { x: 9, y: 6 }
             },
             step: {
-                from: {x: 6, y: 4},
-                to: {x: 6, y: 5}
+                from: { x: 6, y: 4 },
+                to: { x: 6, y: 5 }
             },
             text: {
                 data: "tutorial_web",
@@ -420,18 +420,18 @@ export const _GAME_CONFIG = {
                 pos: vmath.vector3(0, 390, 0)
             },
             bounds: {
-                from: {x:0, y: 0},
-                to: {x:10, y: 10}
+                from: { x: 0, y: 0 },
+                to: { x: 10, y: 10 }
             },
             cells: [
-                {x: 3, y: 4}
+                { x: 3, y: 4 }
             ],
-            click: {x: 3, y: 4}
+            click: { x: 3, y: 4 }
         }
     } as TutorialData,
 
     levels: [] as Level[],
-    
+
     is_revive: false,
     is_restart: false,
     revive_states: {} as GameState[],
@@ -451,11 +451,11 @@ export const _STORAGE_CONFIG = {
     completed_levels: [] as number[],
 
     sound_bg: true,
-    
+
     move_showed: false,
-    
+
     map_last_pos_y: 0,
-    
+
     hammer_opened: false,
     spinning_opened: false,
     horizontal_rocket_opened: false,
@@ -467,7 +467,7 @@ export const _STORAGE_CONFIG = {
     vertical_rocket_counts: 0,
 
     coins: 0,
-    
+
     life: {
         start_time: 0,
         amount: 2
@@ -481,7 +481,7 @@ export const _STORAGE_CONFIG = {
 
     completed_tutorials: [] as number[],
 
-    noads: {} as {end_data: number}
+    noads: {} as { end_data: number }
 };
 
 export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
@@ -593,7 +593,7 @@ export type _UserMessages = {
 
     ON_WIN: VoidMessage,
     ON_WIN_END: GameState,
-    ON_GAME_OVER: {state: GameState, revive: boolean},
+    ON_GAME_OVER: { state: GameState, revive: boolean },
 
     MOVIE_END: VoidMessage,
 
@@ -626,7 +626,7 @@ export type _UserMessages = {
     TRY_BUY_VERTICAL_ROCKET: VoidMessage,
 
     SET_LIFE_NOTIFICATION: VoidMessage,
-    REVIVE: number,    
+    REVIVE: number,
 
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,

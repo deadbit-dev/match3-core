@@ -43,10 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/bull/bull.spinescene"
-        :scene
-      ]
-      [
         "/assets/vfx/cells/box/box.atlas"
         :scene
       ]
@@ -99,10 +95,6 @@
         :scene
       ]
       [
-        "/game.project"
-        :cljfx-form-view
-      ]
-      [
         "/map/map.gui"
         :scene
       ]
@@ -147,10 +139,6 @@
         :scene
       ]
       [
-        "/assets/fonts/16.font"
-        :scene
-      ]
-      [
         "/game/ui/game.gui"
         :scene
       ]
@@ -168,6 +156,18 @@
       ]
       [
         "/main/ui/dlg/store_dlg.gui"
+        :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
+        "/project_settings/generated.appmanifest"
+        :code
+      ]
+      [
+        "/assets/fonts/16.font"
         :scene
       ]
     ]
