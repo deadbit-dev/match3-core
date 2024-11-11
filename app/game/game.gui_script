@@ -33,6 +33,10 @@ function setup_info_ui(instance)
     setup_step_or_time(instance)
     setup_avatar_or_clock(instance)
     setup_targets(instance)
+    set_text(
+        "current_level",
+        (Lang.get_text("level") .. " ") .. tostring(GameStorage.get("current_level") + 1)
+    )
     gui.animate(
         gui.get_node("substrate"),
         "position",
@@ -306,10 +310,6 @@ function setup_sustem_ui(instance)
         "rewind/button",
         function() return EventBus.send("REQUEST_REWIND") end
     )
-    set_text(
-        "current_level",
-        (Lang.get_text("level") .. " ") .. tostring(GameStorage.get("current_level") + 1)
-    )
     gui.animate(
         gui.get_node("system_buttons"),
         "position",
@@ -419,10 +419,7 @@ function setup_gameover_ui(instance)
             GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
             Metrica.report(
                 "data",
-                {fail_level = {
-                    level = get_current_level() + 1,
-                    event = "3step_ads"
-                }}
+                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
             )
             EventBus.send("REVIVE", 3)
         end
@@ -441,10 +438,7 @@ function setup_gameover_ui(instance)
             remove_coins(30)
             Metrica.report(
                 "data",
-                {fail_level = {
-                    level = get_current_level() + 1,
-                    event = "5step_money"
-                }}
+                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "5step_money"}}
             )
             EventBus.send("REVIVE", 5)
         end

@@ -110,6 +110,8 @@ function setup_info_ui(instance: props) {
     setup_avatar_or_clock(instance);
     setup_targets(instance);
 
+    set_text('current_level', Lang.get_text('level') + ' ' + (GameStorage.get('current_level') + 1));
+
     gui.animate(gui.get_node('substrate'), 'position', vmath.vector3(270, 880, 0), gui.EASING_INCUBIC, 0.5);
 }
 
@@ -268,8 +270,6 @@ function setup_sustem_ui(instance: props) {
     });
     
     instance.druid.new_button('rewind/button', () => EventBus.send('REQUEST_REWIND'));
-
-    set_text('current_level', Lang.get_text('level') + ' ' + (GameStorage.get('current_level') + 1));
 
     gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(0, -40, 0), gui.EASING_INCUBIC, 0.5);
 }
