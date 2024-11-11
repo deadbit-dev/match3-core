@@ -334,7 +334,7 @@ function setup_gameover_ui(instance: props) {
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
     instance.druid.new_button('steps_by_ad/button', () => {
         GAME_CONFIG.steps_by_ad++;
-        Metrica.report('data', {fail_level: {level: get_current_level() + 1, event:'3step_ads'}});
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
         EventBus.send('REVIVE', 3);
     });
     
@@ -345,7 +345,7 @@ function setup_gameover_ui(instance: props) {
             return;
         }
         remove_coins(30);
-        Metrica.report('data', {fail_level: {level: get_current_level() + 1, event:'5step_money'}});
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
         EventBus.send('REVIVE', 5);
     });
 }

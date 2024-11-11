@@ -202,6 +202,9 @@ function ____exports.View(resources)
         end
         local offset_x = original_game_width / 2 - get_field_width() / 2 * cell_size
         local offset_y = -(original_game_height / 2 - get_field_max_height() / 2 * cell_size) + 600
+        if not GAME_CONFIG.debug_levels then
+            offset_y = offset_y - (90 - GAME_CONFIG.bottom_offset)
+        end
         return vmath.vector3(offset_x, offset_y, 0)
     end
     function on_load_game(game_state)
@@ -565,24 +568,24 @@ function ____exports.View(resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch92 = move_direction
-            local ____cond92 = ____switch92 == Direction.Up
-            if ____cond92 then
+            local ____switch93 = move_direction
+            local ____cond93 = ____switch93 == Direction.Up
+            if ____cond93 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond92 = ____cond92 or ____switch92 == Direction.Down
-            if ____cond92 then
+            ____cond93 = ____cond93 or ____switch93 == Direction.Down
+            if ____cond93 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond92 = ____cond92 or ____switch92 == Direction.Left
-            if ____cond92 then
+            ____cond93 = ____cond93 or ____switch93 == Direction.Left
+            if ____cond93 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond92 = ____cond92 or ____switch92 == Direction.Right
-            if ____cond92 then
+            ____cond93 = ____cond93 or ____switch93 == Direction.Right
+            if ____cond93 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1172,19 +1175,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch200 = message.axis
-                    local ____cond200 = ____switch200 == Axis.Horizontal
-                    if ____cond200 then
+                    local ____switch201 = message.axis
+                    local ____cond201 = ____switch201 == Axis.Horizontal
+                    if ____cond201 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond200 = ____cond200 or ____switch200 == Axis.Vertical
-                    if ____cond200 then
+                    ____cond201 = ____cond201 or ____switch201 == Axis.Vertical
+                    if ____cond201 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond200 = ____cond200 or ____switch200 == Axis.All
-                    if ____cond200 then
+                    ____cond201 = ____cond201 or ____switch201 == Axis.All
+                    if ____cond201 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1213,14 +1216,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch203 = axis
-            local ____cond203 = ____switch203 == Axis.Vertical
-            if ____cond203 then
+            local ____switch204 = axis
+            local ____cond204 = ____switch204 == Axis.Vertical
+            if ____cond204 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond203 = ____cond203 or ____switch203 == Axis.Horizontal
-            if ____cond203 then
+            ____cond204 = ____cond204 or ____switch204 == Axis.Horizontal
+            if ____cond204 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break

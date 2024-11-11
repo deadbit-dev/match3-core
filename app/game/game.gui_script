@@ -419,7 +419,10 @@ function setup_gameover_ui(instance)
             GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
             Metrica.report(
                 "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
+                {fail_level = {
+                    level = get_current_level() + 1,
+                    event = "3step_ads"
+                }}
             )
             EventBus.send("REVIVE", 3)
         end
@@ -438,7 +441,10 @@ function setup_gameover_ui(instance)
             remove_coins(30)
             Metrica.report(
                 "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "5step_money"}}
+                {fail_level = {
+                    level = get_current_level() + 1,
+                    event = "5step_money"
+                }}
             )
             EventBus.send("REVIVE", 5)
         end

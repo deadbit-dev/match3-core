@@ -246,7 +246,8 @@ export function View(resources: ViewResources) {
 
     function calculate_cell_offset(height_delta = 0, changes_coff = 1) {
         const offset_x = original_game_width / 2 - (get_field_width() / 2 * cell_size);
-        const offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
+        let offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
+        if(!GAME_CONFIG.debug_levels) offset_y -= 90 - GAME_CONFIG.bottom_offset;
         return vmath.vector3(
             offset_x,
             offset_y,
