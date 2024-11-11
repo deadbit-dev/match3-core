@@ -283,8 +283,8 @@ function setup_store(data: props) {
         EventBus.send('UPDATED_BUTTONS');
 
         Metrica.report('data', { shop: { buy: 'set1' } });
-        Metrica.report('data', { buy: { level: 0, id: 'hammer' } });
-        Metrica.report('data', { buy: { level: 0, id: 'vertical_rocket' } });
+        Metrica.report('data', { 'buy_0': { id: 'hammer' } });
+        Metrica.report('data', { 'buy_0': { id: 'vertical_rocket' } });
     });
 
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
@@ -306,11 +306,11 @@ function setup_store(data: props) {
 
         Metrica.report('data', { shop: { buy: 'set2' } });
 
-        Metrica.report('data', { buy: { level: 0, id: 'hammer' } });
-        Metrica.report('data', { buy: { level: 0, id: 'hammer' } });
-        Metrica.report('data', { buy: { level: 0, id: 'spinning' } });
-        Metrica.report('data', { buy: { level: 0, id: 'vertical_rocket' } });
-        Metrica.report('data', { buy: { level: 0, id: 'vertical_rocket' } });
+        Metrica.report('data', { 'buy_0': { level: 0, id: 'hammer' } });
+        Metrica.report('data', { 'buy_0': { level: 0, id: 'hammer' } });
+        Metrica.report('data', { 'buy_0': { level: 0, id: 'spinning' } });
+        Metrica.report('data', { 'buy_0': { level: 0, id: 'vertical_rocket' } });
+        Metrica.report('data', { 'buy_0': { level: 0, id: 'vertical_rocket' } });
     });
 
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
@@ -472,7 +472,7 @@ function setup_hammer(data: props) {
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_hammer(data, false);
 
-        Metrica.report('data', { buy: { level: get_current_level() + 1, id: 'hammer' } });
+        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'hammer' } });
     });
 
     data.druid.new_button('hammer/close', () => {
@@ -496,7 +496,7 @@ function setup_spinning(data: props) {
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_spinning(data, false);
 
-        Metrica.report('data', { buy: { level: get_current_level() + 1, id: 'spinning' } });
+        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'spinning' } });
     });
 
     data.druid.new_button('spinning/close', () => {
@@ -520,7 +520,7 @@ function setup_horizontal_rocket(data: props) {
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_horizontall_rocket(data, false);
 
-        Metrica.report('data', { buy: { level: get_current_level() + 1, id: 'horizontal_rocket' } });
+        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'horizontal_rocket' } });
     });
 
     data.druid.new_button('horizontal_rocket/close', () => {
@@ -544,7 +544,7 @@ function setup_vertical_rocket(data: props) {
         EventBus.send('UPDATED_BUTTONS');
         set_enabled_vertical_rocket(data, false);
 
-        Metrica.report('data', { buy: { level: get_current_level() + 1, id: 'vertical_rocket' } });
+        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'vertical_rocket' } });
     });
 
     data.druid.new_button('vertical_rocket/close', () => {

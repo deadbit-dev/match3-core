@@ -26,7 +26,7 @@ const presets = {
                 2: { position: vmath.vector3(-40, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
                 3: { position: vmath.vector3(-35, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
             }
-            
+
         },
         {
             node_name: 'second_target',
@@ -42,10 +42,10 @@ const presets = {
             }
         }
     ]
-} as { 
+} as {
     targets: {
         node_name: string,
-        preset_depend_of_length: { 
+        preset_depend_of_length: {
             [key in number]: {
                 position: vmath.vector3,
                 scale: vmath.vector3
@@ -63,7 +63,7 @@ interface props {
 
 export function init(this: props): void {
     Manager.init_script();
-    
+
     this.druid = druid.new(this);
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
     this.busters = this.level['busters'];
@@ -125,7 +125,7 @@ function setup_info_ui(instance: props) {
 }
 
 function setup_avatar_or_clock(instance: props) {
-    if(GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) {
+    if (GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) {
         const avatar = gui.get_node('avatar');
         const clock = gui.get_node('clock');
         gui.set_enabled(avatar, false);
@@ -134,7 +134,7 @@ function setup_avatar_or_clock(instance: props) {
 }
 
 function setup_step_or_time(instance: props) {
-    if(instance.level['time'] != undefined) {
+    if (instance.level['time'] != undefined) {
         const node = gui.get_node('timer');
         gui.set_enabled(node, true);
 
@@ -143,7 +143,7 @@ function setup_step_or_time(instance: props) {
         gui.set_text(gui.get_node('step_time_box/text'), Lang.get_text('time'));
     }
 
-    if(instance.level['steps'] != undefined) {
+    if (instance.level['steps'] != undefined) {
         const node = gui.get_node('step_counter');
         gui.set_enabled(node, true);
 
@@ -155,21 +155,21 @@ function setup_step_or_time(instance: props) {
 
 function setup_targets(instance: props) {
     const targets = instance.level['targets'];
-    for(let i = 0; i < targets.length; i++) {
+    for (let i = 0; i < targets.length; i++) {
         const target = targets[i];
-        if(target != undefined) {
+        if (target != undefined) {
             const node = gui.get_node(presets.targets[i].node_name);
             gui.set_enabled(node, true);
             gui.set_position(node, presets.targets[i].preset_depend_of_length[targets.length].position);
             gui.set_scale(node, presets.targets[i].preset_depend_of_length[targets.length].scale);
 
             let view;
-            if(target.type == TargetType.Cell) {
+            if (target.type == TargetType.Cell) {
                 view = GAME_CONFIG.cell_view[target.id as CellId];
-                if(Array.isArray(view))
+                if (Array.isArray(view))
                     view = view[0];
             } else view = GAME_CONFIG.element_view[target.id as ElementId];
-        
+
             gui.play_flipbook(gui.get_node(presets.targets[i].node_name + '_icon'), (view == 'cell_web') ? view + '_ui' : view);
             set_text(presets.targets[i].node_name + '_counts', target.count);
         }
@@ -179,20 +179,20 @@ function setup_targets(instance: props) {
 }
 
 function setup_busters(instance: props) {
-    if(GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) return;
-    
+    if (GAME_CONFIG.animal_levels.includes(GameStorage.get('current_level') + 1)) return;
+
     gui.set_enabled(gui.get_node('buster_buttons'), true);
-    
-    if(GameStorage.get('spinning_opened')) {
+
+    if (GameStorage.get('spinning_opened')) {
         instance.druid.new_button('spinning/button', () => {
-            if(GameStorage.get('spinning_counts') == 0) {
-                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
-                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+            if (GameStorage.get('spinning_counts') == 0) {
+                if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                         EventBus.send('TRY_BUY_SPINNING');
                 } else EventBus.send('TRY_BUY_SPINNING');
                 return;
             }
-            EventBus.send('ACTIVATE_BUSTER', {name: 'SPINNING'});
+            EventBus.send('ACTIVATE_BUSTER', { name: 'SPINNING' });
         });
 
         gui.set_enabled(gui.get_node('spinning/lock'), false);
@@ -200,60 +200,60 @@ function setup_busters(instance: props) {
         gui.set_enabled(gui.get_node('spinning/counts'), true);
     }
 
-    if(GameStorage.get('hammer_opened')) {
+    if (GameStorage.get('hammer_opened')) {
         instance.druid.new_button('hammer/button', () => {
-            if(GameStorage.get('hammer_counts') == 0) {
-                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
-                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+            if (GameStorage.get('hammer_counts') == 0) {
+                if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                         EventBus.send('TRY_BUY_HAMMER');
                 } else EventBus.send('TRY_BUY_HAMMER');
                 return;
             }
-            EventBus.send('ACTIVATE_BUSTER', {name: 'HAMMER'});
+            EventBus.send('ACTIVATE_BUSTER', { name: 'HAMMER' });
         });
-        
+
         gui.set_enabled(gui.get_node('hammer/lock'), false);
         gui.set_enabled(gui.get_node('hammer/icon'), true);
         gui.set_enabled(gui.get_node('hammer/counts'), true);
     }
-    
-    if(GameStorage.get('horizontal_rocket_opened')) {
+
+    if (GameStorage.get('horizontal_rocket_opened')) {
         instance.druid.new_button('horizontal_rocket/button', () => {
-            if(GameStorage.get('horizontal_rocket_counts') == 0) {
-                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
-                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+            if (GameStorage.get('horizontal_rocket_counts') == 0) {
+                if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                         EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');
                 } else EventBus.send('TRY_BUY_HORIZONTAL_ROCKET');
                 return;
             }
-            EventBus.send('ACTIVATE_BUSTER', {name: 'HORIZONTAL_ROCKET'});
+            EventBus.send('ACTIVATE_BUSTER', { name: 'HORIZONTAL_ROCKET' });
         });
-        
+
         gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
         gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
         gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
     }
 
-    if(GameStorage.get('vertical_rocket_opened')) {
+    if (GameStorage.get('vertical_rocket_opened')) {
         instance.druid.new_button('vertical_rocket/button', () => {
-            if(GameStorage.get('vertical_rocket_counts') == 0) {
-                if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
-                    if(GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+            if (GameStorage.get('vertical_rocket_counts') == 0) {
+                if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+                    if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                         EventBus.send('TRY_BUY_VERTICAL_ROCKET');
                 } else EventBus.send('TRY_BUY_VERTICAL_ROCKET');
                 return;
             }
-            EventBus.send('ACTIVATE_BUSTER', {name: 'VERTICAL_ROCKET'});
+            EventBus.send('ACTIVATE_BUSTER', { name: 'VERTICAL_ROCKET' });
         });
-        
+
         gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
         gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
         gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
     }
 
     instance.druid.new_button('settings/button', () => {
-        if(GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
-            if(!GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
+        if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
+            if (!GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
                 return;
         }
 
@@ -272,7 +272,7 @@ function setup_sustem_ui(instance: props) {
         GAME_CONFIG.is_restart = true;
         Scene.restart();
     });
-    
+
     instance.druid.new_button('rewind/button', () => EventBus.send('REQUEST_REWIND'));
 
     set_text('current_level', Lang.get_text('level') + ' ' + (GameStorage.get('current_level') + 1));
@@ -308,26 +308,26 @@ function next_level() {
 
 function setup_gameover_ui(instance: props) {
     gui.set_text(gui.get_node('gameover_text'), Lang.get_text('gameover_title'));
-    
+
     gui.set_text(gui.get_node('restart_text'), Lang.get_text('restart'));
     instance.druid.new_button('restart_button', () => {
-        if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+        if (!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
             EventBus.send("SET_LIFE_NOTIFICATION");
             return;
         }
 
         GAME_CONFIG.steps_by_ad = 0;
-        
+
         GAME_CONFIG.is_restart = true;
         Scene.restart();
     });
-    
+
     gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
     instance.druid.new_button('map_button', () => {
         Sound.stop('game');
         Scene.load('map');
     });
-    
+
     instance.druid.new_button('gameover_close', () => {
         Sound.stop('game');
         Scene.load('map');
@@ -338,18 +338,18 @@ function setup_gameover_ui(instance: props) {
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
     instance.druid.new_button('steps_by_ad/button', () => {
         GAME_CONFIG.steps_by_ad++;
-        Metrica.report('data', {fail_level: {level: get_current_level() + 1, event:'3step_ads'}});
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
         EventBus.send('REVIVE', 3);
     });
-    
+
     gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов        30");
     instance.druid.new_button('steps_by_coins/button', () => {
-        if(!is_enough_coins(30)) {
+        if (!is_enough_coins(30)) {
             EventBus.send('REQUEST_OPEN_STORE');
             return;
         }
         remove_coins(30);
-        Metrica.report('data', {fail_level: {level: get_current_level() + 1, event:'5step_money'}});
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
         EventBus.send('REVIVE', 5);
     });
 }
@@ -382,7 +382,7 @@ function set_events(instance: props) {
 }
 
 function update_targets(data: TargetMessage) {
-    switch(data.idx) {
+    switch (data.idx) {
         case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
         case 1: set_text('second_target_counts', math.max(0, data.amount)); break;
         case 2: set_text('third_target_counts', math.max(0, data.amount)); break;
@@ -392,12 +392,12 @@ function update_targets(data: TargetMessage) {
 function feed_animation() {
     const level_config = get_current_level_config();
     let item_id = 0;
-    for(const target of level_config.targets) {
-        if(target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id))
+    for (const target of level_config.targets) {
+        if (target.type == TargetType.Element && GAME_CONFIG.feed_elements.includes(target.id))
             item_id = target.id;
     }
 
-    for(let i = 0; i < 5; i++) {
+    for (let i = 0; i < 5; i++) {
         timer.delay(0.05 * i, false, () => {
             flow.start(() => {
                 const element = gui.new_box_node(vmath.vector3(420, 870, 0), vmath.vector3(40, 40, 1));
@@ -409,9 +409,9 @@ function feed_animation() {
                 const width = 540;
                 const height = math.abs(ltrb.w);
                 const points = [
-                    {x: 420, y: 870},
-                    {x: width * 0.3, y: height * 0.5},
-                    {x: width * 0.5, y: height * 0.4}
+                    { x: 420, y: 870 },
+                    { x: width * 0.3, y: height * 0.5 },
+                    { x: width * 0.5, y: height * 0.4 }
                 ];
 
                 let result = vmath.vector3();
@@ -439,15 +439,15 @@ function update_buttons(instance: props) {
     const spinning = GameStorage.get('spinning_counts');
     set_text('spinning/counts', (spinning == 0) ? "+" : spinning);
     set_text_colors(['spinning/button'], '#fff', instance.busters.spinning.active ? 0.5 : 1);
-    
+
     const hammer = GameStorage.get('hammer_counts');
     set_text('hammer/counts', (hammer == 0) ? "+" : hammer);
     set_text_colors(['hammer/button'], '#fff', instance.busters.hammer.active ? 0.5 : 1);
-    
+
     const horizontal_rocket = GameStorage.get('horizontal_rocket_counts');
     set_text('horizontal_rocket/counts', (horizontal_rocket == 0) ? "+" : horizontal_rocket);
     set_text_colors(['horizontal_rocket/button'], '#fff', instance.busters.horizontal_rocket.active ? 0.5 : 1);
-    
+
     const vertical_rocket = GameStorage.get('vertical_rocket_counts');
     set_text('vertical_rocket/counts', (vertical_rocket == 0) ? "+" : vertical_rocket);
     set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
@@ -465,13 +465,13 @@ function set_tutorial() {
 
     gui.set_enabled(gui.get_node('lock1'), true);
 
-    if(tutorial_data.arrow_pos != undefined) {
+    if (tutorial_data.arrow_pos != undefined) {
         const arrow = gui.get_node('arrow');
         gui.set_enabled(arrow, true);
         gui.set_position(arrow, tutorial_data.arrow_pos);
     }
 
-    if(tutorial_data.buster_icon != undefined) {
+    if (tutorial_data.buster_icon != undefined) {
         const buster = gui.get_node('buster');
         const buster_icon = gui.get_node('buster_icon');
 
@@ -480,12 +480,12 @@ function set_tutorial() {
         gui.play_flipbook(buster_icon, tutorial_data.buster_icon.icon);
     }
 
-    if(tutorial_data.busters != undefined) {
-        const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];        
-        for(const buster of busters)
+    if (tutorial_data.busters != undefined) {
+        const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];
+        for (const buster of busters)
             gui.set_layer(gui.get_node(buster + "/button"), "top");
 
-        if(busters.includes('spinning')) {
+        if (busters.includes('spinning')) {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
@@ -497,7 +497,7 @@ function set_tutorial() {
             });
         }
 
-        if(busters.includes('hammer')) {
+        if (busters.includes('hammer')) {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
@@ -513,7 +513,7 @@ function set_tutorial() {
             });
         }
 
-        if(busters.includes('horizontal_rocket')) {
+        if (busters.includes('horizontal_rocket')) {
             // TODO: separate hand logic
             const hand = gui.get_node('hand');
             hand_timer = timer.delay(4, true, () => {
@@ -532,31 +532,31 @@ function set_tutorial() {
 }
 
 function remove_tutorial() {
-    if(hand_timer != null) timer.cancel(hand_timer);
+    if (hand_timer != null) timer.cancel(hand_timer);
     gui.set_enabled(gui.get_node('lock1'), false);
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
 function on_win_end(state: GameState) {
-    if(is_animal_level()) {
+    if (is_animal_level()) {
         timer.delay(0.1, false, feed_animation);
     }
 
     timer.delay(is_animal_level() ? GAME_CONFIG.animal_level_delay_before_win : GAME_CONFIG.delay_before_win, false, () => {
         disable_game_ui();
-        
+
         const lock = gui.get_node('lock1');
         gui.set_enabled(lock, true);
         gui.set_alpha(lock, 0);
         gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.6, 0, () => {
             gui.set_enabled(gui.get_node('win'), true);
-            if(is_last_level()) {
+            if (is_last_level()) {
                 gui.set_enabled(gui.get_node('win_close'), false);
                 gui.set_enabled(gui.get_node('continue_button'), false);
             }
 
             const on_end_for_last_level = () => {
-                if(!is_last_level())
+                if (!is_last_level())
                     return;
                 timer.delay(0.5, false, () => {
                     gui.set_enabled(gui.get_node('win'), false);
@@ -569,7 +569,7 @@ function on_win_end(state: GameState) {
             let level_coins = get_current_level_config().coins;
             let steps = (state.steps != undefined) ? state.steps : 0;
             let remaining_time = (state.remaining_time != undefined) ? math.floor(state.remaining_time) : 0;
-            if(level_coins > 0) {
+            if (level_coins > 0) {
                 const current_coins = GameStorage.get('coins');
                 const before_reward = current_coins - level_coins - steps - remaining_time;
                 gui.set_enabled(gui.get_node('reward'), true);
@@ -591,24 +591,24 @@ function on_win_end(state: GameState) {
                     const width = 540;
                     const height = math.abs(ltrb.w);
                     const level_coin_points = [
-                        {x: 420 * math.random(), y: 1070},
-                        {x: width * 0.3, y: height * 0.5},
-                        {x: 270+25, y: 480-200}
+                        { x: 420 * math.random(), y: 1070 },
+                        { x: width * 0.3, y: height * 0.5 },
+                        { x: 270 + 25, y: 480 - 200 }
                     ];
-                    if(steps > 0 || remaining_time > 0) {
+                    if (steps > 0 || remaining_time > 0) {
                         const steptime_points = [
-                            {x: 100, y: 850},
-                            {x: width * 0.25, y: height * 0.5},
-                            {x: 270+25, y: 480-200}
+                            { x: 100, y: 850 },
+                            { x: width * 0.25, y: height * 0.5 },
+                            { x: 270 + 25, y: 480 - 200 }
                         ];
 
                         const on_each_coin_drop_start = (idx: number) => {
-                            if(steps > 0) {
+                            if (steps > 0) {
                                 gui.set_text(gui.get_node('steps'), tostring(steps - (idx + 1)));
                                 return;
                             }
 
-                            if(remaining_time > 0) {
+                            if (remaining_time > 0) {
                                 gui.set_text(gui.get_node('time'), parse_time(remaining_time - (idx + 1)));
                                 return;
                             }
@@ -625,7 +625,7 @@ function on_win_end(state: GameState) {
 
         Sound.play('passed');
         Sound.play('animalwin');
-    
+
         const anim_props = { blend_duration: 0, playback_rate: 1 };
         gui.play_spine_anim(gui.get_node("firework"), hash("firework"), gui.PLAYBACK_LOOP_FORWARD, anim_props);
     });
@@ -651,7 +651,7 @@ function fade_steptime() {
 }
 
 function drop_coins(init_value: number, amount: number, points: Position[], on_each_drop_start?: (inidx: number) => void, on_each_drop_end?: (init_value: number, idx: number) => void, on_end?: () => void) {
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
         const idx = i;
         timer.delay(0.1 * i, false, () => {
             flow.start(() => {
@@ -660,7 +660,7 @@ function drop_coins(init_value: number, amount: number, points: Position[], on_e
                 gui.set_texture(coin, 'ui');
                 gui.play_flipbook(coin, 'coin_icon_1');
 
-                if(on_each_drop_start != undefined)
+                if (on_each_drop_start != undefined)
                     on_each_drop_start(idx);
 
                 let result = vmath.vector3();
@@ -673,27 +673,27 @@ function drop_coins(init_value: number, amount: number, points: Position[], on_e
 
                 gui.delete_node(coin);
 
-                if(on_each_drop_end != undefined)
+                if (on_each_drop_end != undefined)
                     on_each_drop_end(init_value, idx);
             });
         });
     }
 
-    if(on_end != undefined)
+    if (on_end != undefined)
         timer.delay((amount * 0.1) + (100 * 0.01), false, on_end);
 }
 
 // TODO: make presets for gameover
 function set_gameover(instance: props, state: GameState, revive: boolean) {
     disable_game_ui();
-    
+
     const lock = gui.get_node('lock1');
     gui.set_enabled(lock, true);
     gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
         gui.set_enabled(gui.get_node('gameover'), true);
         gui.set_enabled(gui.get_node('missing_targets'), true);
     });
-    
+
 
     Sound.play('failed');
     Sound.play('animallose');
@@ -701,83 +701,83 @@ function set_gameover(instance: props, state: GameState, revive: boolean) {
     const target_1 = gui.get_node('target_1');
     const target_2 = gui.get_node('target_2');
     const target_3 = gui.get_node('target_3');
-    
-    if(state.targets.length == 1) {
+
+    if (state.targets.length == 1) {
         const target1 = state.targets[0];
 
         let view1 = '';
-        if(target1.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
+        if (target1.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
             else view1 = GAME_CONFIG.cell_view[target1.id as CellId] as string;
         } else view1 = GAME_CONFIG.element_view[target1.id as ElementId];
 
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
-        
+
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
 
         gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
-        
+
         gui.set_position(target_1, vmath.vector3(0, 0, 0));
         gui.set_enabled(target_1, true);
     }
-    else if(state.targets.length == 2) {
+    else if (state.targets.length == 2) {
         const target1 = state.targets[0];
 
         let view1 = '';
-        if(target1.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
+        if (target1.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
             else view1 = GAME_CONFIG.cell_view[target1.id as CellId] as string;
         } else view1 = GAME_CONFIG.element_view[target1.id as ElementId];
 
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
-        
+
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
-        
+
         gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
-        
+
         gui.set_position(target_1, vmath.vector3(-70, 0, 0));
         gui.set_enabled(target_1, true);
 
         const target2 = state.targets[1];
-        
+
         let view2 = '';
-        if(target2.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target2.id as CellId])) view2 = GAME_CONFIG.cell_view[target2.id as CellId][0];
+        if (target2.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target2.id as CellId])) view2 = GAME_CONFIG.cell_view[target2.id as CellId][0];
             else view2 = GAME_CONFIG.cell_view[target2.id as CellId] as string;
         } else view2 = GAME_CONFIG.element_view[target2.id as ElementId];
 
         gui.play_flipbook(gui.get_node('target_2'), (view2 == 'cell_web') ? view2 + '_ui' : view2);
-        
+
         gui.set_text(gui.get_node('target_2_text'), tostring(math.min(target2.uids.length, target2.count) + "/" + target2.count));
-        
+
         gui.set_enabled(gui.get_node('target_2_fail_icon'), target2.uids.length < target2.count);
-        
+
         gui.set_position(target_2, vmath.vector3(70, 0, 0));
         gui.set_enabled(target_2, true);
     }
-    else if(state.targets.length == 3) {
+    else if (state.targets.length == 3) {
         const target1 = state.targets[0];
 
         let view1 = '';
-        if(target1.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
+        if (target1.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target1.id as CellId])) view1 = GAME_CONFIG.cell_view[target1.id as CellId][0];
             else view1 = GAME_CONFIG.cell_view[target1.id as CellId] as string;
         } else view1 = GAME_CONFIG.element_view[target1.id as ElementId];
 
         gui.play_flipbook(gui.get_node('target_1'), (view1 == 'cell_web') ? view1 + '_ui' : view1);
-        
+
         gui.set_text(gui.get_node('target_1_text'), tostring(math.min(target1.uids.length, target1.count) + "/" + target1.count));
 
         gui.set_enabled(gui.get_node('target_1_fail_icon'), target1.uids.length < target1.count);
-        
+
         gui.set_position(target_1, vmath.vector3(-125, 0, 0));
         gui.set_enabled(target_1, true);
-    
+
         const target2 = state.targets[1];
 
         let view2 = '';
-        if(target2.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target2.id as CellId])) view2 = GAME_CONFIG.cell_view[target2.id as CellId][0];
+        if (target2.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target2.id as CellId])) view2 = GAME_CONFIG.cell_view[target2.id as CellId][0];
             else view2 = GAME_CONFIG.cell_view[target2.id as CellId] as string;
         } else view2 = GAME_CONFIG.element_view[target2.id as ElementId];
 
@@ -786,15 +786,15 @@ function set_gameover(instance: props, state: GameState, revive: boolean) {
         gui.set_text(gui.get_node('target_2_text'), tostring(math.min(target2.uids.length, target2.count) + "/" + target2.count));
 
         gui.set_enabled(gui.get_node('target_2_fail_icon'), target2.uids.length < target2.count);
-        
+
         gui.set_position(target_2, vmath.vector3(0, 0, 0));
         gui.set_enabled(target_2, true);
-    
+
         const target3 = state.targets[2];
 
         let view3 = '';
-        if(target3.type == TargetType.Cell) {
-            if(Array.isArray(GAME_CONFIG.cell_view[target3.id as CellId])) view3 = GAME_CONFIG.cell_view[target3.id as CellId][0];
+        if (target3.type == TargetType.Cell) {
+            if (Array.isArray(GAME_CONFIG.cell_view[target3.id as CellId])) view3 = GAME_CONFIG.cell_view[target3.id as CellId][0];
             else view3 = GAME_CONFIG.cell_view[target3.id as CellId] as string;
         } else view3 = GAME_CONFIG.element_view[target3.id as ElementId];
 
@@ -808,13 +808,13 @@ function set_gameover(instance: props, state: GameState, revive: boolean) {
         gui.set_enabled(target_3, true);
     }
 
-    if(revive) set_gameover_offer();
+    if (revive) set_gameover_offer();
     else disabled_gameover_offer();
 }
 
 function set_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), true);
-    if(GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
+    if (GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
     gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
 }
 
@@ -824,7 +824,7 @@ function disabled_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), false);
     gui.set_enabled(gui.get_node('steps_by_ad/button'), false);
     gui.set_enabled(gui.get_node('steps_by_coins/button'), false);
-    
+
     gui.set_enabled(gui.get_node('gameover_close'), true);
     gui.set_enabled(gui.get_node('restart_button'), true);
     gui.set_enabled(gui.get_node('map_button'), true);
@@ -835,7 +835,7 @@ function disable_game_ui() {
 
     gui.animate(gui.get_node('substrate'), 'position', vmath.vector3(270, 1050, 0), gui.EASING_INCUBIC, 0.5);
     gui.animate(gui.get_node('system_buttons'), 'position', vmath.vector3(0, -200, 0), gui.EASING_INCUBIC, 0.5);
-    
+
     timer.delay(0.5, false, () => {
         gui.set_enabled(gui.get_node('substrate'), false);
         gui.set_enabled(gui.get_node('system_buttons'), false);
@@ -846,7 +846,7 @@ function on_shuffle_start() {
     const shuffle = gui.get_node('shuffle');
     // const init_scale = gui.get_scale(shuffle);
     // gui.set_scale(shuffle, vmath.vector3());
-    
+
     const lock = gui.get_node('lock1');
     gui.set_enabled(lock, true);
     gui.animate(lock, gui.PROP_COLOR, vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3, 0, () => {
@@ -865,7 +865,7 @@ function on_shuffle_action() {
             gui.set_enabled(lock, false);
         });
         // gui.animate(shuffle, gui.PROP_COLOR, vmath.vector4(), gui.EASING_INCUBIC, 0.3, 0, () => {
-            
+
         // });
     });
 }
