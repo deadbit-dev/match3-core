@@ -43,26 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/vfx/cells/grass/grass.spinescene"
-        :scene
-      ]
-      [
-        "/game/view.lua"
-        :code
-      ]
-      [
-        "/modules/Scene.lua"
-        :code
-      ]
-      [
-        "/assets/background.atlas"
-        :scene
-      ]
-      [
-        "/assets/map.atlas"
-        :scene
-      ]
-      [
         "/assets/bull/bull.spinescene"
         :scene
       ]
@@ -91,31 +71,7 @@
         :scene
       ]
       [
-        "/main/ui/parts/lable_button.gui"
-        :scene
-      ]
-      [
-        "/map/map.gui"
-        :scene
-      ]
-      [
         "/assets/background_old.atlas"
-        :scene
-      ]
-      [
-        "/game.project"
-        :cljfx-form-view
-      ]
-      [
-        "/project_settings/TextureProfile.texture_profiles"
-        :cljfx-form-view
-      ]
-      [
-        "/assets/fonts/16.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/27.font"
         :scene
       ]
       [
@@ -123,7 +79,11 @@
         :scene
       ]
       [
-        "/assets/fonts/18.font"
+        "/assets/fonts/42.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/44.font"
         :scene
       ]
       [
@@ -131,7 +91,19 @@
         :scene
       ]
       [
+        "/project_settings/TextureProfile.texture_profiles"
+        :cljfx-form-view
+      ]
+      [
         "/assets/fonts/32-top.font"
+        :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
+        "/map/map.gui"
         :scene
       ]
       [
@@ -143,6 +115,10 @@
         :scene
       ]
       [
+        "/main/ui/parts/lable_button.gui"
+        :scene
+      ]
+      [
         "/assets/fonts/32_medium.font"
         :scene
       ]
@@ -151,15 +127,7 @@
         :scene
       ]
       [
-        "/assets/fonts/42.font"
-        :scene
-      ]
-      [
         "/assets/fonts/48.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/44.font"
         :scene
       ]
       [
@@ -168,6 +136,38 @@
       ]
       [
         "/assets/fonts/70.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/27.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/18.font"
+        :scene
+      ]
+      [
+        "/assets/fonts/16.font"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/game/game.collection"
+        :scene
+      ]
+      [
+        "/main/main.collection"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui"
+        :scene
+      ]
+      [
+        "/main/ui/dlg/store_dlg.gui"
         :scene
       ]
     ]
