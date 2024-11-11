@@ -327,6 +327,7 @@ nodes {
   texture: "graphics/element_emerald"
   id: "first_target_icon"
   parent: "first_target"
+  layer: "back"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -336,8 +337,8 @@ nodes {
     y: -42.0
   }
   scale {
-    x: 3.3
-    y: 3.3
+    x: 3.0
+    y: 3.0
   }
   color {
     x: 0.988
@@ -358,6 +359,7 @@ nodes {
     z: 1.0
   }
   parent: "first_target"
+  layer: "top"
   inherit_alpha: true
 }
 nodes {
@@ -386,6 +388,7 @@ nodes {
   texture: "graphics/element_gold"
   id: "second_target_icon"
   parent: "second_target"
+  layer: "back"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -395,8 +398,8 @@ nodes {
     y: -42.0
   }
   scale {
-    x: 3.3
-    y: 3.3
+    x: 3.0
+    y: 3.0
   }
   color {
     x: 0.988
@@ -417,6 +420,7 @@ nodes {
     z: 1.0
   }
   parent: "second_target"
+  layer: "top"
   inherit_alpha: true
 }
 nodes {
@@ -444,6 +448,7 @@ nodes {
   texture: "graphics/element_diamond"
   id: "third_target_icon"
   parent: "third_target"
+  layer: "back"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
 }
@@ -453,8 +458,8 @@ nodes {
     y: -42.0
   }
   scale {
-    x: 3.3
-    y: 3.3
+    x: 3.0
+    y: 3.0
   }
   color {
     x: 0.988
@@ -475,6 +480,7 @@ nodes {
     z: 1.0
   }
   parent: "third_target"
+  layer: "top"
   inherit_alpha: true
 }
 nodes {
