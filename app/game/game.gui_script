@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, set_animal_tutorial_tip, set_events, update_targets, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, fade_steptime, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -16,6 +16,7 @@ local get_current_level_config = ____utils.get_current_level_config
 local is_animal_level = ____utils.is_animal_level
 local is_enough_coins = ____utils.is_enough_coins
 local is_last_level = ____utils.is_last_level
+local is_time_level = ____utils.is_time_level
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local ____game = require("game.game")
@@ -410,12 +411,16 @@ function setup_gameover_ui(instance)
                 "data",
                 {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
             )
-            EventBus.send("REVIVE", 3)
+            EventBus.send("REVIVE", {step = 3})
         end
     )
     gui.set_text(
         gui.get_node("steps_by_coins/text"),
-        "+5 ходов        30"
+        "+5 ходов"
+    )
+    gui.set_text(
+        gui.get_node("steps_by_coins/text1"),
+        "30"
     )
     instance.druid:new_button(
         "steps_by_coins/button",
@@ -429,7 +434,30 @@ function setup_gameover_ui(instance)
                 "data",
                 {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "5step_money"}}
             )
-            EventBus.send("REVIVE", 5)
+            EventBus.send("REVIVE", {step = 5})
+        end
+    )
+    gui.set_text(
+        gui.get_node("time_by_coins/text"),
+        "+15 cек"
+    )
+    gui.set_text(
+        gui.get_node("time_by_coins/text1"),
+        "50"
+    )
+    instance.druid:new_button(
+        "time_by_coins/button",
+        function()
+            if not is_enough_coins(50) then
+                EventBus.send("REQUEST_OPEN_STORE")
+                return
+            end
+            remove_coins(50)
+            Metrica.report(
+                "data",
+                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "15time_money"}}
+            )
+            EventBus.send("REVIVE", {time = 15})
         end
     )
 end
@@ -493,12 +521,12 @@ function set_events(instance)
     EventBus.on("ON_WIN_END", on_win_end)
     EventBus.on(
         "ON_GAME_OVER",
-        function(data)
+        function(state)
             timer.delay(
                 GAME_CONFIG.delay_before_gameover,
                 false,
                 function()
-                    set_gameover(instance, data.state, data.revive)
+                    set_gameover(instance, state)
                 end
             )
         end,
@@ -1074,7 +1102,7 @@ function drop_coins(init_value, amount, points, on_each_drop_start, on_each_drop
         timer.delay(amount * 0.1 + 100 * 0.01, false, on_end)
     end
 end
-function set_gameover(instance, state, revive)
+function set_gameover(instance, state)
     disable_game_ui()
     local lock = gui.get_node("lock1")
     gui.set_enabled(lock, true)
@@ -1273,27 +1301,30 @@ function set_gameover(instance, state, revive)
         )
         gui.set_enabled(target_3, true)
     end
-    if revive then
-        set_gameover_offer()
-    else
-        disabled_gameover_offer()
-    end
+    set_gameover_offer()
 end
 function set_gameover_offer()
     gui.set_enabled(
         gui.get_node("gameover_offer_close"),
         true
     )
-    if GAME_CONFIG.steps_by_ad < 2 then
+    if not is_time_level() then
+        if GAME_CONFIG.steps_by_ad < 2 then
+            gui.set_enabled(
+                gui.get_node("steps_by_ad/button"),
+                true
+            )
+        end
         gui.set_enabled(
-            gui.get_node("steps_by_ad/button"),
+            gui.get_node("steps_by_coins/button"),
+            true
+        )
+    else
+        gui.set_enabled(
+            gui.get_node("time_by_coins/button"),
             true
         )
     end
-    gui.set_enabled(
-        gui.get_node("steps_by_coins/button"),
-        true
-    )
 end
 function disabled_gameover_offer()
     remove_lifes(1)

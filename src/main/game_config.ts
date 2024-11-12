@@ -595,7 +595,7 @@ export type _UserMessages = {
 
     ON_WIN: VoidMessage,
     ON_WIN_END: GameState,
-    ON_GAME_OVER: { state: GameState, revive: boolean },
+    ON_GAME_OVER: GameState,
 
     MOVIE_END: VoidMessage,
 
@@ -628,7 +628,7 @@ export type _UserMessages = {
     TRY_BUY_VERTICAL_ROCKET: VoidMessage,
 
     SET_LIFE_NOTIFICATION: VoidMessage,
-    REVIVE: number,
+    REVIVE: {step?: number, time?: number},
 
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,

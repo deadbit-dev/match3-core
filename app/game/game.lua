@@ -175,6 +175,9 @@ function ____exports.Game()
             update_core_state()
             set_targets(level_config.targets)
             set_steps(level_config.steps)
+            if level_config.time ~= nil then
+                get_state().remaining_time = level_config.time
+            end
             set_random()
         end
         EventBus.send(
@@ -251,24 +254,24 @@ function ____exports.Game()
     end
     function unlock_buster(name)
         repeat
-            local ____switch35 = name
-            local ____cond35 = ____switch35 == "hammer"
-            if ____cond35 then
+            local ____switch36 = name
+            local ____cond36 = ____switch36 == "hammer"
+            if ____cond36 then
                 busters.hammer.block = false
                 break
             end
-            ____cond35 = ____cond35 or ____switch35 == "spinning"
-            if ____cond35 then
+            ____cond36 = ____cond36 or ____switch36 == "spinning"
+            if ____cond36 then
                 busters.spinning.block = false
                 break
             end
-            ____cond35 = ____cond35 or ____switch35 == "horizontal_rocket"
-            if ____cond35 then
+            ____cond36 = ____cond36 or ____switch36 == "horizontal_rocket"
+            if ____cond36 then
                 busters.horizontal_rocket.block = false
                 break
             end
-            ____cond35 = ____cond35 or ____switch35 == "vertical_rocket"
-            if ____cond35 then
+            ____cond36 = ____cond36 or ____switch36 == "vertical_rocket"
+            if ____cond36 then
                 busters.vertical_rocket.block = false
                 break
             end
@@ -346,6 +349,9 @@ function ____exports.Game()
         local last_state = get_state(1)
         set_targets(last_state.targets)
         set_steps(last_state.steps)
+        if level_config.time ~= nil then
+            get_state().remaining_time = last_state.remaining_time
+        end
         set_random()
         if not is_tutorial() and helper_timer == nil then
             helper_timer = timer.delay(
@@ -585,30 +591,28 @@ function ____exports.Game()
             end
         )
     end
-    function on_gameover(revive)
-        if revive == nil then
-            revive = level_config.time == nil
-        end
+    function on_gameover()
         timer.cancel(game_timer)
         update_core_state()
-        if revive then
-            GAME_CONFIG.revive_states = json.decode(json.encode(states))
-        end
+        GAME_CONFIG.revive_states = json.decode(json.encode(states))
         EventBus.send(
             "ON_GAME_OVER",
-            {
-                state = copy_state(),
-                revive = revive
-            }
+            copy_state()
         )
         Metrica.report(
             "data",
             {["level_" .. tostring(get_current_level() + 1)] = {type = "fail"}}
         )
     end
-    function on_revive(steps)
-        local ____GAME_CONFIG_revive_states_index_3, ____steps_4 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "steps"
-        ____GAME_CONFIG_revive_states_index_3[____steps_4] = ____GAME_CONFIG_revive_states_index_3[____steps_4] + steps
+    function on_revive(data)
+        if data.steps ~= nil then
+            local ____GAME_CONFIG_revive_states_index_3, ____steps_4 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "steps"
+            ____GAME_CONFIG_revive_states_index_3[____steps_4] = ____GAME_CONFIG_revive_states_index_3[____steps_4] + data.steps
+        end
+        if data.time ~= nil then
+            local ____GAME_CONFIG_revive_states_index_5, ____remaining_time_6 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "remaining_time"
+            ____GAME_CONFIG_revive_states_index_5[____remaining_time_6] = ____GAME_CONFIG_revive_states_index_5[____remaining_time_6] + data.time
+        end
         GAME_CONFIG.is_revive = true
         GAME_CONFIG.is_restart = true
         Scene.restart()
@@ -642,7 +646,7 @@ function ____exports.Game()
             timer.delay(
                 0.5,
                 false,
-                function() return on_gameover(false) end
+                function() return on_gameover() end
             )
         end
         EventBus.send("SHUFFLE_START")
@@ -954,6 +958,15 @@ function ____exports.Game()
                 y = y + 1
             end
         end
+        if level_config.time ~= nil then
+            timer.delay(
+                0,
+                false,
+                function()
+                    EventBus.send("GAME_TIMER", last_state.remaining_time)
+                end
+            )
+        end
         if not has_step() then
             shuffle()
         end
@@ -981,7 +994,7 @@ function ____exports.Game()
         if level_config.time == nil then
             return
         end
-        start_game_time = System.now()
+        start_game_time = System.now() - level_config.time + get_state().remaining_time
     end
     function set_targets(targets)
         local last_state = get_state()
@@ -1029,9 +1042,9 @@ function ____exports.Game()
         return to_state
     end
     function generate_uid()
-        local ____game_item_counter_5 = game_item_counter
-        game_item_counter = ____game_item_counter_5 + 1
-        return ____game_item_counter_5
+        local ____game_item_counter_7 = game_item_counter
+        game_item_counter = ____game_item_counter_7 + 1
+        return ____game_item_counter_7
     end
     function make_cell(pos, id, under_cells)
         if id == NotActiveCell then
@@ -1113,9 +1126,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_6 = index
-                    index = ____index_6 - 1
-                    if ____index_6 == 0 then
+                    local ____index_8 = index
+                    index = ____index_8 - 1
+                    if ____index_8 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1162,8 +1175,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
-                    local ____target_uids_7 = target.uids
-                    ____target_uids_7[#____target_uids_7 + 1] = element.uid
+                    local ____target_uids_9 = target.uids
+                    ____target_uids_9[#____target_uids_9 + 1] = element.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1210,8 +1223,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
-                    local ____target_uids_8 = target.uids
-                    ____target_uids_8[#____target_uids_8 + 1] = cell.uid
+                    local ____target_uids_10 = target.uids
+                    ____target_uids_10[#____target_uids_10 + 1] = cell.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1254,24 +1267,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch265 = message.name
-            local ____cond265 = ____switch265 == "SPINNING"
-            if ____cond265 then
+            local ____switch270 = message.name
+            local ____cond270 = ____switch270 == "SPINNING"
+            if ____cond270 then
                 on_activate_spinning()
                 break
             end
-            ____cond265 = ____cond265 or ____switch265 == "HAMMER"
-            if ____cond265 then
+            ____cond270 = ____cond270 or ____switch270 == "HAMMER"
+            if ____cond270 then
                 on_activate_hammer()
                 break
             end
-            ____cond265 = ____cond265 or ____switch265 == "HORIZONTAL_ROCKET"
-            if ____cond265 then
+            ____cond270 = ____cond270 or ____switch270 == "HORIZONTAL_ROCKET"
+            if ____cond270 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond265 = ____cond265 or ____switch265 == "VERTICAL_ROCKET"
-            if ____cond265 then
+            ____cond270 = ____cond270 or ____switch270 == "VERTICAL_ROCKET"
+            if ____cond270 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1759,25 +1772,25 @@ function ____exports.Game()
                     while x < field_width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_11 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                        if ____temp_11 then
-                            local ____opt_9 = exclude
-                            ____temp_11 = (____opt_9 and __TS__ArrayFindIndex(
+                        local ____temp_13 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                        if ____temp_13 then
+                            local ____opt_11 = exclude
+                            ____temp_13 = (____opt_11 and __TS__ArrayFindIndex(
                                 exclude,
                                 function(____, uid) return uid == cell.uid end
                             )) == -1
                         end
-                        local ____temp_11_14 = ____temp_11
-                        if ____temp_11_14 then
-                            local ____opt_12 = targets
-                            ____temp_11_14 = (____opt_12 and __TS__ArrayFindIndex(
+                        local ____temp_13_16 = ____temp_13
+                        if ____temp_13_16 then
+                            local ____opt_14 = targets
+                            ____temp_13_16 = (____opt_14 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
                                     return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids and cell.strength ~= nil and cell.strength < GAME_CONFIG.cell_strength[cell.id]
                                 end
                             )) ~= -1
                         end
-                        local is_valid_cell = ____temp_11_14
+                        local is_valid_cell = ____temp_13_16
                         if is_valid_cell then
                             if element ~= NullElement then
                                 available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1800,44 +1813,44 @@ function ____exports.Game()
                         while x < field_width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_17 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                            if ____temp_17 then
-                                local ____opt_15 = exclude
-                                ____temp_17 = (____opt_15 and __TS__ArrayFindIndex(
+                            local ____temp_19 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                            if ____temp_19 then
+                                local ____opt_17 = exclude
+                                ____temp_19 = (____opt_17 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == cell.uid end
                                 )) == -1
                             end
-                            local ____temp_17_20 = ____temp_17
-                            if ____temp_17_20 then
-                                local ____opt_18 = targets
-                                ____temp_17_20 = (____opt_18 and __TS__ArrayFindIndex(
+                            local ____temp_19_22 = ____temp_19
+                            if ____temp_19_22 then
+                                local ____opt_20 = targets
+                                ____temp_19_22 = (____opt_20 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_cell = ____temp_17_20
-                            local ____temp_23 = element ~= NullElement
-                            if ____temp_23 then
-                                local ____opt_21 = exclude
-                                ____temp_23 = (____opt_21 and __TS__ArrayFindIndex(
+                            local is_valid_cell = ____temp_19_22
+                            local ____temp_25 = element ~= NullElement
+                            if ____temp_25 then
+                                local ____opt_23 = exclude
+                                ____temp_25 = (____opt_23 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local ____temp_23_26 = ____temp_23
-                            if ____temp_23_26 then
-                                local ____opt_24 = targets
-                                ____temp_23_26 = (____opt_24 and __TS__ArrayFindIndex(
+                            local ____temp_25_28 = ____temp_25
+                            if ____temp_25_28 then
+                                local ____opt_26 = targets
+                                ____temp_25_28 = (____opt_26 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Element and target.id == element.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_element = ____temp_23_26
+                            local is_valid_element = ____temp_25_28
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1868,15 +1881,15 @@ function ____exports.Game()
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
-                            local ____temp_29 = element ~= NullElement
-                            if ____temp_29 then
-                                local ____opt_27 = exclude
-                                ____temp_29 = (____opt_27 and __TS__ArrayFindIndex(
+                            local ____temp_31 = element ~= NullElement
+                            if ____temp_31 then
+                                local ____opt_29 = exclude
+                                ____temp_31 = (____opt_29 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local is_valid_element = ____temp_29
+                            local is_valid_element = ____temp_31
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1899,20 +1912,20 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_targets[math.random(0, #available_targets - 1) + 1]
-        local ____field_try_damage_32 = field.try_damage
-        local ____target_pos_31 = target.pos
-        local ____temp_30
+        local ____field_try_damage_34 = field.try_damage
+        local ____target_pos_33 = target.pos
+        local ____temp_32
         if target.cell ~= nil then
-            ____temp_30 = true
+            ____temp_32 = true
         else
-            ____temp_30 = false
+            ____temp_32 = false
         end
-        local damage_info = ____field_try_damage_32(
-            ____target_pos_31,
+        local damage_info = ____field_try_damage_34(
+            ____target_pos_33,
             false,
             false,
             false,
-            ____temp_30
+            ____temp_32
         )
         return damage_info ~= NotDamage and damage_info or NullElement
     end
@@ -2108,29 +2121,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch458 = combination.type
-            local ____cond458 = ____switch458 == CombinationType.Comb4
-            if ____cond458 then
+            local ____switch463 = combination.type
+            local ____cond463 = ____switch463 == CombinationType.Comb4
+            if ____cond463 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond458 = ____cond458 or ____switch458 == CombinationType.Comb2x2
-            if ____cond458 then
+            ____cond463 = ____cond463 or ____switch463 == CombinationType.Comb2x2
+            if ____cond463 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond458 = ____cond458 or (____switch458 == CombinationType.Comb3x3a or ____switch458 == CombinationType.Comb3x3b)
-            if ____cond458 then
+            ____cond463 = ____cond463 or (____switch463 == CombinationType.Comb3x3a or ____switch463 == CombinationType.Comb3x3b)
+            if ____cond463 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond458 = ____cond458 or (____switch458 == CombinationType.Comb3x4a or ____switch458 == CombinationType.Comb3x4b or ____switch458 == CombinationType.Comb3x5)
-            if ____cond458 then
+            ____cond463 = ____cond463 or (____switch463 == CombinationType.Comb3x4a or ____switch463 == CombinationType.Comb3x4b or ____switch463 == CombinationType.Comb3x5)
+            if ____cond463 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond458 = ____cond458 or ____switch458 == CombinationType.Comb5
-            if ____cond458 then
+            ____cond463 = ____cond463 or ____switch463 == CombinationType.Comb5
+            if ____cond463 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end

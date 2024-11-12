@@ -389,5 +389,11 @@ nodes {
   parent: "buy_button/button"
   template_node_child: true
 }
+nodes {
+  type: TYPE_TEXT
+  id: "buy_button/text1"
+  parent: "buy_button/button"
+  template_node_child: true
+}
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

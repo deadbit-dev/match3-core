@@ -11,7 +11,7 @@ import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { TargetMessage } from '../main/game_config';
 import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
-import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, remove_coins, remove_lifes } from './utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, is_time_level, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
@@ -329,10 +329,11 @@ function setup_gameover_ui(instance: props) {
     instance.druid.new_button('steps_by_ad/button', () => {
         GAME_CONFIG.steps_by_ad++;
         Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
-        EventBus.send('REVIVE', 3);
+        EventBus.send('REVIVE', {step:3});
     });
 
-    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов        30");
+    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов");
+    gui.set_text(gui.get_node('steps_by_coins/text1'), "30");
     instance.druid.new_button('steps_by_coins/button', () => {
         if (!is_enough_coins(30)) {
             EventBus.send('REQUEST_OPEN_STORE');
@@ -340,8 +341,22 @@ function setup_gameover_ui(instance: props) {
         }
         remove_coins(30);
         Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
-        EventBus.send('REVIVE', 5);
+        EventBus.send('REVIVE', {step:5});
     });
+
+    gui.set_text(gui.get_node('time_by_coins/text'), "+15 cек");
+    gui.set_text(gui.get_node('time_by_coins/text1'), "50");
+    instance.druid.new_button('time_by_coins/button', () => {
+        if (!is_enough_coins(50)) {
+            EventBus.send('REQUEST_OPEN_STORE');
+            return;
+        }
+        remove_coins(50);
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '15time_money' } });
+        EventBus.send('REVIVE', {time:15});
+    });
+}
+
 function to_map() {
     if(!GameStorage.get('was_purchased') && Ads.is_allow_ads()) {
         Ads.show_interstitial(false, () => {
@@ -372,9 +387,9 @@ function set_events(instance: props) {
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN_END', on_win_end);
-    EventBus.on('ON_GAME_OVER', (data) => {
+    EventBus.on('ON_GAME_OVER', (state) => {
         timer.delay(GAME_CONFIG.delay_before_gameover, false, () => {
-            set_gameover(instance, data.state, data.revive);
+            set_gameover(instance, state);
         });
     }, true);
     EventBus.on('SHUFFLE_START', on_shuffle_start);
@@ -702,7 +717,7 @@ function drop_coins(init_value: number, amount: number, points: Position[], on_e
 }
 
 // TODO: make presets for gameover
-function set_gameover(instance: props, state: GameState, revive: boolean) {
+function set_gameover(instance: props, state: GameState) {
     disable_game_ui();
 
     const lock = gui.get_node('lock1');
@@ -826,14 +841,15 @@ function set_gameover(instance: props, state: GameState, revive: boolean) {
         gui.set_enabled(target_3, true);
     }
 
-    if (revive) set_gameover_offer();
-    else disabled_gameover_offer();
+    set_gameover_offer();
 }
 
 function set_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), true);
-    if (GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
-    gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
+    if(!is_time_level()) {
+        if (GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
+        gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
+    } else gui.set_enabled(gui.get_node('time_by_coins/button'), true);
 }
 
 function disabled_gameover_offer() {

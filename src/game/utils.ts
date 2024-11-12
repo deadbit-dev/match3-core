@@ -18,6 +18,10 @@ export function is_animal_level() {
     return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
 }
 
+export function is_time_level() {
+    return (GAME_CONFIG.levels[get_current_level()].time != undefined);
+}
+
 export function get_level_targets() {
     const level_config = GAME_CONFIG.levels[get_current_level()];
     return level_config.targets;

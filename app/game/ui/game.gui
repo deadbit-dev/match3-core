@@ -1449,6 +1449,39 @@ nodes {
 }
 nodes {
   position {
+    x: 111.42857
+    y: 5.714286
+  }
+  size {
+    x: 200.0
+    y: 50.0
+  }
+  type: TYPE_TEXT
+  font: "32"
+  id: "steps_by_ad/text1"
+  pivot: PIVOT_W
+  outline {
+    x: 0.169
+    y: 0.38
+    z: 0.063
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "steps_by_ad/button"
+  overridden_fields: 1
+  overridden_fields: 4
+  overridden_fields: 8
+  overridden_fields: 10
+  overridden_fields: 14
+  overridden_fields: 15
+  overridden_fields: 16
+  template_node_child: true
+}
+nodes {
+  position {
     y: -318.0
   }
   type: TYPE_TEMPLATE
@@ -1481,11 +1514,11 @@ nodes {
 }
 nodes {
   position {
-    x: 140.0
+    x: 14.285712
     y: 7.0
   }
   type: TYPE_TEXT
-  text: "+5 \321\205\320\276\320\264\320\276\320\262         500"
+  text: "+5 \321\205\320\276\320\264\320\276\320\262"
   id: "steps_by_coins/text"
   parent: "steps_by_coins/button"
   layer: "ontop"
@@ -1512,6 +1545,141 @@ nodes {
   overridden_fields: 3
   overridden_fields: 9
   overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 70.0
+    y: 8.571429
+  }
+  size {
+    x: 200.0
+    y: 50.0
+  }
+  type: TYPE_TEXT
+  text: "30"
+  font: "32"
+  id: "steps_by_coins/text1"
+  pivot: PIVOT_W
+  outline {
+    x: 0.169
+    y: 0.38
+    z: 0.063
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "steps_by_coins/button"
+  overridden_fields: 1
+  overridden_fields: 4
+  overridden_fields: 8
+  overridden_fields: 10
+  overridden_fields: 14
+  overridden_fields: 15
+  overridden_fields: 16
+  template_node_child: true
+}
+nodes {
+  position {
+    y: -318.0
+  }
+  type: TYPE_TEMPLATE
+  id: "time_by_coins"
+  parent: "gameover"
+  layer: "ontop"
+  inherit_alpha: true
+  template: "/main/ui/parts/buy_button.gui"
+  enabled: false
+}
+nodes {
+  position {
+    y: -17.0
+  }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
+  type: TYPE_BOX
+  texture: "ui/long_button"
+  id: "time_by_coins/button"
+  parent: "time_by_coins"
+  layer: "ontop"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 20
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 14.285714
+    y: 7.0
+  }
+  type: TYPE_TEXT
+  text: "+15  \321\201\320\265\320\272"
+  id: "time_by_coins/text"
+  parent: "time_by_coins/button"
+  layer: "ontop"
+  overridden_fields: 1
+  overridden_fields: 8
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 42.0
+    y: 7.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  type: TYPE_BOX
+  texture: "ui/coin_btn"
+  id: "time_by_coins/icon"
+  parent: "time_by_coins/button"
+  layer: "ontop"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 9
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  position {
+    x: 68.57143
+    y: 7.142857
+  }
+  size {
+    x: 200.0
+    y: 50.0
+  }
+  type: TYPE_TEXT
+  text: "50"
+  font: "32"
+  id: "time_by_coins/text1"
+  pivot: PIVOT_W
+  outline {
+    x: 0.169
+    y: 0.38
+    z: 0.063
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "time_by_coins/button"
+  overridden_fields: 1
+  overridden_fields: 4
+  overridden_fields: 8
+  overridden_fields: 10
+  overridden_fields: 14
+  overridden_fields: 15
+  overridden_fields: 16
   template_node_child: true
 }
 nodes {

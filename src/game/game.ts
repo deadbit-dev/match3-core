@@ -230,6 +230,9 @@ export function Game() {
             update_core_state();
             set_targets(level_config.targets);
             set_steps(level_config.steps);
+            if(level_config.time != undefined) {
+                get_state().remaining_time = level_config.time;
+            }
             set_random();
         }
 
@@ -377,6 +380,8 @@ export function Game() {
         const last_state = get_state(1);
         set_targets(last_state.targets);
         set_steps(last_state.steps);
+        if(level_config.time != undefined)
+            get_state().remaining_time = last_state.remaining_time;
         set_random();
 
         if (!is_tutorial() && helper_timer == null) {
@@ -603,22 +608,23 @@ export function Game() {
         });
     }
 
-    function on_gameover(revive = (level_config.time == undefined)) {
+    function on_gameover() {
         timer.cancel(game_timer);
 
         update_core_state();
 
-        if (revive) GAME_CONFIG.revive_states = json.decode(json.encode(states));
+        GAME_CONFIG.revive_states = json.decode(json.encode(states));
 
-        EventBus.send('ON_GAME_OVER', { state: copy_state(), revive });
+        EventBus.send('ON_GAME_OVER', copy_state());
 
         Metrica.report('data', {
             ['level_' + tostring(get_current_level() + 1)]: { type: 'fail' }
         });
     }
 
-    function on_revive(steps: number) {
-        GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].steps += steps;
+    function on_revive(data: {steps?: number, time?: number}) {
+        if(data.steps != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].steps += data.steps;
+        if(data.time != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_time += data.time;
         GAME_CONFIG.is_revive = true;
         GAME_CONFIG.is_restart = true;
         Scene.restart();
@@ -644,7 +650,7 @@ export function Game() {
         function on_error() {
             update_core_state();
             EventBus.send('SHUFFLE_ACTION', copy_state());
-            timer.delay(0.5, false, () => on_gameover(false));
+            timer.delay(0.5, false, () => on_gameover());
         }
 
         EventBus.send('SHUFFLE_START');
@@ -940,6 +946,10 @@ export function Game() {
             }
         }
 
+        if(level_config.time != undefined) {
+            timer.delay(0, false, () => {EventBus.send('GAME_TIMER', last_state.remaining_time);});
+        }
+
         if (!has_step())
             shuffle();
     }
@@ -960,7 +970,7 @@ export function Game() {
 
     function set_timer() {
         if (level_config.time == undefined) return;
-        start_game_time = System.now();
+        start_game_time = (System.now() - level_config.time) + get_state().remaining_time;
     }
 
     function set_targets(targets: TargetState[]) {

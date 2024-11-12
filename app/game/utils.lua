@@ -20,6 +20,9 @@ function ____exports.is_animal_level()
         ____exports.get_current_level() + 1
     )
 end
+function ____exports.is_time_level()
+    return GAME_CONFIG.levels[____exports.get_current_level() + 1].time ~= nil
+end
 function ____exports.get_level_targets()
     local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
     return level_config.targets

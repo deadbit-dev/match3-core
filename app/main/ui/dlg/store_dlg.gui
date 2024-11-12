@@ -1000,6 +1000,12 @@ nodes {
   template_node_child: true
 }
 nodes {
+  type: TYPE_TEXT
+  id: "junior_box/buy_button/text1"
+  parent: "junior_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
   position {
     x: 259.0
     y: -204.0
@@ -1212,6 +1218,12 @@ nodes {
 nodes {
   type: TYPE_BOX
   id: "catlover_box/buy_button/icon"
+  parent: "catlover_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "catlover_box/buy_button/text1"
   parent: "catlover_box/buy_button/button"
   template_node_child: true
 }
@@ -1628,6 +1640,12 @@ nodes {
   parent: "reset/button"
   overridden_fields: 3
   overridden_fields: 9
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "reset/text1"
+  parent: "reset/button"
   template_node_child: true
 }
 material: "/builtins/materials/gui.material"
