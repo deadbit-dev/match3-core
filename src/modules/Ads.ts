@@ -242,13 +242,13 @@ function AdsModule() {
 
     function show_reward(callback_shown?: CallbackAds) {
         if (callback_shown)
-            EventBus.once('ON_REWARDED_SHOWN', (state) => callback_shown(state.result));
+            EventBus.once('ON_REWARDED_SHOWN', (state) => callback_shown(state.result), false);
         EventBus.trigger("SYS_SHOW_REWARD");
     }
 
     function show_interstitial(is_check = true, callback_shown?: CallbackAds) {
         if (callback_shown)
-            EventBus.once('ON_INTER_SHOWN', (state) => callback_shown(state.result));
+            EventBus.once('ON_INTER_SHOWN', (state) => callback_shown(state.result), false);
         EventBus.trigger("SYS_SHOW_INTER", { is_check });
     }
 
@@ -299,11 +299,11 @@ function AdsModule() {
         EventBus.on('ON_INTER_SHOWN', () => {
             if (is_fix_last_inter)
                 last_view_ads = System.now();
-        });
-        EventBus.on('SYS_SHOW_REWARD', () => _show_reward());
-        EventBus.on('SYS_SHOW_INTER', (m) => _show_interstitial(m.is_check));
-        EventBus.on('SYS_SHOW_BANNER', (m) => _show_banner(m.pos));
-        EventBus.on('SYS_HIDE_BANNER', () => _hide_banner());
+        }, false);
+        EventBus.on('SYS_SHOW_REWARD', () => _show_reward(), false);
+        EventBus.on('SYS_SHOW_INTER', (m) => _show_interstitial(m.is_check), false);
+        EventBus.on('SYS_SHOW_BANNER', (m) => _show_banner(m.pos), false);
+        EventBus.on('SYS_HIDE_BANNER', () => _hide_banner(), false);
     }
 
     function ads_init_callback() {
