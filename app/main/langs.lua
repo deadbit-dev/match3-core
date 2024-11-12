@@ -295,11 +295,11 @@ ____exports.lang_data = {
         ["Turkish-tr"] = "Müzik"
     },
     animal_tutorial_description = {
-        ["Русский-ru"] = "Собери все подсолнухи чтобы задобрить петуха.",
-        ["Английский-en"] = "Collect all the sunflowers to appease the cock.",
-        ["German-de"] = "Sammle alle Sonnenblumen, um den Hahn zu besänftigen.",
-        ["испанский-es"] = "Recoge todos los girasoles para aplacar al gallo.",
-        ["Turkish-tr"] = "Horozu yatıştırmak için tüm ayçiçeklerini toplayın."
+        ["Русский-ru"] = "Собери все подсолнухи чтобы задобрить петуха.\nВремя ограничено!",
+        ["Английский-en"] = "Collect all the sunflowers to appease the cock.\nTime is short!",
+        ["German-de"] = "Sammle alle Sonnenblumen, um den Hahn zu besänftigen.\nDie Zeit ist knapp!",
+        ["испанский-es"] = "Recoge todos los girasoles para aplacar al gallo.\nEl tiempo apremia.",
+        ["Turkish-tr"] = "Horozu yatıştırmak için tüm ayçiçeklerini toplayın.\nZaman çok kısa!"
     },
     animal_tutorial_description1 = {
         ["Русский-ru"] = "Накорми его и продложи путь!",
