@@ -648,10 +648,21 @@ function on_win_end(state: GameState) {
                         };
 
                         drop_coins(before_reward, steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
-                            fade_steptime();
-                            drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
+                            fade_steptime(() => {
+                                drop_targets(() => {
+                                    drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, undefined, on_each_coin_drop_end, () => {
+                                        fade_targets(on_end_for_last_level);
+                                    });
+                                });
+                            });                
                         });
-                    } else drop_coins(before_reward, level_coins, level_coin_points, undefined, on_each_coin_drop_end, on_end_for_last_level);
+                    } else {
+                        drop_targets(() => {
+                            drop_coins(before_reward, level_coins, level_coin_points, undefined, on_each_coin_drop_end, () => {
+                                fade_targets(on_end_for_last_level);
+                            });
+                        });
+                    }
                 });
             } else on_end_for_last_level();
         });
@@ -673,13 +684,34 @@ function drop_steptime(on_end: () => void) {
     gui.animate(steptime, 'position', pos, gui.EASING_OUTBOUNCE, 0.5, 0, on_end);
 }
 
-function fade_steptime() {
+function drop_targets(on_end: () => void) {
+    gui.set_enabled(gui.get_node('substrate'), true);
+    const targets = gui.get_node('targets');
+    gui.set_layer(targets, 'ontop');
+    const pos = gui.get_position(targets);
+    pos.y -= 300;
+    gui.animate(targets, 'position', pos, gui.EASING_OUTBOUNCE, 0.5, 0, on_end);
+}
+
+function fade_steptime(on_end: () => void) {
     const steptime = gui.get_node('step_time');
     const pos = gui.get_position(steptime);
     pos.y += 300;
     gui.animate(steptime, 'position', pos, gui.EASING_OUTCUBIC, 0.5, 0, () => {
         gui.set_layer(steptime, '');
         gui.set_enabled(gui.get_node('substrate'), false);
+        on_end();
+    });
+}
+
+function fade_targets(on_end: () => void) {
+    const targets = gui.get_node('targets');
+    const pos = gui.get_position(targets);
+    pos.y += 300;
+    gui.animate(targets, 'position', pos, gui.EASING_OUTCUBIC, 0.5, 0, () => {
+        gui.set_layer(targets, '');
+        gui.set_enabled(gui.get_node('substrate'), false);
+        on_end();
     });
 }
 

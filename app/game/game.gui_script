@@ -974,26 +974,35 @@ function on_win_end(state)
                                     on_each_coin_drop_start,
                                     on_each_coin_drop_end,
                                     function()
-                                        fade_steptime()
-                                        drop_coins(
-                                            before_reward + steps + remaining_time,
-                                            level_coins,
-                                            level_coin_points,
-                                            nil,
-                                            on_each_coin_drop_end,
-                                            on_end_for_last_level
-                                        )
+                                        fade_steptime(function()
+                                            drop_targets(function()
+                                                drop_coins(
+                                                    before_reward + steps + remaining_time,
+                                                    level_coins,
+                                                    level_coin_points,
+                                                    nil,
+                                                    on_each_coin_drop_end,
+                                                    function()
+                                                        fade_targets(on_end_for_last_level)
+                                                    end
+                                                )
+                                            end)
+                                        end)
                                     end
                                 )
                             else
-                                drop_coins(
-                                    before_reward,
-                                    level_coins,
-                                    level_coin_points,
-                                    nil,
-                                    on_each_coin_drop_end,
-                                    on_end_for_last_level
-                                )
+                                drop_targets(function()
+                                    drop_coins(
+                                        before_reward,
+                                        level_coins,
+                                        level_coin_points,
+                                        nil,
+                                        on_each_coin_drop_end,
+                                        function()
+                                            fade_targets(on_end_for_last_level)
+                                        end
+                                    )
+                                end)
                             end
                         end)
                     else
@@ -1032,7 +1041,26 @@ function drop_steptime(on_end)
         on_end
     )
 end
-function fade_steptime()
+function drop_targets(on_end)
+    gui.set_enabled(
+        gui.get_node("substrate"),
+        true
+    )
+    local targets = gui.get_node("targets")
+    gui.set_layer(targets, "ontop")
+    local pos = gui.get_position(targets)
+    pos.y = pos.y - 300
+    gui.animate(
+        targets,
+        "position",
+        pos,
+        gui.EASING_OUTBOUNCE,
+        0.5,
+        0,
+        on_end
+    )
+end
+function fade_steptime(on_end)
     local steptime = gui.get_node("step_time")
     local pos = gui.get_position(steptime)
     pos.y = pos.y + 300
@@ -1049,6 +1077,28 @@ function fade_steptime()
                 gui.get_node("substrate"),
                 false
             )
+            on_end()
+        end
+    )
+end
+function fade_targets(on_end)
+    local targets = gui.get_node("targets")
+    local pos = gui.get_position(targets)
+    pos.y = pos.y + 300
+    gui.animate(
+        targets,
+        "position",
+        pos,
+        gui.EASING_OUTCUBIC,
+        0.5,
+        0,
+        function()
+            gui.set_layer(targets, "")
+            gui.set_enabled(
+                gui.get_node("substrate"),
+                false
+            )
+            on_end()
         end
     )
 end
