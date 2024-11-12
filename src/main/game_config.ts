@@ -41,7 +41,7 @@ export const MAIN_BUNDLE_SCENES = ['movie', 'game'];
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
     debug_levels: false,
-    bottom_offset: 0,
+    bottom_offset: 50,
 
     min_swipe_distance: 32,
     swap_element_easing: go.EASING_INOUTQUAD,

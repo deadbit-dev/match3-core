@@ -43,54 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/vfx/explode/explode.spinescene"
-        :scene
-      ]
-      [
-        "/game/animals/bull.collection"
-        :scene
-      ]
-      [
-        "/assets/background_old.atlas"
-        :scene
-      ]
-      [
-        "/assets/fonts/24.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/42.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/44.font"
-        :scene
-      ]
-      [
-        "/project_settings/TextureProfile.texture_profiles"
-        :cljfx-form-view
-      ]
-      [
-        "/map/map.gui"
-        :scene
-      ]
-      [
-        "/main/ui/parts/lable_button.gui"
-        :scene
-      ]
-      [
-        "/assets/fonts/64.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/70.font"
-        :scene
-      ]
-      [
-        "/game/ui/game.gui"
-        :scene
-      ]
-      [
         "/game/game.collection"
         :scene
       ]
@@ -105,10 +57,6 @@
       [
         "/main/ui/dlg/store_dlg.gui"
         :scene
-      ]
-      [
-        "/game.project"
-        :cljfx-form-view
       ]
       [
         "/project_settings/generated.appmanifest"
@@ -163,11 +111,63 @@
         :scene
       ]
       [
-        "/map/level.gui"
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
+        "/project_settings/my_profile.display_profiles"
+        :cljfx-form-view
+      ]
+      [
+        "/game/view.script"
+        :code
+      ]
+      [
+        "/game/view.lua"
+        :code
+      ]
+      [
+        "/main/ui/parts/buy_button.gui"
         :scene
       ]
       [
         "/assets/background.atlas"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/game/animals/cat.collection"
+        :scene
+      ]
+      [
+        "/game/ui/background.gui"
+        :scene
+      ]
+      [
+        "/game/animals/kozel.collection"
+        :scene
+      ]
+      [
+        "/game/animals/kaban.collection"
+        :scene
+      ]
+      [
+        "/game/animals/goose.collection"
+        :scene
+      ]
+      [
+        "/game/animals/rats.collection"
+        :scene
+      ]
+      [
+        "/game/animals/dog.collection"
+        :scene
+      ]
+      [
+        "/game/animals/bull.collection"
         :scene
       ]
     ]

@@ -1,19 +1,28 @@
+script: "/game/background.gui_script"
 textures {
   name: "background"
   texture: "/assets/background.atlas"
 }
 nodes {
   position {
-    x: 270.0
+    x: 280.0
     y: 480.0
-  }
-  scale {
-    x: 0.6
-    y: 0.6
   }
   type: TYPE_BOX
   texture: "background/background"
   id: "bg"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  material: "bg"
+}
+nodes {
+  position {
+    x: 250.0
+    y: -275.0
+  }
+  type: TYPE_BOX
+  texture: "background/hill"
+  id: "hill"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   material: "bg"

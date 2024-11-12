@@ -10,6 +10,7 @@ width = 540
 height = 960
 display_profiles = /project_settings/my_profile.display_profilesc
 high_dpi = 1
+dynamic_orientation = 1
 
 [android]
 input_method = HiddenInputField

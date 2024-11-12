@@ -1,0 +1,56 @@
+local ____exports = {}
+local set_events, on_resize
+local druid = require("druid.druid")
+function set_events(data)
+    EventBus.on("SYS_ON_RESIZED", on_resize, false)
+end
+function on_resize(data)
+    local bg = gui.get_node("bg")
+    if data.width >= data.height then
+        gui.set_position(
+            bg,
+            vmath.vector3(280, 480, 0)
+        )
+    else
+        gui.set_position(
+            bg,
+            vmath.vector3(920, 480, 0)
+        )
+    end
+    local hill = gui.get_node("hill")
+    local posY = -275 + GAME_CONFIG.bottom_offset
+    if GAME_CONFIG.debug_levels then
+        posY = posY + 100
+    end
+    gui.set_position(
+        hill,
+        vmath.vector3(250, posY, 0)
+    )
+end
+function ____exports.init(self)
+    Manager.init_script()
+    self.druid = druid.new(self)
+    set_events(self)
+    Camera.update_window_size()
+end
+function ____exports.on_input(self, action_id, action)
+    return self.druid:on_input(action_id, action)
+end
+function ____exports.update(self, dt)
+    self.druid:update(dt)
+end
+function ____exports.on_message(self, message_id, message, sender)
+    Manager.on_message(self, message_id, message, sender)
+    self.druid:on_message(message_id, message, sender)
+end
+function ____exports.final(self)
+    self.druid:final()
+    EventBus.off_all_current_script()
+    Manager.final_script()
+end
+init = ____exports.init
+on_input = ____exports.on_input
+update = ____exports.update
+on_message = ____exports.on_message
+final = ____exports.final
+
