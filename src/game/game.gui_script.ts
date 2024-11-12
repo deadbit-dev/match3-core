@@ -281,17 +281,12 @@ function setup_sustem_ui(instance: props) {
 
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', () => {
-        next_level();
+        if(!GameStorage.get('was_purchased') && Ads.is_allow_ads()) Ads.show_interstitial(false, next_level);
+        else next_level();
     });
-    instance.druid.new_button('win_close', () => {
-        Sound.stop('game');
-        Scene.load('map');
-    });
+    instance.druid.new_button('win_close', to_map);
 
-    instance.druid.new_button('last_level_btn', () => {
-        Sound.stop('game');
-        Scene.load('map');
-    });
+    instance.druid.new_button('last_level_btn', to_map);
 
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
@@ -324,15 +319,9 @@ function setup_gameover_ui(instance: props) {
     });
 
     gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
-    instance.druid.new_button('map_button', () => {
-        Sound.stop('game');
-        Scene.load('map');
-    });
+    instance.druid.new_button('map_button', to_map);
 
-    instance.druid.new_button('gameover_close', () => {
-        Sound.stop('game');
-        Scene.load('map');
-    });
+    instance.druid.new_button('gameover_close', to_map);
 
     instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
@@ -353,6 +342,16 @@ function setup_gameover_ui(instance: props) {
         Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
         EventBus.send('REVIVE', 5);
     });
+function to_map() {
+    if(!GameStorage.get('was_purchased') && Ads.is_allow_ads()) {
+        Ads.show_interstitial(false, () => {
+            Sound.stop('game');
+            Scene.load('map');
+        });
+    } else {
+        Sound.stop('game');
+        Scene.load('map');
+    }
 }
 
 function set_animal_tutorial_tip() {

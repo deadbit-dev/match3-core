@@ -156,6 +156,8 @@ function setup_store(data: props) {
             Sound.play('purchase');
             add_coins(30);
 
+            GameStorage.set('was_purchased', true);
+
             Metrica.report('data', { shop: { buy: 'maney30' } });
 
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
@@ -175,6 +177,8 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(150);
+
+            GameStorage.set('was_purchased', true);
 
             Metrica.report('data', { shop: { buy: 'maney150' } });
 
@@ -196,6 +200,8 @@ function setup_store(data: props) {
             Sound.play('purchase');
             add_coins(300);
 
+            GameStorage.set('was_purchased', true);
+
             Metrica.report('data', { shop: { buy: 'maney300' } });
 
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
@@ -215,6 +221,8 @@ function setup_store(data: props) {
 
             Sound.play('purchase');
             add_coins(800);
+
+            GameStorage.set('was_purchased', true);
 
             Metrica.report('data', { shop: { buy: 'maney800' } });
 
@@ -427,9 +435,17 @@ function setup_settings(data: props) {
 
     gui.set_text(gui.get_node('buy_button_text1'), Lang.get_text('on_map'));
     data.druid.new_button('map_button', () => {
-        set_enabled_settings(data, false);
-        Sound.stop('game');
-        Scene.load('map');
+        if(!GameStorage.get('was_purchased')) {
+            Ads.show_interstitial(false, () => {
+                set_enabled_settings(data, false);
+                Sound.stop('game');
+                Scene.load('map');
+            });
+        } else {
+            set_enabled_settings(data, false);
+            Sound.stop('game');
+            Scene.load('map');
+        }
     });
 
     const sound_on = gui.get_node('sound_on');

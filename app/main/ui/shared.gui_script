@@ -174,6 +174,7 @@ function setup_store(data)
                     end
                     Sound.play("purchase")
                     add_coins(30)
+                    GameStorage.set("was_purchased", true)
                     Metrica.report("data", {shop = {buy = "maney30"}})
                     HtmlBridge.consume_purchase(
                         purchase.purchaseToken,
@@ -201,6 +202,7 @@ function setup_store(data)
                     end
                     Sound.play("purchase")
                     add_coins(150)
+                    GameStorage.set("was_purchased", true)
                     Metrica.report("data", {shop = {buy = "maney150"}})
                     HtmlBridge.consume_purchase(
                         purchase.purchaseToken,
@@ -228,6 +230,7 @@ function setup_store(data)
                     end
                     Sound.play("purchase")
                     add_coins(300)
+                    GameStorage.set("was_purchased", true)
                     Metrica.report("data", {shop = {buy = "maney300"}})
                     HtmlBridge.consume_purchase(
                         purchase.purchaseToken,
@@ -255,6 +258,7 @@ function setup_store(data)
                     end
                     Sound.play("purchase")
                     add_coins(800)
+                    GameStorage.set("was_purchased", true)
                     Metrica.report("data", {shop = {buy = "maney800"}})
                     HtmlBridge.consume_purchase(
                         purchase.purchaseToken,
@@ -523,9 +527,20 @@ function setup_settings(data)
     data.druid:new_button(
         "map_button",
         function()
-            set_enabled_settings(data, false)
-            Sound.stop("game")
-            Scene.load("map")
+            if not GameStorage.get("was_purchased") then
+                Ads.show_interstitial(
+                    false,
+                    function()
+                        set_enabled_settings(data, false)
+                        Sound.stop("game")
+                        Scene.load("map")
+                    end
+                )
+            else
+                set_enabled_settings(data, false)
+                Sound.stop("game")
+                Scene.load("map")
+            end
         end
     )
     local sound_on = gui.get_node("sound_on")
@@ -853,17 +868,17 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch135 = scene.name
-        local ____cond135 = ____switch135 == "movie" or ____switch135 == "game"
-        if ____cond135 then
+        local ____switch138 = scene.name
+        local ____cond138 = ____switch138 == "movie" or ____switch138 == "game"
+        if ____cond138 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
             set_enabled_settings_button(false)
             break
         end
-        ____cond135 = ____cond135 or ____switch135 == "map"
-        if ____cond135 then
+        ____cond138 = ____cond138 or ____switch138 == "map"
+        if ____cond138 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -888,9 +903,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch140 = Scene.get_current_name()
-        local ____cond140 = ____switch140 == "game"
-        if ____cond140 then
+        local ____switch143 = Scene.get_current_name()
+        local ____cond143 = ____switch143 == "game"
+        if ____cond143 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -899,8 +914,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond140 = ____cond140 or ____switch140 == "map"
-        if ____cond140 then
+        ____cond143 = ____cond143 or ____switch143 == "map"
+        if ____cond143 then
             gui.set_enabled(
                 gui.get_node("store_button"),
                 not state
@@ -961,9 +976,9 @@ function set_enabled_settings(data, state)
     end
     if state then
         repeat
-            local ____switch147 = Scene.get_current_name()
-            local ____cond147 = ____switch147 == "game"
-            if ____cond147 then
+            local ____switch150 = Scene.get_current_name()
+            local ____cond150 = ____switch150 == "game"
+            if ____cond150 then
                 gui.set_enabled(
                     gui.get_node("map_button"),
                     true

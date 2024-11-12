@@ -66,18 +66,22 @@ export function init(this: props) {
                             log('process buyed:', purchase);
                             if (id_product == 'maney30') {
                                 add_coins(30);
+                                GameStorage.set('was_purchased', true);
                                 HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
                             }
                             if (id_product == 'maney150') {
                                 add_coins(150);
+                                GameStorage.set('was_purchased', true);
                                 HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
                             }
                             else if (id_product == 'maney300') {
                                 add_coins(300);
+                                GameStorage.set('was_purchased', true);
                                 HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
                             }
                             else if (id_product == 'maney800') {
                                 add_coins(800);
+                                GameStorage.set('was_purchased', true);
                                 HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
                             }
                             else if(id_product == 'noads1') {

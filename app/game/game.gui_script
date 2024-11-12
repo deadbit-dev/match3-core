@@ -331,23 +331,15 @@ function setup_win_ui(instance)
     instance.druid:new_button(
         "continue_button",
         function()
-            next_level()
+            if not GameStorage.get("was_purchased") and Ads.is_allow_ads() then
+                Ads.show_interstitial(false, next_level)
+            else
+                next_level()
+            end
         end
     )
-    instance.druid:new_button(
-        "win_close",
-        function()
-            Sound.stop("game")
-            Scene.load("map")
-        end
-    )
-    instance.druid:new_button(
-        "last_level_btn",
-        function()
-            Sound.stop("game")
-            Scene.load("map")
-        end
-    )
+    instance.druid:new_button("win_close", to_map)
+    instance.druid:new_button("last_level_btn", to_map)
     gui.set_enabled(
         gui.get_node("win"),
         false
@@ -403,20 +395,8 @@ function setup_gameover_ui(instance)
         gui.get_node("map_text"),
         Lang.get_text("map")
     )
-    instance.druid:new_button(
-        "map_button",
-        function()
-            Sound.stop("game")
-            Scene.load("map")
-        end
-    )
-    instance.druid:new_button(
-        "gameover_close",
-        function()
-            Sound.stop("game")
-            Scene.load("map")
-        end
-    )
+    instance.druid:new_button("map_button", to_map)
+    instance.druid:new_button("gameover_close", to_map)
     instance.druid:new_button("gameover_offer_close", disabled_gameover_offer)
     gui.set_text(
         gui.get_node("steps_by_ad/text"),
@@ -452,6 +432,20 @@ function setup_gameover_ui(instance)
             EventBus.send("REVIVE", 5)
         end
     )
+end
+function to_map()
+    if not GameStorage.get("was_purchased") and Ads.is_allow_ads() then
+        Ads.show_interstitial(
+            false,
+            function()
+                Sound.stop("game")
+                Scene.load("map")
+            end
+        )
+    else
+        Sound.stop("game")
+        Scene.load("map")
+    end
 end
 function set_animal_tutorial_tip()
     local window = gui.get_node("window")

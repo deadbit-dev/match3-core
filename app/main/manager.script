@@ -52,6 +52,7 @@ function ____exports.init(self)
                                     log("process buyed:", purchase)
                                     if id_product == "maney30" then
                                         add_coins(30)
+                                        GameStorage.set("was_purchased", true)
                                         HtmlBridge.consume_purchase(
                                             purchase.purchaseToken,
                                             function()
@@ -60,6 +61,7 @@ function ____exports.init(self)
                                     end
                                     if id_product == "maney150" then
                                         add_coins(150)
+                                        GameStorage.set("was_purchased", true)
                                         HtmlBridge.consume_purchase(
                                             purchase.purchaseToken,
                                             function()
@@ -67,6 +69,7 @@ function ____exports.init(self)
                                         )
                                     elseif id_product == "maney300" then
                                         add_coins(300)
+                                        GameStorage.set("was_purchased", true)
                                         HtmlBridge.consume_purchase(
                                             purchase.purchaseToken,
                                             function()
@@ -74,6 +77,7 @@ function ____exports.init(self)
                                         )
                                     elseif id_product == "maney800" then
                                         add_coins(800)
+                                        GameStorage.set("was_purchased", true)
                                         HtmlBridge.consume_purchase(
                                             purchase.purchaseToken,
                                             function()
