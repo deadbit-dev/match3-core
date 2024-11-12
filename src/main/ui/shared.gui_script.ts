@@ -435,8 +435,8 @@ function setup_settings(data: props) {
 
     gui.set_text(gui.get_node('buy_button_text1'), Lang.get_text('on_map'));
     data.druid.new_button('map_button', () => {
-        if(!GameStorage.get('was_purchased')) {
-            Ads.show_interstitial(false, () => {
+        if (!GameStorage.get('was_purchased')) {
+            Ads.show_interstitial(true, () => {
                 set_enabled_settings(data, false);
                 Sound.stop('game');
                 Scene.load('map');

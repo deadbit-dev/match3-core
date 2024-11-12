@@ -529,7 +529,7 @@ function setup_settings(data)
         function()
             if not GameStorage.get("was_purchased") then
                 Ads.show_interstitial(
-                    false,
+                    true,
                     function()
                         set_enabled_settings(data, false)
                         Sound.stop("game")
