@@ -332,8 +332,8 @@ function setup_win_ui(instance)
     instance.druid:new_button(
         "continue_button",
         function()
-            if not GameStorage.get("was_purchased") and Ads.is_allow_ads() then
-                Ads.show_interstitial(false, next_level)
+            if not GameStorage.get("was_purchased") then
+                Ads.show_interstitial(true, next_level)
             else
                 next_level()
             end
@@ -462,9 +462,9 @@ function setup_gameover_ui(instance)
     )
 end
 function to_map()
-    if not GameStorage.get("was_purchased") and Ads.is_allow_ads() then
+    if not GameStorage.get("was_purchased") then
         Ads.show_interstitial(
-            false,
+            true,
             function()
                 Sound.stop("game")
                 Scene.load("map")

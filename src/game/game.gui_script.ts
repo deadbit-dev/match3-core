@@ -281,7 +281,7 @@ function setup_sustem_ui(instance: props) {
 
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', () => {
-        if(!GameStorage.get('was_purchased') && Ads.is_allow_ads()) Ads.show_interstitial(false, next_level);
+        if(!GameStorage.get('was_purchased')) Ads.show_interstitial(true, next_level);
         else next_level();
     });
     instance.druid.new_button('win_close', to_map);
@@ -358,8 +358,8 @@ function setup_gameover_ui(instance: props) {
 }
 
 function to_map() {
-    if(!GameStorage.get('was_purchased') && Ads.is_allow_ads()) {
-        Ads.show_interstitial(false, () => {
+    if(!GameStorage.get('was_purchased')) {
+        Ads.show_interstitial(true, () => {
             Sound.stop('game');
             Scene.load('map');
         });
