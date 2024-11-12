@@ -42,7 +42,7 @@ function CameraModule() {
         let last_window_y = 0;
 
         window.set_listener((self: any, event: any) => {
-            if(event != window.WINDOW_EVENT_RESIZED)
+            if (event != window.WINDOW_EVENT_RESIZED)
                 return;
 
             const [window_x, window_y] = window.get_size();
@@ -98,6 +98,33 @@ function CameraModule() {
 
         WINDOW_WIDTH = width;
         WINDOW_HEIGHT = height;
+
+        // screen
+        const sx = WINDOW_WIDTH / DISPLAY_WIDTH;
+        const sy = WINDOW_HEIGHT / DISPLAY_HEIGHT;
+
+        //Fit
+        let adjust = GUI_ADJUST['ADJUST_FIT'];
+        let scale = math.min(sx, sy);
+        adjust.sx = scale * 1 / sx;
+        adjust.sy = scale * 1 / sy;
+        adjust.ox = (WINDOW_WIDTH - DISPLAY_WIDTH * scale) * 0.5 / scale;
+        adjust.oy = (WINDOW_HEIGHT - DISPLAY_HEIGHT * scale) * 0.5 / scale;
+
+        //Zoom
+        adjust = GUI_ADJUST['ADJUST_ZOOM'];
+        scale = math.max(sx, sy);
+        adjust.sx = scale * 1 / sx;
+        adjust.sy = scale * 1 / sy;
+        adjust.ox = (WINDOW_WIDTH - DISPLAY_WIDTH * scale) * 0.5 / scale;
+        adjust.oy = (WINDOW_HEIGHT - DISPLAY_HEIGHT * scale) * 0.5 / scale;
+
+        //Stretch
+        adjust = GUI_ADJUST['ADJUST_STRETCH'];
+        adjust.sx = 1;
+        adjust.sy = 1;
+
+        // screen 
         update_auto_zoom(width, height);
         if (is_trigger_event)
             EventBus.trigger('SYS_ON_RESIZED', { width, height }, false);
@@ -213,6 +240,29 @@ function CameraModule() {
         return vmath.vector3(scale_x, scale_y, 0);
     }
 
+    const GUI_ADJUST = {
+        'ADJUST_FIT': { sx: 1, sy: 1, ox: 0, oy: 0 }, // Fit
+        'ADJUST_ZOOM': { sx: 1, sy: 1, ox: 0, oy: 0 }, // Zoom
+        'ADJUST_STRETCH': { sx: 1, sy: 1, ox: 0, oy: 0 }, // Stretch
+    };
+
+    function world_to_screen(world: vmath.vector3, adjustMode?: keyof typeof GUI_ADJUST) {
+        const viewport = get_viewport();
+        const viewport_width = viewport.z * DISPLAY_WIDTH / WINDOW_WIDTH;
+        const viewport_height = viewport.w * DISPLAY_HEIGHT / WINDOW_HEIGHT;
+        const viewport_left = viewport.x * DISPLAY_WIDTH / WINDOW_WIDTH;
+        const viewport_bottom = viewport.y * DISPLAY_HEIGHT / WINDOW_HEIGHT;
+
+        const screen = project(_view_matrix, width_projection(), vmath.vector3(world));
+        screen.x = viewport_left + screen.x * (viewport_width / DISPLAY_WIDTH);
+        screen.y = viewport_bottom + screen.y * (viewport_height / DISPLAY_HEIGHT);
+        if (adjustMode) {
+            screen.x = (screen.x / GUI_ADJUST[adjustMode].sx) - GUI_ADJUST[adjustMode].ox;
+            screen.y = (screen.y / GUI_ADJUST[adjustMode].sy) - GUI_ADJUST[adjustMode].oy;
+        }
+        return vmath.vector3(screen.x, screen.y, screen.z);
+    }
+
     function project(view: vmath.matrix4, projection: vmath.matrix4, world: vmath.vector3) {
         v4_tmp.x, v4_tmp.y, v4_tmp.z, v4_tmp.w = world.x, world.y, world.z, 1;
         const v4: vmath.vector3 = projection * view * v4_tmp as vmath.vector3;
@@ -260,5 +310,5 @@ function CameraModule() {
 
     init();
 
-    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window, width_projection, set_auto_zoom, set_dynamic_orientation, is_dynamic_orientation, update_window_size };
+    return { set_gui_projection, transform_input_action, set_go_prjection, get_ltrb, screen_to_world, window_to_world, get_zoom, set_zoom, set_view, world_to_window, world_to_screen, width_projection, set_auto_zoom, set_dynamic_orientation, is_dynamic_orientation, update_window_size };
 }
