@@ -380,7 +380,8 @@ export function View(resources: ViewResources) {
             return;
         }
 
-        update_targets_by_uid(uid);
+        const pos = go.get_position(item._hash);
+        update_targets_by_uid(pos, uid);
 
         go_manager.delete_item(item, true);
         view_state.game_id_to_view_index[uid].splice(0, 1);
@@ -390,21 +391,23 @@ export function View(resources: ViewResources) {
         const items = get_all_view_items_by_uid(uid);
         if (items == undefined) return;
     
+        let pos = vmath.vector3();
         for (const item of items) {
+            pos = go.get_position(item._hash);
             go_manager.delete_item(item, true);
         }
 
-        update_targets_by_uid(uid);
+        update_targets_by_uid(pos, uid);
 
         delete view_state.game_id_to_view_index[uid];
     }
 
-    function update_targets_by_uid(uid: number) {
+    function update_targets_by_uid(pos: vmath.vector3, uid: number) {
         for(let i = 0; i < Object.entries(view_state.targets).length; i++) {
             const target = view_state.targets[i];
             if(target.uids.includes(uid)) {
                 const amount = target.count - target.uids.length;
-                EventBus.send('UPDATED_TARGET_UI', {idx: i, amount, id: target.id, type: target.type});
+                EventBus.send('UPDATED_TARGET_UI', {idx: i, amount, id: target.id, type: target.type, pos});
             }
         }
     }
@@ -716,7 +719,7 @@ export function View(resources: ViewResources) {
         if (element_view == undefined) return;
 
         delete_all_view_items_by_uid(element.uid);
-    
+
         if(GAME_CONFIG.buster_elements.includes(element.id))
             return;
     

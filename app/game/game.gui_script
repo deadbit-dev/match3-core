@@ -508,26 +508,52 @@ function set_events(instance)
     EventBus.on("SHUFFLE_ACTION", on_shuffle_action)
 end
 function update_targets(data)
+    if data.pos ~= nil and data.type == TargetType.Element then
+        local pos = Camera.world_to_screen(data.pos)
+        local element = gui.new_box_node(
+            pos,
+            vmath.vector3(40, 40, 1)
+        )
+        local view = GAME_CONFIG.element_view[data.id]
+        gui.set_texture(element, "graphics")
+        gui.play_flipbook(element, view)
+        gui.animate(
+            element,
+            gui.PROP_POSITION,
+            vmath.vector3(450, 850, 0),
+            gui.EASING_INQUAD,
+            0.5,
+            0,
+            function()
+                gui.delete_node(element)
+                set_target(data)
+            end
+        )
+    else
+        set_target(data)
+    end
+end
+function set_target(data)
     repeat
-        local ____switch82 = data.idx
-        local ____cond82 = ____switch82 == 0
-        if ____cond82 then
+        local ____switch90 = data.idx
+        local ____cond90 = ____switch90 == 0
+        if ____cond90 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond82 = ____cond82 or ____switch82 == 1
-        if ____cond82 then
+        ____cond90 = ____cond90 or ____switch90 == 1
+        if ____cond90 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond82 = ____cond82 or ____switch82 == 2
-        if ____cond82 then
+        ____cond90 = ____cond90 or ____switch90 == 2
+        if ____cond90 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -562,7 +588,10 @@ function feed_animation()
                         local ltrb = Camera.get_ltrb()
                         local width = 540
                         local height = math.abs(ltrb.w)
-                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = height * 0.4}}
+                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = 50 + GAME_CONFIG.bottom_offset}}
+                        if GAME_CONFIG.debug_levels then
+                            points[#points].y = width * 0.4 + GAME_CONFIG.bottom_offset
+                        end
                         local result = vmath.vector3()
                         do
                             local i = 0
@@ -891,14 +920,7 @@ function on_win_end(state)
                             local ltrb = Camera.get_ltrb()
                             local width = 540
                             local height = math.abs(ltrb.w)
-                            local level_coin_points = {
-                                {
-                                    x = 420 * math.random(),
-                                    y = 1070
-                                },
-                                {x = width * 0.3, y = height * 0.5},
-                                {x = 270 + 25, y = 480 - 200}
-                            }
+                            local level_coin_points = {{x = 450, y = 850}, {x = width * 0.3, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
                             if steps > 0 or remaining_time > 0 then
                                 local steptime_points = {{x = 100, y = 850}, {x = width * 0.25, y = height * 0.5}, {x = 270 + 25, y = 480 - 200}}
                                 local function on_each_coin_drop_start(idx)

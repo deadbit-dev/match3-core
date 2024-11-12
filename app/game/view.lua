@@ -357,7 +357,8 @@ function ____exports.View(resources)
             __TS__Delete(view_state.game_id_to_view_index, uid)
             return
         end
-        update_targets_by_uid(uid)
+        local pos = go.get_position(item._hash)
+        update_targets_by_uid(pos, uid)
         go_manager.delete_item(item, true)
         __TS__ArraySplice(view_state.game_id_to_view_index[uid], 0, 1)
     end
@@ -366,20 +367,28 @@ function ____exports.View(resources)
         if items == nil then
             return
         end
+        local pos = vmath.vector3()
         for ____, item in ipairs(items) do
+            pos = go.get_position(item._hash)
             go_manager.delete_item(item, true)
         end
-        update_targets_by_uid(uid)
+        update_targets_by_uid(pos, uid)
         __TS__Delete(view_state.game_id_to_view_index, uid)
     end
-    function update_targets_by_uid(uid)
+    function update_targets_by_uid(pos, uid)
         do
             local i = 0
             while i < #__TS__ObjectEntries(view_state.targets) do
                 local target = view_state.targets[i]
                 if __TS__ArrayIncludes(target.uids, uid) then
                     local amount = target.count - #target.uids
-                    EventBus.send("UPDATED_TARGET_UI", {idx = i, amount = amount, id = target.id, type = target.type})
+                    EventBus.send("UPDATED_TARGET_UI", {
+                        idx = i,
+                        amount = amount,
+                        id = target.id,
+                        type = target.type,
+                        pos = pos
+                    })
                 end
                 i = i + 1
             end

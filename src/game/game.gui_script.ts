@@ -382,7 +382,21 @@ function set_events(instance: props) {
 }
 
 function update_targets(data: TargetMessage) {
-    switch (data.idx) {
+    if(data.pos != undefined && data.type == TargetType.Element) {
+        const pos = Camera.world_to_screen(data.pos);
+        const element = gui.new_box_node(pos, vmath.vector3(40, 40, 1));
+        const view = GAME_CONFIG.element_view[data.id as ElementId];
+        gui.set_texture(element, 'graphics');
+        gui.play_flipbook(element, view);
+        gui.animate(element, gui.PROP_POSITION, vmath.vector3(450, 850, 0), gui.EASING_INQUAD, 0.5, 0, () => {
+            gui.delete_node(element);
+            set_target(data);
+        });
+    } else set_target(data);
+}
+
+function set_target(data: TargetMessage) {
+    switch(data.idx) {
         case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
         case 1: set_text('second_target_counts', math.max(0, data.amount)); break;
         case 2: set_text('third_target_counts', math.max(0, data.amount)); break;
@@ -409,10 +423,14 @@ function feed_animation() {
                 const width = 540;
                 const height = math.abs(ltrb.w);
                 const points = [
-                    { x: 420, y: 870 },
-                    { x: width * 0.3, y: height * 0.5 },
-                    { x: width * 0.5, y: height * 0.4 }
+                    {x: 420, y: 870},
+                    {x: width * 0.3, y: height * 0.5},
+                    {x: width * 0.5, y: 50 + GAME_CONFIG.bottom_offset}
                 ];
+
+                if(GAME_CONFIG.debug_levels) {
+                    points[points.length - 1].y = width * 0.4 + GAME_CONFIG.bottom_offset;
+                }
 
                 let result = vmath.vector3();
                 for (let i = 0; i < 100; i++) {
@@ -591,9 +609,9 @@ function on_win_end(state: GameState) {
                     const width = 540;
                     const height = math.abs(ltrb.w);
                     const level_coin_points = [
-                        { x: 420 * math.random(), y: 1070 },
-                        { x: width * 0.3, y: height * 0.5 },
-                        { x: 270 + 25, y: 480 - 200 }
+                        {x: 450, y: 850},
+                        {x: width * 0.3, y: height * 0.5},
+                        {x: 270+25, y: 480-200}
                     ];
                     if (steps > 0 || remaining_time > 0) {
                         const steptime_points = [

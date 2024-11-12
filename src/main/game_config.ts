@@ -487,7 +487,7 @@ export const _STORAGE_CONFIG = {
 };
 
 export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
-export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType }
+export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType, pos ?: vmath.vector3 }
 export interface SwapElementsMessage extends SwapInfo { element_from: Element, element_to: Element | typeof NullElement }
 export interface CombinateMessage { combined_positions: Position[] }
 export interface ResponseCombinateMessage { pos: Position, combination: CombinationInfo }
