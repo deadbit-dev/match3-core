@@ -717,10 +717,9 @@ function set_tutorial()
                 4,
                 true,
                 function()
-                    gui.set_position(
-                        hand,
-                        vmath.vector3(-90, -350, 0)
-                    )
+                    local pos = gui.get_screen_position(gui.get_node("spinning/button"))
+                    pos.y = pos.y - 100
+                    gui.set_screen_position(hand, pos)
                     gui.set_enabled(hand, true)
                     gui.animate(
                         hand,
@@ -743,10 +742,9 @@ function set_tutorial()
                 4,
                 true,
                 function()
-                    gui.set_position(
-                        hand,
-                        vmath.vector3(-190, -350, 0)
-                    )
+                    local pos = gui.get_screen_position(gui.get_node("hammer/button"))
+                    pos.y = pos.y - 100
+                    gui.set_screen_position(hand, pos)
                     gui.set_enabled(hand, true)
                     gui.animate(
                         hand,
@@ -790,10 +788,9 @@ function set_tutorial()
                 4,
                 true,
                 function()
-                    gui.set_position(
-                        hand,
-                        vmath.vector3(15, -350, 0)
-                    )
+                    local pos = gui.get_screen_position(gui.get_node("horizontal_rocket/button"))
+                    pos.y = pos.y - 100
+                    gui.set_screen_position(hand, pos)
                     gui.set_enabled(hand, true)
                     gui.animate(
                         hand,
