@@ -127,6 +127,8 @@ export function Game() {
 
     const spawn_element_chances: { [key in number]: number } = {};
 
+    let get_step_handle: Coroutine;
+
     let game_item_counter = 0;
     let states: GameState[] = [];
     let is_block_input = false;
@@ -136,6 +138,7 @@ export function Game() {
     let game_timer: hash;
     let helper_timer: hash | null = null;
 
+    let previous_helper_data: HelperMessage | null = null;
     let helper_data: HelperMessage | null = null;
 
     let is_idle = false;
@@ -385,6 +388,7 @@ export function Game() {
         set_random();
 
         if (!is_tutorial() && helper_timer == null) {
+            set_helper_data();
             helper_timer = timer.delay(5, true, () => {
                 reset_helper();
                 set_helper();
@@ -444,27 +448,14 @@ export function Game() {
     function set_helper(message?: HelperMessage) {
         Log.log("SET_HELPER");
 
-        if (message != undefined) helper_data = message;
-        else {
-            const info = get_step();
-            if (info == NotFound)
-                return;
+        if (message != undefined)
+            helper_data = message;
 
-            const combined_element = field.get_element(info.step.from);
+        if (helper_data != null) {
+            EventBus.send('SET_HELPER', helper_data);
 
-            const elements = [];
-            for (const pos of info.combination.elementsInfo) {
-                const element = field.get_element(pos);
-                if (element != NullElement)
-                    elements.push(element);
-            }
-
-            if (combined_element != NullElement) {
-                helper_data = { step: info.step, combined_element, elements };
-            }
+            set_helper_data();
         }
-
-        if (helper_data != null) EventBus.send('SET_HELPER', helper_data);
     }
 
     function reset_helper() {
@@ -472,15 +463,18 @@ export function Game() {
         if (helper_timer == null)
             return;
 
-        if (helper_data == null)
+        if (previous_helper_data == null)
             return;
 
-        EventBus.send('RESET_HELPER', helper_data);
-        helper_data = null;
+        EventBus.send('RESET_HELPER', previous_helper_data);
+        previous_helper_data = null;
     }
 
     function stop_helper() {
         Log.log("STOP_HELPER");
+
+        if(get_step_handle != null)
+            flow.stop(get_step_handle);
 
         if (!is_tutorial()) {
             if (helper_timer == null)
@@ -490,10 +484,13 @@ export function Game() {
             helper_timer = null;
         }
 
-        if (helper_data == null)
+        if (previous_helper_data == null) {
+            helper_data = null;
             return;
+        }
 
-        EventBus.send('STOP_HELPER', helper_data);
+        EventBus.send('STOP_HELPER', previous_helper_data);
+        previous_helper_data = null;
         helper_data = null;
     }
 
@@ -640,6 +637,7 @@ export function Game() {
             EventBus.send('SHUFFLE_ACTION', copy_state());
 
             if (helper_timer == null) {
+                set_helper_data();
                 helper_timer = timer.delay(5, true, () => {
                     reset_helper();
                     set_helper();
@@ -855,76 +853,102 @@ export function Game() {
         return false;
     }
 
-    function get_step() {
-        const steps = [];
+    function set_helper_data() {
+        previous_helper_data = helper_data;
+        helper_data = null;
+        get_step_handle = get_step((info) => {
+            if(info == NotFound) {
+                return;
+            }
+            
+            const combined_element = field.get_element(info.step.from);
+            const elements = [];
+            for (const pos of info.combination.elementsInfo) {
+                const element = field.get_element(pos);
+                if (element != NullElement)
+                    elements.push(element);
+            }
 
-        for (let y = 0; y < field_height; y++) {
-            for (let x = 0; x < field_width; x++) {
-                const cell = field.get_cell({ x, y });
-                if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                    if (is_valid_pos(x + 1, y, field_width, field_height)) {
-                        const cell = field.get_cell({ x: x + 1, y });
-                        if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                            // swap element to right
-                            field.swap_elements({ x, y }, { x: x + 1, y });
+            if (combined_element != NullElement) {
+                helper_data = { step: info.step, combined_element, elements };
+            }
+        });
+    }
 
-                            // chech for combinations
-                            const resultA = field.search_combination({ x, y });
-                            const resultB = field.search_combination({ x: x + 1, y });
+    function get_step(on_end: (step: {step: SwapInfo, combination: CombinationInfo} | NotFound) => void) {
+        return flow.start(() => {
+            const steps = [];
 
-                            // swap element back
-                            field.swap_elements({ x, y }, { x: x + 1, y });
+            for (let y = 0; y < field_height; y++) {
+                for (let x = 0; x < field_width; x++) {
+                    const cell = field.get_cell({ x, y });
+                    if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                        if (is_valid_pos(x + 1, y, field_width, field_height)) {
+                            const cell = field.get_cell({ x: x + 1, y });
+                            if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                                // swap element to right
+                                field.swap_elements({ x, y }, { x: x + 1, y });
 
-                            if (resultA != NotFound) {
-                                steps.push({
-                                    step: { from: { x: x + 1, y }, to: { x, y } },
-                                    combination: resultA
-                                });
-                            }
+                                // chech for combinations
+                                const resultA = field.search_combination({ x, y });
+                                const resultB = field.search_combination({ x: x + 1, y });
 
-                            if (resultB != NotFound) {
-                                steps.push({
-                                    step: { from: { x, y }, to: { x: x + 1, y } },
-                                    combination: resultB
-                                });
+                                // swap element back
+                                field.swap_elements({ x, y }, { x: x + 1, y });
+
+                                if (resultA != NotFound) {
+                                    steps.push({
+                                        step: { from: { x: x + 1, y }, to: { x, y } },
+                                        combination: resultA
+                                    });
+                                }
+
+                                if (resultB != NotFound) {
+                                    steps.push({
+                                        step: { from: { x, y }, to: { x: x + 1, y } },
+                                        combination: resultB
+                                    });
+                                }
                             }
                         }
-                    }
 
-                    if (is_valid_pos(x, y + 1, field_width, field_height)) {
-                        const cell = field.get_cell({ x, y: y + 1 });
-                        if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
-                            // swap element down
-                            field.swap_elements({ x, y }, { x, y: y + 1 });
+                        flow.frames(1);
 
-                            // check for combination
-                            const resultC = field.search_combination({ x, y });
-                            const resultD = field.search_combination({ x, y: y + 1 });
+                        if (is_valid_pos(x, y + 1, field_width, field_height)) {
+                            const cell = field.get_cell({ x, y: y + 1 });
+                            if (cell != NotActiveCell && is_available_cell_type_for_move(cell)) {
+                                // swap element down
+                                field.swap_elements({ x, y }, { x, y: y + 1 });
 
-                            // swap element back
-                            field.swap_elements({ x, y }, { x, y: y + 1 });
+                                // check for combination
+                                const resultC = field.search_combination({ x, y });
+                                const resultD = field.search_combination({ x, y: y + 1 });
 
-                            if (resultC != NotFound) {
-                                steps.push({
-                                    step: { from: { x, y: y + 1 }, to: { x, y } },
-                                    combination: resultC
-                                });
-                            }
+                                // swap element back
+                                field.swap_elements({ x, y }, { x, y: y + 1 });
 
-                            if (resultD != NotFound) {
-                                steps.push({
-                                    step: { from: { x, y }, to: { x, y: y + 1 } },
-                                    combination: resultD
-                                });
+                                if (resultC != NotFound) {
+                                    steps.push({
+                                        step: { from: { x, y: y + 1 }, to: { x, y } },
+                                        combination: resultC
+                                    });
+                                }
+
+                                if (resultD != NotFound) {
+                                    steps.push({
+                                        step: { from: { x, y }, to: { x, y: y + 1 } },
+                                        combination: resultD
+                                    });
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        if (steps.length == 0) return NotFound;
-        return steps[math.random(0, steps.length - 1)];
+            if (steps.length == 0) on_end(NotFound);
+            else on_end(steps[math.random(0, steps.length - 1)]);
+        }, {parallel: true});
     }
 
     function revive() {
@@ -1348,8 +1372,13 @@ export function Game() {
 
                 if (is_gameover())
                     is_block_input = true;
+                
+                return;
             }
         }
+
+        is_idle = false;
+        on_idle();
     }
 
     function try_hammer_damage(pos: Position) {
@@ -1748,7 +1777,8 @@ export function Game() {
                 element_to: element_to
             });
 
-            return;
+            is_idle = false;
+            return on_idle();
         }
 
         is_idle = false;
