@@ -39,7 +39,7 @@ nodes {
 }
 nodes {
   position {
-    y: 4039.0
+    y: 4044.5
   }
   scale {
     x: 0.935
@@ -162,7 +162,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "4/level"
   parent: "4"
   overridden_fields: 1
@@ -191,7 +191,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "5/level"
   parent: "5"
   overridden_fields: 1
@@ -220,7 +220,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "6/level"
   parent: "6"
   overridden_fields: 1
@@ -249,7 +249,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "7/level"
   parent: "7"
   overridden_fields: 1
@@ -278,7 +278,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "8/level"
   parent: "8"
   overridden_fields: 9
@@ -306,7 +306,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "9/level"
   parent: "9"
   overridden_fields: 9
@@ -334,7 +334,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "10/level"
   parent: "10"
   overridden_fields: 9
@@ -362,7 +362,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "11/level"
   parent: "11"
   overridden_fields: 9
@@ -390,7 +390,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "12/level"
   parent: "12"
   overridden_fields: 9
@@ -418,7 +418,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "13/level"
   parent: "13"
   overridden_fields: 9
@@ -446,7 +446,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "14/level"
   parent: "14"
   overridden_fields: 9
@@ -474,7 +474,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "15/level"
   parent: "15"
   overridden_fields: 9
@@ -502,7 +502,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "16/level"
   parent: "16"
   overridden_fields: 9
@@ -530,7 +530,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "17/level"
   parent: "17"
   overridden_fields: 9
@@ -558,7 +558,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "18/level"
   parent: "18"
   overridden_fields: 9
@@ -586,7 +586,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "19/level"
   parent: "19"
   overridden_fields: 9
@@ -614,7 +614,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "20/level"
   parent: "20"
   overridden_fields: 9
@@ -642,7 +642,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "21/level"
   parent: "21"
   overridden_fields: 9
@@ -670,7 +670,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "22/level"
   parent: "22"
   overridden_fields: 9
@@ -698,7 +698,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "23/level"
   parent: "23"
   overridden_fields: 9
@@ -726,7 +726,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "24/level"
   parent: "24"
   overridden_fields: 9
@@ -754,7 +754,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "25/level"
   parent: "25"
   overridden_fields: 9
@@ -782,7 +782,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "26/level"
   parent: "26"
   overridden_fields: 9
@@ -810,7 +810,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "27/level"
   parent: "27"
   overridden_fields: 9
@@ -838,7 +838,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "28/level"
   parent: "28"
   overridden_fields: 9
@@ -866,7 +866,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "29/level"
   parent: "29"
   overridden_fields: 9
@@ -894,7 +894,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "30/level"
   parent: "30"
   overridden_fields: 9
@@ -922,7 +922,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "31/level"
   parent: "31"
   overridden_fields: 9
@@ -950,7 +950,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "32/level"
   parent: "32"
   overridden_fields: 9
@@ -978,7 +978,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "33/level"
   parent: "33"
   overridden_fields: 9
@@ -1006,7 +1006,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "34/level"
   parent: "34"
   overridden_fields: 9
@@ -1034,7 +1034,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "35/level"
   parent: "35"
   overridden_fields: 9
@@ -1062,7 +1062,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "36/level"
   parent: "36"
   overridden_fields: 9
@@ -1090,7 +1090,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "37/level"
   parent: "37"
   overridden_fields: 9
@@ -1118,7 +1118,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "38/level"
   parent: "38"
   overridden_fields: 9
@@ -1146,7 +1146,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "39/level"
   parent: "39"
   overridden_fields: 9
@@ -1174,7 +1174,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "40/level"
   parent: "40"
   overridden_fields: 9
@@ -1202,7 +1202,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "41/level"
   parent: "41"
   overridden_fields: 9
@@ -1230,7 +1230,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "42/level"
   parent: "42"
   overridden_fields: 9
@@ -1258,7 +1258,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "43/level"
   parent: "43"
   overridden_fields: 9
@@ -1286,7 +1286,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "44/level"
   parent: "44"
   overridden_fields: 9
@@ -1314,7 +1314,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "45/level"
   parent: "45"
   overridden_fields: 9
@@ -1342,7 +1342,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level"
+  texture: "map/button_level_down"
   id: "46/level"
   parent: "46"
   overridden_fields: 9
@@ -1370,7 +1370,7 @@ nodes {
 }
 nodes {
   type: TYPE_BOX
-  texture: "map/button_level_red"
+  texture: "map/button_level_down"
   id: "47/level"
   parent: "47"
   overridden_fields: 1

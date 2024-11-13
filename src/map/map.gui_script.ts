@@ -32,14 +32,7 @@ export function init(this: props): void {
 
     Sound.play('map');
 
-    let max_level = 0;
-    for(let level of GameStorage.get('completed_levels')) {
-        if(++level > max_level)
-            max_level = level;
-    }
-    const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");
-    const pos = gui.get_position(level);
-    gui.set_position(gui.get_node('cat'), pos);
+    set_current_level();
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
@@ -109,6 +102,19 @@ function set_completed_levels() {
         gui.set_texture(level_node, "map");
         gui.play_flipbook(level_node, 'button_level_green');
     }
+}
+
+function set_current_level() {
+    let max_level = 0;
+    for(let level of GameStorage.get('completed_levels')) {
+        if(++level > max_level)
+            max_level = level;
+    }
+    const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");
+    gui.set_texture(level, "map");
+    gui.play_flipbook(level, (GAME_CONFIG.animal_levels.includes(max_level + 1)) ? 'button_level_red' : 'button_level');
+    const pos = gui.get_position(level);
+    gui.set_position(gui.get_node('cat'), pos);
 }
 
 function on_drag(action: any) {
