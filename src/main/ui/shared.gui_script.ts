@@ -90,6 +90,30 @@ function set_events(data: props) {
         if (data.dlg_opened) return;
         set_enabled_settings(data, true);
     });
+    EventBus.on('PURCHASE_INITIALIZED', () => {
+        // products
+        if (GAME_CONFIG.products.length >= 4) {
+            const maney30 = GAME_CONFIG.products.filter(p => p.id == 'maney30')[0];
+            const maney150 = GAME_CONFIG.products.filter(p => p.id == 'maney150')[0];
+            const maney300 = GAME_CONFIG.products.filter(p => p.id == 'maney300')[0];
+            const maney800 = GAME_CONFIG.products.filter(p => p.id == 'maney800')[0];
+
+            set_text('store/buy_30_text', maney30.priceValue + ' ' + maney30.priceCurrencyCode);
+            set_text('store/buy_150_text', maney150.priceValue + ' ' + maney150.priceCurrencyCode);
+            set_text('store/buy_300_text', maney300.priceValue + ' ' + maney300.priceCurrencyCode);
+            set_text('store/buy_800_text', maney800.priceValue + ' ' + maney800.priceCurrencyCode);
+
+            /*
+            const noads1 = GAME_CONFIG.products.filter(p => p.id == 'noads1')[0];
+            const noads7 = GAME_CONFIG.products.filter(p => p.id == 'noads7')[0];
+            const noads30 = GAME_CONFIG.products.filter(p => p.id == 'noads30')[0];
+
+            set_text('store/buy_ad_1_text', noads1.priceValue + ' ' + noads1.priceCurrencyCode);
+            set_text('store/buy_ad_7_text', noads7.priceValue + ' ' + noads7.priceCurrencyCode);
+            set_text('store/buy_ad_30_text', noads30.priceValue + ' ' + noads30.priceCurrencyCode);
+            */
+        }
+    });
 }
 
 function setup(data: props) {
@@ -118,29 +142,6 @@ function setup_store(data: props) {
     data.druid.new_button('store/close', () => set_enabled_store(data, false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
-
-    // products
-    if (GAME_CONFIG.products.length >= 4) {
-        const maney30 = GAME_CONFIG.products.filter(p => p.id == 'maney30')[0];
-        const maney150 = GAME_CONFIG.products.filter(p => p.id == 'maney150')[0];
-        const maney300 = GAME_CONFIG.products.filter(p => p.id == 'maney300')[0];
-        const maney800 = GAME_CONFIG.products.filter(p => p.id == 'maney800')[0];
-
-        set_text('store/buy_30_text', maney30.priceValue + ' ' + maney30.priceCurrencyCode);
-        set_text('store/buy_150_text', maney150.priceValue + ' ' + maney150.priceCurrencyCode);
-        set_text('store/buy_300_text', maney300.priceValue + ' ' + maney300.priceCurrencyCode);
-        set_text('store/buy_800_text', maney800.priceValue + ' ' + maney800.priceCurrencyCode);
-
-        /*
-        const noads1 = GAME_CONFIG.products.filter(p => p.id == 'noads1')[0];
-        const noads7 = GAME_CONFIG.products.filter(p => p.id == 'noads7')[0];
-        const noads30 = GAME_CONFIG.products.filter(p => p.id == 'noads30')[0];
-
-        set_text('store/buy_ad_1_text', noads1.priceValue + ' ' + noads1.priceCurrencyCode);
-        set_text('store/buy_ad_7_text', noads7.priceValue + ' ' + noads7.priceCurrencyCode);
-        set_text('store/buy_ad_30_text', noads30.priceValue + ' ' + noads30.priceCurrencyCode);
-        */
-    }
 
     data.druid.new_button('store/buy_30_btn', () => {
         if (HtmlBridge == null) {
@@ -383,25 +384,28 @@ function setup_store(data: props) {
         });
     });
 
-    data.druid.new_button('store/reset/button', () => {
-        remove_coins(GameStorage.get('coins'));
-        remove_lifes(GameStorage.get('life').amount);
+    if(GAME_CONFIG.debug_levels) {
+        gui.set_enabled(gui.get_node('store/reset/button'), true);
+        data.druid.new_button('store/reset/button', () => {
+            remove_coins(GameStorage.get('coins'));
+            remove_lifes(GameStorage.get('life').amount);
 
-        const life = GameStorage.get('life');
-        life.start_time = System.now() - life.start_time;
-        GameStorage.set('life', life);
-        on_life_tick();
+            const life = GameStorage.get('life');
+            life.start_time = System.now() - life.start_time;
+            GameStorage.set('life', life);
+            on_life_tick();
 
-        const infinit_life = GameStorage.get('infinit_life');
-        infinit_life.start_time = System.now() - infinit_life.duration;
-        GameStorage.set('infinit_life', infinit_life);
-        on_infinit_life_tick();
+            const infinit_life = GameStorage.get('infinit_life');
+            infinit_life.start_time = System.now() - infinit_life.duration;
+            GameStorage.set('infinit_life', infinit_life);
+            on_infinit_life_tick();
 
-        GameStorage.set('hammer_counts', 0);
-        GameStorage.set('spinning_counts', 0);
-        GameStorage.set('horizontal_rocket_counts', 0);
-        GameStorage.set('vertical_rocket_counts', 0);
-    });
+            GameStorage.set('hammer_counts', 0);
+            GameStorage.set('spinning_counts', 0);
+            GameStorage.set('horizontal_rocket_counts', 0);
+            GameStorage.set('vertical_rocket_counts', 0);
+        });
+    }
 }
 
 function setup_settings(data: props) {

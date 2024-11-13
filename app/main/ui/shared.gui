@@ -1107,7 +1107,9 @@ nodes {
   parent: "store/reset"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   type: TYPE_TEXT

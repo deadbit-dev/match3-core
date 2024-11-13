@@ -628,7 +628,7 @@ export type _UserMessages = {
     TRY_BUY_VERTICAL_ROCKET: VoidMessage,
 
     SET_LIFE_NOTIFICATION: VoidMessage,
-    REVIVE: {step?: number, time?: number},
+    REVIVE: {steps?: number, time?: number},
 
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,
@@ -646,5 +646,6 @@ export type _UserMessages = {
     RESPONSE_REWIND: GameState,
     OPEN_SETTINGS: VoidMessage,
     FORCE_REMOVE_ELEMENT: number,
-    START_MOVIE: VoidMessage
+    START_MOVIE: VoidMessage,
+    PURCHASE_INITIALIZED: VoidMessage
 };

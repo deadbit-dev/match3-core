@@ -39,6 +39,8 @@ export function init(this: props) {
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')
             HtmlBridge.start_resize_monitor();
 
+        Scene.load_resource('main', 'shared_gui');
+
         // yandex purchases
         // получаем список возможных покупок(иды, цены)
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'yandex') {
@@ -98,6 +100,8 @@ export function init(this: props) {
                             }
                         }
                     });
+
+                    EventBus.send('PURCHASE_INITIALIZED');
                 }
             });
         }
@@ -108,8 +112,6 @@ export function init(this: props) {
         Camera.set_go_prjection(-1, 1, -3, 3);
 
         Sound.play('map', 1, 0.7);
-
-        Scene.load_resource('main', 'shared_gui');
 
         Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
