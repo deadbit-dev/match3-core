@@ -101,7 +101,7 @@ function setup_targets(instance)
                 if target.type == TargetType.Cell then
                     view = GAME_CONFIG.cell_view[target.id]
                     if __TS__ArrayIsArray(view) then
-                        view = view[1]
+                        view = view[#view]
                     end
                 else
                     view = GAME_CONFIG.element_view[target.id]

@@ -161,7 +161,7 @@ function setup_targets(instance: props) {
             if (target.type == TargetType.Cell) {
                 view = GAME_CONFIG.cell_view[target.id as CellId];
                 if (Array.isArray(view))
-                    view = view[0];
+                    view = view[view.length - 1];
             } else view = GAME_CONFIG.element_view[target.id as ElementId];
 
             gui.play_flipbook(gui.get_node(presets.targets[i].node_name + '_icon'), (view == 'cell_web') ? view + '_ui' : view);
