@@ -411,7 +411,7 @@ function setup_gameover_ui(instance)
                 "data",
                 {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
             )
-            EventBus.send("REVIVE", {step = 3})
+            EventBus.send("REVIVE", {steps = 3})
         end
     )
     gui.set_text(
@@ -434,7 +434,7 @@ function setup_gameover_ui(instance)
                 "data",
                 {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "5step_money"}}
             )
-            EventBus.send("REVIVE", {step = 5})
+            EventBus.send("REVIVE", {steps = 5})
         end
     )
     gui.set_text(

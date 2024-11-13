@@ -583,7 +583,9 @@ function ____exports.Game()
         )
     end
     function on_gameover()
-        timer.cancel(game_timer)
+        if game_timer ~= nil then
+            timer.cancel(game_timer)
+        end
         update_core_state()
         GAME_CONFIG.revive_states = json.decode(json.encode(states))
         EventBus.send(
@@ -2176,7 +2178,7 @@ function ____exports.Game()
         end
     end
     function on_falling(pos)
-        print("FALL: ", pos.x, pos.y)
+        Log.log((("FALL: " .. tostring(pos.x)) .. ", ") .. tostring(pos.y))
         local result = search_fall_element(pos, pos)
         if result ~= NotFound then
             local move_info = field.fell_element(result)

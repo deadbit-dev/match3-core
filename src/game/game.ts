@@ -606,7 +606,8 @@ export function Game() {
     }
 
     function on_gameover() {
-        timer.cancel(game_timer);
+        if(game_timer != null)
+            timer.cancel(game_timer);
 
         update_core_state();
 
@@ -1995,7 +1996,7 @@ export function Game() {
     }
 
     function on_falling(pos: Position) {
-        print("FALL: ", pos.x, pos.y);
+        Log.log(`FALL: ${pos.x}, ${pos.y}`);
         const result = search_fall_element(pos, pos);
         if (result != NotFound) {
             const move_info = field.fell_element(result);
