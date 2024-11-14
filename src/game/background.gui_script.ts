@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { is_animal_level } from './utils';
 
 
 interface props {
@@ -48,10 +49,20 @@ function set_events(data: props) {
 function on_resize(data: {width: number, height: number}) {
     const bg = gui.get_node('bg');
     
-    if(data.width >= data.height) gui.set_position(bg, vmath.vector3(280, 480, 0));
-    else gui.set_position(bg, vmath.vector3(920, 480, 0));
+    print("WIDTH: ", data.width, Camera.get_ltrb().x, Camera.get_ltrb().z);
+
+    if(math.abs(Camera.get_ltrb().z - Camera.get_ltrb().x) < 1920) {
+        gui.set_pivot(bg, gui.PIVOT_W);
+        gui.set_xanchor(bg, gui.ANCHOR_LEFT);
+        gui.set_position(bg, vmath.vector3(0, 480, 0));
+    } else {
+        gui.set_pivot(bg, gui.PIVOT_CENTER);
+        gui.set_xanchor(bg, gui.ANCHOR_NONE);
+        gui.set_position(bg, vmath.vector3(280, 480, 0));
+    }
 
     const hill = gui.get_node('hill');
+    gui.set_enabled(hill, is_animal_level());
     let posY = -275 + GAME_CONFIG.bottom_offset;
     if(GAME_CONFIG.debug_levels)
         posY += 100;

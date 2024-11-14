@@ -5,12 +5,13 @@ textures {
 }
 nodes {
   position {
-    x: 280.0
     y: 480.0
   }
   type: TYPE_BOX
   texture: "background/background"
   id: "bg"
+  xanchor: XANCHOR_LEFT
+  pivot: PIVOT_W
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   material: "bg"
@@ -25,6 +26,7 @@ nodes {
   id: "hill"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+  enabled: false
   material: "bg"
 }
 material: "/builtins/materials/gui.material"

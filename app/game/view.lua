@@ -90,7 +90,7 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win_end, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, calculate_sizes, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win_end, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, max_width, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -186,7 +186,7 @@ function ____exports.View(resources)
     end
     function calculate_cell_size()
         return math.floor(math.min(
-            (original_game_width - get_field_offset_border() * 2) / get_field_max_width(),
+            (original_game_width - get_field_offset_border() * 2) / max_width,
             100
         ))
     end
@@ -200,14 +200,44 @@ function ____exports.View(resources)
         if changes_coff == nil then
             changes_coff = 1
         end
-        local offset_x = original_game_width / 2 - get_field_width() / 2 * cell_size
+        local offset_x = (max_width * cell_size - get_field_width() * cell_size) / 2 + get_field_offset_border()
         local offset_y = -(original_game_height / 2 - get_field_max_height() / 2 * cell_size) + 600
         if not GAME_CONFIG.debug_levels then
             offset_y = offset_y - (90 - GAME_CONFIG.bottom_offset)
         end
+        print("OFF: ", offset_x)
         return vmath.vector3(offset_x, offset_y, 0)
     end
+    function calculate_sizes(game_state)
+        local min_pos_x = get_field_width()
+        local max_pos_x = 0
+        do
+            local y = 0
+            while y < get_field_height() do
+                do
+                    local x = 0
+                    while x < get_field_width() do
+                        local cell = game_state.cells[y + 1][x + 1]
+                        if cell ~= NotActiveCell and min_pos_x > x then
+                            min_pos_x = x
+                        end
+                        if cell ~= NotActiveCell and max_pos_x < x then
+                            max_pos_x = x
+                        end
+                        x = x + 1
+                    end
+                end
+                y = y + 1
+            end
+        end
+        max_width = max_pos_x - min_pos_x
+        print("MAX_X: ", max_width)
+        cell_size = calculate_cell_size()
+        scale_ratio = calculate_scale_ratio()
+        cells_offset = calculate_cell_offset()
+    end
     function on_load_game(game_state)
+        calculate_sizes(game_state)
         load_field(game_state)
         EventBus.send("INIT_UI")
         EventBus.send("UPDATED_STEP_COUNTER", game_state.steps)
@@ -577,24 +607,24 @@ function ____exports.View(resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch93 = move_direction
-            local ____cond93 = ____switch93 == Direction.Up
-            if ____cond93 then
+            local ____switch98 = move_direction
+            local ____cond98 = ____switch98 == Direction.Up
+            if ____cond98 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Down
-            if ____cond93 then
+            ____cond98 = ____cond98 or ____switch98 == Direction.Down
+            if ____cond98 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Left
-            if ____cond93 then
+            ____cond98 = ____cond98 or ____switch98 == Direction.Left
+            if ____cond98 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Right
-            if ____cond93 then
+            ____cond98 = ____cond98 or ____switch98 == Direction.Right
+            if ____cond98 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1184,19 +1214,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch201 = message.axis
-                    local ____cond201 = ____switch201 == Axis.Horizontal
-                    if ____cond201 then
+                    local ____switch206 = message.axis
+                    local ____cond206 = ____switch206 == Axis.Horizontal
+                    if ____cond206 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond201 = ____cond201 or ____switch201 == Axis.Vertical
-                    if ____cond201 then
+                    ____cond206 = ____cond206 or ____switch206 == Axis.Vertical
+                    if ____cond206 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond201 = ____cond201 or ____switch201 == Axis.All
-                    if ____cond201 then
+                    ____cond206 = ____cond206 or ____switch206 == Axis.All
+                    if ____cond206 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1225,14 +1255,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch204 = axis
-            local ____cond204 = ____switch204 == Axis.Vertical
-            if ____cond204 then
+            local ____switch209 = axis
+            local ____cond209 = ____switch209 == Axis.Vertical
+            if ____cond209 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond204 = ____cond204 or ____switch204 == Axis.Horizontal
-            if ____cond204 then
+            ____cond209 = ____cond209 or ____switch209 == Axis.Horizontal
+            if ____cond209 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break
@@ -1765,6 +1795,7 @@ function ____exports.View(resources)
     view_state.targets = {}
     original_game_width = 540
     original_game_height = 960
+    max_width = get_field_max_width()
     cell_size = calculate_cell_size()
     scale_ratio = calculate_scale_ratio()
     cells_offset = calculate_cell_offset()
