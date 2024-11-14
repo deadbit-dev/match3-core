@@ -58,7 +58,8 @@ const presets = {
 interface props {
     druid: DruidClass,
     level: Level,
-    busters: Busters
+    busters: Busters,
+    settings_opened: boolean
 }
 
 export function init(this: props): void {
@@ -258,10 +259,87 @@ function setup_busters(instance: props) {
                 return;
         }
 
-        EventBus.send('OPEN_SETTINGS');
+        instance.settings_opened = !instance.settings_opened;
+
+        set_enabled_settings(instance.settings_opened);        
+
+        instance.druid.new_button('music', () => {
+            const music_off = gui.get_node('music_off');
+            Sound.set_music_active(!Sound.is_music_active());
+            gui.set_enabled(music_off, !Sound.is_music_active());
+        });
+
+        instance.druid.new_button('sound', () => {
+            const sound_off = gui.get_node('sound_off');
+            Sound.set_sfx_active(!Sound.is_sfx_active());
+            gui.set_enabled(sound_off, !Sound.is_sfx_active());
+        });
+
+        instance.druid.new_button('store', () => {
+            set_enabled_settings(false);
+            EventBus.send('REQUEST_OPEN_STORE');
+        });
+
+        instance.druid.new_button('map', () => {
+            Sound.stop('game');
+            Scene.load('map');
+        });
+
+        const sound_off = gui.get_node('sound_off');
+        gui.set_enabled(sound_off, !Sound.is_sfx_active());
+
+        const music_off = gui.get_node('music_off');
+        gui.set_enabled(music_off, !Sound.is_music_active());
     });
 
     update_buttons(instance);
+}
+
+function set_enabled_settings(state: boolean) {
+    const sound = gui.get_node('sound');
+    const music = gui.get_node('music');
+    const store = gui.get_node('store');
+    const map = gui.get_node('map');
+
+    if(state) {
+        const sound_pos = gui.get_position(sound);
+        sound_pos.y += 80;
+        gui.set_enabled(sound, true);
+        gui.animate(sound, gui.PROP_POSITION, sound_pos, gui.EASING_INCUBIC, 0.3);
+        const music_pos = gui.get_position(music);
+        music_pos.y += 150;
+        gui.set_enabled(music, true);
+        gui.animate(music, gui.PROP_POSITION, music_pos, gui.EASING_INCUBIC, 0.3);
+        const store_pos = gui.get_position(store);
+        store_pos.y += 220;
+        gui.set_enabled(store, true);
+        gui.animate(store, gui.PROP_POSITION, store_pos, gui.EASING_INCUBIC, 0.3);
+        const map_pos = gui.get_position(map);
+        map_pos.y += 290;
+        gui.set_enabled(map, true);
+        gui.animate(map, gui.PROP_POSITION, map_pos, gui.EASING_INCUBIC, 0.3);
+    } else {
+        const sound_pos = gui.get_position(sound);
+        sound_pos.y -= 80;
+        gui.animate(sound, gui.PROP_POSITION, sound_pos, gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(sound, false);
+        });
+        const music_pos = gui.get_position(music);
+        music_pos.y -= 150;
+        gui.animate(music, gui.PROP_POSITION, music_pos, gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(music, false);
+        });
+        const store_pos = gui.get_position(store);
+        store_pos.y -= 220;
+        gui.animate(store, gui.PROP_POSITION, store_pos, gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(store, false);
+        });
+        const map_pos = gui.get_position(map);
+        map_pos.y -= 290;
+        gui.animate(map, gui.PROP_POSITION, map_pos, gui.EASING_INCUBIC, 0.3, 0, () => {
+            gui.set_enabled(map, false);
+        });
+    }
 }
 
 function setup_sustem_ui(instance: props) {

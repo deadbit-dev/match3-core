@@ -1942,12 +1942,47 @@ nodes {
     y: 0.5
   }
   type: TYPE_BOX
-  texture: "ui/BtnSet"
-  id: "settings_button"
+  texture: "ui/BtnMus"
+  id: "music"
   parent: "top_right_container"
   layer: "top"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/btnSetoff"
+  id: "music_off"
+  parent: "music"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: -51.0
+    y: -179.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/BtnSoundOn"
+  id: "sound"
+  parent: "top_right_container"
+  layer: "top"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/btnSetoff"
+  id: "sound_off"
+  parent: "sound"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
 }
 nodes {
   position {
@@ -1969,352 +2004,6 @@ nodes {
   layer: "fade"
   inherit_alpha: true
   alpha: 0.0
-}
-nodes {
-  position {
-    x: 270.0
-    y: 1150.0
-  }
-  scale {
-    x: 0.75
-    y: 0.75
-  }
-  type: TYPE_BOX
-  texture: "ui/complete_window"
-  id: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  enabled: false
-  material: "dlg"
-}
-nodes {
-  position {
-    y: 260.0
-  }
-  scale {
-    x: 0.8
-    y: 0.8
-  }
-  size {
-    x: 296.0
-    y: 56.0
-  }
-  color {
-    y: 0.855
-    z: 0.651
-  }
-  type: TYPE_TEXT
-  text: "\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270"
-  font: "48"
-  id: "title_text"
-  outline {
-    x: 0.498
-    y: 0.271
-    z: 0.118
-  }
-  shadow {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  material: "font_top"
-}
-nodes {
-  position {
-    y: -210.0
-  }
-  type: TYPE_BOX
-  texture: "ui/btn_2"
-  id: "ok_button"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -1.0
-    y: 5.0
-  }
-  scale {
-    x: 0.63
-    y: 0.63
-  }
-  size {
-    x: 250.0
-    y: 45.0
-  }
-  type: TYPE_TEXT
-  text: "O\320\272"
-  font: "48"
-  id: "buy_button_text"
-  outline {
-    x: 0.169
-    y: 0.38
-    z: 0.063
-  }
-  shadow {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  parent: "ok_button"
-  layer: "top"
-  inherit_alpha: true
-  material: "font_top"
-}
-nodes {
-  position {
-    x: -168.0
-    y: 66.666664
-  }
-  scale {
-    x: 1.5
-    y: 1.5
-  }
-  type: TYPE_BOX
-  texture: "ui/iconSound"
-  id: "sound_icon"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -168.0
-    y: -57.333332
-  }
-  scale {
-    x: 1.5
-    y: 1.5
-  }
-  type: TYPE_BOX
-  texture: "ui/iconMusic"
-  id: "music_icon"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -106.0
-    y: 65.666664
-  }
-  scale {
-    x: 0.8
-    y: 0.8
-  }
-  size {
-    x: 240.0
-    y: 80.0
-  }
-  color {
-    x: 0.498
-    y: 0.271
-    z: 0.118
-  }
-  type: TYPE_TEXT
-  text: "\320\227\320\262\321\203\320\272\320\270"
-  font: "48"
-  id: "sound_lable"
-  pivot: PIVOT_W
-  outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  shadow {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  line_break: true
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  outline_alpha: 0.0
-  text_leading: 0.9
-  material: "font_top"
-}
-nodes {
-  position {
-    x: -106.0
-    y: -60.333332
-  }
-  scale {
-    x: 0.8
-    y: 0.8
-  }
-  size {
-    x: 240.0
-    y: 80.0
-  }
-  color {
-    x: 0.498
-    y: 0.271
-    z: 0.118
-  }
-  type: TYPE_TEXT
-  text: "\320\234\321\203\320\267\321\213\320\272\320\260"
-  font: "48"
-  id: "music_lable"
-  pivot: PIVOT_W
-  outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  shadow {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  line_break: true
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  outline_alpha: 0.0
-  text_leading: 0.9
-  material: "font_top"
-}
-nodes {
-  position {
-    x: 140.0
-    y: 64.666664
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnONBack"
-  id: "sound_button"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -26.0
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnOFF"
-  id: "sound_off"
-  parent: "sound_button"
-  layer: "top"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  enabled: false
-  material: "dlg_part"
-}
-nodes {
-  position {
-    x: 26.0
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnON"
-  id: "sound_on"
-  parent: "sound_button"
-  layer: "top"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg_part"
-}
-nodes {
-  position {
-    x: 140.0
-    y: -63.333332
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnONBack"
-  id: "music_button"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -26.0
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnOFF"
-  id: "music_off"
-  parent: "music_button"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  enabled: false
-  material: "dlg_part"
-}
-nodes {
-  position {
-    x: 26.0
-  }
-  type: TYPE_BOX
-  texture: "ui/BtnON"
-  id: "music_on"
-  parent: "music_button"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  material: "dlg_part"
-}
-nodes {
-  position {
-    x: -120.0
-    y: -210.0
-  }
-  type: TYPE_BOX
-  texture: "ui/btn_2"
-  id: "map_button"
-  parent: "settings"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  enabled: false
-  material: "dlg"
-}
-nodes {
-  position {
-    x: -1.0
-    y: 5.0
-  }
-  scale {
-    x: 0.63
-    y: 0.63
-  }
-  size {
-    x: 225.0
-    y: 45.0
-  }
-  type: TYPE_TEXT
-  text: "\320\275\320\260 \320\272\320\260\321\200\321\202\321\203\n"
-  ""
-  font: "48"
-  id: "buy_button_text1"
-  outline {
-    x: 0.169
-    y: 0.38
-    z: 0.063
-  }
-  shadow {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-  parent: "map_button"
-  layer: "top"
-  inherit_alpha: true
-  material: "font_top"
 }
 layers {
   name: "back"

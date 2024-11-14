@@ -8,7 +8,7 @@ local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_settings, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_settings_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_settings, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
+local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -84,15 +84,6 @@ function set_events(data)
         true
     )
     EventBus.on(
-        "OPEN_SETTINGS",
-        function()
-            if data.dlg_opened then
-                return
-            end
-            set_enabled_settings(data, true)
-        end
-    )
-    EventBus.on(
         "PURCHASE_INITIALIZED",
         function()
             if #GAME_CONFIG.products >= 4 then
@@ -124,7 +115,7 @@ function setup(data)
     setup_coins(data)
     setup_life(data)
     setup_store(data)
-    setup_settings(data)
+    setup_right_container(data)
     setup_life_notification(data)
     setup_not_enough_coins(data)
     setup_busters(data)
@@ -150,10 +141,6 @@ function setup_life(data)
     )
 end
 function setup_store(data)
-    data.druid:new_button(
-        "store_button",
-        function() return set_enabled_store(data, true) end
-    )
     data.druid:new_button(
         "store/close",
         function() return set_enabled_store(data, false) end
@@ -486,23 +473,16 @@ function setup_store(data)
         )
     end
 end
-function setup_settings(data)
+function setup_right_container(data)
     data.druid:new_button(
-        "settings_button",
-        function()
-            set_enabled_settings(data, true)
-        end
+        "store_button",
+        function() return set_enabled_store(data, true) end
     )
     data.druid:new_button(
-        "sound_button",
+        "sound",
         function()
-            local sound_on = gui.get_node("sound_on")
             local sound_off = gui.get_node("sound_off")
             Sound.set_sfx_active(not Sound.is_sfx_active())
-            gui.set_enabled(
-                sound_on,
-                Sound.is_sfx_active()
-            )
             gui.set_enabled(
                 sound_off,
                 not Sound.is_sfx_active()
@@ -510,81 +490,25 @@ function setup_settings(data)
         end
     )
     data.druid:new_button(
-        "music_button",
+        "music",
         function()
-            local music_on = gui.get_node("music_on")
             local music_off = gui.get_node("music_off")
             Sound.set_music_active(not Sound.is_music_active())
-            gui.set_enabled(
-                music_on,
-                Sound.is_music_active()
-            )
             gui.set_enabled(
                 music_off,
                 not Sound.is_music_active()
             )
         end
     )
-    data.druid:new_button(
-        "ok_button",
-        function()
-            set_enabled_settings(data, false)
-        end
-    )
-    gui.set_text(
-        gui.get_node("buy_button_text1"),
-        Lang.get_text("on_map")
-    )
-    data.druid:new_button(
-        "map_button",
-        function()
-            if not GameStorage.get("was_purchased") then
-                Ads.show_interstitial(
-                    true,
-                    function()
-                        set_enabled_settings(data, false)
-                        Sound.stop("game")
-                        Scene.load("map")
-                    end
-                )
-            else
-                set_enabled_settings(data, false)
-                Sound.stop("game")
-                Scene.load("map")
-            end
-        end
-    )
-    local sound_on = gui.get_node("sound_on")
     local sound_off = gui.get_node("sound_off")
-    gui.set_enabled(
-        sound_on,
-        Sound.is_sfx_active()
-    )
     gui.set_enabled(
         sound_off,
         not Sound.is_sfx_active()
     )
-    local music_on = gui.get_node("music_on")
     local music_off = gui.get_node("music_off")
-    gui.set_enabled(
-        music_on,
-        Sound.is_music_active()
-    )
     gui.set_enabled(
         music_off,
         not Sound.is_music_active()
-    )
-    gui.set_text(
-        gui.get_node("title_text"),
-        Lang.get_text("settings")
-    )
-    gui.set_text(
-        gui.get_node("sound_lable"),
-        Lang.get_text("sound")
-    )
-    gui.set_text(
-        gui.get_node("music_lable"),
-        Lang.get_text("music")
     )
 end
 function setup_busters(data)
@@ -839,9 +763,13 @@ function set_enabled_store_button(state)
     local store_button = gui.get_node("store_button")
     gui.set_enabled(store_button, state)
 end
-function set_enabled_settings_button(state)
-    local settings_button = gui.get_node("settings_button")
-    gui.set_enabled(settings_button, state)
+function set_enabled_sound_button(state)
+    local sound_button = gui.get_node("sound")
+    gui.set_enabled(sound_button, state)
+end
+function set_enabled_music_button(state)
+    local music_button = gui.get_node("music")
+    gui.set_enabled(music_button, state)
 end
 function on_add_coins()
     local coins_text = gui.get_node("coins/text")
@@ -879,21 +807,23 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch140 = scene.name
-        local ____cond140 = ____switch140 == "movie" or ____switch140 == "game"
-        if ____cond140 then
+        local ____switch133 = scene.name
+        local ____cond133 = ____switch133 == "movie" or ____switch133 == "game"
+        if ____cond133 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
-            set_enabled_settings_button(false)
+            set_enabled_sound_button(false)
+            set_enabled_music_button(false)
             break
         end
-        ____cond140 = ____cond140 or ____switch140 == "map"
-        if ____cond140 then
+        ____cond133 = ____cond133 or ____switch133 == "map"
+        if ____cond133 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
-            set_enabled_settings_button(true)
+            set_enabled_sound_button(true)
+            set_enabled_music_button(true)
             break
         end
     until true
@@ -914,9 +844,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch145 = Scene.get_current_name()
-        local ____cond145 = ____switch145 == "game"
-        if ____cond145 then
+        local ____switch138 = Scene.get_current_name()
+        local ____cond138 = ____switch138 == "game"
+        if ____cond138 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -925,16 +855,11 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond145 = ____cond145 or ____switch145 == "map"
-        if ____cond145 then
-            gui.set_enabled(
-                gui.get_node("store_button"),
-                not state
-            )
-            gui.set_enabled(
-                gui.get_node("settings_button"),
-                not state
-            )
+        ____cond138 = ____cond138 or ____switch138 == "map"
+        if ____cond138 then
+            set_enabled_store_button(not state)
+            set_enabled_sound_button(not state)
+            set_enabled_music_button(not state)
             break
         end
     until true
@@ -979,87 +904,6 @@ function set_enabled_store(data, state)
         Sound.stop("store")
     end
     data.is_store_open = state
-end
-function set_enabled_settings(data, state)
-    local settings = gui.get_node("settings")
-    if state and gui.is_enabled(settings, false) then
-        return
-    end
-    if state then
-        repeat
-            local ____switch152 = Scene.get_current_name()
-            local ____cond152 = ____switch152 == "game"
-            if ____cond152 then
-                gui.set_enabled(
-                    gui.get_node("map_button"),
-                    true
-                )
-                gui.set_position(
-                    gui.get_node("ok_button"),
-                    vmath.vector3(120, -210, 0)
-                )
-                break
-            end
-            do
-                gui.set_enabled(
-                    gui.get_node("map_button"),
-                    false
-                )
-                gui.set_position(
-                    gui.get_node("ok_button"),
-                    vmath.vector3(0, -210, 0)
-                )
-                set_enabled_coins(false)
-                set_enabled_lifes(false)
-                set_enabled_settings_button(false)
-                set_enabled_store_button(false)
-                break
-            end
-        until true
-        gui.set_enabled(settings, state)
-        gui.animate(
-            gui.get_node("settings"),
-            "position",
-            vmath.vector3(270, 480, 0),
-            gui.EASING_INCUBIC,
-            0.3
-        )
-        gui.animate(
-            gui.get_node("fade"),
-            "color",
-            vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value),
-            gui.EASING_INCUBIC,
-            0.3
-        )
-        EventBus.send("OPENED_DLG", Dlg.Settings)
-    else
-        gui.animate(
-            gui.get_node("fade"),
-            "color",
-            vmath.vector4(0, 0, 0, 0),
-            gui.EASING_INCUBIC,
-            0.3
-        )
-        gui.animate(
-            gui.get_node("settings"),
-            "position",
-            vmath.vector3(270, 1150, 0),
-            gui.EASING_INCUBIC,
-            0.3,
-            0,
-            function()
-                gui.set_enabled(settings, state)
-            end
-        )
-        EventBus.send("CLOSED_DLG", Dlg.Settings)
-        if Scene.get_current_name() == "map" then
-            set_enabled_coins(true)
-            set_enabled_lifes(true)
-            set_enabled_settings_button(true)
-            set_enabled_store_button(true)
-        end
-    end
-    data.dlg_opened = state
 end
 function set_enabled_life_notification(state)
     local life = gui.get_node("life_notification/manager")
@@ -1344,7 +1188,8 @@ function ____exports.init(self)
         set_enabled_coins(false)
         set_enabled_lifes(false)
         set_enabled_store_button(false)
-        set_enabled_settings_button(false)
+        set_enabled_sound_button(false)
+        set_enabled_music_button(false)
     end
 end
 function ____exports.on_input(self, action_id, action)

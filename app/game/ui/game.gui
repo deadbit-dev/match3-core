@@ -896,7 +896,7 @@ nodes {
 }
 nodes {
   position {
-    y: 118.0
+    y: 168.66667
   }
   size {
     x: 350.0
@@ -911,6 +911,8 @@ nodes {
   text: "\320\241\320\276\320\261\320\265\321\200\320\270 \320\262\321\201\320\265 \320\277\320\276\320\264\321\201\320\276\320\273\320\275\321\203\321\205\320\270 \321\207\321\202\320\276\320\261\321\213 \320\267\320\260\320\264\320\276\320\261\321\200\320\270\321\202\321\214 \320\277\320\265\321\202\321\203\321\205\320\260."
   font: "36_medium"
   id: "description"
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_N
   outline {
     x: 0.498
     y: 0.271
@@ -929,7 +931,7 @@ nodes {
 }
 nodes {
   position {
-    y: -23.333332
+    y: -101.99999
   }
   size {
     x: 300.0
@@ -944,6 +946,8 @@ nodes {
   text: "\320\235\320\260\320\272\320\276\321\200\320\274\320\270 \320\265\320\263\320\276 \320\270 \320\277\321\200\320\276\320\264\320\273\320\276\320\266\320\270 \320\277\321\203\321\202\321\214!"
   font: "36_medium"
   id: "description1"
+  yanchor: YANCHOR_BOTTOM
+  pivot: PIVOT_S
   outline {
     x: 0.498
     y: 0.271
@@ -2018,6 +2022,96 @@ nodes {
   overridden_fields: 3
   overridden_fields: 4
   template_node_child: true
+}
+nodes {
+  position {
+    x: 200.0
+    y: -5.0
+    z: -1.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/BtnMap"
+  id: "map"
+  parent: "buster_buttons"
+  layer: "back"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 200.0
+    y: -5.0
+    z: -1.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/BtnShop"
+  id: "store"
+  parent: "buster_buttons"
+  layer: "back"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 200.0
+    y: -5.0
+    z: -1.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/BtnMus"
+  id: "music"
+  parent: "buster_buttons"
+  layer: "back"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/btnSetoff"
+  id: "music_off"
+  parent: "music"
+  layer: "back"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 200.0
+    y: -5.0
+    z: -1.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/BtnSoundOn"
+  id: "sound"
+  parent: "buster_buttons"
+  layer: "back"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  type: TYPE_BOX
+  texture: "ui/btnSetoff"
+  id: "sound_off"
+  parent: "sound"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
 }
 nodes {
   position {

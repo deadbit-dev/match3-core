@@ -38,7 +38,8 @@ export function init(this: props): void {
         set_enabled_coins(false);
         set_enabled_lifes(false);
         set_enabled_store_button(false);
-        set_enabled_settings_button(false);
+        set_enabled_sound_button(false);
+        set_enabled_music_button(false);
     }
 }
 
@@ -86,10 +87,6 @@ function set_events(data: props) {
         if (data.dlg_opened) return;
         set_enabled_vertical_rocket(data, true);
     }, true);
-    EventBus.on('OPEN_SETTINGS', () => {
-        if (data.dlg_opened) return;
-        set_enabled_settings(data, true);
-    });
     EventBus.on('PURCHASE_INITIALIZED', () => {
         // products
         if (GAME_CONFIG.products.length >= 4) {
@@ -120,7 +117,7 @@ function setup(data: props) {
     setup_coins(data);
     setup_life(data);
     setup_store(data);
-    setup_settings(data);
+    setup_right_container(data);
     setup_life_notification(data);
     setup_not_enough_coins(data);
     setup_busters(data);
@@ -137,8 +134,6 @@ function setup_life(data: props) {
 }
 
 function setup_store(data: props) {
-    data.druid.new_button('store_button', () => set_enabled_store(data, true));
-
     data.druid.new_button('store/close', () => set_enabled_store(data, false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
@@ -408,65 +403,26 @@ function setup_store(data: props) {
     }
 }
 
-function setup_settings(data: props) {
-    data.druid.new_button('settings_button', () => {
-        set_enabled_settings(data, true);
-    });
+function setup_right_container(data: props) {
+    data.druid.new_button('store_button', () => set_enabled_store(data, true));
 
-    data.druid.new_button('sound_button', () => {
-        const sound_on = gui.get_node('sound_on');
+    data.druid.new_button('sound', () => {
         const sound_off = gui.get_node('sound_off');
-
         Sound.set_sfx_active(!Sound.is_sfx_active());
-
-        gui.set_enabled(sound_on, Sound.is_sfx_active());
         gui.set_enabled(sound_off, !Sound.is_sfx_active());
     });
 
-    data.druid.new_button('music_button', () => {
-        const music_on = gui.get_node('music_on');
+    data.druid.new_button('music', () => {
         const music_off = gui.get_node('music_off');
-
         Sound.set_music_active(!Sound.is_music_active());
-
-        gui.set_enabled(music_on, Sound.is_music_active());
         gui.set_enabled(music_off, !Sound.is_music_active());
     });
 
-    data.druid.new_button('ok_button', () => {
-        set_enabled_settings(data, false);
-    });
-
-    gui.set_text(gui.get_node('buy_button_text1'), Lang.get_text('on_map'));
-    data.druid.new_button('map_button', () => {
-        if (!GameStorage.get('was_purchased')) {
-            Ads.show_interstitial(true, () => {
-                set_enabled_settings(data, false);
-                Sound.stop('game');
-                Scene.load('map');
-            });
-        } else {
-            set_enabled_settings(data, false);
-            Sound.stop('game');
-            Scene.load('map');
-        }
-    });
-
-    const sound_on = gui.get_node('sound_on');
     const sound_off = gui.get_node('sound_off');
-
-    gui.set_enabled(sound_on, Sound.is_sfx_active());
     gui.set_enabled(sound_off, !Sound.is_sfx_active());
 
-    const music_on = gui.get_node('music_on');
     const music_off = gui.get_node('music_off');
-
-    gui.set_enabled(music_on, Sound.is_music_active());
     gui.set_enabled(music_off, !Sound.is_music_active());
-
-    gui.set_text(gui.get_node('title_text'), Lang.get_text('settings'));
-    gui.set_text(gui.get_node('sound_lable'), Lang.get_text('sound'));
-    gui.set_text(gui.get_node('music_lable'), Lang.get_text('music'));
 }
 
 function setup_busters(data: props) {
@@ -662,9 +618,14 @@ function set_enabled_store_button(state: boolean) {
     gui.set_enabled(store_button, state);
 }
 
-function set_enabled_settings_button(state: boolean) {
-    const settings_button = gui.get_node('settings_button');
-    gui.set_enabled(settings_button, state);
+function set_enabled_sound_button(state: boolean) {
+    const sound_button = gui.get_node('sound');
+    gui.set_enabled(sound_button, state);
+}
+
+function set_enabled_music_button(state: boolean) {
+    const music_button = gui.get_node('music');
+    gui.set_enabled(music_button, state);
 }
 
 function on_add_coins() {
@@ -698,13 +659,15 @@ function on_scene_loaded(scene: NameMessage) {
             set_enabled_coins(false);
             set_enabled_lifes(false);
             set_enabled_store_button(false);
-            set_enabled_settings_button(false);
+            set_enabled_sound_button(false);
+            set_enabled_music_button(false);
             break;
         case 'map':
             set_enabled_coins(true);
             set_enabled_lifes(true);
             set_enabled_store_button(true);
-            set_enabled_settings_button(true);
+            set_enabled_sound_button(true);
+            set_enabled_music_button(true);
             break;
     }
 }
@@ -733,8 +696,9 @@ function set_enabled_store(data: props, state: boolean) {
             set_enabled_lifes(state);
             break;
         case "map":
-            gui.set_enabled(gui.get_node('store_button'), !state);
-            gui.set_enabled(gui.get_node('settings_button'), !state);
+            set_enabled_store_button(!state);
+            set_enabled_sound_button(!state);
+            set_enabled_music_button(!state);
             break;
     }
 
@@ -754,50 +718,6 @@ function set_enabled_store(data: props, state: boolean) {
     }
 
     data.is_store_open = state;
-}
-
-function set_enabled_settings(data: props, state: boolean) {
-    const settings = gui.get_node('settings');
-
-    if (state && gui.is_enabled(settings, false))
-        return;
-
-    if (state) {
-        switch (Scene.get_current_name()) {
-            case 'game':
-                gui.set_enabled(gui.get_node('map_button'), true);
-                gui.set_position(gui.get_node('ok_button'), vmath.vector3(120, -210, 0));
-                break;
-            default:
-                gui.set_enabled(gui.get_node('map_button'), false);
-                gui.set_position(gui.get_node('ok_button'), vmath.vector3(0, -210, 0));
-                set_enabled_coins(false);
-                set_enabled_lifes(false);
-                set_enabled_settings_button(false);
-                set_enabled_store_button(false);
-                break;
-        }
-
-        gui.set_enabled(settings, state);
-        gui.animate(gui.get_node('settings'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
-        EventBus.send('OPENED_DLG', Dlg.Settings);
-    } else {
-        gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, 0), gui.EASING_INCUBIC, 0.3);
-        gui.animate(gui.get_node('settings'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
-            gui.set_enabled(settings, state);
-        });
-        EventBus.send('CLOSED_DLG', Dlg.Settings);
-
-        if (Scene.get_current_name() == 'map') {
-            set_enabled_coins(true);
-            set_enabled_lifes(true);
-            set_enabled_settings_button(true);
-            set_enabled_store_button(true);
-        }
-    }
-
-    data.dlg_opened = state;
 }
 
 function set_enabled_life_notification(state: boolean) {

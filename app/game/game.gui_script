@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____utils = require("utils.utils")
@@ -296,10 +296,158 @@ function setup_busters(instance)
                     return
                 end
             end
-            EventBus.send("OPEN_SETTINGS")
+            instance.settings_opened = not instance.settings_opened
+            set_enabled_settings(instance.settings_opened)
+            instance.druid:new_button(
+                "music",
+                function()
+                    local music_off = gui.get_node("music_off")
+                    Sound.set_music_active(not Sound.is_music_active())
+                    gui.set_enabled(
+                        music_off,
+                        not Sound.is_music_active()
+                    )
+                end
+            )
+            instance.druid:new_button(
+                "sound",
+                function()
+                    local sound_off = gui.get_node("sound_off")
+                    Sound.set_sfx_active(not Sound.is_sfx_active())
+                    gui.set_enabled(
+                        sound_off,
+                        not Sound.is_sfx_active()
+                    )
+                end
+            )
+            instance.druid:new_button(
+                "store",
+                function()
+                    set_enabled_settings(false)
+                    EventBus.send("REQUEST_OPEN_STORE")
+                end
+            )
+            instance.druid:new_button(
+                "map",
+                function()
+                    Sound.stop("game")
+                    Scene.load("map")
+                end
+            )
+            local sound_off = gui.get_node("sound_off")
+            gui.set_enabled(
+                sound_off,
+                not Sound.is_sfx_active()
+            )
+            local music_off = gui.get_node("music_off")
+            gui.set_enabled(
+                music_off,
+                not Sound.is_music_active()
+            )
         end
     )
     update_buttons(instance)
+end
+function set_enabled_settings(state)
+    local sound = gui.get_node("sound")
+    local music = gui.get_node("music")
+    local store = gui.get_node("store")
+    local map = gui.get_node("map")
+    if state then
+        local sound_pos = gui.get_position(sound)
+        sound_pos.y = sound_pos.y + 80
+        gui.set_enabled(sound, true)
+        gui.animate(
+            sound,
+            gui.PROP_POSITION,
+            sound_pos,
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        local music_pos = gui.get_position(music)
+        music_pos.y = music_pos.y + 150
+        gui.set_enabled(music, true)
+        gui.animate(
+            music,
+            gui.PROP_POSITION,
+            music_pos,
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        local store_pos = gui.get_position(store)
+        store_pos.y = store_pos.y + 220
+        gui.set_enabled(store, true)
+        gui.animate(
+            store,
+            gui.PROP_POSITION,
+            store_pos,
+            gui.EASING_INCUBIC,
+            0.3
+        )
+        local map_pos = gui.get_position(map)
+        map_pos.y = map_pos.y + 290
+        gui.set_enabled(map, true)
+        gui.animate(
+            map,
+            gui.PROP_POSITION,
+            map_pos,
+            gui.EASING_INCUBIC,
+            0.3
+        )
+    else
+        local sound_pos = gui.get_position(sound)
+        sound_pos.y = sound_pos.y - 80
+        gui.animate(
+            sound,
+            gui.PROP_POSITION,
+            sound_pos,
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(sound, false)
+            end
+        )
+        local music_pos = gui.get_position(music)
+        music_pos.y = music_pos.y - 150
+        gui.animate(
+            music,
+            gui.PROP_POSITION,
+            music_pos,
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(music, false)
+            end
+        )
+        local store_pos = gui.get_position(store)
+        store_pos.y = store_pos.y - 220
+        gui.animate(
+            store,
+            gui.PROP_POSITION,
+            store_pos,
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(store, false)
+            end
+        )
+        local map_pos = gui.get_position(map)
+        map_pos.y = map_pos.y - 290
+        gui.animate(
+            map,
+            gui.PROP_POSITION,
+            map_pos,
+            gui.EASING_INCUBIC,
+            0.3,
+            0,
+            function()
+                gui.set_enabled(map, false)
+            end
+        )
+    end
 end
 function setup_sustem_ui(instance)
     instance.druid:new_button(
@@ -563,25 +711,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch90 = data.idx
-        local ____cond90 = ____switch90 == 0
-        if ____cond90 then
+        local ____switch101 = data.idx
+        local ____cond101 = ____switch101 == 0
+        if ____cond101 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond90 = ____cond90 or ____switch90 == 1
-        if ____cond90 then
+        ____cond101 = ____cond101 or ____switch101 == 1
+        if ____cond101 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond90 = ____cond90 or ____switch90 == 2
-        if ____cond90 then
+        ____cond101 = ____cond101 or ____switch101 == 2
+        if ____cond101 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)

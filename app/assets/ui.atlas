@@ -244,4 +244,13 @@ images {
 images {
   image: "/assets/ui/diskosphere_icon.png"
 }
+images {
+  image: "/assets/ui/BtnMus.png"
+}
+images {
+  image: "/assets/ui/BtnMap.png"
+}
+images {
+  image: "/assets/ui/btnSetoff.png"
+}
 extrude_borders: 2
