@@ -62,6 +62,20 @@ export const lang_data = {
     "испанский-es": "El martillo elimina cualquier objeto del campo.",
     "Turkish-tr": "Çekiç alandaki herhangi bir nesneyi kaldırır!"
   },
+  "tutorial_buster_click": {
+    "Русский-ru": "Нажми на бустер чтобы активировать его!",
+    "Английский-en": "Click on the booster to activate it!",
+    "German-de": "Klicken Sie auf den Booster, um ihn zu aktivieren!",
+    "испанский-es": "¡Haz clic en el refuerzo para activarlo!",
+    "Turkish-tr": "Etkinleştirmek için güçlendiriciye tıklayın!"
+  },
+  "tutorial_buster_swap": {
+    "Русский-ru": "Свайпни два бустера вместе и получи крутой эффект!",
+    "Английский-en": "Swipe two boosters together for a cool effect!",
+    "German-de": "Wischen Sie zwei Booster zusammen und erzielen Sie einen coolen Effekt!",
+    "испанский-es": "¡Desliza dos potenciadores juntos y obtén un efecto genial!",
+    "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
+  },
   "tutorial_box": {
     "Русский-ru": "Собирай предметы в ряд около коробки, чтобы сломать её!",
     "Английский-en": "Collect items in a row near the box to break it!",
@@ -294,11 +308,11 @@ export const lang_data = {
     "Turkish-tr": "Müzik"
   },
   "animal_tutorial_description": {
-    "Русский-ru": "Собери все подсолнухи чтобы задобрить петуха.\nВремя ограничено!",
-    "Английский-en": "Collect all the sunflowers to appease the cock.\nTime is short!",
-    "German-de": "Sammle alle Sonnenblumen, um den Hahn zu besänftigen.\nDie Zeit ist knapp!",
-    "испанский-es": "Recoge todos los girasoles para aplacar al gallo.\nEl tiempo apremia.",
-    "Turkish-tr": "Horozu yatıştırmak için tüm ayçiçeklerini toplayın.\nZaman çok kısa!"
+    "Русский-ru": "Собери все подсолнухи чтобы задобрить петуха.",
+    "Английский-en": "Collect all the sunflowers to appease the cock.",
+    "German-de": "Sammle alle Sonnenblumen, um den Hahn zu besänftigen.",
+    "испанский-es": "Recoge todos los girasoles para aplacar al gallo.",
+    "Turkish-tr": "Horozu yatıştırmak için tüm ayçiçeklerini toplayın."
   },
   "animal_tutorial_description1": {
     "Русский-ru": "Накорми его и продложи путь!",
