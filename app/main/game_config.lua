@@ -268,7 +268,7 @@ ____exports._GAME_CONFIG = {
             },
             cells = {{x = 6, y = 3}},
             click = {x = 6, y = 3},
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
+            bounds = {from = {x = 6, y = 3}, to = {x = 7, y = 4}}
         },
         [7] = {
             cells = {{x = 1, y = 7}},

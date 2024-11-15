@@ -5,7 +5,7 @@ textures {
 }
 nodes {
   position {
-    y: 480.0
+    y: 444.0
   }
   type: TYPE_BOX
   texture: "background/background"

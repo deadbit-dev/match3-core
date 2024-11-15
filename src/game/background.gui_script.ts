@@ -55,12 +55,12 @@ function on_resize(data: {width: number, height: number}) {
     if(dr < br) {
         gui.set_pivot(bg, gui.PIVOT_W);
         gui.set_xanchor(bg, gui.ANCHOR_LEFT);
-        gui.set_position(bg, vmath.vector3(0, 480, 0));
+        gui.set_position(bg, vmath.vector3(0, 444, 0));
         gui.set_scale(bg, vmath.vector3(1, 1, 1));
     } else {
         gui.set_pivot(bg, gui.PIVOT_CENTER);
         gui.set_xanchor(bg, gui.ANCHOR_NONE);
-        gui.set_position(bg, vmath.vector3(280, 480, 0));
+        gui.set_position(bg, vmath.vector3(280, 444, 0));
         const delta = dr - br;
         print(delta);
         const scale = math.min(1 + delta, 1.5);

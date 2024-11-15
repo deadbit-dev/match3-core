@@ -16,7 +16,7 @@ function on_resize(data)
         gui.set_xanchor(bg, gui.ANCHOR_LEFT)
         gui.set_position(
             bg,
-            vmath.vector3(0, 480, 0)
+            vmath.vector3(0, 444, 0)
         )
         gui.set_scale(
             bg,
@@ -27,7 +27,7 @@ function on_resize(data)
         gui.set_xanchor(bg, gui.ANCHOR_NONE)
         gui.set_position(
             bg,
-            vmath.vector3(280, 480, 0)
+            vmath.vector3(280, 444, 0)
         )
         local delta = dr - br
         print(delta)

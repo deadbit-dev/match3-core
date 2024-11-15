@@ -11,9 +11,9 @@
       }
       :format "apk"
       :install false
-      :key-pass "D:\\Android\\Keys\\2023_games.txt"
-      :keystore "D:\\Android\\Keys\\2023_games.jks"
-      :keystore-pass "D:\\Android\\Keys\\2023_games.txt"
+      :key-pass ""
+      :keystore ""
+      :keystore-pass ""
       :launch true
     }
     :build-report true
@@ -26,7 +26,7 @@
       }
     }
     :liveupdate false
-    :output-directory "D:\\Defold\\projects\\builds"
+    :output-directory "/Users/pavel/Dev/match3-core/app/build"
     :texture-compression "enabled"
     :variant "release"
     :windows {
@@ -159,15 +159,15 @@
         :scene
       ]
       [
+        "/map/map.gui"
+        :scene
+      ]
+      [
         "/game/ui/game.gui"
         :scene
       ]
       [
         "/game/ui/background.gui"
-        :scene
-      ]
-      [
-        "/map/map.gui"
         :scene
       ]
     ]
