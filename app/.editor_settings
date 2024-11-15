@@ -43,58 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/game/game.collection"
-        :scene
-      ]
-      [
-        "/main/main.collection"
-        :scene
-      ]
-      [
-        "/main/ui/shared.gui"
-        :scene
-      ]
-      [
-        "/main/ui/dlg/store_dlg.gui"
-        :scene
-      ]
-      [
-        "/project_settings/generated.appmanifest"
-        :code
-      ]
-      [
-        "/assets/fonts/16.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/18.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/27.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/27_medium.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/32-top.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/32.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/32_bold_outline.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/32_medium.font"
-        :scene
-      ]
-      [
         "/assets/fonts/36_medium.font"
         :scene
       ]
@@ -123,43 +71,11 @@
         :code
       ]
       [
-        "/game/view.lua"
-        :code
-      ]
-      [
         "/main/ui/parts/buy_button.gui"
         :scene
       ]
       [
-        "/assets/background.atlas"
-        :scene
-      ]
-      [
-        "/game/ui/game.gui"
-        :scene
-      ]
-      [
-        "/game/animals/cat.collection"
-        :scene
-      ]
-      [
-        "/game/ui/background.gui"
-        :scene
-      ]
-      [
-        "/game/animals/kozel.collection"
-        :scene
-      ]
-      [
-        "/game/animals/kaban.collection"
-        :scene
-      ]
-      [
-        "/game/animals/goose.collection"
-        :scene
-      ]
-      [
-        "/game/animals/rats.collection"
+        "/game/animals/bull.collection"
         :scene
       ]
       [
@@ -167,7 +83,91 @@
         :scene
       ]
       [
-        "/game/animals/bull.collection"
+        "/game/animals/rats.collection"
+        :scene
+      ]
+      [
+        "/game/animals/goose.collection"
+        :scene
+      ]
+      [
+        "/game/animals/kaban.collection"
+        :scene
+      ]
+      [
+        "/game/animals/kozel.collection"
+        :scene
+      ]
+      [
+        "/game/animals/cat.collection"
+        :scene
+      ]
+      [
+        "/assets/background.atlas"
+        :scene
+      ]
+      [
+        "/project_settings/generated.appmanifest"
+        :code
+      ]
+      [
+        "/map/level.gui"
+        :scene
+      ]
+      [
+        "/game/game.lua"
+        :code
+      ]
+      [
+        "/game/view.lua"
+        :code
+      ]
+      [
+        "/game/background.collection"
+        :scene
+      ]
+      [
+        "/assets/ui.atlas"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui_script"
+        :code
+      ]
+      [
+        "/game/game.collection"
+        :scene
+      ]
+      [
+        "/main/ui/dlg/store_dlg.gui"
+        :scene
+      ]
+      [
+        "/main/game_config.lua"
+        :code
+      ]
+      [
+        "/main/ui/shared.gui"
+        :scene
+      ]
+      [
+        "/assets/map.atlas"
+        :scene
+      ]
+      [
+        "/map/map.collection"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/game/ui/background.gui"
+        :scene
+      ]
+      [
+        "/map/map.gui"
         :scene
       ]
     ]

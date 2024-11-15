@@ -9,6 +9,36 @@ textures {
 }
 nodes {
   position {
+    x: -283.0
+    y: 603.0
+  }
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  type: TYPE_BOX
+  texture: "map/backsmall"
+  id: "back_left"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 802.0
+    y: 603.0
+  }
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  type: TYPE_BOX
+  texture: "map/backsmall"
+  id: "back_right"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
     x: 270.0
   }
   size {

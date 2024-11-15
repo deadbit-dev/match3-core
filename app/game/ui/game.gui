@@ -72,12 +72,21 @@ nodes {
     x: 0.6
     y: 0.6
   }
+  size {
+    x: 930.0
+    y: 246.0
+  }
   type: TYPE_BOX
   texture: "ui/substrate"
   id: "substrate"
   yanchor: YANCHOR_TOP
   inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
+  slice9 {
+    x: 100.0
+    y: 100.0
+    z: 100.0
+    w: 100.0
+  }
 }
 nodes {
   position {
@@ -482,6 +491,60 @@ nodes {
   parent: "third_target"
   layer: "top"
   inherit_alpha: true
+}
+nodes {
+  size {
+    x: 100.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "coins"
+  parent: "targets"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+  visible: false
+}
+nodes {
+  position {
+    x: 35.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/Coin"
+  id: "coins_icon"
+  parent: "coins"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  scale {
+    x: 1.1
+    y: 1.1
+  }
+  color {
+    x: 0.988
+    y: 0.969
+    z: 0.855
+  }
+  type: TYPE_TEXT
+  text: "5"
+  font: "48"
+  id: "coins_text"
+  pivot: PIVOT_E
+  outline {
+    x: 0.388
+    y: 0.106
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "coins"
 }
 nodes {
   position {

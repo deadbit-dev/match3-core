@@ -51,15 +51,6 @@ function ____exports.init(self)
                                     local purchase = purchases[i + 1]
                                     local id_product = purchase.productID
                                     log("process buyed:", purchase)
-                                    if id_product == "maney30" then
-                                        add_coins(30)
-                                        GameStorage.set("was_purchased", true)
-                                        HtmlBridge.consume_purchase(
-                                            purchase.purchaseToken,
-                                            function()
-                                            end
-                                        )
-                                    end
                                     if id_product == "maney150" then
                                         add_coins(150)
                                         GameStorage.set("was_purchased", true)

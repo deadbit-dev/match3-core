@@ -5,6 +5,8 @@ local ____exports = {}
 local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
+local ____game_config = require("main.game_config")
+local Dlg = ____game_config.Dlg
 local ____utils = require("utils.utils")
 local get_point_curve = ____utils.get_point_curve
 local parse_time = ____utils.parse_time
@@ -299,6 +301,21 @@ function setup_busters(instance)
             instance.settings_opened = not instance.settings_opened
             set_enabled_settings(instance.settings_opened)
             instance.druid:new_button(
+                "sound",
+                function()
+                    local sound_off = gui.get_node("sound_off")
+                    local music_off = gui.get_node("music_off")
+                    local state = not Sound.is_sfx_active()
+                    Sound.set_sfx_active(state)
+                    if not state then
+                        Sound.set_sfx_active(false)
+                        Sound.set_music_active(false)
+                        gui.set_enabled(music_off, true)
+                    end
+                    gui.set_enabled(sound_off, not state)
+                end
+            )
+            instance.druid:new_button(
                 "music",
                 function()
                     local music_off = gui.get_node("music_off")
@@ -310,20 +327,11 @@ function setup_busters(instance)
                 end
             )
             instance.druid:new_button(
-                "sound",
-                function()
-                    local sound_off = gui.get_node("sound_off")
-                    Sound.set_sfx_active(not Sound.is_sfx_active())
-                    gui.set_enabled(
-                        sound_off,
-                        not Sound.is_sfx_active()
-                    )
-                end
-            )
-            instance.druid:new_button(
                 "store",
                 function()
                     set_enabled_settings(false)
+                    instance.settings_opened = false
+                    Sound.stop("game")
                     EventBus.send("REQUEST_OPEN_STORE")
                 end
             )
@@ -335,14 +343,14 @@ function setup_busters(instance)
                 end
             )
             local sound_off = gui.get_node("sound_off")
+            local music_off = gui.get_node("music_off")
             gui.set_enabled(
                 sound_off,
                 not Sound.is_sfx_active()
             )
-            local music_off = gui.get_node("music_off")
             gui.set_enabled(
                 music_off,
-                not Sound.is_music_active()
+                not Sound.is_sfx_active() or not Sound.is_music_active()
             )
         end
     )
@@ -682,6 +690,14 @@ function set_events(instance)
     )
     EventBus.on("SHUFFLE_START", on_shuffle_start)
     EventBus.on("SHUFFLE_ACTION", on_shuffle_action)
+    EventBus.on(
+        "CLOSED_DLG",
+        function(dlg)
+            if dlg == Dlg.Store then
+                Sound.play("game")
+            end
+        end
+    )
 end
 function update_targets(data)
     if data.pos ~= nil and data.type == TargetType.Element then
@@ -711,25 +727,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch101 = data.idx
-        local ____cond101 = ____switch101 == 0
-        if ____cond101 then
+        local ____switch104 = data.idx
+        local ____cond104 = ____switch104 == 0
+        if ____cond104 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond101 = ____cond101 or ____switch101 == 1
-        if ____cond101 then
+        ____cond104 = ____cond104 or ____switch104 == 1
+        if ____cond104 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond101 = ____cond101 or ____switch101 == 2
-        if ____cond101 then
+        ____cond104 = ____cond104 or ____switch104 == 2
+        if ____cond104 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -977,6 +993,64 @@ function set_tutorial()
             )
         end
     end
+    local hand = gui.get_node("hand")
+    repeat
+        local ____switch136 = get_current_level() + 1
+        local ____cond136 = ____switch136 == 7
+        if ____cond136 then
+            hand_timer = timer.delay(
+                4,
+                true,
+                function()
+                    gui.set_position(
+                        hand,
+                        vmath.vector3(-200, -125, 0)
+                    )
+                    gui.set_enabled(hand, true)
+                    gui.animate(
+                        hand,
+                        gui.PROP_SCALE,
+                        vmath.vector3(0.7, 0.7, 0.7),
+                        gui.EASING_INCUBIC,
+                        1,
+                        0,
+                        function()
+                            gui.set_enabled(hand, false)
+                        end,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
+                end
+            )
+            break
+        end
+        ____cond136 = ____cond136 or ____switch136 == 8
+        if ____cond136 then
+            hand_timer = timer.delay(
+                4,
+                true,
+                function()
+                    gui.set_position(
+                        hand,
+                        vmath.vector3(100, 90, 0)
+                    )
+                    gui.set_enabled(hand, true)
+                    gui.animate(
+                        hand,
+                        gui.PROP_POSITION,
+                        vmath.vector3(150, 90, 0),
+                        gui.EASING_INCUBIC,
+                        0.5,
+                        0,
+                        function()
+                            gui.set_enabled(hand, false)
+                        end,
+                        gui.PLAYBACK_ONCE_FORWARD
+                    )
+                end
+            )
+            break
+        end
+    until true
 end
 function remove_tutorial()
     if hand_timer ~= nil then
@@ -1125,7 +1199,12 @@ function on_win_end(state)
                                                     before_reward + steps + remaining_time,
                                                     level_coins,
                                                     level_coin_points,
-                                                    nil,
+                                                    function(idx)
+                                                        gui.set_text(
+                                                            gui.get_node("coins_text"),
+                                                            tostring(level_coins - (idx + 1))
+                                                        )
+                                                    end,
                                                     on_each_coin_drop_end,
                                                     function()
                                                         fade_targets(on_end_for_last_level)
@@ -1141,7 +1220,12 @@ function on_win_end(state)
                                         before_reward,
                                         level_coins,
                                         level_coin_points,
-                                        nil,
+                                        function(idx)
+                                            gui.set_text(
+                                                gui.get_node("coins_text"),
+                                                tostring(level_coins - (idx + 1))
+                                            )
+                                        end,
                                         on_each_coin_drop_end,
                                         function()
                                             fade_targets(on_end_for_last_level)
@@ -1192,6 +1276,14 @@ function drop_targets(on_end)
         true
     )
     local targets = gui.get_node("targets")
+    gui.set_enabled(
+        gui.get_node("coins"),
+        true
+    )
+    set_text(
+        "coins_text",
+        get_current_level_config().coins
+    )
     gui.set_layer(targets, "ontop")
     local pos = gui.get_position(targets)
     pos.y = pos.y - 300
@@ -1239,6 +1331,10 @@ function fade_targets(on_end)
         0,
         function()
             gui.set_layer(targets, "")
+            gui.set_enabled(
+                gui.get_node("coins"),
+                false
+            )
             gui.set_enabled(
                 gui.get_node("substrate"),
                 false
@@ -1533,6 +1629,10 @@ function disabled_gameover_offer()
     )
     gui.set_enabled(
         gui.get_node("steps_by_coins/button"),
+        false
+    )
+    gui.set_enabled(
+        gui.get_node("time_by_coins/button"),
         false
     )
     gui.set_enabled(

@@ -57,7 +57,7 @@ export function load_levels_config() {
                 max_width: 8,
                 max_height: 8,
                 cell_size: 128,
-                offset_border: 50,
+                offset_border: 0,
 
                 cells: [] as (typeof NotActiveCell | CellId)[][] | CellId[][][],
                 elements: [] as (typeof NullElement | typeof RandomElement | ElementId)[][]

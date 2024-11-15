@@ -89,13 +89,11 @@ function set_events(data: props) {
     }, true);
     EventBus.on('PURCHASE_INITIALIZED', () => {
         // products
-        if (GAME_CONFIG.products.length >= 4) {
-            const maney30 = GAME_CONFIG.products.filter(p => p.id == 'maney30')[0];
+        if (GAME_CONFIG.products.length >= 3) {
             const maney150 = GAME_CONFIG.products.filter(p => p.id == 'maney150')[0];
             const maney300 = GAME_CONFIG.products.filter(p => p.id == 'maney300')[0];
             const maney800 = GAME_CONFIG.products.filter(p => p.id == 'maney800')[0];
 
-            set_text('store/buy_30_text', maney30.priceValue + ' ' + maney30.priceCurrencyCode);
             set_text('store/buy_150_text', maney150.priceValue + ' ' + maney150.priceCurrencyCode);
             set_text('store/buy_300_text', maney300.priceValue + ' ' + maney300.priceCurrencyCode);
             set_text('store/buy_800_text', maney800.priceValue + ' ' + maney800.priceCurrencyCode);
@@ -137,28 +135,6 @@ function setup_store(data: props) {
     data.druid.new_button('store/close', () => set_enabled_store(data, false));
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
-
-    data.druid.new_button('store/buy_30_btn', () => {
-        if (HtmlBridge == null) {
-            Sound.play('purchase');
-            add_coins(30);
-            return;
-        }
-
-        HtmlBridge.purchase({ id: 'maney30' }, (result, purchase) => {
-            if (!result)
-                return () => { };
-
-            Sound.play('purchase');
-            add_coins(30);
-
-            GameStorage.set('was_purchased', true);
-
-            Metrica.report('data', { shop: { buy: 'maney30' } });
-
-            HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-        });
-    });
 
     data.druid.new_button('store/buy_150_btn', () => {
         if (HtmlBridge == null) {
@@ -408,8 +384,15 @@ function setup_right_container(data: props) {
 
     data.druid.new_button('sound', () => {
         const sound_off = gui.get_node('sound_off');
-        Sound.set_sfx_active(!Sound.is_sfx_active());
-        gui.set_enabled(sound_off, !Sound.is_sfx_active());
+        const music_off = gui.get_node('music_off');
+        const state = !Sound.is_sfx_active();
+        Sound.set_sfx_active(state);
+        if(!state) {
+            Sound.set_sfx_active(false);
+            Sound.set_music_active(false);
+            gui.set_enabled(music_off, true);
+        }
+        gui.set_enabled(sound_off, !state);
     });
 
     data.druid.new_button('music', () => {
@@ -419,10 +402,10 @@ function setup_right_container(data: props) {
     });
 
     const sound_off = gui.get_node('sound_off');
-    gui.set_enabled(sound_off, !Sound.is_sfx_active());
-
     const music_off = gui.get_node('music_off');
-    gui.set_enabled(music_off, !Sound.is_music_active());
+
+    gui.set_enabled(sound_off, !Sound.is_sfx_active());
+    gui.set_enabled(music_off, !Sound.is_sfx_active() || !Sound.is_music_active());
 }
 
 function setup_busters(data: props) {

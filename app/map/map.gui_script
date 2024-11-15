@@ -142,6 +142,24 @@ function on_resize(data)
         math.min(0 - offset, pos.y)
     )
     gui.set_position(map, pos)
+    local back_left = gui.get_node("back_left")
+    local back_right = gui.get_node("back_right")
+    print("DATA: ", data.width, data.height)
+    local dr = data.width / data.height
+    local br = 2160 / 2400
+    if dr > br then
+        local delta = dr - br
+        print(delta)
+        local scale = math.min(2 + delta, 2.5)
+        gui.set_scale(
+            back_left,
+            vmath.vector3(scale, scale, 1)
+        )
+        gui.set_scale(
+            back_right,
+            vmath.vector3(scale, scale, 1)
+        )
+    end
 end
 function get_offset()
     local height = Camera.get_ltrb(true).w

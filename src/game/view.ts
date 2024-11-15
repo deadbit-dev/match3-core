@@ -11,7 +11,7 @@ import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils
 import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo, ElementState } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, Target, TargetState, UnlockInfo } from "./game";
-import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
+import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, Dlg, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
 
 
 const SubstrateMasks = [
@@ -137,10 +137,10 @@ export function View(resources: ViewResources) {
     const original_game_width = 540;
     const original_game_height = 960;
     
-    let max_width = get_field_max_width();
-    let cell_size = calculate_cell_size();
-    let scale_ratio = calculate_scale_ratio();
-    let cells_offset = calculate_cell_offset();
+    const max_width = get_field_max_width();
+    const cell_size = calculate_cell_size();
+    const scale_ratio = calculate_scale_ratio();
+    const cells_offset = calculate_cell_offset();
 
     let down_item: IGameItem | null = null;
     let is_block_input = false;
@@ -245,12 +245,10 @@ export function View(resources: ViewResources) {
         return cell_size / get_field_cell_size();
     }
 
-    function calculate_cell_offset(height_delta = 0, changes_coff = 1) {
+    function calculate_cell_offset() {
         const offset_x = (((max_width * cell_size) - (get_field_width() * cell_size)) / 2) + get_field_offset_border();
         let offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
         if(!GAME_CONFIG.debug_levels) offset_y -= 90 - GAME_CONFIG.bottom_offset;
-
-        print("OFF: ", offset_x);
 
         return vmath.vector3(
             offset_x,
@@ -259,31 +257,30 @@ export function View(resources: ViewResources) {
         );
     }
 
-    function calculate_sizes(game_state: GameState) {
-        let min_pos_x = get_field_width();
-        let max_pos_x = 0;
-        for(let y = 0; y < get_field_height(); y++) {
-            for(let x = 0; x < get_field_width(); x++) {
-                const cell = game_state.cells[y][x];
-                if(cell != NotActiveCell && min_pos_x > x) {
-                    min_pos_x = x;
-                }
+    // function calculate_sizes(game_state: GameState) {
+    //     let min_pos_x = get_field_width();
+    //     let max_pos_x = 0;
+    //     for(let y = 0; y < get_field_height(); y++) {
+    //         for(let x = 0; x < get_field_width(); x++) {
+    //             const cell = game_state.cells[y][x];
+    //             if(cell != NotActiveCell && min_pos_x > x) {
+    //                 min_pos_x = x;
+    //             }
 
-                if(cell != NotActiveCell && max_pos_x < x) {
-                    max_pos_x = x;
-                }
-            }
-        }
+    //             if(cell != NotActiveCell && max_pos_x < x) {
+    //                 max_pos_x = x;
+    //             }
+    //         }
+    //     }
 
-        max_width = (max_pos_x - min_pos_x);
-        print("MAX_X: ", max_width);
-        cell_size = calculate_cell_size();
-        scale_ratio = calculate_scale_ratio();
-        cells_offset = calculate_cell_offset();
-    }
+    //     max_width = (max_pos_x - min_pos_x);
+    //     print("MAX_X: ", max_width);
+    //     cell_size = calculate_cell_size();
+    //     scale_ratio = calculate_scale_ratio();
+    //     cells_offset = calculate_cell_offset();
+    // }
 
     function on_load_game(game_state: GameState) {
-        calculate_sizes(game_state);
         load_field(game_state);
 
         EventBus.send('INIT_UI');

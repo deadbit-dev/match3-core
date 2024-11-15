@@ -24,7 +24,6 @@ function SoundModule() {
         set_active(is_active());
         set_sfx_active(is_sfx_active());
         set_music_active(is_music_active());
-        //  play('empty');
     }
 
     function attach_druid_click(name = 'btn') {

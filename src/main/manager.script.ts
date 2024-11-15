@@ -66,11 +66,6 @@ export function init(this: props) {
                             const purchase = purchases[i];
                             const id_product = purchase.productID;
                             log('process buyed:', purchase);
-                            if (id_product == 'maney30') {
-                                add_coins(30);
-                                GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
-                            }
                             if (id_product == 'maney150') {
                                 add_coins(150);
                                 GameStorage.set('was_purchased', true);

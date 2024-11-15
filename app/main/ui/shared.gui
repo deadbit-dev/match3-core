@@ -29,19 +29,33 @@ nodes {
     x: 270.0
     y: 1500.0
   }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
   type: TYPE_BOX
   id: "store/dlg"
   parent: "store/manager"
   layer: "top"
   overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    y: 391.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   id: "store/coins_box"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -58,54 +72,25 @@ nodes {
   id: "store/store_title_text"
   parent: "store/store_title"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
-  type: TYPE_BOX
-  id: "store/cash_30"
-  parent: "store/coins_box"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/buy_30_btn"
-  parent: "store/cash_30"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/buy_30_text"
-  parent: "store/buy_30_btn"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/30_text"
-  parent: "store/cash_30"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/30_icon"
-  parent: "store/cash_30"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
+  position {
+    x: -310.0
+    y: -2.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/coins_150"
   parent: "store/coins_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -126,26 +111,52 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -50.54701
+    y: 29.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/150_text"
   parent: "store/coins_150"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   id: "store/150_icon"
   parent: "store/coins_150"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    y: -2.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/coins_300"
   parent: "store/coins_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -166,26 +177,58 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -45.290596
+    y: 29.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/300_text"
   parent: "store/coins_300"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 49.128204
+    y: 28.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   id: "store/300_icon"
   parent: "store/coins_300"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 310.0
+    y: -2.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/coins_800"
   parent: "store/coins_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -206,50 +249,92 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/800_text"
   parent: "store/coins_800"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: 52.54701
+    y: 31.418804
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   id: "store/800_icon"
   parent: "store/coins_800"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    y: 3.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_BOX
   id: "store/life_box"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    y: 145.0
+  }
   type: TYPE_BOX
   id: "store/life_title"
   parent: "store/life_box"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "store/life_title_text"
   parent: "store/life_title"
   layer: "top"
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    x: -310.0
+    y: -3.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/life_1"
   parent: "store/life_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -279,9 +364,11 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "store/x1_text"
   parent: "store/life_1"
   layer: "top"
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -294,10 +381,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    y: -3.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/life_2"
   parent: "store/life_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -327,9 +423,11 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "store/x2_text"
   parent: "store/life_2"
   layer: "top"
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -342,10 +440,20 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 310.0
+    y: -3.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
   type: TYPE_BOX
   id: "store/life_3"
   parent: "store/life_box"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
@@ -374,10 +482,17 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/x3_text"
   parent: "store/life_3"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -390,19 +505,38 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: -237.0
+    y: -452.0
+  }
   type: TYPE_TEMPLATE
   id: "store/junior_box"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  size {
+    x: 400.0
+    y: 430.0
+  }
   type: TYPE_BOX
   id: "store/junior_box/box"
   parent: "store/junior_box"
   layer: "top"
+  slice9 {
+    x: 100.0
+    y: 100.0
+    z: 100.0
+    w: 100.0
+  }
+  overridden_fields: 3
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
   template_node_child: true
 }
 nodes {
@@ -411,22 +545,53 @@ nodes {
   parent: "store/junior_box/box"
   layer: "top"
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  size {
+    x: 200.0
+    y: 50.0
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/junior_box/text"
   parent: "store/junior_box/title"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 4
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  position {
+    y: 16.0
+  }
+  size {
+    x: 325.0
+    y: 270.0
+  }
   type: TYPE_BOX
   id: "store/junior_box/items"
   parent: "store/junior_box/box"
   layer: "top"
+  slice9 {
+    x: 50.0
+    y: 50.0
+    z: 50.0
+    w: 50.0
+  }
+  overridden_fields: 1
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
+  overridden_fields: 45
   template_node_child: true
 }
 nodes {
@@ -469,10 +634,22 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 39.0
+    y: 30.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/junior_box/life_text"
   parent: "store/junior_box/life"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -486,7 +663,7 @@ nodes {
 }
 nodes {
   position {
-    x: -94.0
+    x: -104.0
     y: -54.0
   }
   scale {
@@ -503,10 +680,17 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/junior_box/vertical_rocket_text"
   parent: "store/junior_box/vertical_rocket"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -525,7 +709,7 @@ nodes {
 }
 nodes {
   position {
-    x: 93.0
+    x: 65.0
     y: -50.0
   }
   scale {
@@ -542,10 +726,17 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/junior_box/hammer_text"
   parent: "store/junior_box/hammer"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -572,9 +763,11 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  font: "48"
   id: "store/junior_box/spinning_text"
   parent: "store/junior_box/spinning"
   layer: "top"
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -592,11 +785,16 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    y: -153.0
+  }
   type: TYPE_TEMPLATE
   id: "store/junior_box/buy_button"
   parent: "store/junior_box/box"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
+  overridden_fields: 45
   template_node_child: true
 }
 nodes {
@@ -630,19 +828,38 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 239.0
+    y: -454.0
+  }
   type: TYPE_TEMPLATE
   id: "store/catlover_box"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  size {
+    x: 400.0
+    y: 430.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/box"
   parent: "store/catlover_box"
   layer: "top"
+  slice9 {
+    x: 100.0
+    y: 100.0
+    z: 100.0
+    w: 100.0
+  }
+  overridden_fields: 3
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
   template_node_child: true
 }
 nodes {
@@ -654,19 +871,44 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
+  size {
+    x: 200.0
+    y: 50.0
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/catlover_box/text"
   parent: "store/catlover_box/title"
   layer: "top"
+  overridden_fields: 3
+  overridden_fields: 4
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
+  size {
+    x: 325.0
+    y: 270.0
+  }
   type: TYPE_BOX
   id: "store/catlover_box/items"
   parent: "store/catlover_box/box"
   layer: "top"
+  slice9 {
+    x: 50.0
+    y: 50.0
+    z: 50.0
+    w: 50.0
+  }
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
   template_node_child: true
 }
 nodes {
@@ -710,10 +952,22 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 45.0
+    y: 30.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/catlover_box/life_text"
   parent: "store/catlover_box/life"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -727,8 +981,8 @@ nodes {
 }
 nodes {
   position {
-    x: 3.0
-    y: -77.0
+    x: -111.0
+    y: 15.0
   }
   type: TYPE_BOX
   id: "store/catlover_box/vertical_rocket"
@@ -740,12 +994,24 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 39.0
+    y: -22.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
   text: "x2"
+  font: "48"
   id: "store/catlover_box/vertical_rocket_text"
   parent: "store/catlover_box/vertical_rocket"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
   overridden_fields: 8
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -764,8 +1030,8 @@ nodes {
 }
 nodes {
   position {
-    x: 107.0
-    y: -18.0
+    x: 73.0
+    y: 4.0
   }
   type: TYPE_BOX
   id: "store/catlover_box/hammer"
@@ -777,12 +1043,19 @@ nodes {
   template_node_child: true
 }
 nodes {
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
   text: "x2"
+  font: "48"
   id: "store/catlover_box/hammer_text"
   parent: "store/catlover_box/hammer"
   layer: "top"
+  overridden_fields: 3
   overridden_fields: 8
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -801,8 +1074,8 @@ nodes {
 }
 nodes {
   position {
-    x: -114.0
-    y: -10.0
+    x: -18.0
+    y: -64.0
   }
   type: TYPE_BOX
   id: "store/catlover_box/spinning"
@@ -814,10 +1087,22 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    x: 46.0
+    y: -41.0
+  }
+  scale {
+    x: 0.9
+    y: 0.9
+  }
   type: TYPE_TEXT
+  font: "48"
   id: "store/catlover_box/spinning_text"
   parent: "store/catlover_box/spinning"
   layer: "top"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 10
   overridden_fields: 20
   template_node_child: true
 }
@@ -1077,12 +1362,12 @@ nodes {
 }
 nodes {
   position {
-    x: 470.0
-    y: 766.0
+    x: 411.6667
+    y: 588.0
   }
   scale {
-    x: 2.0
-    y: 2.0
+    x: 1.7
+    y: 1.7
   }
   type: TYPE_BOX
   id: "store/close"
@@ -1094,10 +1379,14 @@ nodes {
   template_node_child: true
 }
 nodes {
+  position {
+    y: -727.0
+  }
   type: TYPE_TEMPLATE
   id: "store/reset"
   parent: "store/dlg"
   layer: "top"
+  overridden_fields: 1
   overridden_fields: 20
   template_node_child: true
 }
@@ -1712,28 +2001,72 @@ nodes {
     x: 0.5
     y: 0.5
   }
+  size {
+    x: 850.0
+    y: 500.0
+  }
   type: TYPE_BOX
   id: "not_enough_coins/dlg"
   parent: "not_enough_coins/manager"
   layer: "top"
+  slice9 {
+    x: 100.0
+    y: 100.0
+    z: 100.0
+    w: 100.0
+  }
+  overridden_fields: 3
+  overridden_fields: 4
+  overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
+  template_node_child: true
+}
+nodes {
+  position {
+    y: 66.0
+  }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
+  type: TYPE_TEXT
+  id: "not_enough_coins/title_text"
+  parent: "not_enough_coins/dlg"
+  layer: "top"
+  overridden_fields: 1
   overridden_fields: 3
   overridden_fields: 20
   template_node_child: true
 }
 nodes {
-  type: TYPE_TEXT
-  id: "not_enough_coins/title_text"
-  parent: "not_enough_coins/dlg"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
+  position {
+    y: -115.0
+  }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
+  size {
+    x: 200.0
+    y: 80.0
+  }
   type: TYPE_BOX
   id: "not_enough_coins/buy_button"
   parent: "not_enough_coins/dlg"
   layer: "top"
+  slice9 {
+    x: 25.0
+    y: 25.0
+    z: 25.0
+    w: 25.0
+  }
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
   template_node_child: true
 }
 nodes {

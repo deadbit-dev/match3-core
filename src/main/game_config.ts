@@ -372,12 +372,12 @@ export const _GAME_CONFIG = {
             ],
             click: { x: 1, y: 7 },
             bounds: {
-                from: { x: 0, y: 0 },
-                to: { x: 10, y: 10 }
+                from: { x: 0, y: 7 },
+                to: { x: 2, y: 8 }
             },
             text: {
                 data: "tutorial_buster_click",
-                pos: vmath.vector3(0, 320, 0)
+                pos: vmath.vector3(0, 100, 0)
             }
         },
         8: {
@@ -389,8 +389,8 @@ export const _GAME_CONFIG = {
                 to: { x: 7, y: 3 }
             },
             bounds: {
-                from: { x: 0, y: 0 },
-                to: { x: 10, y: 10 }
+                from: { x: 6, y: 3 },
+                to: { x: 8, y: 4 }
             },
             text: {
                 data: "tutorial_buster_swap",
@@ -401,11 +401,7 @@ export const _GAME_CONFIG = {
             busters: 'spinning',
             text: {
                 data: "tutorial_spinning",
-                pos: vmath.vector3(0, 390, 0)
-            },
-            bounds: {
-                from: { x: 0, y: 0 },
-                to: { x: 10, y: 10 }
+                pos: vmath.vector3(0, -100, 0)
             }
         },
         10: {

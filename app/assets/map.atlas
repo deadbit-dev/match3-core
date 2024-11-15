@@ -16,4 +16,7 @@ images {
 images {
   image: "/assets/map/button_level_down.png"
 }
+images {
+  image: "/assets/map/backsmall.png"
+}
 extrude_borders: 2

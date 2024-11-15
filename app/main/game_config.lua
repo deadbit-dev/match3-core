@@ -273,16 +273,16 @@ ____exports._GAME_CONFIG = {
         [7] = {
             cells = {{x = 1, y = 7}},
             click = {x = 1, y = 7},
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}},
+            bounds = {from = {x = 0, y = 7}, to = {x = 2, y = 8}},
             text = {
                 data = "tutorial_buster_click",
-                pos = vmath.vector3(0, 320, 0)
+                pos = vmath.vector3(0, 100, 0)
             }
         },
         [8] = {
             cells = {{x = 6, y = 3}, {x = 7, y = 3}},
             step = {from = {x = 6, y = 3}, to = {x = 7, y = 3}},
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}},
+            bounds = {from = {x = 6, y = 3}, to = {x = 8, y = 4}},
             text = {
                 data = "tutorial_buster_swap",
                 pos = vmath.vector3(0, 320, 0)
@@ -292,9 +292,8 @@ ____exports._GAME_CONFIG = {
             busters = "spinning",
             text = {
                 data = "tutorial_spinning",
-                pos = vmath.vector3(0, 390, 0)
-            },
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}}
+                pos = vmath.vector3(0, -100, 0)
+            }
         },
         [10] = {
             cells = {

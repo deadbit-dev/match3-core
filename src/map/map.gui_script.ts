@@ -164,6 +164,19 @@ function on_resize(data: { width: number, height: number }) {
     const pos = gui.get_position(map);
     pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y));
     gui.set_position(map, pos);
+
+    const back_left = gui.get_node('back_left');
+    const back_right = gui.get_node('back_right');
+    print("DATA: ", data.width, data.height);
+    const dr = data.width / data.height;
+    const br = 2160/2400;
+    if(dr > br) {
+        const delta = dr - br;
+        print(delta);
+        const scale = math.min(2 + delta, 2.5);
+        gui.set_scale(back_left, vmath.vector3(scale, scale, 1));
+        gui.set_scale(back_right, vmath.vector3(scale, scale, 1));
+    }
 }
 
 function get_offset() {

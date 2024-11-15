@@ -86,11 +86,7 @@ function set_events(data)
     EventBus.on(
         "PURCHASE_INITIALIZED",
         function()
-            if #GAME_CONFIG.products >= 4 then
-                local maney30 = __TS__ArrayFilter(
-                    GAME_CONFIG.products,
-                    function(____, p) return p.id == "maney30" end
-                )[1]
+            if #GAME_CONFIG.products >= 3 then
                 local maney150 = __TS__ArrayFilter(
                     GAME_CONFIG.products,
                     function(____, p) return p.id == "maney150" end
@@ -103,7 +99,6 @@ function set_events(data)
                     GAME_CONFIG.products,
                     function(____, p) return p.id == "maney800" end
                 )[1]
-                set_text("store/buy_30_text", (maney30.priceValue .. " ") .. maney30.priceCurrencyCode)
                 set_text("store/buy_150_text", (maney150.priceValue .. " ") .. maney150.priceCurrencyCode)
                 set_text("store/buy_300_text", (maney300.priceValue .. " ") .. maney300.priceCurrencyCode)
                 set_text("store/buy_800_text", (maney800.priceValue .. " ") .. maney800.priceCurrencyCode)
@@ -148,34 +143,6 @@ function setup_store(data)
     gui.set_text(
         gui.get_node("store/store_title_text"),
         Lang.get_text("store_title")
-    )
-    data.druid:new_button(
-        "store/buy_30_btn",
-        function()
-            if HtmlBridge == nil then
-                Sound.play("purchase")
-                add_coins(30)
-                return
-            end
-            HtmlBridge.purchase(
-                {id = "maney30"},
-                function(result, purchase)
-                    if not result then
-                        return function()
-                        end
-                    end
-                    Sound.play("purchase")
-                    add_coins(30)
-                    GameStorage.set("was_purchased", true)
-                    Metrica.report("data", {shop = {buy = "maney30"}})
-                    HtmlBridge.consume_purchase(
-                        purchase.purchaseToken,
-                        function()
-                        end
-                    )
-                end
-            )
-        end
     )
     data.druid:new_button(
         "store/buy_150_btn",
@@ -482,11 +449,15 @@ function setup_right_container(data)
         "sound",
         function()
             local sound_off = gui.get_node("sound_off")
-            Sound.set_sfx_active(not Sound.is_sfx_active())
-            gui.set_enabled(
-                sound_off,
-                not Sound.is_sfx_active()
-            )
+            local music_off = gui.get_node("music_off")
+            local state = not Sound.is_sfx_active()
+            Sound.set_sfx_active(state)
+            if not state then
+                Sound.set_sfx_active(false)
+                Sound.set_music_active(false)
+                gui.set_enabled(music_off, true)
+            end
+            gui.set_enabled(sound_off, not state)
         end
     )
     data.druid:new_button(
@@ -501,14 +472,14 @@ function setup_right_container(data)
         end
     )
     local sound_off = gui.get_node("sound_off")
+    local music_off = gui.get_node("music_off")
     gui.set_enabled(
         sound_off,
         not Sound.is_sfx_active()
     )
-    local music_off = gui.get_node("music_off")
     gui.set_enabled(
         music_off,
-        not Sound.is_music_active()
+        not Sound.is_sfx_active() or not Sound.is_music_active()
     )
 end
 function setup_busters(data)
@@ -807,9 +778,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch133 = scene.name
-        local ____cond133 = ____switch133 == "movie" or ____switch133 == "game"
-        if ____cond133 then
+        local ____switch127 = scene.name
+        local ____cond127 = ____switch127 == "movie" or ____switch127 == "game"
+        if ____cond127 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -817,8 +788,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == "map"
-        if ____cond133 then
+        ____cond127 = ____cond127 or ____switch127 == "map"
+        if ____cond127 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -844,9 +815,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch138 = Scene.get_current_name()
-        local ____cond138 = ____switch138 == "game"
-        if ____cond138 then
+        local ____switch132 = Scene.get_current_name()
+        local ____cond132 = ____switch132 == "game"
+        if ____cond132 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -855,8 +826,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == "map"
-        if ____cond138 then
+        ____cond132 = ____cond132 or ____switch132 == "map"
+        if ____cond132 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

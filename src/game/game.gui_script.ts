@@ -9,12 +9,13 @@
 
 import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
-import { TargetMessage } from '../main/game_config';
+import { Dlg, TargetMessage } from '../main/game_config';
 import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
 import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, is_time_level, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
+import { View } from './view';
 
 const presets = {
     targets: [
@@ -263,20 +264,29 @@ function setup_busters(instance: props) {
 
         set_enabled_settings(instance.settings_opened);        
 
+        instance.druid.new_button('sound', () => {
+            const sound_off = gui.get_node('sound_off');
+            const music_off = gui.get_node('music_off');
+            const state = !Sound.is_sfx_active();
+            Sound.set_sfx_active(state);
+            if(!state) {
+                Sound.set_sfx_active(false);
+                Sound.set_music_active(false);
+                gui.set_enabled(music_off, true);
+            }
+            gui.set_enabled(sound_off, !state);
+        });
+
         instance.druid.new_button('music', () => {
             const music_off = gui.get_node('music_off');
             Sound.set_music_active(!Sound.is_music_active());
             gui.set_enabled(music_off, !Sound.is_music_active());
         });
 
-        instance.druid.new_button('sound', () => {
-            const sound_off = gui.get_node('sound_off');
-            Sound.set_sfx_active(!Sound.is_sfx_active());
-            gui.set_enabled(sound_off, !Sound.is_sfx_active());
-        });
-
         instance.druid.new_button('store', () => {
             set_enabled_settings(false);
+            instance.settings_opened = false;
+            Sound.stop('game');
             EventBus.send('REQUEST_OPEN_STORE');
         });
 
@@ -286,10 +296,10 @@ function setup_busters(instance: props) {
         });
 
         const sound_off = gui.get_node('sound_off');
-        gui.set_enabled(sound_off, !Sound.is_sfx_active());
-
         const music_off = gui.get_node('music_off');
-        gui.set_enabled(music_off, !Sound.is_music_active());
+
+        gui.set_enabled(sound_off, !Sound.is_sfx_active());
+        gui.set_enabled(music_off, !Sound.is_sfx_active() || !Sound.is_music_active());
     });
 
     update_buttons(instance);
@@ -472,6 +482,9 @@ function set_events(instance: props) {
     }, true);
     EventBus.on('SHUFFLE_START', on_shuffle_start);
     EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
+    EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
+        if(dlg == Dlg.Store) Sound.play('game');
+    });
 }
 
 function update_targets(data: TargetMessage) {
@@ -646,6 +659,28 @@ function set_tutorial() {
             });
         }
     }
+
+    const hand = gui.get_node('hand');
+    switch(get_current_level() + 1) {
+        case 7:
+            hand_timer = timer.delay(4, true, () => {
+                gui.set_position(hand, vmath.vector3(-200, -125, 0));
+                gui.set_enabled(hand, true);
+                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 1, 0, () => {
+                    gui.set_enabled(hand, false);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
+            break;
+        case 8:
+            hand_timer = timer.delay(4, true, () => {
+                gui.set_position(hand, vmath.vector3(100, 90, 0));
+                gui.set_enabled(hand, true);
+                gui.animate(hand, gui.PROP_POSITION, vmath.vector3(150, 90, 0), gui.EASING_INCUBIC, 0.5, 0, () => {
+                    gui.set_enabled(hand, false);
+                }, gui.PLAYBACK_ONCE_FORWARD);
+            });
+            break;
+    }
 }
 
 function remove_tutorial() {
@@ -734,7 +769,9 @@ function on_win_end(state: GameState) {
                         drop_coins(before_reward, steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
                             fade_steptime(() => {
                                 drop_targets(() => {
-                                    drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, undefined, on_each_coin_drop_end, () => {
+                                    drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, (idx: number) => {
+                                        gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
+                                    }, on_each_coin_drop_end, () => {
                                         fade_targets(on_end_for_last_level);
                                     });
                                 });
@@ -742,7 +779,9 @@ function on_win_end(state: GameState) {
                         });
                     } else {
                         drop_targets(() => {
-                            drop_coins(before_reward, level_coins, level_coin_points, undefined, on_each_coin_drop_end, () => {
+                            drop_coins(before_reward, level_coins, level_coin_points, (idx: number) => {
+                                gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
+                            }, on_each_coin_drop_end, () => {
                                 fade_targets(on_end_for_last_level);
                             });
                         });
@@ -771,6 +810,8 @@ function drop_steptime(on_end: () => void) {
 function drop_targets(on_end: () => void) {
     gui.set_enabled(gui.get_node('substrate'), true);
     const targets = gui.get_node('targets');
+    gui.set_enabled(gui.get_node('coins'), true);
+    set_text('coins_text', get_current_level_config().coins);
     gui.set_layer(targets, 'ontop');
     const pos = gui.get_position(targets);
     pos.y -= 300;
@@ -794,6 +835,7 @@ function fade_targets(on_end: () => void) {
     pos.y += 300;
     gui.animate(targets, 'position', pos, gui.EASING_OUTCUBIC, 0.5, 0, () => {
         gui.set_layer(targets, '');
+        gui.set_enabled(gui.get_node('coins'), false);
         gui.set_enabled(gui.get_node('substrate'), false);
         on_end();
     });
@@ -974,6 +1016,7 @@ function disabled_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), false);
     gui.set_enabled(gui.get_node('steps_by_ad/button'), false);
     gui.set_enabled(gui.get_node('steps_by_coins/button'), false);
+    gui.set_enabled(gui.get_node('time_by_coins/button'), false);
 
     gui.set_enabled(gui.get_node('gameover_close'), true);
     gui.set_enabled(gui.get_node('restart_button'), true);
