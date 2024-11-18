@@ -265,21 +265,14 @@ function setup_busters(instance: props) {
         set_enabled_settings(instance.settings_opened);        
 
         instance.druid.new_button('sound', () => {
+            EventBus.send('SOUND_BUTTON');
             const sound_off = gui.get_node('sound_off');
-            const music_off = gui.get_node('music_off');
-            const state = !Sound.is_sfx_active();
-            Sound.set_sfx_active(state);
-            if(!state) {
-                Sound.set_sfx_active(false);
-                Sound.set_music_active(false);
-                gui.set_enabled(music_off, true);
-            }
-            gui.set_enabled(sound_off, !state);
+            gui.set_enabled(sound_off, !Sound.is_sfx_active());
         });
 
         instance.druid.new_button('music', () => {
+            EventBus.send('MUSIC_BUTTON');
             const music_off = gui.get_node('music_off');
-            Sound.set_music_active(!Sound.is_music_active());
             gui.set_enabled(music_off, !Sound.is_music_active());
         });
 
@@ -299,7 +292,7 @@ function setup_busters(instance: props) {
         const music_off = gui.get_node('music_off');
 
         gui.set_enabled(sound_off, !Sound.is_sfx_active());
-        gui.set_enabled(music_off, !Sound.is_sfx_active() || !Sound.is_music_active());
+        gui.set_enabled(music_off, !Sound.is_music_active());
     });
 
     update_buttons(instance);
@@ -369,6 +362,7 @@ function setup_sustem_ui(instance: props) {
 
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', () => {
+        gui.set_enabled(gui.get_node('continue_button'), false);
         if(!GameStorage.get('was_purchased')) Ads.show_interstitial(true, next_level);
         else next_level();
     });
@@ -608,79 +602,86 @@ function set_tutorial() {
         const busters = Array.isArray(tutorial_data.busters) ? tutorial_data.busters : [tutorial_data.busters];
         for (const buster of busters)
             gui.set_layer(gui.get_node(buster + "/button"), "top");
+    }
 
-        if (busters.includes('spinning')) {
-            // TODO: separate hand logic
-            const hand = gui.get_node('hand');
-            hand_timer = timer.delay(4, true, () => {
+    switch(get_current_level() + 1) {
+        case 6:
+            hand_timer = timer.delay(2, false, () => {
+                const pos = gui.get_screen_position(gui.get_node('hammer/button'));
+                pos.y -= 100;
+                click_in_two_pos(pos, vmath.vector3(100, 90, 0));
+            });
+            break;
+        case 7:
+            hand_timer = timer.delay(2, false, () => { hand_click_animation(vmath.vector3(-245, -210, 0)); });
+            break;
+        case 8:
+            hand_timer = timer.delay(2, false, hand_swap_animation);
+            break;
+        case 9:
+            hand_timer = timer.delay(2, false, () => {
+                const hand = gui.get_node('hand');
                 const pos = gui.get_screen_position(gui.get_node('spinning/button'));
                 pos.y -= 100;
                 gui.set_screen_position(hand, pos);
-                gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 1, 0, () => {
-                    gui.set_enabled(hand, false);
-                }, gui.PLAYBACK_ONCE_PINGPONG);
+                hand_click_animation(gui.get_position(hand));
             });
-        }
-
-        if (busters.includes('hammer')) {
-            // TODO: separate hand logic
-            const hand = gui.get_node('hand');
-            hand_timer = timer.delay(4, true, () => {
-                const pos = gui.get_screen_position(gui.get_node('hammer/button'));
-                pos.y -= 100;
-                gui.set_screen_position(hand, pos);
-                gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
-                    gui.animate(hand, gui.PROP_POSITION, vmath.vector3(70, 70, 0), gui.EASING_INCUBIC, 1, 0, () => {
-                        gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
-                            gui.set_enabled(hand, false);
-                        }, gui.PLAYBACK_ONCE_PINGPONG);
-                    });
-                }, gui.PLAYBACK_ONCE_PINGPONG);
-            });
-        }
-
-        if (busters.includes('horizontal_rocket')) {
-            // TODO: separate hand logic
-            const hand = gui.get_node('hand');
-            hand_timer = timer.delay(4, true, () => {
+            break;
+        case 17:
+            hand_timer = timer.delay(2, false, () => {
                 const pos = gui.get_screen_position(gui.get_node('horizontal_rocket/button'));
                 pos.y -= 100;
-                gui.set_screen_position(hand, pos);
-                gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
-                    gui.animate(hand, gui.PROP_POSITION, vmath.vector3(-100, 20, 0), gui.EASING_INCUBIC, 1, 0, () => {
-                        gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 0.5, 0, () => {
-                            gui.set_enabled(hand, false);
-                        }, gui.PLAYBACK_ONCE_PINGPONG);
-                    });
-                }, gui.PLAYBACK_ONCE_PINGPONG);
+                click_in_two_pos(pos, vmath.vector3(-100, 30, 0));
             });
-        }
+            break;
     }
+}
 
+function click_in_two_pos(pos1: vmath.vector3, pos2: vmath.vector3) {
     const hand = gui.get_node('hand');
-    switch(get_current_level() + 1) {
-        case 7:
-            hand_timer = timer.delay(4, true, () => {
-                gui.set_position(hand, vmath.vector3(-200, -125, 0));
-                gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.7, 0.7, 0.7), gui.EASING_INCUBIC, 1, 0, () => {
-                    gui.set_enabled(hand, false);
-                }, gui.PLAYBACK_ONCE_PINGPONG);
+    gui.set_screen_position(hand, pos1);
+    hand_click_animation(gui.get_position(hand), () => {
+        timer.delay(1, false, () => {
+            hand_click_animation(pos2, () => {
+                gui.set_enabled(hand, false);
+                timer.delay(1, false, () => {
+                    click_in_two_pos(pos1, pos2);
+                });
             });
-            break;
-        case 8:
-            hand_timer = timer.delay(4, true, () => {
-                gui.set_position(hand, vmath.vector3(100, 90, 0));
-                gui.set_enabled(hand, true);
-                gui.animate(hand, gui.PROP_POSITION, vmath.vector3(150, 90, 0), gui.EASING_INCUBIC, 0.5, 0, () => {
-                    gui.set_enabled(hand, false);
-                }, gui.PLAYBACK_ONCE_FORWARD);
+        });
+    });
+}
+
+function hand_click_animation(position: vmath.vector3, on_end ?: () => void) {
+    const hand = gui.get_node('hand');
+    gui.set_position(hand, position);
+    gui.set_enabled(hand, true);
+    gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.5, 0.5, 0.5), gui.EASING_INCUBIC, 1, 0, () => {
+        gui.set_enabled(hand, false);
+        if(on_end != undefined) on_end();
+        else timer.delay(1, false, () => {
+            hand_click_animation(position, on_end);
+        });
+    }, gui.PLAYBACK_ONCE_PINGPONG);
+}
+
+function hand_swap_animation() {
+    const hand = gui.get_node('hand');
+    const color = gui.get_color(hand);
+    gui.set_position(hand, vmath.vector3(70, 50, 0));
+    color.w = 0.5;
+    gui.set_color(hand, color);
+    gui.set_enabled(hand, true);
+    color.w = 1;
+    gui.animate(hand, gui.PROP_COLOR, color, gui.EASING_INCUBIC, 0.3, 0, () => {
+        gui.animate(hand, gui.PROP_POSITION, vmath.vector3(190, 50, 0), gui.EASING_INCUBIC, 1, 0, () => {
+            color.w = 0.5;
+            gui.animate(hand, gui.PROP_COLOR, color, gui.EASING_INCUBIC, 0.7, 0, () => {
+                gui.set_enabled(hand, false);
+                timer.delay(1, false, hand_swap_animation);
             });
-            break;
-    }
+        });
+    });
 }
 
 function remove_tutorial() {

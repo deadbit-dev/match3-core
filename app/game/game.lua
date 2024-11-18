@@ -1281,7 +1281,6 @@ function ____exports.Game()
         if GameStorage.get("vertical_rocket_counts") <= 0 and vertical_rocket_counts ~= nil then
             GameStorage.set("vertical_rocket_counts", vertical_rocket_counts)
         end
-        EventBus.send("UPDATED_BUTTONS")
     end
     function on_activate_buster(message)
         if is_block_input then

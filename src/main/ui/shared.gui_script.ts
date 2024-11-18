@@ -109,6 +109,8 @@ function set_events(data: props) {
             */
         }
     });
+    EventBus.on('SOUND_BUTTON', on_sound, false);
+    EventBus.on('MUSIC_BUTTON', on_music, false);
 }
 
 function setup(data: props) {
@@ -382,30 +384,28 @@ function setup_store(data: props) {
 function setup_right_container(data: props) {
     data.druid.new_button('store_button', () => set_enabled_store(data, true));
 
-    data.druid.new_button('sound', () => {
-        const sound_off = gui.get_node('sound_off');
-        const music_off = gui.get_node('music_off');
-        const state = !Sound.is_sfx_active();
-        Sound.set_sfx_active(state);
-        if(!state) {
-            Sound.set_sfx_active(false);
-            Sound.set_music_active(false);
-            gui.set_enabled(music_off, true);
-        }
-        gui.set_enabled(sound_off, !state);
-    });
-
-    data.druid.new_button('music', () => {
-        const music_off = gui.get_node('music_off');
-        Sound.set_music_active(!Sound.is_music_active());
-        gui.set_enabled(music_off, !Sound.is_music_active());
-    });
+    data.druid.new_button('sound', on_sound);
+    data.druid.new_button('music', on_music);
 
     const sound_off = gui.get_node('sound_off');
     const music_off = gui.get_node('music_off');
 
     gui.set_enabled(sound_off, !Sound.is_sfx_active());
-    gui.set_enabled(music_off, !Sound.is_sfx_active() || !Sound.is_music_active());
+    gui.set_enabled(music_off, !Sound.is_music_active());
+}
+
+function on_sound() {
+    const sound_off = gui.get_node('sound_off');
+    const state = !Sound.is_sfx_active();
+    Sound.set_sfx_active(state);
+    gui.set_enabled(sound_off, !state);
+}
+
+function on_music() {
+    const music_off = gui.get_node('music_off');
+    const state = !Sound.is_music_active();
+    Sound.set_music_active(state);
+    gui.set_enabled(music_off, !state);
 }
 
 function setup_busters(data: props) {

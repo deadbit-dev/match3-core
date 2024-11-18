@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, click_in_two_pos, hand_click_animation, hand_swap_animation, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____game_config = require("main.game_config")
@@ -303,23 +303,19 @@ function setup_busters(instance)
             instance.druid:new_button(
                 "sound",
                 function()
+                    EventBus.send("SOUND_BUTTON")
                     local sound_off = gui.get_node("sound_off")
-                    local music_off = gui.get_node("music_off")
-                    local state = not Sound.is_sfx_active()
-                    Sound.set_sfx_active(state)
-                    if not state then
-                        Sound.set_sfx_active(false)
-                        Sound.set_music_active(false)
-                        gui.set_enabled(music_off, true)
-                    end
-                    gui.set_enabled(sound_off, not state)
+                    gui.set_enabled(
+                        sound_off,
+                        not Sound.is_sfx_active()
+                    )
                 end
             )
             instance.druid:new_button(
                 "music",
                 function()
+                    EventBus.send("MUSIC_BUTTON")
                     local music_off = gui.get_node("music_off")
-                    Sound.set_music_active(not Sound.is_music_active())
                     gui.set_enabled(
                         music_off,
                         not Sound.is_music_active()
@@ -350,7 +346,7 @@ function setup_busters(instance)
             )
             gui.set_enabled(
                 music_off,
-                not Sound.is_sfx_active() or not Sound.is_music_active()
+                not Sound.is_music_active()
             )
         end
     )
@@ -488,6 +484,10 @@ function setup_win_ui(instance)
     instance.druid:new_button(
         "continue_button",
         function()
+            gui.set_enabled(
+                gui.get_node("continue_button"),
+                false
+            )
             if not GameStorage.get("was_purchased") then
                 Ads.show_interstitial(true, next_level)
             else
@@ -727,25 +727,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch104 = data.idx
-        local ____cond104 = ____switch104 == 0
-        if ____cond104 then
+        local ____switch103 = data.idx
+        local ____cond103 = ____switch103 == 0
+        if ____cond103 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond104 = ____cond104 or ____switch104 == 1
-        if ____cond104 then
+        ____cond103 = ____cond103 or ____switch103 == 1
+        if ____cond103 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond104 = ____cond104 or ____switch104 == 2
-        if ____cond104 then
+        ____cond103 = ____cond103 or ____switch103 == 2
+        if ____cond103 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -875,182 +875,174 @@ function set_tutorial()
                 "top"
             )
         end
-        if __TS__ArrayIncludes(busters, "spinning") then
-            local hand = gui.get_node("hand")
+    end
+    repeat
+        local ____switch122 = get_current_level() + 1
+        local ____cond122 = ____switch122 == 6
+        if ____cond122 then
             hand_timer = timer.delay(
-                4,
-                true,
-                function()
-                    local pos = gui.get_screen_position(gui.get_node("spinning/button"))
-                    pos.y = pos.y - 100
-                    gui.set_screen_position(hand, pos)
-                    gui.set_enabled(hand, true)
-                    gui.animate(
-                        hand,
-                        gui.PROP_SCALE,
-                        vmath.vector3(0.7, 0.7, 0.7),
-                        gui.EASING_INCUBIC,
-                        1,
-                        0,
-                        function()
-                            gui.set_enabled(hand, false)
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
-                    )
-                end
-            )
-        end
-        if __TS__ArrayIncludes(busters, "hammer") then
-            local hand = gui.get_node("hand")
-            hand_timer = timer.delay(
-                4,
-                true,
+                2,
+                false,
                 function()
                     local pos = gui.get_screen_position(gui.get_node("hammer/button"))
                     pos.y = pos.y - 100
-                    gui.set_screen_position(hand, pos)
-                    gui.set_enabled(hand, true)
-                    gui.animate(
-                        hand,
-                        gui.PROP_SCALE,
-                        vmath.vector3(0.7, 0.7, 0.7),
-                        gui.EASING_INCUBIC,
-                        0.5,
-                        0,
-                        function()
-                            gui.animate(
-                                hand,
-                                gui.PROP_POSITION,
-                                vmath.vector3(70, 70, 0),
-                                gui.EASING_INCUBIC,
-                                1,
-                                0,
-                                function()
-                                    gui.animate(
-                                        hand,
-                                        gui.PROP_SCALE,
-                                        vmath.vector3(0.7, 0.7, 0.7),
-                                        gui.EASING_INCUBIC,
-                                        0.5,
-                                        0,
-                                        function()
-                                            gui.set_enabled(hand, false)
-                                        end,
-                                        gui.PLAYBACK_ONCE_PINGPONG
-                                    )
-                                end
-                            )
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
-                    )
-                end
-            )
-        end
-        if __TS__ArrayIncludes(busters, "horizontal_rocket") then
-            local hand = gui.get_node("hand")
-            hand_timer = timer.delay(
-                4,
-                true,
-                function()
-                    local pos = gui.get_screen_position(gui.get_node("horizontal_rocket/button"))
-                    pos.y = pos.y - 100
-                    gui.set_screen_position(hand, pos)
-                    gui.set_enabled(hand, true)
-                    gui.animate(
-                        hand,
-                        gui.PROP_SCALE,
-                        vmath.vector3(0.7, 0.7, 0.7),
-                        gui.EASING_INCUBIC,
-                        0.5,
-                        0,
-                        function()
-                            gui.animate(
-                                hand,
-                                gui.PROP_POSITION,
-                                vmath.vector3(-100, 20, 0),
-                                gui.EASING_INCUBIC,
-                                1,
-                                0,
-                                function()
-                                    gui.animate(
-                                        hand,
-                                        gui.PROP_SCALE,
-                                        vmath.vector3(0.7, 0.7, 0.7),
-                                        gui.EASING_INCUBIC,
-                                        0.5,
-                                        0,
-                                        function()
-                                            gui.set_enabled(hand, false)
-                                        end,
-                                        gui.PLAYBACK_ONCE_PINGPONG
-                                    )
-                                end
-                            )
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
-                    )
-                end
-            )
-        end
-    end
-    local hand = gui.get_node("hand")
-    repeat
-        local ____switch136 = get_current_level() + 1
-        local ____cond136 = ____switch136 == 7
-        if ____cond136 then
-            hand_timer = timer.delay(
-                4,
-                true,
-                function()
-                    gui.set_position(
-                        hand,
-                        vmath.vector3(-200, -125, 0)
-                    )
-                    gui.set_enabled(hand, true)
-                    gui.animate(
-                        hand,
-                        gui.PROP_SCALE,
-                        vmath.vector3(0.7, 0.7, 0.7),
-                        gui.EASING_INCUBIC,
-                        1,
-                        0,
-                        function()
-                            gui.set_enabled(hand, false)
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
+                    click_in_two_pos(
+                        pos,
+                        vmath.vector3(100, 90, 0)
                     )
                 end
             )
             break
         end
-        ____cond136 = ____cond136 or ____switch136 == 8
-        if ____cond136 then
+        ____cond122 = ____cond122 or ____switch122 == 7
+        if ____cond122 then
             hand_timer = timer.delay(
-                4,
-                true,
+                2,
+                false,
                 function()
-                    gui.set_position(
-                        hand,
-                        vmath.vector3(100, 90, 0)
-                    )
-                    gui.set_enabled(hand, true)
-                    gui.animate(
-                        hand,
-                        gui.PROP_POSITION,
-                        vmath.vector3(150, 90, 0),
-                        gui.EASING_INCUBIC,
-                        0.5,
-                        0,
-                        function()
-                            gui.set_enabled(hand, false)
-                        end,
-                        gui.PLAYBACK_ONCE_FORWARD
+                    hand_click_animation(vmath.vector3(-245, -210, 0))
+                end
+            )
+            break
+        end
+        ____cond122 = ____cond122 or ____switch122 == 8
+        if ____cond122 then
+            hand_timer = timer.delay(2, false, hand_swap_animation)
+            break
+        end
+        ____cond122 = ____cond122 or ____switch122 == 9
+        if ____cond122 then
+            hand_timer = timer.delay(
+                2,
+                false,
+                function()
+                    local hand = gui.get_node("hand")
+                    local pos = gui.get_screen_position(gui.get_node("spinning/button"))
+                    pos.y = pos.y - 100
+                    gui.set_screen_position(hand, pos)
+                    hand_click_animation(gui.get_position(hand))
+                end
+            )
+            break
+        end
+        ____cond122 = ____cond122 or ____switch122 == 17
+        if ____cond122 then
+            hand_timer = timer.delay(
+                2,
+                false,
+                function()
+                    local pos = gui.get_screen_position(gui.get_node("horizontal_rocket/button"))
+                    pos.y = pos.y - 100
+                    click_in_two_pos(
+                        pos,
+                        vmath.vector3(-100, 30, 0)
                     )
                 end
             )
             break
         end
     until true
+end
+function click_in_two_pos(pos1, pos2)
+    local hand = gui.get_node("hand")
+    gui.set_screen_position(hand, pos1)
+    hand_click_animation(
+        gui.get_position(hand),
+        function()
+            timer.delay(
+                1,
+                false,
+                function()
+                    hand_click_animation(
+                        pos2,
+                        function()
+                            gui.set_enabled(hand, false)
+                            timer.delay(
+                                1,
+                                false,
+                                function()
+                                    click_in_two_pos(pos1, pos2)
+                                end
+                            )
+                        end
+                    )
+                end
+            )
+        end
+    )
+end
+function hand_click_animation(position, on_end)
+    local hand = gui.get_node("hand")
+    gui.set_position(hand, position)
+    gui.set_enabled(hand, true)
+    gui.animate(
+        hand,
+        gui.PROP_SCALE,
+        vmath.vector3(0.5, 0.5, 0.5),
+        gui.EASING_INCUBIC,
+        1,
+        0,
+        function()
+            gui.set_enabled(hand, false)
+            if on_end ~= nil then
+                on_end()
+            else
+                timer.delay(
+                    1,
+                    false,
+                    function()
+                        hand_click_animation(position, on_end)
+                    end
+                )
+            end
+        end,
+        gui.PLAYBACK_ONCE_PINGPONG
+    )
+end
+function hand_swap_animation()
+    local hand = gui.get_node("hand")
+    local color = gui.get_color(hand)
+    gui.set_position(
+        hand,
+        vmath.vector3(70, 50, 0)
+    )
+    color.w = 0.5
+    gui.set_color(hand, color)
+    gui.set_enabled(hand, true)
+    color.w = 1
+    gui.animate(
+        hand,
+        gui.PROP_COLOR,
+        color,
+        gui.EASING_INCUBIC,
+        0.3,
+        0,
+        function()
+            gui.animate(
+                hand,
+                gui.PROP_POSITION,
+                vmath.vector3(190, 50, 0),
+                gui.EASING_INCUBIC,
+                1,
+                0,
+                function()
+                    color.w = 0.5
+                    gui.animate(
+                        hand,
+                        gui.PROP_COLOR,
+                        color,
+                        gui.EASING_INCUBIC,
+                        0.7,
+                        0,
+                        function()
+                            gui.set_enabled(hand, false)
+                            timer.delay(1, false, hand_swap_animation)
+                        end
+                    )
+                end
+            )
+        end
+    )
 end
 function remove_tutorial()
     if hand_timer ~= nil then

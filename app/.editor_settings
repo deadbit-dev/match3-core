@@ -135,10 +135,6 @@
         :code
       ]
       [
-        "/game/game.collection"
-        :scene
-      ]
-      [
         "/main/ui/dlg/store_dlg.gui"
         :scene
       ]
@@ -163,11 +159,15 @@
         :scene
       ]
       [
+        "/game/ui/background.gui"
+        :scene
+      ]
+      [
         "/game/ui/game.gui"
         :scene
       ]
       [
-        "/game/ui/background.gui"
+        "/game/game.collection"
         :scene
       ]
     ]

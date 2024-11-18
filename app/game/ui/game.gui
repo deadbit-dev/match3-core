@@ -720,6 +720,10 @@ nodes {
   position {
     z: 1.0
   }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
   type: TYPE_BOX
   texture: "ui/finger"
   id: "hand"

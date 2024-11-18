@@ -1232,8 +1232,6 @@ export function Game() {
 
         const vertical_rocket_counts = tonumber(level_config.busters.vertical_rocket.counts);
         if (GameStorage.get('vertical_rocket_counts') <= 0 && vertical_rocket_counts != undefined) GameStorage.set('vertical_rocket_counts', vertical_rocket_counts);
-
-        EventBus.send('UPDATED_BUTTONS');
     }
 
     function on_activate_buster(message: NameMessage) {

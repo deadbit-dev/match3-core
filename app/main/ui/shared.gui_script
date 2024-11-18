@@ -8,7 +8,7 @@ local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
+local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, on_sound, on_music, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -105,6 +105,8 @@ function set_events(data)
             end
         end
     )
+    EventBus.on("SOUND_BUTTON", on_sound, false)
+    EventBus.on("MUSIC_BUTTON", on_music, false)
 end
 function setup(data)
     setup_coins(data)
@@ -445,32 +447,8 @@ function setup_right_container(data)
         "store_button",
         function() return set_enabled_store(data, true) end
     )
-    data.druid:new_button(
-        "sound",
-        function()
-            local sound_off = gui.get_node("sound_off")
-            local music_off = gui.get_node("music_off")
-            local state = not Sound.is_sfx_active()
-            Sound.set_sfx_active(state)
-            if not state then
-                Sound.set_sfx_active(false)
-                Sound.set_music_active(false)
-                gui.set_enabled(music_off, true)
-            end
-            gui.set_enabled(sound_off, not state)
-        end
-    )
-    data.druid:new_button(
-        "music",
-        function()
-            local music_off = gui.get_node("music_off")
-            Sound.set_music_active(not Sound.is_music_active())
-            gui.set_enabled(
-                music_off,
-                not Sound.is_music_active()
-            )
-        end
-    )
+    data.druid:new_button("sound", on_sound)
+    data.druid:new_button("music", on_music)
     local sound_off = gui.get_node("sound_off")
     local music_off = gui.get_node("music_off")
     gui.set_enabled(
@@ -479,8 +457,20 @@ function setup_right_container(data)
     )
     gui.set_enabled(
         music_off,
-        not Sound.is_sfx_active() or not Sound.is_music_active()
+        not Sound.is_music_active()
     )
+end
+function on_sound()
+    local sound_off = gui.get_node("sound_off")
+    local state = not Sound.is_sfx_active()
+    Sound.set_sfx_active(state)
+    gui.set_enabled(sound_off, not state)
+end
+function on_music()
+    local music_off = gui.get_node("music_off")
+    local state = not Sound.is_music_active()
+    Sound.set_music_active(state)
+    gui.set_enabled(music_off, not state)
 end
 function setup_busters(data)
     setup_hammer(data)
@@ -778,9 +768,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch127 = scene.name
-        local ____cond127 = ____switch127 == "movie" or ____switch127 == "game"
-        if ____cond127 then
+        local ____switch126 = scene.name
+        local ____cond126 = ____switch126 == "movie" or ____switch126 == "game"
+        if ____cond126 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -788,8 +778,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond127 = ____cond127 or ____switch127 == "map"
-        if ____cond127 then
+        ____cond126 = ____cond126 or ____switch126 == "map"
+        if ____cond126 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -815,9 +805,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch132 = Scene.get_current_name()
-        local ____cond132 = ____switch132 == "game"
-        if ____cond132 then
+        local ____switch131 = Scene.get_current_name()
+        local ____cond131 = ____switch131 == "game"
+        if ____cond131 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -826,8 +816,8 @@ function set_enabled_store(data, state)
             set_enabled_lifes(state)
             break
         end
-        ____cond132 = ____cond132 or ____switch132 == "map"
-        if ____cond132 then
+        ____cond131 = ____cond131 or ____switch131 == "map"
+        if ____cond131 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

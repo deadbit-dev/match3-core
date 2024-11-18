@@ -62,8 +62,12 @@ function on_resize(data: {width: number, height: number}) {
         gui.set_xanchor(bg, gui.ANCHOR_NONE);
         gui.set_position(bg, vmath.vector3(280, 444, 0));
         const delta = dr - br;
-        print(delta);
         const scale = math.min(1 + delta, 1.5);
+        gui.set_scale(bg, vmath.vector3(scale, scale, 1));
+    }
+
+    if(data.width < 800) {
+        const scale = 1.5;
         gui.set_scale(bg, vmath.vector3(scale, scale, 1));
     }
 
