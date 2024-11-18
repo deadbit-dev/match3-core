@@ -635,11 +635,11 @@ function set_tutorial() {
             break;
         case 17:
             hand_timer = timer.delay(2, false, () => {
-                const from_pos = vmath.vector3(-100, -400, 0);
-                const to_pos = vmath.vector3(-100, 30, 0);
+                const from_pos = vmath.vector3(0, -400, 0);
+                const to_pos = vmath.vector3(-100, 10, 0);
                 if(GAME_CONFIG.debug_levels) {
                     from_pos.y += 125;
-                    to_pos.y += 125;
+                    to_pos.y += 50;
                 }
                 click_in_two_pos(from_pos, to_pos);
             });

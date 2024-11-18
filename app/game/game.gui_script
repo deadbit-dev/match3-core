@@ -936,11 +936,11 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local from_pos = vmath.vector3(-100, -400, 0)
-                    local to_pos = vmath.vector3(-100, 30, 0)
+                    local from_pos = vmath.vector3(0, -400, 0)
+                    local to_pos = vmath.vector3(-100, 10, 0)
                     if GAME_CONFIG.debug_levels then
                         from_pos.y = from_pos.y + 125
-                        to_pos.y = to_pos.y + 125
+                        to_pos.y = to_pos.y + 50
                     end
                     click_in_two_pos(from_pos, to_pos)
                 end
