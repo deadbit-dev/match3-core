@@ -62,20 +62,6 @@ export const lang_data = {
     "испанский-es": "El martillo elimina cualquier objeto del campo.",
     "Turkish-tr": "Çekiç alandaki herhangi bir nesneyi kaldırır!"
   },
-  "tutorial_buster_click": {
-    "Русский-ru": "Нажми на бустер чтобы активировать его!",
-    "Английский-en": "Click on the booster to activate it!",
-    "German-de": "Klicken Sie auf den Booster, um ihn zu aktivieren!",
-    "испанский-es": "¡Haz clic en el refuerzo para activarlo!",
-    "Turkish-tr": "Etkinleştirmek için güçlendiriciye tıklayın!"
-  },
-  "tutorial_buster_swap": {
-    "Русский-ru": "Свайпни два бустера вместе и получи крутой эффект!",
-    "Английский-en": "Swipe two boosters together for a cool effect!",
-    "German-de": "Wischen Sie zwei Booster zusammen und erzielen Sie einen coolen Effekt!",
-    "испанский-es": "¡Desliza dos potenciadores juntos y obtén un efecto genial!",
-    "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
-  },
   "tutorial_box": {
     "Русский-ru": "Собирай предметы в ряд около коробки, чтобы сломать её!",
     "Английский-en": "Collect items in a row near the box to break it!",
@@ -103,6 +89,13 @@ export const lang_data = {
     "German-de": "Raketen jagen alles in die Luft!",
     "испанский-es": "¡Los cohetes lo vuelan todo!",
     "Turkish-tr": "Roketler etrafımızdaki her şeyi havaya uçuruyor!"
+  },
+  "tutorial_super": {
+    "Русский-ru": "Свайпни два бустера вместе и получи крутой эффект",
+    "Английский-en": "Swipe two boosters together and get a cool effect",
+    "German-de": "Streiche zwei Booster zusammen für einen coolen Effekt",
+    "испанский-es": "Junta dos potenciadores para conseguir un efecto genial",
+    "Turkish-tr": "Havalı bir efekt için iki güçlendiriciyi birlikte kaydırın"
   },
   "steps": {
     "Русский-ru": "Ходы",
@@ -245,18 +238,18 @@ export const lang_data = {
     "Turkish-tr": "Yaşam"
   },
   "junior_box": {
-    "Русский-ru": "Набор новичка",
-    "Английский-en": "Junior box",
-    "German-de": "Rookie-Kit",
-    "испанский-es": "Kit novato",
-    "Turkish-tr": "Çaylak seti"
+    "Русский-ru": "Набор мини",
+    "Английский-en": "Box mini",
+    "German-de": "Box mini",
+    "испанский-es": "Box mini",
+    "Turkish-tr": "Box mini"
   },
   "catlover_box": {
-    "Русский-ru": "Набор кошатника",
-    "Английский-en": "Catman's kit",
-    "German-de": "Catman's Kit",
-    "испанский-es": "Kit Catman",
-    "Turkish-tr": "Catman'in çantası"
+    "Русский-ru": "Набор макси",
+    "Английский-en": "Box max",
+    "German-de": "Box max",
+    "испанский-es": "Box max",
+    "Turkish-tr": "Box max"
   },
   "remove_ad": {
     "Русский-ru": "Отключить рекламу",
@@ -348,5 +341,19 @@ export const lang_data = {
     "German-de": "Danke fürs Mitspielen, erwarte bald das nächste Kapitel.",
     "испанский-es": "Gracias por jugar, esperen pronto el próximo capítulo.",
     "Turkish-tr": "Oynadığınız için teşekkürler, bir sonraki bölümü yakında bekliyoruz."
+  },
+  "tutorial_buster_click": {
+    "Русский-ru": "Нажми на бустер чтобы активировать его!",
+    "Английский-en": "Click on the booster to activate it!",
+    "German-de": "Klicken Sie auf den Booster, um ihn zu aktivieren!",
+    "испанский-es": "¡Haz clic en el refuerzo para activarlo!",
+    "Turkish-tr": "Etkinleştirmek için güçlendiriciye tıklayın!"
+  },
+  "tutorial_buster_swap": {
+    "Русский-ru": "Свайпни два бустера вместе и получи крутой эффект!",
+    "Английский-en": "Swipe two boosters together for a cool effect!",
+    "German-de": "Wischen Sie zwei Booster zusammen und erzielen Sie einen coolen Effekt!",
+    "испанский-es": "¡Desliza dos potenciadores juntos y obtén un efecto genial!",
+    "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
   }
 };
