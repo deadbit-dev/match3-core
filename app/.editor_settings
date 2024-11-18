@@ -151,10 +151,6 @@
         :scene
       ]
       [
-        "/map/map.collection"
-        :scene
-      ]
-      [
         "/map/map.gui"
         :scene
       ]
@@ -163,11 +159,15 @@
         :scene
       ]
       [
-        "/game/ui/game.gui"
+        "/game/game.collection"
         :scene
       ]
       [
-        "/game/game.collection"
+        "/map/map.collection"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
         :scene
       ]
     ]

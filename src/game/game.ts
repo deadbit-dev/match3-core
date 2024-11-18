@@ -145,6 +145,8 @@ export function Game() {
     let is_win = false;
     let is_win_action = false;
 
+    let first_pass = false;
+
     function init() {
         Log.log("INIT GAME");
 
@@ -529,27 +531,25 @@ export function Game() {
             if (!completed_levels.includes(current_level)) {
                 completed_levels.push(current_level);
                 GameStorage.set('completed_levels', completed_levels);
-            }
-            const last_state = get_state();
-            add_coins(level_config.coins);
-            if (level_config.coins > 0) {
-                if (last_state.steps != undefined) add_coins(last_state.steps);
-                if (last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
-            }
-            Metrica.report('data', {
-                ['level_' + tostring(get_current_level() + 1)]: {
-                    type: 'end',
-                    time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
-                    steps: last_state.steps
+
+                first_pass = true;
+
+                const last_state = get_state();
+                add_coins(level_config.coins);
+                if (level_config.coins > 0) {
+                    if (last_state.steps != undefined) add_coins(last_state.steps);
+                    if (last_state.remaining_time != undefined) add_coins(math.floor(last_state.remaining_time));
                 }
-            });
-            Log.log({
-                ['level_' + tostring(get_current_level() + 1)]: {
-                    type: 'end',
-                    time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
-                    steps: last_state.steps
-                }
-            });
+
+                Metrica.report('data', {
+                    ['level_' + tostring(get_current_level() + 1)]: {
+                        type: 'end',
+                        time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
+                        steps: last_state.steps
+                    }
+                });
+            }
+            
             EventBus.send('ON_WIN');
             win_action();
             return;
@@ -559,7 +559,7 @@ export function Game() {
 
         update_core_state();
 
-        EventBus.send('ON_WIN_END', copy_state());
+        EventBus.send('ON_WIN_END', {state: copy_state(), with_reward: first_pass});
     }
 
     function win_action() {

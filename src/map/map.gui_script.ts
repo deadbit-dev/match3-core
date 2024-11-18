@@ -173,7 +173,7 @@ function on_resize(data: { width: number, height: number }) {
     if(dr > br) {
         const delta = dr - br;
         print(delta);
-        const scale = math.min(2 + delta, 2.5);
+        const scale = math.min(2.1 + delta, 2.6);
         gui.set_scale(back_left, vmath.vector3(scale, scale, 1));
         gui.set_scale(back_right, vmath.vector3(scale, scale, 1));
     }

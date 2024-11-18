@@ -13,8 +13,8 @@ nodes {
     y: 603.0
   }
   scale {
-    x: 2.0
-    y: 2.0
+    x: 2.1
+    y: 2.1
   }
   type: TYPE_BOX
   texture: "map/backsmall"
@@ -28,8 +28,8 @@ nodes {
     y: 603.0
   }
   scale {
-    x: 2.0
-    y: 2.0
+    x: 2.1
+    y: 2.1
   }
   type: TYPE_BOX
   texture: "map/backsmall"

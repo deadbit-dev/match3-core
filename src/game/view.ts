@@ -1269,7 +1269,7 @@ export function View(resources: ViewResources) {
         });
     }
 
-    function on_win_end(state: GameState) {
+    function on_win_end(data: {state: GameState, with_reward: boolean}) {
         is_block_input = true;
 
 

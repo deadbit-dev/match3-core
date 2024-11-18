@@ -150,7 +150,7 @@ function on_resize(data)
     if dr > br then
         local delta = dr - br
         print(delta)
-        local scale = math.min(2 + delta, 2.5)
+        local scale = math.min(2.1 + delta, 2.6)
         gui.set_scale(
             back_left,
             vmath.vector3(scale, scale, 1)

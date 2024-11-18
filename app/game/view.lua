@@ -1616,7 +1616,7 @@ function ____exports.View(resources)
             end
         )
     end
-    function on_win_end(state)
+    function on_win_end(data)
         is_block_input = true
         for ____, row in ipairs(view_state.substrates) do
             for ____, substrate in ipairs(row) do

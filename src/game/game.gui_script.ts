@@ -607,31 +607,41 @@ function set_tutorial() {
     switch(get_current_level() + 1) {
         case 6:
             hand_timer = timer.delay(2, false, () => {
-                const pos = gui.get_screen_position(gui.get_node('hammer/button'));
-                pos.y -= 100;
-                click_in_two_pos(pos, vmath.vector3(100, 90, 0));
+                const from_pos = vmath.vector3(-200, -400, 0);
+                const to_pos = vmath.vector3(100, 70, 0);
+                if(GAME_CONFIG.debug_levels) {
+                    from_pos.y += 125;
+                    to_pos.y += 50;
+                }
+                click_in_two_pos(from_pos, to_pos);
             });
             break;
         case 7:
-            hand_timer = timer.delay(2, false, () => { hand_click_animation(vmath.vector3(-245, -210, 0)); });
+            hand_timer = timer.delay(2, false, () => {
+                const pos = vmath.vector3(-245, -210, 0);
+                if(GAME_CONFIG.debug_levels) pos.y += 50;
+                hand_click_animation(pos);
+            });
             break;
         case 8:
             hand_timer = timer.delay(2, false, hand_swap_animation);
             break;
         case 9:
             hand_timer = timer.delay(2, false, () => {
-                const hand = gui.get_node('hand');
-                const pos = gui.get_screen_position(gui.get_node('spinning/button'));
-                pos.y -= 100;
-                gui.set_screen_position(hand, pos);
-                hand_click_animation(gui.get_position(hand));
+                const pos = vmath.vector3(-100, -400, 0);
+                if(GAME_CONFIG.debug_levels) pos.y += 125;
+                hand_click_animation(pos);
             });
             break;
         case 17:
             hand_timer = timer.delay(2, false, () => {
-                const pos = gui.get_screen_position(gui.get_node('horizontal_rocket/button'));
-                pos.y -= 100;
-                click_in_two_pos(pos, vmath.vector3(-100, 30, 0));
+                const from_pos = vmath.vector3(-100, -400, 0);
+                const to_pos = vmath.vector3(-100, 30, 0);
+                if(GAME_CONFIG.debug_levels) {
+                    from_pos.y += 125;
+                    to_pos.y += 125;
+                }
+                click_in_two_pos(from_pos, to_pos);
             });
             break;
     }
@@ -639,8 +649,7 @@ function set_tutorial() {
 
 function click_in_two_pos(pos1: vmath.vector3, pos2: vmath.vector3) {
     const hand = gui.get_node('hand');
-    gui.set_screen_position(hand, pos1);
-    hand_click_animation(gui.get_position(hand), () => {
+    hand_click_animation(pos1, () => {
         timer.delay(1, false, () => {
             hand_click_animation(pos2, () => {
                 gui.set_enabled(hand, false);
@@ -668,13 +677,20 @@ function hand_click_animation(position: vmath.vector3, on_end ?: () => void) {
 function hand_swap_animation() {
     const hand = gui.get_node('hand');
     const color = gui.get_color(hand);
-    gui.set_position(hand, vmath.vector3(70, 50, 0));
+    const from_pos = vmath.vector3(70, 50, 0);
+    const to_pos = vmath.vector3(190, 50, 0);
+    if(GAME_CONFIG.debug_levels) {
+        from_pos.y += 50;
+        to_pos.y += 50;
+    }
+    gui.set_position(hand, from_pos);
     color.w = 0.5;
     gui.set_color(hand, color);
     gui.set_enabled(hand, true);
     color.w = 1;
     gui.animate(hand, gui.PROP_COLOR, color, gui.EASING_INCUBIC, 0.3, 0, () => {
-        gui.animate(hand, gui.PROP_POSITION, vmath.vector3(190, 50, 0), gui.EASING_INCUBIC, 1, 0, () => {
+
+        gui.animate(hand, gui.PROP_POSITION, to_pos, gui.EASING_INCUBIC, 1, 0, () => {
             color.w = 0.5;
             gui.animate(hand, gui.PROP_COLOR, color, gui.EASING_INCUBIC, 0.7, 0, () => {
                 gui.set_enabled(hand, false);
@@ -690,7 +706,7 @@ function remove_tutorial() {
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
-function on_win_end(state: GameState) {
+function on_win_end(data: {state: GameState, with_reward: boolean}) {
     if (is_animal_level()) {
         timer.delay(0.1, false, feed_animation);
     }
@@ -719,75 +735,78 @@ function on_win_end(state: GameState) {
                 });
             };
 
-            let level_coins = get_current_level_config().coins;
-            let steps = (state.steps != undefined) ? state.steps : 0;
-            let remaining_time = (state.remaining_time != undefined) ? math.floor(state.remaining_time) : 0;
-            if (level_coins > 0) {
-                const current_coins = GameStorage.get('coins');
-                const before_reward = current_coins - level_coins - steps - remaining_time;
-                gui.set_enabled(gui.get_node('reward'), true);
-                gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
+            if (data.with_reward) {
 
-                const on_each_coin_drop_end = (init_value: number, idx: number) => {
-                    Sound.play('coin');
+                let level_coins = get_current_level_config().coins;
+                let steps = (data.state.steps != undefined) ? data.state.steps : 0;
+                let remaining_time = (data.state.remaining_time != undefined) ? math.floor(data.state.remaining_time) : 0;
+                if (level_coins > 0) {
+                    const current_coins = GameStorage.get('coins');
+                    const before_reward = current_coins - level_coins - steps - remaining_time;
+                    gui.set_enabled(gui.get_node('reward'), true);
+                    gui.set_text(gui.get_node('coins_count'), tostring(before_reward));
 
-                    gui.set_text(gui.get_node('coins_count'), tostring(init_value + idx + 1));
-                    const icon = gui.get_node('coin_icon');
-                    const init_scale = gui.get_scale(icon);
-                    gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
-                        gui.animate(icon, gui.PROP_SCALE, init_scale, gui.EASING_INELASTIC, 0.01);
-                    });
-                };
+                    const on_each_coin_drop_end = (init_value: number, idx: number) => {
+                        Sound.play('coin');
 
-                drop_steptime(() => {
-                    const ltrb = Camera.get_ltrb();
-                    const width = 540;
-                    const height = math.abs(ltrb.w);
-                    const level_coin_points = [
-                        {x: 450, y: 850},
-                        {x: width * 0.3, y: height * 0.5},
-                        {x: 270+25, y: 480-200}
-                    ];
-                    if (steps > 0 || remaining_time > 0) {
-                        const steptime_points = [
-                            { x: 100, y: 850 },
-                            { x: width * 0.25, y: height * 0.5 },
-                            { x: 270 + 25, y: 480 - 200 }
+                        gui.set_text(gui.get_node('coins_count'), tostring(init_value + idx + 1));
+                        const icon = gui.get_node('coin_icon');
+                        const init_scale = gui.get_scale(icon);
+                        gui.animate(icon, gui.PROP_SCALE, vmath.vector3(init_scale.x + 0.03, init_scale.y + 0.03, init_scale.z), gui.EASING_INELASTIC, 0.01, 0, () => {
+                            gui.animate(icon, gui.PROP_SCALE, init_scale, gui.EASING_INELASTIC, 0.01);
+                        });
+                    };
+
+                    drop_steptime(() => {
+                        const ltrb = Camera.get_ltrb();
+                        const width = 540;
+                        const height = math.abs(ltrb.w);
+                        const level_coin_points = [
+                            {x: 450, y: 850},
+                            {x: width * 0.3, y: height * 0.5},
+                            {x: 270+25, y: 480-200}
                         ];
+                        if (steps > 0 || remaining_time > 0) {
+                            const steptime_points = [
+                                { x: 100, y: 850 },
+                                { x: width * 0.25, y: height * 0.5 },
+                                { x: 270 + 25, y: 480 - 200 }
+                            ];
 
-                        const on_each_coin_drop_start = (idx: number) => {
-                            if (steps > 0) {
-                                gui.set_text(gui.get_node('steps'), tostring(steps - (idx + 1)));
-                                return;
-                            }
+                            const on_each_coin_drop_start = (idx: number) => {
+                                if (steps > 0) {
+                                    gui.set_text(gui.get_node('steps'), tostring(steps - (idx + 1)));
+                                    return;
+                                }
 
-                            if (remaining_time > 0) {
-                                gui.set_text(gui.get_node('time'), parse_time(remaining_time - (idx + 1)));
-                                return;
-                            }
-                        };
+                                if (remaining_time > 0) {
+                                    gui.set_text(gui.get_node('time'), parse_time(remaining_time - (idx + 1)));
+                                    return;
+                                }
+                            };
 
-                        drop_coins(before_reward, steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
-                            fade_steptime(() => {
-                                drop_targets(() => {
-                                    drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, (idx: number) => {
-                                        gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
-                                    }, on_each_coin_drop_end, () => {
-                                        fade_targets(on_end_for_last_level);
+                            drop_coins(before_reward, steps + remaining_time, steptime_points, on_each_coin_drop_start, on_each_coin_drop_end, () => {
+                                fade_steptime(() => {
+                                    drop_targets(() => {
+                                        drop_coins(before_reward + steps + remaining_time, level_coins, level_coin_points, (idx: number) => {
+                                            gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
+                                        }, on_each_coin_drop_end, () => {
+                                            fade_targets(on_end_for_last_level);
+                                        });
                                     });
-                                });
-                            });                
-                        });
-                    } else {
-                        drop_targets(() => {
-                            drop_coins(before_reward, level_coins, level_coin_points, (idx: number) => {
-                                gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
-                            }, on_each_coin_drop_end, () => {
-                                fade_targets(on_end_for_last_level);
+                                });                
                             });
-                        });
-                    }
-                });
+                        } else {
+                            drop_targets(() => {
+                                drop_coins(before_reward, level_coins, level_coin_points, (idx: number) => {
+                                    gui.set_text(gui.get_node('coins_text'), tostring(level_coins - (idx + 1)));
+                                }, on_each_coin_drop_end, () => {
+                                    fade_targets(on_end_for_last_level);
+                                });
+                            });
+                        }
+                    });
+                } else on_end_for_last_level();
             } else on_end_for_last_level();
         });
 

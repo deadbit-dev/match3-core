@@ -97,7 +97,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action, first_pass
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -489,30 +489,26 @@ function ____exports.Game()
             if not __TS__ArrayIncludes(completed_levels, current_level) then
                 completed_levels[#completed_levels + 1] = current_level
                 GameStorage.set("completed_levels", completed_levels)
-            end
-            local last_state = get_state()
-            add_coins(level_config.coins)
-            if level_config.coins > 0 then
-                if last_state.steps ~= nil then
-                    add_coins(last_state.steps)
+                first_pass = true
+                local last_state = get_state()
+                add_coins(level_config.coins)
+                if level_config.coins > 0 then
+                    if last_state.steps ~= nil then
+                        add_coins(last_state.steps)
+                    end
+                    if last_state.remaining_time ~= nil then
+                        add_coins(math.floor(last_state.remaining_time))
+                    end
                 end
-                if last_state.remaining_time ~= nil then
-                    add_coins(math.floor(last_state.remaining_time))
-                end
+                Metrica.report(
+                    "data",
+                    {["level_" .. tostring(get_current_level() + 1)] = {
+                        type = "end",
+                        time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
+                        steps = last_state.steps
+                    }}
+                )
             end
-            Metrica.report(
-                "data",
-                {["level_" .. tostring(get_current_level() + 1)] = {
-                    type = "end",
-                    time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
-                    steps = last_state.steps
-                }}
-            )
-            Log.log({["level_" .. tostring(get_current_level() + 1)] = {
-                type = "end",
-                time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
-                steps = last_state.steps
-            }})
             EventBus.send("ON_WIN")
             win_action()
             return
@@ -521,7 +517,10 @@ function ____exports.Game()
         update_core_state()
         EventBus.send(
             "ON_WIN_END",
-            copy_state()
+            {
+                state = copy_state(),
+                with_reward = first_pass
+            }
         )
     end
     function win_action()
@@ -2313,6 +2312,7 @@ function ____exports.Game()
     is_idle = false
     is_win = false
     is_win_action = false
+    first_pass = false
     local function init()
         Log.log("INIT GAME")
         field.init()
