@@ -25,8 +25,8 @@
         :wasm-web true
       }
     }
-    :liveupdate false
-    :output-directory "/Users/pavel/Dev/match3-core/app/build"
+    :liveupdate true
+    :output-directory "D:\\Defold\\projects\\builds"
     :texture-compression "enabled"
     :variant "release"
     :windows {
