@@ -1,14 +1,7 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
-local Error = ____lualib.Error
-local RangeError = ____lualib.RangeError
-local ReferenceError = ____lualib.ReferenceError
-local SyntaxError = ____lualib.SyntaxError
-local TypeError = ____lualib.TypeError
-local URIError = ____lualib.URIError
-local __TS__New = ____lualib.__TS__New
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, on_sound, on_music, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket, set_text
+local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, on_sound, on_music, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -20,6 +13,7 @@ local get_current_level = ____utils.get_current_level
 local remove_ad = ____utils.remove_ad
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
+local set_text = ____utils.set_text
 local ____game_config = require("main.game_config")
 local Dlg = ____game_config.Dlg
 function set_events(data)
@@ -1128,12 +1122,6 @@ function set_enabled_vertical_rocket(data, state)
         EventBus.send("CLOSED_DLG", Dlg.VerticalRocket)
     end
     data.dlg_opened = state
-end
-function set_text(arg0, arg1)
-    error(
-        __TS__New(Error, "Function not implemented."),
-        0
-    )
 end
 function ____exports.init(self)
     Manager.init_script()

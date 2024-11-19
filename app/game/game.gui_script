@@ -562,12 +562,14 @@ function setup_gameover_ui(instance)
     instance.druid:new_button(
         "steps_by_ad/button",
         function()
-            GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
-            Metrica.report(
-                "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
-            )
-            EventBus.send("REVIVE", {steps = 3})
+            Ads.show_reward(function()
+                GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
+                Metrica.report(
+                    "data",
+                    {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
+                )
+                EventBus.send("REVIVE", {steps = 3})
+            end)
         end
     )
     gui.set_text(
@@ -742,25 +744,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch105 = data.idx
-        local ____cond105 = ____switch105 == 0
-        if ____cond105 then
+        local ____switch106 = data.idx
+        local ____cond106 = ____switch106 == 0
+        if ____cond106 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond105 = ____cond105 or ____switch105 == 1
-        if ____cond105 then
+        ____cond106 = ____cond106 or ____switch106 == 1
+        if ____cond106 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond105 = ____cond105 or ____switch105 == 2
-        if ____cond105 then
+        ____cond106 = ____cond106 or ____switch106 == 2
+        if ____cond106 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -892,9 +894,9 @@ function set_tutorial()
         end
     end
     repeat
-        local ____switch124 = get_current_level() + 1
-        local ____cond124 = ____switch124 == 6
-        if ____cond124 then
+        local ____switch125 = get_current_level() + 1
+        local ____cond125 = ____switch125 == 6
+        if ____cond125 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -910,8 +912,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond124 = ____cond124 or ____switch124 == 7
-        if ____cond124 then
+        ____cond125 = ____cond125 or ____switch125 == 7
+        if ____cond125 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -925,13 +927,13 @@ function set_tutorial()
             )
             break
         end
-        ____cond124 = ____cond124 or ____switch124 == 8
-        if ____cond124 then
+        ____cond125 = ____cond125 or ____switch125 == 8
+        if ____cond125 then
             hand_timer = timer.delay(2, false, hand_swap_animation)
             break
         end
-        ____cond124 = ____cond124 or ____switch124 == 9
-        if ____cond124 then
+        ____cond125 = ____cond125 or ____switch125 == 9
+        if ____cond125 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -945,8 +947,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond124 = ____cond124 or ____switch124 == 17
-        if ____cond124 then
+        ____cond125 = ____cond125 or ____switch125 == 17
+        if ____cond125 then
             hand_timer = timer.delay(
                 2,
                 false,

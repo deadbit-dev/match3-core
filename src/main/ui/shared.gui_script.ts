@@ -9,7 +9,7 @@
 import * as druid from 'druid.druid';
 import { add_lifes, add_coins, is_max_lifes, is_enough_coins, remove_coins, remove_lifes, get_current_level, remove_ad } from '../../game/utils';
 import { NameMessage } from '../../modules/modules_const';
-import { parse_time } from '../../utils/utils';
+import { parse_time, set_text } from '../../utils/utils';
 import { Dlg } from '../game_config';
 
 interface props {
@@ -357,7 +357,7 @@ function setup_store(data: props) {
         });
     });
 
-    if(GAME_CONFIG.debug_levels) {
+    if (GAME_CONFIG.debug_levels) {
         gui.set_enabled(gui.get_node('store/reset/button'), true);
         data.druid.new_button('store/reset/button', () => {
             remove_coins(GameStorage.get('coins'));
@@ -829,6 +829,3 @@ function set_enabled_vertical_rocket(data: props, state: boolean) {
     data.dlg_opened = state;
 }
 
-function set_text(arg0: string, arg1: string) {
-    throw new Error('Function not implemented.');
-}

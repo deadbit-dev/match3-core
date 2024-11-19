@@ -24,7 +24,7 @@ interface props {
 export function init(this: props) {
     msg.post('.', 'acquire_input_focus');
     register_manager();
-    
+
     Manager.init(() => {
         EventBus.on('ON_SCENE_LOADED', (message) => {
             const name = message.name;
@@ -34,7 +34,7 @@ export function init(this: props) {
             else
                 Ads.hide_banner();
         });
-        
+
         // если это одноклассники
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')
             HtmlBridge.start_resize_monitor();
@@ -50,7 +50,7 @@ export function init(this: props) {
                     const products: Product[] = data as Product[];
                     GAME_CONFIG.products = products;
                     GAME_CONFIG.has_payments = true;
-                    
+
                     log('Yandex init_purchases success');
 
                     // необработанные покупки, такое бывает когда юзер покупает например в яндексе
@@ -58,10 +58,10 @@ export function init(this: props) {
                     HtmlBridge.get_purchases((status, data) => {
                         if (!status)
                             return;
-                    
+
                         const purchases: Purchase[] = data as Purchase[];
                         log('Yandex get_purchases success', purchases);
-                        
+
                         for (let i = 0; i < purchases.length; i++) {
                             const purchase = purchases[i];
                             const id_product = purchase.productID;
@@ -69,29 +69,29 @@ export function init(this: props) {
                             if (id_product == 'maney150') {
                                 add_coins(150);
                                 GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
                             else if (id_product == 'maney300') {
                                 add_coins(300);
                                 GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
                             else if (id_product == 'maney800') {
                                 add_coins(800);
                                 GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
-                            else if(id_product == 'noads1') {
+                            else if (id_product == 'noads1') {
                                 remove_ad(24 * 60 * 60); // 1 day
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
-                            else if(id_product == 'noads7') {
+                            else if (id_product == 'noads7') {
                                 remove_ad(24 * 60 * 60 * 7); // 7 day's
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
-                            else if(id_product == 'noads30') {
+                            else if (id_product == 'noads30') {
                                 remove_ad(24 * 60 * 60 * 30); // 30 day's
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => {});
+                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
                             }
                         }
                     });

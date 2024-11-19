@@ -262,7 +262,7 @@ function setup_busters(instance: props) {
 
         instance.settings_opened = !instance.settings_opened;
 
-        set_enabled_settings(instance.settings_opened);        
+        set_enabled_settings(instance.settings_opened);
 
         instance.druid.new_button('sound', () => {
             EventBus.send('SOUND_BUTTON');
@@ -304,7 +304,7 @@ function set_enabled_settings(state: boolean) {
     const store = gui.get_node('store');
     const map = gui.get_node('map');
 
-    if(state) {
+    if (state) {
         const sound_pos = gui.get_position(sound);
         sound_pos.y += 80;
         gui.set_enabled(sound, true);
@@ -363,7 +363,7 @@ function setup_sustem_ui(instance: props) {
 function setup_win_ui(instance: props) {
     instance.druid.new_button('continue_button', () => {
         gui.set_enabled(gui.get_node('continue_button'), false);
-        if(!GameStorage.get('was_purchased')) Ads.show_interstitial(true, next_level);
+        if (!GameStorage.get('was_purchased')) Ads.show_interstitial(true, next_level);
         else next_level();
     });
     instance.druid.new_button('win_close', to_map);
@@ -409,9 +409,11 @@ function setup_gameover_ui(instance: props) {
 
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
     instance.druid.new_button('steps_by_ad/button', () => {
-        GAME_CONFIG.steps_by_ad++;
-        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
-        EventBus.send('REVIVE', {steps:3});
+        Ads.show_reward(() => {
+            GAME_CONFIG.steps_by_ad++;
+            Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
+            EventBus.send('REVIVE', { steps: 3 });
+        });
     });
 
     gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов");
@@ -423,7 +425,7 @@ function setup_gameover_ui(instance: props) {
         }
         remove_coins(30);
         Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
-        EventBus.send('REVIVE', {steps:5});
+        EventBus.send('REVIVE', { steps: 5 });
     });
 
     gui.set_text(gui.get_node('time_by_coins/text'), "+20 cек");
@@ -435,12 +437,12 @@ function setup_gameover_ui(instance: props) {
         }
         remove_coins(40);
         Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: 'time_money' } });
-        EventBus.send('REVIVE', {time:20});
+        EventBus.send('REVIVE', { time: 20 });
     });
 }
 
 function to_map() {
-    if(!GameStorage.get('was_purchased')) {
+    if (!GameStorage.get('was_purchased')) {
         Ads.show_interstitial(true, () => {
             Sound.stop('game');
             Scene.load('map');
@@ -477,12 +479,12 @@ function set_events(instance: props) {
     EventBus.on('SHUFFLE_START', on_shuffle_start);
     EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
     EventBus.on('OPENED_DLG', (dlg: Dlg) => {
-       if(dlg == Dlg.Store) {
-        gui.set_enabled(gui.get_node('buster_buttons'), false);
-       } 
+        if (dlg == Dlg.Store) {
+            gui.set_enabled(gui.get_node('buster_buttons'), false);
+        }
     });
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
-        if(dlg == Dlg.Store) {
+        if (dlg == Dlg.Store) {
             gui.set_enabled(gui.get_node('buster_buttons'), true);
             Sound.play('game');
         }
@@ -490,7 +492,7 @@ function set_events(instance: props) {
 }
 
 function update_targets(data: TargetMessage) {
-    if(data.pos != undefined && data.type == TargetType.Element) {
+    if (data.pos != undefined && data.type == TargetType.Element) {
         const pos = Camera.world_to_screen(data.pos);
         const element = gui.new_box_node(pos, vmath.vector3(40, 40, 1));
         const view = GAME_CONFIG.element_view[data.id as ElementId];
@@ -504,7 +506,7 @@ function update_targets(data: TargetMessage) {
 }
 
 function set_target(data: TargetMessage) {
-    switch(data.idx) {
+    switch (data.idx) {
         case 0: set_text('first_target_counts', math.max(0, data.amount)); break;
         case 1: set_text('second_target_counts', math.max(0, data.amount)); break;
         case 2: set_text('third_target_counts', math.max(0, data.amount)); break;
@@ -531,12 +533,12 @@ function feed_animation() {
                 const width = 540;
                 const height = math.abs(ltrb.w);
                 const points = [
-                    {x: 420, y: 870},
-                    {x: width * 0.3, y: height * 0.5},
-                    {x: width * 0.5, y: 50 + GAME_CONFIG.bottom_offset}
+                    { x: 420, y: 870 },
+                    { x: width * 0.3, y: height * 0.5 },
+                    { x: width * 0.5, y: 50 + GAME_CONFIG.bottom_offset }
                 ];
 
-                if(GAME_CONFIG.debug_levels) {
+                if (GAME_CONFIG.debug_levels) {
                     points[points.length - 1].y = width * 0.4 + GAME_CONFIG.bottom_offset;
                 }
 
@@ -612,12 +614,12 @@ function set_tutorial() {
             gui.set_layer(gui.get_node(buster + "/button"), "top");
     }
 
-    switch(get_current_level() + 1) {
+    switch (get_current_level() + 1) {
         case 6:
             hand_timer = timer.delay(2, false, () => {
                 const from_pos = vmath.vector3(-200, -400, 0);
                 const to_pos = vmath.vector3(100, 70, 0);
-                if(GAME_CONFIG.debug_levels) {
+                if (GAME_CONFIG.debug_levels) {
                     from_pos.y += 125;
                     to_pos.y += 50;
                 }
@@ -627,7 +629,7 @@ function set_tutorial() {
         case 7:
             hand_timer = timer.delay(2, false, () => {
                 const pos = vmath.vector3(-245, -210, 0);
-                if(GAME_CONFIG.debug_levels) pos.y += 50;
+                if (GAME_CONFIG.debug_levels) pos.y += 50;
                 hand_click_animation(pos);
             });
             break;
@@ -637,7 +639,7 @@ function set_tutorial() {
         case 9:
             hand_timer = timer.delay(2, false, () => {
                 const pos = vmath.vector3(-100, -400, 0);
-                if(GAME_CONFIG.debug_levels) pos.y += 125;
+                if (GAME_CONFIG.debug_levels) pos.y += 125;
                 hand_click_animation(pos);
             });
             break;
@@ -645,7 +647,7 @@ function set_tutorial() {
             hand_timer = timer.delay(2, false, () => {
                 const from_pos = vmath.vector3(0, -400, 0);
                 const to_pos = vmath.vector3(-100, 10, 0);
-                if(GAME_CONFIG.debug_levels) {
+                if (GAME_CONFIG.debug_levels) {
                     from_pos.y += 125;
                     to_pos.y += 50;
                 }
@@ -669,13 +671,13 @@ function click_in_two_pos(pos1: vmath.vector3, pos2: vmath.vector3) {
     });
 }
 
-function hand_click_animation(position: vmath.vector3, on_end ?: () => void) {
+function hand_click_animation(position: vmath.vector3, on_end?: () => void) {
     const hand = gui.get_node('hand');
     gui.set_position(hand, position);
     gui.set_enabled(hand, true);
     gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.5, 0.5, 0.5), gui.EASING_INCUBIC, 1, 0, () => {
         gui.set_enabled(hand, false);
-        if(on_end != undefined) on_end();
+        if (on_end != undefined) on_end();
         else timer.delay(1, false, () => {
             hand_click_animation(position, on_end);
         });
@@ -687,7 +689,7 @@ function hand_swap_animation() {
     const color = gui.get_color(hand);
     const from_pos = vmath.vector3(70, 50, 0);
     const to_pos = vmath.vector3(190, 50, 0);
-    if(GAME_CONFIG.debug_levels) {
+    if (GAME_CONFIG.debug_levels) {
         from_pos.y += 50;
         to_pos.y += 50;
     }
@@ -714,7 +716,7 @@ function remove_tutorial() {
     gui.set_enabled(gui.get_node('tutorial'), false);
 }
 
-function on_win_end(data: {state: GameState, with_reward: boolean}) {
+function on_win_end(data: { state: GameState, with_reward: boolean }) {
     if (is_animal_level()) {
         timer.delay(0.1, false, feed_animation);
     }
@@ -770,9 +772,9 @@ function on_win_end(data: {state: GameState, with_reward: boolean}) {
                         const width = 540;
                         const height = math.abs(ltrb.w);
                         const level_coin_points = [
-                            {x: 450, y: 850},
-                            {x: width * 0.3, y: height * 0.5},
-                            {x: 270+25, y: 480-200}
+                            { x: 450, y: 850 },
+                            { x: width * 0.3, y: height * 0.5 },
+                            { x: 270 + 25, y: 480 - 200 }
                         ];
                         if (steps > 0 || remaining_time > 0) {
                             const steptime_points = [
@@ -802,7 +804,7 @@ function on_win_end(data: {state: GameState, with_reward: boolean}) {
                                             fade_targets(on_end_for_last_level);
                                         });
                                     });
-                                });                
+                                });
                             });
                         } else {
                             drop_targets(() => {
@@ -1032,7 +1034,7 @@ function set_gameover(instance: props, state: GameState) {
 
 function set_gameover_offer() {
     gui.set_enabled(gui.get_node('gameover_offer_close'), true);
-    if(!is_time_level()) {
+    if (!is_time_level()) {
         if (GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
         gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
     } else gui.set_enabled(gui.get_node('time_by_coins/button'), true);
