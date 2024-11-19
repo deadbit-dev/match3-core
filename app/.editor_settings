@@ -143,10 +143,6 @@
         :code
       ]
       [
-        "/main/ui/shared.gui"
-        :scene
-      ]
-      [
         "/assets/map.atlas"
         :scene
       ]
@@ -168,6 +164,10 @@
       ]
       [
         "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui"
         :scene
       ]
     ]

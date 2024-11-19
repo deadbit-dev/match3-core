@@ -476,8 +476,16 @@ function set_events(instance: props) {
     }, true);
     EventBus.on('SHUFFLE_START', on_shuffle_start);
     EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
+    EventBus.on('OPENED_DLG', (dlg: Dlg) => {
+       if(dlg == Dlg.Store) {
+        gui.set_enabled(gui.get_node('buster_buttons'), false);
+       } 
+    });
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
-        if(dlg == Dlg.Store) Sound.play('game');
+        if(dlg == Dlg.Store) {
+            gui.set_enabled(gui.get_node('buster_buttons'), true);
+            Sound.play('game');
+        }
     });
 }
 

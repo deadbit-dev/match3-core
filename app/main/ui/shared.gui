@@ -8,6 +8,27 @@ textures {
   texture: "/assets/ui.atlas"
 }
 nodes {
+  position {
+    x: 270.0
+    y: 480.0
+  }
+  size {
+    x: 540.0
+    y: 960.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "fade"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "fade"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
   type: TYPE_TEMPLATE
   id: "store"
   layer: "top"
@@ -2316,27 +2337,6 @@ nodes {
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
   enabled: false
-}
-nodes {
-  position {
-    x: 270.0
-    y: 480.0
-  }
-  size {
-    x: 540.0
-    y: 960.0
-  }
-  color {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  type: TYPE_BOX
-  id: "fade"
-  adjust_mode: ADJUST_MODE_STRETCH
-  layer: "fade"
-  inherit_alpha: true
-  alpha: 0.0
 }
 layers {
   name: "back"
