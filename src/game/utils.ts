@@ -125,7 +125,9 @@ export function is_tutorial_swap(swap_info: SwapInfo) {
 
     const is_from = swap_info.from.x == tutorial_data.step.from.x && swap_info.from.y == tutorial_data.step.from.y;
     const is_to = swap_info.to.x == tutorial_data.step.to.x && swap_info.to.y == tutorial_data.step.to.y;
-    return (is_from && is_to);
+    const is_fromto = swap_info.to.x == tutorial_data.step.from.x && swap_info.to.y == tutorial_data.step.from.y;
+    const is_tofrom = swap_info.from.x == tutorial_data.step.to.x && swap_info.from.y == tutorial_data.step.to.y;
+    return (is_from && is_to) || (is_fromto && is_tofrom);
 }
 
 export function is_tutorial_click(pos: Position) {

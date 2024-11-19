@@ -118,7 +118,9 @@ function ____exports.is_tutorial_swap(swap_info)
     end
     local is_from = swap_info.from.x == tutorial_data.step.from.x and swap_info.from.y == tutorial_data.step.from.y
     local is_to = swap_info.to.x == tutorial_data.step.to.x and swap_info.to.y == tutorial_data.step.to.y
-    return is_from and is_to
+    local is_fromto = swap_info.to.x == tutorial_data.step.from.x and swap_info.to.y == tutorial_data.step.from.y
+    local is_tofrom = swap_info.from.x == tutorial_data.step.to.x and swap_info.from.y == tutorial_data.step.to.y
+    return is_from and is_to or is_fromto and is_tofrom
 end
 function ____exports.is_tutorial_click(pos)
     local current_level = ____exports.get_current_level()
