@@ -426,16 +426,16 @@ function setup_gameover_ui(instance: props) {
         EventBus.send('REVIVE', {steps:5});
     });
 
-    gui.set_text(gui.get_node('time_by_coins/text'), "+15 cек");
-    gui.set_text(gui.get_node('time_by_coins/text1'), "50");
+    gui.set_text(gui.get_node('time_by_coins/text'), "+20 cек");
+    gui.set_text(gui.get_node('time_by_coins/text1'), "40");
     instance.druid.new_button('time_by_coins/button', () => {
-        if (!is_enough_coins(50)) {
+        if (!is_enough_coins(40)) {
             EventBus.send('REQUEST_OPEN_STORE');
             return;
         }
-        remove_coins(50);
-        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '15time_money' } });
-        EventBus.send('REVIVE', {time:15});
+        remove_coins(40);
+        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: 'time_money' } });
+        EventBus.send('REVIVE', {time:20});
     });
 }
 

@@ -595,25 +595,25 @@ function setup_gameover_ui(instance)
     )
     gui.set_text(
         gui.get_node("time_by_coins/text"),
-        "+15 cек"
+        "+20 cек"
     )
     gui.set_text(
         gui.get_node("time_by_coins/text1"),
-        "50"
+        "40"
     )
     instance.druid:new_button(
         "time_by_coins/button",
         function()
-            if not is_enough_coins(50) then
+            if not is_enough_coins(40) then
                 EventBus.send("REQUEST_OPEN_STORE")
                 return
             end
-            remove_coins(50)
+            remove_coins(40)
             Metrica.report(
                 "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "15time_money"}}
+                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "time_money"}}
             )
-            EventBus.send("REVIVE", {time = 15})
+            EventBus.send("REVIVE", {time = 20})
         end
     )
 end
