@@ -59,6 +59,10 @@
         :scene
       ]
       [
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
         "/project_settings/my_profile.display_profiles"
         :cljfx-form-view
       ]
@@ -123,10 +127,6 @@
         :scene
       ]
       [
-        "/assets/ui.atlas"
-        :scene
-      ]
-      [
         "/main/ui/shared.gui_script"
         :code
       ]
@@ -159,11 +159,11 @@
         :scene
       ]
       [
-        "/game.project"
-        :cljfx-form-view
+        "/main/ui/shared.gui"
+        :scene
       ]
       [
-        "/main/ui/shared.gui"
+        "/assets/ui.atlas"
         :scene
       ]
       [

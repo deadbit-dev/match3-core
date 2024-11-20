@@ -10,7 +10,7 @@
 import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { Dlg, TargetMessage } from '../main/game_config';
-import { get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
+import { format_string, get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
 import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, is_time_level, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
@@ -186,8 +186,8 @@ function setup_busters(instance: props) {
     if (GAME_CONFIG.debug_levels) pos.y += 125;
     gui.set_position(busters, pos);
 
-    if (GameStorage.get('spinning_opened')) {
-        instance.druid.new_button('spinning/button', () => {
+    instance.druid.new_button('spinning/button', () => {
+        if (GameStorage.get('spinning_opened')) {
             if (GameStorage.get('spinning_counts') == 0) {
                 if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
                     if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
@@ -196,15 +196,22 @@ function setup_busters(instance: props) {
                 return;
             }
             EventBus.send('ACTIVATE_BUSTER', { name: 'SPINNING' });
-        });
-
+        } else {
+            const popup = gui.get_node('popup');
+            gui.set_position(popup, vmath.vector3(-70, -5, 0));
+            set_text('popup/text', format_string(Lang.get_text('buster_open'),[9]));
+            gui.set_enabled(popup, !gui.is_enabled(popup, false));
+        }
+    });
+    if (GameStorage.get('spinning_opened')) {
         gui.set_enabled(gui.get_node('spinning/lock'), false);
         gui.set_enabled(gui.get_node('spinning/icon'), true);
         gui.set_enabled(gui.get_node('spinning/counts'), true);
     }
 
-    if (GameStorage.get('hammer_opened')) {
-        instance.druid.new_button('hammer/button', () => {
+    
+    instance.druid.new_button('hammer/button', () => {
+        if (GameStorage.get('hammer_opened')) {
             if (GameStorage.get('hammer_counts') == 0) {
                 if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
                     if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
@@ -213,15 +220,23 @@ function setup_busters(instance: props) {
                 return;
             }
             EventBus.send('ACTIVATE_BUSTER', { name: 'HAMMER' });
-        });
+        } else {
+            const popup = gui.get_node('popup');
+            gui.set_position(popup, vmath.vector3(-170, -5, 0));
+            set_text('popup/text', format_string(Lang.get_text('buster_open'), [6]));
+            gui.set_enabled(popup, !gui.is_enabled(popup, false));
+        }
+    });
 
+    if (GameStorage.get('hammer_opened')) {
         gui.set_enabled(gui.get_node('hammer/lock'), false);
         gui.set_enabled(gui.get_node('hammer/icon'), true);
         gui.set_enabled(gui.get_node('hammer/counts'), true);
     }
 
-    if (GameStorage.get('horizontal_rocket_opened')) {
-        instance.druid.new_button('horizontal_rocket/button', () => {
+    
+    instance.druid.new_button('horizontal_rocket/button', () => {
+        if (GameStorage.get('horizontal_rocket_opened')) {
             if (GameStorage.get('horizontal_rocket_counts') == 0) {
                 if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
                     if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
@@ -230,15 +245,23 @@ function setup_busters(instance: props) {
                 return;
             }
             EventBus.send('ACTIVATE_BUSTER', { name: 'HORIZONTAL_ROCKET' });
-        });
+        } else {
+            const popup = gui.get_node('popup');
+            gui.set_position(popup, vmath.vector3(30, -5, 0));
+            set_text('popup/text', format_string(Lang.get_text('buster_open'), [17]));
+            gui.set_enabled(popup, !gui.is_enabled(popup, false));
+        }
+    });
 
+    if (GameStorage.get('horizontal_rocket_opened')) {
         gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
         gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
         gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
     }
 
-    if (GameStorage.get('vertical_rocket_opened')) {
-        instance.druid.new_button('vertical_rocket/button', () => {
+    
+    instance.druid.new_button('vertical_rocket/button', () => {
+        if (GameStorage.get('vertical_rocket_opened')) {
             if (GameStorage.get('vertical_rocket_counts') == 0) {
                 if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
                     if (GameStorage.get('completed_tutorials').includes(GameStorage.get('current_level') + 1))
@@ -247,8 +270,15 @@ function setup_busters(instance: props) {
                 return;
             }
             EventBus.send('ACTIVATE_BUSTER', { name: 'VERTICAL_ROCKET' });
-        });
+        } else {
+            const popup = gui.get_node('popup');
+            gui.set_position(popup, vmath.vector3(130, -5, 0));
+            set_text('popup/text', format_string(Lang.get_text('buster_open'), [17]));
+            gui.set_enabled(popup, !gui.is_enabled(popup, false));
+        }
+    });
 
+    if (GameStorage.get('vertical_rocket_opened')) {
         gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
         gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
         gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);

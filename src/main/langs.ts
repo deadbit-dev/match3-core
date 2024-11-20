@@ -355,5 +355,13 @@ export const lang_data = {
     "German-de": "Wischen Sie zwei Booster zusammen und erzielen Sie einen coolen Effekt!",
     "испанский-es": "¡Desliza dos potenciadores juntos y obtén un efecto genial!",
     "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
+  },
+  "buster_open": {
+    "Русский-ru": "Будет доступно \n с {0} уровня",
+    "Английский-en": "Будет доступно \n с {0} уровня",
+    "German-de": "Будет доступно \n с {0} уровня",
+    "испанский-es": "Будет доступно \n с {0} уровня",
+    "Turkish-tr": "Будет доступно \n с {0} уровня"
+    
   }
 };

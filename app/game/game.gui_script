@@ -8,6 +8,7 @@ local druid = require("druid.druid")
 local ____game_config = require("main.game_config")
 local Dlg = ____game_config.Dlg
 local ____utils = require("utils.utils")
+local format_string = ____utils.format_string
 local get_point_curve = ____utils.get_point_curve
 local parse_time = ____utils.parse_time
 local set_text = ____utils.set_text
@@ -140,10 +141,10 @@ function setup_busters(instance)
         pos.y = pos.y + 125
     end
     gui.set_position(busters, pos)
-    if GameStorage.get("spinning_opened") then
-        instance.druid:new_button(
-            "spinning/button",
-            function()
+    instance.druid:new_button(
+        "spinning/button",
+        function()
+            if GameStorage.get("spinning_opened") then
                 if GameStorage.get("spinning_counts") == 0 then
                     if __TS__ArrayIncludes(
                         GAME_CONFIG.tutorial_levels,
@@ -161,8 +162,27 @@ function setup_busters(instance)
                     return
                 end
                 EventBus.send("ACTIVATE_BUSTER", {name = "SPINNING"})
+            else
+                local popup = gui.get_node("popup")
+                gui.set_position(
+                    popup,
+                    vmath.vector3(-70, -5, 0)
+                )
+                set_text(
+                    "popup/text",
+                    format_string(
+                        Lang.get_text("buster_open"),
+                        {9}
+                    )
+                )
+                gui.set_enabled(
+                    popup,
+                    not gui.is_enabled(popup, false)
+                )
             end
-        )
+        end
+    )
+    if GameStorage.get("spinning_opened") then
         gui.set_enabled(
             gui.get_node("spinning/lock"),
             false
@@ -176,10 +196,10 @@ function setup_busters(instance)
             true
         )
     end
-    if GameStorage.get("hammer_opened") then
-        instance.druid:new_button(
-            "hammer/button",
-            function()
+    instance.druid:new_button(
+        "hammer/button",
+        function()
+            if GameStorage.get("hammer_opened") then
                 if GameStorage.get("hammer_counts") == 0 then
                     if __TS__ArrayIncludes(
                         GAME_CONFIG.tutorial_levels,
@@ -197,8 +217,27 @@ function setup_busters(instance)
                     return
                 end
                 EventBus.send("ACTIVATE_BUSTER", {name = "HAMMER"})
+            else
+                local popup = gui.get_node("popup")
+                gui.set_position(
+                    popup,
+                    vmath.vector3(-170, -5, 0)
+                )
+                set_text(
+                    "popup/text",
+                    format_string(
+                        Lang.get_text("buster_open"),
+                        {6}
+                    )
+                )
+                gui.set_enabled(
+                    popup,
+                    not gui.is_enabled(popup, false)
+                )
             end
-        )
+        end
+    )
+    if GameStorage.get("hammer_opened") then
         gui.set_enabled(
             gui.get_node("hammer/lock"),
             false
@@ -212,10 +251,10 @@ function setup_busters(instance)
             true
         )
     end
-    if GameStorage.get("horizontal_rocket_opened") then
-        instance.druid:new_button(
-            "horizontal_rocket/button",
-            function()
+    instance.druid:new_button(
+        "horizontal_rocket/button",
+        function()
+            if GameStorage.get("horizontal_rocket_opened") then
                 if GameStorage.get("horizontal_rocket_counts") == 0 then
                     if __TS__ArrayIncludes(
                         GAME_CONFIG.tutorial_levels,
@@ -233,8 +272,27 @@ function setup_busters(instance)
                     return
                 end
                 EventBus.send("ACTIVATE_BUSTER", {name = "HORIZONTAL_ROCKET"})
+            else
+                local popup = gui.get_node("popup")
+                gui.set_position(
+                    popup,
+                    vmath.vector3(30, -5, 0)
+                )
+                set_text(
+                    "popup/text",
+                    format_string(
+                        Lang.get_text("buster_open"),
+                        {17}
+                    )
+                )
+                gui.set_enabled(
+                    popup,
+                    not gui.is_enabled(popup, false)
+                )
             end
-        )
+        end
+    )
+    if GameStorage.get("horizontal_rocket_opened") then
         gui.set_enabled(
             gui.get_node("horizontal_rocket/lock"),
             false
@@ -248,10 +306,10 @@ function setup_busters(instance)
             true
         )
     end
-    if GameStorage.get("vertical_rocket_opened") then
-        instance.druid:new_button(
-            "vertical_rocket/button",
-            function()
+    instance.druid:new_button(
+        "vertical_rocket/button",
+        function()
+            if GameStorage.get("vertical_rocket_opened") then
                 if GameStorage.get("vertical_rocket_counts") == 0 then
                     if __TS__ArrayIncludes(
                         GAME_CONFIG.tutorial_levels,
@@ -269,8 +327,27 @@ function setup_busters(instance)
                     return
                 end
                 EventBus.send("ACTIVATE_BUSTER", {name = "VERTICAL_ROCKET"})
+            else
+                local popup = gui.get_node("popup")
+                gui.set_position(
+                    popup,
+                    vmath.vector3(130, -5, 0)
+                )
+                set_text(
+                    "popup/text",
+                    format_string(
+                        Lang.get_text("buster_open"),
+                        {17}
+                    )
+                )
+                gui.set_enabled(
+                    popup,
+                    not gui.is_enabled(popup, false)
+                )
             end
-        )
+        end
+    )
+    if GameStorage.get("vertical_rocket_opened") then
         gui.set_enabled(
             gui.get_node("vertical_rocket/lock"),
             false
@@ -744,25 +821,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch106 = data.idx
-        local ____cond106 = ____switch106 == 0
-        if ____cond106 then
+        local ____switch114 = data.idx
+        local ____cond114 = ____switch114 == 0
+        if ____cond114 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond106 = ____cond106 or ____switch106 == 1
-        if ____cond106 then
+        ____cond114 = ____cond114 or ____switch114 == 1
+        if ____cond114 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond106 = ____cond106 or ____switch106 == 2
-        if ____cond106 then
+        ____cond114 = ____cond114 or ____switch114 == 2
+        if ____cond114 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -894,9 +971,9 @@ function set_tutorial()
         end
     end
     repeat
-        local ____switch125 = get_current_level() + 1
-        local ____cond125 = ____switch125 == 6
-        if ____cond125 then
+        local ____switch133 = get_current_level() + 1
+        local ____cond133 = ____switch133 == 6
+        if ____cond133 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -912,8 +989,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond125 = ____cond125 or ____switch125 == 7
-        if ____cond125 then
+        ____cond133 = ____cond133 or ____switch133 == 7
+        if ____cond133 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -927,13 +1004,13 @@ function set_tutorial()
             )
             break
         end
-        ____cond125 = ____cond125 or ____switch125 == 8
-        if ____cond125 then
+        ____cond133 = ____cond133 or ____switch133 == 8
+        if ____cond133 then
             hand_timer = timer.delay(2, false, hand_swap_animation)
             break
         end
-        ____cond125 = ____cond125 or ____switch125 == 9
-        if ____cond125 then
+        ____cond133 = ____cond133 or ____switch133 == 9
+        if ____cond133 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -947,8 +1024,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond125 = ____cond125 or ____switch125 == 17
-        if ____cond125 then
+        ____cond133 = ____cond133 or ____switch133 == 17
+        if ____cond133 then
             hand_timer = timer.delay(
                 2,
                 false,

@@ -224,9 +224,6 @@ images {
   image: "/assets/ui/BtnSoundOn.png"
 }
 images {
-  image: "/assets/ui/BtnSoundOff.png"
-}
-images {
   image: "/assets/ui/life_icon.png"
 }
 images {
@@ -252,5 +249,8 @@ images {
 }
 images {
   image: "/assets/ui/btnSetoff.png"
+}
+images {
+  image: "/assets/ui/PopUp.png"
 }
 extrude_borders: 2
