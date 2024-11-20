@@ -810,6 +810,11 @@ function set_enabled_store(data, state)
             set_enabled_vertical_rocket(data, false)
             set_enabled_coins(state)
             set_enabled_lifes(state)
+            if state then
+                Sound.stop("game")
+            else
+                Sound.play("game")
+            end
             break
         end
         ____cond131 = ____cond131 or ____switch131 == "map"

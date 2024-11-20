@@ -678,6 +678,8 @@ function set_enabled_store(data: props, state: boolean) {
 
             set_enabled_coins(state);
             set_enabled_lifes(state);
+            if(state) Sound.stop('game');
+            else Sound.play('game');
             break;
         case "map":
             set_enabled_store_button(!state);
