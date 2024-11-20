@@ -364,7 +364,8 @@ function setup_store(data: props) {
             remove_lifes(GameStorage.get('life').amount);
 
             const life = GameStorage.get('life');
-            life.start_time = System.now() - life.start_time;
+            life.start_time = System.now();
+            life.amount = 0;
             GameStorage.set('life', life);
             on_life_tick();
 
@@ -546,13 +547,13 @@ function on_life_tick() {
 
     gui.set_text(gui.get_node('life_notification/time_text'), parse_time(20 * 60 - delta));
 
-    if (delta < 20 * 60) return;
+    if (delta <= 20 * 60) return;
 
     add_lifes(1);
 
-    life.start_time = System.now();
-    GameStorage.set('life', life);
-
+    const new_life = GameStorage.get('life');
+    new_life.start_time = System.now();
+    GameStorage.set('life', new_life);
 }
 
 function set_infinit_life(duration: number) {

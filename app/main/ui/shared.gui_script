@@ -421,7 +421,8 @@ function setup_store(data)
                 remove_coins(GameStorage.get("coins"))
                 remove_lifes(GameStorage.get("life").amount)
                 local life = GameStorage.get("life")
-                life.start_time = System.now() - life.start_time
+                life.start_time = System.now()
+                life.amount = 0
                 GameStorage.set("life", life)
                 on_life_tick()
                 local infinit_life = GameStorage.get("infinit_life")
@@ -664,12 +665,13 @@ function on_life_tick()
         gui.get_node("life_notification/time_text"),
         parse_time(20 * 60 - delta)
     )
-    if delta < 20 * 60 then
+    if delta <= 20 * 60 then
         return
     end
     add_lifes(1)
-    life.start_time = System.now()
-    GameStorage.set("life", life)
+    local new_life = GameStorage.get("life")
+    new_life.start_time = System.now()
+    GameStorage.set("life", new_life)
 end
 function set_infinit_life(duration)
     local life = GameStorage.get("infinit_life")
