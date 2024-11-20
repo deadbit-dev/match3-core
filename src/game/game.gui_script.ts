@@ -458,7 +458,7 @@ function setup_gameover_ui(instance: props) {
         EventBus.send('REVIVE', { steps: 5 });
     });
 
-    gui.set_text(gui.get_node('time_by_coins/text'), "+20 cек");
+    gui.set_text(gui.get_node('time_by_coins/text'), "+20 " + Lang.get_text('sec'));
     gui.set_text(gui.get_node('time_by_coins/text1'), "40");
     instance.druid.new_button('time_by_coins/button', () => {
         if (!is_enough_coins(40)) {
@@ -948,6 +948,8 @@ function set_gameover(instance: props, state: GameState) {
 
     Sound.play('failed');
     Sound.play('animallose');
+
+    set_text('missing_text', Lang.get_text("targets"));
 
     const target_1 = gui.get_node('target_1');
     const target_2 = gui.get_node('target_2');

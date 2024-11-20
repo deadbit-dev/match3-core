@@ -91,13 +91,6 @@ ____exports.lang_data = {
         ["испанский-es"] = "¡Los cohetes lo vuelan todo!",
         ["Turkish-tr"] = "Roketler etrafımızdaki her şeyi havaya uçuruyor!"
     },
-    tutorial_super = {
-        ["Русский-ru"] = "Свайпни два бустера вместе и получи крутой эффект",
-        ["Английский-en"] = "Swipe two boosters together and get a cool effect",
-        ["German-de"] = "Streiche zwei Booster zusammen für einen coolen Effekt",
-        ["испанский-es"] = "Junta dos potenciadores para conseguir un efecto genial",
-        ["Turkish-tr"] = "Havalı bir efekt için iki güçlendiriciyi birlikte kaydırın"
-    },
     steps = {
         ["Русский-ru"] = "Ходы",
         ["Английский-en"] = "Steps",
@@ -363,6 +356,20 @@ ____exports.lang_data = {
         ["German-de"] = "Будет доступно \n с {0} уровня",
         ["испанский-es"] = "Будет доступно \n с {0} уровня",
         ["Turkish-tr"] = "Будет доступно \n с {0} уровня"
+    },
+    sec = {
+        ["Русский-ru"] = "ceк",
+        ["Английский-en"] = "sec",
+        ["German-de"] = "sec",
+        ["испанский-es"] = "sec",
+        ["Turkish-tr"] = "sec"
+    },
+    not_enough_coins = {
+        ["Русский-ru"] = "Недостаточно монет",
+        ["Английский-en"] = "not_enough_coins",
+        ["German-de"] = "not_enough_coins",
+        ["испанский-es"] = "not_enough_coins",
+        ["Turkish-tr"] = "not_enough_coins"
     }
 }
 return ____exports

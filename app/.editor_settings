@@ -159,15 +159,15 @@
         :scene
       ]
       [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
         "/main/ui/shared.gui"
         :scene
       ]
       [
         "/assets/ui.atlas"
-        :scene
-      ]
-      [
-        "/game/ui/game.gui"
         :scene
       ]
     ]

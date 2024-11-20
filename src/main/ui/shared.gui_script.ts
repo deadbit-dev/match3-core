@@ -513,6 +513,7 @@ function setup_vertical_rocket(data: props) {
 }
 
 function setup_life_notification(data: props) {
+    set_text('life_notification/buy_button_text', Lang.get_text('buy') + " 30");
     data.druid.new_button('life_notification/buy_button', () => {
         if (!is_enough_coins(30)) {
             set_enabled_life_notification(false);
@@ -524,6 +525,9 @@ function setup_life_notification(data: props) {
         remove_coins(30);
         add_lifes(1);
     });
+
+    set_text('life_notification/title_text', Lang.get_text('lifes'));
+    set_text('life_notification/description', Lang.get_text('next_life'));
 
     data.druid.new_button('life_notification/close', () => set_enabled_life_notification(false));
 }
@@ -539,6 +543,8 @@ function setup_not_enough_coins(data: props) {
         set_enabled_not_enough_coins(data, false);
         set_enabled_store(data, true);
     });
+
+    set_text("not_enough_coins/title_text", Lang.get_text("not_enough_coins"));
 }
 
 function on_life_tick() {
