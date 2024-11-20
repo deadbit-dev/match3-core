@@ -159,7 +159,7 @@
         :scene
       ]
       [
-        "/game/ui/game.gui"
+        "/assets/ui.atlas"
         :scene
       ]
       [
@@ -167,7 +167,7 @@
         :scene
       ]
       [
-        "/assets/ui.atlas"
+        "/game/ui/game.gui"
         :scene
       ]
     ]

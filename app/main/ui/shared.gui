@@ -1458,7 +1458,6 @@ nodes {
   overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
-  enabled: false
 }
 nodes {
   position {
@@ -1518,11 +1517,24 @@ nodes {
   text_leading: 0.9
 }
 nodes {
+  size {
+    x: 354.0
+    y: 71.0
+  }
   type: TYPE_BOX
   id: "hammer/buy_button"
   parent: "hammer/dlg"
   layer: "top"
+  slice9 {
+    x: 25.0
+    y: 25.0
+    z: 25.0
+    w: 25.0
+  }
+  overridden_fields: 4
   overridden_fields: 20
+  overridden_fields: 22
+  overridden_fields: 38
   template_node_child: true
 }
 nodes {
