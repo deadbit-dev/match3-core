@@ -26,7 +26,7 @@
       }
     }
     :liveupdate true
-    :output-directory "D:\\Defold\\projects\\builds"
+    :output-directory "/Users/pavel/Dev/match3-core/app/build"
     :texture-compression "enabled"
     :variant "release"
     :windows {
@@ -42,14 +42,6 @@
   }
   :workflow {
     :recent-files [
-      [
-        "/assets/fonts/36_medium.font"
-        :scene
-      ]
-      [
-        "/assets/fonts/48.font"
-        :scene
-      ]
       [
         "/assets/fonts/60.font"
         :scene
@@ -163,12 +155,20 @@
         :scene
       ]
       [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
         "/main/ui/shared.gui"
         :scene
       ]
       [
-        "/game/ui/game.gui"
-        :scene
+        "/main/manager.script"
+        :code
+      ]
+      [
+        "/modules/Manager.lua"
+        :code
       ]
     ]
   }

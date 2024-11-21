@@ -161,10 +161,17 @@ function ____exports.View(resources)
             GAME_CONFIG.animal_levels,
             get_current_level() + 1
         ) then
-            Scene.load_resource(scene_name, "cat")
+            local function checker()
+                return __TS__ArrayIncludes(
+                    GAME_CONFIG.animal_levels,
+                    get_current_level() + 1
+                )
+            end
+            Scene.load_resource(scene_name, "cat", checker)
             Scene.load_resource(
                 scene_name,
-                GAME_CONFIG.level_to_animal[get_current_level() + 1]
+                GAME_CONFIG.level_to_animal[get_current_level() + 1],
+                checker
             )
         end
     end
@@ -571,24 +578,24 @@ function ____exports.View(resources)
         local direction = vmath.normalize(delta)
         local move_direction = get_move_direction(direction)
         repeat
-            local ____switch93 = move_direction
-            local ____cond93 = ____switch93 == Direction.Up
-            if ____cond93 then
+            local ____switch94 = move_direction
+            local ____cond94 = ____switch94 == Direction.Up
+            if ____cond94 then
                 element_to_pos.y = element_to_pos.y - 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Down
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == Direction.Down
+            if ____cond94 then
                 element_to_pos.y = element_to_pos.y + 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Left
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == Direction.Left
+            if ____cond94 then
                 element_to_pos.x = element_to_pos.x - 1
                 break
             end
-            ____cond93 = ____cond93 or ____switch93 == Direction.Right
-            if ____cond93 then
+            ____cond94 = ____cond94 or ____switch94 == Direction.Right
+            if ____cond94 then
                 element_to_pos.x = element_to_pos.x + 1
                 break
             end
@@ -1178,19 +1185,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch201 = message.axis
-                    local ____cond201 = ____switch201 == Axis.Horizontal
-                    if ____cond201 then
+                    local ____switch202 = message.axis
+                    local ____cond202 = ____switch202 == Axis.Horizontal
+                    if ____cond202 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond201 = ____cond201 or ____switch201 == Axis.Vertical
-                    if ____cond201 then
+                    ____cond202 = ____cond202 or ____switch202 == Axis.Vertical
+                    if ____cond202 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond201 = ____cond201 or ____switch201 == Axis.All
-                    if ____cond201 then
+                    ____cond202 = ____cond202 or ____switch202 == Axis.All
+                    if ____cond202 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1219,14 +1226,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch204 = axis
-            local ____cond204 = ____switch204 == Axis.Vertical
-            if ____cond204 then
+            local ____switch205 = axis
+            local ____cond205 = ____switch205 == Axis.Vertical
+            if ____cond205 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond204 = ____cond204 or ____switch204 == Axis.Horizontal
-            if ____cond204 then
+            ____cond205 = ____cond205 or ____switch205 == Axis.Horizontal
+            if ____cond205 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break

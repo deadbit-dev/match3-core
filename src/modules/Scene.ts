@@ -31,6 +31,7 @@ function SceneModule() {
     
     const scene_resources: { [key in string]: string[] } = {'main': []};
     const sender_to_name: { [key in string]: hash } = {};
+    const resource_to_checker: { [key in string]: () => boolean } = {};
 
     function init() {
         if (System.platform == 'HTML5')
@@ -61,11 +62,12 @@ function SceneModule() {
             scene_resources[name] = [];
         Manager.send('SYS_LOAD_SCENE', { name });
     }
-    function load_resource(scene: string, resource: string) {
+    function load_resource(scene: string, resource: string, checker = () => { return true; }) {
         if(scene_resources[scene].indexOf(resource) != -1)
             return;
 
         scene_resources[scene].push(resource);
+        resource_to_checker[resource] = checker;
         Manager.send('SYS_LOAD_RESOURCE', { name: resource });
     }
 
@@ -169,6 +171,8 @@ function SceneModule() {
             const message = _message as Messages['SYS_LOAD_RESOURCE'];
 
             try_load(message.name, () => {
+                if(!resource_to_checker[message.name]())
+                    return;
                 const receiver = Manager.MANAGER_ID + "#" + message.name;
                 sender_to_name[message.name] = msg.url(receiver);
                 msg.post(receiver, "load");

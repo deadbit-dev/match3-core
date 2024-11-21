@@ -223,8 +223,11 @@ export function View(resources: ViewResources) {
         Scene.load_resource(scene_name, 'background');
         
         if(GAME_CONFIG.animal_levels.includes(get_current_level() + 1)) {
-            Scene.load_resource(scene_name, 'cat');
-            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[get_current_level() + 1]);
+            const checker = () => {
+                return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
+            };
+            Scene.load_resource(scene_name, 'cat', checker);
+            Scene.load_resource(scene_name, GAME_CONFIG.level_to_animal[get_current_level() + 1], checker);
         }
     }
 

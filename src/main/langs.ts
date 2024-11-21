@@ -90,6 +90,13 @@ export const lang_data = {
     "испанский-es": "¡Los cohetes lo vuelan todo!",
     "Turkish-tr": "Roketler etrafımızdaki her şeyi havaya uçuruyor!"
   },
+  "tutorial_super": {
+    "Русский-ru": "Свайпни два бустера вместе и получи крутой эффект",
+    "Английский-en": "Swipe two boosters together and get a cool effect",
+    "German-de": "Streiche zwei Booster zusammen für einen coolen Effekt",
+    "испанский-es": "Junta dos potenciadores para conseguir un efecto genial",
+    "Turkish-tr": "Havalı bir efekt için iki güçlendiriciyi birlikte kaydırın"
+  },
   "steps": {
     "Русский-ru": "Ходы",
     "Английский-en": "Steps",
@@ -107,7 +114,7 @@ export const lang_data = {
   "targets": {
     "Русский-ru": "Цели",
     "Английский-en": "Targets",
-    "German-de": "Sammeln",
+    "German-de": "Ziele",
     "испанский-es": "Objetivo",
     "Turkish-tr": "Amaç"
   },
@@ -155,10 +162,10 @@ export const lang_data = {
   },
   "spinning": {
     "Русский-ru": "Юла",
-    "Английский-en": "Yula",
-    "German-de": "Yula",
-    "испанский-es": "Yula",
-    "Turkish-tr": "Yula"
+    "Английский-en": "Whirligig",
+    "German-de": "Kreisel",
+    "испанский-es": "Peonza",
+    "Turkish-tr": "Topaç"
   },
   "rocket": {
     "Русский-ru": "Ракета",
@@ -190,7 +197,7 @@ export const lang_data = {
   },
   "spinning_description": {
     "Русский-ru": "Перемешивает предметы",
-    "Английский-en": "Shuffle items",
+    "Английский-en": "Shuffles items",
     "German-de": "Rührende Objekte",
     "испанский-es": "Agitar objetos",
     "Turkish-tr": "Karıştırılan nesneler"
@@ -213,8 +220,8 @@ export const lang_data = {
     "Русский-ru": "Купить",
     "Английский-en": "Buy",
     "German-de": "Kaufen",
-    "испанский-es": "Comprar",
-    "Turkish-tr": "Satın almak"
+    "испанский-es": "Compre",
+    "Turkish-tr": "Almak"
   },
   "store_title": {
     "Русский-ru": "Магазин",
@@ -259,11 +266,11 @@ export const lang_data = {
     "Turkish-tr": "Bir sonraki hayat"
   },
   "movie_description": {
-    "Русский-ru": "Котенок потерялся, помоги ему преодолеть препятствия и вернуться домой",
-    "Английский-en": "The cat is lost, help her overcome obstacles and return home",
-    "German-de": "Das Kätzchen hat sich verirrt, hilf ihm, nach Hause zu kommen",
-    "испанский-es": "El gatito se ha perdido, ayúdale a llegar a casa",
-    "Turkish-tr": "Yavru kedi kayboldu, eve gitmesine yardım edin"
+    "Русский-ru": "Котенок потерялся, помоги ему преодолеть препятствия и вернуться домой.",
+    "Английский-en": "The cat is lost, help her overcome obstacles and return home.",
+    "German-de": "Das Kätzchen hat sich verirrt, hilf ihm, nach Hause zu kommen.",
+    "испанский-es": "El gatito se ha perdido, ayúdale a llegar a casa.",
+    "Turkish-tr": "Yavru kedi kayboldu, eve gitmesine yardım edin."
   },
   "play": {
     "Русский-ru": "Играть",
@@ -350,24 +357,24 @@ export const lang_data = {
     "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
   },
   "buster_open": {
-    "Русский-ru": "Будет доступно \n с {0} уровня",
-    "Английский-en": "Будет доступно \n с {0} уровня",
-    "German-de": "Будет доступно \n с {0} уровня",
-    "испанский-es": "Будет доступно \n с {0} уровня",
-    "Turkish-tr": "Будет доступно \n с {0} уровня" 
+    "Русский-ru": "Будет доступно с\n% уровня",
+    "Английский-en": "Будет доступно с\n% уровня",
+    "German-de": "Будет доступно с\n% уровня",
+    "испанский-es": "Будет доступно с\n% уровня",
+    "Turkish-tr": "Будет доступно с\n% уровня"
   },
   "sec": {
-    "Русский-ru": "ceк",
-    "Английский-en": "sec",
-    "German-de": "sec",
-    "испанский-es": "sec",
-    "Turkish-tr": "sec"
+    "Русский-ru": "сек",
+    "Английский-en": "сек",
+    "German-de": "сек",
+    "испанский-es": "сек",
+    "Turkish-tr": "сек"
   },
   "not_enough_coins": {
-    "Русский-ru": "Недостаточно монет",
-    "Английский-en": "not_enough_coins",
-    "German-de": "not_enough_coins",
-    "испанский-es": "not_enough_coins",
-    "Turkish-tr": "not_enough_coins"
+    "Русский-ru": "Недоастаточно монет",
+    "Английский-en": "Недоастаточно монет",
+    "German-de": "Недоастаточно монет",
+    "испанский-es": "Недоастаточно монет",
+    "Turkish-tr": "Недоастаточно монет"
   }
 };
