@@ -50,10 +50,10 @@ ____exports.lang_data = {
         ["Turkish-tr"] = "Horozu ayrılan süre içinde besleyin!"
     },
     tutorial_grass = {
-        ["Русский-ru"] = "Чтобы убрать траву, собирай на ней предметы в один ряд!",
-        ["Английский-en"] = "To remove grass, collect objects on it in one row!",
-        ["German-de"] = "Um das Gras zu säubern, sammle Gegenstände darauf!",
-        ["испанский-es"] = "Para despejar la hierba, recoge objetos sobre ella en una sola fila.",
+        ["Русский-ru"] = "Чтобы убрать цветы, собирай на них предметы в один ряд!",
+        ["Английский-en"] = "To remove Flowers, collect objects on it in one row!",
+        ["German-de"] = "Um das Blumen zu säubern, sammle Gegenstände darauf!",
+        ["испанский-es"] = "Para despejar la flores, recoge objetos sobre ella en una sola fila.",
         ["Turkish-tr"] = "Çimleri temizlemek için üzerindeki öğeleri tek bir sıra halinde toplayın!"
     },
     tutorial_hammer = {
@@ -358,25 +358,25 @@ ____exports.lang_data = {
         ["Turkish-tr"] = "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
     },
     buster_open = {
-        ["Русский-ru"] = "Будет доступно с\n {0} уровня",
-        ["Английский-en"] = "Будет доступно с\n {0} уровня",
-        ["German-de"] = "Будет доступно с\n {0} уровня",
-        ["испанский-es"] = "Будет доступно с\n {0} уровня",
-        ["Turkish-tr"] = "Будет доступно с\n {0} уровня"
+        ["Русский-ru"] = "Будет доступно с\n% уровня",
+        ["Английский-en"] = "Available from\n% level",
+        ["German-de"] = "Verfügbar ab\n% Ebene",
+        ["испанский-es"] = "Disponible a partir de\n% nivel",
+        ["Turkish-tr"] = "Şu adresten temin edilebilir\n% seviye"
     },
     sec = {
         ["Русский-ru"] = "сек",
-        ["Английский-en"] = "сек",
-        ["German-de"] = "сек",
-        ["испанский-es"] = "сек",
-        ["Turkish-tr"] = "сек"
+        ["Английский-en"] = "sec",
+        ["German-de"] = "sek",
+        ["испанский-es"] = "seg",
+        ["Turkish-tr"] = "san"
     },
     not_enough_coins = {
-        ["Русский-ru"] = "Недоастаточно монет",
-        ["Английский-en"] = "Недоастаточно монет",
-        ["German-de"] = "Недоастаточно монет",
-        ["испанский-es"] = "Недоастаточно монет",
-        ["Turkish-tr"] = "Недоастаточно монет"
+        ["Русский-ru"] = "Недостаточно монет",
+        ["Английский-en"] = "Not enough coins",
+        ["German-de"] = "Zu wenig Münzen",
+        ["испанский-es"] = "Pocas monedas",
+        ["Turkish-tr"] = "Yeterli para yok"
     }
 }
 return ____exports
