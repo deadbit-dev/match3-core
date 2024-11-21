@@ -43,10 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/assets/fonts/60.font"
-        :scene
-      ]
-      [
         "/assets/fonts/60_medium.font"
         :scene
       ]
@@ -155,6 +151,14 @@
         :scene
       ]
       [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui"
+        :scene
+      ]
+      [
         "/main/manager.script"
         :code
       ]
@@ -163,11 +167,7 @@
         :code
       ]
       [
-        "/game/ui/game.gui"
-        :scene
-      ]
-      [
-        "/main/ui/shared.gui"
+        "/movie/movie.gui"
         :scene
       ]
     ]

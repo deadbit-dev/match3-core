@@ -30,13 +30,16 @@ export function init(this: props): void {
         Sound.stop('map');
         Scene.load('game');
         Scene.try_load_async('map');
+        Metrica.report('data', { 'movie': { event: 'button_2' } });
     });
 
     gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
+    Metrica.report('data', { 'movie': { event: 'start' } });
     this.druid.new_button('start_button', () => {
         this.is_started = true;
         gui.set_enabled(gui.get_node('start_button'), false);
         EventBus.send('START_MOVIE');
+        Metrica.report('data', { 'movie': { event: 'button_1' } });
     });
 
     Camera.set_dynamic_orientation(false);
@@ -45,9 +48,9 @@ export function init(this: props): void {
     EventBus.on("SYS_ON_RESIZED", on_resize);
 
     Camera.update_window_size();
-    
+
     EventBus.on('MOVIE_END', () => {
-        if(! this.is_started)
+        if (!this.is_started)
             return;
         const window = gui.get_node('window');
         gui.set_enabled(window, true);

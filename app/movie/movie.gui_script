@@ -40,12 +40,14 @@ function ____exports.init(self)
             Sound.stop("map")
             Scene.load("game")
             Scene.try_load_async("map")
+            Metrica.report("data", {movie = {event = "button_2"}})
         end
     )
     gui.set_text(
         gui.get_node("start_lable"),
         Lang.get_text("start")
     )
+    Metrica.report("data", {movie = {event = "start"}})
     self.druid:new_button(
         "start_button",
         function()
@@ -55,6 +57,7 @@ function ____exports.init(self)
                 false
             )
             EventBus.send("START_MOVIE")
+            Metrica.report("data", {movie = {event = "button_1"}})
         end
     )
     Camera.set_dynamic_orientation(false)

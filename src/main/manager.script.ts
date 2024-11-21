@@ -107,8 +107,11 @@ export function init(this: props) {
         Camera.set_go_prjection(-1, 1, -3, 3);
 
         Sound.play('map', 1, 0.7);
-
-        Scene.load(GameStorage.get('move_showed') ? 'map' : 'movie');
+        const is_shown = GameStorage.get('move_showed');
+        if (System.platform == 'HTML5')
+            HtmlBridge.game_ready();
+        Metrica.report('data', { 'game_ready': { is_first: !is_shown } });
+        Scene.load(is_shown ? 'map' : 'movie');
         Scene.set_bg('#88dfeb');
 
         timer.delay(0, false, load_levels_config);
