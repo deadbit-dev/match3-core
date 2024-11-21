@@ -6,6 +6,7 @@ local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
 local add_coins = ____utils.add_coins
+local is_max_lifes = ____utils.is_max_lifes
 local is_enough_coins = ____utils.is_enough_coins
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
@@ -879,7 +880,15 @@ function on_life_tick()
     if delta <= 20 * 60 then
         return
     end
-    add_lifes(1)
+    local counts = delta % (20 * 60)
+    while true do
+        local ____counts_6 = counts
+        counts = ____counts_6 - 1
+        if not (____counts_6 > 0 and not is_max_lifes()) then
+            break
+        end
+        add_lifes(1)
+    end
     local new_life = GameStorage.get("life")
     new_life.start_time = System.now()
     GameStorage.set("life", new_life)
@@ -975,9 +984,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch133 = scene.name
-        local ____cond133 = ____switch133 == "movie" or ____switch133 == "game"
-        if ____cond133 then
+        local ____switch134 = scene.name
+        local ____cond134 = ____switch134 == "movie" or ____switch134 == "game"
+        if ____cond134 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -985,8 +994,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == "map"
-        if ____cond133 then
+        ____cond134 = ____cond134 or ____switch134 == "map"
+        if ____cond134 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -1012,9 +1021,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch138 = Scene.get_current_name()
-        local ____cond138 = ____switch138 == "game"
-        if ____cond138 then
+        local ____switch139 = Scene.get_current_name()
+        local ____cond139 = ____switch139 == "game"
+        if ____cond139 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -1028,8 +1037,8 @@ function set_enabled_store(data, state)
             end
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == "map"
-        if ____cond138 then
+        ____cond139 = ____cond139 or ____switch139 == "map"
+        if ____cond139 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

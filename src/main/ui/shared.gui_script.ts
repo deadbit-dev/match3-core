@@ -622,7 +622,10 @@ function on_life_tick() {
 
     if (delta <= 20 * 60) return;
 
-    add_lifes(1);
+    let counts = delta % (20 * 60);
+    while(counts-- > 0 && !is_max_lifes()) {
+        add_lifes(1);
+    }
 
     const new_life = GameStorage.get('life');
     new_life.start_time = System.now();
