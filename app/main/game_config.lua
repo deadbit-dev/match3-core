@@ -328,7 +328,7 @@ ____exports._GAME_CONFIG = {
                 data = "tutorial_rockets",
                 pos = vmath.vector3(0, 390, 0)
             },
-            bounds = {from = {x = 0, y = 0}, to = {x = 10, y = 10}},
+            bounds = {from = {x = 3, y = 4}, to = {x = 4, y = 5}},
             cells = {{x = 3, y = 4}},
             click = {x = 3, y = 4}
         }

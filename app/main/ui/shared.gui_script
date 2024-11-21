@@ -146,6 +146,22 @@ function setup_store(data)
             if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(150)
+                local pack = gui.get_node("store/coins_150")
+                gui.set_scale(
+                    pack,
+                    vmath.vector3(1.3, 1.3, 1.3)
+                )
+                gui.cancel_animation(pack, gui.PROP_SCALE)
+                gui.animate(
+                    pack,
+                    gui.PROP_SCALE,
+                    vmath.vector3(1.95, 1.95, 1.95),
+                    gui.EASING_INOUTQUAD,
+                    1,
+                    0,
+                    nil,
+                    gui.PLAYBACK_ONCE_PINGPONG
+                )
                 return
             end
             HtmlBridge.purchase(
@@ -164,6 +180,22 @@ function setup_store(data)
                         function()
                         end
                     )
+                    local pack = gui.get_node("store/coins_150")
+                    gui.set_scale(
+                        pack,
+                        vmath.vector3(1.3, 1.3, 1.3)
+                    )
+                    gui.cancel_animation(pack, gui.PROP_SCALE)
+                    gui.animate(
+                        pack,
+                        gui.PROP_SCALE,
+                        vmath.vector3(1.95, 1.95, 1.95),
+                        gui.EASING_INOUTQUAD,
+                        1,
+                        0,
+                        nil,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
                 end
             )
         end
@@ -174,6 +206,22 @@ function setup_store(data)
             if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(300)
+                local pack = gui.get_node("store/coins_300")
+                gui.set_scale(
+                    pack,
+                    vmath.vector3(1.3, 1.3, 1.3)
+                )
+                gui.cancel_animation(pack, gui.PROP_SCALE)
+                gui.animate(
+                    pack,
+                    gui.PROP_SCALE,
+                    vmath.vector3(1.95, 1.95, 1.95),
+                    gui.EASING_INOUTQUAD,
+                    1,
+                    0,
+                    nil,
+                    gui.PLAYBACK_ONCE_PINGPONG
+                )
                 return
             end
             HtmlBridge.purchase(
@@ -192,6 +240,22 @@ function setup_store(data)
                         function()
                         end
                     )
+                    local pack = gui.get_node("store/coins_300")
+                    gui.set_scale(
+                        pack,
+                        vmath.vector3(1.3, 1.3, 1.3)
+                    )
+                    gui.cancel_animation(pack, gui.PROP_SCALE)
+                    gui.animate(
+                        pack,
+                        gui.PROP_SCALE,
+                        vmath.vector3(1.95, 1.95, 1.95),
+                        gui.EASING_INOUTQUAD,
+                        1,
+                        0,
+                        nil,
+                        gui.PLAYBACK_ONCE_PINGPONG
+                    )
                 end
             )
         end
@@ -202,6 +266,22 @@ function setup_store(data)
             if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(800)
+                local pack = gui.get_node("store/coins_800")
+                gui.set_scale(
+                    pack,
+                    vmath.vector3(1.3, 1.3, 1.3)
+                )
+                gui.cancel_animation(pack, gui.PROP_SCALE)
+                gui.animate(
+                    pack,
+                    gui.PROP_SCALE,
+                    vmath.vector3(1.95, 1.95, 1.95),
+                    gui.EASING_INOUTQUAD,
+                    1,
+                    0,
+                    nil,
+                    gui.PLAYBACK_ONCE_PINGPONG
+                )
                 return
             end
             HtmlBridge.purchase(
@@ -219,6 +299,22 @@ function setup_store(data)
                         purchase.purchaseToken,
                         function()
                         end
+                    )
+                    local pack = gui.get_node("store/coins_800")
+                    gui.set_scale(
+                        pack,
+                        vmath.vector3(1.3, 1.3, 1.3)
+                    )
+                    gui.cancel_animation(pack, gui.PROP_SCALE)
+                    gui.animate(
+                        pack,
+                        gui.PROP_SCALE,
+                        vmath.vector3(1.95, 1.95, 1.95),
+                        gui.EASING_INOUTQUAD,
+                        1,
+                        0,
+                        nil,
+                        gui.PLAYBACK_ONCE_PINGPONG
                     )
                 end
             )
@@ -238,6 +334,22 @@ function setup_store(data)
             add_lifes(1)
             remove_coins(20)
             Metrica.report("data", {shop = {buy = "life1"}})
+            local pack = gui.get_node("store/life_1")
+            gui.set_scale(
+                pack,
+                vmath.vector3(1.3, 1.3, 1.3)
+            )
+            gui.cancel_animation(pack, gui.PROP_SCALE)
+            gui.animate(
+                pack,
+                gui.PROP_SCALE,
+                vmath.vector3(1.95, 1.95, 1.95),
+                gui.EASING_INOUTQUAD,
+                1,
+                0,
+                nil,
+                gui.PLAYBACK_ONCE_PINGPONG
+            )
         end
     )
     data.druid:new_button(
@@ -250,6 +362,22 @@ function setup_store(data)
             add_lifes(2)
             remove_coins(35)
             Metrica.report("data", {shop = {buy = "life2"}})
+            local pack = gui.get_node("store/life_2")
+            gui.set_scale(
+                pack,
+                vmath.vector3(1.3, 1.3, 1.3)
+            )
+            gui.cancel_animation(pack, gui.PROP_SCALE)
+            gui.animate(
+                pack,
+                gui.PROP_SCALE,
+                vmath.vector3(1.95, 1.95, 1.95),
+                gui.EASING_INOUTQUAD,
+                1,
+                0,
+                nil,
+                gui.PLAYBACK_ONCE_PINGPONG
+            )
         end
     )
     data.druid:new_button(
@@ -262,6 +390,22 @@ function setup_store(data)
             add_lifes(3)
             remove_coins(50)
             Metrica.report("data", {shop = {buy = "life3"}})
+            local pack = gui.get_node("store/life_3")
+            gui.set_scale(
+                pack,
+                vmath.vector3(1.3, 1.3, 1.3)
+            )
+            gui.cancel_animation(pack, gui.PROP_SCALE)
+            gui.animate(
+                pack,
+                gui.PROP_SCALE,
+                vmath.vector3(1.95, 1.95, 1.95),
+                gui.EASING_INOUTQUAD,
+                1,
+                0,
+                nil,
+                gui.PLAYBACK_ONCE_PINGPONG
+            )
         end
     )
     gui.set_text(
@@ -285,10 +429,34 @@ function setup_store(data)
                 "vertical_rocket_counts",
                 GameStorage.get("vertical_rocket_counts") + 1
             )
-            EventBus.send("UPDATED_BUTTONS")
+            if not GameStorage.get("hammer_opened") then
+                GameStorage.set("hammer_opened", true)
+            end
+            if not GameStorage.get("vertical_rocket_opened") then
+                GameStorage.set("vertical_rocket_opened", true)
+            end
+            if Scene.get_current_name() == "game" then
+                EventBus.send("UPDATED_BUTTONS")
+            end
             Metrica.report("data", {shop = {buy = "set1"}})
             Metrica.report("data", {buy_0 = {id = "hammer"}})
             Metrica.report("data", {buy_0 = {id = "vertical_rocket"}})
+            local pack = gui.get_node("store/junior_box/items")
+            gui.set_scale(
+                pack,
+                vmath.vector3(1, 1, 1)
+            )
+            gui.cancel_animation(pack, gui.PROP_SCALE)
+            gui.animate(
+                pack,
+                gui.PROP_SCALE,
+                vmath.vector3(1.5, 1.5, 1.5),
+                gui.EASING_INOUTQUAD,
+                1,
+                0,
+                nil,
+                gui.PLAYBACK_ONCE_PINGPONG
+            )
         end
     )
     gui.set_text(
@@ -316,13 +484,40 @@ function setup_store(data)
                 "vertical_rocket_counts",
                 GameStorage.get("vertical_rocket_counts") + 2
             )
-            EventBus.send("UPDATED_BUTTONS")
+            if not GameStorage.get("hammer_opened") then
+                GameStorage.set("hammer_opened", true)
+            end
+            if not GameStorage.get("spinning_opened") then
+                GameStorage.set("spinning_opened", true)
+            end
+            if not GameStorage.get("vertical_rocket_opened") then
+                GameStorage.set("vertical_rocket_opened", true)
+            end
+            if Scene.get_current_name() == "game" then
+                EventBus.send("UPDATED_BUTTONS")
+            end
             Metrica.report("data", {shop = {buy = "set2"}})
             Metrica.report("data", {buy_0 = {level = 0, id = "hammer"}})
             Metrica.report("data", {buy_0 = {level = 0, id = "hammer"}})
             Metrica.report("data", {buy_0 = {level = 0, id = "spinning"}})
             Metrica.report("data", {buy_0 = {level = 0, id = "vertical_rocket"}})
             Metrica.report("data", {buy_0 = {level = 0, id = "vertical_rocket"}})
+            local pack = gui.get_node("store/catlover_box/items")
+            gui.set_scale(
+                pack,
+                vmath.vector3(1, 1, 1)
+            )
+            gui.cancel_animation(pack, gui.PROP_SCALE)
+            gui.animate(
+                pack,
+                gui.PROP_SCALE,
+                vmath.vector3(1.5, 1.5, 1.5),
+                gui.EASING_INOUTQUAD,
+                1,
+                0,
+                nil,
+                gui.PLAYBACK_ONCE_PINGPONG
+            )
         end
     )
     gui.set_text(
@@ -780,9 +975,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch126 = scene.name
-        local ____cond126 = ____switch126 == "movie" or ____switch126 == "game"
-        if ____cond126 then
+        local ____switch133 = scene.name
+        local ____cond133 = ____switch133 == "movie" or ____switch133 == "game"
+        if ____cond133 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -790,8 +985,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond126 = ____cond126 or ____switch126 == "map"
-        if ____cond126 then
+        ____cond133 = ____cond133 or ____switch133 == "map"
+        if ____cond133 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -817,9 +1012,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch131 = Scene.get_current_name()
-        local ____cond131 = ____switch131 == "game"
-        if ____cond131 then
+        local ____switch138 = Scene.get_current_name()
+        local ____cond138 = ____switch138 == "game"
+        if ____cond138 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -833,8 +1028,8 @@ function set_enabled_store(data, state)
             end
             break
         end
-        ____cond131 = ____cond131 or ____switch131 == "map"
-        if ____cond131 then
+        ____cond138 = ____cond138 or ____switch138 == "map"
+        if ____cond138 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

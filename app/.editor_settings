@@ -155,20 +155,20 @@
         :scene
       ]
       [
-        "/game/ui/game.gui"
-        :scene
-      ]
-      [
-        "/main/ui/shared.gui"
-        :scene
-      ]
-      [
         "/main/manager.script"
         :code
       ]
       [
         "/modules/Manager.lua"
         :code
+      ]
+      [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui"
+        :scene
       ]
     ]
   }

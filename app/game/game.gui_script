@@ -925,15 +925,71 @@ function update_buttons(instance)
     local spinning = GameStorage.get("spinning_counts")
     set_text("spinning/counts", spinning == 0 and "+" or spinning)
     set_text_colors({"spinning/button"}, "#fff", instance.busters.spinning.active and 0.5 or 1)
+    if GameStorage.get("spinning_opened") then
+        gui.set_enabled(
+            gui.get_node("spinning/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("spinning/icon"),
+            true
+        )
+        gui.set_enabled(
+            gui.get_node("spinning/counts"),
+            true
+        )
+    end
     local hammer = GameStorage.get("hammer_counts")
     set_text("hammer/counts", hammer == 0 and "+" or hammer)
     set_text_colors({"hammer/button"}, "#fff", instance.busters.hammer.active and 0.5 or 1)
+    if GameStorage.get("hammer_opened") then
+        gui.set_enabled(
+            gui.get_node("hammer/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("hammer/icon"),
+            true
+        )
+        gui.set_enabled(
+            gui.get_node("hammer/counts"),
+            true
+        )
+    end
     local horizontal_rocket = GameStorage.get("horizontal_rocket_counts")
     set_text("horizontal_rocket/counts", horizontal_rocket == 0 and "+" or horizontal_rocket)
     set_text_colors({"horizontal_rocket/button"}, "#fff", instance.busters.horizontal_rocket.active and 0.5 or 1)
+    if GameStorage.get("horizontal_rocket_opened") then
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/icon"),
+            true
+        )
+        gui.set_enabled(
+            gui.get_node("horizontal_rocket/counts"),
+            true
+        )
+    end
     local vertical_rocket = GameStorage.get("vertical_rocket_counts")
     set_text("vertical_rocket/counts", vertical_rocket == 0 and "+" or vertical_rocket)
     set_text_colors({"vertical_rocket/button"}, "#fff", instance.busters.vertical_rocket.active and 0.5 or 1)
+    if GameStorage.get("vertical_rocket_opened") then
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/lock"),
+            false
+        )
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/icon"),
+            true
+        )
+        gui.set_enabled(
+            gui.get_node("vertical_rocket/counts"),
+            true
+        )
+    end
 end
 function set_tutorial()
     local tutorial_data = GAME_CONFIG.tutorials_data[GameStorage.get("current_level") + 1]
@@ -971,9 +1027,9 @@ function set_tutorial()
         end
     end
     repeat
-        local ____switch133 = get_current_level() + 1
-        local ____cond133 = ____switch133 == 6
-        if ____cond133 then
+        local ____switch137 = get_current_level() + 1
+        local ____cond137 = ____switch137 == 6
+        if ____cond137 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -989,8 +1045,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == 7
-        if ____cond133 then
+        ____cond137 = ____cond137 or ____switch137 == 7
+        if ____cond137 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1004,13 +1060,13 @@ function set_tutorial()
             )
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == 8
-        if ____cond133 then
+        ____cond137 = ____cond137 or ____switch137 == 8
+        if ____cond137 then
             hand_timer = timer.delay(2, false, hand_swap_animation)
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == 9
-        if ____cond133 then
+        ____cond137 = ____cond137 or ____switch137 == 9
+        if ____cond137 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1024,8 +1080,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond133 = ____cond133 or ____switch133 == 17
-        if ____cond133 then
+        ____cond137 = ____cond137 or ____switch137 == 17
+        if ____cond137 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1831,11 +1887,11 @@ presets = {targets = {
                 scale = vmath.vector3(0.5, 0.5, 1)
             },
             [2] = {
-                position = vmath.vector3(-40, 0, 0),
+                position = vmath.vector3(-60, 0, 0),
                 scale = vmath.vector3(0.5, 0.5, 1)
             },
             [3] = {
-                position = vmath.vector3(-35, 20, 0),
+                position = vmath.vector3(-60, 20, 0),
                 scale = vmath.vector3(0.4, 0.4, 1)
             }
         }
@@ -1844,11 +1900,11 @@ presets = {targets = {
         node_name = "second_target",
         preset_depend_of_length = {
             [2] = {
-                position = vmath.vector3(40, 0, 0),
+                position = vmath.vector3(60, 0, 0),
                 scale = vmath.vector3(0.5, 0.5, 1)
             },
             [3] = {
-                position = vmath.vector3(35, 20, 0),
+                position = vmath.vector3(60, 20, 0),
                 scale = vmath.vector3(0.4, 0.4, 1)
             }
         }

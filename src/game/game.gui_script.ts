@@ -24,16 +24,16 @@ const presets = {
             node_name: 'first_target',
             preset_depend_of_length: {
                 1: { position: vmath.vector3(0, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                2: { position: vmath.vector3(-40, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                3: { position: vmath.vector3(-35, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+                2: { position: vmath.vector3(-60, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(-60, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
             }
 
         },
         {
             node_name: 'second_target',
             preset_depend_of_length: {
-                2: { position: vmath.vector3(40, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                3: { position: vmath.vector3(35, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+                2: { position: vmath.vector3(60, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(60, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
             }
         },
         {
@@ -597,18 +597,43 @@ function update_buttons(instance: props) {
     const spinning = GameStorage.get('spinning_counts');
     set_text('spinning/counts', (spinning == 0) ? "+" : spinning);
     set_text_colors(['spinning/button'], '#fff', instance.busters.spinning.active ? 0.5 : 1);
+    
+    if(GameStorage.get('spinning_opened')) {
+        gui.set_enabled(gui.get_node('spinning/lock'), false);
+        gui.set_enabled(gui.get_node('spinning/icon'), true);
+        gui.set_enabled(gui.get_node('spinning/counts'), true);
+    }
+
 
     const hammer = GameStorage.get('hammer_counts');
     set_text('hammer/counts', (hammer == 0) ? "+" : hammer);
     set_text_colors(['hammer/button'], '#fff', instance.busters.hammer.active ? 0.5 : 1);
 
+    if(GameStorage.get('hammer_opened')) {
+        gui.set_enabled(gui.get_node('hammer/lock'), false);
+        gui.set_enabled(gui.get_node('hammer/icon'), true);
+        gui.set_enabled(gui.get_node('hammer/counts'), true);
+    }
+
     const horizontal_rocket = GameStorage.get('horizontal_rocket_counts');
     set_text('horizontal_rocket/counts', (horizontal_rocket == 0) ? "+" : horizontal_rocket);
     set_text_colors(['horizontal_rocket/button'], '#fff', instance.busters.horizontal_rocket.active ? 0.5 : 1);
+    
+    if(GameStorage.get('horizontal_rocket_opened')) {
+        gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
+        gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
+        gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
+    }
 
     const vertical_rocket = GameStorage.get('vertical_rocket_counts');
     set_text('vertical_rocket/counts', (vertical_rocket == 0) ? "+" : vertical_rocket);
     set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
+
+    if(GameStorage.get('vertical_rocket_opened')) {
+        gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
+        gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
+        gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
+    }
 }
 
 let hand_timer: hash;

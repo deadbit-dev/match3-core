@@ -798,6 +798,10 @@ nodes {
   position {
     y: -300.0
   }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
   type: TYPE_BOX
   texture: "ui/long_button"
   id: "continue_button"
@@ -819,9 +823,9 @@ nodes {
   font: "32_medium"
   id: "continue_text"
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.169
+    y: 0.38
+    z: 0.063
   }
   shadow {
     x: 1.0
@@ -831,7 +835,6 @@ nodes {
   parent: "continue_button"
   layer: "ontop"
   inherit_alpha: true
-  outline_alpha: 0.0
   shadow_alpha: 0.0
 }
 nodes {
@@ -1189,9 +1192,9 @@ nodes {
   font: "32_medium"
   id: "restart_text"
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.169
+    y: 0.38
+    z: 0.063
   }
   shadow {
     x: 1.0
@@ -1201,7 +1204,6 @@ nodes {
   parent: "restart_button"
   layer: "ontop"
   inherit_alpha: true
-  outline_alpha: 0.0
 }
 nodes {
   position {
@@ -1233,9 +1235,9 @@ nodes {
   font: "32_medium"
   id: "map_text"
   outline {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 0.169
+    y: 0.38
+    z: 0.063
   }
   shadow {
     x: 1.0
@@ -1245,11 +1247,10 @@ nodes {
   parent: "map_button"
   layer: "ontop"
   inherit_alpha: true
-  outline_alpha: 0.0
 }
 nodes {
   position {
-    y: -130.0
+    y: -183.0
   }
   size {
     x: 200.0
@@ -1458,7 +1459,7 @@ nodes {
 }
 nodes {
   position {
-    y: -254.0
+    y: -294.0
   }
   type: TYPE_TEMPLATE
   id: "steps_by_ad"
@@ -1554,7 +1555,7 @@ nodes {
 }
 nodes {
   position {
-    y: -318.0
+    y: -358.0
   }
   type: TYPE_TEMPLATE
   id: "steps_by_coins"
@@ -2256,7 +2257,7 @@ nodes {
     y: 0.7
   }
   size {
-    x: 250.0
+    x: 300.0
     y: 150.0
   }
   type: TYPE_BOX
