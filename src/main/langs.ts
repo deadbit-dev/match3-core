@@ -104,6 +104,20 @@ export const lang_data = {
     "испанский-es": "Paso",
     "Turkish-tr": "Adım"
   },
+  "3steps": {
+    "Русский-ru": "хода",
+    "Английский-en": "steps",
+    "German-de": "schritt",
+    "испанский-es": "paso",
+    "Turkish-tr": "adım"
+  },
+  "5steps": {
+    "Русский-ru": "ходов",
+    "Английский-en": "steps",
+    "German-de": "schritt",
+    "испанский-es": "paso",
+    "Turkish-tr": "adım"
+  },
   "time": {
     "Русский-ru": "Время",
     "Английский-en": "Time",
@@ -357,11 +371,11 @@ export const lang_data = {
     "Turkish-tr": "İki güçlendiriciyi birlikte kaydırın ve harika bir etki elde edin!"
   },
   "buster_open": {
-    "Русский-ru": "Будет доступно с\n% уровня",
-    "Английский-en": "Available from\n% level",
-    "German-de": "Verfügbar ab\n% Ebene",
-    "испанский-es": "Disponible a partir de\n% nivel",
-    "Turkish-tr": "Şu adresten temin edilebilir\n% seviye"
+    "Русский-ru": "Будет доступно с\n {0} уровня",
+    "Английский-en": "Available from\n {0} level",
+    "German-de": "Verfügbar ab\n {0} Ebene",
+    "испанский-es": "Disponible a partir de\n {0} nivel",
+    "Turkish-tr": "Şu adresten temin edilebilir\n {0} seviye"
   },
   "sec": {
     "Русский-ru": "сек",

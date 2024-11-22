@@ -24,16 +24,16 @@ const presets = {
             node_name: 'first_target',
             preset_depend_of_length: {
                 1: { position: vmath.vector3(0, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                2: { position: vmath.vector3(-60, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                3: { position: vmath.vector3(-60, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+                2: { position: vmath.vector3(-50, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(-55, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
             }
 
         },
         {
             node_name: 'second_target',
             preset_depend_of_length: {
-                2: { position: vmath.vector3(60, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
-                3: { position: vmath.vector3(60, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
+                2: { position: vmath.vector3(35, 0, 0), scale: vmath.vector3(0.5, 0.5, 1) },
+                3: { position: vmath.vector3(55, 20, 0), scale: vmath.vector3(0.4, 0.4, 1) }
             }
         },
         {
@@ -437,7 +437,7 @@ function setup_gameover_ui(instance: props) {
 
     instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
-    gui.set_text(gui.get_node('steps_by_ad/text'), "+3 хода");
+    gui.set_text(gui.get_node('steps_by_ad/text'), "+3 " + Lang.get_text('3steps'));
     instance.druid.new_button('steps_by_ad/button', () => {
         Ads.show_reward(() => {
             GAME_CONFIG.steps_by_ad++;
@@ -446,7 +446,7 @@ function setup_gameover_ui(instance: props) {
         });
     });
 
-    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 ходов");
+    gui.set_text(gui.get_node('steps_by_coins/text'), "+5 " + Lang.get_text('5steps'));
     gui.set_text(gui.get_node('steps_by_coins/text1'), "30");
     instance.druid.new_button('steps_by_coins/button', () => {
         if (!is_enough_coins(30)) {

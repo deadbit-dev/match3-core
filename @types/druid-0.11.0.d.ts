@@ -82,5 +82,8 @@ interface DruidStyles {
     scroll: {
         WHEEL_SCROLL_SPEED: number;
     }
+    button: {
+        DISABLED_COLOR: vmath.vector4
+    }
 }
 

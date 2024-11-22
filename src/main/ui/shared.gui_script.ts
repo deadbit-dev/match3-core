@@ -138,15 +138,20 @@ function setup_store(data: props) {
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
 
-    data.druid.new_button('store/buy_150_btn', () => {
+    const buy_150 = (button: DruidButton) => {
         if (HtmlBridge == null) {
             Sound.play('purchase');
             add_coins(150);
 
-            const pack = gui.get_node('store/coins_150');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_150');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
 
             return;
         }
@@ -164,22 +169,40 @@ function setup_store(data: props) {
 
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
 
-            const pack = gui.get_node('store/coins_150');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_150');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
         });
+    };
+
+    const coins150 = data.druid.new_button('store/coins_150', () => {
+        buy_150(coins150);
     });
 
-    data.druid.new_button('store/buy_300_btn', () => {
+    const coins150_btn = data.druid.new_button('store/buy_150_btn', () => {
+        buy_150(coins150_btn);
+    });
+
+    const buy_300 = (button: DruidButton) => {
         if (HtmlBridge == null) {
             Sound.play('purchase');
             add_coins(300);
 
-            const pack = gui.get_node('store/coins_300');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_300');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
 
             return;
         }
@@ -197,22 +220,40 @@ function setup_store(data: props) {
 
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
 
-            const pack = gui.get_node('store/coins_300');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_300');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
         });
+    };
+
+    const coins300 = data.druid.new_button('store/coins_300', () => {
+        buy_300(coins300);
     });
 
-    data.druid.new_button('store/buy_800_btn', () => {
+    const coins300_btn = data.druid.new_button('store/buy_300_btn', () => {
+        buy_300(coins300_btn);
+    });
+
+    const buy_800 = (button: DruidButton) => {
         if (HtmlBridge == null) {
             Sound.play('purchase');
             add_coins(800);
 
-            const pack = gui.get_node('store/coins_800');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_800');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
 
             return;
         }
@@ -230,54 +271,61 @@ function setup_store(data: props) {
 
             HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
 
-            const pack = gui.get_node('store/coins_800');
-            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-            gui.cancel_animation(pack, gui.PROP_SCALE);
-            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+            timer.delay(0.1, false, () => {
+                button.set_enabled(false);
+                const pack = gui.get_node('store/coins_800');
+                gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+                gui.cancel_animation(pack, gui.PROP_SCALE);
+                gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                    button.set_enabled(true);
+                }, gui.PLAYBACK_ONCE_PINGPONG);
+            });
         });
+    };
+
+    const coins800 = data.druid.new_button('store/coins_800', () => {
+        buy_800(coins800);
+    });
+
+    const coins800_btn = data.druid.new_button('store/buy_800_btn', () => {
+        buy_800(coins800_btn);
     });
 
     gui.set_text(gui.get_node('store/life_title_text'), Lang.get_text('lifes'));
 
-    data.druid.new_button('store/buy_x1_btn', () => {
+    const buy_x1 = (button: DruidButton) => {
         // if(is_max_lifes()) return;
-        if (!is_enough_coins(20)) {
+        if (!is_enough_coins(30)) {
             return set_enabled_not_enough_coins(data, true);
         }
 
         Sound.play('purchase');
 
         add_lifes(1);
-        remove_coins(20);
+        remove_coins(30);
 
         Metrica.report('data', { shop: { buy: 'life1' } });
 
-        const pack = gui.get_node('store/life_1');
-        gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-        gui.cancel_animation(pack, gui.PROP_SCALE);
-        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+        timer.delay(0.1, false, () => {
+            button.set_enabled(false);
+            const pack = gui.get_node('store/life_1');
+            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+            gui.cancel_animation(pack, gui.PROP_SCALE);
+            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                button.set_enabled(true);
+            }, gui.PLAYBACK_ONCE_PINGPONG);
+        });
+    };
+
+    const life1 = data.druid.new_button('store/life_1', () => {
+        buy_x1(life1);
     });
 
-    data.druid.new_button('store/buy_x2_btn', () => {
-        // if(is_max_lifes()) return;
-        if (!is_enough_coins(35)) {
-            return set_enabled_not_enough_coins(data, true);
-        }
-
-        Sound.play('purchase');
-
-        add_lifes(2);
-        remove_coins(35);
-
-        Metrica.report('data', { shop: { buy: 'life2' } });
-
-        const pack = gui.get_node('store/life_2');
-        gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-        gui.cancel_animation(pack, gui.PROP_SCALE);
-        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+    const life1_btn = data.druid.new_button('store/buy_x1_btn', () => {
+        buy_x1(life1_btn);
     });
 
-    data.druid.new_button('store/buy_x3_btn', () => {
+    const buy_x2 = (button: DruidButton) => {
         // if(is_max_lifes()) return;
         if (!is_enough_coins(50)) {
             return set_enabled_not_enough_coins(data, true);
@@ -285,55 +333,113 @@ function setup_store(data: props) {
 
         Sound.play('purchase');
 
-        add_lifes(3);
+        add_lifes(2);
         remove_coins(50);
+
+        Metrica.report('data', { shop: { buy: 'life2' } });
+
+        timer.delay(0.1, false, () => {
+            button.set_enabled(false);
+            const pack = gui.get_node('store/life_2');
+            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+            gui.cancel_animation(pack, gui.PROP_SCALE);
+            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                button.set_enabled(true);
+            }, gui.PLAYBACK_ONCE_PINGPONG);
+        });
+    };
+
+    const life2 = data.druid.new_button('store/life_2', () => {
+        buy_x2(life2);
+    });
+
+    const life2_btn = data.druid.new_button('store/buy_x2_btn', () => {
+        buy_x2(life2_btn);
+    });
+
+    const buy_x3 = (button: DruidButton) => {
+        // if(is_max_lifes()) return;
+        if (!is_enough_coins(70)) {
+            return set_enabled_not_enough_coins(data, true);
+        }
+
+        Sound.play('purchase');
+
+        add_lifes(3);
+        remove_coins(70);
 
         Metrica.report('data', { shop: { buy: 'life3' } });
 
-        const pack = gui.get_node('store/life_3');
-        gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
-        gui.cancel_animation(pack, gui.PROP_SCALE);
-        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.95, 1.95, 1.95), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+        timer.delay(0.1, false, () => {
+            button.set_enabled(false);
+            const pack = gui.get_node('store/life_3');
+            gui.set_scale(pack, vmath.vector3(1.3, 1.3, 1.3));
+            gui.cancel_animation(pack, gui.PROP_SCALE);
+            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.79, 1.79, 1.79), gui.EASING_INOUTQUAD, 1, 0, () => {
+                button.set_enabled(true);
+            }, gui.PLAYBACK_ONCE_PINGPONG);
+        });
+    };
+
+    const life3 = data.druid.new_button('store/life_3', () => {
+        buy_x3(life3);
+    });
+
+    const life3_btn = data.druid.new_button('store/buy_x3_btn', () => {
+        buy_x3(life3_btn);
     });
 
     gui.set_text(gui.get_node('store/junior_box/text'), Lang.get_text('junior_box'));
 
-    data.druid.new_button('store/junior_box/buy_button/button', () => {
-        if (!is_enough_coins(60)) return set_enabled_not_enough_coins(data, true);
-
+    const buy_junior = (button: DruidButton) => {
+        if (!is_enough_coins(80)) return set_enabled_not_enough_coins(data, true);
+    
         Sound.play('purchase');
-
-        remove_coins(60);
-
+    
+        remove_coins(80);
+    
         set_infinit_life(1);
-
+    
         GameStorage.set('hammer_counts', GameStorage.get('hammer_counts') + 1);
         GameStorage.set('vertical_rocket_counts', GameStorage.get('vertical_rocket_counts') + 1);
-
+    
         if (!GameStorage.get('hammer_opened')) GameStorage.set('hammer_opened', true);
         if (!GameStorage.get('vertical_rocket_opened')) GameStorage.set('vertical_rocket_opened', true);
-
+    
         if(Scene.get_current_name() == 'game')
             EventBus.send('UPDATED_BUTTONS');
-
+    
         Metrica.report('data', { shop: { buy: 'set1' } });
         Metrica.report('data', { 'buy_0': { id: 'hammer' } });
         Metrica.report('data', { 'buy_0': { id: 'vertical_rocket' } });
+    
+        timer.delay(0.1, false, () => {
+            button.set_enabled(false);
+            const pack = gui.get_node('store/junior_box/items');
+            gui.set_scale(pack, vmath.vector3(1, 1, 1));
+            gui.cancel_animation(pack, gui.PROP_SCALE);
+            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1.5), gui.EASING_INOUTQUAD, 1, 0, () => {
+                button.set_enabled(true);
+            }, gui.PLAYBACK_ONCE_PINGPONG);
+        });
+    };
 
-        const pack = gui.get_node('store/junior_box/items');
-        gui.set_scale(pack, vmath.vector3(1, 1, 1));
-        gui.cancel_animation(pack, gui.PROP_SCALE);
-        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1.5), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+    const junior = data.druid.new_button('store/junior_box/items', () => {
+        buy_junior(junior);
+    });
+
+    const junior_btn = data.druid.new_button('store/junior_box/buy_button/button', () => {
+        buy_junior(junior_btn);
     });
 
     gui.set_text(gui.get_node('store/catlover_box/text'), Lang.get_text('catlover_box'));
 
-    data.druid.new_button('store/catlover_box/buy_button/button', () => {
-        if (!is_enough_coins(100)) return set_enabled_not_enough_coins(data, true);
+    const buy_catlover = (button: DruidButton) => {
+        if (!is_enough_coins(160)) return set_enabled_not_enough_coins(data, true);
 
         Sound.play('purchase');
 
-        remove_coins(100);
+        remove_coins(160);
 
         set_infinit_life(24);
 
@@ -356,10 +462,23 @@ function setup_store(data: props) {
         Metrica.report('data', { 'buy_0': { level: 0, id: 'vertical_rocket' } });
         Metrica.report('data', { 'buy_0': { level: 0, id: 'vertical_rocket' } });
 
-        const pack = gui.get_node('store/catlover_box/items');
-        gui.set_scale(pack, vmath.vector3(1, 1, 1));
-        gui.cancel_animation(pack, gui.PROP_SCALE);
-        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1.5), gui.EASING_INOUTQUAD, 1, 0, undefined, gui.PLAYBACK_ONCE_PINGPONG);
+        timer.delay(0.1, false, () => {
+            button.set_enabled(false);
+            const pack = gui.get_node('store/catlover_box/items');
+            gui.set_scale(pack, vmath.vector3(1, 1, 1));
+            gui.cancel_animation(pack, gui.PROP_SCALE);
+            gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.5, 1.5, 1.5), gui.EASING_INOUTQUAD, 1, 0, () => {
+                button.set_enabled(true);
+            }, gui.PLAYBACK_ONCE_PINGPONG);
+        });
+    };
+
+    const catlover = data.druid.new_button('store/catlover_box/items', () => {
+        buy_catlover(catlover);
+    });
+
+    const catlover_btn = data.druid.new_button('store/catlover_box/buy_button/button', () => {
+        buy_catlover(catlover_btn);
     });
 
     gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
@@ -494,12 +613,19 @@ function setup_hammer(data: props) {
             set_enabled_not_enough_coins(data, true);
             return;
         }
+
         remove_coins(30);
         GameStorage.set('hammer_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_hammer(data, false);
-
+        
         Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'hammer' } });
+
+        const pack = gui.get_node('hammer/image');
+        gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
+        gui.cancel_animation(pack, gui.PROP_SCALE);
+        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.8, 1.8, 1.8), gui.EASING_INOUTQUAD, 1, 0, () => {
+            set_enabled_hammer(data, false);
+        }, gui.PLAYBACK_ONCE_PINGPONG);
     });
 
     data.druid.new_button('hammer/close', () => {
@@ -518,12 +644,19 @@ function setup_spinning(data: props) {
             set_enabled_not_enough_coins(data, true);
             return;
         }
+
         remove_coins(30);
         GameStorage.set('spinning_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_spinning(data, false);
 
         Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'spinning' } });
+
+        const pack = gui.get_node('spinning/image');
+        gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
+        gui.cancel_animation(pack, gui.PROP_SCALE);
+        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.8, 1.8, 1.8), gui.EASING_INOUTQUAD, 1, 0, () => {
+            set_enabled_spinning(data, false);
+        }, gui.PLAYBACK_ONCE_PINGPONG);
     });
 
     data.druid.new_button('spinning/close', () => {
@@ -542,12 +675,19 @@ function setup_horizontal_rocket(data: props) {
             set_enabled_not_enough_coins(data, true);
             return;
         }
+
         remove_coins(30);
         GameStorage.set('horizontal_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_horizontall_rocket(data, false);
 
         Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'horizontal_rocket' } });
+
+        const pack = gui.get_node('horizontal_rocket/image');
+        gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
+        gui.cancel_animation(pack, gui.PROP_SCALE);
+        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.8, 1.8, 1.8), gui.EASING_INOUTQUAD, 1, 0, () => {
+            set_enabled_horizontall_rocket(data, false);
+        }, gui.PLAYBACK_ONCE_PINGPONG);
     });
 
     data.druid.new_button('horizontal_rocket/close', () => {
@@ -566,12 +706,20 @@ function setup_vertical_rocket(data: props) {
             set_enabled_not_enough_coins(data, true);
             return;
         }
+
         remove_coins(30);
         GameStorage.set('vertical_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-        set_enabled_vertical_rocket(data, false);
 
         Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'vertical_rocket' } });
+
+        const pack = gui.get_node('vertical_rocket/image');
+        gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
+        gui.cancel_animation(pack, gui.PROP_SCALE);
+        gui.animate(pack, gui.PROP_SCALE, vmath.vector3(1.8, 1.8, 1.8), gui.EASING_INOUTQUAD, 1, 0, () => {
+            set_enabled_vertical_rocket(data, false);
+        }, gui.PLAYBACK_ONCE_PINGPONG);
+
     });
 
     data.druid.new_button('vertical_rocket/close', () => {

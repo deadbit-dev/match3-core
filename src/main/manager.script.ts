@@ -102,6 +102,7 @@ export function init(this: props) {
         }
 
         default_style.scroll.WHEEL_SCROLL_SPEED = 10;
+        default_style.button.DISABLED_COLOR = vmath.vector4(1);
         druid.set_default_style(default_style);
         Sound.attach_druid_click('btn');
         Camera.set_go_prjection(-1, 1, -3, 3);

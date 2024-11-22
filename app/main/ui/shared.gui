@@ -591,6 +591,49 @@ nodes {
 }
 nodes {
   position {
+    y: -153.0
+  }
+  type: TYPE_TEMPLATE
+  id: "store/junior_box/buy_button"
+  parent: "store/junior_box/box"
+  layer: "top"
+  overridden_fields: 1
+  overridden_fields: 20
+  overridden_fields: 45
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "store/junior_box/buy_button/button"
+  parent: "store/junior_box/buy_button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "store/junior_box/buy_button/text"
+  parent: "store/junior_box/buy_button/button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "store/junior_box/buy_button/icon"
+  parent: "store/junior_box/buy_button/button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "store/junior_box/buy_button/text1"
+  parent: "store/junior_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
+  position {
     y: 16.0
   }
   size {
@@ -807,49 +850,6 @@ nodes {
 }
 nodes {
   position {
-    y: -153.0
-  }
-  type: TYPE_TEMPLATE
-  id: "store/junior_box/buy_button"
-  parent: "store/junior_box/box"
-  layer: "top"
-  overridden_fields: 1
-  overridden_fields: 20
-  overridden_fields: 45
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/buy_button/button"
-  parent: "store/junior_box/buy_button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/junior_box/buy_button/text"
-  parent: "store/junior_box/buy_button/button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/junior_box/buy_button/icon"
-  parent: "store/junior_box/buy_button/button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/junior_box/buy_button/text1"
-  parent: "store/junior_box/buy_button/button"
-  template_node_child: true
-}
-nodes {
-  position {
     x: 239.0
     y: -454.0
   }
@@ -909,6 +909,44 @@ nodes {
   overridden_fields: 4
   overridden_fields: 10
   overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEMPLATE
+  id: "store/catlover_box/buy_button"
+  parent: "store/catlover_box/box"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "store/catlover_box/buy_button/button"
+  parent: "store/catlover_box/buy_button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "store/catlover_box/buy_button/text"
+  parent: "store/catlover_box/buy_button/button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "store/catlover_box/buy_button/icon"
+  parent: "store/catlover_box/buy_button/button"
+  layer: "top"
+  overridden_fields: 20
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "store/catlover_box/buy_button/text1"
+  parent: "store/catlover_box/buy_button/button"
   template_node_child: true
 }
 nodes {
@@ -1138,44 +1176,6 @@ nodes {
   layer: "top"
   overridden_fields: 3
   overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEMPLATE
-  id: "store/catlover_box/buy_button"
-  parent: "store/catlover_box/box"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/buy_button/button"
-  parent: "store/catlover_box/buy_button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/catlover_box/buy_button/text"
-  parent: "store/catlover_box/buy_button/button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "store/catlover_box/buy_button/icon"
-  parent: "store/catlover_box/buy_button/button"
-  layer: "top"
-  overridden_fields: 20
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "store/catlover_box/buy_button/text1"
-  parent: "store/catlover_box/buy_button/button"
   template_node_child: true
 }
 nodes {

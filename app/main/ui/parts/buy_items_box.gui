@@ -59,6 +59,40 @@ nodes {
 }
 nodes {
   position {
+    y: -155.0
+  }
+  type: TYPE_TEMPLATE
+  id: "buy_button"
+  parent: "box"
+  inherit_alpha: true
+  template: "/main/ui/parts/buy_button.gui"
+}
+nodes {
+  type: TYPE_BOX
+  id: "buy_button/button"
+  parent: "buy_button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "buy_button/text"
+  parent: "buy_button/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "buy_button/icon"
+  parent: "buy_button/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "buy_button/text1"
+  parent: "buy_button/button"
+  template_node_child: true
+}
+nodes {
+  position {
     y: 20.0
   }
   type: TYPE_BOX
@@ -360,40 +394,6 @@ nodes {
   parent: "spinning"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
-}
-nodes {
-  position {
-    y: -155.0
-  }
-  type: TYPE_TEMPLATE
-  id: "buy_button"
-  parent: "box"
-  inherit_alpha: true
-  template: "/main/ui/parts/buy_button.gui"
-}
-nodes {
-  type: TYPE_BOX
-  id: "buy_button/button"
-  parent: "buy_button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "buy_button/text"
-  parent: "buy_button/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "buy_button/icon"
-  parent: "buy_button/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "buy_button/text1"
-  parent: "buy_button/button"
-  template_node_child: true
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

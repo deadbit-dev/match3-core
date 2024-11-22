@@ -1164,7 +1164,7 @@ nodes {
 }
 nodes {
   position {
-    y: -273.0
+    y: -321.0
   }
   scale {
     x: 0.7
@@ -1207,7 +1207,7 @@ nodes {
 }
 nodes {
   position {
-    y: -352.0
+    y: -400.0
   }
   scale {
     x: 0.7
@@ -1250,7 +1250,7 @@ nodes {
 }
 nodes {
   position {
-    y: -183.0
+    y: -166.0
   }
   size {
     x: 200.0
@@ -1459,7 +1459,7 @@ nodes {
 }
 nodes {
   position {
-    y: -294.0
+    y: -324.0
   }
   type: TYPE_TEMPLATE
   id: "steps_by_ad"
@@ -1555,7 +1555,7 @@ nodes {
 }
 nodes {
   position {
-    y: -358.0
+    y: -388.0
   }
   type: TYPE_TEMPLATE
   id: "steps_by_coins"
@@ -1656,7 +1656,7 @@ nodes {
 }
 nodes {
   position {
-    y: -318.0
+    y: -348.0
   }
   type: TYPE_TEMPLATE
   id: "time_by_coins"
@@ -1685,6 +1685,7 @@ nodes {
   overridden_fields: 20
   overridden_fields: 45
   template_node_child: true
+  enabled: false
 }
 nodes {
   position {

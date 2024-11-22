@@ -43,43 +43,15 @@
   :workflow {
     :recent-files [
       [
-        "/assets/fonts/60_medium.font"
-        :scene
-      ]
-      [
-        "/game.project"
-        :cljfx-form-view
-      ]
-      [
-        "/project_settings/my_profile.display_profiles"
-        :cljfx-form-view
-      ]
-      [
         "/game/view.script"
         :code
-      ]
-      [
-        "/main/ui/parts/buy_button.gui"
-        :scene
-      ]
-      [
-        "/game/animals/bull.collection"
-        :scene
       ]
       [
         "/game/animals/dog.collection"
         :scene
       ]
       [
-        "/game/animals/rats.collection"
-        :scene
-      ]
-      [
         "/game/animals/goose.collection"
-        :scene
-      ]
-      [
-        "/game/animals/kaban.collection"
         :scene
       ]
       [
@@ -119,10 +91,6 @@
         :code
       ]
       [
-        "/main/ui/dlg/store_dlg.gui"
-        :scene
-      ]
-      [
         "/main/game_config.lua"
         :code
       ]
@@ -151,14 +119,6 @@
         :scene
       ]
       [
-        "/game/ui/game.gui"
-        :scene
-      ]
-      [
-        "/main/ui/shared.gui"
-        :scene
-      ]
-      [
         "/main/manager.script"
         :code
       ]
@@ -167,8 +127,48 @@
         :code
       ]
       [
-        "/movie/movie.gui"
+        "/game/ui/game.gui"
         :scene
+      ]
+      [
+        "/game/animals/bull.collection"
+        :scene
+      ]
+      [
+        "/game/animals/kaban.collection"
+        :scene
+      ]
+      [
+        "/game/animals/rats.collection"
+        :scene
+      ]
+      [
+        "/main/ui/parts/lable_button.gui"
+        :scene
+      ]
+      [
+        "/main/ui/parts/buy_button.gui"
+        :scene
+      ]
+      [
+        "/main/ui/parts/buy_items_box.gui"
+        :scene
+      ]
+      [
+        "/druid/base/button.lua"
+        :code
+      ]
+      [
+        "/main/ui/dlg/store_dlg.gui"
+        :scene
+      ]
+      [
+        "/main/ui/shared.gui"
+        :scene
+      ]
+      [
+        "/druid/styles/default/style.lua"
+        :code
       ]
     ]
   }

@@ -768,6 +768,38 @@ nodes {
   template_node_child: true
 }
 nodes {
+  type: TYPE_TEMPLATE
+  id: "junior_box/buy_button"
+  parent: "junior_box/box"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "junior_box/buy_button/button"
+  parent: "junior_box/buy_button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  text: "80"
+  id: "junior_box/buy_button/text"
+  parent: "junior_box/buy_button/button"
+  overridden_fields: 8
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "junior_box/buy_button/icon"
+  parent: "junior_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "junior_box/buy_button/text1"
+  parent: "junior_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
   type: TYPE_BOX
   id: "junior_box/items"
   parent: "junior_box/box"
@@ -887,38 +919,6 @@ nodes {
   template_node_child: true
 }
 nodes {
-  type: TYPE_TEMPLATE
-  id: "junior_box/buy_button"
-  parent: "junior_box/box"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/buy_button/button"
-  parent: "junior_box/buy_button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  text: "80"
-  id: "junior_box/buy_button/text"
-  parent: "junior_box/buy_button/button"
-  overridden_fields: 8
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "junior_box/buy_button/icon"
-  parent: "junior_box/buy_button/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "junior_box/buy_button/text1"
-  parent: "junior_box/buy_button/button"
-  template_node_child: true
-}
-nodes {
   position {
     x: 259.0
     y: -204.0
@@ -945,6 +945,38 @@ nodes {
   type: TYPE_TEXT
   id: "catlover_box/text"
   parent: "catlover_box/title"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEMPLATE
+  id: "catlover_box/buy_button"
+  parent: "catlover_box/box"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "catlover_box/buy_button/button"
+  parent: "catlover_box/buy_button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  text: "160"
+  id: "catlover_box/buy_button/text"
+  parent: "catlover_box/buy_button/button"
+  overridden_fields: 8
+  template_node_child: true
+}
+nodes {
+  type: TYPE_BOX
+  id: "catlover_box/buy_button/icon"
+  parent: "catlover_box/buy_button/button"
+  template_node_child: true
+}
+nodes {
+  type: TYPE_TEXT
+  id: "catlover_box/buy_button/text1"
+  parent: "catlover_box/buy_button/button"
   template_node_child: true
 }
 nodes {
@@ -1106,38 +1138,6 @@ nodes {
   type: TYPE_BOX
   id: "catlover_box/spinning_icon"
   parent: "catlover_box/spinning"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEMPLATE
-  id: "catlover_box/buy_button"
-  parent: "catlover_box/box"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "catlover_box/buy_button/button"
-  parent: "catlover_box/buy_button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  text: "160"
-  id: "catlover_box/buy_button/text"
-  parent: "catlover_box/buy_button/button"
-  overridden_fields: 8
-  template_node_child: true
-}
-nodes {
-  type: TYPE_BOX
-  id: "catlover_box/buy_button/icon"
-  parent: "catlover_box/buy_button/button"
-  template_node_child: true
-}
-nodes {
-  type: TYPE_TEXT
-  id: "catlover_box/buy_button/text1"
-  parent: "catlover_box/buy_button/button"
   template_node_child: true
 }
 nodes {
