@@ -773,10 +773,7 @@ function set_events(instance)
         "OPENED_DLG",
         function(dlg)
             if dlg == Dlg.Store then
-                gui.set_enabled(
-                    gui.get_node("buster_buttons"),
-                    false
-                )
+                instance.block_input = true
             end
         end
     )
@@ -784,10 +781,7 @@ function set_events(instance)
         "CLOSED_DLG",
         function(dlg)
             if dlg == Dlg.Store then
-                gui.set_enabled(
-                    gui.get_node("buster_buttons"),
-                    true
-                )
+                instance.block_input = false
                 Sound.play("game")
             end
         end
@@ -821,25 +815,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch114 = data.idx
-        local ____cond114 = ____switch114 == 0
-        if ____cond114 then
+        local ____switch115 = data.idx
+        local ____cond115 = ____switch115 == 0
+        if ____cond115 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond114 = ____cond114 or ____switch114 == 1
-        if ____cond114 then
+        ____cond115 = ____cond115 or ____switch115 == 1
+        if ____cond115 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond114 = ____cond114 or ____switch114 == 2
-        if ____cond114 then
+        ____cond115 = ____cond115 or ____switch115 == 2
+        if ____cond115 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -1027,9 +1021,9 @@ function set_tutorial()
         end
     end
     repeat
-        local ____switch137 = get_current_level() + 1
-        local ____cond137 = ____switch137 == 6
-        if ____cond137 then
+        local ____switch138 = get_current_level() + 1
+        local ____cond138 = ____switch138 == 6
+        if ____cond138 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1045,8 +1039,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond137 = ____cond137 or ____switch137 == 7
-        if ____cond137 then
+        ____cond138 = ____cond138 or ____switch138 == 7
+        if ____cond138 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1060,13 +1054,13 @@ function set_tutorial()
             )
             break
         end
-        ____cond137 = ____cond137 or ____switch137 == 8
-        if ____cond137 then
+        ____cond138 = ____cond138 or ____switch138 == 8
+        if ____cond138 then
             hand_timer = timer.delay(2, false, hand_swap_animation)
             break
         end
-        ____cond137 = ____cond137 or ____switch137 == 9
-        if ____cond137 then
+        ____cond138 = ____cond138 or ____switch138 == 9
+        if ____cond138 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1080,8 +1074,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond137 = ____cond137 or ____switch137 == 17
-        if ____cond137 then
+        ____cond138 = ____cond138 or ____switch138 == 17
+        if ____cond138 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1922,6 +1916,7 @@ function ____exports.init(self)
     self.druid = druid.new(self)
     self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
     self.busters = self.level.busters
+    self.block_input = false
     set_text(
         "text",
         Lang.get_text("play")
@@ -1937,6 +1932,9 @@ function ____exports.init(self)
     set_events(self)
 end
 function ____exports.on_input(self, action_id, action)
+    if self.block_input then
+        return false
+    end
     return self.druid:on_input(action_id, action)
 end
 function ____exports.update(self, dt)

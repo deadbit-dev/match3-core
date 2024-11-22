@@ -60,7 +60,8 @@ interface props {
     druid: DruidClass,
     level: Level,
     busters: Busters,
-    settings_opened: boolean
+    settings_opened: boolean,
+    block_input: boolean
 }
 
 export function init(this: props): void {
@@ -69,6 +70,7 @@ export function init(this: props): void {
     this.druid = druid.new(this);
     this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
     this.busters = this.level['busters'];
+    this.block_input = false;
 
     set_text('text', Lang.get_text('play'));
     // FIXME: (for now) test animal tutorial tip
@@ -82,6 +84,8 @@ export function init(this: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: unknown): boolean {
+    if(this.block_input)
+        return false;
     return this.druid.on_input(action_id, action);
 }
 
@@ -510,12 +514,13 @@ function set_events(instance: props) {
     EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
     EventBus.on('OPENED_DLG', (dlg: Dlg) => {
         if (dlg == Dlg.Store) {
-            gui.set_enabled(gui.get_node('buster_buttons'), false);
+            instance.block_input = true;
         }
+        
     });
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
         if (dlg == Dlg.Store) {
-            gui.set_enabled(gui.get_node('buster_buttons'), true);
+            instance.block_input = false;
             Sound.play('game');
         }
     });
