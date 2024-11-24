@@ -135,7 +135,12 @@ end
 function setup_store(data)
     data.druid:new_button(
         "store/close",
-        function() return set_enabled_store(data, false) end
+        function()
+            if data.is_not_enough_coins then
+                return
+            end
+            set_enabled_store(data, false)
+        end
     )
     gui.set_text(
         gui.get_node("store/store_title_text"),
@@ -1239,9 +1244,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch176 = scene.name
-        local ____cond176 = ____switch176 == "movie" or ____switch176 == "game"
-        if ____cond176 then
+        local ____switch177 = scene.name
+        local ____cond177 = ____switch177 == "movie" or ____switch177 == "game"
+        if ____cond177 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -1249,8 +1254,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond176 = ____cond176 or ____switch176 == "map"
-        if ____cond176 then
+        ____cond177 = ____cond177 or ____switch177 == "map"
+        if ____cond177 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -1276,9 +1281,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch181 = Scene.get_current_name()
-        local ____cond181 = ____switch181 == "game"
-        if ____cond181 then
+        local ____switch182 = Scene.get_current_name()
+        local ____cond182 = ____switch182 == "game"
+        if ____cond182 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -1292,8 +1297,8 @@ function set_enabled_store(data, state)
             end
             break
         end
-        ____cond181 = ____cond181 or ____switch181 == "map"
-        if ____cond181 then
+        ____cond182 = ____cond182 or ____switch182 == "map"
+        if ____cond182 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)
@@ -1404,6 +1409,7 @@ function set_enabled_not_enough_coins(data, state)
                 0.3
             )
         end
+        data.is_not_enough_coins = true
         EventBus.send("OPENED_DLG", Dlg.NotEnoughCoins)
     else
         if not data.is_store_open then
@@ -1426,6 +1432,7 @@ function set_enabled_not_enough_coins(data, state)
                 gui.set_enabled(coins, state)
             end
         )
+        data.is_not_enough_coins = false
         EventBus.send("CLOSED_DLG", Dlg.NotEnoughCoins)
     end
 end

@@ -15,7 +15,8 @@ import { Dlg } from '../game_config';
 interface props {
     druid: DruidClass,
     dlg_opened: boolean,
-    is_store_open: boolean
+    is_store_open: boolean,
+    is_not_enough_coins: boolean
 }
 
 export function init(this: props): void {
@@ -134,7 +135,11 @@ function setup_life(data: props) {
 }
 
 function setup_store(data: props) {
-    data.druid.new_button('store/close', () => set_enabled_store(data, false));
+    data.druid.new_button('store/close', () => {
+        if(data.is_not_enough_coins)
+            return;
+        set_enabled_store(data, false);
+    });
 
     gui.set_text(gui.get_node('store/store_title_text'), Lang.get_text('store_title'));
 
@@ -957,6 +962,7 @@ function set_enabled_not_enough_coins(data: props, state: boolean) {
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 480, 0), gui.EASING_INCUBIC, 0.3);
         if (!data.is_store_open)
             gui.animate(gui.get_node('fade'), 'color', vmath.vector4(0, 0, 0, GAME_CONFIG.fade_value), gui.EASING_INCUBIC, 0.3);
+        data.is_not_enough_coins = true;
         EventBus.send('OPENED_DLG', Dlg.NotEnoughCoins);
     } else {
         if (!data.is_store_open)
@@ -964,6 +970,7 @@ function set_enabled_not_enough_coins(data: props, state: boolean) {
         gui.animate(gui.get_node('not_enough_coins/dlg'), 'position', vmath.vector3(270, 1150, 0), gui.EASING_INCUBIC, 0.3, 0, () => {
             gui.set_enabled(coins, state);
         });
+        data.is_not_enough_coins = false;
         EventBus.send('CLOSED_DLG', Dlg.NotEnoughCoins);
     }
 }
