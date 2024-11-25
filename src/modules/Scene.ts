@@ -100,10 +100,9 @@ function SceneModule() {
     }
 
     function try_load(name: string, on_loaded: () => void) {
-        const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
-        // const miss_resource = missing_resources != null;
-        // if(miss_resource) Log.warn("Нехватает ресурсов!");
+        if(!liveupdate || MAIN_BUNDLE_SCENES.includes(name)) return on_loaded();
 
+        const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
         let is_missing = false;
         for(const [key, value] of Object.entries(missing_resources)) {
             if(value != null) {
@@ -114,13 +113,10 @@ function SceneModule() {
         }
 
         const resource_file = name + ".zip";
+        const miss_match_version = !reszip.version_match(resource_file);
+        if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
 
-        // FIXME: why 'reszip.version_match' allways return false ?
-        // const miss_match_version = !reszip.version_match(resource_file);
-        // if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
-
-        // if(liveupdate && (miss_match_version || is_missing) && !MAIN_BUNDLE_SCENES.includes(name)) {
-        if(liveupdate && is_missing && !MAIN_BUNDLE_SCENES.includes(name)) {
+        if(miss_match_version || is_missing) {
             Log.log("Загрузка ресурсов для сцены: " + name);
             reszip.load_and_mount_zip(resource_file, {
                 filename: resource_file,

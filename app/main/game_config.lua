@@ -25,7 +25,7 @@ ____exports.OK_SHARE_TEXT = ""
 ____exports.ID_YANDEX_METRICA = sys.get_sys_info().system_name == "Android" and "c1ce595b-7bf8-4b99-b487-0457f8da7b95" or "91a2fd82-b0de-4fb2-b3a7-03bff14b9d09"
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
-____exports.MAIN_BUNDLE_SCENES = {"movie", "game"}
+____exports.MAIN_BUNDLE_SCENES = {"movie", "shared_gui", "game"}
 ____exports._GAME_CONFIG = {
     debug_levels = false,
     bottom_offset = 50,
