@@ -494,12 +494,12 @@ function ____exports.Game()
                 add_coins(level_config.coins)
                 if level_config.coins > 0 then
                     if last_state.steps ~= nil then
-                        add_coins(math.min(last_state.steps, GAME_CONFIG.max_coins_for_reward))
+                        add_coins(math.min(last_state.steps, current_level ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock))
                     end
                     if last_state.remaining_time ~= nil then
                         add_coins(math.min(
                             math.floor(last_state.remaining_time),
-                            GAME_CONFIG.max_coins_for_reward
+                            current_level ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock
                         ))
                     end
                 end
