@@ -43,10 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/game/view.script"
-        :code
-      ]
-      [
         "/game/animals/dog.collection"
         :scene
       ]
@@ -56,10 +52,6 @@
       ]
       [
         "/game/animals/kozel.collection"
-        :scene
-      ]
-      [
-        "/game/animals/cat.collection"
         :scene
       ]
       [
@@ -103,10 +95,6 @@
         :scene
       ]
       [
-        "/game/ui/background.gui"
-        :scene
-      ]
-      [
         "/game/game.collection"
         :scene
       ]
@@ -125,10 +113,6 @@
       [
         "/modules/Manager.lua"
         :code
-      ]
-      [
-        "/game/ui/game.gui"
-        :scene
       ]
       [
         "/game/animals/bull.collection"
@@ -163,12 +147,28 @@
         :scene
       ]
       [
+        "/druid/styles/default/style.lua"
+        :code
+      ]
+      [
         "/main/ui/shared.gui"
         :scene
       ]
       [
-        "/druid/styles/default/style.lua"
-        :code
+        "/prefabs/substrate_view.go"
+        :scene
+      ]
+      [
+        "/game/animals/cat.collection"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/game/ui/background.gui"
+        :scene
       ]
     ]
   }

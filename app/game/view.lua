@@ -201,7 +201,7 @@ function ____exports.View(resources)
         return cell_size / get_field_cell_size()
     end
     function calculate_cell_offset()
-        local offset_x = (max_width * cell_size - get_field_width() * cell_size) / 2 + get_field_offset_border()
+        local offset_x = (max_width * cell_size - get_field_width() * cell_size + get_field_offset_border() * 2) / 2 + 2
         local offset_y = -(original_game_height / 2 - get_field_max_height() / 2 * cell_size) + 600
         if not GAME_CONFIG.debug_levels then
             offset_y = offset_y - (90 - GAME_CONFIG.bottom_offset)
@@ -235,8 +235,13 @@ function ____exports.View(resources)
             local aspect = display_width / display_height
             local zoom = 1
             if window_aspect >= aspect then
+                local aspect_delta = data.width < data.height and math.min(
+                    math.abs(window_aspect - aspect),
+                    0.1
+                ) or 0
+                print("ASPECT DELTA: ", aspect_delta)
                 local height = display_width / window_aspect
-                zoom = height / display_height
+                zoom = height / display_height + aspect_delta
             end
             print("ZOOM: ", zoom)
             Camera.set_zoom(zoom)

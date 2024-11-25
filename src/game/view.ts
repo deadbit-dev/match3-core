@@ -249,7 +249,7 @@ export function View(resources: ViewResources) {
     }
 
     function calculate_cell_offset() {
-        const offset_x = (((max_width * cell_size) - (get_field_width() * cell_size)) / 2) + get_field_offset_border();
+        const offset_x = (((max_width * cell_size) - (get_field_width() * cell_size) + (get_field_offset_border() * 2)) / 2) + 2;
         let offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
         if(!GAME_CONFIG.debug_levels) offset_y -= 90 - GAME_CONFIG.bottom_offset;
 
@@ -311,8 +311,10 @@ export function View(resources: ViewResources) {
             const aspect = display_width / display_height;
             let zoom = 1;
             if (window_aspect >= aspect) {
+                const aspect_delta = (data.width < data.height) ? math.min(math.abs(window_aspect - aspect), 0.1) : 0;
+                print("ASPECT DELTA: ", aspect_delta);
                 const height = display_width / window_aspect;
-                zoom = height / display_height;
+                zoom = (height / display_height) + aspect_delta;
             }
             print("ZOOM: ", zoom);
             Camera.set_zoom(zoom);

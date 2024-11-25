@@ -48,7 +48,7 @@ function on_resize(data)
         hill,
         is_animal_level()
     )
-    local posY = -275 + GAME_CONFIG.bottom_offset
+    local posY = -210 + GAME_CONFIG.bottom_offset
     if GAME_CONFIG.debug_levels then
         posY = posY + 100
     end

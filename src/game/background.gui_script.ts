@@ -73,7 +73,7 @@ function on_resize(data: {width: number, height: number}) {
 
     const hill = gui.get_node('hill');
     gui.set_enabled(hill, is_animal_level());
-    let posY = -275 + GAME_CONFIG.bottom_offset;
+    let posY = -210 + GAME_CONFIG.bottom_offset;
     if(GAME_CONFIG.debug_levels)
         posY += 100;
     gui.set_position(hill, vmath.vector3(250, posY, 0));
