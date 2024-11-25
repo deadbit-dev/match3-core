@@ -228,7 +228,9 @@ function ____exports.View(resources)
         Log.log("RESIZE")
         local display_height = 960
         local window_aspect = data.width / data.height
+        print("WINDOW ASPECT: ", window_aspect)
         local display_width = tonumber(sys.get_config("display.width"))
+        print("DISPLAY WIDTH: ", display_width)
         if display_width then
             local aspect = display_width / display_height
             local zoom = 1
@@ -236,7 +238,7 @@ function ____exports.View(resources)
                 local height = display_width / window_aspect
                 zoom = height / display_height
             end
-            Log.log("ZOOM")
+            print("ZOOM: ", zoom)
             Camera.set_zoom(zoom)
         end
     end

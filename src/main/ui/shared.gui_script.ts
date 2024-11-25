@@ -187,10 +187,15 @@ function setup_store(data: props) {
     };
 
     const coins150 = data.druid.new_button('store/coins_150', () => {
+        if(data.is_not_enough_coins)
+            return;
+
         buy_150(coins150);
     });
 
     const coins150_btn = data.druid.new_button('store/buy_150_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_150(coins150_btn);
     });
 
@@ -238,10 +243,14 @@ function setup_store(data: props) {
     };
 
     const coins300 = data.druid.new_button('store/coins_300', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_300(coins300);
     });
 
     const coins300_btn = data.druid.new_button('store/buy_300_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_300(coins300_btn);
     });
 
@@ -289,10 +298,14 @@ function setup_store(data: props) {
     };
 
     const coins800 = data.druid.new_button('store/coins_800', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_800(coins800);
     });
 
     const coins800_btn = data.druid.new_button('store/buy_800_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_800(coins800_btn);
     });
 
@@ -323,10 +336,14 @@ function setup_store(data: props) {
     };
 
     const life1 = data.druid.new_button('store/life_1', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x1(life1);
     });
 
     const life1_btn = data.druid.new_button('store/buy_x1_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x1(life1_btn);
     });
 
@@ -355,10 +372,14 @@ function setup_store(data: props) {
     };
 
     const life2 = data.druid.new_button('store/life_2', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x2(life2);
     });
 
     const life2_btn = data.druid.new_button('store/buy_x2_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x2(life2_btn);
     });
 
@@ -387,10 +408,14 @@ function setup_store(data: props) {
     };
 
     const life3 = data.druid.new_button('store/life_3', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x3(life3);
     });
 
     const life3_btn = data.druid.new_button('store/buy_x3_btn', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_x3(life3_btn);
     });
 
@@ -430,10 +455,14 @@ function setup_store(data: props) {
     };
 
     const junior = data.druid.new_button('store/junior_box/items', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_junior(junior);
     });
 
     const junior_btn = data.druid.new_button('store/junior_box/buy_button/button', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_junior(junior_btn);
     });
 
@@ -479,74 +508,80 @@ function setup_store(data: props) {
     };
 
     const catlover = data.druid.new_button('store/catlover_box/items', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_catlover(catlover);
     });
 
     const catlover_btn = data.druid.new_button('store/catlover_box/buy_button/button', () => {
+        if(data.is_not_enough_coins)
+            return;
         buy_catlover(catlover_btn);
     });
 
-    gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
+    // -----------------------------------ADS-----------------------------------
 
-    data.druid.new_button('store/buy_ad_1_btn', () => {
-        if (HtmlBridge == null) {
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60); // one day
-            return;
-        }
+    // gui.set_text(gui.get_node('store/ad_title_text'), Lang.get_text('remove_ad'));
 
-        HtmlBridge.purchase({ id: 'noads1' }, (result, purchase) => {
-            if (!result)
-                return () => { };
+    // data.druid.new_button('store/buy_ad_1_btn', () => {
+    //     if (HtmlBridge == null) {
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60); // one day
+    //         return;
+    //     }
 
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60); // 1 day
+    //     HtmlBridge.purchase({ id: 'noads1' }, (result, purchase) => {
+    //         if (!result)
+    //             return () => { };
 
-            Metrica.report('data', { shop: { buy: 'noads1' } });
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60); // 1 day
 
-            HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-        });
-    });
+    //         Metrica.report('data', { shop: { buy: 'noads1' } });
 
-    data.druid.new_button('store/buy_ad_7_btn', () => {
-        if (HtmlBridge == null) {
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60 * 7); // 7 day's
-            return;
-        }
+    //         HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+    //     });
+    // });
 
-        HtmlBridge.purchase({ id: 'noads7' }, (result, purchase) => {
-            if (!result)
-                return () => { };
+    // data.druid.new_button('store/buy_ad_7_btn', () => {
+    //     if (HtmlBridge == null) {
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60 * 7); // 7 day's
+    //         return;
+    //     }
 
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60 * 7); // 7 day's
+    //     HtmlBridge.purchase({ id: 'noads7' }, (result, purchase) => {
+    //         if (!result)
+    //             return () => { };
 
-            Metrica.report('data', { shop: { buy: 'noads7' } });
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60 * 7); // 7 day's
 
-            HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-        });
-    });
+    //         Metrica.report('data', { shop: { buy: 'noads7' } });
 
-    data.druid.new_button('store/buy_ad_30_btn', () => {
-        if (HtmlBridge == null) {
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60 * 30); // 30 day's
-            return;
-        }
+    //         HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+    //     });
+    // });
 
-        HtmlBridge.purchase({ id: 'noads30' }, (result, purchase) => {
-            if (!result)
-                return () => { };
+    // data.druid.new_button('store/buy_ad_30_btn', () => {
+    //     if (HtmlBridge == null) {
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60 * 30); // 30 day's
+    //         return;
+    //     }
 
-            Sound.play('purchase');
-            remove_ad(24 * 60 * 60 * 30); // 7 day's
+    //     HtmlBridge.purchase({ id: 'noads30' }, (result, purchase) => {
+    //         if (!result)
+    //             return () => { };
 
-            Metrica.report('data', { shop: { buy: 'noads30' } });
+    //         Sound.play('purchase');
+    //         remove_ad(24 * 60 * 60 * 30); // 7 day's
 
-            HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-        });
-    });
+    //         Metrica.report('data', { shop: { buy: 'noads30' } });
+
+    //         HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+    //     });
+    // });
 
     if (GAME_CONFIG.debug_levels) {
         gui.set_enabled(gui.get_node('store/reset/button'), true);
