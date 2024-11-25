@@ -494,10 +494,13 @@ function ____exports.Game()
                 add_coins(level_config.coins)
                 if level_config.coins > 0 then
                     if last_state.steps ~= nil then
-                        add_coins(last_state.steps)
+                        add_coins(math.min(last_state.steps, GAME_CONFIG.max_coins_for_reward))
                     end
                     if last_state.remaining_time ~= nil then
-                        add_coins(math.floor(last_state.remaining_time))
+                        add_coins(math.min(
+                            math.floor(last_state.remaining_time),
+                            GAME_CONFIG.max_coins_for_reward
+                        ))
                     end
                 end
                 Metrica.report(
