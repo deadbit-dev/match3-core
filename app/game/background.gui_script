@@ -14,10 +14,11 @@ function on_resize(data)
     if dr < br then
         gui.set_pivot(bg, gui.PIVOT_W)
         gui.set_xanchor(bg, gui.ANCHOR_LEFT)
-        gui.set_position(
-            bg,
-            vmath.vector3(0, 444, 0)
-        )
+        local pos = vmath.vector3(0, 444, 0)
+        if is_animal_level() then
+            pos.y = pos.y + 90
+        end
+        gui.set_position(bg, pos)
         gui.set_scale(
             bg,
             vmath.vector3(1, 1, 1)
@@ -48,7 +49,7 @@ function on_resize(data)
         hill,
         is_animal_level()
     )
-    local posY = -210 + GAME_CONFIG.bottom_offset
+    local posY = -250 + GAME_CONFIG.bottom_offset
     if GAME_CONFIG.debug_levels then
         posY = posY + 100
     end

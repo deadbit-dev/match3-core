@@ -159,11 +159,11 @@
         :scene
       ]
       [
-        "/game/animals/cat.collection"
+        "/game/ui/game.gui"
         :scene
       ]
       [
-        "/game/ui/game.gui"
+        "/game/animals/cat.collection"
         :scene
       ]
       [

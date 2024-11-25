@@ -55,7 +55,10 @@ function on_resize(data: {width: number, height: number}) {
     if(dr < br) {
         gui.set_pivot(bg, gui.PIVOT_W);
         gui.set_xanchor(bg, gui.ANCHOR_LEFT);
-        gui.set_position(bg, vmath.vector3(0, 444, 0));
+        const pos = vmath.vector3(0, 444, 0);
+        if(is_animal_level())
+            pos.y += 90;
+        gui.set_position(bg, pos);
         gui.set_scale(bg, vmath.vector3(1, 1, 1));
     } else {
         gui.set_pivot(bg, gui.PIVOT_CENTER);
@@ -73,7 +76,7 @@ function on_resize(data: {width: number, height: number}) {
 
     const hill = gui.get_node('hill');
     gui.set_enabled(hill, is_animal_level());
-    let posY = -210 + GAME_CONFIG.bottom_offset;
+    let posY = -250 + GAME_CONFIG.bottom_offset;
     if(GAME_CONFIG.debug_levels)
         posY += 100;
     gui.set_position(hill, vmath.vector3(250, posY, 0));
