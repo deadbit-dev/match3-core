@@ -35,6 +35,7 @@ export function on_message(this: props, message_id: hash, message: any, sender: 
 export function on_input(this: props, action_id: string | hash, action: any): void {
     if (action_id == hash('touch')) {
         msg.post('.', action_id, action);
+        EventBus.send('INPUT');
     }
 }
 

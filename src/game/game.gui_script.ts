@@ -377,6 +377,8 @@ function set_enabled_settings(state: boolean) {
             gui.set_enabled(map, false);
         });
     }
+
+    off_buster_tip_popup();
 }
 
 function setup_sustem_ui(instance: props) {
@@ -524,6 +526,13 @@ function set_events(instance: props) {
             Sound.play('game');
         }
     });
+    EventBus.on('INPUT', off_buster_tip_popup, false);
+}
+
+function off_buster_tip_popup() {
+    const popup = gui.get_node('popup');
+    if(gui.is_enabled(popup, false))
+        gui.set_enabled(popup, false);
 }
 
 function update_targets(data: TargetMessage) {
@@ -570,7 +579,7 @@ function feed_animation() {
                 const points = [
                     { x: 420, y: 870 },
                     { x: width * 0.3, y: height * 0.5 },
-                    { x: width * 0.5, y: 50 + GAME_CONFIG.bottom_offset }
+                    { x: width * 0.5, y: 20 + GAME_CONFIG.bottom_offset }
                 ];
 
                 if (GAME_CONFIG.debug_levels) {

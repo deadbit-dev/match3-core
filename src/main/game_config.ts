@@ -679,5 +679,6 @@ export type _UserMessages = {
     START_MOVIE: VoidMessage,
     PURCHASE_INITIALIZED: VoidMessage,
     SOUND_BUTTON: VoidMessage,
-    MUSIC_BUTTON: VoidMessage
+    MUSIC_BUTTON: VoidMessage,
+    INPUT: VoidMessage
 };

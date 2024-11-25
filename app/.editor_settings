@@ -43,14 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/game/animals/dog.collection"
-        :scene
-      ]
-      [
-        "/game/animals/goose.collection"
-        :scene
-      ]
-      [
         "/game/animals/kozel.collection"
         :scene
       ]
@@ -159,7 +151,7 @@
         :scene
       ]
       [
-        "/game/ui/game.gui"
+        "/game/ui/background.gui"
         :scene
       ]
       [
@@ -167,7 +159,15 @@
         :scene
       ]
       [
-        "/game/ui/background.gui"
+        "/movie/movie.gui"
+        :scene
+      ]
+      [
+        "/movie/movie.collection"
+        :scene
+      ]
+      [
+        "/game/ui/game.gui"
         :scene
       ]
     ]

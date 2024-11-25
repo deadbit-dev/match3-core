@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, update_targets, set_target, feed_animation, update_buttons, set_tutorial, click_in_two_pos, hand_click_animation, hand_swap_animation, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, off_buster_tip_popup, update_targets, set_target, feed_animation, update_buttons, set_tutorial, click_in_two_pos, hand_click_animation, hand_swap_animation, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____game_config = require("main.game_config")
@@ -529,6 +529,7 @@ function set_enabled_settings(state)
             end
         )
     end
+    off_buster_tip_popup()
 end
 function setup_sustem_ui(instance)
     instance.druid:new_button(
@@ -786,6 +787,13 @@ function set_events(instance)
             end
         end
     )
+    EventBus.on("INPUT", off_buster_tip_popup, false)
+end
+function off_buster_tip_popup()
+    local popup = gui.get_node("popup")
+    if gui.is_enabled(popup, false) then
+        gui.set_enabled(popup, false)
+    end
 end
 function update_targets(data)
     if data.pos ~= nil and data.type == TargetType.Element then
@@ -815,25 +823,25 @@ function update_targets(data)
 end
 function set_target(data)
     repeat
-        local ____switch115 = data.idx
-        local ____cond115 = ____switch115 == 0
-        if ____cond115 then
+        local ____switch117 = data.idx
+        local ____cond117 = ____switch117 == 0
+        if ____cond117 then
             set_text(
                 "first_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond115 = ____cond115 or ____switch115 == 1
-        if ____cond115 then
+        ____cond117 = ____cond117 or ____switch117 == 1
+        if ____cond117 then
             set_text(
                 "second_target_counts",
                 math.max(0, data.amount)
             )
             break
         end
-        ____cond115 = ____cond115 or ____switch115 == 2
-        if ____cond115 then
+        ____cond117 = ____cond117 or ____switch117 == 2
+        if ____cond117 then
             set_text(
                 "third_target_counts",
                 math.max(0, data.amount)
@@ -868,7 +876,7 @@ function feed_animation()
                         local ltrb = Camera.get_ltrb()
                         local width = 540
                         local height = math.abs(ltrb.w)
-                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = 50 + GAME_CONFIG.bottom_offset}}
+                        local points = {{x = 420, y = 870}, {x = width * 0.3, y = height * 0.5}, {x = width * 0.5, y = 20 + GAME_CONFIG.bottom_offset}}
                         if GAME_CONFIG.debug_levels then
                             points[#points].y = width * 0.4 + GAME_CONFIG.bottom_offset
                         end
@@ -1021,9 +1029,9 @@ function set_tutorial()
         end
     end
     repeat
-        local ____switch138 = get_current_level() + 1
-        local ____cond138 = ____switch138 == 6
-        if ____cond138 then
+        local ____switch140 = get_current_level() + 1
+        local ____cond140 = ____switch140 == 6
+        if ____cond140 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1039,8 +1047,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == 7
-        if ____cond138 then
+        ____cond140 = ____cond140 or ____switch140 == 7
+        if ____cond140 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1054,13 +1062,13 @@ function set_tutorial()
             )
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == 8
-        if ____cond138 then
+        ____cond140 = ____cond140 or ____switch140 == 8
+        if ____cond140 then
             hand_timer = timer.delay(2, false, hand_swap_animation)
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == 9
-        if ____cond138 then
+        ____cond140 = ____cond140 or ____switch140 == 9
+        if ____cond140 then
             hand_timer = timer.delay(
                 2,
                 false,
@@ -1074,8 +1082,8 @@ function set_tutorial()
             )
             break
         end
-        ____cond138 = ____cond138 or ____switch138 == 17
-        if ____cond138 then
+        ____cond140 = ____cond140 or ____switch140 == 17
+        if ____cond140 then
             hand_timer = timer.delay(
                 2,
                 false,

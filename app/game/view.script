@@ -21,6 +21,7 @@ end
 function ____exports.on_input(self, action_id, action)
     if action_id == hash("touch") then
         msg.post(".", action_id, action)
+        EventBus.send("INPUT")
     end
 end
 function ____exports.final(self)
