@@ -107,7 +107,6 @@ export function init(this: props) {
         Sound.attach_druid_click('btn');
         Camera.set_go_prjection(-1, 1, -3, 3);
 
-        Sound.play('map', 1, 0.7);
         const is_shown = GameStorage.get('move_showed');
         if (System.platform == 'HTML5')
             HtmlBridge.game_ready();

@@ -12,6 +12,7 @@ function ____exports.init(self)
     msg.post(".", "acquire_input_focus")
     local anim_props = {blend_duration = 0, playback_rate = 0}
     spine.play_anim("#spinemodel", "start", go.PLAYBACK_ONCE_FORWARD, anim_props)
+    Sound.play("map", 1, 0.7)
     EventBus.on(
         "START_MOVIE",
         function()

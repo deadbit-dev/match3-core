@@ -16,7 +16,7 @@ export function init(this: props) {
     const anim_props = { blend_duration: 0, playback_rate: 0 };
     spine.play_anim('#spinemodel', 'start', go.PLAYBACK_ONCE_FORWARD, anim_props);
 
-    // Sound.play('map', 1, 0.7);
+    Sound.play('map', 1, 0.7);
 
     EventBus.on('START_MOVIE', () => {
         Sound.play('car');

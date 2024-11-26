@@ -28,9 +28,9 @@ export function init(this: props): void {
     
     set_level_buttons(this);
 
-    set_events(this);
+    Sound.play("map");
 
-    Sound.play('map');
+    set_events(this);
 
     set_current_level();
 }
