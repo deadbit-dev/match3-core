@@ -113,8 +113,14 @@ function set_current_level() {
     const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");
     gui.set_texture(level, "map");
     gui.play_flipbook(level, (GAME_CONFIG.animal_levels.includes(max_level + 1)) ? 'button_level_red' : 'button_level');
-    const pos = gui.get_position(level);
-    gui.set_position(gui.get_node('cat'), pos);
+    const level_pos = gui.get_position(level);
+    gui.set_position(gui.get_node('cat'), level_pos);
+
+    const map = gui.get_node('map');
+    const map_pos = gui.get_position(map);
+    const offset = get_offset();
+    map_pos.y = math.max(-3990 + offset, math.min(0 - offset, level_pos.y + 500));
+    gui.set_position(map, map_pos);
 }
 
 function on_drag(action: any) {

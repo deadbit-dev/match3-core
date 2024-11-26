@@ -43,14 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/game/animals/kozel.collection"
-        :scene
-      ]
-      [
-        "/assets/background.atlas"
-        :scene
-      ]
-      [
         "/project_settings/generated.appmanifest"
         :code
       ]
@@ -83,15 +75,7 @@
         :scene
       ]
       [
-        "/map/map.gui"
-        :scene
-      ]
-      [
         "/game/game.collection"
-        :scene
-      ]
-      [
-        "/map/map.collection"
         :scene
       ]
       [
@@ -167,7 +151,23 @@
         :scene
       ]
       [
+        "/map/map.collection"
+        :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
+        "/liveupdate.settings"
+        :cljfx-form-view
+      ]
+      [
         "/game/ui/game.gui"
+        :scene
+      ]
+      [
+        "/map/map.gui"
         :scene
       ]
     ]

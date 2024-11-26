@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as reszip from 'liveupdate_reszip.reszip';
 import { hex2rgba } from "../utils/utils";
@@ -102,6 +103,10 @@ function SceneModule() {
     function try_load(name: string, on_loaded: () => void) {
         if(!liveupdate || MAIN_BUNDLE_SCENES.includes(name)) return on_loaded();
 
+        for(const mount of liveupdate.get_mounts()) {
+            Log.log(mount.name, mount.uri);
+        }
+
         const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
         let is_missing = false;
         for(const [key, value] of Object.entries(missing_resources)) {
@@ -113,14 +118,15 @@ function SceneModule() {
         }
 
         const resource_file = name + ".zip";
-        const miss_match_version = !reszip.version_match(resource_file);
+        const miss_match_version = !reszip.version_match(resource_file, name);
         if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
 
         if(miss_match_version || is_missing) {
             Log.log("Загрузка ресурсов для сцены: " + name);
+            
             reszip.load_and_mount_zip(resource_file, {
                 filename: resource_file,
-                mount_name: resource_file,
+                mount_name: name,
                 delete_old_file: true,
                 on_finish: (self: any, err: any) => {
                     if(!err) {

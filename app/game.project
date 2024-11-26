@@ -77,3 +77,6 @@ applovin_android = MmHLJLwlhhLwuWZiNeyeLte3zfmk4GImmOIOs6U5eCW31mzSvyzXbhJuoTTGh
 [sound]
 max_component_count = 64
 
+[liveupdate]
+settings = /liveupdate.settings
+
