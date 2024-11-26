@@ -163,11 +163,11 @@
         :cljfx-form-view
       ]
       [
-        "/game/ui/game.gui"
+        "/map/map.gui"
         :scene
       ]
       [
-        "/map/map.gui"
+        "/game/ui/game.gui"
         :scene
       ]
     ]
