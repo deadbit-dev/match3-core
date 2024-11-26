@@ -78,7 +78,7 @@ function set_current_level()
     local offset = get_offset()
     map_pos.y = math.max(
         -3990 + offset,
-        math.min(0 - offset, level_pos.y + 500)
+        math.min(0 - offset, -(level_pos.y - 250))
     )
     gui.set_position(map, map_pos)
 end

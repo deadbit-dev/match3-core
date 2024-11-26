@@ -119,7 +119,7 @@ function set_current_level() {
     const map = gui.get_node('map');
     const map_pos = gui.get_position(map);
     const offset = get_offset();
-    map_pos.y = math.max(-3990 + offset, math.min(0 - offset, level_pos.y + 500));
+    map_pos.y = math.max(-3990 + offset, math.min(0 - offset, -(level_pos.y - 250)));
     gui.set_position(map, map_pos);
 }
 
