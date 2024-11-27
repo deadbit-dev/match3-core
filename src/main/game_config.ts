@@ -36,7 +36,7 @@ export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
 export const MAIN_BUNDLE_SCENES = ['movie', 'shared_gui', 'game'];
 
-export const RESOURCE_VERSION = 4;
+export const RESOURCE_VERSION = 1;
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
@@ -386,7 +386,7 @@ export const _GAME_CONFIG = {
         },
         8: {
             cells: [
-                { x: 6, y: 3 }, { x: 7, y: 3}
+                { x: 6, y: 3 }, { x: 7, y: 3 }
             ],
             step: {
                 from: { x: 6, y: 3 },
@@ -518,7 +518,7 @@ export const _STORAGE_CONFIG = {
 };
 
 export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
-export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType, pos ?: vmath.vector3 }
+export interface TargetMessage { idx: number, amount: number, id: number, type: TargetType, pos?: vmath.vector3 }
 export interface SwapElementsMessage extends SwapInfo { element_from: Element, element_to: Element | typeof NullElement }
 export interface CombinateMessage { combined_positions: Position[] }
 export interface ResponseCombinateMessage { pos: Position, combination: CombinationInfo }
@@ -625,7 +625,7 @@ export type _UserMessages = {
     NOT_ENOUGH_LIFE: VoidMessage,
 
     ON_WIN: VoidMessage,
-    ON_WIN_END: {state: GameState, with_reward: boolean },
+    ON_WIN_END: { state: GameState, with_reward: boolean },
     ON_GAME_OVER: GameState,
 
     MOVIE_END: VoidMessage,
@@ -659,7 +659,7 @@ export type _UserMessages = {
     TRY_BUY_VERTICAL_ROCKET: VoidMessage,
 
     SET_LIFE_NOTIFICATION: VoidMessage,
-    REVIVE: {steps?: number, time?: number},
+    REVIVE: { steps?: number, time?: number },
 
     SET_ANIMAL_TUTORIAL_TIP: VoidMessage,
     HIDED_ANIMAL_TUTORIAL_TIP: VoidMessage,

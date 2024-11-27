@@ -42,13 +42,22 @@ export function init(this: props) {
         Scene.load_resource('main', 'shared_gui');
 
         if (System.platform == 'HTML5') {
-            if(html5.run(`new URL(location).searchParams.has('delete_mounts')`) == "true") {
+            let is_clear = html5.run(`new URL(location).searchParams.has('delete_mounts')`) == "true";
+
+            if (Ads.get_social_platform() == 'yandex') {
+                const payload = HtmlBridge.get_payload();
+                if (payload.indexOf('delete_mounts') > -1)
+                    is_clear = true;
+            }
+            if (is_clear) {
+                log('delete mounts');
                 delete_mounts();
             }
 
+
             // yandex purchases
             // получаем список возможных покупок(иды, цены)
-            if(HtmlBridge.get_platform() == 'yandex') {
+            if (HtmlBridge.get_platform() == 'yandex') {
                 HtmlBridge.init_purchases((status, data) => {
                     if (!status) Log.error('Yandex init_purchases error');
                     else {

@@ -26,7 +26,7 @@
       }
     }
     :liveupdate true
-    :output-directory "/Users/pavel/Dev/match3-core/app/build/v4"
+    :output-directory "D:\\Defold\\projects\\builds"
     :texture-compression "enabled"
     :variant "release"
     :windows {
@@ -42,18 +42,6 @@
   }
   :workflow {
     :recent-files [
-      [
-        "/assets/background.atlas"
-        :scene
-      ]
-      [
-        "/project_settings/generated.appmanifest"
-        :code
-      ]
-      [
-        "/map/level.gui"
-        :scene
-      ]
       [
         "/game/game.lua"
         :code
@@ -168,6 +156,18 @@
       ]
       [
         "/game/utils.lua"
+        :code
+      ]
+      [
+        "/map/map.gui_script"
+        :code
+      ]
+      [
+        "/main/main.collection"
+        :scene
+      ]
+      [
+        "/modules/Camera.lua"
         :code
       ]
     ]

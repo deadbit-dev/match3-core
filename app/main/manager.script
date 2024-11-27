@@ -32,7 +32,15 @@ function ____exports.init(self)
             end
             Scene.load_resource("main", "shared_gui")
             if System.platform == "HTML5" then
-                if html5.run("new URL(location).searchParams.has('delete_mounts')") == "true" then
+                local is_clear = html5.run("new URL(location).searchParams.has('delete_mounts')") == "true"
+                if Ads.get_social_platform() == "yandex" then
+                    local payload = HtmlBridge.get_payload()
+                    if (string.find(payload, "delete_mounts", nil, true) or 0) - 1 > -1 then
+                        is_clear = true
+                    end
+                end
+                if is_clear then
+                    log("delete mounts")
                     delete_mounts()
                 end
                 if HtmlBridge.get_platform() == "yandex" then
