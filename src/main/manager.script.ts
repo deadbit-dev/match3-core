@@ -14,7 +14,7 @@ import { BannerPos } from '../modules/Ads';
 import { register_manager } from '../modules/Manager';
 import { load_levels_config } from '../game/level';
 import { Product, Purchase } from '../modules/HtmlBridgeTypes';
-import { add_coins, remove_ad } from '../game/utils';
+import { add_coins, delete_mounts, remove_ad } from '../game/utils';
 
 
 interface props {
@@ -41,64 +41,70 @@ export function init(this: props) {
 
         Scene.load_resource('main', 'shared_gui');
 
-        // yandex purchases
-        // получаем список возможных покупок(иды, цены)
-        if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'yandex') {
-            HtmlBridge.init_purchases((status, data) => {
-                if (!status) Log.error('Yandex init_purchases error');
-                else {
-                    const products: Product[] = data as Product[];
-                    GAME_CONFIG.products = products;
-                    GAME_CONFIG.has_payments = true;
+        if (System.platform == 'HTML5') {
+            if(html5.run(`new URL(location).searchParams.has('delete_mounts')`) == "true") {
+                delete_mounts();
+            }
 
-                    log('Yandex init_purchases success');
+            // yandex purchases
+            // получаем список возможных покупок(иды, цены)
+            if(HtmlBridge.get_platform() == 'yandex') {
+                HtmlBridge.init_purchases((status, data) => {
+                    if (!status) Log.error('Yandex init_purchases error');
+                    else {
+                        const products: Product[] = data as Product[];
+                        GAME_CONFIG.products = products;
+                        GAME_CONFIG.has_payments = true;
 
-                    // необработанные покупки, такое бывает когда юзер покупает например в яндексе
-                    // и тут же например обновит страницу, и нужно их обработать и начислить
-                    HtmlBridge.get_purchases((status, data) => {
-                        if (!status)
-                            return;
+                        log('Yandex init_purchases success');
 
-                        const purchases: Purchase[] = data as Purchase[];
-                        log('Yandex get_purchases success', purchases);
+                        // необработанные покупки, такое бывает когда юзер покупает например в яндексе
+                        // и тут же например обновит страницу, и нужно их обработать и начислить
+                        HtmlBridge.get_purchases((status, data) => {
+                            if (!status)
+                                return;
 
-                        for (let i = 0; i < purchases.length; i++) {
-                            const purchase = purchases[i];
-                            const id_product = purchase.productID;
-                            log('process buyed:', purchase);
-                            if (id_product == 'maney150') {
-                                add_coins(150);
-                                GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                            else if (id_product == 'maney300') {
-                                add_coins(300);
-                                GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                            else if (id_product == 'maney800') {
-                                add_coins(800);
-                                GameStorage.set('was_purchased', true);
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                            else if (id_product == 'noads1') {
-                                remove_ad(24 * 60 * 60); // 1 day
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                            else if (id_product == 'noads7') {
-                                remove_ad(24 * 60 * 60 * 7); // 7 day's
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                            else if (id_product == 'noads30') {
-                                remove_ad(24 * 60 * 60 * 30); // 30 day's
-                                HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
-                            }
-                        }
-                    });
+                            const purchases: Purchase[] = data as Purchase[];
+                            log('Yandex get_purchases success', purchases);
 
-                    EventBus.send('PURCHASE_INITIALIZED');
-                }
-            });
+                            for (let i = 0; i < purchases.length; i++) {
+                                const purchase = purchases[i];
+                                const id_product = purchase.productID;
+                                log('process buyed:', purchase);
+                                if (id_product == 'maney150') {
+                                    add_coins(150);
+                                    GameStorage.set('was_purchased', true);
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                                else if (id_product == 'maney300') {
+                                    add_coins(300);
+                                    GameStorage.set('was_purchased', true);
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                                else if (id_product == 'maney800') {
+                                    add_coins(800);
+                                    GameStorage.set('was_purchased', true);
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                                else if (id_product == 'noads1') {
+                                    remove_ad(24 * 60 * 60); // 1 day
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                                else if (id_product == 'noads7') {
+                                    remove_ad(24 * 60 * 60 * 7); // 7 day's
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                                else if (id_product == 'noads30') {
+                                    remove_ad(24 * 60 * 60 * 30); // 30 day's
+                                    HtmlBridge.consume_purchase(purchase.purchaseToken, () => { });
+                                }
+                            }
+                        });
+
+                        EventBus.send('PURCHASE_INITIALIZED');
+                    }
+                });
+            }
         }
 
         default_style.scroll.WHEEL_SCROLL_SPEED = 10;

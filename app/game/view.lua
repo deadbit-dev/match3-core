@@ -1099,7 +1099,6 @@ function ____exports.View(resources)
             delay,
             false,
             function()
-                Log.log("REQUEST FALLING: ", pos.x, pos.y)
                 EventBus.send("REQUEST_FALLING", pos)
             end
         )

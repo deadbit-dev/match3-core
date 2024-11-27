@@ -8,7 +8,7 @@
 import * as reszip from 'liveupdate_reszip.reszip';
 import { hex2rgba } from "../utils/utils";
 import { Messages } from "./modules_const";
-import { MAIN_BUNDLE_SCENES } from '../main/game_config';
+import { MAIN_BUNDLE_SCENES, RESOURCE_VERSION } from '../main/game_config';
 
 /*
     Модуль для работы со сценой
@@ -103,8 +103,9 @@ function SceneModule() {
     function try_load(name: string, on_loaded: () => void) {
         if(!liveupdate || MAIN_BUNDLE_SCENES.includes(name)) return on_loaded();
 
+        Log.log("Найдены рессурсы: ");
         for(const mount of liveupdate.get_mounts()) {
-            Log.log(mount.name, mount.uri);
+            Log.log(`\tРессурс: ${mount.uri} в маунте: ${mount.name}`);
         }
 
         const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
@@ -117,15 +118,16 @@ function SceneModule() {
             }
         }
 
+        const versioned_file_name = name + "_v" + RESOURCE_VERSION + ".zip";
         const resource_file = name + ".zip";
-        const miss_match_version = !reszip.version_match(resource_file, name);
+        const miss_match_version = !reszip.version_match(versioned_file_name, name);
         if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
 
         if(miss_match_version || is_missing) {
             Log.log("Загрузка ресурсов для сцены: " + name);
             
             reszip.load_and_mount_zip(resource_file, {
-                filename: resource_file,
+                filename: versioned_file_name,
                 mount_name: name,
                 delete_old_file: true,
                 on_finish: (self: any, err: any) => {
@@ -137,6 +139,19 @@ function SceneModule() {
             });
         } else on_loaded();
     }
+
+    // function version_match(versioned_file_name: string, mount_name: string): boolean {
+    //     const mounts = liveupdate.get_mounts();
+    //     for(const mount of mounts) {
+    //         if(mount.name == mount_name) {
+    //             const basename = mount.uri.find()  '^.+(v\\d+.+)$')[0];
+    //             Log.log("MOUNT: ", basename);
+    //             return basename == versioned_file_name;
+    //         }
+    //     }
+        
+    //     return false;
+    // }
 
     function _on_message(_this: any, message_id: hash, _message: any, sender: hash) {
         if (message_id == to_hash('MANAGER_READY')) {

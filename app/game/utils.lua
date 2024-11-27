@@ -1,5 +1,6 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
+local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
 local ____exports = {}
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
@@ -137,5 +138,16 @@ function ____exports.remove_ad(time)
     data.end_data = data.end_data + (current_date + time + delta)
     GameStorage.set("noads", data)
     Log.log("REMOVE AD FOR: " .. parse_time(data.end_data))
+end
+function ____exports.delete_mounts()
+    if not liveupdate then
+        return
+    end
+    local mounts = liveupdate.get_mounts()
+    for ____, mount in ipairs(mounts) do
+        if __TS__StringEndsWith(mount.name, ".zip") then
+            liveupdate.remove_mount(mount.name)
+        end
+    end
 end
 return ____exports

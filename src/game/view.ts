@@ -943,7 +943,6 @@ export function View(resources: ViewResources) {
     function request_falling(pos: Position, delay = GAME_CONFIG.falling_dalay) {
         record_action(Action.Falling);
         timer.delay(delay, false, () => {
-            Log.log("REQUEST FALLING: ", pos.x, pos.y);
             EventBus.send('REQUEST_FALLING', pos);
         });
     }

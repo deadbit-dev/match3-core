@@ -6,14 +6,13 @@ declare namespace collectionproxy {
     export function missing_resources(url: string): any;
 }
 
-declare let liveupdate: any;
-
-declare interface Mount{
+declare interface Mount {
     name: string,
     uri: string,
     priority: number
 }
 
-declare interface liveupdate {
-    get_mounts: () => Mount[]
+declare namespace liveupdate {
+    export function get_mounts(): Mount[];
+    export function remove_mount(name: string): void;
 }

@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
 import { Direction } from "../utils/math_utils";
 import { parse_time } from "../utils/utils";
 import { Position, SwapInfo } from "./core";
@@ -146,4 +151,16 @@ export function remove_ad(time: number) {
     data.end_data += current_date + time + delta;
     GameStorage.set('noads', data);
     Log.log(`REMOVE AD FOR: ${parse_time(data.end_data)}`);
+}
+
+export function delete_mounts() {
+    if(!liveupdate)
+        return;
+
+    const mounts = liveupdate.get_mounts();
+    for(const mount of mounts) {
+        if(mount.name.endsWith(".zip")) {
+            liveupdate.remove_mount(mount.name);
+        }
+    }
 }

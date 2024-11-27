@@ -305,10 +305,8 @@ function ____exports.Game()
     end
     function on_idle()
         if is_idle then
-            Log.log("RETURN")
             return
         end
-        Log.log("TRY IDLE")
         do
             local y = 0
             while y < field_height do
@@ -667,7 +665,6 @@ function ____exports.Game()
                         local attempt = 0
                         repeat
                             do
-                                Log.log("SHUFFLE - ATTEMPT: " .. tostring(attempt))
                                 local positions = {}
                                 local elements = {}
                                 do
@@ -708,7 +705,6 @@ function ____exports.Game()
                                             if field.search_combination(position) == NotFound then
                                                 __TS__ArraySplice(elements, i, 1)
                                                 element_assigned = true
-                                                Log.log((("ASSIGNED FROM AVAILABLE IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
                                                 break
                                             end
                                             i = i - 1
@@ -722,7 +718,6 @@ function ____exports.Game()
                                             ) == nil then
                                                 make_element(position, element_id)
                                                 if field.search_combination(position) == NotFound then
-                                                    Log.log((("ASSIGNED NEW ELEMENT IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
                                                     element_assigned = true
                                                     break
                                                 end
@@ -730,7 +725,6 @@ function ____exports.Game()
                                         end
                                     end
                                     if not element_assigned then
-                                        Log.log((("SHUFFLE - NOT FOUND RIGHT ELEMENT, SET EMPTY IN POS: " .. tostring(position.x)) .. ", ") .. tostring(position.y))
                                         field.set_element(position, NullElement)
                                     end
                                     counter = counter + 1
@@ -747,7 +741,6 @@ function ____exports.Game()
                                 break
                             end
                         until false
-                        Log.log("SHUFFLE - FILLED EMPTY CELLS")
                         do
                             local y = field_height - 1
                             while y > 0 do
@@ -2179,7 +2172,6 @@ function ____exports.Game()
         end
     end
     function on_falling(pos)
-        Log.log((("FALL: " .. tostring(pos.x)) .. ", ") .. tostring(pos.y))
         local result = search_fall_element(pos, pos)
         if result ~= NotFound then
             local move_info = field.fell_element(result)
@@ -2215,7 +2207,6 @@ function ____exports.Game()
             return element
         end
         if field.is_outside_pos_in_column(top_pos) and field.is_pos_empty(top_pos) and field.is_pos_empty(pos) then
-            Log.log("REQUEST ELEMENT IN: ", pos)
             local element = field.request_element(top_pos)
             if element ~= NullElement then
                 EventBus.send("REQUESTED_ELEMENT", {pos = top_pos, element = element})

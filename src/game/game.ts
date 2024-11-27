@@ -340,11 +340,8 @@ export function Game() {
 
     function on_idle() {
         if (is_idle) {
-            Log.log("RETURN");
             return;
         }
-
-        Log.log("TRY IDLE");
 
         for (let y = 0; y < field_height; y++) {
             for (let x = 0; x < field_width; x++) {
@@ -673,8 +670,6 @@ export function Game() {
                 let attempt = 0;
 
                 do {
-                    Log.log(`SHUFFLE - ATTEMPT: ${attempt}`);
-
                     // collecting elements for shuffling
                     const positions = [];
                     const elements = [];
@@ -712,7 +707,6 @@ export function Game() {
                             if (field.search_combination(position) == NotFound) {
                                 elements.splice(i, 1);
                                 element_assigned = true;
-                                Log.log(`ASSIGNED FROM AVAILABLE IN POS: ${position.x}, ${position.y}`);
                                 break;
                             }
                         }
@@ -724,7 +718,6 @@ export function Game() {
                                 if (elements.find((element) => element.id == element_id) == undefined) {
                                     make_element(position, element_id);
                                     if (field.search_combination(position) == NotFound) {
-                                        Log.log(`ASSIGNED NEW ELEMENT IN POS: ${position.x}, ${position.y}`);
                                         element_assigned = true;
                                         break;
                                     }
@@ -733,7 +726,6 @@ export function Game() {
                         }
 
                         if (!element_assigned) {
-                            Log.log(`SHUFFLE - NOT FOUND RIGHT ELEMENT, SET EMPTY IN POS: ${position.x}, ${position.y}`);
                             field.set_element(position, NullElement);
                         }
 
@@ -748,7 +740,6 @@ export function Game() {
                     }
                 } while (++attempt < GAME_CONFIG.shuffle_max_attempt);
 
-                Log.log("SHUFFLE - FILLED EMPTY CELLS");
                 for (let y = field_height - 1; y > 0; y--) {
                     for (let x = 0; x < field_width; x++) {
                         const pos = { x, y };
@@ -1994,7 +1985,6 @@ export function Game() {
     }
 
     function on_falling(pos: Position) {
-        Log.log(`FALL: ${pos.x}, ${pos.y}`);
         const result = search_fall_element(pos, pos);
         if (result != NotFound) {
             const move_info = field.fell_element(result);
@@ -2033,7 +2023,6 @@ export function Game() {
             return element;
 
         if (field.is_outside_pos_in_column(top_pos) && field.is_pos_empty(top_pos) && field.is_pos_empty(pos)) {
-            Log.log("REQUEST ELEMENT IN: ", pos);
             const element = field.request_element(top_pos);
             if (element != NullElement) {
                 EventBus.send('REQUESTED_ELEMENT', { pos: top_pos, element });

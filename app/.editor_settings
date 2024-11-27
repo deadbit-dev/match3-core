@@ -26,7 +26,7 @@
       }
     }
     :liveupdate true
-    :output-directory "/Users/pavel/Dev/match3-core/app/build"
+    :output-directory "/Users/pavel/Dev/match3-core/app/build/v4"
     :texture-compression "enabled"
     :variant "release"
     :windows {
@@ -42,6 +42,10 @@
   }
   :workflow {
     :recent-files [
+      [
+        "/assets/background.atlas"
+        :scene
+      ]
       [
         "/project_settings/generated.appmanifest"
         :code
@@ -75,7 +79,15 @@
         :scene
       ]
       [
+        "/map/map.gui"
+        :scene
+      ]
+      [
         "/game/game.collection"
+        :scene
+      ]
+      [
+        "/map/map.collection"
         :scene
       ]
       [
@@ -143,32 +155,20 @@
         :scene
       ]
       [
-        "/movie/movie.gui"
-        :scene
-      ]
-      [
-        "/movie/movie.collection"
-        :scene
-      ]
-      [
-        "/map/map.collection"
-        :scene
-      ]
-      [
-        "/game.project"
-        :cljfx-form-view
-      ]
-      [
-        "/liveupdate.settings"
-        :cljfx-form-view
-      ]
-      [
-        "/map/map.gui"
-        :scene
-      ]
-      [
         "/game/ui/game.gui"
         :scene
+      ]
+      [
+        "/utils/utils.lua"
+        :code
+      ]
+      [
+        "/utils/math_utils.lua"
+        :code
+      ]
+      [
+        "/game/utils.lua"
+        :code
       ]
     ]
   }

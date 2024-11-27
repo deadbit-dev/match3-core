@@ -70,7 +70,8 @@ function loading_resources_from_source_zip(config, resources) {
     const source_zip = find_source_zip(config);
     decompress(source_zip).then((files) => {
         for(const resource of resources) {
-            const path = config.build_path + '/' + resource.name + '.zip';
+            const version = "v" + config.version;
+            const path = config.build_path + '/' + version + '/' + resource.name + '.zip';
             const file = fs.createWriteStream(path);
             const zip = archiver('zip');
             zip.pipe(file);
@@ -91,12 +92,15 @@ function loading_resources_from_source_zip(config, resources) {
             zip.finalize();
         }
     });
+
+    fs.unlinkSync(source_zip);
 }
 
 function find_source_zip(config) {
-    const files = fs.readdirSync(config.build_path);
+    const version = "v" + config.version;
+    const files = fs.readdirSync(config.build_path + '/' + version);
     for(const filename of files) {
-        const full_filename = path.join(config.build_path, filename);
+        const full_filename = path.join(config.build_path + '/' + version, filename);
         const stat = fs.lstatSync(full_filename);
         if(!stat.isDirectory() && filename.endsWith('.zip'))
             return full_filename;
