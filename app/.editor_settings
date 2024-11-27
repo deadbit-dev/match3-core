@@ -43,6 +43,14 @@
   :workflow {
     :recent-files [
       [
+        "/project_settings/generated.appmanifest"
+        :code
+      ]
+      [
+        "/map/level.gui"
+        :scene
+      ]
+      [
         "/game/game.lua"
         :code
       ]
@@ -159,15 +167,7 @@
         :code
       ]
       [
-        "/map/map.gui_script"
-        :code
-      ]
-      [
-        "/main/main.collection"
-        :scene
-      ]
-      [
-        "/modules/Camera.lua"
+        "/modules/Scene.lua"
         :code
       ]
     ]

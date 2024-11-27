@@ -126,7 +126,7 @@ function SceneModule() {
         if(miss_match_version || is_missing) {
             Log.log("Загрузка ресурсов для сцены: " + name);
             
-            reszip.load_and_mount_zip(resource_file, {
+            reszip.load_and_mount_zip('v' + RESOURCE_VERSION + '/' + resource_file, {
                 filename: versioned_file_name,
                 mount_name: name,
                 delete_old_file: true,
