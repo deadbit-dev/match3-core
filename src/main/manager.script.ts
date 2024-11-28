@@ -42,17 +42,22 @@ export function init(this: props) {
         Scene.load_resource('main', 'shared_gui');
 
         if (System.platform == 'HTML5') {
-            let is_clear = html5.run(`new URL(location).searchParams.has('delete_mounts')`) == "true";
+            let is_debug = html5.run(`new URL(location).searchParams.get('debug')||'0'`) == '1';
+            let is_clear = html5.run(`new URL(location).searchParams.has('delete_mounts')`) == '1';
 
             if (Ads.get_social_platform() == 'yandex') {
                 const payload = HtmlBridge.get_payload();
                 if (payload.indexOf('delete_mounts') > -1)
                     is_clear = true;
+                if (payload.indexOf('debug') > -1)
+                    is_debug = true;
             }
             if (is_clear) {
                 log('delete mounts');
                 delete_mounts();
             }
+            if (is_debug)
+                GAME_CONFIG.debug_levels = true;
 
 
             // yandex purchases

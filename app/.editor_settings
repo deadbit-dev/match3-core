@@ -43,10 +43,6 @@
   :workflow {
     :recent-files [
       [
-        "/game/game.lua"
-        :code
-      ]
-      [
         "/game/view.lua"
         :code
       ]
@@ -169,6 +165,10 @@
       [
         "/main/main.collection"
         :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
       ]
     ]
   }
