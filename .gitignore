@@ -37,5 +37,7 @@ app/build
 app/builtins
 dmengine*
 .vscode
-app/.editor_settings
-app/.editor_settings
+.editor_settings
+
+debug.keystore
+debug.keystore.pass.txt
