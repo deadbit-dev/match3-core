@@ -50,12 +50,6 @@ images {
   image: "/assets/ui/snd_1.png"
 }
 images {
-  image: "/assets/ui/star_0.png"
-}
-images {
-  image: "/assets/ui/star_1.png"
-}
-images {
   image: "/assets/ui/lock.png"
 }
 images {
@@ -252,5 +246,11 @@ images {
 }
 images {
   image: "/assets/ui/PopUp.png"
+}
+images {
+  image: "/assets/ui/starBack.png"
+}
+images {
+  image: "/assets/ui/star.png"
 }
 extrude_borders: 2

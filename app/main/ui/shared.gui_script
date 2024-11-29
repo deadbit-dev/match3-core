@@ -1,7 +1,7 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayFilter = ____lualib.__TS__ArrayFilter
 local ____exports = {}
-local set_events, setup, setup_coins, setup_life, setup_store, setup_right_container, on_sound, on_music, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
+local set_events, set_enabled_ui, setup, setup_coins, setup_life, setup_store, setup_right_container, on_sound, on_music, setup_busters, setup_hammer, setup_spinning, setup_horizontal_rocket, setup_vertical_rocket, setup_life_notification, setup_not_enough_coins, on_life_tick, set_infinit_life, on_infinit_life_tick, set_enabled_coins, set_enabled_lifes, set_enabled_store_button, set_enabled_sound_button, set_enabled_music_button, on_add_coins, on_remove_coins, on_add_lifes, on_remove_lifes, on_scene_loaded, on_gameover, set_enabled_store, set_enabled_life_notification, set_enabled_not_enough_coins, set_enabled_hammer, set_enabled_spinning, set_enabled_horizontall_rocket, set_enabled_vertical_rocket
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local add_lifes = ____utils.add_lifes
@@ -101,6 +101,25 @@ function set_events(data)
     )
     EventBus.on("SOUND_BUTTON", on_sound, false)
     EventBus.on("MUSIC_BUTTON", on_music, false)
+    EventBus.on(
+        "SYS_SHOW_RATE",
+        function()
+            set_enabled_ui(false)
+        end
+    )
+    EventBus.on(
+        "SYS_HIDE_RATE",
+        function()
+            set_enabled_ui(true)
+        end
+    )
+end
+function set_enabled_ui(state)
+    set_enabled_coins(state)
+    set_enabled_lifes(state)
+    set_enabled_store_button(state)
+    set_enabled_sound_button(state)
+    set_enabled_music_button(state)
 end
 function setup(data)
     setup_coins(data)
@@ -1206,9 +1225,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch175 = scene.name
-        local ____cond175 = ____switch175 == "movie" or ____switch175 == "game"
-        if ____cond175 then
+        local ____switch178 = scene.name
+        local ____cond178 = ____switch178 == "movie" or ____switch178 == "game"
+        if ____cond178 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -1216,8 +1235,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond175 = ____cond175 or ____switch175 == "map"
-        if ____cond175 then
+        ____cond178 = ____cond178 or ____switch178 == "map"
+        if ____cond178 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -1243,9 +1262,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch180 = Scene.get_current_name()
-        local ____cond180 = ____switch180 == "game"
-        if ____cond180 then
+        local ____switch183 = Scene.get_current_name()
+        local ____cond183 = ____switch183 == "game"
+        if ____cond183 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -1259,8 +1278,8 @@ function set_enabled_store(data, state)
             end
             break
         end
-        ____cond180 = ____cond180 or ____switch180 == "map"
-        if ____cond180 then
+        ____cond183 = ____cond183 or ____switch183 == "map"
+        if ____cond183 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

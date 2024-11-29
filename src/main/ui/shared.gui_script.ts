@@ -112,6 +112,20 @@ function set_events(data: props) {
     });
     EventBus.on('SOUND_BUTTON', on_sound, false);
     EventBus.on('MUSIC_BUTTON', on_music, false);
+    EventBus.on('SYS_SHOW_RATE', () => {
+        set_enabled_ui(false);
+    });
+    EventBus.on('SYS_HIDE_RATE', () => {
+        set_enabled_ui(true);
+    });
+}
+
+function set_enabled_ui(state: boolean) {
+    set_enabled_coins(state);
+    set_enabled_lifes(state);
+    set_enabled_store_button(state);
+    set_enabled_sound_button(state);
+    set_enabled_music_button(state);
 }
 
 function setup(data: props) {

@@ -21,8 +21,10 @@ function RateModule() {
     let _is_shown = false;
 
     function show() {
-        if ((System.platform == 'Android' && !IS_HUAWEI) || System.platform == 'iPhone OS' || (System.platform == 'HTML5' && Ads.get_social_platform() == 'yandex') || System.platform == 'Windows')
-            msg.post('main:/rate#rate', to_hash('SYS_SHOW_RATE'));
+        // if ((System.platform == 'Android' && !IS_HUAWEI) || System.platform == 'iPhone OS' || (System.platform == 'HTML5' && Ads.get_social_platform() == 'yandex') || System.platform == 'Windows') {
+            // msg.post('main:/rate#rate', to_hash('SYS_SHOW_RATE'));
+            EventBus.send('SYS_SHOW_RATE');
+        // }
     }
 
     function _mark_shown() {

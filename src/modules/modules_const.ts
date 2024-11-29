@@ -35,6 +35,7 @@ export type _SystemMessages = {
     SYS_LOAD_SCENE: NameMessage,
     SYS_RESTART_SCENE: VoidMessage,
     SYS_SHOW_RATE: VoidMessage,
+    SYS_HIDE_RATE: VoidMessage,
     ON_APPLY_CUSTOM_LANG: VoidMessage,
     ON_SCENE_LOADED: NameMessage,
     SYS_SHOW_REWARD: VoidMessage,

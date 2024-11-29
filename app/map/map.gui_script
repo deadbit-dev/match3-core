@@ -139,6 +139,18 @@ function set_events(instace)
         end
     )
     EventBus.on("SYS_ON_RESIZED", on_resize)
+    EventBus.on(
+        "SYS_SHOW_RATE",
+        function()
+            instace.block_input = true
+        end
+    )
+    EventBus.on(
+        "SYS_HIDE_RATE",
+        function()
+            instace.block_input = false
+        end
+    )
 end
 function on_resize(data)
     Log.log("RESIZE")

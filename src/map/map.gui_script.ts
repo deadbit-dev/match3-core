@@ -161,6 +161,14 @@ function set_events(instace: props) {
     });
 
     EventBus.on("SYS_ON_RESIZED", on_resize);
+
+    EventBus.on('SYS_SHOW_RATE', () => {
+        instace.block_input = true;
+    });
+
+    EventBus.on('SYS_HIDE_RATE', () => {
+        instace.block_input = false;
+    });
 }
 
 function on_resize(data: { width: number, height: number }) {

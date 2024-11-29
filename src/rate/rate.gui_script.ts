@@ -16,18 +16,18 @@ let rate_log: typeof Log.log;
 function init_gui(_this: props): void {
     Manager.init_script();
     gui.set_render_order(10);
-    hide_gui_list(['btnRate']);
+
+    hide_gui_list(['rate_bg']);
+    
     _this.rate_val = 0;
     _this.druid = druid.new(_this);
 
     _this.druid.new_blocker('rate_bg');
 
-    _this.druid.new_button('btnClose', () => {
-        gui.set_enabled(gui.get_node('rate_bg'), false);
-    });
+    _this.druid.new_button('btnClose', hide_rate);
 
-    _this.druid.new_button('btnRate', () => {
-        gui.set_enabled(gui.get_node('rate_bg'), false);
+    _this.druid.new_button('btnRate/button', () => {
+        hide_rate();
         show_rate_form(_this);
     });
 
@@ -36,6 +36,16 @@ function init_gui(_this: props): void {
     _this.druid.new_button('s2', () => show_rate(2, _this));
     _this.druid.new_button('s3', () => show_rate(3, _this));
     _this.druid.new_button('s4', () => show_rate(4, _this));
+
+    EventBus.on('SYS_SHOW_RATE', () => {
+        print("HERE2");
+        show_form();
+    });
+}
+
+function hide_rate() {
+    gui.set_enabled(gui.get_node('rate_bg'), false);
+    EventBus.send('SYS_HIDE_RATE');
 }
 
 export function on_input(this: props, action_id: string | hash, action: unknown) {
@@ -52,13 +62,13 @@ export function on_message(this: props, message_id: string | hash, message: any,
         init_gui(this);
         init_rate_info();
     }
-    if (message_id == to_hash('SYS_SHOW_RATE'))
-        show_form();
     this.druid?.on_message(message_id, message, sender);
+    Manager.on_message(this, message_id, message, sender);
 }
 
 export function final(this: props): void {
     this.druid?.final();
+    Manager.final_script();
 }
 
 
@@ -67,8 +77,8 @@ export function final(this: props): void {
 function show_rate(cnt: number, _this: props) {
     _this.rate_val = cnt + 1;
     for (let i = 0; i < 5; i++)
-        gui.play_flipbook(gui.get_node('s' + i), i <= cnt ? 'star_1' : 'star_0');
-    show_gui_list(['btnRate']);
+        gui.play_flipbook(gui.get_node('s' + i), i <= cnt ? 'star' : 'starBack');
+    show_gui_list(['rate_bg']);
 }
 
 
@@ -78,7 +88,10 @@ function show_form() {
         Rate._mark_shown();
         rate_log('show rate OK');
         gui.set_enabled(gui.get_node('rate_bg'), true);
+        return;
     }
+
+    EventBus.send('SYS_HIDE_RATE');
 }
 
 let first_start = 0;
