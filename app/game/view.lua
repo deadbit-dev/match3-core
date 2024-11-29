@@ -228,9 +228,7 @@ function ____exports.View(resources)
         Log.log("RESIZE")
         local display_height = 960
         local window_aspect = data.width / data.height
-        print("WINDOW ASPECT: ", window_aspect)
         local display_width = tonumber(sys.get_config("display.width"))
-        print("DISPLAY WIDTH: ", display_width)
         if display_width then
             local aspect = display_width / display_height
             local zoom = 1
@@ -239,11 +237,9 @@ function ____exports.View(resources)
                     math.abs(window_aspect - aspect),
                     0.1
                 ) or 0
-                print("ASPECT DELTA: ", aspect_delta)
                 local height = display_width / window_aspect
                 zoom = height / display_height + aspect_delta
             end
-            print("ZOOM: ", zoom)
             Camera.set_zoom(zoom)
         end
     end
@@ -748,7 +744,6 @@ function ____exports.View(resources)
                 remove_action(____exports.Action.Swap)
                 EventBus.send("REQUEST_SWAP_ELEMENTS_END", message)
                 if element_to == NullElement then
-                    print("REQUEST FALLING SWAP: ", message.from.x, message.from.y)
                     request_falling(message.from)
                 end
                 EventBus.send("REQUEST_TRY_ACTIVATE_BUSTER_AFTER_SWAP", message)
@@ -878,7 +873,6 @@ function ____exports.View(resources)
         if cell.strength ~= nil and cell.strength > 0 then
             make_cell_view(pos, cell)
         elseif __TS__ArrayIncludes(GAME_CONFIG.not_moved_cells, cell.id) then
-            print("REQUEST FALLING DAMAGE CELL: ", pos.x, pos.y)
             request_falling(pos)
         end
         local ____type = cell.id
@@ -942,7 +936,6 @@ function ____exports.View(resources)
             0,
             function()
                 delete_view_item_by_uid(message.buster_from.element.uid)
-                print("REQUEST FALLING COMBINATE: ", message.buster_from.pos.x, message.buster_from.pos.y)
                 request_falling(message.buster_from.pos)
                 EventBus.send("REQUEST_COMBINED_BUSTERS", message)
             end
@@ -964,7 +957,6 @@ function ____exports.View(resources)
         end
         for ____, damage_info in ipairs(message.damages) do
             on_damage(damage_info)
-            print("REQUEST FALLING COMBINED: ", damage_info.pos.x, damage_info.pos.y)
             request_falling(damage_info.pos)
         end
         EventBus.send("REQUEST_COMBINATION_END", message.damages)
@@ -996,7 +988,6 @@ function ____exports.View(resources)
                             end
                         end
                     )
-                    print("REQUEST FALLING COMBO: ", damage_info.pos.x, damage_info.pos.y)
                     request_falling(damage_info.pos, GAME_CONFIG.squash_time + 0.1)
                 end
             end
@@ -1009,7 +1000,6 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.Combo)
                 if message.maked_element ~= nil then
-                    print("MAKE ELEMENT: ", message.pos.x, message.pos.y)
                     make_element_view(message.pos.x, message.pos.y, message.maked_element)
                     EventBus.send("MAKED_ELEMENT", message.pos)
                 end
@@ -1019,7 +1009,6 @@ function ____exports.View(resources)
     end
     function on_combinate_not_found(pos)
         remove_action(____exports.Action.Combination)
-        print("REQUEST FALLING COMBINATE NOT FOUND: ", pos.x, pos.y)
         request_falling(pos)
     end
     function on_requested_element_animation(message)
@@ -1028,7 +1017,6 @@ function ____exports.View(resources)
     function on_falling_animation(message)
         local element_view = get_view_item_by_uid(message.element.uid)
         if element_view ~= nil then
-            print("REQUEST FALLING ANIMATION: ", message.start_pos.x, message.start_pos.y)
             request_falling(message.start_pos)
             local to_world_pos = get_world_pos(message.next_pos)
             go.animate(
@@ -1043,8 +1031,6 @@ function ____exports.View(resources)
                     EventBus.send("REQUEST_FALL_END", message.next_pos)
                 end
             )
-        else
-            print("FAIL FALL ANIMATION: ", message.start_pos.x, message.start_pos.y)
         end
     end
     function on_falling_not_found(pos)
@@ -1191,19 +1177,19 @@ function ____exports.View(resources)
             function()
                 remove_action(____exports.Action.RocketActivation)
                 repeat
-                    local ____switch202 = message.axis
-                    local ____cond202 = ____switch202 == Axis.Horizontal
-                    if ____cond202 then
+                    local ____switch201 = message.axis
+                    local ____cond201 = ____switch201 == Axis.Horizontal
+                    if ____cond201 then
                         on_horizontal_damage_animation(message.damages)
                         break
                     end
-                    ____cond202 = ____cond202 or ____switch202 == Axis.Vertical
-                    if ____cond202 then
+                    ____cond201 = ____cond201 or ____switch201 == Axis.Vertical
+                    if ____cond201 then
                         on_vertical_damage_animation(message.damages)
                         break
                     end
-                    ____cond202 = ____cond202 or ____switch202 == Axis.All
-                    if ____cond202 then
+                    ____cond201 = ____cond201 or ____switch201 == Axis.All
+                    if ____cond201 then
                         on_horizontal_damage_animation(message.damages)
                         on_vertical_damage_animation(message.damages)
                         break
@@ -1232,14 +1218,14 @@ function ____exports.View(resources)
             part1
         )
         repeat
-            local ____switch205 = axis
-            local ____cond205 = ____switch205 == Axis.Vertical
-            if ____cond205 then
+            local ____switch204 = axis
+            local ____cond204 = ____switch204 == Axis.Vertical
+            if ____cond204 then
                 go_manager.set_rotation_hash(part1, 180)
                 break
             end
-            ____cond205 = ____cond205 or ____switch205 == Axis.Horizontal
-            if ____cond205 then
+            ____cond204 = ____cond204 or ____switch204 == Axis.Horizontal
+            if ____cond204 then
                 go_manager.set_rotation_hash(part0, 90)
                 go_manager.set_rotation_hash(part1, -90)
                 break

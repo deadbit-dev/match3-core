@@ -135,7 +135,6 @@ local function init_gui(_this)
     EventBus.on(
         "SYS_SHOW_RATE",
         function()
-            print("HERE2")
             show_form()
         end
     )

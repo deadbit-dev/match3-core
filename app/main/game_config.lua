@@ -348,9 +348,10 @@ ____exports._GAME_CONFIG = {
 ____exports._STORAGE_CONFIG = {
     current_level = 0,
     completed_levels = {},
-    sound_bg = true,
+    completed_tutorials = {},
+    noads = {},
     move_showed = false,
-    map_last_pos_y = 0,
+    was_purchased = false,
     hammer_opened = false,
     spinning_opened = false,
     horizontal_rocket_opened = false,
@@ -359,12 +360,10 @@ ____exports._STORAGE_CONFIG = {
     spinning_counts = 0,
     horizontal_rocket_counts = 0,
     vertical_rocket_counts = 0,
+    map_last_pos_y = 0,
     coins = 0,
     life = {start_time = 0, amount = 2},
-    infinit_life = {is_active = false, start_time = 0, duration = 0},
-    completed_tutorials = {},
-    noads = {},
-    was_purchased = false
+    infinit_life = {is_active = false, start_time = 0, duration = 0}
 }
 ____exports.Dlg = Dlg or ({})
 ____exports.Dlg.Store = 0
@@ -373,14 +372,12 @@ ____exports.Dlg.NotEnoughCoins = 1
 ____exports.Dlg[____exports.Dlg.NotEnoughCoins] = "NotEnoughCoins"
 ____exports.Dlg.LifeNotification = 2
 ____exports.Dlg[____exports.Dlg.LifeNotification] = "LifeNotification"
-____exports.Dlg.Settings = 3
-____exports.Dlg[____exports.Dlg.Settings] = "Settings"
-____exports.Dlg.Hammer = 4
+____exports.Dlg.Hammer = 3
 ____exports.Dlg[____exports.Dlg.Hammer] = "Hammer"
-____exports.Dlg.VerticalRocket = 5
+____exports.Dlg.VerticalRocket = 4
 ____exports.Dlg[____exports.Dlg.VerticalRocket] = "VerticalRocket"
-____exports.Dlg.HorizontalRocket = 6
+____exports.Dlg.HorizontalRocket = 5
 ____exports.Dlg[____exports.Dlg.HorizontalRocket] = "HorizontalRocket"
-____exports.Dlg.Spinning = 7
+____exports.Dlg.Spinning = 6
 ____exports.Dlg[____exports.Dlg.Spinning] = "Spinning"
 return ____exports

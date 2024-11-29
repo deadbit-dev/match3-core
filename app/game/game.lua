@@ -2176,7 +2176,6 @@ function ____exports.Game()
         if result ~= NotFound then
             local move_info = field.fell_element(result)
             if move_info ~= NotFound then
-                print("RESPONSE FALLING: ", move_info.start_pos.x, move_info.start_pos.y)
                 return EventBus.send("RESPONSE_FALLING", move_info)
             end
         end

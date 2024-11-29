@@ -38,7 +38,6 @@ function init_gui(_this: props): void {
     _this.druid.new_button('s4', () => show_rate(4, _this));
 
     EventBus.on('SYS_SHOW_RATE', () => {
-        print("HERE2");
         show_form();
     });
 }

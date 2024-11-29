@@ -48,10 +48,9 @@ function set_events(data: props) {
 
 function on_resize(data: {width: number, height: number}) {
     const bg = gui.get_node('bg');
-    print("DATA: ", data.width, data.height);
     const dr = data.width / data.height;
     const br = 1920/1080;
-    // if(data.width < 1920 && data.height > 1080) {
+    
     if(dr < br) {
         gui.set_pivot(bg, gui.PIVOT_W);
         gui.set_xanchor(bg, gui.ANCHOR_LEFT);

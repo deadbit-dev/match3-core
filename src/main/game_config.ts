@@ -115,6 +115,7 @@ export const _GAME_CONFIG = {
     } as { [key in CellId]: string | string[] },
 
     sounded_cells: [CellId.Box, CellId.Web, CellId.Grass, CellId.Stone],
+    
     cell_sound: {
         [CellId.Box]: 'wood',
         [CellId.Grass]: 'grass',
@@ -481,11 +482,11 @@ export const _STORAGE_CONFIG = {
     current_level: 0,
     completed_levels: [] as number[],
 
-    sound_bg: true,
+    completed_tutorials: [] as number[],
+    noads: {} as { end_data: number },
 
     move_showed: false,
-
-    map_last_pos_y: 0,
+    was_purchased: false,
 
     hammer_opened: false,
     spinning_opened: false,
@@ -496,6 +497,8 @@ export const _STORAGE_CONFIG = {
     spinning_counts: 0,
     horizontal_rocket_counts: 0,
     vertical_rocket_counts: 0,
+
+    map_last_pos_y: 0,
 
     coins: 0,
 
@@ -508,13 +511,7 @@ export const _STORAGE_CONFIG = {
         is_active: false,
         start_time: 0,
         duration: 0
-    },
-
-    completed_tutorials: [] as number[],
-
-    noads: {} as { end_data: number },
-
-    was_purchased: false
+    }
 };
 
 export type HelperMessage = { step: SwapInfo, combined_element: Element, elements: Element[] };
@@ -528,8 +525,6 @@ export interface RequestElementMessage { pos: Position, element: Element }
 export interface BusterActivatedMessage { pos: Position, uid: number, damages: DamageInfo[] }
 export interface DynamiteActivatedMessage extends BusterActivatedMessage { big_range: boolean }
 export interface RocketActivatedMessage extends BusterActivatedMessage { axis: Axis }
-
-// TODO: refactor
 export interface HelicopterActivatedMessage extends BusterActivatedMessage { triple: boolean, buster?: ElementId }
 export interface HelicopterActionMessage extends BusterActivatedMessage { buster?: ElementId }
 export interface DiskosphereActivatedMessage extends BusterActivatedMessage { buster?: ElementId }
@@ -539,7 +534,6 @@ export enum Dlg {
     Store,
     NotEnoughCoins,
     LifeNotification,
-    Settings,
     Hammer,
     VerticalRocket,
     HorizontalRocket,

@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import * as druid from 'druid.druid';
+import { get_last_completed_level } from '../game/utils';
 import { Dlg } from '../main/game_config';
 
 
@@ -105,12 +106,8 @@ function set_completed_levels() {
 }
 
 function set_current_level() {
-    let max_level = 0;
-    for(let level of GameStorage.get('completed_levels')) {
-        if(++level > max_level)
-            max_level = level;
-    }
-    const level = gui.get_node(tostring(math.min(47, max_level + 1)) + "/level");
+    const max_level = get_last_completed_level();
+    const level = gui.get_node(tostring(max_level + 1) + "/level");
     gui.set_texture(level, "map");
     gui.play_flipbook(level, (GAME_CONFIG.animal_levels.includes(max_level + 1)) ? 'button_level_red' : 'button_level');
     const level_pos = gui.get_position(level);
@@ -181,12 +178,10 @@ function on_resize(data: { width: number, height: number }) {
 
     const back_left = gui.get_node('back_left');
     const back_right = gui.get_node('back_right');
-    print("DATA: ", data.width, data.height);
     const dr = data.width / data.height;
     const br = 2160/2400;
     if(dr > br) {
         const delta = dr - br;
-        print(delta);
         const scale = math.min(2.1 + delta, 2.6);
         gui.set_scale(back_left, vmath.vector3(scale, scale, 1));
         gui.set_scale(back_right, vmath.vector3(scale, scale, 1));

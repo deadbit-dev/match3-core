@@ -94,7 +94,7 @@ function ____exports.add_coins(amount)
     coins = math.min(coins + amount, GAME_CONFIG.max_coins)
     GameStorage.set("coins", coins)
     EventBus.send("ADDED_COIN")
-    print("ADDED COINS: ", amount)
+    Log.log("ADDED COINS: ", amount)
 end
 function ____exports.remove_coins(amount)
     local coins = GameStorage.get("coins")
@@ -149,5 +149,15 @@ function ____exports.delete_mounts()
             liveupdate.remove_mount(mount.name)
         end
     end
+end
+function ____exports.get_last_completed_level()
+    local max_level = 0
+    for ____, level in ipairs(GameStorage.get("completed_levels")) do
+        level = level + 1
+        if level > max_level then
+            max_level = level
+        end
+    end
+    return math.min(46, max_level)
 end
 return ____exports

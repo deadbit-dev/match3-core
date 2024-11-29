@@ -8,7 +8,6 @@ function set_events(data)
 end
 function on_resize(data)
     local bg = gui.get_node("bg")
-    print("DATA: ", data.width, data.height)
     local dr = data.width / data.height
     local br = 1920 / 1080
     if dr < br then

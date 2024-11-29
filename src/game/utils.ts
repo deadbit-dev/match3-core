@@ -105,7 +105,7 @@ export function add_coins(amount: number) {
     GameStorage.set('coins', coins);
     EventBus.send('ADDED_COIN');
 
-    print("ADDED COINS: ", amount);
+    Log.log("ADDED COINS: ", amount);
 }
 
 export function remove_coins(amount: number) {
@@ -163,4 +163,13 @@ export function delete_mounts() {
             liveupdate.remove_mount(mount.name);
         }
     }
+}
+
+export function get_last_completed_level() {
+    let max_level = 0;
+    for(let level of GameStorage.get('completed_levels')) {
+        if(++level > max_level)
+            max_level = level;
+    }
+    return math.min(46, max_level); // max levels 47
 }

@@ -260,29 +260,6 @@ export function View(resources: ViewResources) {
         );
     }
 
-    // function calculate_sizes(game_state: GameState) {
-    //     let min_pos_x = get_field_width();
-    //     let max_pos_x = 0;
-    //     for(let y = 0; y < get_field_height(); y++) {
-    //         for(let x = 0; x < get_field_width(); x++) {
-    //             const cell = game_state.cells[y][x];
-    //             if(cell != NotActiveCell && min_pos_x > x) {
-    //                 min_pos_x = x;
-    //             }
-
-    //             if(cell != NotActiveCell && max_pos_x < x) {
-    //                 max_pos_x = x;
-    //             }
-    //         }
-    //     }
-
-    //     max_width = (max_pos_x - min_pos_x);
-    //     print("MAX_X: ", max_width);
-    //     cell_size = calculate_cell_size();
-    //     scale_ratio = calculate_scale_ratio();
-    //     cells_offset = calculate_cell_offset();
-    // }
-
     function on_load_game(game_state: GameState) {
         load_field(game_state);
 
@@ -304,19 +281,15 @@ export function View(resources: ViewResources) {
         Log.log("RESIZE");
         const display_height = 960;
         const window_aspect = data.width / data.height;
-        print("WINDOW ASPECT: ", window_aspect);
         const display_width = tonumber(sys.get_config("display.width"));
-        print("DISPLAY WIDTH: ", display_width);
         if (display_width) {
             const aspect = display_width / display_height;
             let zoom = 1;
             if (window_aspect >= aspect) {
                 const aspect_delta = (data.width < data.height) ? math.min(math.abs(window_aspect - aspect), 0.1) : 0;
-                print("ASPECT DELTA: ", aspect_delta);
                 const height = display_width / window_aspect;
                 zoom = (height / display_height) + aspect_delta;
             }
-            print("ZOOM: ", zoom);
             Camera.set_zoom(zoom);
         }
     }
@@ -693,7 +666,6 @@ export function View(resources: ViewResources) {
             EventBus.send('REQUEST_SWAP_ELEMENTS_END', message);
 
             if(element_to == NullElement) {
-                print("REQUEST FALLING SWAP: ", message.from.x, message.from.y);
                 request_falling(message.from);
             }
 
@@ -785,7 +757,6 @@ export function View(resources: ViewResources) {
 
         if(cell.strength != undefined && cell.strength > 0) make_cell_view(pos, cell);
         else if(GAME_CONFIG.not_moved_cells.includes(cell.id)) {
-            print("REQUEST FALLING DAMAGE CELL: ", pos.x, pos.y);
             request_falling(pos);
         }
     
@@ -824,7 +795,6 @@ export function View(resources: ViewResources) {
         const to_world_pos = get_world_pos(message.buster_to.pos);
         go.animate(view_from_buster._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, GAME_CONFIG.squash_easing, GAME_CONFIG.squash_time, 0, () => {
             delete_view_item_by_uid(message.buster_from.element.uid);
-            print("REQUEST FALLING COMBINATE: ", message.buster_from.pos.x, message.buster_from.pos.y);
             request_falling(message.buster_from.pos);
 
             EventBus.send('REQUEST_COMBINED_BUSTERS', message);
@@ -843,7 +813,6 @@ export function View(resources: ViewResources) {
         if(message.maked_element != undefined) return on_combo_animation(message);
         for (const damage_info of message.damages) {
             on_damage(damage_info);
-            print("REQUEST FALLING COMBINED: ", damage_info.pos.x, damage_info.pos.y);
             request_falling(damage_info.pos);
         }
 
@@ -868,7 +837,6 @@ export function View(resources: ViewResources) {
                         }
                     });
 
-                    print("REQUEST FALLING COMBO: ", damage_info.pos.x, damage_info.pos.y);
                     request_falling(damage_info.pos, GAME_CONFIG.squash_time + 0.1);
                 }
             }
@@ -880,7 +848,6 @@ export function View(resources: ViewResources) {
         timer.delay(GAME_CONFIG.squash_time, false, () => {
             remove_action(Action.Combo);
             if(message.maked_element != undefined) {
-                print("MAKE ELEMENT: ", message.pos.x, message.pos.y);
                 make_element_view(message.pos.x, message.pos.y, message.maked_element);
                 EventBus.send("MAKED_ELEMENT", message.pos);
             }
@@ -891,7 +858,6 @@ export function View(resources: ViewResources) {
 
     function on_combinate_not_found(pos: Position) {
         remove_action(Action.Combination);
-        print("REQUEST FALLING COMBINATE NOT FOUND: ", pos.x, pos.y);
         request_falling(pos);
     }
 
@@ -902,14 +868,13 @@ export function View(resources: ViewResources) {
     function on_falling_animation(message: MoveInfo) {
         const element_view = get_view_item_by_uid(message.element.uid);
         if(element_view != undefined) {
-            print("REQUEST FALLING ANIMATION: ", message.start_pos.x, message.start_pos.y);
             request_falling(message.start_pos);
 
             const to_world_pos = get_world_pos(message.next_pos);
             go.animate(element_view._hash, 'position', go.PLAYBACK_ONCE_FORWARD, to_world_pos, go.EASING_LINEAR, GAME_CONFIG.falling_time, 0, () => {
                 EventBus.send('REQUEST_FALL_END', message.next_pos);
             });
-        } else print("FAIL FALL ANIMATION: ", message.start_pos.x, message.start_pos.y);
+        }
     }
 
     function on_falling_not_found(pos: Position) {
