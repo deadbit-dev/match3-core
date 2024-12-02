@@ -1,7 +1,7 @@
 {
     "graph_path": "./app/build/default/game.graph.json",
     "build_path": "./app/build",
-    "version": 1,
+    "version": 2,
     "resources": [
         "/map/map.collectionc",
         "/game/background.collectionc",

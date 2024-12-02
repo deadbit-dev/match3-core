@@ -36,7 +36,7 @@ export const RATE_SECOND_SHOW = 3 * 24 * 60 * 60;
 
 export const MAIN_BUNDLE_SCENES = ['movie', 'shared_gui', 'game'];
 
-export const RESOURCE_VERSION = 1;
+export const RESOURCE_VERSION = 2;
 
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
@@ -44,8 +44,7 @@ export const _GAME_CONFIG = {
     movie_btn: false,
     is_movie: true,
 
-
-    debug_levels: false,
+    debug_levels: true,
     bottom_offset: 50,
 
     min_swipe_distance: 32,

@@ -26,11 +26,11 @@ ____exports.ID_YANDEX_METRICA = sys.get_sys_info().system_name == "Android" and 
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.MAIN_BUNDLE_SCENES = {"movie", "shared_gui", "game"}
-____exports.RESOURCE_VERSION = 1
+____exports.RESOURCE_VERSION = 2
 ____exports._GAME_CONFIG = {
     movie_btn = false,
     is_movie = true,
-    debug_levels = false,
+    debug_levels = true,
     bottom_offset = 50,
     min_swipe_distance = 32,
     swap_element_easing = go.EASING_INOUTQUAD,
