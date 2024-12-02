@@ -30,6 +30,7 @@ function set_level_buttons(data)
         data.druid:new_button(
             "generated_level/level",
             function()
+                Metrica.report("data", {start_generated_level = {event = last_level}})
                 load_level(get_last_completed_level())
             end
         )

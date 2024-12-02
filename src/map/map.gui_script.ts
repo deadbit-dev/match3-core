@@ -20,7 +20,7 @@ const min = -3990;
 
 export function init(this: props): void {
     Manager.init_script();
-    
+
     this.druid = druid.new(this);
 
     Camera.set_dynamic_orientation(false);
@@ -28,7 +28,7 @@ export function init(this: props): void {
 
     set_last_map_position();
     set_completed_levels();
-    
+
     set_level_buttons(this);
 
     Sound.play("map");
@@ -39,19 +39,19 @@ export function init(this: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: any): void {
-    if(GAME_CONFIG.is_busy_input || this.block_input) return;
+    if (GAME_CONFIG.is_busy_input || this.block_input) return;
 
     this.druid.on_input(action_id, action);
-    
-    if(action_id == hash("scroll_up") && action.value == 1) {
+
+    if (action_id == hash("scroll_up") && action.value == 1) {
         return on_scroll(250);
     }
-    
-    if(action_id == hash("scroll_down") && action.value == 1) {
+
+    if (action_id == hash("scroll_down") && action.value == 1) {
         return on_scroll(-250);
     }
 
-    if(action_id == ID_MESSAGES.MSG_TOUCH && !action.pressed && !action.released) on_drag(action);
+    if (action_id == ID_MESSAGES.MSG_TOUCH && !action.pressed && !action.released) on_drag(action);
 }
 
 export function update(this: props, dt: number): void {
@@ -70,27 +70,28 @@ export function final(this: props): void {
 }
 
 function set_level_buttons(data: props) {
-    for(let i = 0; i < 47; i++) {
+    for (let i = 0; i < 47; i++) {
         data.druid.new_button(tostring(i + 1) + '/level', (self, params) => {
             load_level(params);
         }, i);
     }
 
     const last_level = get_last_completed_level();
-    if(last_level >= 46) {
+    if (last_level >= 46) {
         gui.set_enabled(gui.get_node('generated_level/level'), true);
         data.druid.new_button('generated_level/level', () => {
+            Metrica.report('data', { 'start_generated_level': { event: last_level } });
             load_level(get_last_completed_level());
         });
     }
 }
 
 function load_level(level: number) {
-    if(!GAME_CONFIG.debug_levels) {
-        if(level > GameStorage.get('completed_levels').length)
+    if (!GAME_CONFIG.debug_levels) {
+        if (level > GameStorage.get('completed_levels').length)
             return;
     }
-    if(!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
+    if (!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
         return EventBus.send('NOT_ENOUGH_LIFE');
     }
     GAME_CONFIG.steps_by_ad = 0;
@@ -108,8 +109,8 @@ function set_last_map_position() {
 }
 
 function set_completed_levels() {
-    for(const level of GameStorage.get('completed_levels')) {
-        if(level < 47) {
+    for (const level of GameStorage.get('completed_levels')) {
+        if (level < 47) {
             const level_node = gui.get_node(tostring(level + 1) + '/level');
             gui.set_texture(level_node, "map");
             gui.play_flipbook(level_node, 'button_level_green');
@@ -136,9 +137,9 @@ function set_current_level() {
 }
 
 function on_drag(action: any) {
-    if(math.abs(action.dy) == 0)
+    if (math.abs(action.dy) == 0)
         return;
-    
+
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
     const offset = get_offset();
@@ -160,12 +161,12 @@ function on_scroll(value: number) {
 function set_events(instace: props) {
     EventBus.on('OPENED_DLG', (dlg: Dlg) => {
         instace.block_input = true;
-        if(dlg == Dlg.Store) Sound.stop('map');
+        if (dlg == Dlg.Store) Sound.stop('map');
     });
 
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
         instace.block_input = false;
-        if(dlg == Dlg.Store) Sound.play('map');
+        if (dlg == Dlg.Store) Sound.play('map');
     });
 
     EventBus.on('LIFE_NOTIFICATION', (state) => {
@@ -194,8 +195,8 @@ function on_resize(data: { width: number, height: number }) {
     const back_left = gui.get_node('back_left');
     const back_right = gui.get_node('back_right');
     const dr = data.width / data.height;
-    const br = 2160/2400;
-    if(dr > br) {
+    const br = 2160 / 2400;
+    if (dr > br) {
         const delta = dr - br;
         const scale = math.min(2.1 + delta, 2.6);
         gui.set_scale(back_left, vmath.vector3(scale, scale, 1));
@@ -205,7 +206,7 @@ function on_resize(data: { width: number, height: number }) {
 
 function get_offset() {
     const height = Camera.get_ltrb(true).w;
-    if(height >= -480)
+    if (height >= -480)
         return 0;
 
     return math.abs(480 - math.abs(height));
