@@ -1421,47 +1421,41 @@ nodes {
 }
 nodes {
   position {
-    x: 226.66667
-    y: 4243.4995
+    x: 167.5
+    y: 3999.1663
   }
-  scale {
-    x: 0.7
-    y: 0.7
-  }
-  size {
-    x: 250.0
-    y: 70.0
-  }
-  type: TYPE_BOX
-  texture: "ui/btn_3"
+  type: TYPE_TEMPLATE
   id: "generated_level"
   parent: "levels"
+  layer: "top"
   inherit_alpha: true
-  slice9 {
-    x: 50.0
-    y: 50.0
-    z: 50.0
-    w: 59.0
-  }
+  template: "/map/level.gui"
+}
+nodes {
+  type: TYPE_BOX
+  id: "generated_level/level"
+  parent: "generated_level"
+  overridden_fields: 45
+  template_node_child: true
   enabled: false
 }
 nodes {
   position {
-    y: -18.095238
+    x: -5.0
+    y: -0.666666
   }
   scale {
-    x: 3.0
-  }
-  size {
-    x: 200.0
-    y: 100.0
+    x: 1.5
+    y: 1.5
   }
   type: TYPE_TEXT
   text: "^"
-  font: "70"
-  id: "arrow"
-  parent: "generated_level"
-  inherit_alpha: true
+  id: "generated_level/level_num"
+  parent: "generated_level/level"
+  overridden_fields: 1
+  overridden_fields: 3
+  overridden_fields: 8
+  template_node_child: true
 }
 nodes {
   position {

@@ -24,11 +24,11 @@ function set_level_buttons(data)
     local last_level = get_last_completed_level()
     if last_level >= 46 then
         gui.set_enabled(
-            gui.get_node("generated_level"),
+            gui.get_node("generated_level/level"),
             true
         )
         data.druid:new_button(
-            "generated_level",
+            "generated_level/level",
             function()
                 load_level(get_last_completed_level())
             end
@@ -201,7 +201,7 @@ function get_offset()
     end
     return math.abs(480 - math.abs(height))
 end
-min = -4350
+min = -3990
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)

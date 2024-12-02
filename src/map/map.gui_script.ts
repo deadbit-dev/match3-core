@@ -16,7 +16,7 @@ interface props {
     block_input: boolean
 }
 
-const min = -4350;
+const min = -3990;
 
 export function init(this: props): void {
     Manager.init_script();
@@ -78,8 +78,8 @@ function set_level_buttons(data: props) {
 
     const last_level = get_last_completed_level();
     if(last_level >= 46) {
-        gui.set_enabled(gui.get_node('generated_level'), true);
-        data.druid.new_button('generated_level', () => {
+        gui.set_enabled(gui.get_node('generated_level/level'), true);
+        data.druid.new_button('generated_level/level', () => {
             load_level(get_last_completed_level());
         });
     }
