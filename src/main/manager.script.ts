@@ -131,10 +131,28 @@ export function init(this: props) {
         if (System.platform == 'HTML5')
             HtmlBridge.game_ready();
         Metrica.report('data', { 'game_ready': { is_first: !is_shown } });
-        Scene.load(is_shown ? 'map' : 'movie');
-        Scene.set_bg('#88dfeb');
+        timer.delay(0, false, () => {
+            load_levels_config();
+            if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'yandex') {
+                HtmlBridge.get_flags({ defaultFlags: { movie_btn: '0', is_movie: '1' } }, (status, data) => {
+                    if (status) {
+                        if (data['movie_btn'] != null)
+                            GAME_CONFIG.movie_btn = data['movie_btn'] == '1';
+                        if (data['is_movie'] != null)
+                            GAME_CONFIG.is_movie = data['is_movie'] == '1';
+                        log('Yandex get_flags success', data, 'set:' + GAME_CONFIG.movie_btn + '/' + GAME_CONFIG.is_movie);
+                    }
+                    Scene.load(is_shown ? 'map' : (GAME_CONFIG.is_movie ? 'movie' : 'game'));
+                    if (!is_shown && !GAME_CONFIG.is_movie)
+                        Scene.try_load_async('map');
+                });
+            }
+            else
+                Scene.load(is_shown ? 'map' : 'movie');
+            Scene.set_bg('#88dfeb');
+        });
 
-        timer.delay(0, false, load_levels_config);
+
     }, true);
 }
 

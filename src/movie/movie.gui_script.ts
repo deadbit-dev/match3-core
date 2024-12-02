@@ -22,6 +22,25 @@ export function init(this: props): void {
     gui.set_text(gui.get_node('description'), Lang.get_text('movie_description'));
     gui.set_text(gui.get_node('text'), Lang.get_text('play'));
 
+    gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
+    Metrica.report('data', { 'movie': { event: 'start' } });
+
+    if (GAME_CONFIG.movie_btn) {
+        this.druid.new_button('start_button', () => {
+            this.is_started = true;
+            gui.set_enabled(gui.get_node('start_button'), false);
+            EventBus.send('START_MOVIE');
+            Metrica.report('data', { 'movie': { event: 'button_1' } });
+        });
+    }
+    else {
+        this.is_started = true;
+        gui.set_enabled(gui.get_node('start_button'), false);
+        EventBus.send('START_MOVIE');
+        Metrica.report('data', { 'movie': { event: 'auto_start' } });
+    }
+
+
     this.druid.new_button('btn', () => {
         GameStorage.set("move_showed", true);
         gui.set_enabled(gui.get_node('window'), false);
@@ -31,15 +50,6 @@ export function init(this: props): void {
         Scene.load('game');
         Scene.try_load_async('map');
         Metrica.report('data', { 'movie': { event: 'button_2' } });
-    });
-
-    gui.set_text(gui.get_node('start_lable'), Lang.get_text('start'));
-    Metrica.report('data', { 'movie': { event: 'start' } });
-    this.druid.new_button('start_button', () => {
-        this.is_started = true;
-        gui.set_enabled(gui.get_node('start_button'), false);
-        EventBus.send('START_MOVIE');
-        Metrica.report('data', { 'movie': { event: 'button_1' } });
     });
 
     Camera.set_dynamic_orientation(false);

@@ -27,6 +27,33 @@ function ____exports.init(self)
         gui.get_node("text"),
         Lang.get_text("play")
     )
+    gui.set_text(
+        gui.get_node("start_lable"),
+        Lang.get_text("start")
+    )
+    Metrica.report("data", {movie = {event = "start"}})
+    if GAME_CONFIG.movie_btn then
+        self.druid:new_button(
+            "start_button",
+            function()
+                self.is_started = true
+                gui.set_enabled(
+                    gui.get_node("start_button"),
+                    false
+                )
+                EventBus.send("START_MOVIE")
+                Metrica.report("data", {movie = {event = "button_1"}})
+            end
+        )
+    else
+        self.is_started = true
+        gui.set_enabled(
+            gui.get_node("start_button"),
+            false
+        )
+        EventBus.send("START_MOVIE")
+        Metrica.report("data", {movie = {event = "auto_start"}})
+    end
     self.druid:new_button(
         "btn",
         function()
@@ -41,23 +68,6 @@ function ____exports.init(self)
             Scene.load("game")
             Scene.try_load_async("map")
             Metrica.report("data", {movie = {event = "button_2"}})
-        end
-    )
-    gui.set_text(
-        gui.get_node("start_lable"),
-        Lang.get_text("start")
-    )
-    Metrica.report("data", {movie = {event = "start"}})
-    self.druid:new_button(
-        "start_button",
-        function()
-            self.is_started = true
-            gui.set_enabled(
-                gui.get_node("start_button"),
-                false
-            )
-            EventBus.send("START_MOVIE")
-            Metrica.report("data", {movie = {event = "button_1"}})
         end
     )
     Camera.set_dynamic_orientation(false)

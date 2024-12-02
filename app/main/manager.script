@@ -136,9 +136,40 @@ function ____exports.init(self)
                 HtmlBridge.game_ready()
             end
             Metrica.report("data", {game_ready = {is_first = not is_shown}})
-            Scene.load(is_shown and "map" or "movie")
-            Scene.set_bg("#88dfeb")
-            timer.delay(0, false, load_levels_config)
+            timer.delay(
+                0,
+                false,
+                function()
+                    load_levels_config()
+                    if System.platform == "HTML5" and HtmlBridge.get_platform() == "yandex" then
+                        HtmlBridge.get_flags(
+                            {defaultFlags = {movie_btn = "0", is_movie = "1"}},
+                            function(status, data)
+                                if status then
+                                    if data.movie_btn ~= nil then
+                                        GAME_CONFIG.movie_btn = data.movie_btn == "1"
+                                    end
+                                    if data.is_movie ~= nil then
+                                        GAME_CONFIG.is_movie = data.is_movie == "1"
+                                    end
+                                    log(
+                                        "Yandex get_flags success",
+                                        data,
+                                        (("set:" .. tostring(GAME_CONFIG.movie_btn)) .. "/") .. tostring(GAME_CONFIG.is_movie)
+                                    )
+                                end
+                                Scene.load(is_shown and "map" or (GAME_CONFIG.is_movie and "movie" or "game"))
+                                if not is_shown and not GAME_CONFIG.is_movie then
+                                    Scene.try_load_async("map")
+                                end
+                            end
+                        )
+                    else
+                        Scene.load(is_shown and "map" or "movie")
+                    end
+                    Scene.set_bg("#88dfeb")
+                end
+            )
         end,
         true
     )

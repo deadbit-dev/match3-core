@@ -41,6 +41,10 @@ export const RESOURCE_VERSION = 1;
 // игровой конфиг (сюда не пишем/не читаем если предполагается сохранение после выхода из игры)
 // все обращения через глобальную переменную GAME_CONFIG
 export const _GAME_CONFIG = {
+    movie_btn: false,
+    is_movie: true,
+
+
     debug_levels: false,
     bottom_offset: 50,
 
@@ -115,7 +119,7 @@ export const _GAME_CONFIG = {
     } as { [key in CellId]: string | string[] },
 
     sounded_cells: [CellId.Box, CellId.Web, CellId.Grass, CellId.Stone],
-    
+
     cell_sound: {
         [CellId.Box]: 'wood',
         [CellId.Grass]: 'grass',
