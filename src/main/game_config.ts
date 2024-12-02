@@ -44,7 +44,7 @@ export const _GAME_CONFIG = {
     movie_btn: false,
     is_movie: true,
 
-    debug_levels: true,
+    debug_levels: false,
     bottom_offset: 50,
 
     min_swipe_distance: 32,
