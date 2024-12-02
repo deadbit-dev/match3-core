@@ -11,7 +11,7 @@ import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { Dlg, TargetMessage } from '../main/game_config';
 import { format_string, get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
-import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, is_time_level, remove_coins, remove_lifes } from './utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
@@ -58,6 +58,7 @@ const presets = {
 
 interface props {
     druid: DruidClass,
+    level_name: string,
     level: Level,
     busters: Busters,
     settings_opened: boolean,
@@ -68,11 +69,10 @@ export function init(this: props): void {
     Manager.init_script();
 
     this.druid = druid.new(this);
-    this.level = GAME_CONFIG.levels[GameStorage.get('current_level')];
-    this.busters = this.level['busters'];
     this.block_input = false;
 
     set_text('text', Lang.get_text('play'));
+    
     // FIXME: (for now) test animal tutorial tip
     this.druid.new_button('btn', () => {
         const window = gui.get_node('window');
@@ -103,12 +103,12 @@ export function final(this: props): void {
     Manager.final_script();
 }
 
-function setup(instance: props) {
-    setup_info_ui(instance);
-    setup_busters(instance);
-    if (GAME_CONFIG.debug_levels) setup_sustem_ui(instance);
-    setup_win_ui(instance);
-    setup_gameover_ui(instance);
+function setup(_this: props) {
+    setup_info_ui(_this);
+    setup_busters(_this);
+    if (GAME_CONFIG.debug_levels) setup_sustem_ui(_this);
+    setup_win_ui(_this);
+    setup_gameover_ui(_this);    
 }
 
 function setup_info_ui(instance: props) {
@@ -404,7 +404,12 @@ function setup_win_ui(instance: props) {
     });
     instance.druid.new_button('win_close', to_map);
 
+    set_text('last_level_btn_text', Lang.get_text('on_map'));
+    set_text('last_level_continue_text', Lang.get_text('next'));
+
     instance.druid.new_button('last_level_btn', to_map);
+    instance.druid.new_button('last_level_continue', next_level);
+
 
     gui.set_enabled(gui.get_node('win'), false);
     gui.set_text(gui.get_node('win_text'), Lang.get_text('win_title'));
@@ -420,11 +425,11 @@ function next_level() {
     Scene.restart();
 }
 
-function setup_gameover_ui(instance: props) {
+function setup_gameover_ui(_this: props) {
     gui.set_text(gui.get_node('gameover_text'), Lang.get_text('gameover_title'));
 
     gui.set_text(gui.get_node('restart_text'), Lang.get_text('restart'));
-    instance.druid.new_button('restart_button', () => {
+    _this.druid.new_button('restart_button', () => {
         if (!GameStorage.get('infinit_life').is_active && GameStorage.get('life').amount == 0) {
             EventBus.send("SET_LIFE_NOTIFICATION");
             return;
@@ -437,42 +442,42 @@ function setup_gameover_ui(instance: props) {
     });
 
     gui.set_text(gui.get_node('map_text'), Lang.get_text('map'));
-    instance.druid.new_button('map_button', to_map);
+    _this.druid.new_button('map_button', to_map);
 
-    instance.druid.new_button('gameover_close', to_map);
+    _this.druid.new_button('gameover_close', to_map);
 
-    instance.druid.new_button('gameover_offer_close', disabled_gameover_offer);
+    _this.druid.new_button('gameover_offer_close', disabled_gameover_offer);
 
     gui.set_text(gui.get_node('steps_by_ad/text'), "+3 " + Lang.get_text('3steps'));
-    instance.druid.new_button('steps_by_ad/button', () => {
+    _this.druid.new_button('steps_by_ad/button', () => {
         Ads.show_reward(() => {
             GAME_CONFIG.steps_by_ad++;
-            Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '3step_ads' } });
+            Metrica.report('data', { ['fail_level_' + _this.level_name]: { event: '3step_ads' } });
             EventBus.send('REVIVE', { steps: 3 });
         });
     });
 
     gui.set_text(gui.get_node('steps_by_coins/text'), "+5 " + Lang.get_text('5steps'));
     gui.set_text(gui.get_node('steps_by_coins/text1'), "30");
-    instance.druid.new_button('steps_by_coins/button', () => {
+    _this.druid.new_button('steps_by_coins/button', () => {
         if (!is_enough_coins(30)) {
             EventBus.send('REQUEST_OPEN_STORE');
             return;
         }
         remove_coins(30);
-        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: '5step_money' } });
+        Metrica.report('data', { ['fail_level_' + _this.level_name]: { event: '5step_money' } });
         EventBus.send('REVIVE', { steps: 5 });
     });
 
     gui.set_text(gui.get_node('time_by_coins/text'), "+20 " + Lang.get_text('sec'));
     gui.set_text(gui.get_node('time_by_coins/text1'), "40");
-    instance.druid.new_button('time_by_coins/button', () => {
+    _this.druid.new_button('time_by_coins/button', () => {
         if (!is_enough_coins(40)) {
             EventBus.send('REQUEST_OPEN_STORE');
             return;
         }
         remove_coins(40);
-        Metrica.report('data', { ['fail_level_' + tostring(get_current_level() + 1)]: { event: 'time_money' } });
+        Metrica.report('data', { ['fail_level_' + _this.level_name]: { event: 'time_money' } });
         EventBus.send('REVIVE', { time: 20 });
     });
 }
@@ -497,32 +502,38 @@ function set_animal_tutorial_tip() {
 }
 
 // TODO: get data from game load event instead read config
-function set_events(instance: props) {
+function set_events(_this: props) {
     EventBus.on('SET_ANIMAL_TUTORIAL_TIP', set_animal_tutorial_tip, true);
-    EventBus.on('INIT_UI', () => setup(instance));
+    EventBus.on('INIT_UI', (level: Level) => {
+        const num = get_current_level() + 1;
+        _this.level_name = num > 47 ? tostring(num) + '_gen' : tostring(num);
+        _this.level = level;
+        _this.busters = _this.level.busters;
+        setup(_this);
+    });
     EventBus.on('UPDATED_STEP_COUNTER', (steps) => set_text('steps', steps), true);
     EventBus.on('UPDATED_TARGET_UI', (data) => update_targets(data), true);
-    EventBus.on('UPDATED_BUTTONS', () => update_buttons(instance), true);
+    EventBus.on('UPDATED_BUTTONS', () => update_buttons(_this), true);
     EventBus.on('GAME_TIMER', (time) => set_text('time', parse_time(time)), true);
     EventBus.on('SET_TUTORIAL', set_tutorial, true);
     EventBus.on('REMOVE_TUTORIAL', remove_tutorial, true);
     EventBus.on('ON_WIN_END', on_win_end);
     EventBus.on('ON_GAME_OVER', (state) => {
         timer.delay(GAME_CONFIG.delay_before_gameover, false, () => {
-            set_gameover(instance, state);
+            set_gameover(_this, state);
         });
     }, true);
     EventBus.on('SHUFFLE_START', on_shuffle_start);
     EventBus.on('SHUFFLE_ACTION', on_shuffle_action);
     EventBus.on('OPENED_DLG', (dlg: Dlg) => {
         if (dlg == Dlg.Store) {
-            instance.block_input = true;
+            _this.block_input = true;
         }
         
     });
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
         if (dlg == Dlg.Store) {
-            instance.block_input = false;
+            _this.block_input = false;
             Sound.play('game');
         }
     });
@@ -973,7 +984,7 @@ function drop_coins(init_value: number, amount: number, points: Position[], on_e
 }
 
 // TODO: make presets for gameover
-function set_gameover(instance: props, state: GameState) {
+function set_gameover(_this: props, state: GameState) {
     disable_game_ui();
 
     const lock = gui.get_node('lock1');
@@ -1099,12 +1110,12 @@ function set_gameover(instance: props, state: GameState) {
         gui.set_enabled(target_3, true);
     }
 
-    set_gameover_offer();
+    set_gameover_offer(_this);
 }
 
-function set_gameover_offer() {
+function set_gameover_offer(_this: props) {
     gui.set_enabled(gui.get_node('gameover_offer_close'), true);
-    if (!is_time_level()) {
+    if (_this.level.time == undefined) {
         if (GAME_CONFIG.steps_by_ad < 2) gui.set_enabled(gui.get_node('steps_by_ad/button'), true);
         gui.set_enabled(gui.get_node('steps_by_coins/button'), true);
     } else gui.set_enabled(gui.get_node('time_by_coins/button'), true);

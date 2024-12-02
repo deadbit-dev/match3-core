@@ -10,10 +10,6 @@ local __TS__ArrayFindIndex = ____lualib.__TS__ArrayFindIndex
 local ____exports = {}
 local flow = require("ludobits.m.flow")
 local ____utils = require("game.utils")
-local get_field_width = ____utils.get_field_width
-local get_field_height = ____utils.get_field_height
-local get_current_level_config = ____utils.get_current_level_config
-local get_busters = ____utils.get_busters
 local add_coins = ____utils.add_coins
 local is_tutorial = ____utils.is_tutorial
 local get_current_level = ____utils.get_current_level
@@ -97,7 +93,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, level_config, field_width, field_height, busters, field, spawn_element_chances, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action, first_pass
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, field, spawn_element_chances, level_name, level, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action, first_pass
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -152,31 +148,43 @@ function ____exports.Game()
             local id = tonumber(key)
             if id ~= nil then
                 local is_base_element = __TS__ArrayIncludes(GAME_CONFIG.base_elements, id)
-                local is_additional_element = id == level_config.additional_element
+                local is_additional_element = id == level.additional_element
                 if is_base_element or is_additional_element then
                     spawn_element_chances[id] = 10
                 else
                     spawn_element_chances[id] = 0
                 end
-                local is_excluded_element = id == level_config.exclude_element
+                local is_excluded_element = id == level.exclude_element
                 if is_excluded_element then
                     spawn_element_chances[id] = 0
                 end
             end
         end
     end
-    function load()
+    function load(level_config)
         Log.log("LOAD GAME")
+        local num = get_current_level() + 1
+        level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+        level = level_config
+        field.init(level.field.width, level.field.height)
+        field.set_callback_is_can_swap(is_can_swap)
+        field.set_callback_is_combined_elements(is_combined_elements)
+        field.set_callback_on_request_element(on_request_element)
+        field.set_callback_on_element_damaged(on_element_damaged)
+        field.set_callback_on_cell_damaged(on_cell_damaged)
+        field.set_callback_on_near_cells_damaged(on_near_cells_damaged)
+        set_busters()
+        set_element_chances()
         if GAME_CONFIG.is_revive then
             revive()
         else
             new_state()
             try_load_field()
             update_core_state()
-            set_targets(level_config.targets)
-            set_steps(level_config.steps)
-            if level_config.time ~= nil then
-                get_state().remaining_time = level_config.time
+            set_targets(level.targets)
+            set_steps(level.steps)
+            if level.time ~= nil then
+                get_state().remaining_time = level.time
             end
             set_random()
         end
@@ -190,10 +198,8 @@ function ____exports.Game()
         GAME_CONFIG.is_revive = false
         game_timer = timer.delay(1, true, on_tick)
         on_idle()
-        Metrica.report(
-            "data",
-            {["level_" .. tostring(get_current_level() + 1)] = {type = "start"}}
-        )
+        local curr_level = get_current_level() + 1
+        Metrica.report("data", {["level_" .. level_name] = {type = "start"}})
     end
     function set_tutorial()
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]
@@ -226,10 +232,10 @@ function ____exports.Game()
             end
         end
         if tutorial_data.busters ~= nil then
-            busters.spinning.block = true
-            busters.hammer.block = true
-            busters.horizontal_rocket.block = true
-            busters.vertical_rocket.block = true
+            level.busters.spinning.block = true
+            level.busters.hammer.block = true
+            level.busters.horizontal_rocket.block = true
+            level.busters.vertical_rocket.block = true
             if __TS__ArrayIsArray(tutorial_data.busters) then
                 for ____, buster in ipairs(tutorial_data.busters) do
                     unlock_buster(buster)
@@ -257,29 +263,29 @@ function ____exports.Game()
             local ____switch36 = name
             local ____cond36 = ____switch36 == "hammer"
             if ____cond36 then
-                busters.hammer.block = false
+                level.busters.hammer.block = false
                 break
             end
             ____cond36 = ____cond36 or ____switch36 == "spinning"
             if ____cond36 then
-                busters.spinning.block = false
+                level.busters.spinning.block = false
                 break
             end
             ____cond36 = ____cond36 or ____switch36 == "horizontal_rocket"
             if ____cond36 then
-                busters.horizontal_rocket.block = false
+                level.busters.horizontal_rocket.block = false
                 break
             end
             ____cond36 = ____cond36 or ____switch36 == "vertical_rocket"
             if ____cond36 then
-                busters.vertical_rocket.block = false
+                level.busters.vertical_rocket.block = false
                 break
             end
         until true
     end
     function is_gameover()
         local ____temp_0
-        if level_config.time ~= nil then
+        if level.time ~= nil then
             ____temp_0 = is_timeout()
         else
             ____temp_0 = not is_have_steps()
@@ -287,7 +293,7 @@ function ____exports.Game()
         return ____temp_0
     end
     function on_tick()
-        if level_config.time ~= nil and not is_win then
+        if level.time ~= nil and not is_win then
             update_timer()
         end
         if is_level_completed() then
@@ -309,10 +315,10 @@ function ____exports.Game()
         end
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local pos = {x = x, y = y}
                         local cell = field.get_cell(pos)
                         local element = field.get_element(pos)
@@ -347,7 +353,7 @@ function ____exports.Game()
         local last_state = get_state(1)
         set_targets(last_state.targets)
         set_steps(last_state.steps)
-        if level_config.time ~= nil then
+        if level.time ~= nil then
             get_state().remaining_time = last_state.remaining_time
         end
         set_random()
@@ -385,10 +391,10 @@ function ____exports.Game()
         end
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local cell = previous_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
                             cell.uid = generate_uid()
@@ -461,7 +467,7 @@ function ____exports.Game()
             return
         end
         local dt = System.now() - start_game_time
-        local remaining_time = math.max(0, level_config.time - dt)
+        local remaining_time = math.max(0, level.time - dt)
         get_state().remaining_time = remaining_time
         EventBus.send("GAME_TIMER", remaining_time)
     end
@@ -482,15 +488,15 @@ function ____exports.Game()
     function on_win()
         if not is_win then
             is_win = true
-            local completed_levels = GameStorage.get("completed_levels")
+            local last_state = get_state()
             local current_level = GameStorage.get("current_level")
+            local completed_levels = GameStorage.get("completed_levels")
             if not __TS__ArrayIncludes(completed_levels, current_level) then
                 completed_levels[#completed_levels + 1] = current_level
                 GameStorage.set("completed_levels", completed_levels)
                 first_pass = true
-                local last_state = get_state()
-                add_coins(level_config.coins)
-                if level_config.coins > 0 then
+                add_coins(level.coins)
+                if level.coins > 0 then
                     if last_state.steps ~= nil then
                         add_coins(math.min(last_state.steps, current_level ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock))
                     end
@@ -503,7 +509,7 @@ function ____exports.Game()
                 end
                 Metrica.report(
                     "data",
-                    {["level_" .. tostring(get_current_level() + 1)] = {
+                    {["level_" .. level_name] = {
                         type = "end",
                         time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
                         steps = last_state.steps
@@ -530,10 +536,10 @@ function ____exports.Game()
         local counts = 0
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local pos = {x = x, y = y}
                         local cell = field.get_cell(pos)
                         local element = field.get_element(pos)
@@ -592,10 +598,7 @@ function ____exports.Game()
             "ON_GAME_OVER",
             copy_state()
         )
-        Metrica.report(
-            "data",
-            {["level_" .. tostring(get_current_level() + 1)] = {type = "fail"}}
-        )
+        Metrica.report("data", {["level_" .. level_name] = {type = "fail"}})
     end
     function on_revive(data)
         if data.steps ~= nil then
@@ -669,10 +672,10 @@ function ____exports.Game()
                                 local elements = {}
                                 do
                                     local y = 0
-                                    while y < field_height do
+                                    while y < level.field.height do
                                         do
                                             local x = 0
-                                            while x < field_width do
+                                            while x < level.field.width do
                                                 local cell = field.get_cell({x = x, y = y})
                                                 if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
                                                     local element = field.get_element({x = x, y = y})
@@ -742,11 +745,11 @@ function ____exports.Game()
                             end
                         until false
                         do
-                            local y = field_height - 1
+                            local y = level.field.height - 1
                             while y > 0 do
                                 do
                                     local x = 0
-                                    while x < field_width do
+                                    while x < level.field.width do
                                         local pos = {x = x, y = y}
                                         local cell = field.get_cell(pos)
                                         if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
@@ -787,10 +790,10 @@ function ____exports.Game()
     function try_load_field()
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         load_cell({x = x, y = y})
                         load_element({x = x, y = y})
                         x = x + 1
@@ -800,7 +803,7 @@ function ____exports.Game()
             end
         end
         if has_combination() then
-            field.init()
+            field.init(level.field.width, level.field.height)
             try_load_field()
             return
         end
@@ -808,10 +811,10 @@ function ____exports.Game()
     function has_combination()
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local result = field.search_combination({x = x, y = y})
                         if result ~= NotFound then
                             return true
@@ -827,13 +830,13 @@ function ____exports.Game()
     function has_step()
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local cell = field.get_cell({x = x, y = y})
                         if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                            if is_valid_pos(x + 1, y, field_width, field_height) then
+                            if is_valid_pos(x + 1, y, level.field.width, level.field.height) then
                                 local cell = field.get_cell({x = x + 1, y = y})
                                 if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
                                     field.swap_elements({x = x, y = y}, {x = x + 1, y = y})
@@ -845,7 +848,7 @@ function ____exports.Game()
                                     end
                                 end
                             end
-                            if is_valid_pos(x, y + 1, field_width, field_height) then
+                            if is_valid_pos(x, y + 1, level.field.width, level.field.height) then
                                 local cell = field.get_cell({x = x, y = y + 1})
                                 if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
                                     field.swap_elements({x = x, y = y}, {x = x, y = y + 1})
@@ -892,13 +895,13 @@ function ____exports.Game()
                 local steps = {}
                 do
                     local y = 0
-                    while y < field_height do
+                    while y < level.field.height do
                         do
                             local x = 0
-                            while x < field_width do
+                            while x < level.field.width do
                                 local cell = field.get_cell({x = x, y = y})
                                 if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
-                                    if is_valid_pos(x + 1, y, field_width, field_height) then
+                                    if is_valid_pos(x + 1, y, level.field.width, level.field.height) then
                                         local cell = field.get_cell({x = x + 1, y = y})
                                         if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
                                             field.swap_elements({x = x, y = y}, {x = x + 1, y = y})
@@ -914,7 +917,7 @@ function ____exports.Game()
                                         end
                                     end
                                     flow.frames(1)
-                                    if is_valid_pos(x, y + 1, field_width, field_height) then
+                                    if is_valid_pos(x, y + 1, level.field.width, level.field.height) then
                                         local cell = field.get_cell({x = x, y = y + 1})
                                         if cell ~= NotActiveCell and is_available_cell_type_for_move(cell) then
                                             field.swap_elements({x = x, y = y}, {x = x, y = y + 1})
@@ -950,10 +953,10 @@ function ____exports.Game()
         local last_state = get_state()
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local cell = last_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
                             cell.uid = generate_uid()
@@ -974,7 +977,7 @@ function ____exports.Game()
                 y = y + 1
             end
         end
-        if level_config.time ~= nil then
+        if level.time ~= nil then
             timer.delay(
                 0,
                 false,
@@ -988,7 +991,7 @@ function ____exports.Game()
         end
     end
     function load_cell(pos)
-        local cell_config = level_config.field.cells[pos.y + 1][pos.x + 1]
+        local cell_config = level.field.cells[pos.y + 1][pos.x + 1]
         if __TS__ArrayIsArray(cell_config) then
             local cells = json.decode(json.encode(cell_config))
             local cell_id = table.remove(cells)
@@ -1000,17 +1003,17 @@ function ____exports.Game()
         end
     end
     function load_element(pos)
-        local element = level_config.field.elements[pos.y + 1][pos.x + 1]
+        local element = level.field.elements[pos.y + 1][pos.x + 1]
         make_element(
             pos,
             element == ____exports.RandomElement and get_random_element_id() or element
         )
     end
     function set_timer()
-        if level_config.time == nil then
+        if level.time == nil then
             return
         end
-        start_game_time = System.now() - level_config.time + get_state().remaining_time
+        start_game_time = System.now() - level.time + get_state().remaining_time
     end
     function set_targets(targets)
         local last_state = get_state()
@@ -1020,7 +1023,7 @@ function ____exports.Game()
         if steps == nil then
             steps = 0
         end
-        if level_config.steps == nil then
+        if level.steps == nil then
             return
         end
         local last_state = get_state()
@@ -1248,31 +1251,31 @@ function ____exports.Game()
         end
     end
     function set_busters()
-        if not GameStorage.get("spinning_opened") and level_config.busters.spinning.counts ~= 0 then
+        if not GameStorage.get("spinning_opened") and level.busters.spinning.counts ~= 0 then
             GameStorage.set("spinning_opened", true)
         end
-        if not GameStorage.get("hammer_opened") and level_config.busters.hammer.counts ~= 0 then
+        if not GameStorage.get("hammer_opened") and level.busters.hammer.counts ~= 0 then
             GameStorage.set("hammer_opened", true)
         end
-        if not GameStorage.get("horizontal_rocket_opened") and level_config.busters.horizontal_rocket.counts ~= 0 then
+        if not GameStorage.get("horizontal_rocket_opened") and level.busters.horizontal_rocket.counts ~= 0 then
             GameStorage.set("horizontal_rocket_opened", true)
         end
-        if not GameStorage.get("vertical_rocket_opened") and level_config.busters.vertical_rocket.counts ~= 0 then
+        if not GameStorage.get("vertical_rocket_opened") and level.busters.vertical_rocket.counts ~= 0 then
             GameStorage.set("vertical_rocket_opened", true)
         end
-        local spinning_counts = tonumber(level_config.busters.spinning.counts)
+        local spinning_counts = tonumber(level.busters.spinning.counts)
         if GameStorage.get("spinning_counts") <= 0 and spinning_counts ~= nil then
             GameStorage.set("spinning_counts", spinning_counts)
         end
-        local hammer_counts = tonumber(level_config.busters.hammer.counts)
+        local hammer_counts = tonumber(level.busters.hammer.counts)
         if GameStorage.get("hammer_counts") <= 0 and hammer_counts ~= nil then
             GameStorage.set("hammer_counts", hammer_counts)
         end
-        local horizontal_rocket_counts = tonumber(level_config.busters.horizontal_rocket.counts)
+        local horizontal_rocket_counts = tonumber(level.busters.horizontal_rocket.counts)
         if GameStorage.get("horizontal_rocket_counts") <= 0 and horizontal_rocket_counts ~= nil then
             GameStorage.set("horizontal_rocket_counts", horizontal_rocket_counts)
         end
-        local vertical_rocket_counts = tonumber(level_config.busters.vertical_rocket.counts)
+        local vertical_rocket_counts = tonumber(level.busters.vertical_rocket.counts)
         if GameStorage.get("vertical_rocket_counts") <= 0 and vertical_rocket_counts ~= nil then
             GameStorage.set("vertical_rocket_counts", vertical_rocket_counts)
         end
@@ -1306,7 +1309,7 @@ function ____exports.Game()
         until true
     end
     function on_activate_spinning()
-        if busters.spinning.block then
+        if level.busters.spinning.block then
             return
         end
         if GameStorage.get("spinning_counts") <= 0 or not is_idle then
@@ -1321,52 +1324,49 @@ function ____exports.Game()
         end
         stop_helper()
         shuffle()
-        Metrica.report(
-            "data",
-            {["use_" .. tostring(get_current_level() + 1)] = {id = "spinning"}}
-        )
-        busters.hammer.active = false
-        busters.horizontal_rocket.active = false
-        busters.vertical_rocket.active = false
+        Metrica.report("data", {["use_" .. level_name] = {id = "spinning"}})
+        level.busters.hammer.active = false
+        level.busters.horizontal_rocket.active = false
+        level.busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function on_activate_hammer()
-        if busters.hammer.block then
+        if level.busters.hammer.block then
             return
         end
         if GameStorage.get("hammer_counts") <= 0 then
             return
         end
-        busters.hammer.active = not busters.hammer.active
-        busters.spinning.active = false
-        busters.horizontal_rocket.active = false
-        busters.vertical_rocket.active = false
+        level.busters.hammer.active = not level.busters.hammer.active
+        level.busters.spinning.active = false
+        level.busters.horizontal_rocket.active = false
+        level.busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function on_activate_horizontal_rocket()
-        if busters.horizontal_rocket.block then
+        if level.busters.horizontal_rocket.block then
             return
         end
         if GameStorage.get("horizontal_rocket_counts") <= 0 then
             return
         end
-        busters.horizontal_rocket.active = not busters.horizontal_rocket.active
-        busters.hammer.active = false
-        busters.spinning.active = false
-        busters.vertical_rocket.active = false
+        level.busters.horizontal_rocket.active = not level.busters.horizontal_rocket.active
+        level.busters.hammer.active = false
+        level.busters.spinning.active = false
+        level.busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function on_activate_vertical_rocket()
-        if busters.vertical_rocket.block then
+        if level.busters.vertical_rocket.block then
             return
         end
         if GameStorage.get("vertical_rocket_counts") <= 0 then
             return
         end
-        busters.vertical_rocket.active = not busters.vertical_rocket.active
-        busters.hammer.active = false
-        busters.spinning.active = false
-        busters.horizontal_rocket.active = false
+        level.busters.vertical_rocket.active = not level.busters.vertical_rocket.active
+        level.busters.hammer.active = false
+        level.busters.spinning.active = false
+        level.busters.horizontal_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function on_click(pos)
@@ -1381,10 +1381,10 @@ function ____exports.Game()
                     tutorial_data.busters = {tutorial_data.busters}
                 end
                 for ____, buster in ipairs(tutorial_data.busters) do
-                    if buster == "hammer" and not busters.hammer.active then
+                    if buster == "hammer" and not level.busters.hammer.active then
                         return
                     end
-                    if buster == "horizontal_rocket" and not busters.horizontal_rocket.active and not busters.vertical_rocket.active then
+                    if buster == "horizontal_rocket" and not level.busters.horizontal_rocket.active and not level.busters.vertical_rocket.active then
                         return
                     end
                 end
@@ -1394,29 +1394,20 @@ function ____exports.Game()
             complete_tutorial()
         end
         stop_helper()
-        if busters.hammer.active then
-            Metrica.report(
-                "data",
-                {["use_" .. tostring(get_current_level() + 1)] = {id = "hammer"}}
-            )
+        if level.busters.hammer.active then
+            Metrica.report("data", {["use_" .. level_name] = {id = "hammer"}})
             try_hammer_damage(pos)
             is_idle = false
             return
         end
-        if busters.horizontal_rocket.active then
-            Metrica.report(
-                "data",
-                {["use_" .. tostring(get_current_level() + 1)] = {id = "horizontal_rocket"}}
-            )
+        if level.busters.horizontal_rocket.active then
+            Metrica.report("data", {["use_" .. level_name] = {id = "horizontal_rocket"}})
             try_horizontal_damage(pos)
             is_idle = false
             return
         end
-        if busters.vertical_rocket.active then
-            Metrica.report(
-                "data",
-                {["use_" .. tostring(get_current_level() + 1)] = {id = "vertical_rocket"}}
-            )
+        if level.busters.vertical_rocket.active then
+            Metrica.report("data", {["use_" .. level_name] = {id = "vertical_rocket"}})
             try_vertical_damage(pos)
             is_idle = false
             return
@@ -1424,7 +1415,7 @@ function ____exports.Game()
         if field.try_click(pos) then
             if try_activate_buster_element(pos) then
                 is_idle = false
-                if level_config.steps ~= nil then
+                if level.steps ~= nil then
                     local state = get_state()
                     state.steps = state.steps - 1
                     EventBus.send("UPDATED_STEP_COUNTER", state.steps)
@@ -1451,14 +1442,14 @@ function ____exports.Game()
             "hammer_counts",
             GameStorage.get("hammer_counts") - 1
         )
-        busters.hammer.active = false
+        level.busters.hammer.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function try_horizontal_damage(pos)
         local damages = {}
         do
             local x = 0
-            while x < field_width do
+            while x < level.field.width do
                 if is_buster({x = x, y = pos.y}) then
                     try_activate_buster_element({x = x, y = pos.y})
                 else
@@ -1475,14 +1466,14 @@ function ____exports.Game()
             "horizontal_rocket_counts",
             GameStorage.get("horizontal_rocket_counts") - 1
         )
-        busters.horizontal_rocket.active = false
+        level.busters.horizontal_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function try_vertical_damage(pos)
         local damages = {}
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 if is_buster({x = pos.x, y = y}) then
                     try_activate_buster_element({x = pos.x, y = y})
                 else
@@ -1499,7 +1490,7 @@ function ____exports.Game()
             "vertical_rocket_counts",
             GameStorage.get("vertical_rocket_counts") - 1
         )
-        busters.vertical_rocket.active = false
+        level.busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
     end
     function try_activate_buster_element(pos)
@@ -1532,7 +1523,7 @@ function ____exports.Game()
                     local j = pos.x - (#mask[1] - 1) / 2
                     while j <= pos.x + (#mask[1] - 1) / 2 do
                         if mask[i - (pos.y - (#mask - 1) / 2) + 1][j - (pos.x - (#mask[1] - 1) / 2) + 1] == 1 then
-                            if is_valid_pos(j, i, field_width, field_height) then
+                            if is_valid_pos(j, i, level.field.width, level.field.height) then
                                 local cell = field.get_cell({x = j, y = i})
                                 local element = field.get_element({x = j, y = i})
                                 if cell ~= NotActiveCell and cell.state == CellState.Idle and (element ~= NullElement and element.state == ElementState.Idle or element == NullElement) then
@@ -1630,7 +1621,7 @@ function ____exports.Game()
         if rocket.id == ____exports.ElementId.VerticalRocket or rocket.id == ____exports.ElementId.AllAxisRocket or all_axis then
             do
                 local y = 0
-                while y < field_height do
+                while y < level.field.height do
                     if y ~= pos.y then
                         local cell = field.get_cell({x = pos.x, y = y})
                         local element = field.get_element({x = pos.x, y = y})
@@ -1654,7 +1645,7 @@ function ____exports.Game()
         if rocket.id == ____exports.ElementId.HorizontalRocket or rocket.id == ____exports.ElementId.AllAxisRocket or all_axis then
             do
                 local x = 0
-                while x < field_width do
+                while x < level.field.width do
                     if x ~= pos.x then
                         local cell = field.get_cell({x = x, y = pos.y})
                         local element = field.get_element({x = x, y = pos.y})
@@ -1784,10 +1775,10 @@ function ____exports.Game()
         local available_targets = {}
         do
             local y = 0
-            while y < field_height do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < field_width do
+                    while x < level.field.width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
                         local ____temp_13 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
@@ -1825,10 +1816,10 @@ function ____exports.Game()
         if #available_targets == 0 then
             do
                 local y = 0
-                while y < field_height do
+                while y < level.field.height do
                     do
                         local x = 0
-                        while x < field_width do
+                        while x < level.field.width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local ____temp_19 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
@@ -1892,10 +1883,10 @@ function ____exports.Game()
         if #available_targets == 0 then
             do
                 local y = 0
-                while y < field_height do
+                while y < level.field.height do
                     do
                         local x = 0
-                        while x < field_width do
+                        while x < level.field.width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
@@ -1951,10 +1942,10 @@ function ____exports.Game()
         if is_block_input or is_tutorial() and not is_tutorial_swap(swap) then
             return
         end
-        busters.hammer.active = false
-        busters.spinning.active = false
-        busters.horizontal_rocket.active = false
-        busters.vertical_rocket.active = false
+        level.busters.hammer.active = false
+        level.busters.spinning.active = false
+        level.busters.horizontal_rocket.active = false
+        level.busters.vertical_rocket.active = false
         EventBus.send("UPDATED_BUTTONS")
         if is_first_step then
             is_first_step = false
@@ -1983,7 +1974,7 @@ function ____exports.Game()
             return on_idle()
         end
         is_idle = false
-        if level_config.steps ~= nil then
+        if level.steps ~= nil then
             local state = get_state()
             state.steps = state.steps - 1
             EventBus.send("UPDATED_STEP_COUNTER", state.steps)
@@ -2281,18 +2272,14 @@ function ____exports.Game()
             end
         end
         if tutorial_data.busters ~= nil then
-            busters.spinning.block = false
-            busters.hammer.block = false
-            busters.horizontal_rocket.block = false
-            busters.vertical_rocket.block = false
+            level.busters.spinning.block = false
+            level.busters.hammer.block = false
+            level.busters.horizontal_rocket.block = false
+            level.busters.vertical_rocket.block = false
         end
         EventBus.send("REMOVE_TUTORIAL", unlock_info)
     end
-    level_config = get_current_level_config()
-    field_width = get_field_width()
-    field_height = get_field_height()
-    busters = get_busters()
-    field = Field(field_width, field_height)
+    field = Field()
     spawn_element_chances = {}
     game_item_counter = 0
     states = {}
@@ -2308,15 +2295,6 @@ function ____exports.Game()
     first_pass = false
     local function init()
         Log.log("INIT GAME")
-        field.init()
-        field.set_callback_is_can_swap(is_can_swap)
-        field.set_callback_is_combined_elements(is_combined_elements)
-        field.set_callback_on_request_element(on_request_element)
-        field.set_callback_on_element_damaged(on_element_damaged)
-        field.set_callback_on_cell_damaged(on_cell_damaged)
-        field.set_callback_on_near_cells_damaged(on_near_cells_damaged)
-        set_busters()
-        set_element_chances()
         set_events()
     end
     return init()

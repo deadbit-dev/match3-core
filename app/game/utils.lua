@@ -2,10 +2,55 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__StringEndsWith = ____lualib.__TS__StringEndsWith
 local ____exports = {}
+local generate_random_level
 local ____math_utils = require("utils.math_utils")
 local Direction = ____math_utils.Direction
 local ____utils = require("utils.utils")
 local parse_time = ____utils.parse_time
+function generate_random_level()
+    local exclude_levels = {
+        3,
+        10,
+        17,
+        24,
+        31,
+        38,
+        46
+    }
+    local levels = {}
+    do
+        local i = 0
+        while i < 47 do
+            if not __TS__ArrayIncludes(exclude_levels, i) then
+                levels[#levels + 1] = i
+            end
+            i = i + 1
+        end
+    end
+    local picked_level = levels[math.random(0, #levels - 1) + 1]
+    print(picked_level)
+    local random_level = GAME_CONFIG.levels[picked_level + 1]
+    print(random_level)
+    random_level.coins = 0
+    random_level.steps = random_level.steps + math.random(-5, 5)
+    for ____, target in ipairs(random_level.targets) do
+        repeat
+            local ____switch11 = target.type
+            local ____cond11 = ____switch11 == 1
+            if ____cond11 then
+                target.count = target.count + math.random(-5, 5)
+                break
+            end
+            ____cond11 = ____cond11 or ____switch11 == 0
+            if ____cond11 then
+                target.count = target.count - math.random(0, 5)
+                break
+            end
+        until true
+    end
+    print(random_level)
+    return random_level
+end
 function ____exports.get_current_level()
     return GameStorage.get("current_level")
 end
@@ -13,48 +58,20 @@ function ____exports.is_last_level()
     return GameStorage.get("current_level") == #GAME_CONFIG.levels - 1
 end
 function ____exports.get_current_level_config()
-    return GAME_CONFIG.levels[____exports.get_current_level() + 1]
+    if GAME_CONFIG.is_revive then
+        return GAME_CONFIG.revive_level
+    end
+    local current_level = ____exports.get_current_level()
+    if current_level < 47 then
+        return GAME_CONFIG.levels[current_level + 1]
+    end
+    return generate_random_level()
 end
 function ____exports.is_animal_level()
     return __TS__ArrayIncludes(
         GAME_CONFIG.animal_levels,
         ____exports.get_current_level() + 1
     )
-end
-function ____exports.is_time_level()
-    return GAME_CONFIG.levels[____exports.get_current_level() + 1].time ~= nil
-end
-function ____exports.get_level_targets()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.targets
-end
-function ____exports.get_field_width()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.width
-end
-function ____exports.get_field_height()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.height
-end
-function ____exports.get_field_max_width()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.max_width
-end
-function ____exports.get_field_max_height()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.max_height
-end
-function ____exports.get_field_offset_border()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.offset_border
-end
-function ____exports.get_field_cell_size()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.field.cell_size
-end
-function ____exports.get_busters()
-    local level_config = GAME_CONFIG.levels[____exports.get_current_level() + 1]
-    return level_config.busters
 end
 function ____exports.get_move_direction(dir)
     local cs45 = 0.7
@@ -158,6 +175,6 @@ function ____exports.get_last_completed_level()
             max_level = level
         end
     end
-    return math.min(46, max_level)
+    return max_level
 end
 return ____exports

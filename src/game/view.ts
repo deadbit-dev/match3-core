@@ -8,7 +8,7 @@
 import { GoManager } from "../modules/GoManager";
 import { IGameItem, ItemMessage, PosXYMessage } from '../modules/modules_const';
 import { Axis, Direction, is_valid_pos, rotateMatrix } from "../utils/math_utils";
-import { get_current_level, get_field_cell_size, get_field_height, get_field_max_height, get_field_max_width, get_field_offset_border, get_field_width, get_move_direction, is_animal_level, is_tutorial } from "./utils";
+import { get_current_level, get_current_level_config, get_move_direction, is_animal_level, is_tutorial } from "./utils";
 import { NotActiveCell, NullElement, Cell, Element, MoveInfo, Position, DamageInfo, CombinationInfo, is_available_cell_type_for_move, ElementInfo, ElementState } from "./core";
 import { base_cell, CellId, ElementId, GameState, LockInfo, Target, TargetState, UnlockInfo } from "./game";
 import { BusterActivatedMessage, CombinateBustersMessage, CombinedMessage, DiskosphereActivatedMessage, Dlg, DynamiteActivatedMessage, HelicopterActionMessage, HelicopterActivatedMessage, HelperMessage, RequestElementMessage, RocketActivatedMessage, SwapElementsMessage, TargetMessage } from '../main/game_config';
@@ -126,6 +126,7 @@ export interface View {
 }
 
 export function View(resources: ViewResources) {
+    const level = get_current_level_config();
 
     const go_manager = GoManager();
     const view_state = {} as ViewState;
@@ -137,7 +138,7 @@ export function View(resources: ViewResources) {
     const original_game_width = 540;
     const original_game_height = 960;
     
-    const max_width = get_field_max_width();
+    const max_width = level.field.max_width;
     const cell_size = calculate_cell_size();
     const scale_ratio = calculate_scale_ratio();
     const cells_offset = calculate_cell_offset();
@@ -163,7 +164,7 @@ export function View(resources: ViewResources) {
         if(!GAME_CONFIG.is_restart) Sound.play('game');
         GAME_CONFIG.is_restart = false;
 
-        EventBus.send('REQUEST_LOAD_GAME');
+        EventBus.send('REQUEST_LOAD_GAME', level);
     }
 
     function set_events() {
@@ -175,6 +176,7 @@ export function View(resources: ViewResources) {
         EventBus.on('MSG_ON_MOVE', on_move);
         EventBus.on('ON_WIN_END', on_win_end);
         EventBus.on('ON_GAME_OVER', on_gameover);
+
         EventBus.on('SET_TUTORIAL', (lock_info: LockInfo) => {
             if(is_animal_level() && is_tutorial()) {
                 EventBus.send('SET_ANIMAL_TUTORIAL_TIP');
@@ -183,6 +185,7 @@ export function View(resources: ViewResources) {
                 });
             } else on_set_tutorial(lock_info);
         });
+
         EventBus.on('SET_HELPER', on_set_helper, false);
         EventBus.on('RESET_HELPER', on_reset_helper, false);
         EventBus.on('STOP_HELPER', on_stop_helper, false);
@@ -205,13 +208,16 @@ export function View(resources: ViewResources) {
         EventBus.on('RESPONSE_ACTIVATED_HELICOPTER', on_helicopter_activated_animation, false);
         EventBus.on('RESPONSE_HELICOPTER_ACTION', on_helicopter_action_animation, false);
         EventBus.on('SHUFFLE_ACTION', on_shuffle_animation, false);
+
         EventBus.on('UPDATED_TARGET', (message: {idx: number, target: TargetState}) => {
             view_state.targets[message.idx] = message.target;
         }, false);
+
         EventBus.on('RESPONSE_REWIND', on_rewind_animation, false);
-        EventBus.on('FORCE_REMOVE_ELEMENT', (uid: number) => {
-            delete_view_item_by_uid(uid);
-        }, false);
+        EventBus.on('FORCE_REMOVE_ELEMENT', delete_view_item_by_uid, false);
+        EventBus.on('REVIVE', (data: {steps?: number, time?: number}) => {
+            GAME_CONFIG.revive_level = level;
+        });
     }
 
     function on_message(this: any, message_id: hash, message: any, sender: hash) {
@@ -232,25 +238,25 @@ export function View(resources: ViewResources) {
     }
 
     function set_substrates() {
-        for(let y = 0; y < get_field_height(); y++) {
+        for(let y = 0; y < level.field.height; y++) {
             view_state.substrates[y] = [];
-            for(let x = 0; x < get_field_width(); x++) {
+            for(let x = 0; x < level.field.width; x++) {
                 view_state.substrates[y][x] = EMPTY_SUBSTRATE;
             }
         }
     }
 
     function calculate_cell_size() {
-        return math.floor(math.min((original_game_width - get_field_offset_border() * 2) / max_width, 100));
+        return math.floor(math.min((original_game_width - level.field.offset_border * 2) / max_width, 100));
     }
 
     function calculate_scale_ratio() {
-        return cell_size / get_field_cell_size();
+        return cell_size / level.field.cell_size;
     }
 
     function calculate_cell_offset() {
-        const offset_x = (((max_width * cell_size) - (get_field_width() * cell_size) + (get_field_offset_border() * 2)) / 2) + 2;
-        let offset_y = -(original_game_height / 2 - (get_field_max_height() / 2 * cell_size)) + 600;
+        const offset_x = (((max_width * cell_size) - (level.field.width * cell_size) + (level.field.offset_border * 2)) / 2) + 2;
+        let offset_y = -(original_game_height / 2 - (level.field.max_height / 2 * cell_size)) + 600;
         if(!GAME_CONFIG.debug_levels) offset_y -= 90 - GAME_CONFIG.bottom_offset;
 
         return vmath.vector3(
@@ -263,7 +269,7 @@ export function View(resources: ViewResources) {
     function on_load_game(game_state: GameState) {
         load_field(game_state);
 
-        EventBus.send('INIT_UI');
+        EventBus.send('INIT_UI', level);
         EventBus.send('UPDATED_STEP_COUNTER', game_state.steps);
         
         for(let i = 0; i < game_state.targets.length; i++) {
@@ -299,8 +305,8 @@ export function View(resources: ViewResources) {
 
         set_substrates();
 
-        for (let y = 0; y < get_field_height(); y++) {
-            for (let x = 0; x < get_field_width(); x++) {
+        for (let y = 0; y < level.field.height; y++) {
+            for (let x = 0; x < level.field.width; x++) {
                 const cell = game_state.cells[y][x];
                 if (cell != NotActiveCell) {
                     make_substrate_view({x, y}, game_state.cells);
@@ -329,8 +335,8 @@ export function View(resources: ViewResources) {
             }
         }
 
-        for(let y = 0; y < get_field_height(); y++) {
-            for(let x = 0; x < get_field_width(); x++) {
+        for(let y = 0; y < level.field.height; y++) {
+            for(let x = 0; x < level.field.width; x++) {
                 const substrate = view_state.substrates[y][x];
                 if(substrate != EMPTY_SUBSTRATE) {
                     go.delete(substrate);
@@ -341,9 +347,9 @@ export function View(resources: ViewResources) {
         view_state.game_id_to_view_index = {};
         view_state.substrates = [];
 
-        for(let y = 0; y < get_field_height(); y++) {
+        for(let y = 0; y < level.field.height; y++) {
             view_state.substrates[y] = [];
-            for(let x = 0; x < get_field_width(); x++)
+            for(let x = 0; x < level.field.width; x++)
                 view_state.substrates[y][x] = EMPTY_SUBSTRATE;
         }
     }
@@ -426,8 +432,8 @@ export function View(resources: ViewResources) {
     }
 
     function get_field_pos(world_pos: vmath.vector3): Position {
-        for (let y = 0; y < get_field_height(); y++) {
-            for (let x = 0; x < get_field_width(); x++) {
+        for (let y = 0; y < level.field.height; y++) {
+            for (let x = 0; x < level.field.width; x++) {
                 const original_world_pos = get_world_pos({x, y});
                 const in_x = (world_pos.x >= original_world_pos.x - cell_size * 0.5) && (world_pos.x <= original_world_pos.x + cell_size * 0.5);
                 const in_y = (world_pos.y >= original_world_pos.y - cell_size * 0.5) && (world_pos.y <= original_world_pos.y + cell_size * 0.5);
@@ -555,8 +561,8 @@ export function View(resources: ViewResources) {
             case Direction.Right: element_to_pos.x += 1; break;
         }
 
-        const is_valid_x = (element_to_pos.x >= 0) && (element_to_pos.x < get_field_width());
-        const is_valid_y = (element_to_pos.y >= 0) && (element_to_pos.y < get_field_height());
+        const is_valid_x = (element_to_pos.x >= 0) && (element_to_pos.x < level.field.width);
+        const is_valid_y = (element_to_pos.y >= 0) && (element_to_pos.y < level.field.height);
         if (!is_valid_x || !is_valid_y) return;
 
         EventBus.send('REQUEST_TRY_SWAP_ELEMENTS', {
@@ -1043,13 +1049,13 @@ export function View(resources: ViewResources) {
         const part1_to_world_pos = vmath.vector3(pos);
     
         if(axis == Axis.Vertical) {
-            const distance = get_field_height() * cell_size;
+            const distance = level.field.height * cell_size;
             part0_to_world_pos.y += distance;
             part1_to_world_pos.y += -distance;
         }
     
         if(axis == Axis.Horizontal) {
-            const distance = get_field_width() * cell_size;
+            const distance = level.field.width * cell_size;
             part0_to_world_pos.x += -distance;
             part1_to_world_pos.x += distance;
         }
@@ -1221,8 +1227,8 @@ export function View(resources: ViewResources) {
         timer.delay(1, false, () => {
             Sound.play('shuffle');
 
-            for(let y = 0; y < get_field_height(); y++) {
-                for(let x = 0; x < get_field_width(); x++) {
+            for(let y = 0; y < level.field.height; y++) {
+                for(let x = 0; x < level.field.width; x++) {
                     const element = game_state.elements[y][x];
                     if(element != NullElement) {
                         const element_view = get_view_item_by_uid(element.uid);

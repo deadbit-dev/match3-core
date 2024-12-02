@@ -1,7 +1,7 @@
 local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local ____exports = {}
-local set_level_buttons, load_level, set_last_map_position, set_completed_levels, set_current_level, on_drag, on_scroll, set_events, on_resize, get_offset
+local set_level_buttons, load_level, set_last_map_position, set_completed_levels, set_current_level, on_drag, on_scroll, set_events, on_resize, get_offset, min
 local druid = require("druid.druid")
 local ____utils = require("game.utils")
 local get_last_completed_level = ____utils.get_last_completed_level
@@ -20,6 +20,19 @@ function set_level_buttons(data)
             )
             i = i + 1
         end
+    end
+    local last_level = get_last_completed_level()
+    if last_level >= 46 then
+        gui.set_enabled(
+            gui.get_node("generated_level"),
+            true
+        )
+        data.druid:new_button(
+            "generated_level",
+            function()
+                load_level(get_last_completed_level())
+            end
+        )
     end
 end
 function load_level(level)
@@ -41,7 +54,7 @@ function set_last_map_position()
     local pos = gui.get_position(map)
     local offset = get_offset()
     pos.y = math.max(
-        -3990 + offset,
+        min + offset,
         math.min(
             0 - offset,
             GameStorage.get("map_last_pos_y")
@@ -51,13 +64,18 @@ function set_last_map_position()
 end
 function set_completed_levels()
     for ____, level in ipairs(GameStorage.get("completed_levels")) do
-        local level_node = gui.get_node(tostring(level + 1) .. "/level")
-        gui.set_texture(level_node, "map")
-        gui.play_flipbook(level_node, "button_level_green")
+        if level < 47 then
+            local level_node = gui.get_node(tostring(level + 1) .. "/level")
+            gui.set_texture(level_node, "map")
+            gui.play_flipbook(level_node, "button_level_green")
+        end
     end
 end
 function set_current_level()
-    local max_level = get_last_completed_level()
+    local max_level = math.min(
+        46,
+        get_last_completed_level()
+    )
     local level = gui.get_node(tostring(max_level + 1) .. "/level")
     gui.set_texture(level, "map")
     gui.play_flipbook(
@@ -72,9 +90,10 @@ function set_current_level()
     local map = gui.get_node("map")
     local map_pos = gui.get_position(map)
     local offset = get_offset()
+    local pos = level_pos.y < 2000 and level_pos.y - 50 or level_pos.y + 400
     map_pos.y = math.max(
-        -3990 + offset,
-        math.min(0 - offset, -(level_pos.y - 250))
+        min + offset,
+        math.min(0 - offset, -pos)
     )
     gui.set_position(map, map_pos)
 end
@@ -86,7 +105,7 @@ function on_drag(action)
     local pos = gui.get_position(map)
     local offset = get_offset()
     pos.y = math.max(
-        -3990 + offset,
+        min + offset,
         math.min(0 - offset, pos.y + action.dy)
     )
     gui.set_position(map, pos)
@@ -97,7 +116,7 @@ function on_scroll(value)
     local pos = gui.get_position(map)
     local offset = get_offset()
     pos.y = math.max(
-        -3990 + offset,
+        min + offset,
         math.min(0 - offset, pos.y + value)
     )
     gui.animate(
@@ -154,7 +173,7 @@ function on_resize(data)
     local map = gui.get_node("map")
     local pos = gui.get_position(map)
     pos.y = math.max(
-        -3990 + offset,
+        min + offset,
         math.min(0 - offset, pos.y)
     )
     gui.set_position(map, pos)
@@ -182,6 +201,7 @@ function get_offset()
     end
     return math.abs(480 - math.abs(height))
 end
+min = -4350
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)

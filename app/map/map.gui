@@ -1,4 +1,8 @@
 script: "/map/map.gui_script"
+fonts {
+  name: "70"
+  font: "/assets/fonts/70.font"
+}
 textures {
   name: "map"
   texture: "/assets/map.atlas"
@@ -1414,6 +1418,50 @@ nodes {
   parent: "47/level"
   overridden_fields: 8
   template_node_child: true
+}
+nodes {
+  position {
+    x: 226.66667
+    y: 4243.4995
+  }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
+  size {
+    x: 250.0
+    y: 70.0
+  }
+  type: TYPE_BOX
+  texture: "ui/btn_3"
+  id: "generated_level"
+  parent: "levels"
+  inherit_alpha: true
+  slice9 {
+    x: 50.0
+    y: 50.0
+    z: 50.0
+    w: 59.0
+  }
+  enabled: false
+}
+nodes {
+  position {
+    y: -18.095238
+  }
+  scale {
+    x: 3.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "^"
+  font: "70"
+  id: "arrow"
+  parent: "generated_level"
+  inherit_alpha: true
 }
 nodes {
   position {

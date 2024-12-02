@@ -470,6 +470,7 @@ export const _GAME_CONFIG = {
 
     is_revive: false,
     is_restart: false,
+    revive_level: {} as Level,
     revive_states: {} as GameState[],
 
     is_busy_input: false,
@@ -550,7 +551,7 @@ export type _UserMessages = {
     SYS_LOAD_RESOURCE: NameMessage,
     SYS_UNLOAD_RESOURCE: NameMessage,
 
-    REQUEST_LOAD_GAME: VoidMessage,
+    REQUEST_LOAD_GAME: Level,
     RESPONSE_LOAD_GAME: GameState,
 
     REQUEST_CLICK: Position,
@@ -605,7 +606,7 @@ export type _UserMessages = {
 
     //---------------------------------------------------------------
 
-    INIT_UI: VoidMessage,
+    INIT_UI: Level,
     UPDATED_STEP_COUNTER: number,
     UPDATED_TARGET: { idx: number, target: TargetState },
     UPDATED_TARGET_UI: TargetMessage,

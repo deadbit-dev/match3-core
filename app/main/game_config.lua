@@ -341,6 +341,7 @@ ____exports._GAME_CONFIG = {
     levels = {},
     is_revive = false,
     is_restart = false,
+    revive_level = {},
     revive_states = {},
     is_busy_input = false,
     steps_by_ad = 0,

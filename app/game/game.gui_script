@@ -19,19 +19,18 @@ local get_current_level_config = ____utils.get_current_level_config
 local is_animal_level = ____utils.is_animal_level
 local is_enough_coins = ____utils.is_enough_coins
 local is_last_level = ____utils.is_last_level
-local is_time_level = ____utils.is_time_level
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local ____game = require("game.game")
 local TargetType = ____game.TargetType
-function setup(instance)
-    setup_info_ui(instance)
-    setup_busters(instance)
+function setup(_this)
+    setup_info_ui(_this)
+    setup_busters(_this)
     if GAME_CONFIG.debug_levels then
-        setup_sustem_ui(instance)
+        setup_sustem_ui(_this)
     end
-    setup_win_ui(instance)
-    setup_gameover_ui(instance)
+    setup_win_ui(_this)
+    setup_gameover_ui(_this)
 end
 function setup_info_ui(instance)
     setup_step_or_time(instance)
@@ -574,7 +573,16 @@ function setup_win_ui(instance)
         end
     )
     instance.druid:new_button("win_close", to_map)
+    set_text(
+        "last_level_btn_text",
+        Lang.get_text("on_map")
+    )
+    set_text(
+        "last_level_continue_text",
+        Lang.get_text("next")
+    )
     instance.druid:new_button("last_level_btn", to_map)
+    instance.druid:new_button("last_level_continue", next_level)
     gui.set_enabled(
         gui.get_node("win"),
         false
@@ -605,7 +613,7 @@ function next_level()
     GAME_CONFIG.is_restart = true
     Scene.restart()
 end
-function setup_gameover_ui(instance)
+function setup_gameover_ui(_this)
     gui.set_text(
         gui.get_node("gameover_text"),
         Lang.get_text("gameover_title")
@@ -614,7 +622,7 @@ function setup_gameover_ui(instance)
         gui.get_node("restart_text"),
         Lang.get_text("restart")
     )
-    instance.druid:new_button(
+    _this.druid:new_button(
         "restart_button",
         function()
             if not GameStorage.get("infinit_life").is_active and GameStorage.get("life").amount == 0 then
@@ -630,22 +638,19 @@ function setup_gameover_ui(instance)
         gui.get_node("map_text"),
         Lang.get_text("map")
     )
-    instance.druid:new_button("map_button", to_map)
-    instance.druid:new_button("gameover_close", to_map)
-    instance.druid:new_button("gameover_offer_close", disabled_gameover_offer)
+    _this.druid:new_button("map_button", to_map)
+    _this.druid:new_button("gameover_close", to_map)
+    _this.druid:new_button("gameover_offer_close", disabled_gameover_offer)
     gui.set_text(
         gui.get_node("steps_by_ad/text"),
         "+3 " .. Lang.get_text("3steps")
     )
-    instance.druid:new_button(
+    _this.druid:new_button(
         "steps_by_ad/button",
         function()
             Ads.show_reward(function()
                 GAME_CONFIG.steps_by_ad = GAME_CONFIG.steps_by_ad + 1
-                Metrica.report(
-                    "data",
-                    {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "3step_ads"}}
-                )
+                Metrica.report("data", {["fail_level_" .. _this.level_name] = {event = "3step_ads"}})
                 EventBus.send("REVIVE", {steps = 3})
             end)
         end
@@ -658,7 +663,7 @@ function setup_gameover_ui(instance)
         gui.get_node("steps_by_coins/text1"),
         "30"
     )
-    instance.druid:new_button(
+    _this.druid:new_button(
         "steps_by_coins/button",
         function()
             if not is_enough_coins(30) then
@@ -666,10 +671,7 @@ function setup_gameover_ui(instance)
                 return
             end
             remove_coins(30)
-            Metrica.report(
-                "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "5step_money"}}
-            )
+            Metrica.report("data", {["fail_level_" .. _this.level_name] = {event = "5step_money"}})
             EventBus.send("REVIVE", {steps = 5})
         end
     )
@@ -681,7 +683,7 @@ function setup_gameover_ui(instance)
         gui.get_node("time_by_coins/text1"),
         "40"
     )
-    instance.druid:new_button(
+    _this.druid:new_button(
         "time_by_coins/button",
         function()
             if not is_enough_coins(40) then
@@ -689,10 +691,7 @@ function setup_gameover_ui(instance)
                 return
             end
             remove_coins(40)
-            Metrica.report(
-                "data",
-                {["fail_level_" .. tostring(get_current_level() + 1)] = {event = "time_money"}}
-            )
+            Metrica.report("data", {["fail_level_" .. _this.level_name] = {event = "time_money"}})
             EventBus.send("REVIVE", {time = 20})
         end
     )
@@ -723,11 +722,17 @@ function set_animal_tutorial_tip()
         Lang.get_text("animal_tutorial_description1")
     )
 end
-function set_events(instance)
+function set_events(_this)
     EventBus.on("SET_ANIMAL_TUTORIAL_TIP", set_animal_tutorial_tip, true)
     EventBus.on(
         "INIT_UI",
-        function() return setup(instance) end
+        function(level)
+            local num = get_current_level() + 1
+            _this.level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+            _this.level = level
+            _this.busters = _this.level.busters
+            setup(_this)
+        end
     )
     EventBus.on(
         "UPDATED_STEP_COUNTER",
@@ -741,7 +746,7 @@ function set_events(instance)
     )
     EventBus.on(
         "UPDATED_BUTTONS",
-        function() return update_buttons(instance) end,
+        function() return update_buttons(_this) end,
         true
     )
     EventBus.on(
@@ -762,7 +767,7 @@ function set_events(instance)
                 GAME_CONFIG.delay_before_gameover,
                 false,
                 function()
-                    set_gameover(instance, state)
+                    set_gameover(_this, state)
                 end
             )
         end,
@@ -774,7 +779,7 @@ function set_events(instance)
         "OPENED_DLG",
         function(dlg)
             if dlg == Dlg.Store then
-                instance.block_input = true
+                _this.block_input = true
             end
         end
     )
@@ -782,7 +787,7 @@ function set_events(instance)
         "CLOSED_DLG",
         function(dlg)
             if dlg == Dlg.Store then
-                instance.block_input = false
+                _this.block_input = false
                 Sound.play("game")
             end
         end
@@ -1555,7 +1560,7 @@ function drop_coins(init_value, amount, points, on_each_drop_start, on_each_drop
         timer.delay(amount * 0.1 + 100 * 0.01, false, on_end)
     end
 end
-function set_gameover(instance, state)
+function set_gameover(_this, state)
     disable_game_ui()
     local lock = gui.get_node("lock1")
     gui.set_enabled(lock, true)
@@ -1758,14 +1763,14 @@ function set_gameover(instance, state)
         )
         gui.set_enabled(target_3, true)
     end
-    set_gameover_offer()
+    set_gameover_offer(_this)
 end
-function set_gameover_offer()
+function set_gameover_offer(_this)
     gui.set_enabled(
         gui.get_node("gameover_offer_close"),
         true
     )
-    if not is_time_level() then
+    if _this.level.time == nil then
         if GAME_CONFIG.steps_by_ad < 2 then
             gui.set_enabled(
                 gui.get_node("steps_by_ad/button"),
@@ -1928,8 +1933,6 @@ presets = {targets = {
 function ____exports.init(self)
     Manager.init_script()
     self.druid = druid.new(self)
-    self.level = GAME_CONFIG.levels[GameStorage.get("current_level") + 1]
-    self.busters = self.level.busters
     self.block_input = false
     set_text(
         "text",

@@ -16,6 +16,8 @@ interface props {
     block_input: boolean
 }
 
+const min = -4350;
+
 export function init(this: props): void {
     Manager.init_script();
     
@@ -73,6 +75,14 @@ function set_level_buttons(data: props) {
             load_level(params);
         }, i);
     }
+
+    const last_level = get_last_completed_level();
+    if(last_level >= 46) {
+        gui.set_enabled(gui.get_node('generated_level'), true);
+        data.druid.new_button('generated_level', () => {
+            load_level(get_last_completed_level());
+        });
+    }
 }
 
 function load_level(level: number) {
@@ -93,20 +103,22 @@ function set_last_map_position() {
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
     const offset = get_offset();
-    pos.y = math.max(-3990 + offset, math.min(0 - offset, GameStorage.get('map_last_pos_y')));
+    pos.y = math.max(min + offset, math.min(0 - offset, GameStorage.get('map_last_pos_y')));
     gui.set_position(map, pos);
 }
 
 function set_completed_levels() {
     for(const level of GameStorage.get('completed_levels')) {
-        const level_node = gui.get_node(tostring(level + 1) + '/level');
-        gui.set_texture(level_node, "map");
-        gui.play_flipbook(level_node, 'button_level_green');
+        if(level < 47) {
+            const level_node = gui.get_node(tostring(level + 1) + '/level');
+            gui.set_texture(level_node, "map");
+            gui.play_flipbook(level_node, 'button_level_green');
+        }
     }
 }
 
 function set_current_level() {
-    const max_level = get_last_completed_level();
+    const max_level = math.min(46, get_last_completed_level());
     const level = gui.get_node(tostring(max_level + 1) + "/level");
     gui.set_texture(level, "map");
     gui.play_flipbook(level, (GAME_CONFIG.animal_levels.includes(max_level + 1)) ? 'button_level_red' : 'button_level');
@@ -116,7 +128,10 @@ function set_current_level() {
     const map = gui.get_node('map');
     const map_pos = gui.get_position(map);
     const offset = get_offset();
-    map_pos.y = math.max(-3990 + offset, math.min(0 - offset, -(level_pos.y - 250)));
+
+    const pos = level_pos.y < 2000 ? level_pos.y - 50 : level_pos.y + 400;
+    map_pos.y = math.max(min + offset, math.min(0 - offset, -pos));
+
     gui.set_position(map, map_pos);
 }
 
@@ -127,7 +142,7 @@ function on_drag(action: any) {
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
     const offset = get_offset();
-    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y + action.dy));
+    pos.y = math.max(min + offset, math.min(0 - offset, pos.y + action.dy));
     gui.set_position(map, pos);
 
     GameStorage.set('map_last_pos_y', pos.y);
@@ -137,7 +152,7 @@ function on_scroll(value: number) {
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
     const offset = get_offset();
-    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y + value));
+    pos.y = math.max(min + offset, math.min(0 - offset, pos.y + value));
     gui.animate(map, gui.PROP_POSITION, pos, gui.EASING_OUTQUAD, 0.5);
     GameStorage.set('map_last_pos_y', pos.y);
 }
@@ -173,7 +188,7 @@ function on_resize(data: { width: number, height: number }) {
     const offset = get_offset();
     const map = gui.get_node('map');
     const pos = gui.get_position(map);
-    pos.y = math.max(-3990 + offset, math.min(0 - offset, pos.y));
+    pos.y = math.max(min + offset, math.min(0 - offset, pos.y));
     gui.set_position(map, pos);
 
     const back_left = gui.get_node('back_left');

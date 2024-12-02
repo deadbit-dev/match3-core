@@ -16,12 +16,7 @@ local is_valid_pos = ____math_utils.is_valid_pos
 local rotateMatrix = ____math_utils.rotateMatrix
 local ____utils = require("game.utils")
 local get_current_level = ____utils.get_current_level
-local get_field_cell_size = ____utils.get_field_cell_size
-local get_field_height = ____utils.get_field_height
-local get_field_max_height = ____utils.get_field_max_height
-local get_field_max_width = ____utils.get_field_max_width
-local get_field_offset_border = ____utils.get_field_offset_border
-local get_field_width = ____utils.get_field_width
+local get_current_level_config = ____utils.get_current_level_config
 local get_move_direction = ____utils.get_move_direction
 local is_animal_level = ____utils.is_animal_level
 local is_tutorial = ____utils.is_tutorial
@@ -90,7 +85,7 @@ ____exports.Action[____exports.Action.RocketActivation] = "RocketActivation"
 ____exports.Action.Falling = 8
 ____exports.Action[____exports.Action.Falling] = "Falling"
 function ____exports.View(resources)
-    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win_end, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, go_manager, view_state, original_game_width, original_game_height, max_width, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
+    local set_events, set_scene_art, set_substrates, calculate_cell_size, calculate_scale_ratio, calculate_cell_offset, on_load_game, on_resize, load_field, reset_field, on_rewind_animation, get_view_item_by_uid, get_all_view_items_by_uid, delete_view_item_by_uid, delete_all_view_items_by_uid, update_targets_by_uid, get_world_pos, get_field_pos, make_substrate_view, make_cell_view, make_element_view, on_down, on_move, on_up, on_set_helper, on_reset_helper, on_stop_helper, swap_elements_animation, wrong_swap_elements_animation, record_action, remove_action, has_actions, damage_element_animation, damage_cell_animation, on_combinate_busters, on_combinate_animation, on_combined_animation, on_combo_animation, on_combinate_not_found, on_requested_element_animation, on_falling_animation, on_falling_not_found, on_fall_end_animation, request_falling, on_damage, on_hammer_damage_animation, on_horizontal_damage_animation, on_vertical_damage_animation, on_dynamite_activated_animation, on_dynamite_action_animation, activate_dynamite_animation, on_rocket_activated_animation, rocket_effect, on_diskosphere_activated_animation, diskosphere_effect, trace_animation, on_helicopter_activated_animation, on_helicopter_action_animation, on_shuffle_animation, on_win_end, on_gameover, clear_field, remove_animals, on_set_tutorial, on_remove_tutorial, level, go_manager, view_state, original_game_width, original_game_height, max_width, cell_size, scale_ratio, cells_offset, down_item, is_block_input, locks, actions
     function set_events()
         EventBus.on("SYS_ON_RESIZED", on_resize)
         EventBus.on("RESPONSE_LOAD_GAME", on_load_game, false)
@@ -146,12 +141,12 @@ function ____exports.View(resources)
             false
         )
         EventBus.on("RESPONSE_REWIND", on_rewind_animation, false)
+        EventBus.on("FORCE_REMOVE_ELEMENT", delete_view_item_by_uid, false)
         EventBus.on(
-            "FORCE_REMOVE_ELEMENT",
-            function(uid)
-                delete_view_item_by_uid(uid)
-            end,
-            false
+            "REVIVE",
+            function(data)
+                GAME_CONFIG.revive_level = level
+            end
         )
     end
     function set_scene_art()
@@ -178,11 +173,11 @@ function ____exports.View(resources)
     function set_substrates()
         do
             local y = 0
-            while y < get_field_height() do
+            while y < level.field.height do
                 view_state.substrates[y + 1] = {}
                 do
                     local x = 0
-                    while x < get_field_width() do
+                    while x < level.field.width do
                         view_state.substrates[y + 1][x + 1] = ____exports.EMPTY_SUBSTRATE
                         x = x + 1
                     end
@@ -192,17 +187,14 @@ function ____exports.View(resources)
         end
     end
     function calculate_cell_size()
-        return math.floor(math.min(
-            (original_game_width - get_field_offset_border() * 2) / max_width,
-            100
-        ))
+        return math.floor(math.min((original_game_width - level.field.offset_border * 2) / max_width, 100))
     end
     function calculate_scale_ratio()
-        return cell_size / get_field_cell_size()
+        return cell_size / level.field.cell_size
     end
     function calculate_cell_offset()
-        local offset_x = (max_width * cell_size - get_field_width() * cell_size + get_field_offset_border() * 2) / 2 + 2
-        local offset_y = -(original_game_height / 2 - get_field_max_height() / 2 * cell_size) + 600
+        local offset_x = (max_width * cell_size - level.field.width * cell_size + level.field.offset_border * 2) / 2 + 2
+        local offset_y = -(original_game_height / 2 - level.field.max_height / 2 * cell_size) + 600
         if not GAME_CONFIG.debug_levels then
             offset_y = offset_y - (90 - GAME_CONFIG.bottom_offset)
         end
@@ -210,7 +202,7 @@ function ____exports.View(resources)
     end
     function on_load_game(game_state)
         load_field(game_state)
-        EventBus.send("INIT_UI")
+        EventBus.send("INIT_UI", level)
         EventBus.send("UPDATED_STEP_COUNTER", game_state.steps)
         do
             local i = 0
@@ -251,10 +243,10 @@ function ____exports.View(resources)
         set_substrates()
         do
             local y = 0
-            while y < get_field_height() do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < get_field_width() do
+                    while x < level.field.width do
                         local cell = game_state.cells[y + 1][x + 1]
                         if cell ~= NotActiveCell then
                             make_substrate_view({x = x, y = y}, game_state.cells)
@@ -292,10 +284,10 @@ function ____exports.View(resources)
         end
         do
             local y = 0
-            while y < get_field_height() do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < get_field_width() do
+                    while x < level.field.width do
                         local substrate = view_state.substrates[y + 1][x + 1]
                         if substrate ~= ____exports.EMPTY_SUBSTRATE then
                             go.delete(substrate)
@@ -310,11 +302,11 @@ function ____exports.View(resources)
         view_state.substrates = {}
         do
             local y = 0
-            while y < get_field_height() do
+            while y < level.field.height do
                 view_state.substrates[y + 1] = {}
                 do
                     local x = 0
-                    while x < get_field_width() do
+                    while x < level.field.width do
                         view_state.substrates[y + 1][x + 1] = ____exports.EMPTY_SUBSTRATE
                         x = x + 1
                     end
@@ -407,10 +399,10 @@ function ____exports.View(resources)
     function get_field_pos(world_pos)
         do
             local y = 0
-            while y < get_field_height() do
+            while y < level.field.height do
                 do
                     local x = 0
-                    while x < get_field_width() do
+                    while x < level.field.width do
                         local original_world_pos = get_world_pos({x = x, y = y})
                         local in_x = world_pos.x >= original_world_pos.x - cell_size * 0.5 and world_pos.x <= original_world_pos.x + cell_size * 0.5
                         local in_y = world_pos.y >= original_world_pos.y - cell_size * 0.5 and world_pos.y <= original_world_pos.y + cell_size * 0.5
@@ -603,8 +595,8 @@ function ____exports.View(resources)
                 break
             end
         until true
-        local is_valid_x = element_to_pos.x >= 0 and element_to_pos.x < get_field_width()
-        local is_valid_y = element_to_pos.y >= 0 and element_to_pos.y < get_field_height()
+        local is_valid_x = element_to_pos.x >= 0 and element_to_pos.x < level.field.width
+        local is_valid_y = element_to_pos.y >= 0 and element_to_pos.y < level.field.height
         if not is_valid_x or not is_valid_y then
             return
         end
@@ -1263,12 +1255,12 @@ function ____exports.View(resources)
         local part0_to_world_pos = vmath.vector3(pos)
         local part1_to_world_pos = vmath.vector3(pos)
         if axis == Axis.Vertical then
-            local distance = get_field_height() * cell_size
+            local distance = level.field.height * cell_size
             part0_to_world_pos.y = part0_to_world_pos.y + distance
             part1_to_world_pos.y = part1_to_world_pos.y + -distance
         end
         if axis == Axis.Horizontal then
-            local distance = get_field_width() * cell_size
+            local distance = level.field.width * cell_size
             part0_to_world_pos.x = part0_to_world_pos.x + -distance
             part1_to_world_pos.x = part1_to_world_pos.x + distance
         end
@@ -1578,10 +1570,10 @@ function ____exports.View(resources)
                 Sound.play("shuffle")
                 do
                     local y = 0
-                    while y < get_field_height() do
+                    while y < level.field.height do
                         do
                             local x = 0
-                            while x < get_field_width() do
+                            while x < level.field.width do
                                 local element = game_state.elements[y + 1][x + 1]
                                 if element ~= NullElement then
                                     local element_view = get_view_item_by_uid(element.uid)
@@ -1751,6 +1743,7 @@ function ____exports.View(resources)
             go.delete(lock)
         end
     end
+    level = get_current_level_config()
     go_manager = GoManager()
     view_state = {}
     view_state.game_id_to_view_index = {}
@@ -1758,7 +1751,7 @@ function ____exports.View(resources)
     view_state.targets = {}
     original_game_width = 540
     original_game_height = 960
-    max_width = get_field_max_width()
+    max_width = level.field.max_width
     cell_size = calculate_cell_size()
     scale_ratio = calculate_scale_ratio()
     cells_offset = calculate_cell_offset()
@@ -1777,7 +1770,7 @@ function ____exports.View(resources)
             Sound.play("game")
         end
         GAME_CONFIG.is_restart = false
-        EventBus.send("REQUEST_LOAD_GAME")
+        EventBus.send("REQUEST_LOAD_GAME", level)
     end
     local function on_message(self, message_id, message, sender)
         go_manager.do_message(message_id, message, sender)

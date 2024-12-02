@@ -103,8 +103,8 @@ ____exports.ElementState[____exports.ElementState.Busy] = "Busy"
 ____exports.NullElement = -1
 ____exports.NotFound = nil
 ____exports.NotDamage = nil
-function ____exports.Field(size_x, size_y)
-    local rotate_all_masks, set_cell, get_cell, get_cell_pos, set_element, get_element, get_element_pos, swap_elements, get_neighbor_cells, search_combination, on_element_damaged, on_cell_damaged, on_cell_damaged_base, on_near_cells_damaged, on_near_cells_damaged_base, is_combined_elements, is_combined_elements_base, falling_down, falling_through_corner, is_can_swap, is_can_swap_base, on_request_element, is_available_cell_type_for_activation, is_available_cell_type_for_click, is_type_element, is_movable_element, is_clickable_element, get_last_pos_in_column, is_pos_empty, state, rotated_masks, cb_is_can_swap, cb_is_combined_elements, cb_on_element_damaged, cb_on_cell_damaged, cb_on_near_cells_damaged, cb_on_request_element
+function ____exports.Field()
+    local rotate_all_masks, set_cell, get_cell, get_cell_pos, set_element, get_element, get_element_pos, swap_elements, get_neighbor_cells, search_combination, on_element_damaged, on_cell_damaged, on_cell_damaged_base, on_near_cells_damaged, on_near_cells_damaged_base, is_combined_elements, is_combined_elements_base, falling_down, falling_through_corner, is_can_swap, is_can_swap_base, on_request_element, is_available_cell_type_for_activation, is_available_cell_type_for_click, is_type_element, is_movable_element, is_clickable_element, get_last_pos_in_column, is_pos_empty, state, rotated_masks, cb_is_can_swap, cb_is_combined_elements, cb_on_element_damaged, cb_on_cell_damaged, cb_on_near_cells_damaged, cb_on_request_element, size_x, size_y
     function rotate_all_masks()
         do
             local mask_index = #____exports.CombinationMasks - 1
@@ -493,7 +493,9 @@ function ____exports.Field(size_x, size_y)
     end
     state = {cells = {}, elements = {}}
     rotated_masks = {}
-    local function init()
+    local function init(width, height)
+        size_x = width
+        size_y = height
         rotate_all_masks()
         do
             local y = 0

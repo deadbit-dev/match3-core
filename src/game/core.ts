@@ -192,7 +192,7 @@ type FncOnCellDamaged = (cell: Cell) => CellDamageInfo | NotDamage;
 type FncOnNearCellsDamaged = (cells: Cell[]) => CellDamageInfo[];
 type FncOnRequestElement = (pos: Position) => Element | typeof NullElement;
 
-export function Field(size_x: number, size_y: number) {
+export function Field() {
     const state: CoreState = {
         cells: [],
         elements: []
@@ -207,10 +207,16 @@ export function Field(size_x: number, size_y: number) {
     let cb_on_cell_damaged: FncOnCellDamaged;
     let cb_on_near_cells_damaged: FncOnNearCellsDamaged;
     let cb_on_request_element: FncOnRequestElement;
+
+    let size_x: number;
+    let size_y: number;
     
-    function init() {
+    function init(width: number, height: number) {
         // заполняем массив cells с размерностью size_x, size_y с порядком: cells[y][x] is_active false, типа пустое поле
         // а также массив elements с размерностью size_x, size_y и значением NullElement
+
+        size_x = width;
+        size_y = height;
 
         rotate_all_masks();
 

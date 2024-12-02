@@ -2584,6 +2584,7 @@ nodes {
 }
 nodes {
   position {
+    x: -134.66667
     y: -194.0
   }
   scale {
@@ -2621,6 +2622,56 @@ nodes {
     z: 1.0
   }
   parent: "last_level_btn"
+  layer: "ontop"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
+nodes {
+  position {
+    x: 130.66666
+    y: -194.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "ui/btn_2"
+  id: "last_level_continue"
+  parent: "last_level_popup"
+  layer: "ontop"
+  inherit_alpha: true
+  slice9 {
+    x: 25.0
+    y: 25.0
+    z: 25.0
+    w: 25.0
+  }
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 3.076924
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "\320\224\320\260\320\273\320\265\320\265"
+  font: "27_medium"
+  id: "last_level_continue_text"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "last_level_continue"
   layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0

@@ -2,10 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { Direction } from "../utils/math_utils";
 import { parse_time } from "../utils/utils";
 import { Position, SwapInfo } from "./core";
+import { Level } from "./level";
 
 export function get_current_level() {
     return GameStorage.get('current_level');
@@ -16,55 +18,49 @@ export function is_last_level() {
 }
 
 export function get_current_level_config() {
-    return GAME_CONFIG.levels[get_current_level()];
+    if(GAME_CONFIG.is_revive)
+        return GAME_CONFIG.revive_level;
+
+    const current_level = get_current_level();
+    if(current_level < 47)
+        return GAME_CONFIG.levels[current_level];
+
+    return generate_random_level();
+}
+
+function generate_random_level() {
+    const exclude_levels = [3, 10, 17, 24, 31, 38, 46];
+    const levels = [];
+    for(let i = 0; i < 47; i++) {
+        if(!exclude_levels.includes(i))
+            levels.push(i);
+    }
+    const picked_level = levels[math.random(0, levels.length - 1)];
+    // const level = GAME_CONFIG.levels[picked_level];
+    print(picked_level);
+    const random_level = GAME_CONFIG.levels[picked_level]; //json.decode(json.encode(level));
+    print(random_level);
+    random_level.coins = 0;
+    random_level.steps += math.random(-5, 5);
+    for(const target of random_level.targets) {
+        // FIXME: TargetType enum give cycle dependens with game
+        switch(target.type) {
+            case 1: // ELEMENT
+                target.count += math.random(-5, 5);
+                break;
+            case 0: // CELL
+                target.count -= math.random(0, 5);
+                break;
+        }
+    }
+
+    print(random_level);
+
+    return random_level;
 }
 
 export function is_animal_level() {
     return GAME_CONFIG.animal_levels.includes(get_current_level() + 1);
-}
-
-export function is_time_level() {
-    return (GAME_CONFIG.levels[get_current_level()].time != undefined);
-}
-
-export function get_level_targets() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config.targets;
-}
-
-export function get_field_width() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['width'];
-}
-
-export function get_field_height() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['height'];
-}
-
-export function get_field_max_width() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['max_width'];
-}
-
-export function get_field_max_height() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['max_height'];
-}
-
-export function get_field_offset_border() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['offset_border'];
-}
-
-export function get_field_cell_size() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['field']['cell_size'];
-}
-
-export function get_busters() {
-    const level_config = GAME_CONFIG.levels[get_current_level()];
-    return level_config['busters'];
 }
 
 export function get_move_direction(dir: vmath.vector3) {
@@ -171,5 +167,5 @@ export function get_last_completed_level() {
         if(++level > max_level)
             max_level = level;
     }
-    return math.min(46, max_level); // max levels 47
+    return max_level;
 }

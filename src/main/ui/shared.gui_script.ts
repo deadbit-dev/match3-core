@@ -672,7 +672,9 @@ function setup_hammer(data: props) {
         GameStorage.set('hammer_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
         
-        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'hammer' } });
+        const num = get_current_level() + 1;
+        const level_name = num > 47 ? tostring(num) + '_gen' : tostring(num);
+        Metrica.report('data', { ['buy_' + level_name]: { id: 'hammer' } });
 
         const pack = gui.get_node('hammer/image');
         gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
@@ -702,8 +704,10 @@ function setup_spinning(data: props) {
         remove_coins(30);
         GameStorage.set('spinning_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
-
-        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'spinning' } });
+    
+        const num = get_current_level() + 1;
+        const level_name = num > 47 ? tostring(num) + '_gen' : tostring(num);
+        Metrica.report('data', { ['buy_' + level_name]: { id: 'spinning' } });
 
         const pack = gui.get_node('spinning/image');
         gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
@@ -734,7 +738,9 @@ function setup_horizontal_rocket(data: props) {
         GameStorage.set('horizontal_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
 
-        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'horizontal_rocket' } });
+        const num = get_current_level() + 1;
+        const level_name = num > 47 ? tostring(num) + '_gen' : tostring(num);
+        Metrica.report('data', { ['buy_' + level_name]: { id: 'horizontal_rocket' } });
 
         const pack = gui.get_node('horizontal_rocket/image');
         gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));
@@ -765,7 +771,9 @@ function setup_vertical_rocket(data: props) {
         GameStorage.set('vertical_rocket_counts', 1);
         EventBus.send('UPDATED_BUTTONS');
 
-        Metrica.report('data', { ['buy_' + tostring(get_current_level() + 1)]: { id: 'vertical_rocket' } });
+        const num = get_current_level() + 1;
+        const level_name = num > 47 ? tostring(num) + '_gen' : tostring(num);
+        Metrica.report('data', { ['buy_' + level_name]: { id: 'vertical_rocket' } });
 
         const pack = gui.get_node('vertical_rocket/image');
         gui.set_scale(pack, vmath.vector3(1.2, 1.2, 1.2));

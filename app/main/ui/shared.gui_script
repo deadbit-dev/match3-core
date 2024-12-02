@@ -866,10 +866,9 @@ function setup_hammer(data)
             remove_coins(30)
             GameStorage.set("hammer_counts", 1)
             EventBus.send("UPDATED_BUTTONS")
-            Metrica.report(
-                "data",
-                {["buy_" .. tostring(get_current_level() + 1)] = {id = "hammer"}}
-            )
+            local num = get_current_level() + 1
+            local level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+            Metrica.report("data", {["buy_" .. level_name] = {id = "hammer"}})
             local pack = gui.get_node("hammer/image")
             gui.set_scale(
                 pack,
@@ -921,10 +920,9 @@ function setup_spinning(data)
             remove_coins(30)
             GameStorage.set("spinning_counts", 1)
             EventBus.send("UPDATED_BUTTONS")
-            Metrica.report(
-                "data",
-                {["buy_" .. tostring(get_current_level() + 1)] = {id = "spinning"}}
-            )
+            local num = get_current_level() + 1
+            local level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+            Metrica.report("data", {["buy_" .. level_name] = {id = "spinning"}})
             local pack = gui.get_node("spinning/image")
             gui.set_scale(
                 pack,
@@ -976,10 +974,9 @@ function setup_horizontal_rocket(data)
             remove_coins(30)
             GameStorage.set("horizontal_rocket_counts", 1)
             EventBus.send("UPDATED_BUTTONS")
-            Metrica.report(
-                "data",
-                {["buy_" .. tostring(get_current_level() + 1)] = {id = "horizontal_rocket"}}
-            )
+            local num = get_current_level() + 1
+            local level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+            Metrica.report("data", {["buy_" .. level_name] = {id = "horizontal_rocket"}})
             local pack = gui.get_node("horizontal_rocket/image")
             gui.set_scale(
                 pack,
@@ -1031,10 +1028,9 @@ function setup_vertical_rocket(data)
             remove_coins(30)
             GameStorage.set("vertical_rocket_counts", 1)
             EventBus.send("UPDATED_BUTTONS")
-            Metrica.report(
-                "data",
-                {["buy_" .. tostring(get_current_level() + 1)] = {id = "vertical_rocket"}}
-            )
+            local num = get_current_level() + 1
+            local level_name = num > 47 and tostring(num) .. "_gen" or tostring(num)
+            Metrica.report("data", {["buy_" .. level_name] = {id = "vertical_rocket"}})
             local pack = gui.get_node("vertical_rocket/image")
             gui.set_scale(
                 pack,
