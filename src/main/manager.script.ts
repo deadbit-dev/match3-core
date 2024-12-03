@@ -142,9 +142,11 @@ export function init(this: props) {
                             GAME_CONFIG.is_movie = data['is_movie'] == '1';
                         log('Yandex get_flags success', data, 'set:' + GAME_CONFIG.movie_btn + '/' + GAME_CONFIG.is_movie);
                     }
-                    Scene.load(is_shown ? 'map' : (GAME_CONFIG.is_movie ? 'movie' : 'game'));
-                    if (!is_shown && !GAME_CONFIG.is_movie)
+                    Scene.load(is_shown ? 'game' : (GAME_CONFIG.is_movie ? 'movie' : 'game'));
+                    if (!is_shown && !GAME_CONFIG.is_movie) {
                         Scene.try_load_async('map');
+                        GameStorage.set("move_showed", true);
+                    }
                 });
             }
             else

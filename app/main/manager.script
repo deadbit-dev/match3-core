@@ -158,9 +158,10 @@ function ____exports.init(self)
                                         (("set:" .. tostring(GAME_CONFIG.movie_btn)) .. "/") .. tostring(GAME_CONFIG.is_movie)
                                     )
                                 end
-                                Scene.load(is_shown and "map" or (GAME_CONFIG.is_movie and "movie" or "game"))
+                                Scene.load(is_shown and "game" or (GAME_CONFIG.is_movie and "movie" or "game"))
                                 if not is_shown and not GAME_CONFIG.is_movie then
                                     Scene.try_load_async("map")
+                                    GameStorage.set("move_showed", true)
                                 end
                             end
                         )
