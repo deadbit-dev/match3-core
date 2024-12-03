@@ -93,7 +93,7 @@ ____exports.TargetType[____exports.TargetType.Cell] = "Cell"
 ____exports.TargetType.Element = 1
 ____exports.TargetType[____exports.TargetType.Element] = "Element"
 function ____exports.Game()
-    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, field, spawn_element_chances, level_name, level, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action, first_pass
+    local set_events, set_element_chances, load, set_tutorial, unlock_buster, is_gameover, on_tick, on_idle, on_rewind, try_rewind, set_helper, reset_helper, stop_helper, update_timer, is_level_completed, is_timeout, is_have_steps, on_win, win_action, on_gameover, on_revive, shuffle, on_shuffle_end, shuffle_field, try_load_field, has_combination, has_step, set_helper_data, get_step, revive, load_cell, load_element, set_timer, set_targets, set_steps, set_time, set_random, get_state, new_state, update_core_state, copy_state, generate_uid, make_cell, make_element, generate_cell_type_by_id, generate_element_type_by_id, get_random_element_id, is_buster, is_can_swap, is_combined_elements, on_request_element, on_element_damaged, on_cell_damaged, on_near_cells_damaged, update_cell_targets, set_busters, on_activate_buster, on_activate_spinning, on_activate_hammer, on_activate_horizontal_rocket, on_activate_vertical_rocket, on_click, try_hammer_damage, try_horizontal_damage, try_vertical_damage, try_activate_buster_element, damage_element_by_mask, try_activate_dynamite, on_dynamite_action, try_activate_rocket, on_rocket_end, try_activate_diskosphere, on_diskosphere_damage_element_end, on_diskosphere_activated_end, try_activate_helicopter, on_helicopter_action, on_helicopter_end, remove_random_target, on_swap_elements, on_swap_elements_end, on_buster_activate_after_swap, on_combined_busters, on_combinate, on_combination, on_maked_element, on_combination_end, try_combo, on_falling, search_fall_element, on_fall_end, complete_tutorial, remove_tutorial, field, spawn_element_chances, level_name, level, get_step_handle, game_item_counter, states, is_block_input, is_first_step, start_game_time, game_timer, helper_timer, previous_helper_data, helper_data, is_idle, is_win, is_win_action, first_pass
     function set_events()
         EventBus.on("REQUEST_LOAD_GAME", load)
         EventBus.on("ACTIVATE_BUSTER", on_activate_buster)
@@ -182,9 +182,11 @@ function ____exports.Game()
             try_load_field()
             update_core_state()
             set_targets(level.targets)
-            set_steps(level.steps)
+            if level.steps ~= nil then
+                set_steps(level.steps, 0)
+            end
             if level.time ~= nil then
-                get_state().remaining_time = level.time
+                set_time(level.time, 0)
             end
             set_random()
         end
@@ -260,24 +262,24 @@ function ____exports.Game()
     end
     function unlock_buster(name)
         repeat
-            local ____switch36 = name
-            local ____cond36 = ____switch36 == "hammer"
-            if ____cond36 then
+            local ____switch37 = name
+            local ____cond37 = ____switch37 == "hammer"
+            if ____cond37 then
                 level.busters.hammer.block = false
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == "spinning"
-            if ____cond36 then
+            ____cond37 = ____cond37 or ____switch37 == "spinning"
+            if ____cond37 then
                 level.busters.spinning.block = false
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == "horizontal_rocket"
-            if ____cond36 then
+            ____cond37 = ____cond37 or ____switch37 == "horizontal_rocket"
+            if ____cond37 then
                 level.busters.horizontal_rocket.block = false
                 break
             end
-            ____cond36 = ____cond36 or ____switch36 == "vertical_rocket"
-            if ____cond36 then
+            ____cond37 = ____cond37 or ____switch37 == "vertical_rocket"
+            if ____cond37 then
                 level.busters.vertical_rocket.block = false
                 break
             end
@@ -352,9 +354,11 @@ function ____exports.Game()
         update_core_state()
         local last_state = get_state(1)
         set_targets(last_state.targets)
-        set_steps(last_state.steps)
+        if level.steps ~= nil then
+            set_steps(last_state.remaining_steps, last_state.steps)
+        end
         if level.time ~= nil then
-            get_state().remaining_time = last_state.remaining_time
+            set_time(last_state.remaining_time, last_state.time)
         end
         set_random()
         if not is_tutorial() and helper_timer == nil then
@@ -418,7 +422,7 @@ function ____exports.Game()
         update_core_state()
         set_random(previous_state.randomseed)
         EventBus.send("RESPONSE_REWIND", previous_state)
-        EventBus.send("UPDATED_STEP_COUNTER", previous_state.steps)
+        EventBus.send("UPDATED_STEP_COUNTER", previous_state.remaining_steps)
         return true
     end
     function set_helper(message)
@@ -468,7 +472,11 @@ function ____exports.Game()
         end
         local dt = System.now() - start_game_time
         local remaining_time = math.max(0, level.time - dt)
-        get_state().remaining_time = remaining_time
+        local ____set_time_4 = set_time
+        local ____get_state_result_1, ____time_2 = get_state(), "time"
+        local ____get_state_result_time_3 = ____get_state_result_1[____time_2] + 1
+        ____get_state_result_1[____time_2] = ____get_state_result_time_3
+        ____set_time_4(remaining_time, ____get_state_result_time_3)
         EventBus.send("GAME_TIMER", remaining_time)
     end
     function is_level_completed()
@@ -483,7 +491,7 @@ function ____exports.Game()
         return get_state().remaining_time == 0
     end
     function is_have_steps()
-        return get_state().steps > 0
+        return get_state().remaining_steps > 0
     end
     function on_win()
         if not is_win then
@@ -497,8 +505,8 @@ function ____exports.Game()
                 first_pass = true
                 add_coins(level.coins)
                 if level.coins > 0 then
-                    if last_state.steps ~= nil then
-                        add_coins(math.min(last_state.steps, current_level ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock))
+                    if last_state.remaining_steps ~= nil then
+                        add_coins(math.min(last_state.remaining_steps, current_level ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock))
                     end
                     if last_state.remaining_time ~= nil then
                         add_coins(math.min(
@@ -507,15 +515,9 @@ function ____exports.Game()
                         ))
                     end
                 end
-                Metrica.report(
-                    "data",
-                    {["level_" .. level_name] = {
-                        type = "end",
-                        time = last_state.remaining_time ~= nil and math.floor(last_state.remaining_time) or nil,
-                        steps = last_state.steps
-                    }}
-                )
             end
+            Metrica.report("data", {["level_" .. level_name] = {type = "end", time = level.time ~= nil and last_state.time or nil, steps = level.steps ~= nil and last_state.steps or nil}})
+            Log.log("END: ", last_state.time, last_state.steps)
             EventBus.send("ON_WIN")
             win_action()
             return
@@ -544,11 +546,11 @@ function ____exports.Game()
                         local cell = field.get_cell(pos)
                         local element = field.get_element(pos)
                         if cell ~= NotActiveCell then
-                            local ____timer_delay_2 = timer.delay
-                            local ____counts_1 = counts
-                            counts = ____counts_1 + 1
-                            ____timer_delay_2(
-                                0.05 * ____counts_1,
+                            local ____timer_delay_6 = timer.delay
+                            local ____counts_5 = counts
+                            counts = ____counts_5 + 1
+                            ____timer_delay_6(
+                                0.05 * ____counts_5,
                                 false,
                                 function()
                                     if is_buster(pos) then
@@ -602,12 +604,12 @@ function ____exports.Game()
     end
     function on_revive(data)
         if data.steps ~= nil then
-            local ____GAME_CONFIG_revive_states_index_3, ____steps_4 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "steps"
-            ____GAME_CONFIG_revive_states_index_3[____steps_4] = ____GAME_CONFIG_revive_states_index_3[____steps_4] + data.steps
+            local ____GAME_CONFIG_revive_states_index_7, ____remaining_steps_8 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "remaining_steps"
+            ____GAME_CONFIG_revive_states_index_7[____remaining_steps_8] = ____GAME_CONFIG_revive_states_index_7[____remaining_steps_8] + data.steps
         end
         if data.time ~= nil then
-            local ____GAME_CONFIG_revive_states_index_5, ____remaining_time_6 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "remaining_time"
-            ____GAME_CONFIG_revive_states_index_5[____remaining_time_6] = ____GAME_CONFIG_revive_states_index_5[____remaining_time_6] + data.time
+            local ____GAME_CONFIG_revive_states_index_9, ____remaining_time_10 = GAME_CONFIG.revive_states[#GAME_CONFIG.revive_states], "remaining_time"
+            ____GAME_CONFIG_revive_states_index_9[____remaining_time_10] = ____GAME_CONFIG_revive_states_index_9[____remaining_time_10] + data.time
         end
         GAME_CONFIG.is_revive = true
         GAME_CONFIG.is_restart = true
@@ -1019,15 +1021,15 @@ function ____exports.Game()
         local last_state = get_state()
         last_state.targets = json.decode(json.encode(targets))
     end
-    function set_steps(steps)
-        if steps == nil then
-            steps = 0
-        end
-        if level.steps == nil then
-            return
-        end
+    function set_steps(remaining_steps, steps)
         local last_state = get_state()
+        last_state.remaining_steps = remaining_steps
         last_state.steps = steps
+    end
+    function set_time(remaining_time, time)
+        local last_state = get_state()
+        last_state.remaining_time = remaining_time
+        last_state.time = time
     end
     function set_random(seed)
         local randomseed = seed ~= nil and seed or os.time()
@@ -1061,9 +1063,9 @@ function ____exports.Game()
         return to_state
     end
     function generate_uid()
-        local ____game_item_counter_7 = game_item_counter
-        game_item_counter = ____game_item_counter_7 + 1
-        return ____game_item_counter_7
+        local ____game_item_counter_11 = game_item_counter
+        game_item_counter = ____game_item_counter_11 + 1
+        return ____game_item_counter_11
     end
     function make_cell(pos, id, under_cells)
         if id == NotActiveCell then
@@ -1145,9 +1147,9 @@ function ____exports.Game()
                 for ____, ____value in ipairs(__TS__ObjectEntries(GAME_CONFIG.element_view)) do
                     local key = ____value[1]
                     local _ = ____value[2]
-                    local ____index_8 = index
-                    index = ____index_8 - 1
-                    if ____index_8 == 0 then
+                    local ____index_12 = index
+                    index = ____index_12 - 1
+                    if ____index_12 == 0 then
                         return tonumber(key)
                     end
                 end
@@ -1194,8 +1196,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Element and target.id == element.id then
-                    local ____target_uids_9 = target.uids
-                    ____target_uids_9[#____target_uids_9 + 1] = element.uid
+                    local ____target_uids_13 = target.uids
+                    ____target_uids_13[#____target_uids_13 + 1] = element.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1242,8 +1244,8 @@ function ____exports.Game()
             while i < #targets do
                 local target = targets[i + 1]
                 if target.type == ____exports.TargetType.Cell and target.id == cell.id then
-                    local ____target_uids_10 = target.uids
-                    ____target_uids_10[#____target_uids_10 + 1] = cell.uid
+                    local ____target_uids_14 = target.uids
+                    ____target_uids_14[#____target_uids_14 + 1] = cell.uid
                     EventBus.send("UPDATED_TARGET", {idx = i, target = target})
                 end
                 i = i + 1
@@ -1285,24 +1287,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch275 = message.name
-            local ____cond275 = ____switch275 == "SPINNING"
-            if ____cond275 then
+            local ____switch277 = message.name
+            local ____cond277 = ____switch277 == "SPINNING"
+            if ____cond277 then
                 on_activate_spinning()
                 break
             end
-            ____cond275 = ____cond275 or ____switch275 == "HAMMER"
-            if ____cond275 then
+            ____cond277 = ____cond277 or ____switch277 == "HAMMER"
+            if ____cond277 then
                 on_activate_hammer()
                 break
             end
-            ____cond275 = ____cond275 or ____switch275 == "HORIZONTAL_ROCKET"
-            if ____cond275 then
+            ____cond277 = ____cond277 or ____switch277 == "HORIZONTAL_ROCKET"
+            if ____cond277 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond275 = ____cond275 or ____switch275 == "VERTICAL_ROCKET"
-            if ____cond275 then
+            ____cond277 = ____cond277 or ____switch277 == "VERTICAL_ROCKET"
+            if ____cond277 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -1417,8 +1419,9 @@ function ____exports.Game()
                 is_idle = false
                 if level.steps ~= nil then
                     local state = get_state()
-                    state.steps = state.steps - 1
-                    EventBus.send("UPDATED_STEP_COUNTER", state.steps)
+                    state.remaining_steps = state.remaining_steps - 1
+                    state.steps = state.steps + 1
+                    EventBus.send("UPDATED_STEP_COUNTER", state.remaining_steps)
                 end
                 if is_gameover() then
                     is_block_input = true
@@ -1781,25 +1784,25 @@ function ____exports.Game()
                     while x < level.field.width do
                         local cell = field.get_cell({x = x, y = y})
                         local element = field.get_element({x = x, y = y})
-                        local ____temp_13 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                        if ____temp_13 then
-                            local ____opt_11 = exclude
-                            ____temp_13 = (____opt_11 and __TS__ArrayFindIndex(
+                        local ____temp_17 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                        if ____temp_17 then
+                            local ____opt_15 = exclude
+                            ____temp_17 = (____opt_15 and __TS__ArrayFindIndex(
                                 exclude,
                                 function(____, uid) return uid == cell.uid end
                             )) == -1
                         end
-                        local ____temp_13_16 = ____temp_13
-                        if ____temp_13_16 then
-                            local ____opt_14 = targets
-                            ____temp_13_16 = (____opt_14 and __TS__ArrayFindIndex(
+                        local ____temp_17_20 = ____temp_17
+                        if ____temp_17_20 then
+                            local ____opt_18 = targets
+                            ____temp_17_20 = (____opt_18 and __TS__ArrayFindIndex(
                                 targets,
                                 function(____, target)
                                     return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids and cell.strength ~= nil and cell.strength < GAME_CONFIG.cell_strength[cell.id]
                                 end
                             )) ~= -1
                         end
-                        local is_valid_cell = ____temp_13_16
+                        local is_valid_cell = ____temp_17_20
                         if is_valid_cell then
                             if element ~= NullElement then
                                 available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1822,44 +1825,44 @@ function ____exports.Game()
                         while x < level.field.width do
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
-                            local ____temp_19 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
-                            if ____temp_19 then
-                                local ____opt_17 = exclude
-                                ____temp_19 = (____opt_17 and __TS__ArrayFindIndex(
+                            local ____temp_23 = cell ~= NotActiveCell and cell.state ~= CellState.Busy
+                            if ____temp_23 then
+                                local ____opt_21 = exclude
+                                ____temp_23 = (____opt_21 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == cell.uid end
                                 )) == -1
                             end
-                            local ____temp_19_22 = ____temp_19
-                            if ____temp_19_22 then
-                                local ____opt_20 = targets
-                                ____temp_19_22 = (____opt_20 and __TS__ArrayFindIndex(
+                            local ____temp_23_26 = ____temp_23
+                            if ____temp_23_26 then
+                                local ____opt_24 = targets
+                                ____temp_23_26 = (____opt_24 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Cell and target.id == cell.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_cell = ____temp_19_22
-                            local ____temp_25 = element ~= NullElement
-                            if ____temp_25 then
-                                local ____opt_23 = exclude
-                                ____temp_25 = (____opt_23 and __TS__ArrayFindIndex(
+                            local is_valid_cell = ____temp_23_26
+                            local ____temp_29 = element ~= NullElement
+                            if ____temp_29 then
+                                local ____opt_27 = exclude
+                                ____temp_29 = (____opt_27 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local ____temp_25_28 = ____temp_25
-                            if ____temp_25_28 then
-                                local ____opt_26 = targets
-                                ____temp_25_28 = (____opt_26 and __TS__ArrayFindIndex(
+                            local ____temp_29_32 = ____temp_29
+                            if ____temp_29_32 then
+                                local ____opt_30 = targets
+                                ____temp_29_32 = (____opt_30 and __TS__ArrayFindIndex(
                                     targets,
                                     function(____, target)
                                         return target.type == ____exports.TargetType.Element and target.id == element.id and target.count > #target.uids
                                     end
                                 )) ~= -1
                             end
-                            local is_valid_element = ____temp_25_28
+                            local is_valid_element = ____temp_29_32
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1890,15 +1893,15 @@ function ____exports.Game()
                             local cell = field.get_cell({x = x, y = y})
                             local element = field.get_element({x = x, y = y})
                             local is_valid_cell = cell ~= NotActiveCell and cell.id ~= ____exports.CellId.Base
-                            local ____temp_31 = element ~= NullElement
-                            if ____temp_31 then
-                                local ____opt_29 = exclude
-                                ____temp_31 = (____opt_29 and __TS__ArrayFindIndex(
+                            local ____temp_35 = element ~= NullElement
+                            if ____temp_35 then
+                                local ____opt_33 = exclude
+                                ____temp_35 = (____opt_33 and __TS__ArrayFindIndex(
                                     exclude,
                                     function(____, uid) return uid == element.uid end
                                 )) == -1
                             end
-                            local is_valid_element = ____temp_31
+                            local is_valid_element = ____temp_35
                             if is_valid_cell then
                                 if element ~= NullElement then
                                     available_targets[#available_targets + 1] = {pos = {x = x, y = y}, element = element}
@@ -1921,20 +1924,20 @@ function ____exports.Game()
             return NullElement
         end
         local target = available_targets[math.random(0, #available_targets - 1) + 1]
-        local ____field_try_damage_34 = field.try_damage
-        local ____target_pos_33 = target.pos
-        local ____temp_32
+        local ____field_try_damage_38 = field.try_damage
+        local ____target_pos_37 = target.pos
+        local ____temp_36
         if target.cell ~= nil then
-            ____temp_32 = true
+            ____temp_36 = true
         else
-            ____temp_32 = false
+            ____temp_36 = false
         end
-        local damage_info = ____field_try_damage_34(
-            ____target_pos_33,
+        local damage_info = ____field_try_damage_38(
+            ____target_pos_37,
             false,
             false,
             false,
-            ____temp_32
+            ____temp_36
         )
         return damage_info ~= NotDamage and damage_info or NullElement
     end
@@ -1976,8 +1979,9 @@ function ____exports.Game()
         is_idle = false
         if level.steps ~= nil then
             local state = get_state()
-            state.steps = state.steps - 1
-            EventBus.send("UPDATED_STEP_COUNTER", state.steps)
+            state.remaining_steps = state.remaining_steps - 1
+            state.steps = state.steps + 1
+            EventBus.send("UPDATED_STEP_COUNTER", state.remaining_steps)
         end
         if is_gameover() then
             is_block_input = true
@@ -2131,29 +2135,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch468 = combination.type
-            local ____cond468 = ____switch468 == CombinationType.Comb4
-            if ____cond468 then
+            local ____switch470 = combination.type
+            local ____cond470 = ____switch470 == CombinationType.Comb4
+            if ____cond470 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond468 = ____cond468 or ____switch468 == CombinationType.Comb2x2
-            if ____cond468 then
+            ____cond470 = ____cond470 or ____switch470 == CombinationType.Comb2x2
+            if ____cond470 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond468 = ____cond468 or (____switch468 == CombinationType.Comb3x3a or ____switch468 == CombinationType.Comb3x3b)
-            if ____cond468 then
+            ____cond470 = ____cond470 or (____switch470 == CombinationType.Comb3x3a or ____switch470 == CombinationType.Comb3x3b)
+            if ____cond470 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond468 = ____cond468 or (____switch468 == CombinationType.Comb3x4a or ____switch468 == CombinationType.Comb3x4b or ____switch468 == CombinationType.Comb3x5)
-            if ____cond468 then
+            ____cond470 = ____cond470 or (____switch470 == CombinationType.Comb3x4a or ____switch470 == CombinationType.Comb3x4b or ____switch470 == CombinationType.Comb3x5)
+            if ____cond470 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond468 = ____cond468 or ____switch468 == CombinationType.Comb5
-            if ____cond468 then
+            ____cond470 = ____cond470 or ____switch470 == CombinationType.Comb5
+            if ____cond470 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end

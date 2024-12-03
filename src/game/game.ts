@@ -113,6 +113,8 @@ export interface GameState extends CoreState {
     randomseed: number,
     targets: TargetState[],
     steps: number,
+    time: number,
+    remaining_steps: number,
     remaining_time: number
 }
 
@@ -234,10 +236,10 @@ export function Game() {
             try_load_field();
             update_core_state();
             set_targets(level.targets);
-            set_steps(level.steps);
-            if(level.time != undefined) {
-                get_state().remaining_time = level.time;
-            }
+            
+            if(level.steps != undefined) set_steps(level.steps, 0);
+            if(level.time != undefined) set_time(level.time, 0);
+
             set_random();
         }
 
@@ -382,9 +384,9 @@ export function Game() {
 
         const last_state = get_state(1);
         set_targets(last_state.targets);
-        set_steps(last_state.steps);
-        if(level.time != undefined)
-            get_state().remaining_time = last_state.remaining_time;
+        if(level.steps != undefined) set_steps(last_state.remaining_steps, last_state.steps);
+        if(level.time != undefined) set_time(last_state.remaining_time, last_state.time);
+            
         set_random();
 
         if (!is_tutorial() && helper_timer == null) {
@@ -440,7 +442,7 @@ export function Game() {
         set_random(previous_state.randomseed);
 
         EventBus.send('RESPONSE_REWIND', previous_state);
-        EventBus.send('UPDATED_STEP_COUNTER', previous_state.steps);
+        EventBus.send('UPDATED_STEP_COUNTER', previous_state.remaining_steps);
 
         return true;
     }
@@ -501,7 +503,8 @@ export function Game() {
 
         const dt = System.now() - start_game_time;
         const remaining_time = math.max(0, level.time - dt);
-        get_state().remaining_time = remaining_time;
+        set_time(remaining_time, ++get_state().time);
+        // get_state().remaining_time = remaining_time;
         EventBus.send('GAME_TIMER', remaining_time);
     }
 
@@ -518,7 +521,7 @@ export function Game() {
     }
 
     function is_have_steps() {
-        return get_state().steps > 0;
+        return get_state().remaining_steps > 0;
     }
 
     function on_win() {
@@ -535,19 +538,21 @@ export function Game() {
 
                 add_coins(level.coins);
                 if (level.coins > 0) {
-                    if (last_state.steps != undefined) add_coins(math.min(last_state.steps, (current_level != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock));
+                    if (last_state.remaining_steps != undefined) add_coins(math.min(last_state.remaining_steps, (current_level != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock));
                     if (last_state.remaining_time != undefined) add_coins(math.min(math.floor(last_state.remaining_time), (current_level != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock));
                 }
-            
-                Metrica.report('data', {
-                    ['level_' + level_name]: {
-                        type: 'end',
-                        time: last_state.remaining_time != undefined ? math.floor(last_state.remaining_time) : undefined,
-                        steps: last_state.steps
-                    }
-                });
             }
-            
+
+            Metrica.report('data', {
+                ['level_' + level_name]: {
+                    type: 'end',
+                    time: (level.time != undefined) ? last_state.time : undefined,
+                    steps: (level.steps != undefined) ? last_state.steps : undefined
+                }
+            });
+
+            Log.log("END: ", last_state.time, last_state.steps);
+        
             EventBus.send('ON_WIN');
 
             win_action();
@@ -620,7 +625,7 @@ export function Game() {
     }
 
     function on_revive(data: {steps?: number, time?: number}) {
-        if(data.steps != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].steps += data.steps;
+        if(data.steps != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_steps += data.steps;
         if(data.time != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_time += data.time;
         GAME_CONFIG.is_revive = true;
         GAME_CONFIG.is_restart = true;
@@ -996,11 +1001,16 @@ export function Game() {
         last_state.targets = json.decode(json.encode(targets));
     }
 
-    function set_steps(steps = 0) {
-        if (level.steps == undefined) return;
-
+    function set_steps(remaining_steps: number, steps: number) {
         const last_state = get_state();
+        last_state.remaining_steps = remaining_steps;
         last_state.steps = steps;
+    }
+
+    function set_time(remaining_time: number, time: number) {
+        const last_state = get_state();
+        last_state.remaining_time = remaining_time;
+        last_state.time = time;
     }
 
     function set_random(seed?: number) {
@@ -1358,8 +1368,9 @@ export function Game() {
 
                 if (level.steps != undefined) {
                     const state = get_state();
-                    state.steps--;
-                    EventBus.send('UPDATED_STEP_COUNTER', state.steps);
+                    state.remaining_steps--;
+                    state.steps++;
+                    EventBus.send('UPDATED_STEP_COUNTER', state.remaining_steps);
                 }
 
                 if (is_gameover())
@@ -1777,8 +1788,9 @@ export function Game() {
 
         if (level.steps != undefined) {
             const state = get_state();
-            state.steps--;
-            EventBus.send('UPDATED_STEP_COUNTER', state.steps);
+            state.remaining_steps--;
+            state.steps++;
+            EventBus.send('UPDATED_STEP_COUNTER', state.remaining_steps);
         }
 
         if (is_gameover())

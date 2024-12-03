@@ -203,7 +203,7 @@ function ____exports.View(resources)
     function on_load_game(game_state)
         load_field(game_state)
         EventBus.send("INIT_UI", level)
-        EventBus.send("UPDATED_STEP_COUNTER", game_state.steps)
+        EventBus.send("UPDATED_STEP_COUNTER", game_state.remaining_steps)
         do
             local i = 0
             while i < #game_state.targets do

@@ -1282,8 +1282,8 @@ function on_win_end(data)
                     end
                     if data.with_reward then
                         local level_coins = get_current_level_config().coins
-                        local steps = data.state.steps ~= nil and math.min(
-                            data.state.steps,
+                        local steps = data.state.remaining_steps ~= nil and math.min(
+                            data.state.remaining_steps,
                             get_current_level() ~= 3 and GAME_CONFIG.max_coins_reward or GAME_CONFIG.max_coins_reward_for_cock
                         ) or 0
                         local remaining_time = data.state.remaining_time ~= nil and math.min(

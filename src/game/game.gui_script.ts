@@ -827,7 +827,7 @@ function on_win_end(data: { state: GameState, with_reward: boolean }) {
 
             if (data.with_reward) {
                 let level_coins = get_current_level_config().coins;
-                let steps = (data.state.steps != undefined) ? math.min(data.state.steps, (get_current_level() != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock) : 0;
+                let steps = (data.state.remaining_steps != undefined) ? math.min(data.state.remaining_steps, (get_current_level() != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock) : 0;
                 let remaining_time = (data.state.remaining_time != undefined) ? math.min(math.floor(data.state.remaining_time), (get_current_level() != 3) ? GAME_CONFIG.max_coins_reward : GAME_CONFIG.max_coins_reward_for_cock) : 0;
                 if (level_coins > 0) {
                     const current_coins = GameStorage.get('coins');

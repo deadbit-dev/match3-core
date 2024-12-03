@@ -270,7 +270,7 @@ export function View(resources: ViewResources) {
         load_field(game_state);
 
         EventBus.send('INIT_UI', level);
-        EventBus.send('UPDATED_STEP_COUNTER', game_state.steps);
+        EventBus.send('UPDATED_STEP_COUNTER', game_state.remaining_steps);
         
         for(let i = 0; i < game_state.targets.length; i++) {
             const target = game_state.targets[i];
