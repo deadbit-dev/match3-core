@@ -249,15 +249,16 @@ export function Game() {
             set_tutorial();
         }
 
+        if(!GAME_CONFIG.is_revive) {
+            Metrica.report('data', {
+                ['level_' + level_name]: { type: 'start' }
+            });
+        }
+
         GAME_CONFIG.is_revive = false;
         game_timer = timer.delay(1, true, on_tick);
 
         on_idle();
-
-        const curr_level = get_current_level() + 1;
-        Metrica.report('data', {
-            ['level_' + level_name]: { type: 'start' }
-        });
     }
 
     function set_tutorial() {
@@ -550,8 +551,6 @@ export function Game() {
                     steps: (level.steps != undefined) ? last_state.steps : undefined
                 }
             });
-
-            Log.log("END: ", last_state.time, last_state.steps);
         
             EventBus.send('ON_WIN');
 

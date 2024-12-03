@@ -197,11 +197,12 @@ function ____exports.Game()
         if not GAME_CONFIG.is_revive and is_tutorial() then
             set_tutorial()
         end
+        if not GAME_CONFIG.is_revive then
+            Metrica.report("data", {["level_" .. level_name] = {type = "start"}})
+        end
         GAME_CONFIG.is_revive = false
         game_timer = timer.delay(1, true, on_tick)
         on_idle()
-        local curr_level = get_current_level() + 1
-        Metrica.report("data", {["level_" .. level_name] = {type = "start"}})
     end
     function set_tutorial()
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]
@@ -262,24 +263,24 @@ function ____exports.Game()
     end
     function unlock_buster(name)
         repeat
-            local ____switch37 = name
-            local ____cond37 = ____switch37 == "hammer"
-            if ____cond37 then
+            local ____switch38 = name
+            local ____cond38 = ____switch38 == "hammer"
+            if ____cond38 then
                 level.busters.hammer.block = false
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == "spinning"
-            if ____cond37 then
+            ____cond38 = ____cond38 or ____switch38 == "spinning"
+            if ____cond38 then
                 level.busters.spinning.block = false
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == "horizontal_rocket"
-            if ____cond37 then
+            ____cond38 = ____cond38 or ____switch38 == "horizontal_rocket"
+            if ____cond38 then
                 level.busters.horizontal_rocket.block = false
                 break
             end
-            ____cond37 = ____cond37 or ____switch37 == "vertical_rocket"
-            if ____cond37 then
+            ____cond38 = ____cond38 or ____switch38 == "vertical_rocket"
+            if ____cond38 then
                 level.busters.vertical_rocket.block = false
                 break
             end
@@ -517,7 +518,6 @@ function ____exports.Game()
                 end
             end
             Metrica.report("data", {["level_" .. level_name] = {type = "end", time = level.time ~= nil and last_state.time or nil, steps = level.steps ~= nil and last_state.steps or nil}})
-            Log.log("END: ", last_state.time, last_state.steps)
             EventBus.send("ON_WIN")
             win_action()
             return
@@ -1287,24 +1287,24 @@ function ____exports.Game()
             return
         end
         repeat
-            local ____switch277 = message.name
-            local ____cond277 = ____switch277 == "SPINNING"
-            if ____cond277 then
+            local ____switch278 = message.name
+            local ____cond278 = ____switch278 == "SPINNING"
+            if ____cond278 then
                 on_activate_spinning()
                 break
             end
-            ____cond277 = ____cond277 or ____switch277 == "HAMMER"
-            if ____cond277 then
+            ____cond278 = ____cond278 or ____switch278 == "HAMMER"
+            if ____cond278 then
                 on_activate_hammer()
                 break
             end
-            ____cond277 = ____cond277 or ____switch277 == "HORIZONTAL_ROCKET"
-            if ____cond277 then
+            ____cond278 = ____cond278 or ____switch278 == "HORIZONTAL_ROCKET"
+            if ____cond278 then
                 on_activate_horizontal_rocket()
                 break
             end
-            ____cond277 = ____cond277 or ____switch277 == "VERTICAL_ROCKET"
-            if ____cond277 then
+            ____cond278 = ____cond278 or ____switch278 == "VERTICAL_ROCKET"
+            if ____cond278 then
                 on_activate_vertical_rocket()
                 break
             end
@@ -2135,29 +2135,29 @@ function ____exports.Game()
     function try_combo(pos, combination)
         local element = NullElement
         repeat
-            local ____switch470 = combination.type
-            local ____cond470 = ____switch470 == CombinationType.Comb4
-            if ____cond470 then
+            local ____switch471 = combination.type
+            local ____cond471 = ____switch471 == CombinationType.Comb4
+            if ____cond471 then
                 element = make_element(pos, combination.angle == 0 and ____exports.ElementId.HorizontalRocket or ____exports.ElementId.VerticalRocket)
                 break
             end
-            ____cond470 = ____cond470 or ____switch470 == CombinationType.Comb2x2
-            if ____cond470 then
+            ____cond471 = ____cond471 or ____switch471 == CombinationType.Comb2x2
+            if ____cond471 then
                 element = make_element(pos, ____exports.ElementId.Helicopter)
                 break
             end
-            ____cond470 = ____cond470 or (____switch470 == CombinationType.Comb3x3a or ____switch470 == CombinationType.Comb3x3b)
-            if ____cond470 then
+            ____cond471 = ____cond471 or (____switch471 == CombinationType.Comb3x3a or ____switch471 == CombinationType.Comb3x3b)
+            if ____cond471 then
                 element = make_element(pos, ____exports.ElementId.Dynamite)
                 break
             end
-            ____cond470 = ____cond470 or (____switch470 == CombinationType.Comb3x4a or ____switch470 == CombinationType.Comb3x4b or ____switch470 == CombinationType.Comb3x5)
-            if ____cond470 then
+            ____cond471 = ____cond471 or (____switch471 == CombinationType.Comb3x4a or ____switch471 == CombinationType.Comb3x4b or ____switch471 == CombinationType.Comb3x5)
+            if ____cond471 then
                 element = make_element(pos, ____exports.ElementId.AllAxisRocket)
                 break
             end
-            ____cond470 = ____cond470 or ____switch470 == CombinationType.Comb5
-            if ____cond470 then
+            ____cond471 = ____cond471 or ____switch471 == CombinationType.Comb5
+            if ____cond471 then
                 element = make_element(pos, ____exports.ElementId.Diskosphere)
                 break
             end
