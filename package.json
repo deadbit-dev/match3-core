@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "tstl --watch",
-     "test_yandex":"npx @yandex-games/sdk-dev-proxy -p \"D:/Defold/projects/builds/wasm-web/Matсh3\" --app-id=386972"
+     "test_yandex":"npx @yandex-games/sdk-dev-proxy -p \"D:/Defold/projects/builds/wasm-web/Matсh3\" --app-id=386972",
+     "build_resources":"node pack_resources.js run \"D:/Defold/projects/builds/wasm-web/Matсh3\""
   },
   "devDependencies": {
     "@ts-defold/library": "latest",
