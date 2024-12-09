@@ -143,7 +143,7 @@ function ____exports.init(self)
                     load_levels_config()
                     if System.platform == "HTML5" and HtmlBridge.get_platform() == "yandex" then
                         HtmlBridge.get_flags(
-                            {defaultFlags = {movie_btn = "0", is_movie = "1"}},
+                            {defaultFlags = {movie_btn = "0", is_movie = "0"}},
                             function(status, data)
                                 if status then
                                     if data.movie_btn ~= nil then

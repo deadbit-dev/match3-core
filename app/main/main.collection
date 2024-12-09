@@ -10,6 +10,7 @@ embedded_instances {
   "  id: \"movie\"\n"
   "  type: \"collectionproxy\"\n"
   "  data: \"collection: \\\"/movie/movie.collection\\\"\\n"
+  "exclude: true\\n"
   "\"\n"
   "}\n"
   "embedded_components {\n"

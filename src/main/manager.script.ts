@@ -134,7 +134,7 @@ export function init(this: props) {
         timer.delay(0, false, () => {
             load_levels_config();
             if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'yandex') {
-                HtmlBridge.get_flags({ defaultFlags: { movie_btn: '0', is_movie: '1' } }, (status, data) => {
+                HtmlBridge.get_flags({ defaultFlags: { movie_btn: '0', is_movie: '0' } }, (status, data) => {
                     if (status) {
                         if (data['movie_btn'] != null)
                             GAME_CONFIG.movie_btn = data['movie_btn'] == '1';
