@@ -21,10 +21,10 @@ package = com.sbGames.match3
 
 [project]
 title = Matсh3
-bundle_resources = /bundle
+bundle_resources = /project_settings/bundle
 version = 1.0
 custom_resources = /resources
-dependencies#0 = https://github.com/Insality/druid/archive/refs/tags/0.11.0.zip
+dependencies#0 = https://github.com/Insality/druid/archive/refs/tags/1.0.zip
 dependencies#1 = https://github.com/britzl/ludobits/archive/refs/heads/master.zip
 dependencies#2 = https://github.com/osov/defold-app-metrica/archive/refs/heads/main.zip
 dependencies#3 = https://github.com/osov/defold-yandex-easy-monetization/archive/refs/heads/main.zip
@@ -79,4 +79,18 @@ max_component_count = 64
 
 [liveupdate]
 settings = /liveupdate.settings
+
+[ios]
+app_icon_76x76 = /assets/icons/IOS/76.png
+app_icon_152x152 = /assets/icons/IOS/152.png
+app_icon_167x167 = /assets/icons/IOS/167.png
+app_icon_120x120 = /assets/icons/IOS/120.png
+app_icon_180x180 = /assets/icons/IOS/180.png
+infoplist = /project_settings/info.plist
+default_language = ru
+localizations = en,ru
+bundle_identifier = sbGames.match3
+bundle_name = Match3
+bundle_version = 1
+icons_asset = /project_settings/Assets.car
 
