@@ -18,11 +18,11 @@ export function is_last_level() {
 }
 
 export function get_current_level_config() {
-    if(GAME_CONFIG.is_revive)
+    if (GAME_CONFIG.is_revive)
         return GAME_CONFIG.revive_level;
 
     const current_level = get_current_level();
-    if(current_level < 47)
+    if (current_level < 47)
         return GAME_CONFIG.levels[current_level];
 
     return generate_random_level();
@@ -31,8 +31,8 @@ export function get_current_level_config() {
 function generate_random_level() {
     const exclude_levels = [3, 10, 17, 24, 31, 38, 46];
     const levels = [];
-    for(let i = 0; i < 47; i++) {
-        if(!exclude_levels.includes(i))
+    for (let i = 0; i < 47; i++) {
+        if (!exclude_levels.includes(i))
             levels.push(i);
     }
     const picked_level = levels[math.random(0, levels.length - 1)];
@@ -42,9 +42,9 @@ function generate_random_level() {
     print(random_level);
     random_level.coins = 0;
     random_level.steps += math.random(-5, 5);
-    for(const target of random_level.targets) {
+    for (const target of random_level.targets) {
         // FIXME: TargetType enum give cycle dependens with game
-        switch(target.type) {
+        switch (target.type) {
             case 1: // ELEMENT
                 target.count += math.random(-5, 5);
                 break;
@@ -121,7 +121,7 @@ export function is_tutorial() {
 export function is_tutorial_swap(swap_info: SwapInfo) {
     const current_level = get_current_level();
     const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-    if(tutorial_data.step == undefined)
+    if (tutorial_data.step == undefined)
         return false;
 
     const is_from = swap_info.from.x == tutorial_data.step.from.x && swap_info.from.y == tutorial_data.step.from.y;
@@ -134,7 +134,7 @@ export function is_tutorial_swap(swap_info: SwapInfo) {
 export function is_tutorial_click(pos: Position) {
     const current_level = get_current_level();
     const tutorial_data = GAME_CONFIG.tutorials_data[current_level + 1];
-    if(tutorial_data.click == undefined)
+    if (tutorial_data.click == undefined)
         return false;
 
     return (tutorial_data.click.x == pos.x && tutorial_data.click.y == pos.y);
@@ -150,12 +150,12 @@ export function remove_ad(time: number) {
 }
 
 export function delete_mounts() {
-    if(!liveupdate)
+    if (!liveupdate)
         return;
 
     const mounts = liveupdate.get_mounts();
-    for(const mount of mounts) {
-        if(mount.name.endsWith(".zip")) {
+    for (const mount of mounts) {
+        if (mount.name.endsWith(".zip")) {
             liveupdate.remove_mount(mount.name);
         }
     }
@@ -163,8 +163,8 @@ export function delete_mounts() {
 
 export function get_last_completed_level() {
     let max_level = 0;
-    for(let level of GameStorage.get('completed_levels')) {
-        if(++level > max_level)
+    for (let level of GameStorage.get('completed_levels')) {
+        if (++level > max_level)
             max_level = level;
     }
     return max_level;

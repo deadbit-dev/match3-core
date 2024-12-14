@@ -29,8 +29,8 @@ function SceneModule() {
     let last_scene = '';
     let is_restarting_scene = false;
     let _wait_ready_manager = false;
-    
-    const scene_resources: { [key in string]: string[] } = {'main': []};
+
+    const scene_resources: { [key in string]: string[] } = { 'main': [] };
     const sender_to_name: { [key in string]: hash } = {};
     const resource_to_checker: { [key in string]: () => boolean } = {};
 
@@ -44,27 +44,27 @@ function SceneModule() {
         if (System.platform == 'HTML5')
             html5.run(`set_light('` + color + `')`);
     }
-    
+
     function is_resource(name: string) {
         return !Object.keys(scene_resources).includes(name);
     }
 
     function get_name_by_hash(h: hash) {
         let name = '';
-        for(const [key, value] of Object.entries(sender_to_name))
-            if(value == h) name = key;
+        for (const [key, value] of Object.entries(sender_to_name))
+            if (value == h) name = key;
         return name;
     }
 
     // загрузить сцену с именем. wait_ready_manager - ждать ли сначала полной загрузки менеджера
     function load(name: string, wait_ready_manager = false) {
         _wait_ready_manager = wait_ready_manager;
-        if(scene_resources[name] == undefined)
+        if (scene_resources[name] == undefined)
             scene_resources[name] = [];
         Manager.send('SYS_LOAD_SCENE', { name });
     }
     function load_resource(scene: string, resource: string, checker = () => { return true; }) {
-        if(scene_resources[scene].indexOf(resource) != -1)
+        if (scene_resources[scene].indexOf(resource) != -1)
             return;
 
         scene_resources[scene].push(resource);
@@ -73,20 +73,20 @@ function SceneModule() {
     }
 
     function unload_resource(scene: string, resource: string) {
-        if(scene_resources[scene].indexOf(resource) == -1)
+        if (scene_resources[scene].indexOf(resource) == -1)
             return;
 
         scene_resources[scene].splice(scene_resources[scene].indexOf(resource), 1);
-        
+
         Manager.send('SYS_UNLOAD_RESOURCE', { name: resource });
     }
 
     function unload_all_resources(scene: string, except?: string[]) {
         const resources = json.decode(json.encode(scene_resources[scene]));
-        if(resources == null) return;
-        
-        for(const resource of resources) {
-            if(!except?.includes(resource)) {
+        if (resources == null) return;
+
+        for (const resource of resources) {
+            if (!except?.includes(resource)) {
                 unload_resource(scene, resource);
             }
         }
@@ -101,17 +101,18 @@ function SceneModule() {
     }
 
     function try_load(name: string, on_loaded: () => void) {
-        if(!liveupdate || MAIN_BUNDLE_SCENES.includes(name)) return on_loaded();
+        if (!liveupdate || System.platform != 'HTML5' || MAIN_BUNDLE_SCENES.includes(name))
+            return on_loaded();
 
         Log.log("Найдены рессурсы: ");
-        for(const mount of liveupdate.get_mounts()) {
+        for (const mount of liveupdate.get_mounts()) {
             Log.log(`\tРессурс: ${mount.uri} в маунте: ${mount.name}`);
         }
 
         const missing_resources = collectionproxy.missing_resources(Manager.MANAGER_ID + '#' + name);
         let is_missing = false;
-        for(const [key, value] of Object.entries(missing_resources)) {
-            if(value != null) {
+        for (const [key, value] of Object.entries(missing_resources)) {
+            if (value != null) {
                 Log.warn("Ненайден ресурс: " + key + " " + value);
                 is_missing = true;
                 break;
@@ -121,17 +122,17 @@ function SceneModule() {
         const versioned_file_name = name + "_v" + RESOURCE_VERSION + ".zip";
         const resource_file = name + ".zip";
         const miss_match_version = !reszip.version_match(versioned_file_name, name);
-        if(miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
+        if (miss_match_version) Log.warn("Несовпадает версия ресурс файла!");
 
-        if(miss_match_version || is_missing) {
+        if (miss_match_version || is_missing) {
             Log.log("Загрузка ресурсов для сцены: " + name);
-            
+
             reszip.load_and_mount_zip('v' + RESOURCE_VERSION + '/' + resource_file, {
                 filename: versioned_file_name,
                 mount_name: name,
                 delete_old_file: true,
                 on_finish: (self: any, err: any) => {
-                    if(!err) {
+                    if (!err) {
                         Log.log("Загружены ресурсы для сцены: " + name);
                         on_loaded();
                     } else Log.warn('Неудалось загрузить сцену: ' + name);
@@ -149,7 +150,7 @@ function SceneModule() {
     //             return basename == versioned_file_name;
     //         }
     //     }
-        
+
     //     return false;
     // }
 
@@ -188,7 +189,7 @@ function SceneModule() {
             const message = _message as Messages['SYS_LOAD_RESOURCE'];
 
             try_load(message.name, () => {
-                if(!resource_to_checker[message.name]())
+                if (!resource_to_checker[message.name]())
                     return;
                 const receiver = Manager.MANAGER_ID + "#" + message.name;
                 sender_to_name[message.name] = msg.url(receiver);
@@ -199,7 +200,7 @@ function SceneModule() {
             const message = _message as Messages['SYS_ASYNC_LOAD_RESOURCE'];
 
             try_load(message.name, () => {
-               Log.log(`RESOURCES FOR ${message.name} ASYNC LOADED`);
+                Log.log(`RESOURCES FOR ${message.name} ASYNC LOADED`);
             });
         }
         if (message_id == hash('SYS_UNLOAD_RESOURCE')) {
@@ -214,18 +215,18 @@ function SceneModule() {
         }
         if (message_id == hash("proxy_loaded")) {
             const name = get_name_by_hash(sender);
-            if(!is_resource(name)) on_loaded_scene(sender);
+            if (!is_resource(name)) on_loaded_scene(sender);
             else on_loaded_resource(sender);
         }
     }
-    
+
     function on_loaded_scene(sender: hash) {
         if (last_scene != '' && !is_restarting_scene) {
             const scene = Manager.MANAGER_ID + "#" + last_scene;
             msg.post(scene, "disable");
             msg.post(scene, "final");
             msg.post(scene, "unload");
-            
+
             last_scene = '';
         }
 
@@ -234,8 +235,8 @@ function SceneModule() {
         msg.post(sender, "init");
         msg.post(sender, "enable");
 
-        EventBus.send('ON_SCENE_LOADED', {name: last_loading_scene} );
-        
+        EventBus.send('ON_SCENE_LOADED', { name: last_loading_scene });
+
         last_scene = last_loading_scene;
         last_loading_scene = '';
     }

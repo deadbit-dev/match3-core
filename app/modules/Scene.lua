@@ -128,7 +128,7 @@ function SceneModule()
         Manager.send("SYS_ASYNC_LOAD_RESOURCE", {name = name})
     end
     local function try_load(name, on_loaded)
-        if not liveupdate or __TS__ArrayIncludes(MAIN_BUNDLE_SCENES, name) then
+        if not liveupdate or System.platform ~= "HTML5" or __TS__ArrayIncludes(MAIN_BUNDLE_SCENES, name) then
             return on_loaded()
         end
         Log.log("Найдены рессурсы: ")

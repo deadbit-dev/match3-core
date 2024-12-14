@@ -164,53 +164,19 @@ function setup_store(data)
         gui.get_node("store/store_title_text"),
         Lang.get_text("store_title")
     )
-    local function buy_150(button)
-        if HtmlBridge == nil then
-            Sound.play("purchase")
-            add_coins(150)
-            timer.delay(
-                0.1,
-                false,
-                function()
-                    button:set_enabled(false)
-                    local pack = gui.get_node("store/coins_150")
-                    gui.set_scale(
-                        pack,
-                        vmath.vector3(1.3, 1.3, 1.3)
-                    )
-                    gui.cancel_animation(pack, gui.PROP_SCALE)
-                    gui.animate(
-                        pack,
-                        gui.PROP_SCALE,
-                        vmath.vector3(1.79, 1.79, 1.79),
-                        gui.EASING_INOUTQUAD,
-                        1,
-                        0,
-                        function()
-                            button:set_enabled(true)
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
-                    )
-                end
-            )
-            return
-        end
-        HtmlBridge.purchase(
-            {id = "maney150"},
-            function(result, purchase)
-                if not result then
-                    return function()
-                    end
-                end
+    if System.platform ~= "Android" and System.platform ~= "iPhone OS" then
+        gui.set_enabled(
+            gui.get_node("store/coins_box"),
+            true
+        )
+        gui.set_position(
+            gui.get_node("store/bottom"),
+            vmath.vector3(0, 0, 0)
+        )
+        local function buy_150(button)
+            if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(150)
-                GameStorage.set("was_purchased", true)
-                Metrica.report("data", {shop = {buy = "maney150"}})
-                HtmlBridge.consume_purchase(
-                    purchase.purchaseToken,
-                    function()
-                    end
-                )
                 timer.delay(
                     0.1,
                     false,
@@ -236,76 +202,76 @@ function setup_store(data)
                         )
                     end
                 )
-            end
-        )
-    end
-    local coins150
-    coins150 = data.druid:new_button(
-        "store/coins_150",
-        function()
-            if data.is_not_enough_coins then
                 return
             end
-            buy_150(coins150)
-        end
-    )
-    local coins150_btn
-    coins150_btn = data.druid:new_button(
-        "store/buy_150_btn",
-        function()
-            if data.is_not_enough_coins then
-                return
-            end
-            buy_150(coins150_btn)
-        end
-    )
-    local function buy_300(button)
-        if HtmlBridge == nil then
-            Sound.play("purchase")
-            add_coins(300)
-            timer.delay(
-                0.1,
-                false,
-                function()
-                    button:set_enabled(false)
-                    local pack = gui.get_node("store/coins_300")
-                    gui.set_scale(
-                        pack,
-                        vmath.vector3(1.3, 1.3, 1.3)
-                    )
-                    gui.cancel_animation(pack, gui.PROP_SCALE)
-                    gui.animate(
-                        pack,
-                        gui.PROP_SCALE,
-                        vmath.vector3(1.79, 1.79, 1.79),
-                        gui.EASING_INOUTQUAD,
-                        1,
-                        0,
+            HtmlBridge.purchase(
+                {id = "maney150"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(150)
+                    GameStorage.set("was_purchased", true)
+                    Metrica.report("data", {shop = {buy = "maney150"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
                         function()
-                            button:set_enabled(true)
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
+                        end
+                    )
+                    timer.delay(
+                        0.1,
+                        false,
+                        function()
+                            button:set_enabled(false)
+                            local pack = gui.get_node("store/coins_150")
+                            gui.set_scale(
+                                pack,
+                                vmath.vector3(1.3, 1.3, 1.3)
+                            )
+                            gui.cancel_animation(pack, gui.PROP_SCALE)
+                            gui.animate(
+                                pack,
+                                gui.PROP_SCALE,
+                                vmath.vector3(1.79, 1.79, 1.79),
+                                gui.EASING_INOUTQUAD,
+                                1,
+                                0,
+                                function()
+                                    button:set_enabled(true)
+                                end,
+                                gui.PLAYBACK_ONCE_PINGPONG
+                            )
+                        end
                     )
                 end
             )
-            return
         end
-        HtmlBridge.purchase(
-            {id = "maney300"},
-            function(result, purchase)
-                if not result then
-                    return function()
-                    end
+        local coins150
+        coins150 = data.druid:new_button(
+            "store/coins_150",
+            function()
+                if data.is_not_enough_coins then
+                    return
                 end
+                buy_150(coins150)
+            end
+        )
+        local coins150_btn
+        coins150_btn = data.druid:new_button(
+            "store/buy_150_btn",
+            function()
+                if data.is_not_enough_coins then
+                    return
+                end
+                buy_150(coins150_btn)
+            end
+        )
+        local function buy_300(button)
+            if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(300)
-                GameStorage.set("was_purchased", true)
-                Metrica.report("data", {shop = {buy = "maney300"}})
-                HtmlBridge.consume_purchase(
-                    purchase.purchaseToken,
-                    function()
-                    end
-                )
                 timer.delay(
                     0.1,
                     false,
@@ -331,76 +297,76 @@ function setup_store(data)
                         )
                     end
                 )
-            end
-        )
-    end
-    local coins300
-    coins300 = data.druid:new_button(
-        "store/coins_300",
-        function()
-            if data.is_not_enough_coins then
                 return
             end
-            buy_300(coins300)
-        end
-    )
-    local coins300_btn
-    coins300_btn = data.druid:new_button(
-        "store/buy_300_btn",
-        function()
-            if data.is_not_enough_coins then
-                return
-            end
-            buy_300(coins300_btn)
-        end
-    )
-    local function buy_800(button)
-        if HtmlBridge == nil then
-            Sound.play("purchase")
-            add_coins(800)
-            timer.delay(
-                0.1,
-                false,
-                function()
-                    button:set_enabled(false)
-                    local pack = gui.get_node("store/coins_800")
-                    gui.set_scale(
-                        pack,
-                        vmath.vector3(1.3, 1.3, 1.3)
-                    )
-                    gui.cancel_animation(pack, gui.PROP_SCALE)
-                    gui.animate(
-                        pack,
-                        gui.PROP_SCALE,
-                        vmath.vector3(1.79, 1.79, 1.79),
-                        gui.EASING_INOUTQUAD,
-                        1,
-                        0,
+            HtmlBridge.purchase(
+                {id = "maney300"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(300)
+                    GameStorage.set("was_purchased", true)
+                    Metrica.report("data", {shop = {buy = "maney300"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
                         function()
-                            button:set_enabled(true)
-                        end,
-                        gui.PLAYBACK_ONCE_PINGPONG
+                        end
+                    )
+                    timer.delay(
+                        0.1,
+                        false,
+                        function()
+                            button:set_enabled(false)
+                            local pack = gui.get_node("store/coins_300")
+                            gui.set_scale(
+                                pack,
+                                vmath.vector3(1.3, 1.3, 1.3)
+                            )
+                            gui.cancel_animation(pack, gui.PROP_SCALE)
+                            gui.animate(
+                                pack,
+                                gui.PROP_SCALE,
+                                vmath.vector3(1.79, 1.79, 1.79),
+                                gui.EASING_INOUTQUAD,
+                                1,
+                                0,
+                                function()
+                                    button:set_enabled(true)
+                                end,
+                                gui.PLAYBACK_ONCE_PINGPONG
+                            )
+                        end
                     )
                 end
             )
-            return
         end
-        HtmlBridge.purchase(
-            {id = "maney800"},
-            function(result, purchase)
-                if not result then
-                    return function()
-                    end
+        local coins300
+        coins300 = data.druid:new_button(
+            "store/coins_300",
+            function()
+                if data.is_not_enough_coins then
+                    return
                 end
+                buy_300(coins300)
+            end
+        )
+        local coins300_btn
+        coins300_btn = data.druid:new_button(
+            "store/buy_300_btn",
+            function()
+                if data.is_not_enough_coins then
+                    return
+                end
+                buy_300(coins300_btn)
+            end
+        )
+        local function buy_800(button)
+            if HtmlBridge == nil then
                 Sound.play("purchase")
                 add_coins(800)
-                GameStorage.set("was_purchased", true)
-                Metrica.report("data", {shop = {buy = "maney800"}})
-                HtmlBridge.consume_purchase(
-                    purchase.purchaseToken,
-                    function()
-                    end
-                )
                 timer.delay(
                     0.1,
                     false,
@@ -426,29 +392,73 @@ function setup_store(data)
                         )
                     end
                 )
+                return
+            end
+            HtmlBridge.purchase(
+                {id = "maney800"},
+                function(result, purchase)
+                    if not result then
+                        return function()
+                        end
+                    end
+                    Sound.play("purchase")
+                    add_coins(800)
+                    GameStorage.set("was_purchased", true)
+                    Metrica.report("data", {shop = {buy = "maney800"}})
+                    HtmlBridge.consume_purchase(
+                        purchase.purchaseToken,
+                        function()
+                        end
+                    )
+                    timer.delay(
+                        0.1,
+                        false,
+                        function()
+                            button:set_enabled(false)
+                            local pack = gui.get_node("store/coins_800")
+                            gui.set_scale(
+                                pack,
+                                vmath.vector3(1.3, 1.3, 1.3)
+                            )
+                            gui.cancel_animation(pack, gui.PROP_SCALE)
+                            gui.animate(
+                                pack,
+                                gui.PROP_SCALE,
+                                vmath.vector3(1.79, 1.79, 1.79),
+                                gui.EASING_INOUTQUAD,
+                                1,
+                                0,
+                                function()
+                                    button:set_enabled(true)
+                                end,
+                                gui.PLAYBACK_ONCE_PINGPONG
+                            )
+                        end
+                    )
+                end
+            )
+        end
+        local coins800
+        coins800 = data.druid:new_button(
+            "store/coins_800",
+            function()
+                if data.is_not_enough_coins then
+                    return
+                end
+                buy_800(coins800)
+            end
+        )
+        local coins800_btn
+        coins800_btn = data.druid:new_button(
+            "store/buy_800_btn",
+            function()
+                if data.is_not_enough_coins then
+                    return
+                end
+                buy_800(coins800_btn)
             end
         )
     end
-    local coins800
-    coins800 = data.druid:new_button(
-        "store/coins_800",
-        function()
-            if data.is_not_enough_coins then
-                return
-            end
-            buy_800(coins800)
-        end
-    )
-    local coins800_btn
-    coins800_btn = data.druid:new_button(
-        "store/buy_800_btn",
-        function()
-            if data.is_not_enough_coins then
-                return
-            end
-            buy_800(coins800_btn)
-        end
-    )
     gui.set_text(
         gui.get_node("store/life_title_text"),
         Lang.get_text("lifes")
@@ -1221,9 +1231,9 @@ function on_remove_lifes()
 end
 function on_scene_loaded(scene)
     repeat
-        local ____switch178 = scene.name
-        local ____cond178 = ____switch178 == "movie" or ____switch178 == "game"
-        if ____cond178 then
+        local ____switch179 = scene.name
+        local ____cond179 = ____switch179 == "movie" or ____switch179 == "game"
+        if ____cond179 then
             set_enabled_coins(false)
             set_enabled_lifes(false)
             set_enabled_store_button(false)
@@ -1231,8 +1241,8 @@ function on_scene_loaded(scene)
             set_enabled_music_button(false)
             break
         end
-        ____cond178 = ____cond178 or ____switch178 == "map"
-        if ____cond178 then
+        ____cond179 = ____cond179 or ____switch179 == "map"
+        if ____cond179 then
             set_enabled_coins(true)
             set_enabled_lifes(true)
             set_enabled_store_button(true)
@@ -1258,9 +1268,9 @@ function set_enabled_store(data, state)
         return
     end
     repeat
-        local ____switch183 = Scene.get_current_name()
-        local ____cond183 = ____switch183 == "game"
-        if ____cond183 then
+        local ____switch184 = Scene.get_current_name()
+        local ____cond184 = ____switch184 == "game"
+        if ____cond184 then
             set_enabled_hammer(data, false)
             set_enabled_spinning(data, false)
             set_enabled_horizontall_rocket(data, false)
@@ -1274,8 +1284,8 @@ function set_enabled_store(data, state)
             end
             break
         end
-        ____cond183 = ____cond183 or ____switch183 == "map"
-        if ____cond183 then
+        ____cond184 = ____cond184 or ____switch184 == "map"
+        if ____cond184 then
             set_enabled_store_button(not state)
             set_enabled_sound_button(not state)
             set_enabled_music_button(not state)

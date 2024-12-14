@@ -236,9 +236,9 @@ export function Game() {
             try_load_field();
             update_core_state();
             set_targets(level.targets);
-            
-            if(level.steps != undefined) set_steps(level.steps, 0);
-            if(level.time != undefined) set_time(level.time, 0);
+
+            if (level.steps != undefined) set_steps(level.steps, 0);
+            if (level.time != undefined) set_time(level.time, 0);
 
             set_random();
         }
@@ -249,7 +249,7 @@ export function Game() {
             set_tutorial();
         }
 
-        if(!GAME_CONFIG.is_revive) {
+        if (!GAME_CONFIG.is_revive) {
             Metrica.report('data', {
                 ['level_' + level_name]: { type: 'start' }
             });
@@ -385,9 +385,9 @@ export function Game() {
 
         const last_state = get_state(1);
         set_targets(last_state.targets);
-        if(level.steps != undefined) set_steps(last_state.remaining_steps, last_state.steps);
-        if(level.time != undefined) set_time(last_state.remaining_time, last_state.time);
-            
+        if (level.steps != undefined) set_steps(last_state.remaining_steps, last_state.steps);
+        if (level.time != undefined) set_time(last_state.remaining_time, last_state.time);
+
         set_random();
 
         if (!is_tutorial() && helper_timer == null) {
@@ -476,7 +476,7 @@ export function Game() {
     function stop_helper() {
         Log.log("STOP_HELPER");
 
-        if(get_step_handle != null)
+        if (get_step_handle != null)
             flow.stop(get_step_handle);
 
         if (!is_tutorial()) {
@@ -551,7 +551,7 @@ export function Game() {
                     steps: (level.steps != undefined) ? last_state.steps : undefined
                 }
             });
-        
+
             EventBus.send('ON_WIN');
 
             win_action();
@@ -562,7 +562,7 @@ export function Game() {
 
         update_core_state();
 
-        EventBus.send('ON_WIN_END', {state: copy_state(), with_reward: first_pass});
+        EventBus.send('ON_WIN_END', { state: copy_state(), with_reward: first_pass });
     }
 
     function win_action() {
@@ -609,7 +609,7 @@ export function Game() {
     }
 
     function on_gameover() {
-        if(game_timer != null)
+        if (game_timer != null)
             timer.cancel(game_timer);
 
         update_core_state();
@@ -623,9 +623,9 @@ export function Game() {
         });
     }
 
-    function on_revive(data: {steps?: number, time?: number}) {
-        if(data.steps != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_steps += data.steps;
-        if(data.time != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_time += data.time;
+    function on_revive(data: { steps?: number, time?: number }) {
+        if (data.steps != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_steps += data.steps;
+        if (data.time != undefined) GAME_CONFIG.revive_states[GAME_CONFIG.revive_states.length - 1].remaining_time += data.time;
         GAME_CONFIG.is_revive = true;
         GAME_CONFIG.is_restart = true;
         Scene.restart();
@@ -855,10 +855,10 @@ export function Game() {
         previous_helper_data = helper_data;
         helper_data = null;
         get_step_handle = get_step((info) => {
-            if(info == NotFound) {
+            if (info == NotFound) {
                 return;
             }
-            
+
             const combined_element = field.get_element(info.step.from);
             const elements = [];
             for (const pos of info.combination.elementsInfo) {
@@ -873,7 +873,7 @@ export function Game() {
         });
     }
 
-    function get_step(on_end: (step: {step: SwapInfo, combination: CombinationInfo} | NotFound) => void) {
+    function get_step(on_end: (step: { step: SwapInfo, combination: CombinationInfo } | NotFound) => void) {
         return flow.start(() => {
             const steps = [];
 
@@ -946,7 +946,7 @@ export function Game() {
 
             if (steps.length == 0) on_end(NotFound);
             else on_end(steps[math.random(0, steps.length - 1)]);
-        }, {parallel: true});
+        }, { parallel: true });
     }
 
     function revive() {
@@ -968,8 +968,8 @@ export function Game() {
             }
         }
 
-        if(level.time != undefined) {
-            timer.delay(0, false, () => {EventBus.send('GAME_TIMER', last_state.remaining_time);});
+        if (level.time != undefined) {
+            timer.delay(0, false, () => { EventBus.send('GAME_TIMER', last_state.remaining_time); });
         }
 
         if (!has_step())
@@ -1374,7 +1374,7 @@ export function Game() {
 
                 if (is_gameover())
                     is_block_input = true;
-                
+
                 return;
             }
         }
