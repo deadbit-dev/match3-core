@@ -72,7 +72,7 @@ export function init(this: props): void {
     this.block_input = false;
 
     set_text('text', Lang.get_text('play'));
-    
+
     // FIXME: (for now) test animal tutorial tip
     this.druid.new_button('btn', () => {
         const window = gui.get_node('window');
@@ -84,7 +84,7 @@ export function init(this: props): void {
 }
 
 export function on_input(this: props, action_id: string | hash, action: unknown): boolean {
-    if(this.block_input)
+    if (this.block_input)
         return false;
     return this.druid.on_input(action_id, action);
 }
@@ -108,7 +108,7 @@ function setup(_this: props) {
     setup_busters(_this);
     if (GAME_CONFIG.debug_levels) setup_sustem_ui(_this);
     setup_win_ui(_this);
-    setup_gameover_ui(_this);    
+    setup_gameover_ui(_this);
 }
 
 function setup_info_ui(instance: props) {
@@ -203,7 +203,7 @@ function setup_busters(instance: props) {
         } else {
             const popup = gui.get_node('popup');
             gui.set_position(popup, vmath.vector3(-70, -5, 0));
-            set_text('popup/text', format_string(Lang.get_text('buster_open'),[9]));
+            set_text('popup/text', format_string(Lang.get_text('buster_open'), [9]));
             gui.set_enabled(popup, !gui.is_enabled(popup, false));
         }
     });
@@ -213,8 +213,13 @@ function setup_busters(instance: props) {
         gui.set_enabled(gui.get_node('spinning/counts'), true);
     }
 
-    
+
     instance.druid.new_button('hammer/button', () => {
+        const container = gui.get_position(gui.get_node('bottom_container'));
+        const busters = gui.get_position(gui.get_node('buster_buttons'));
+        const hammer = gui.get_position(gui.get_node('hammer/button')); //vmath.vector3(-200, -400, 0);
+        const from_pos = vmath.vector3(container.x + busters.x + hammer.x, container.y + busters.y + hammer.y - 25, container.z + busters.z + hammer.z);
+        print("POS: ", gui.get_screen_position(gui.get_node('hammer/button')));
         if (GameStorage.get('hammer_opened')) {
             if (GameStorage.get('hammer_counts') == 0) {
                 if (GAME_CONFIG.tutorial_levels.includes(GameStorage.get('current_level') + 1)) {
@@ -238,7 +243,7 @@ function setup_busters(instance: props) {
         gui.set_enabled(gui.get_node('hammer/counts'), true);
     }
 
-    
+
     instance.druid.new_button('horizontal_rocket/button', () => {
         if (GameStorage.get('horizontal_rocket_opened')) {
             if (GameStorage.get('horizontal_rocket_counts') == 0) {
@@ -263,7 +268,7 @@ function setup_busters(instance: props) {
         gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
     }
 
-    
+
     instance.druid.new_button('vertical_rocket/button', () => {
         if (GameStorage.get('vertical_rocket_opened')) {
             if (GameStorage.get('vertical_rocket_counts') == 0) {
@@ -529,7 +534,7 @@ function set_events(_this: props) {
         if (dlg == Dlg.Store) {
             _this.block_input = true;
         }
-        
+
     });
     EventBus.on('CLOSED_DLG', (dlg: Dlg) => {
         if (dlg == Dlg.Store) {
@@ -542,7 +547,7 @@ function set_events(_this: props) {
 
 function off_buster_tip_popup() {
     const popup = gui.get_node('popup');
-    if(gui.is_enabled(popup, false))
+    if (gui.is_enabled(popup, false))
         gui.set_enabled(popup, false);
 }
 
@@ -622,8 +627,8 @@ function update_buttons(instance: props) {
     const spinning = GameStorage.get('spinning_counts');
     set_text('spinning/counts', (spinning == 0) ? "+" : spinning);
     set_text_colors(['spinning/button'], '#fff', instance.busters.spinning.active ? 0.5 : 1);
-    
-    if(GameStorage.get('spinning_opened')) {
+
+    if (GameStorage.get('spinning_opened')) {
         gui.set_enabled(gui.get_node('spinning/lock'), false);
         gui.set_enabled(gui.get_node('spinning/icon'), true);
         gui.set_enabled(gui.get_node('spinning/counts'), true);
@@ -634,7 +639,7 @@ function update_buttons(instance: props) {
     set_text('hammer/counts', (hammer == 0) ? "+" : hammer);
     set_text_colors(['hammer/button'], '#fff', instance.busters.hammer.active ? 0.5 : 1);
 
-    if(GameStorage.get('hammer_opened')) {
+    if (GameStorage.get('hammer_opened')) {
         gui.set_enabled(gui.get_node('hammer/lock'), false);
         gui.set_enabled(gui.get_node('hammer/icon'), true);
         gui.set_enabled(gui.get_node('hammer/counts'), true);
@@ -643,8 +648,8 @@ function update_buttons(instance: props) {
     const horizontal_rocket = GameStorage.get('horizontal_rocket_counts');
     set_text('horizontal_rocket/counts', (horizontal_rocket == 0) ? "+" : horizontal_rocket);
     set_text_colors(['horizontal_rocket/button'], '#fff', instance.busters.horizontal_rocket.active ? 0.5 : 1);
-    
-    if(GameStorage.get('horizontal_rocket_opened')) {
+
+    if (GameStorage.get('horizontal_rocket_opened')) {
         gui.set_enabled(gui.get_node('horizontal_rocket/lock'), false);
         gui.set_enabled(gui.get_node('horizontal_rocket/icon'), true);
         gui.set_enabled(gui.get_node('horizontal_rocket/counts'), true);
@@ -654,7 +659,7 @@ function update_buttons(instance: props) {
     set_text('vertical_rocket/counts', (vertical_rocket == 0) ? "+" : vertical_rocket);
     set_text_colors(['vertical_rocket/button'], '#fff', instance.busters.vertical_rocket.active ? 0.5 : 1);
 
-    if(GameStorage.get('vertical_rocket_opened')) {
+    if (GameStorage.get('vertical_rocket_opened')) {
         gui.set_enabled(gui.get_node('vertical_rocket/lock'), false);
         gui.set_enabled(gui.get_node('vertical_rocket/icon'), true);
         gui.set_enabled(gui.get_node('vertical_rocket/counts'), true);
@@ -697,20 +702,17 @@ function set_tutorial() {
     switch (get_current_level() + 1) {
         case 6:
             hand_timer = timer.delay(2, false, () => {
-                const from_pos = vmath.vector3(-200, -400, 0);
-                const to_pos = vmath.vector3(100, 70, 0);
-                if (GAME_CONFIG.debug_levels) {
-                    from_pos.y += 125;
+                const to_pos = vmath.vector3(370, 550, 0);
+                if (GAME_CONFIG.debug_levels)
                     to_pos.y += 50;
-                }
-                click_in_two_pos(from_pos, to_pos);
+                click_on_node_and_in_pos(gui.get_node('hammer/button'), to_pos);
             });
             break;
         case 7:
             hand_timer = timer.delay(2, false, () => {
                 const pos = vmath.vector3(-245, -210, 0);
                 if (GAME_CONFIG.debug_levels) pos.y += 50;
-                hand_click_animation(pos);
+                click_in_pos(pos);
             });
             break;
         case 8:
@@ -718,49 +720,68 @@ function set_tutorial() {
             break;
         case 9:
             hand_timer = timer.delay(2, false, () => {
-                const pos = vmath.vector3(-100, -400, 0);
-                if (GAME_CONFIG.debug_levels) pos.y += 125;
-                hand_click_animation(pos);
+                click_on_node(gui.get_node('spinning/button'));
             });
             break;
         case 17:
             hand_timer = timer.delay(2, false, () => {
-                const from_pos = vmath.vector3(0, -400, 0);
                 const to_pos = vmath.vector3(-100, 10, 0);
-                if (GAME_CONFIG.debug_levels) {
-                    from_pos.y += 125;
+                if (GAME_CONFIG.debug_levels)
                     to_pos.y += 50;
-                }
-                click_in_two_pos(from_pos, to_pos);
+                click_on_node_and_in_pos(gui.get_node('horizontal_rocket/button'), to_pos);
             });
             break;
     }
 }
 
-function click_in_two_pos(pos1: vmath.vector3, pos2: vmath.vector3) {
-    const hand = gui.get_node('hand');
-    hand_click_animation(pos1, () => {
+function click_on_node_and_in_pos(target_node: node, pos: vmath.vector3) {
+    click_on_node(target_node, () => {
         timer.delay(1, false, () => {
-            hand_click_animation(pos2, () => {
-                gui.set_enabled(hand, false);
+            click_in_pos(pos, () => {
+                gui.set_enabled(gui.get_node('hand'), false);
                 timer.delay(1, false, () => {
-                    click_in_two_pos(pos1, pos2);
+                    click_on_node_and_in_pos(target_node, pos);
                 });
             });
         });
     });
 }
 
-function hand_click_animation(position: vmath.vector3, on_end?: () => void) {
+function click_in_pos(position: vmath.vector3, on_end?: () => void) {
     const hand = gui.get_node('hand');
     gui.set_position(hand, position);
     gui.set_enabled(hand, true);
+    hand_click_animation(hand, on_end != undefined ? on_end : () => {
+        timer.delay(1, false, () => {
+            click_in_pos(position, on_end);
+        });
+    });
+}
+
+function click_on_node(target_node: node, on_end?: () => void) {
+    const parent = gui.get_parent(target_node);
+    const pos = gui.get_position(target_node);
+    pos.y -= 25;
+    const hand = gui.get_node('hand');
+    const root = gui.get_parent(hand);
+    gui.set_parent(hand, parent);
+    gui.set_position(hand, pos);
+    gui.set_enabled(hand, true);
+    hand_click_animation(hand, () => {
+        gui.set_parent(hand, root);
+        if (on_end != undefined)
+            return on_end();
+        timer.delay(1, false, () => {
+            click_on_node(target_node, on_end);
+        });
+    });
+}
+
+function hand_click_animation(hand: node, on_end?: () => void) {
     gui.animate(hand, gui.PROP_SCALE, vmath.vector3(0.5, 0.5, 0.5), gui.EASING_INCUBIC, 1, 0, () => {
         gui.set_enabled(hand, false);
-        if (on_end != undefined) on_end();
-        else timer.delay(1, false, () => {
-            hand_click_animation(position, on_end);
-        });
+        if (on_end != undefined)
+            on_end();
     }, gui.PLAYBACK_ONCE_PINGPONG);
 }
 

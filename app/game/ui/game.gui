@@ -718,24 +718,6 @@ nodes {
 }
 nodes {
   position {
-    z: 1.0
-  }
-  scale {
-    x: 0.7
-    y: 0.7
-  }
-  type: TYPE_BOX
-  texture: "ui/finger"
-  id: "hand"
-  parent: "tutorial"
-  layer: "ontop"
-  inherit_alpha: true
-  size_mode: SIZE_MODE_AUTO
-  enabled: false
-  material: "dlg"
-}
-nodes {
-  position {
     x: 270.0
     y: 480.0
   }
@@ -2675,6 +2657,22 @@ nodes {
   layer: "ontop"
   inherit_alpha: true
   outline_alpha: 0.0
+}
+nodes {
+  position {
+    z: 1.0
+  }
+  scale {
+    x: 0.7
+    y: 0.7
+  }
+  type: TYPE_BOX
+  texture: "ui/finger"
+  id: "hand"
+  layer: "ontop"
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+  material: "dlg"
 }
 layers {
   name: "back"

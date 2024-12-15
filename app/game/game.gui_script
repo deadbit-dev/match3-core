@@ -2,7 +2,7 @@ local ____lualib = require("lualib_bundle")
 local __TS__ArrayIncludes = ____lualib.__TS__ArrayIncludes
 local __TS__ArrayIsArray = ____lualib.__TS__ArrayIsArray
 local ____exports = {}
-local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, off_buster_tip_popup, update_targets, set_target, feed_animation, update_buttons, set_tutorial, click_in_two_pos, hand_click_animation, hand_swap_animation, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
+local setup, setup_info_ui, setup_avatar_or_clock, setup_step_or_time, setup_targets, setup_busters, set_enabled_settings, setup_sustem_ui, setup_win_ui, next_level, setup_gameover_ui, to_map, set_animal_tutorial_tip, set_events, off_buster_tip_popup, update_targets, set_target, feed_animation, update_buttons, set_tutorial, click_on_node_and_in_pos, click_in_pos, click_on_node, hand_click_animation, hand_swap_animation, remove_tutorial, on_win_end, drop_steptime, drop_targets, fade_steptime, fade_targets, drop_coins, set_gameover, set_gameover_offer, disabled_gameover_offer, disable_game_ui, on_shuffle_start, on_shuffle_action, presets, hand_timer
 local flow = require("ludobits.m.flow")
 local druid = require("druid.druid")
 local ____game_config = require("main.game_config")
@@ -198,6 +198,14 @@ function setup_busters(instance)
     instance.druid:new_button(
         "hammer/button",
         function()
+            local container = gui.get_position(gui.get_node("bottom_container"))
+            local busters = gui.get_position(gui.get_node("buster_buttons"))
+            local hammer = gui.get_position(gui.get_node("hammer/button"))
+            local from_pos = vmath.vector3(container.x + busters.x + hammer.x, container.y + busters.y + hammer.y - 25, container.z + busters.z + hammer.z)
+            print(
+                "POS: ",
+                gui.get_screen_position(gui.get_node("hammer/button"))
+            )
             if GameStorage.get("hammer_opened") then
                 if GameStorage.get("hammer_counts") == 0 then
                     if __TS__ArrayIncludes(
@@ -1041,13 +1049,14 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local from_pos = vmath.vector3(-200, -400, 0)
-                    local to_pos = vmath.vector3(100, 70, 0)
+                    local to_pos = vmath.vector3(370, 550, 0)
                     if GAME_CONFIG.debug_levels then
-                        from_pos.y = from_pos.y + 125
                         to_pos.y = to_pos.y + 50
                     end
-                    click_in_two_pos(from_pos, to_pos)
+                    click_on_node_and_in_pos(
+                        gui.get_node("hammer/button"),
+                        to_pos
+                    )
                 end
             )
             break
@@ -1062,7 +1071,7 @@ function set_tutorial()
                     if GAME_CONFIG.debug_levels then
                         pos.y = pos.y + 50
                     end
-                    hand_click_animation(pos)
+                    click_in_pos(pos)
                 end
             )
             break
@@ -1078,11 +1087,7 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local pos = vmath.vector3(-100, -400, 0)
-                    if GAME_CONFIG.debug_levels then
-                        pos.y = pos.y + 125
-                    end
-                    hand_click_animation(pos)
+                    click_on_node(gui.get_node("spinning/button"))
                 end
             )
             break
@@ -1093,37 +1098,40 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local from_pos = vmath.vector3(0, -400, 0)
                     local to_pos = vmath.vector3(-100, 10, 0)
                     if GAME_CONFIG.debug_levels then
-                        from_pos.y = from_pos.y + 125
                         to_pos.y = to_pos.y + 50
                     end
-                    click_in_two_pos(from_pos, to_pos)
+                    click_on_node_and_in_pos(
+                        gui.get_node("horizontal_rocket/button"),
+                        to_pos
+                    )
                 end
             )
             break
         end
     until true
 end
-function click_in_two_pos(pos1, pos2)
-    local hand = gui.get_node("hand")
-    hand_click_animation(
-        pos1,
+function click_on_node_and_in_pos(target_node, pos)
+    click_on_node(
+        target_node,
         function()
             timer.delay(
                 1,
                 false,
                 function()
-                    hand_click_animation(
-                        pos2,
+                    click_in_pos(
+                        pos,
                         function()
-                            gui.set_enabled(hand, false)
+                            gui.set_enabled(
+                                gui.get_node("hand"),
+                                false
+                            )
                             timer.delay(
                                 1,
                                 false,
                                 function()
-                                    click_in_two_pos(pos1, pos2)
+                                    click_on_node_and_in_pos(target_node, pos)
                                 end
                             )
                         end
@@ -1133,10 +1141,50 @@ function click_in_two_pos(pos1, pos2)
         end
     )
 end
-function hand_click_animation(position, on_end)
+function click_in_pos(position, on_end)
     local hand = gui.get_node("hand")
     gui.set_position(hand, position)
     gui.set_enabled(hand, true)
+    hand_click_animation(
+        hand,
+        on_end ~= nil and on_end or (function()
+            timer.delay(
+                1,
+                false,
+                function()
+                    click_in_pos(position, on_end)
+                end
+            )
+        end)
+    )
+end
+function click_on_node(target_node, on_end)
+    local parent = gui.get_parent(target_node)
+    local pos = gui.get_position(target_node)
+    pos.y = pos.y - 25
+    local hand = gui.get_node("hand")
+    local root = gui.get_parent(hand)
+    gui.set_parent(hand, parent)
+    gui.set_position(hand, pos)
+    gui.set_enabled(hand, true)
+    hand_click_animation(
+        hand,
+        function()
+            gui.set_parent(hand, root)
+            if on_end ~= nil then
+                return on_end()
+            end
+            timer.delay(
+                1,
+                false,
+                function()
+                    click_on_node(target_node, on_end)
+                end
+            )
+        end
+    )
+end
+function hand_click_animation(hand, on_end)
     gui.animate(
         hand,
         gui.PROP_SCALE,
@@ -1148,14 +1196,6 @@ function hand_click_animation(position, on_end)
             gui.set_enabled(hand, false)
             if on_end ~= nil then
                 on_end()
-            else
-                timer.delay(
-                    1,
-                    false,
-                    function()
-                        hand_click_animation(position, on_end)
-                    end
-                )
             end
         end,
         gui.PLAYBACK_ONCE_PINGPONG
