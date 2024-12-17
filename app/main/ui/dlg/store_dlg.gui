@@ -877,9 +877,11 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  text: "80"
   id: "junior_box/buy_button/text"
   parent: "junior_box/buy_button/button"
   layer: "top"
+  overridden_fields: 8
   overridden_fields: 20
   template_node_child: true
 }
@@ -1193,9 +1195,11 @@ nodes {
 }
 nodes {
   type: TYPE_TEXT
+  text: "160"
   id: "catlover_box/buy_button/text"
   parent: "catlover_box/buy_button/button"
   layer: "top"
+  overridden_fields: 8
   overridden_fields: 20
   template_node_child: true
 }
