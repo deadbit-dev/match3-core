@@ -726,6 +726,7 @@ nodes {
   type: TYPE_BOX
   id: "store/catlover_box/spinning"
   parent: "store/catlover_box/items"
+  overridden_fields: 45
   template_node_child: true
 }
 nodes {
