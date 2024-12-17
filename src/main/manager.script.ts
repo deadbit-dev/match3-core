@@ -28,12 +28,12 @@ export function init(this: props) {
     Manager.init(() => {
         EventBus.on('ON_SCENE_LOADED', (message) => {
             const name = message.name;
-            // window.set_dim_mode(name.includes('game') ? window.DIMMING_OFF : window.DIMMING_ON);
+            window.set_dim_mode(name.includes('game') ? window.DIMMING_OFF : window.DIMMING_ON);
             if (message.name == 'game')
                 Ads.show_banner(BannerPos.POS_BOTTOM_CENTER);
             else
                 Ads.hide_banner();
-        });
+        }, false);
 
         // если это одноклассники
         if (System.platform == 'HTML5' && HtmlBridge.get_platform() == 'ok')

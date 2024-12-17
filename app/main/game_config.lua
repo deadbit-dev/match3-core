@@ -13,8 +13,8 @@ ____exports.IS_HUAWEI = sys.get_sys_info().system_name == "Android" and __TS__St
 )
 ____exports.ADS_CONFIG = {
     is_mediation = false,
-    id_banners = {"R-M-13324009-1"},
-    id_inters = {"R-M-13324009-2"},
+    id_banners = {____exports.IS_HUAWEI and "R-M-13372395-1" or "R-M-13324009-1"},
+    id_inters = {____exports.IS_HUAWEI and "R-M-13372395-2" or "R-M-13324009-2"},
     id_reward = {},
     banner_on_init = true,
     ads_interval = 4 * 60,
@@ -22,7 +22,7 @@ ____exports.ADS_CONFIG = {
 }
 ____exports.VK_SHARE_URL = "https://vk.com/app51867396"
 ____exports.OK_SHARE_TEXT = ""
-____exports.ID_YANDEX_METRICA = "eaf20265-0106-451a-ace1-f1587bd01edb"
+____exports.ID_YANDEX_METRICA = ____exports.IS_HUAWEI and "498e330c-0f1f-4d2b-9a86-94d4368887f7" or "eaf20265-0106-451a-ace1-f1587bd01edb"
 ____exports.RATE_FIRST_SHOW = 24 * 60 * 60
 ____exports.RATE_SECOND_SHOW = 3 * 24 * 60 * 60
 ____exports.MAIN_BUNDLE_SCENES = {"movie", "shared_gui", "game"}

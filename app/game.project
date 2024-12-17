@@ -17,7 +17,14 @@ input_method = HiddenInputField
 display_cutout = 0
 immersive_mode = 1
 minimum_sdk_version = 21
-package = com.sbGames.match3
+package = com.sbGames.match3.huawei
+app_icon_36x36 = /assets/icons/mipmap-ldpi/ic_launcher.png
+app_icon_48x48 = /assets/icons/mipmap-mdpi/ic_launcher.png
+app_icon_72x72 = /assets/icons/mipmap-hdpi/ic_launcher.png
+app_icon_96x96 = /assets/icons/mipmap-xhdpi/ic_launcher.png
+app_icon_144x144 = /assets/icons/mipmap-xxhdpi/ic_launcher.png
+app_icon_192x192 = /assets/icons/mipmap-xxxhdpi/ic_launcher.png
+manifest = /project_settings/AndroidManifest.xml
 
 [project]
 title = Matсh3

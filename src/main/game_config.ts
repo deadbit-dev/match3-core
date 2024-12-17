@@ -16,8 +16,8 @@ export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_
 // параметры инициализации для ADS
 export const ADS_CONFIG = {
     is_mediation: false,
-    id_banners: ['R-M-13324009-1'], // TODO ONLY IOS 
-    id_inters: ['R-M-13324009-2'], // TODO ONLY IOS 
+    id_banners: [IS_HUAWEI ? 'R-M-13372395-1' : 'R-M-13324009-1'], 
+    id_inters: [IS_HUAWEI ? 'R-M-13372395-2' : 'R-M-13324009-2'], 
     id_reward: [],
     banner_on_init: true,
     ads_interval: 4 * 60,
@@ -28,7 +28,7 @@ export const ADS_CONFIG = {
 export const VK_SHARE_URL = 'https://vk.com/app51867396';
 export const OK_SHARE_TEXT = '';
 // для андроида метрика
-export const ID_YANDEX_METRICA = "eaf20265-0106-451a-ace1-f1587bd01edb";
+export const ID_YANDEX_METRICA = IS_HUAWEI ? '498e330c-0f1f-4d2b-9a86-94d4368887f7' : "eaf20265-0106-451a-ace1-f1587bd01edb";
 // через сколько показать первое окно оценки
 export const RATE_FIRST_SHOW = 24 * 60 * 60;
 // через сколько второй раз показать 
