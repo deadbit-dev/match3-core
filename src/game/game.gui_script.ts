@@ -15,7 +15,6 @@ import { get_current_level, get_current_level_config, is_animal_level, is_enough
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
-import { View } from './view';
 
 const presets = {
     targets: [
@@ -304,18 +303,21 @@ function setup_busters(instance: props) {
         set_enabled_settings(instance.settings_opened);
 
         instance.druid.new_button('sound', () => {
+            Metrica.report('data', { action: 'sound_' + !Sound.is_sfx_active() });
             EventBus.send('SOUND_BUTTON');
             const sound_off = gui.get_node('sound_off');
             gui.set_enabled(sound_off, !Sound.is_sfx_active());
         });
 
         instance.druid.new_button('music', () => {
+            Metrica.report('data', { action: 'music_' + !Sound.is_music_active() });
             EventBus.send('MUSIC_BUTTON');
             const music_off = gui.get_node('music_off');
             gui.set_enabled(music_off, !Sound.is_music_active());
         });
 
         instance.druid.new_button('store', () => {
+            Metrica.report('data', { action: 'store' });
             set_enabled_settings(false);
             instance.settings_opened = false;
             Sound.stop('game');
@@ -323,6 +325,7 @@ function setup_busters(instance: props) {
         });
 
         instance.druid.new_button('map', () => {
+            Metrica.report('data', { action: 'map' });
             Sound.stop('game');
             Scene.load('map');
         });

@@ -15,6 +15,7 @@ function MetricaModule()
         if json_data == nil then
             json_data = ""
         end
+        log("report", event, json_data)
         if appmetrica ~= nil then
             appmetrica.report_event(
                 event,

@@ -205,6 +205,7 @@ function ____exports.Game()
         on_idle()
     end
     function set_tutorial()
+        Metrica.report("data", {["level_" .. level_name] = {type = "tutorial_start"}})
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]
         local except_cells = tutorial_data.cells ~= nil and tutorial_data.cells or ({})
         local bounds = tutorial_data.bounds ~= nil and tutorial_data.bounds or ({from = {x = 0, y = 0}, to = {x = 0, y = 0}})
@@ -617,6 +618,7 @@ function ____exports.Game()
     end
     function shuffle()
         Log.log("SHUFFLE")
+        Metrica.report("data", {["level_" .. level_name] = {type = "shuffle"}})
         is_block_input = true
         local function on_end()
             update_core_state()
@@ -2252,6 +2254,7 @@ function ____exports.Game()
         completed_tutorials[#completed_tutorials + 1] = get_current_level() + 1
         GameStorage.set("completed_tutorials", completed_tutorials)
         remove_tutorial()
+        Metrica.report("data", {["level_" .. level_name] = {type = "tutorial_end"}})
     end
     function remove_tutorial()
         local tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1]

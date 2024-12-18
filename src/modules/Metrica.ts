@@ -29,6 +29,7 @@ function MetricaModule() {
     }
 
     function report(event: string, json_data: any = '') {
+        log('report', event, json_data);
         if (appmetrica != null)
             appmetrica.report_event(event, json_data == '' ? '' : json.encode(json_data));
         if (yametrica != null)

@@ -262,6 +262,9 @@ export function Game() {
     }
 
     function set_tutorial() {
+        Metrica.report('data', {
+            ['level_' + level_name]: { type: 'tutorial_start' }
+        });
         const tutorial_data = GAME_CONFIG.tutorials_data[get_current_level() + 1];
         const except_cells = tutorial_data.cells != undefined ? tutorial_data.cells : [];
         const bounds = tutorial_data.bounds != undefined ? tutorial_data.bounds : { from: { x: 0, y: 0 }, to: { x: 0, y: 0 } };
@@ -633,7 +636,9 @@ export function Game() {
 
     function shuffle() {
         Log.log("SHUFFLE");
-
+        Metrica.report('data', {
+            ['level_' + level_name]: { type: 'shuffle' }
+        });
         is_block_input = true;
 
         function on_end() {
@@ -2097,6 +2102,9 @@ export function Game() {
         GameStorage.set('completed_tutorials', completed_tutorials);
 
         remove_tutorial();
+        Metrica.report('data', {
+            ['level_' + level_name]: { type: 'tutorial_end' }
+        });
     }
 
     function remove_tutorial() {
