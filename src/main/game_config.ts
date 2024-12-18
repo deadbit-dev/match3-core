@@ -16,8 +16,8 @@ export const IS_HUAWEI = sys.get_sys_info().system_name == 'Android' && sys.get_
 // параметры инициализации для ADS
 export const ADS_CONFIG = {
     is_mediation: false,
-    id_banners: [IS_HUAWEI ? 'R-M-13372395-1' : 'R-M-13324009-1'], 
-    id_inters: [IS_HUAWEI ? 'R-M-13372395-2' : 'R-M-13324009-2'], 
+    id_banners: [IS_HUAWEI ? 'R-M-13372395-1' : 'R-M-13324009-1'],
+    id_inters: [IS_HUAWEI ? 'R-M-13372395-2' : 'R-M-13324009-2'],
     id_reward: [],
     banner_on_init: true,
     ads_interval: 4 * 60,

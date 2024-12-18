@@ -19,6 +19,7 @@ local get_current_level_config = ____utils.get_current_level_config
 local is_animal_level = ____utils.is_animal_level
 local is_enough_coins = ____utils.is_enough_coins
 local is_last_level = ____utils.is_last_level
+local is_tutorial = ____utils.is_tutorial
 local remove_coins = ____utils.remove_coins
 local remove_lifes = ____utils.remove_lifes
 local ____game = require("game.game")
@@ -137,7 +138,7 @@ function setup_busters(instance)
     local pos = gui.get_position(busters)
     pos.y = pos.y + GAME_CONFIG.bottom_offset
     if GAME_CONFIG.debug_levels then
-        pos.y = pos.y + 125
+        pos.y = pos.y + 75
     end
     gui.set_position(busters, pos)
     instance.druid:new_button(
@@ -1077,7 +1078,7 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local pos = vmath.vector3(-245, -210, 0)
+                    local pos = vmath.vector3(30, 275, 0)
                     if GAME_CONFIG.debug_levels then
                         pos.y = pos.y + 50
                     end
@@ -1108,7 +1109,7 @@ function set_tutorial()
                 2,
                 false,
                 function()
-                    local to_pos = vmath.vector3(-100, 10, 0)
+                    local to_pos = vmath.vector3(170, 490, 0)
                     if GAME_CONFIG.debug_levels then
                         to_pos.y = to_pos.y + 50
                     end
@@ -1133,10 +1134,14 @@ function click_on_node_and_in_pos(target_node, pos)
                     click_in_pos(
                         pos,
                         function()
-                            gui.set_enabled(
-                                gui.get_node("hand"),
-                                false
-                            )
+                            local hand = gui.get_node("hand")
+                            if hand == nil then
+                                return
+                            end
+                            gui.set_enabled(hand, false)
+                            if not is_tutorial() then
+                                return
+                            end
                             timer.delay(
                                 1,
                                 false,
@@ -1153,11 +1158,17 @@ function click_on_node_and_in_pos(target_node, pos)
 end
 function click_in_pos(position, on_end)
     local hand = gui.get_node("hand")
+    if hand == nil then
+        return
+    end
     gui.set_position(hand, position)
     gui.set_enabled(hand, true)
     hand_click_animation(
         hand,
         on_end ~= nil and on_end or (function()
+            if not is_tutorial() then
+                return
+            end
             timer.delay(
                 1,
                 false,
@@ -1173,6 +1184,9 @@ function click_on_node(target_node, on_end)
     local pos = gui.get_position(target_node)
     pos.y = pos.y - 25
     local hand = gui.get_node("hand")
+    if hand == nil then
+        return
+    end
     local root = gui.get_parent(hand)
     gui.set_parent(hand, parent)
     gui.set_position(hand, pos)
@@ -1183,6 +1197,9 @@ function click_on_node(target_node, on_end)
             gui.set_parent(hand, root)
             if on_end ~= nil then
                 return on_end()
+            end
+            if not is_tutorial() then
+                return
             end
             timer.delay(
                 1,
@@ -1213,9 +1230,12 @@ function hand_click_animation(hand, on_end)
 end
 function hand_swap_animation()
     local hand = gui.get_node("hand")
+    if hand == nil then
+        return
+    end
     local color = gui.get_color(hand)
-    local from_pos = vmath.vector3(70, 50, 0)
-    local to_pos = vmath.vector3(190, 50, 0)
+    local from_pos = vmath.vector3(340, 530, 0)
+    local to_pos = vmath.vector3(460, 530, 0)
     if GAME_CONFIG.debug_levels then
         from_pos.y = from_pos.y + 50
         to_pos.y = to_pos.y + 50
@@ -1251,6 +1271,9 @@ function hand_swap_animation()
                         0,
                         function()
                             gui.set_enabled(hand, false)
+                            if not is_tutorial() then
+                                return
+                            end
                             timer.delay(1, false, hand_swap_animation)
                         end
                     )
@@ -1271,6 +1294,7 @@ function remove_tutorial()
         gui.get_node("tutorial"),
         false
     )
+    gui.delete_node(gui.get_node("hand"))
 end
 function on_win_end(data)
     if is_animal_level() then

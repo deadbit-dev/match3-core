@@ -11,7 +11,7 @@ import * as flow from 'ludobits.m.flow';
 import * as druid from 'druid.druid';
 import { Dlg, TargetMessage } from '../main/game_config';
 import { format_string, get_point_curve, parse_time, set_text, set_text_colors } from '../utils/utils';
-import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, remove_coins, remove_lifes } from './utils';
+import { get_current_level, get_current_level_config, is_animal_level, is_enough_coins, is_last_level, is_tutorial, remove_coins, remove_lifes } from './utils';
 import { Busters, CellId, ElementId, GameState, TargetType } from './game';
 import { Level } from './level';
 import { Position } from './core';
@@ -186,7 +186,7 @@ function setup_busters(instance: props) {
     gui.set_enabled(busters, true);
     const pos = gui.get_position(busters);
     pos.y += GAME_CONFIG.bottom_offset;
-    if (GAME_CONFIG.debug_levels) pos.y += 125;
+    if (GAME_CONFIG.debug_levels) pos.y += 75;
     gui.set_position(busters, pos);
 
     instance.druid.new_button('spinning/button', () => {
@@ -706,14 +706,13 @@ function set_tutorial() {
         case 6:
             hand_timer = timer.delay(2, false, () => {
                 const to_pos = vmath.vector3(370, 550, 0);
-                if (GAME_CONFIG.debug_levels)
-                    to_pos.y += 50;
+                if (GAME_CONFIG.debug_levels) to_pos.y += 50;
                 click_on_node_and_in_pos(gui.get_node('hammer/button'), to_pos);
             });
             break;
         case 7:
             hand_timer = timer.delay(2, false, () => {
-                const pos = vmath.vector3(-245, -210, 0);
+                const pos = vmath.vector3(30, 275, 0);
                 if (GAME_CONFIG.debug_levels) pos.y += 50;
                 click_in_pos(pos);
             });
@@ -728,9 +727,8 @@ function set_tutorial() {
             break;
         case 17:
             hand_timer = timer.delay(2, false, () => {
-                const to_pos = vmath.vector3(-100, 10, 0);
-                if (GAME_CONFIG.debug_levels)
-                    to_pos.y += 50;
+                const to_pos = vmath.vector3(170, 490, 0);
+                if (GAME_CONFIG.debug_levels) to_pos.y += 50;
                 click_on_node_and_in_pos(gui.get_node('horizontal_rocket/button'), to_pos);
             });
             break;
@@ -741,7 +739,12 @@ function click_on_node_and_in_pos(target_node: node, pos: vmath.vector3) {
     click_on_node(target_node, () => {
         timer.delay(1, false, () => {
             click_in_pos(pos, () => {
-                gui.set_enabled(gui.get_node('hand'), false);
+                const hand = gui.get_node('hand');
+                if (hand == null)
+                    return;
+                gui.set_enabled(hand, false);
+                if (!is_tutorial())
+                    return;
                 timer.delay(1, false, () => {
                     click_on_node_and_in_pos(target_node, pos);
                 });
@@ -752,9 +755,13 @@ function click_on_node_and_in_pos(target_node: node, pos: vmath.vector3) {
 
 function click_in_pos(position: vmath.vector3, on_end?: () => void) {
     const hand = gui.get_node('hand');
+    if (hand == null)
+        return;
     gui.set_position(hand, position);
     gui.set_enabled(hand, true);
     hand_click_animation(hand, on_end != undefined ? on_end : () => {
+        if (!is_tutorial())
+            return;
         timer.delay(1, false, () => {
             click_in_pos(position, on_end);
         });
@@ -766,6 +773,8 @@ function click_on_node(target_node: node, on_end?: () => void) {
     const pos = gui.get_position(target_node);
     pos.y -= 25;
     const hand = gui.get_node('hand');
+    if (hand == null)
+        return;
     const root = gui.get_parent(hand);
     gui.set_parent(hand, parent);
     gui.set_position(hand, pos);
@@ -774,6 +783,8 @@ function click_on_node(target_node: node, on_end?: () => void) {
         gui.set_parent(hand, root);
         if (on_end != undefined)
             return on_end();
+        if (!is_tutorial())
+            return;
         timer.delay(1, false, () => {
             click_on_node(target_node, on_end);
         });
@@ -790,9 +801,11 @@ function hand_click_animation(hand: node, on_end?: () => void) {
 
 function hand_swap_animation() {
     const hand = gui.get_node('hand');
+    if (hand == null)
+        return;
     const color = gui.get_color(hand);
-    const from_pos = vmath.vector3(70, 50, 0);
-    const to_pos = vmath.vector3(190, 50, 0);
+    const from_pos = vmath.vector3(340, 530, 0);
+    const to_pos = vmath.vector3(460, 530, 0);
     if (GAME_CONFIG.debug_levels) {
         from_pos.y += 50;
         to_pos.y += 50;
@@ -808,6 +821,8 @@ function hand_swap_animation() {
             color.w = 0.5;
             gui.animate(hand, gui.PROP_COLOR, color, gui.EASING_INCUBIC, 0.7, 0, () => {
                 gui.set_enabled(hand, false);
+                if (!is_tutorial())
+                    return;
                 timer.delay(1, false, hand_swap_animation);
             });
         });
@@ -818,6 +833,7 @@ function remove_tutorial() {
     if (hand_timer != null) timer.cancel(hand_timer);
     gui.set_enabled(gui.get_node('lock1'), false);
     gui.set_enabled(gui.get_node('tutorial'), false);
+    gui.delete_node(gui.get_node('hand'));
 }
 
 function on_win_end(data: { state: GameState, with_reward: boolean }) {
